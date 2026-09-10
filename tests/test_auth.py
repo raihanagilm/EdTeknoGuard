@@ -27,6 +27,11 @@ def test_unauthenticated_redirect():
     assert resp_logs.status_code in [303, 307]
     assert resp_logs.headers["location"] == "/login"
 
+    # Test /settings
+    resp_settings = client.get("/settings")
+    assert resp_settings.status_code in [303, 307]
+    assert resp_settings.headers["location"] == "/login"
+
 
 def test_login_success():
     """Login dengan kredensial yang benar harus sukses dan menyetel cookie sesi"""
@@ -80,6 +85,48 @@ def test_authenticated_access():
     resp_logs = client.get("/logs")
     assert resp_logs.status_code == 200
     assert "Riwayat Log Performa ONT" in resp_logs.text
+
+    # Settings
+    resp_settings = client.get("/settings")
+    assert resp_settings.status_code == 200
+    assert "Pengaturan Monitoring" in resp_settings.text
+
+
+def test_settings_api():
+    """Menguji API GET dan POST /api/settings untuk mengubah interval dan ambang batas redaman"""
+    client = TestClient(app)
+    token = create_session_token("admin")
+    client.cookies.set(SESSION_COOKIE_NAME, token)
+
+    # 1. GET Settings
+    get_res = client.get("/api/settings")
+    assert get_res.status_code == 200
+    data = get_res.json()
+    assert "polling_interval_minutes" in data
+    assert "warning_threshold_dbm" in data
+    assert "critical_threshold_dbm" in data
+
+    # 2. POST Settings (Update ke 10 menit dan warning -26.5 dBm)
+    payload = {
+        "polling_interval_minutes": 10,
+        "warning_threshold_dbm": -26.5,
+        "critical_threshold_dbm": -33.0,
+        "scheduler_status": "RUNNING"
+    }
+    post_res = client.post("/api/settings", json=payload)
+    assert post_res.status_code == 200
+    res_json = post_res.json()
+    assert res_json["status"] == "success"
+    assert res_json["data"]["polling_interval_minutes"] == 10
+    assert res_json["data"]["warning_threshold_dbm"] == -26.5
+
+    # Kembalikan ke nilai default 5 menit dan -26.0 dBm
+    client.post("/api/settings", json={
+        "polling_interval_minutes": 5,
+        "warning_threshold_dbm": -26.0,
+        "critical_threshold_dbm": -32.0,
+        "scheduler_status": "RUNNING"
+    })
 
 
 def test_logout():

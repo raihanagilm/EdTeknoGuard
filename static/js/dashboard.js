@@ -30,7 +30,6 @@ document.addEventListener('alpine:init', () => {
         init() {
             this.fetchStatus();
             this.fetchKpi();
-            this.fetchCustomers();
             this.initChart();
 
             // Refresh status berkala tiap 30 detik

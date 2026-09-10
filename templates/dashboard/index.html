@@ -32,8 +32,34 @@
     <!-- 3. Visualisasi Grafik Riwayat Redaman -->
     {% include "components/charts.html" %}
 
-    <!-- 4. Tabel & Kartu Mobile Pelanggan -->
-    {% include "components/customer_table.html" %}
+    <!-- 4. Quick Shortcut Navigation -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+        <a href="/pelanggan" class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition flex items-center justify-between group">
+            <div class="flex items-center gap-3.5">
+                <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl group-hover:scale-105 transition">
+                    👥
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition">Kelola Data Pelanggan</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Lihat tabel seluruh ONT, filter per POP, dan jalankan cek redaman live</p>
+                </div>
+            </div>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+        <a href="/logs" class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition flex items-center justify-between group">
+            <div class="flex items-center gap-3.5">
+                <div class="h-11 w-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xl group-hover:scale-105 transition">
+                    📜
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition">Riwayat Log Pemeriksaan</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Audit data time-series performa ONT dengan filter tanggal presisi</p>
+                </div>
+            </div>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
 
 </div>
 {% endblock %}

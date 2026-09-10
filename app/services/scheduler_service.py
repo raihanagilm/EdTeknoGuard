@@ -40,15 +40,44 @@ class MonitoringScheduler:
 
     def start(self):
         if self._scheduler and not self._scheduler.running:
+            db = SessionLocal()
+            try:
+                interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
+                interval = int(interval_str)
+            except Exception:
+                interval = settings.POLLING_INTERVAL_MINUTES
+            finally:
+                db.close()
+
+            settings.POLLING_INTERVAL_MINUTES = interval
             self._scheduler.add_job(
                 self.scheduled_job_wrapper,
                 "interval",
-                minutes=settings.POLLING_INTERVAL_MINUTES,
+                minutes=interval,
                 id="ont_monitoring_job",
                 replace_existing=True
             )
             self._scheduler.start()
-            logger.info(f"Scheduler pemantau ONT dimulai (Interval: {settings.POLLING_INTERVAL_MINUTES} menit).")
+            logger.info(f"Scheduler pemantau ONT dimulai (Interval: {interval} menit).")
+
+    def update_interval(self, minutes: int):
+        db = SessionLocal()
+        try:
+            self.set_setting_in_db(db, "polling_interval_minutes", str(minutes))
+        finally:
+            db.close()
+
+        settings.POLLING_INTERVAL_MINUTES = minutes
+        if self._scheduler and self._scheduler.running:
+            try:
+                self._scheduler.reschedule_job(
+                    "ont_monitoring_job",
+                    trigger="interval",
+                    minutes=minutes
+                )
+                logger.info(f"Interval scheduler berhasil diubah menjadi {minutes} menit.")
+            except Exception as e:
+                logger.error(f"Gagal reschedule job: {e}")
 
     def stop(self):
         db = SessionLocal()

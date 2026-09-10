@@ -1,0 +1,348 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Pengaturan Sistem &amp; Ambang Batas — EdTeknoGuard{% endblock %}
+
+{% block content %}
+<div class="space-y-6" x-data="settingsApp()" x-init="initData()">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                ⚙️ Pengaturan Monitoring &amp; Ambang Batas
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">
+                Atur frekuensi interval pemindaian berkala ONT serta batas toleransi redaman optik (dBm) untuk memicu peringatan dini.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                  :class="form.scheduler_status === 'RUNNING' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'">
+                <span class="w-2 h-2 rounded-full" :class="form.scheduler_status === 'RUNNING' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                <span x-text="form.scheduler_status === 'RUNNING' ? 'Engine Aktif' : 'Engine Dijeda'"></span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Grid Form -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Form Pengaturan (2 Kolom) -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
+            
+            <form @submit.prevent="saveSettings()" class="space-y-6 text-xs">
+
+                <!-- 1. Pengaturan Interval Waktu -->
+                <div class="space-y-3 pb-6 border-b border-slate-100">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                ⏱️ Interval Pemantauan Otomatis (Scheduler)
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-0.5">
+                                Frekuensi background worker menembak query SNMP UDP 161 ke seluruh IP ONT pelanggan.
+                            </p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-extrabold font-mono text-xs">
+                            <span x-text="form.polling_interval_minutes"></span> Menit Sekali
+                        </span>
+                    </div>
+
+                    <!-- Preset Buttons -->
+                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                        <template x-for="p in [1, 3, 5, 10, 15, 30]" :key="p">
+                            <button type="button"
+                                    @click="form.polling_interval_minutes = p"
+                                    :class="form.polling_interval_minutes === p 
+                                            ? 'bg-indigo-600 text-white font-bold shadow-sm shadow-indigo-200 border-indigo-600' 
+                                            : 'bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border-slate-200'"
+                                    class="px-3.5 py-2 rounded-xl border text-xs transition min-h-[40px] flex items-center gap-1">
+                                <span x-text="p"></span> Menit
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Custom Number Input -->
+                    <div class="pt-2 flex items-center gap-3">
+                        <label class="font-bold text-slate-700 whitespace-nowrap">Kustom Menit:</label>
+                        <div class="relative w-36">
+                            <input type="number" min="1" max="1440"
+                                   x-model.number="form.polling_interval_minutes"
+                                   required
+                                   class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                            <span class="absolute right-3 top-3 text-slate-400 font-medium">Menit</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400">Rekomendasi standar ISP: <strong>5 menit</strong>.</span>
+                    </div>
+                </div>
+
+                <!-- 2. Ambang Batas Deteksi Dini (Warning Threshold) -->
+                <div class="space-y-4 pb-6 border-b border-slate-100">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                ⚠️ Ambang Batas Peringatan Dini (Warning Threshold)
+                            </h2>
+                            <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 font-extrabold font-mono text-xs border border-amber-200">
+                                &le; <span x-text="form.warning_threshold_dbm.toFixed(1)"></span> dBm
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Modem dengan redaman lebih buruk atau sama dengan nilai ini akan dikategorikan <strong>WARNING</strong> dan memicu alert Telegram.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Nilai Redaman Peringatan (dBm)</label>
+                            <div class="relative">
+                                <input type="number" step="0.1" max="-15.0" min="-40.0"
+                                       x-model.number="form.warning_threshold_dbm"
+                                       required
+                                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                <span class="absolute right-3 top-3 text-slate-400 font-bold">dBm</span>
+                            </div>
+                        </div>
+
+                        <!-- Presets Warning -->
+                        <div class="flex items-center gap-2 pt-4 sm:pt-0">
+                            <button type="button" @click="form.warning_threshold_dbm = -25.0" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 min-h-[40px]">
+                                -25.0 dBm
+                            </button>
+                            <button type="button" @click="form.warning_threshold_dbm = -26.0" class="px-3 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 text-[11px] font-bold min-h-[40px]">
+                                -26.0 dBm (SOP)
+                            </button>
+                            <button type="button" @click="form.warning_threshold_dbm = -27.0" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 min-h-[40px]">
+                                -27.0 dBm
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Visual Spectrum Bar -->
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 space-y-2">
+                        <div class="text-[11px] font-bold text-slate-700 flex justify-between">
+                            <span>Spektrum Kualitas Sinyal:</span>
+                            <span class="text-amber-700 font-semibold" x-text="'Batas Warning: ' + form.warning_threshold_dbm + ' dBm'"></span>
+                        </div>
+                        <div class="h-3 w-full rounded-full overflow-hidden flex">
+                            <div class="bg-emerald-500 h-full" style="width: 50%" title="Normal (> -26 dBm)"></div>
+                            <div class="bg-amber-500 h-full" style="width: 25%" title="Warning (-26 s/d -31.9 dBm)"></div>
+                            <div class="bg-rose-500 h-full" style="width: 25%" title="Critical (< -32 dBm)"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                            <span>-12 dBm (Sangat Baik)</span>
+                            <span class="text-emerald-700 font-bold">NORMAL</span>
+                            <span class="text-amber-700 font-bold">WARNING</span>
+                            <span class="text-rose-700 font-bold">KRITIS</span>
+                            <span>-40 dBm (Drop)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Ambang Batas Kritis (Critical Threshold) -->
+                <div class="space-y-4 pb-6 border-b border-slate-100">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                🚨 Ambang Batas Kritis / Parah (Critical Threshold)
+                            </h2>
+                            <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-extrabold font-mono text-xs border border-rose-200">
+                                &le; <span x-text="form.critical_threshold_dbm.toFixed(1)"></span> dBm
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Sinyal optik sangat redup. Modem mengalami packet loss tinggi dan terancam putus-nyambung (*intermittent*).
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Nilai Redaman Kritis (dBm)</label>
+                            <div class="relative">
+                                <input type="number" step="0.1" max="-20.0" min="-45.0"
+                                       x-model.number="form.critical_threshold_dbm"
+                                       required
+                                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                <span class="absolute right-3 top-3 text-slate-400 font-bold">dBm</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-4 sm:pt-0">
+                            <button type="button" @click="form.critical_threshold_dbm = -30.0" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 min-h-[40px]">
+                                -30.0 dBm
+                            </button>
+                            <button type="button" @click="form.critical_threshold_dbm = -32.0" class="px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-[11px] font-bold min-h-[40px]">
+                                -32.0 dBm (Default)
+                            </button>
+                            <button type="button" @click="form.critical_threshold_dbm = -35.0" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 min-h-[40px]">
+                                -35.0 dBm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Kontrol Status Scheduler -->
+                <div class="space-y-2 pb-2">
+                    <label class="font-bold text-slate-700 block">Status Operasional Mesin Pemantau</label>
+                    <div class="flex items-center gap-3">
+                        <label class="flex items-center gap-2 cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition min-h-[44px]">
+                            <input type="radio" value="RUNNING" x-model="form.scheduler_status" class="text-indigo-600 focus:ring-indigo-500">
+                            <span class="font-bold text-slate-800">Aktif (RUNNING)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition min-h-[44px]">
+                            <input type="radio" value="STOPPED" x-model="form.scheduler_status" class="text-rose-600 focus:ring-rose-500">
+                            <span class="font-bold text-slate-800">Dijeda (STOPPED)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tombol Simpan -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="submit"
+                            :disabled="saving"
+                            class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px] disabled:opacity-50">
+                        <svg class="w-4 h-4" :class="{'animate-spin': saving}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span x-text="saving ? 'Menerapkan Perubahan...' : 'Simpan &amp; Terapkan Pengaturan'"></span>
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- Sidebar Panduan & Ringkasan Teknis (1 Kolom) -->
+        <div class="space-y-6">
+
+            <!-- Card SOP Batas Redaman -->
+            <div class="bg-indigo-50/75 rounded-2xl border border-indigo-100 p-5 space-y-3.5 text-xs text-indigo-950">
+                <h3 class="font-bold text-indigo-900 flex items-center gap-1.5 text-sm">
+                    📘 SOP Standar Redaman Fiber Optik
+                </h3>
+                <div class="space-y-2 text-[11px] leading-relaxed">
+                    <div class="p-2.5 bg-white rounded-xl border border-indigo-100/80">
+                        <span class="font-bold text-emerald-700 block">Sinyal Prima: &gt; -26.0 dBm</span>
+                        Pelanggan menikmati koneksi lancar tanpa packet loss atau penurunan throughput.
+                    </div>
+                    <div class="p-2.5 bg-white rounded-xl border border-amber-200 bg-amber-50/30">
+                        <span class="font-bold text-amber-800 block">Peringatan Awal: -26.0 s/d -31.9 dBm</span>
+                        Konektor FO kotor atau dropcore tertekuk. Memerlukan penanganan tim teknisi sebelum merusak layanan di -27.0 dBm.
+                    </div>
+                    <div class="p-2.5 bg-white rounded-xl border border-rose-200 bg-rose-50/30">
+                        <span class="font-bold text-rose-800 block">Kritis: &le; -32.0 dBm</span>
+                        Modem terancam putus-nyambung (*loss of signal*).
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Realtime Engine Info -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3 text-xs">
+                <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                    💡 Cara Kerja Perubahan Realtime
+                </h3>
+                <p class="text-slate-500 leading-relaxed text-[11px]">
+                    Saat Anda menekan tombol <strong>Simpan</strong>, sistem akan:
+                </p>
+                <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600">
+                    <li>Menyimpan nilai ke tabel <code>system_settings</code> di TiDB Cloud.</li>
+                    <li>Merestart jadwal background scheduler dengan interval baru secara instan tanpa perlu mematikan aplikasi.</li>
+                    <li>Menyesuaikan ambang batas notifikasi alert Telegram dan garis grafik pada dashboard.</li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Data Helper for Initial Config -->
+    <div id="settings-init-data"
+         data-interval="{{ config.polling_interval_minutes }}"
+         data-warning="{{ config.warning_threshold_dbm }}"
+         data-critical="{{ config.critical_threshold_dbm }}"
+         data-status="{{ config.scheduler_status }}"
+         class="hidden"></div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div x-show="toast.show"
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-4"
+         class="fixed bottom-20 md:bottom-6 right-6 z-50 max-w-sm rounded-2xl p-4 shadow-2xl border text-xs font-semibold flex items-center gap-3"
+         :class="toast.type === 'success' ? 'bg-emerald-900 text-emerald-100 border-emerald-700' : 'bg-rose-900 text-rose-100 border-rose-700'">
+        <span x-text="toast.type === 'success' ? '✅' : '❌'"></span>
+        <span class="flex-1" x-text="toast.message"></span>
+        <button @click="toast.show = false" class="opacity-70 hover:opacity-100">✕</button>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function settingsApp() {
+    const el = document.getElementById('settings-init-data');
+    const initInterval = el ? (Number(el.dataset.interval) || 5) : 5;
+    const initWarning = el ? (Number(el.dataset.warning) || -26.0) : -26.0;
+    const initCritical = el ? (Number(el.dataset.critical) || -32.0) : -32.0;
+    const initStatus = el ? (el.dataset.status || 'RUNNING') : 'RUNNING';
+
+    return {
+        form: {
+            polling_interval_minutes: initInterval,
+            warning_threshold_dbm: initWarning,
+            critical_threshold_dbm: initCritical,
+            scheduler_status: initStatus
+        },
+        saving: false,
+        toast: { show: false, message: '', type: 'success' },
+
+        initData() {
+            // Data sudah dimuat dari data-attributes
+        },
+
+        showToast(message, type = 'success') {
+            this.toast.message = message;
+            this.toast.type = type;
+            this.toast.show = true;
+            setTimeout(() => { this.toast.show = false; }, 4000);
+        },
+
+        async saveSettings() {
+            this.saving = true;
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        polling_interval_minutes: Number(this.form.polling_interval_minutes),
+                        warning_threshold_dbm: Number(this.form.warning_threshold_dbm),
+                        critical_threshold_dbm: Number(this.form.critical_threshold_dbm),
+                        scheduler_status: this.form.scheduler_status
+                    })
+                });
+                const json = await res.json();
+                if (res.ok) {
+                    this.showToast(json.message || "Pengaturan berhasil disimpan!");
+                    if (json.data) {
+                        this.form.polling_interval_minutes = json.data.polling_interval_minutes;
+                        this.form.warning_threshold_dbm = json.data.warning_threshold_dbm;
+                        this.form.critical_threshold_dbm = json.data.critical_threshold_dbm;
+                        this.form.scheduler_status = json.data.scheduler_status;
+                    }
+                } else {
+                    this.showToast(json.detail || "Gagal menyimpan pengaturan", "error");
+                }
+            } catch (err) {
+                this.showToast("Gagal berkomunikasi dengan server", "error");
+            } finally {
+                this.saving = false;
+            }
+        }
+    }
+}
+</script>
+{% endblock %}
