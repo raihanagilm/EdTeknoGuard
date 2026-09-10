@@ -1,0 +1,72 @@
+<!-- 4 Kartu KPI Ringkasan Kesehatan Jaringan ONT -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+    
+    <!-- 1. Total ONT -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Terpantau</span>
+            <div class="h-8 w-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+            </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-slate-900" x-text="kpi.total_monitored">111</span>
+            <span class="text-xs text-slate-500 font-medium">Modem</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-500">
+            Aktif di database TiDB
+        </div>
+    </div>
+
+    <!-- 2. Sinyal Normal -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Sinyal Normal</span>
+            <div class="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600" x-text="kpi.normal">0</span>
+            <span class="text-xs text-emerald-700 font-medium">&gt; -26 dBm</span>
+        </div>
+        <div class="mt-2 text-[11px] text-emerald-600 font-medium">
+            Kualitas optik prima
+        </div>
+    </div>
+
+    <!-- 3. Warning Peringatan Awal (<= -26 dBm) -->
+    <div class="bg-amber-50/50 rounded-2xl p-4 sm:p-5 border border-amber-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">Warning Redaman</span>
+            <div class="h-8 w-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-amber-600" x-text="kpi.warning">0</span>
+            <span class="text-xs text-amber-700 font-medium">&le; -26.0 dBm</span>
+        </div>
+        <div class="mt-2 text-[11px] text-amber-700 font-medium">
+            Indikasi drop / perbaikan
+        </div>
+    </div>
+
+    <!-- 4. LOS / Modem Mati -->
+    <div class="bg-rose-50/40 rounded-2xl p-4 sm:p-5 border border-rose-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-rose-800 uppercase tracking-wider">LOS / Mati</span>
+            <div class="h-8 w-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 4.243a9 9 0 01-2.828-5.657m0 0l2.828 2.828M3 3l18 18"/></svg>
+            </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-rose-600" x-text="kpi.los + kpi.critical">0</span>
+            <span class="text-xs text-rose-600 font-medium">Offline</span>
+        </div>
+        <div class="mt-2 text-[11px] text-rose-600 font-medium">
+            Timeout / putus sinyal
+        </div>
+    </div>
+
+</div>

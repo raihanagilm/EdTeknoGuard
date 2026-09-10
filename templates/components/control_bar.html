@@ -1,0 +1,68 @@
+<!-- Control Bar: Status Engine & Manual Scanning Actions -->
+<div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+    
+    <!-- Sisi Kiri: Status Pemantau Otomatis -->
+    <div class="flex items-center gap-3">
+        <div class="h-3.5 w-3.5 rounded-full flex items-center justify-center"
+             :class="engineStatus === 'RUNNING' ? 'bg-emerald-500' : 'bg-slate-400'">
+            <div class="h-2 w-2 rounded-full bg-white"
+                 :class="engineStatus === 'RUNNING' ? 'animate-ping' : ''"></div>
+        </div>
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-slate-900"
+                      x-text="engineStatus === 'RUNNING' ? 'Pemantauan Otomatis: AKTIF (Tiap 5 Menit)' : 'Pemantauan Otomatis: DIJEDA'">
+                    Pemantauan Otomatis: AKTIF
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                      :class="engineStatus === 'RUNNING' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'"
+                      x-text="engineStatus">
+                    RUNNING
+                </span>
+            </div>
+            <div class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                <span>Pengecekan Terakhir:</span>
+                <strong class="text-slate-700 font-mono" x-text="lastScanTime || '{{ last_scan_time }}'">{{ last_scan_time }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sisi Kanan: Tombol Tindakan Cepat (Touch target >= 44px) -->
+    <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+        
+        <!-- Tombol Cek Redaman Sekarang (Manual Scan All) -->
+        <button @click="triggerScanAll()"
+                :disabled="isScanning"
+                class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition shadow-sm shadow-indigo-200 disabled:opacity-50 min-h-[44px]">
+            <!-- Spinner saat scanning -->
+            <svg x-show="isScanning" class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <!-- Icon refresh saat standby -->
+            <svg x-show="!isScanning" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <span x-text="isScanning ? 'Memindai 111 ONT...' : 'Cek Redaman Sekarang'">Cek Redaman Sekarang</span>
+        </button>
+
+        <!-- Tombol Jeda / Lanjutkan Scheduler -->
+        <button @click="toggleEngine()"
+                :disabled="isToggling"
+                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition min-h-[44px]"
+                :class="engineStatus === 'RUNNING' 
+                        ? 'border-slate-300 text-slate-700 hover:bg-slate-50' 
+                        : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'">
+            <svg x-show="engineStatus === 'RUNNING'" class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <svg x-show="engineStatus !== 'RUNNING'" class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span x-text="engineStatus === 'RUNNING' ? 'Jeda' : 'Lanjutkan'">Jeda</span>
+        </button>
+
+    </div>
+
+</div>

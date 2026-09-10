@@ -1,0 +1,374 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Riwayat Log Performa ONT — EdTeknoGuard{% endblock %}
+
+{% block content %}
+<div class="space-y-6" x-data="logsApp()" x-init="initData()">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                📜 Riwayat Log Performa ONT
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">
+                Audit time-series hasil pengukuran sinyal optik (Rx Power), suhu, uptime, dan status seluruh modem ONT.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span>Time-Series TiDB</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
+            <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
+                📊
+            </div>
+            <div>
+                <div class="text-[11px] font-bold uppercase text-slate-400">Total Log Terekam</div>
+                <div class="text-xl font-extrabold text-slate-900" x-text="summary.total_records || '0'"></div>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
+            <div class="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
+                ⚡
+            </div>
+            <div>
+                <div class="text-[11px] font-bold uppercase text-slate-400">Rata-rata Redaman</div>
+                <div class="text-xl font-extrabold text-emerald-600" x-text="summary.avg_rx_power ? summary.avg_rx_power + ' dBm' : '-'"></div>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
+            <div class="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">
+                ⚠️
+            </div>
+            <div>
+                <div class="text-[11px] font-bold uppercase text-slate-400">Batas Warning</div>
+                <div class="text-xl font-extrabold text-amber-600">&le; -26.0 dBm</div>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
+            <div class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg">
+                🚨
+            </div>
+            <div>
+                <div class="text-[11px] font-bold uppercase text-slate-400">Batas Kritis / LOS</div>
+                <div class="text-xl font-extrabold text-rose-600">&le; -32.0 dBm</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            
+            <!-- Pencarian Cepat -->
+            <div class="relative flex-1">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <input type="text"
+                       x-model="searchQuery"
+                       @input.debounce.350ms="fetchLogs(1)"
+                       placeholder="Cari nama pelanggan, ID, IP (10.10.x.x), atau POP..."
+                       class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+            </div>
+
+            <!-- Filter Status & Rentang -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <!-- Filter Status -->
+                <select x-model="filterStatus"
+                        @change="fetchLogs(1)"
+                        class="px-3 py-2.5 rounded-xl border border-slate-200 text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                    <option value="">Semua Status</option>
+                    <option value="NORMAL">Normal (&gt; -26 dBm)</option>
+                    <option value="WARNING">Warning (&le; -26.0 dBm)</option>
+                    <option value="CRITICAL">Critical (&le; -32.0 dBm)</option>
+                    <option value="LOS">LOS / Modem Mati</option>
+                </select>
+
+                <!-- Filter Rentang Waktu -->
+                <select x-model="filterRange"
+                        @change="onRangeChange()"
+                        class="px-3 py-2.5 rounded-xl border border-slate-200 text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                    <option value="today">Hari Ini</option>
+                    <option value="7d">7 Hari Terakhir</option>
+                    <option value="30d">30 Hari Terakhir</option>
+                    <option value="custom">Kustom Tanggal</option>
+                </select>
+
+                <!-- Refresh Button -->
+                <button @click="fetchLogs(currentPage)"
+                        :disabled="loading"
+                        class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition min-h-[44px] disabled:opacity-50">
+                    <svg class="w-4 h-4" :class="{'animate-spin': loading}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span>Refresh</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Custom Date Range Row (Show only when custom selected) -->
+        <div x-show="filterRange === 'custom'"
+             x-transition
+             class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3 text-xs">
+            <span class="font-semibold text-slate-600">Pilih Rentang Tanggal:</span>
+            <div class="flex items-center gap-2">
+                <input type="date" x-model="customStartDate" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px]">
+                <span class="text-slate-400">s/d</span>
+                <input type="date" x-model="customEndDate" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px]">
+                <button @click="fetchLogs(1)" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs min-h-[40px]">
+                    Terapkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Card (Desktop & Mobile) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        
+        <!-- 1. Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                        <th class="py-3 px-4">Waktu Cek</th>
+                        <th class="py-3 px-4">Pelanggan</th>
+                        <th class="py-3 px-4">POP &amp; IP Router</th>
+                        <th class="py-3 px-4">Modem</th>
+                        <th class="py-3 px-4 text-center">Rx Power</th>
+                        <th class="py-3 px-4 text-center">Suhu</th>
+                        <th class="py-3 px-4 text-center">Latency</th>
+                        <th class="py-3 px-4 text-center">Status</th>
+                        <th class="py-3 px-4">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <template x-for="l in logs" :key="l.id">
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <!-- Waktu Cek -->
+                            <td class="py-3 px-4 font-mono text-slate-600 whitespace-nowrap" x-text="l.waktu_cek"></td>
+
+                            <!-- Pelanggan -->
+                            <td class="py-3 px-4">
+                                <div class="font-bold text-slate-900" x-text="l.nama"></div>
+                                <div class="text-[11px] text-slate-400 font-mono" x-text="l.id_pelanggan"></div>
+                            </td>
+
+                            <!-- POP & IP -->
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200" x-text="l.pop"></span>
+                                <div class="font-mono text-slate-800 font-bold text-xs mt-0.5" x-text="l.ip_router"></div>
+                            </td>
+
+                            <!-- Modem -->
+                            <td class="py-3 px-4 font-medium text-slate-700" x-text="l.jenis_modem"></td>
+
+                            <!-- Rx Power -->
+                            <td class="py-3 px-4 text-center font-mono font-extrabold text-sm">
+                                <span :class="{
+                                    'text-emerald-600': l.status_koneksi === 'NORMAL',
+                                    'text-amber-600': l.status_koneksi === 'WARNING',
+                                    'text-rose-600': l.status_koneksi === 'CRITICAL' || l.status_koneksi === 'LOS'
+                                }" x-text="l.rx_power !== null ? l.rx_power + ' dBm' : 'LOS'"></span>
+                            </td>
+
+                            <!-- Suhu -->
+                            <td class="py-3 px-4 text-center font-mono text-slate-600">
+                                <span x-text="l.suhu_ont !== null ? l.suhu_ont + ' °C' : '-'"></span>
+                            </td>
+
+                            <!-- Latency -->
+                            <td class="py-3 px-4 text-center font-mono text-slate-600">
+                                <span x-text="l.latency_ms !== null ? l.latency_ms + ' ms' : '-'"></span>
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1"
+                                      :class="{
+                                          'bg-emerald-50 text-emerald-700 border border-emerald-200': l.status_koneksi === 'NORMAL',
+                                          'bg-amber-50 text-amber-700 border border-amber-200': l.status_koneksi === 'WARNING',
+                                          'bg-rose-50 text-rose-700 border border-rose-200': l.status_koneksi === 'CRITICAL' || l.status_koneksi === 'LOS'
+                                      }">
+                                    <span class="w-1.5 h-1.5 rounded-full"
+                                          :class="{
+                                              'bg-emerald-500': l.status_koneksi === 'NORMAL',
+                                              'bg-amber-500': l.status_koneksi === 'WARNING',
+                                              'bg-rose-500': l.status_koneksi === 'CRITICAL' || l.status_koneksi === 'LOS'
+                                          }"></span>
+                                    <span x-text="l.status_koneksi"></span>
+                                </span>
+                            </td>
+
+                            <!-- Keterangan -->
+                            <td class="py-3 px-4 text-slate-500 text-[11px] truncate max-w-[150px]" :title="l.keterangan" x-text="l.keterangan || '-'"></td>
+                        </tr>
+                    </template>
+
+                    <tr x-show="logs.length === 0 && !loading">
+                        <td colspan="9" class="py-12 text-center text-slate-400">
+                            Tidak ada riwayat log yang sesuai dengan kriteria filter atau pencarian.
+                        </td>
+                    </tr>
+                    <tr x-show="loading">
+                        <td colspan="9" class="py-12 text-center text-slate-400">
+                            <div class="inline-flex items-center gap-2 font-medium">
+                                <svg class="w-5 h-5 animate-spin text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Memuat log performa dari TiDB...
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2. Mobile Cards -->
+        <div class="block md:hidden divide-y divide-slate-100">
+            <template x-for="l in logs" :key="l.id">
+                <div class="p-4 hover:bg-slate-50 transition">
+                    <div class="flex items-start justify-between gap-2 mb-1.5">
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm" x-text="l.nama"></div>
+                            <div class="text-[11px] text-slate-400 font-mono" x-text="l.id_pelanggan + ' • ' + l.pop"></div>
+                        </div>
+                        <span class="font-mono font-extrabold text-sm px-2.5 py-1 rounded-lg"
+                              :class="{
+                                  'bg-emerald-50 text-emerald-700 border border-emerald-200': l.status_koneksi === 'NORMAL',
+                                  'bg-amber-100 text-amber-800 border border-amber-300': l.status_koneksi === 'WARNING',
+                                  'bg-rose-100 text-rose-800 border border-rose-300': l.status_koneksi === 'CRITICAL' || l.status_koneksi === 'LOS'
+                              }"
+                              x-text="l.rx_power !== null ? l.rx_power + ' dBm' : 'LOS'">
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100 my-2 font-mono">
+                        <div>
+                            <span class="text-slate-400 block text-[10px] font-sans">IP Router</span>
+                            <span class="font-bold text-slate-800" x-text="l.ip_router"></span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[10px] font-sans">Modem / Latency</span>
+                            <span class="text-slate-700 font-sans" x-text="l.jenis_modem + ' (' + (l.latency_ms || 0) + 'ms)'"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                        <span class="font-mono" x-text="l.waktu_cek"></span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                              :class="{
+                                  'bg-emerald-50 text-emerald-700': l.status_koneksi === 'NORMAL',
+                                  'bg-amber-50 text-amber-700': l.status_koneksi === 'WARNING',
+                                  'bg-rose-50 text-rose-700': l.status_koneksi === 'CRITICAL' || l.status_koneksi === 'LOS'
+                              }" x-text="l.status_koneksi"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div>
+                Menampilkan <span class="font-bold text-slate-800" x-text="logs.length"></span> dari <span class="font-bold text-slate-800" x-text="totalRecords"></span> entri log
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button @click="fetchLogs(currentPage - 1)"
+                        :disabled="currentPage <= 1 || loading"
+                        class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[38px]">
+                    &larr; Sebelumnya
+                </button>
+                <span class="px-3 py-1 font-bold text-slate-700">Halaman <span x-text="currentPage"></span> / <span x-text="totalPages"></span></span>
+                <button @click="fetchLogs(currentPage + 1)"
+                        :disabled="currentPage >= totalPages || loading"
+                        class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[38px]">
+                    Selanjutnya &rarr;
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Summary Data Helper for Alpine -->
+    <div id="logs-summary-data"
+         data-total="{{ summary.total_records if summary else 0 }}"
+         data-avg="{{ summary.avg_rx_power if summary and summary.avg_rx_power is not none else '' }}"
+         class="hidden"></div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function logsApp() {
+    const el = document.getElementById('logs-summary-data');
+    const initTotal = el ? (Number(el.dataset.total) || 0) : 0;
+    const initAvg = el && el.dataset.avg ? Number(el.dataset.avg) : null;
+
+    return {
+        logs: [],
+        totalRecords: 0,
+        currentPage: 1,
+        totalPages: 1,
+        limit: 50,
+        searchQuery: '',
+        filterStatus: '',
+        filterRange: 'today',
+        customStartDate: '',
+        customEndDate: '',
+        loading: false,
+        summary: {
+            total_records: initTotal,
+            avg_rx_power: initAvg
+        },
+
+        initData() {
+            this.fetchLogs(1);
+        },
+
+        onRangeChange() {
+            if (this.filterRange !== 'custom') {
+                this.fetchLogs(1);
+            }
+        },
+
+        async fetchLogs(page = 1) {
+            this.loading = true;
+            this.currentPage = page;
+            try {
+                let url = `/api/logs?page=${page}&limit=${this.limit}&range=${this.filterRange}`;
+                if (this.searchQuery) url += `&q=${encodeURIComponent(this.searchQuery)}`;
+                if (this.filterStatus) url += `&status=${encodeURIComponent(this.filterStatus)}`;
+                if (this.filterRange === 'custom' && this.customStartDate && this.customEndDate) {
+                    url += `&start_date=${encodeURIComponent(this.customStartDate)}&end_date=${encodeURIComponent(this.customEndDate)}`;
+                }
+
+                const res = await fetch(url);
+                if (res.ok) {
+                    const json = await res.json();
+                    this.logs = json.data || [];
+                    this.totalRecords = json.total || 0;
+                    this.totalPages = Math.ceil(this.totalRecords / this.limit) || 1;
+                    if (json.summary) {
+                        this.summary = json.summary;
+                    }
+                }
+            } catch (err) {
+                console.error("Gagal mengambil data log:", err);
+            } finally {
+                this.loading = false;
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

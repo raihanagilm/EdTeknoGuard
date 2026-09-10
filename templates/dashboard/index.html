@@ -1,0 +1,43 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Dashboard NOC — EdTeknoGuard{% endblock %}
+
+{% block content %}
+<div x-data="dashboardApp">
+
+    <!-- Hero Title & Ringkasan NOC -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Monitoring &amp; Deteksi Dini ONT
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                Pengawasan berkala setiap 5 menit ke seluruh perangkat ONT jaringan ISP lokal
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span class="h-2 w-2 rounded-full bg-indigo-600 mr-2"></span>
+                <span>TiDB Cloud Connected</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- 1. Control Bar (Status Engine & Action Buttons) -->
+    {% include "components/control_bar.html" %}
+
+    <!-- 2. KPI Summary Cards -->
+    {% include "components/kpi_cards.html" %}
+
+    <!-- 3. Visualisasi Grafik Riwayat Redaman -->
+    {% include "components/charts.html" %}
+
+    <!-- 4. Tabel & Kartu Mobile Pelanggan -->
+    {% include "components/customer_table.html" %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}
