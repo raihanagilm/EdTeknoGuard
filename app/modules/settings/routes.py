@@ -10,6 +10,7 @@ router = APIRouter(tags=["settings"])
 
 # ----------------- HTML PAGE ROUTE -----------------
 @router.get("/settings")
+@router.get("/pengaturan")
 def render_settings_page(
     request: Request,
     db: Session = Depends(get_db),

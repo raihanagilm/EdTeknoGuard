@@ -5,7 +5,7 @@
 {% block content %}
 <div class="space-y-6" x-data="settingsApp()" x-init="initData()">
 
-    <!-- Header -->
+    <!-- Header Halaman -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
@@ -15,307 +15,398 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <span>Pengaturan Monitoring &amp; Ambang Batas</span>
+                <span>Pengaturan Sistem</span>
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                Atur frekuensi interval pemindaian berkala ONT serta batas toleransi redaman optik (dBm) untuk memicu peringatan dini.
+                Kelola parameter pemantauan berkala, batas toleransi redaman optik dBm, dan multi-kredensial default modem ONT.
             </p>
         </div>
 
         <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
-                  :class="form.scheduler_status === 'RUNNING' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'">
-                <span class="w-2 h-2 rounded-full" :class="form.scheduler_status === 'RUNNING' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
-                <span x-text="form.scheduler_status === 'RUNNING' ? 'Engine Aktif' : 'Engine Dijeda'"></span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                <span>Konfigurasi Realtime</span>
             </span>
         </div>
     </div>
 
-    <!-- Main Grid Form -->
+    <!-- Tab Navigation (Mobile-First Scrollable) -->
+    <div class="border-b border-slate-200">
+        <nav class="flex space-x-2 sm:space-x-4 overflow-x-auto pb-px scrollbar-none" aria-label="Tabs">
+            <!-- Tab 1: Parameter & Ambang Batas -->
+            <button type="button"
+                    @click="activeTab = 'thresholds'"
+                    :class="activeTab === 'thresholds'
+                        ? 'border-indigo-600 text-indigo-600 font-bold bg-indigo-50/50'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium'"
+                    class="group inline-flex items-center gap-2 py-3 px-4 border-b-2 text-xs sm:text-sm rounded-t-xl transition whitespace-nowrap min-h-[44px]">
+                <svg class="w-4 h-4 transition" :class="activeTab === 'thresholds' ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                </svg>
+                <span>Parameter &amp; Ambang Batas</span>
+            </button>
+
+            <!-- Tab 2: Kredensial Modem ONT -->
+            <button type="button"
+                    @click="activeTab = 'credentials'"
+                    :class="activeTab === 'credentials'
+                        ? 'border-indigo-600 text-indigo-600 font-bold bg-indigo-50/50'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium'"
+                    class="group inline-flex items-center gap-2 py-3 px-4 border-b-2 text-xs sm:text-sm rounded-t-xl transition whitespace-nowrap min-h-[44px]">
+                <svg class="w-4 h-4 transition" :class="activeTab === 'credentials' ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                </svg>
+                <span>Kredensial Modem ONT</span>
+                <span class="ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                      :class="activeTab === 'credentials' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
+                      x-text="form.default_modem_credentials.length"></span>
+            </button>
+
+            <!-- Tab 3: Integrasi Telegram -->
+            <button type="button"
+                    @click="activeTab = 'telegram'"
+                    :class="activeTab === 'telegram'
+                        ? 'border-indigo-600 text-indigo-600 font-bold bg-indigo-50/50'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium'"
+                    class="group inline-flex items-center gap-2 py-3 px-4 border-b-2 text-xs sm:text-sm rounded-t-xl transition whitespace-nowrap min-h-[44px]">
+                <svg class="w-4 h-4 transition" :class="activeTab === 'telegram' ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <span>Integrasi Bot Telegram</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Main Layout Container -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- Form Pengaturan (2 Kolom) -->
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
-            
-            <form @submit.prevent="confirmSaveSettings()" class="space-y-6 text-xs">
+        <!-- Form Konten Sesuai Tab Aktif (2 Kolom) -->
+        <div class="lg:col-span-2">
 
-                <!-- 1. Pengaturan Interval Waktu -->
-                <div class="space-y-3 pb-6 border-b border-slate-100">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <span>Interval Pemantauan Otomatis (Scheduler)</span>
-                            </h2>
-                            <p class="text-xs text-slate-400 mt-0.5">
-                                Frekuensi background worker menembak query SNMP UDP 161 ke seluruh IP ONT pelanggan.
-                            </p>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-extrabold font-mono text-xs">
-                            <span x-text="form.polling_interval_minutes"></span> Menit Sekali
-                        </span>
-                    </div>
-
-                    <!-- Preset Buttons -->
-                    <div class="flex flex-wrap items-center gap-2 pt-1">
-                        <template x-for="p in [1, 3, 5, 10, 15, 30]" :key="p">
-                            <button type="button"
-                                    @click="form.polling_interval_minutes = p"
-                                    :class="form.polling_interval_minutes === p 
-                                            ? 'bg-indigo-600 text-white font-bold shadow-sm shadow-indigo-200 border-indigo-600' 
-                                            : 'bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold border-slate-200'"
-                                    class="px-3.5 py-2 rounded-xl border text-xs transition min-h-[40px] flex items-center gap-1">
-                                <span x-text="p"></span> Menit
-                            </button>
-                        </template>
-                    </div>
-
-                    <!-- Custom Number Input -->
-                    <div class="pt-2 flex items-center gap-3">
-                        <label class="font-bold text-slate-700 whitespace-nowrap">Kustom Menit:</label>
-                        <div class="relative w-36">
-                            <input type="number" min="1" max="1440"
-                                   x-model.number="form.polling_interval_minutes"
-                                   required
-                                   class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                            <span class="absolute right-3 top-3 text-slate-400 font-medium">Menit</span>
-                        </div>
-                        <span class="text-[11px] text-slate-400">Rekomendasi standar ISP: <strong>5 menit</strong>.</span>
-                    </div>
-                </div>
-
-                <!-- 2. Ambang Batas Deteksi Dini (Warning Threshold) -->
-                <div class="space-y-4 pb-6 border-b border-slate-100">
+            <!-- TAB 1: PARAMETER & AMBANG BATAS REDAMAN -->
+            <div x-show="activeTab === 'thresholds'" class="space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
                     <div>
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                </svg>
-                                <span>Ambang Batas Peringatan Dini (Warning Threshold)</span>
-                            </h2>
-                            <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 font-extrabold font-mono text-xs border border-amber-200">
-                                &le; <span x-text="form.warning_threshold_dbm.toFixed(1)"></span> dBm
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5">
-                            Modem dengan redaman lebih buruk atau sama dengan nilai ini akan dikategorikan <strong>WARNING</strong> dan memicu alert Telegram.
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Parameter Pemantauan &amp; Ambang Batas Redaman</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Atur interval pemindaian berkala serta ambang batas deteksi dini dan notifikasi kritis. Nilai diinput manual oleh Admin.
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                        <div>
-                            <label class="font-bold text-slate-700 block mb-1">Nilai Redaman Peringatan (dBm)</label>
-                            <div class="relative">
-                                <input type="number" step="0.1" max="-15.0" min="-40.0"
+                    <form @submit.prevent="confirmSaveSettings()" class="space-y-6 text-xs">
+
+                        <!-- 1. Interval Pemantauan -->
+                        <div class="space-y-2 pb-5 border-b border-slate-100">
+                            <label class="font-bold text-slate-800 text-sm block">
+                                Interval Pemantauan Otomatis (Menit)
+                            </label>
+                            <p class="text-xs text-slate-400">
+                                Frekuensi background worker mengecek kondisi optik seluruh ONT pelanggan yang terdaftar.
+                            </p>
+                            <div class="relative max-w-xs mt-2">
+                                <input type="number" min="1" max="1440"
+                                       x-model.number="form.polling_interval_minutes"
+                                       required
+                                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                <span class="absolute right-3.5 top-3 text-slate-400 font-semibold">Menit Sekali</span>
+                            </div>
+                            <span class="text-[11px] text-slate-400 block mt-1">Rekomendasi standar ISP: <strong>5 menit</strong>.</span>
+                        </div>
+
+                        <!-- 2. Ambang Batas Peringatan Dini (Warning Threshold) -->
+                        <div class="space-y-2 pb-5 border-b border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                    <span>Ambang Batas Peringatan Dini (Peringatan Ringan)</span>
+                                </label>
+                                <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 font-extrabold font-mono text-xs border border-amber-200">
+                                    &le; <span x-text="Number(form.warning_threshold_dbm).toFixed(1)"></span> dBm
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400">
+                                Modem dengan nilai redaman optik lebih buruk atau sama dengan batas ini akan memicu <strong>Peringatan Ringan</strong> di Telegram.
+                            </p>
+                            <div class="relative max-w-xs mt-2">
+                                <input type="number" step="0.1" max="-10.0" min="-40.0"
                                        x-model.number="form.warning_threshold_dbm"
                                        required
-                                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                                <span class="absolute right-3 top-3 text-slate-400 font-bold">dBm</span>
+                                       placeholder="-26.0"
+                                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-amber-500 min-h-[44px]">
+                                <span class="absolute right-3.5 top-3 text-slate-400 font-bold">dBm</span>
                             </div>
+                            <p class="text-[11px] text-amber-700 mt-1 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Nilai standar: <strong>-26.0 dBm</strong> (Kondisi peringatan ringan sebelum mencapai batas merah).</span>
+                            </p>
                         </div>
 
-                        <!-- Presets Warning -->
-                        <div class="flex items-center gap-2 pt-4 sm:pt-0">
-                            <button type="button" @click="form.warning_threshold_dbm = -25.0" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 min-h-[40px]">
-                                -25.0 dBm
-                            </button>
-                            <button type="button" @click="form.warning_threshold_dbm = -26.0" class="px-3 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 text-[11px] font-bold min-h-[40px]">
-                                -26.0 dBm (SOP)
-                            </button>
-                            <button type="button" @click="form.warning_threshold_dbm = -27.0" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 min-h-[40px]">
-                                -27.0 dBm
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Ambang Batas Kritis (Critical Threshold) -->
-                <div class="space-y-4 pb-6 border-b border-slate-100">
-                    <div>
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <span>Ambang Batas Kritis (Critical Threshold)</span>
-                            </h2>
-                            <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 font-extrabold font-mono text-xs border border-rose-200">
-                                &le; <span x-text="form.critical_threshold_dbm.toFixed(1)"></span> dBm
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5">
-                            Batas redaman di mana pelanggan berisiko tinggi mengalami *Loss of Signal* (LOS) atau drop koneksi.
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                        <div>
-                            <label class="font-bold text-slate-700 block mb-1">Nilai Redaman Kritis (dBm)</label>
-                            <div class="relative">
-                                <input type="number" step="0.1" max="-20.0" min="-45.0"
+                        <!-- 3. Ambang Batas Kritis (Critical Threshold) -->
+                        <div class="space-y-2 pb-5 border-b border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <label class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>Ambang Batas Kritis (Notifikasi Merah Segera Dicek)</span>
+                                </label>
+                                <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 font-extrabold font-mono text-xs border border-rose-200">
+                                    &le; <span x-text="Number(form.critical_threshold_dbm).toFixed(1)"></span> dBm
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400">
+                                Jika redaman optik menyentuh atau melampaui nilai ini, bot akan mengirimkan <strong>NOTIFIKASI MERAH SEGERA DICEK</strong> ke teknisi lapangan.
+                            </p>
+                            <div class="relative max-w-xs mt-2">
+                                <input type="number" step="0.1" max="-15.0" min="-45.0"
                                        x-model.number="form.critical_threshold_dbm"
                                        required
-                                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                                <span class="absolute right-3 top-3 text-slate-400 font-bold">dBm</span>
+                                       placeholder="-27.0"
+                                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-rose-500 min-h-[44px]">
+                                <span class="absolute right-3.5 top-3 text-slate-400 font-bold">dBm</span>
                             </div>
+                            <p class="text-[11px] text-rose-700 mt-1 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span>Nilai standar: <strong>-27.0 dBm</strong> atau lebih buruk (Indikasi konektor kotor/tekukan parah).</span>
+                            </p>
                         </div>
 
-                        <!-- Presets Critical -->
-                        <div class="flex items-center gap-2 pt-4 sm:pt-0">
-                            <button type="button" @click="form.critical_threshold_dbm = -30.0" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 min-h-[40px]">
-                                -30.0 dBm
-                            </button>
-                            <button type="button" @click="form.critical_threshold_dbm = -32.0" class="px-3 py-2 rounded-xl border border-rose-300 bg-rose-50 text-rose-800 text-[11px] font-bold min-h-[40px]">
-                                -32.0 dBm (Standar)
-                            </button>
-                            <button type="button" @click="form.critical_threshold_dbm = -35.0" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 min-h-[40px]">
-                                -35.0 dBm
+                        <!-- Action Button -->
+                        <div class="flex items-center justify-end pt-2">
+                            <button type="submit"
+                                    class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Simpan Parameter Redaman</span>
                             </button>
                         </div>
-                    </div>
+
+                    </form>
                 </div>
+            </div>
 
-                <!-- 4. Kontrol Status Engine Scheduler -->
-                <div class="space-y-3 pb-6 border-b border-slate-100">
-                    <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                        <span>Status Operasional Scheduler</span>
-                    </h2>
-                    <p class="text-xs text-slate-400">
-                        Aktifkan atau jeda pemantauan otomatis berkala ke seluruh ONT jaringan.
-                    </p>
+            <!-- TAB 2: MANAJEMEN MULTI-KREDENSIAL MODEM ONT -->
+            <div x-show="activeTab === 'credentials'" class="space-y-6" style="display: none;">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                </svg>
+                                <span>Daftar Kredensial Default Modem ONT (Multi-User)</span>
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">
+                                Tambahkan kombinasi username dan password modem ONT lebih dari satu. Sistem akan mencoba berurutan saat pengecekan live.
+                            </p>
+                        </div>
 
-                    <div class="flex items-center gap-3 pt-1">
-                        <label class="inline-flex items-center gap-2 cursor-pointer p-3 rounded-xl border transition min-h-[44px]"
-                               :class="form.scheduler_status === 'RUNNING' ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'">
-                            <input type="radio" value="RUNNING" x-model="form.scheduler_status" class="text-emerald-600 focus:ring-emerald-500 h-4 w-4">
-                            <span>RUNNING (Pemantauan Aktif)</span>
-                        </label>
-
-                        <label class="inline-flex items-center gap-2 cursor-pointer p-3 rounded-xl border transition min-h-[44px]"
-                               :class="form.scheduler_status === 'STOPPED' ? 'bg-amber-50 border-amber-300 text-amber-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600'">
-                            <input type="radio" value="STOPPED" x-model="form.scheduler_status" class="text-amber-600 focus:ring-amber-500 h-4 w-4">
-                            <span>STOPPED (Jeda Pemantauan)</span>
-                        </label>
+                        <!-- Tombol Tambah Baris -->
+                        <button type="button"
+                                @click="addCredentialRow()"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 transition min-h-[40px]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>+ Tambah Kredensial</span>
+                        </button>
                     </div>
-                </div>
 
-                <!-- 5. Manajemen Kredensial Default Modem ONT -->
-                <div class="space-y-4 pb-6 border-b border-slate-100">
+                    <form @submit.prevent="confirmSaveSettings()" class="space-y-5 text-xs">
+
+                        <!-- Tabel Repeater Multi-Kredensial -->
+                        <div class="space-y-3">
+                            <template x-for="(cred, index) in form.default_modem_credentials" :key="index">
+                                <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 transition hover:border-slate-300">
+                                    
+                                    <!-- Nomor Urut Prioritas -->
+                                    <div class="flex items-center justify-between sm:justify-start gap-2 flex-shrink-0">
+                                        <span class="h-8 w-8 rounded-xl bg-white border border-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shadow-xs"
+                                              x-text="'#' + (index + 1)"></span>
+                                        <span class="sm:hidden font-semibold text-slate-500 text-[11px]" x-text="index === 0 ? 'Kredensial Utama' : 'Kredensial Alternatif'"></span>
+                                        <!-- Tombol Hapus (Mobile View) -->
+                                        <button type="button"
+                                                x-show="form.default_modem_credentials.length > 1"
+                                                @click="removeCredentialRow(index)"
+                                                class="sm:hidden p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-transparent">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Username Input -->
+                                    <div class="flex-1">
+                                        <label class="font-bold text-slate-700 block mb-1">Username Modem</label>
+                                        <input type="text"
+                                               x-model="cred.username"
+                                               required
+                                               placeholder="Contoh: admin atau tekno"
+                                               class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                    </div>
+
+                                    <!-- Password Input -->
+                                    <div class="flex-1">
+                                        <label class="font-bold text-slate-700 block mb-1">Password Modem</label>
+                                        <input type="text"
+                                               x-model="cred.password"
+                                               required
+                                               placeholder="Contoh: tekno2024 atau admin"
+                                               class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                    </div>
+
+                                    <!-- Tombol Hapus (Desktop View) -->
+                                    <div class="hidden sm:flex items-end pb-0.5">
+                                        <button type="button"
+                                                x-show="form.default_modem_credentials.length > 1"
+                                                @click="removeCredentialRow(index)"
+                                                title="Hapus Kredensial Ini"
+                                                class="p-2.5 rounded-xl text-rose-600 hover:bg-rose-50 hover:border-rose-200 border border-transparent transition min-h-[44px] flex items-center justify-center">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Checkbox Sinkronisasi Massal -->
+                        <div class="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100 flex items-start gap-3 mt-4">
+                            <input type="checkbox"
+                                   id="chk_apply_invalid"
+                                   x-model="form.apply_to_invalid_customers"
+                                   class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                            <label for="chk_apply_invalid" class="text-xs text-indigo-950 cursor-pointer">
+                                <strong>Perbarui ke seluruh pelanggan yang berstatus INVALID / Belum Valid (UNTESTED)</strong>
+                                <span class="block text-slate-500 text-[11px] mt-0.5">
+                                    Akan menerapkan kredensial urutan pertama ke data pelanggan yang gagal autentikasi. Pelanggan yang sudah terverifikasi <strong>VALID tetap aman dan tidak diubah</strong>.
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="flex items-center justify-end pt-3 border-t border-slate-100">
+                            <button type="submit"
+                                    class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Simpan Daftar Kredensial</span>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB 3: INTEGRASI TELEGRAM -->
+            <div x-show="activeTab === 'telegram'" class="space-y-6" style="display: none;">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
                     <div>
-                        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
-                            <span>Manajemen Kredensial Default Modem ONT</span>
+                            <span>Pengaturan Bot Telegram &amp; Penerima Notifikasi</span>
                         </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">
-                            Kredensial cadangan utama jika teknisi melakukan perubahan massal username/password modem di lapangan.
+                        <p class="text-xs text-slate-500 mt-1">
+                            Notifikasi alert dikirimkan otomatis saat ONT redaman drop ke <strong>-26.0 dBm (Peringatan Ringan)</strong> atau <strong>-27.0 dBm (Notifikasi Merah Segera Dicek)</strong>.
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="font-bold text-slate-700 block mb-1">Username Default Modem</label>
-                            <input type="text"
-                                   x-model="form.default_modem_user"
-                                   placeholder="Contoh: admin"
-                                   required
-                                   class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                        </div>
-                        <div>
-                            <label class="font-bold text-slate-700 block mb-1">Password Default Modem</label>
-                            <input type="text"
-                                   x-model="form.default_modem_pass"
-                                   placeholder="Contoh: tekno2024 atau admin"
-                                   required
-                                   class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                        </div>
-                    </div>
-
-                    <!-- Checkbox Sinkronisasi ke Pelanggan Tidak Valid -->
-                    <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 flex items-start gap-2.5">
-                        <input type="checkbox"
-                               id="chk_apply_invalid"
-                               x-model="form.apply_to_invalid_customers"
-                               class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                        <label for="chk_apply_invalid" class="text-[11px] text-indigo-950 cursor-pointer">
-                            <strong>Perbarui ke seluruh pelanggan yang berstatus INVALID / Belum Valid (UNTESTED)</strong>
-                            <span class="block text-slate-500 mt-0.5">
-                                Kredensial pelanggan yang sudah terverifikasi <strong>VALID tidak akan diubah/ditimpa</strong>.
+                    <div class="p-4 rounded-2xl border bg-slate-50 text-xs space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-slate-800 block text-sm">Status Bot Telegram</span>
+                                <span class="text-[11px] text-slate-400">Terhubung ke Telegram API via TiDB Settings</span>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Bot Aktif (@TeknoToTo_bot)</span>
                             </span>
-                        </label>
-                    </div>
-                </div>
+                        </div>
 
-                <!-- Tombol Simpan -->
-                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                    <button type="submit"
-                            class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Simpan &amp; Terapkan Pengaturan</span>
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
-
-        <!-- Sidebar Panduan & Ringkasan Teknis (1 Kolom) -->
-        <div class="space-y-6">
-
-            <!-- Card SOP Batas Redaman -->
-            <div class="bg-indigo-50/75 rounded-2xl border border-indigo-100 p-5 space-y-3.5 text-xs text-indigo-950">
-                <h3 class="font-bold text-indigo-900 flex items-center gap-2 text-sm">
-                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
-                    <span>SOP Standar Redaman Fiber Optik</span>
-                </h3>
-                <div class="space-y-2 text-[11px] leading-relaxed">
-                    <div class="p-2.5 bg-white rounded-xl border border-indigo-100/80">
-                        <span class="font-bold text-emerald-700 block">Sinyal Prima: &gt; -26.0 dBm</span>
-                        Pelanggan menikmati koneksi lancar tanpa packet loss atau penurunan throughput.
-                    </div>
-                    <div class="p-2.5 bg-white rounded-xl border border-amber-200 bg-amber-50/30">
-                        <span class="font-bold text-amber-800 block">Peringatan Awal: -26.0 s/d -31.9 dBm</span>
-                        Konektor FO kotor atau dropcore tertekuk. Memerlukan penanganan tim teknisi sebelum merusak layanan di -27.0 dBm.
-                    </div>
-                    <div class="p-2.5 bg-white rounded-xl border border-rose-200 bg-rose-50/30">
-                        <span class="font-bold text-rose-800 block">Kritis: &le; -32.0 dBm</span>
-                        Modem terancam putus-nyambung (*loss of signal*).
+                        <div class="pt-2 border-t border-slate-200/60 flex flex-wrap gap-3">
+                            <a href="/telegram"
+                               class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition inline-flex items-center gap-2 min-h-[44px]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                <span>Buka Halaman Manajemen Telegram Lengkap</span>
+                            </a>
+                            <button type="button"
+                                    @click="triggerTelegramTest()"
+                                    :disabled="testingTelegram"
+                                    class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 shadow-xs transition inline-flex items-center gap-2 min-h-[44px]">
+                                <svg class="w-4 h-4 text-indigo-600" :class="{'animate-spin': testingTelegram}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                <span x-text="testingTelegram ? 'Mengirim...' : 'Kirim Uji Coba Pesan'"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card Realtime Engine Info -->
+        </div>
+
+        <!-- Sidebar Panduan Teknis & Ringkasan SOP (1 Kolom) -->
+        <div class="space-y-6">
+
+            <!-- Card Standar Redaman Baru -->
+            <div class="bg-indigo-50/75 rounded-2xl border border-indigo-100 p-5 space-y-3.5 text-xs text-indigo-950">
+                <h3 class="font-bold text-indigo-900 flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Ketentuan Ambang Batas Redaman</span>
+                </h3>
+                <div class="space-y-2.5 text-[11px] leading-relaxed">
+                    <div class="p-3 bg-white rounded-xl border border-emerald-200 shadow-xs">
+                        <div class="flex items-center justify-between font-bold text-emerald-800">
+                            <span>Sinyal Optimal</span>
+                            <span class="font-mono">&gt; -26.0 dBm</span>
+                        </div>
+                        <p class="text-slate-500 mt-1">Koneksi prima, throughput lancar, dan modul optik dalam batas toleransi aman.</p>
+                    </div>
+
+                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 shadow-xs">
+                        <div class="flex items-center justify-between font-bold text-amber-800">
+                            <span>⚠️ Peringatan Ringan</span>
+                            <span class="font-mono">&le; -26.0 dBm</span>
+                        </div>
+                        <p class="text-amber-900 mt-1">Deteksi dini redaman optik mulai memburuk. Masih dalam batas toleransi koneksi pelanggan.</p>
+                    </div>
+
+                    <div class="p-3 bg-rose-50 rounded-xl border border-rose-200 shadow-xs">
+                        <div class="flex items-center justify-between font-bold text-rose-800">
+                            <span>🚨🔴 Notifikasi Merah (Segera Dicek)</span>
+                            <span class="font-mono">&le; -27.0 dBm</span>
+                        </div>
+                        <p class="text-rose-900 mt-1">Gangguan serius! Berisiko tinggi LOS (*Loss of Signal*). Tim teknisi harus segera memeriksa fisik kabel/konektor.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Mekanisme Multi-Kredensial -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3 text-xs">
                 <h3 class="font-bold text-slate-900 flex items-center gap-2">
                     <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                     </svg>
-                    <span>Cara Kerja Perubahan Realtime</span>
+                    <span>Cara Kerja Multi-Kredensial</span>
                 </h3>
                 <p class="text-slate-500 leading-relaxed text-[11px]">
-                    Saat Anda mengonfirmasi perubahan, sistem akan:
+                    Saat melakukan live scraping ke ONT:
                 </p>
-                <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600">
-                    <li>Menyimpan nilai ke tabel <code>system_settings</code> di TiDB Cloud.</li>
-                    <li>Merestart jadwal background scheduler dengan interval baru secara instan tanpa perlu mematikan aplikasi.</li>
-                    <li>Menyesuaikan ambang batas notifikasi alert Telegram dan garis grafik pada dashboard.</li>
-                </ul>
+                <ol class="list-decimal list-inside space-y-1.5 text-[11px] text-slate-600">
+                    <li>Sistem mencoba kredensial tersimpan milik pelanggan terlebih dahulu.</li>
+                    <li>Jika ditolak, sistem mencoba semua username/password yang ada di tab <strong>Kredensial Modem ONT</strong> satu per satu.</li>
+                    <li>Jika berhasil terhubung, kredensial pelanggan yang tadinya <code>INVALID</code> otomatis diperbarui menjadi <code>VALID</code>.</li>
+                </ol>
             </div>
 
         </div>
 
     </div>
 
-    <!-- MODAL: Pop-up Konfirmasi Perubahan Pengaturan -->
+    <!-- MODAL POP-UP: Konfirmasi Perubahan Pengaturan -->
     <div x-show="confirmModalOpen"
          style="display: none;"
          class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -329,8 +420,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-slate-900">Konfirmasi Perubahan Pengaturan</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Tinjau kembali parameter pemantauan baru</p>
+                    <h3 class="text-base font-bold text-slate-900">Konfirmasi Simpan Pengaturan</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Tinjau kembali parameter yang akan diterapkan ke sistem</p>
                 </div>
             </div>
 
@@ -340,16 +431,16 @@
                     <strong class="font-mono text-indigo-700" x-text="form.polling_interval_minutes + ' Menit Sekali'"></strong>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
-                    <span class="text-slate-500">Ambang Batas Warning:</span>
+                    <span class="text-slate-500">Ambang Peringatan Ringan:</span>
                     <strong class="font-mono text-amber-700" x-text="form.warning_threshold_dbm + ' dBm'"></strong>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
-                    <span class="text-slate-500">Ambang Batas Kritis:</span>
+                    <span class="text-slate-500">Ambang Notifikasi Merah:</span>
                     <strong class="font-mono text-rose-700" x-text="form.critical_threshold_dbm + ' dBm'"></strong>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
-                    <span class="text-slate-500">Default Kredensial Modem:</span>
-                    <span class="font-mono font-bold text-slate-700" x-text="form.default_modem_user + ' / ' + form.default_modem_pass"></span>
+                    <span class="text-slate-500">Total Kredensial Modem:</span>
+                    <span class="font-mono font-bold text-slate-800" x-text="form.default_modem_credentials.length + ' Pasangan User/Pass'"></span>
                 </div>
                 <template x-if="form.apply_to_invalid_customers">
                     <div class="p-2 bg-amber-50 rounded-lg border border-amber-200 text-[11px] text-amber-800 flex items-center gap-1.5">
@@ -357,16 +448,10 @@
                         <span>Akan disinkronkan ke seluruh pelanggan berstatus <strong>INVALID / Belum Valid</strong> (Pelanggan VALID tetap aman).</span>
                     </div>
                 </template>
-                <div class="flex justify-between items-center py-1">
-                    <span class="text-slate-500">Status Scheduler:</span>
-                    <span class="font-bold px-2 py-0.5 rounded text-[10px]"
-                          :class="form.scheduler_status === 'RUNNING' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'"
-                          x-text="form.scheduler_status"></span>
-                </div>
             </div>
 
             <p class="text-xs text-slate-600 leading-relaxed">
-                Apakah Anda yakin ingin menerapkan perubahan ini? Background worker akan langsung menjadwalkan ulang pemantauan secara otomatis.
+                Apakah Anda yakin ingin menerapkan perubahan ini ke TiDB Cloud? Background scheduler akan langsung menyesuaikan interval pemindaian secara realtime.
             </p>
 
             <div class="flex items-center justify-end gap-2.5 pt-2">
@@ -388,9 +473,7 @@
          data-interval="{{ config.polling_interval_minutes }}"
          data-warning="{{ config.warning_threshold_dbm }}"
          data-critical="{{ config.critical_threshold_dbm }}"
-         data-status="{{ config.scheduler_status }}"
-         data-def-user="{{ config.default_modem_user }}"
-         data-def-pass="{{ config.default_modem_pass }}"
+         data-creds='{{ config.default_modem_credentials | tojson | safe }}'
          class="hidden"></div>
 
     <!-- TOAST NOTIFICATION (Clean SVG) -->
@@ -429,27 +512,51 @@ function settingsApp() {
     const el = document.getElementById('settings-init-data');
     const initInterval = el ? (Number(el.dataset.interval) || 5) : 5;
     const initWarning = el ? (Number(el.dataset.warning) || -26.0) : -26.0;
-    const initCritical = el ? (Number(el.dataset.critical) || -32.0) : -32.0;
-    const initStatus = el ? (el.dataset.status || 'RUNNING') : 'RUNNING';
-    const initDefUser = el ? (el.dataset.defUser || 'admin') : 'admin';
-    const initDefPass = el ? (el.dataset.defPass || 'tekno2024') : 'tekno2024';
+    const initCritical = el ? (Number(el.dataset.critical) || -27.0) : -27.0;
+
+    let initCreds = [];
+    try {
+        if (el && el.dataset.creds) {
+            initCreds = JSON.parse(el.dataset.creds);
+        }
+    } catch (e) {
+        initCreds = [];
+    }
+
+    if (!initCreds || initCreds.length === 0) {
+        initCreds = [
+            { username: 'admin', password: 'tekno2024' },
+            { username: 'admin', password: 'admin' },
+            { username: 'tekno', password: 'tekno2025' }
+        ];
+    }
 
     return {
+        activeTab: 'thresholds', // 'thresholds' | 'credentials' | 'telegram'
         form: {
             polling_interval_minutes: initInterval,
             warning_threshold_dbm: initWarning,
             critical_threshold_dbm: initCritical,
-            scheduler_status: initStatus,
-            default_modem_user: initDefUser,
-            default_modem_pass: initDefPass,
+            default_modem_credentials: initCreds,
             apply_to_invalid_customers: false
         },
         confirmModalOpen: false,
         saving: false,
+        testingTelegram: false,
         toast: { show: false, message: '', type: 'success' },
 
         initData() {
-            // Data sudah dimuat dari data-attributes
+            // Inisialisasi awal
+        },
+
+        addCredentialRow() {
+            this.form.default_modem_credentials.push({ username: '', password: '' });
+        },
+
+        removeCredentialRow(idx) {
+            if (this.form.default_modem_credentials.length > 1) {
+                this.form.default_modem_credentials.splice(idx, 1);
+            }
         },
 
         showToast(message, type = 'success') {
@@ -460,6 +567,15 @@ function settingsApp() {
         },
 
         confirmSaveSettings() {
+            // Validasi kredensial tidak boleh kosong
+            for (let i = 0; i < this.form.default_modem_credentials.length; i++) {
+                const item = this.form.default_modem_credentials[i];
+                if (!item.username.trim() || !item.password.trim()) {
+                    this.showToast(`Kredensial baris #${i + 1} belum lengkap!`, 'error');
+                    this.activeTab = 'credentials';
+                    return;
+                }
+            }
             this.confirmModalOpen = true;
         },
 
@@ -474,9 +590,7 @@ function settingsApp() {
                         polling_interval_minutes: Number(this.form.polling_interval_minutes),
                         warning_threshold_dbm: Number(this.form.warning_threshold_dbm),
                         critical_threshold_dbm: Number(this.form.critical_threshold_dbm),
-                        scheduler_status: this.form.scheduler_status,
-                        default_modem_user: this.form.default_modem_user,
-                        default_modem_pass: this.form.default_modem_pass,
+                        default_modem_credentials: this.form.default_modem_credentials,
                         apply_to_invalid_customers: Boolean(this.form.apply_to_invalid_customers)
                     })
                 });
@@ -487,9 +601,9 @@ function settingsApp() {
                         this.form.polling_interval_minutes = json.data.polling_interval_minutes;
                         this.form.warning_threshold_dbm = json.data.warning_threshold_dbm;
                         this.form.critical_threshold_dbm = json.data.critical_threshold_dbm;
-                        this.form.scheduler_status = json.data.scheduler_status;
-                        if (json.data.default_modem_user) this.form.default_modem_user = json.data.default_modem_user;
-                        if (json.data.default_modem_pass) this.form.default_modem_pass = json.data.default_modem_pass;
+                        if (json.data.default_modem_credentials && json.data.default_modem_credentials.length > 0) {
+                            this.form.default_modem_credentials = json.data.default_modem_credentials;
+                        }
                     }
                 } else {
                     this.showToast(json.detail || "Gagal menyimpan pengaturan", "error");
@@ -498,6 +612,27 @@ function settingsApp() {
                 this.showToast("Gagal berkomunikasi dengan server", "error");
             } finally {
                 this.saving = false;
+            }
+        },
+
+        async triggerTelegramTest() {
+            this.testingTelegram = true;
+            try {
+                const res = await fetch('/api/telegram/test-alert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const json = await res.json();
+                if (res.ok && json.status === 'success') {
+                    this.showToast("Pesan uji coba Telegram berhasil dikirim!");
+                } else {
+                    this.showToast(json.message || "Gagal mengirim pesan uji coba", "error");
+                }
+            } catch (err) {
+                this.showToast("Gagal menghubungi server Telegram", "error");
+            } finally {
+                this.testingTelegram = false;
             }
         }
     }

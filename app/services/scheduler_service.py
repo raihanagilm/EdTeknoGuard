@@ -144,6 +144,15 @@ class MonitoringScheduler:
 
             default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
             default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
+            raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]")
+            default_creds_list = []
+            try:
+                import json
+                p_creds = json.loads(raw_creds)
+                if isinstance(p_creds, list):
+                    default_creds_list = [(c.get("username", ""), c.get("password", "")) for c in p_creds if c.get("username")]
+            except Exception:
+                default_creds_list = []
 
             for cust in pelanggan_list:
                 # 1. Coba Scraping Live ONT GM220-S via HTTP
@@ -153,7 +162,8 @@ class MonitoringScheduler:
                     customer_pass=cust.pass_admin,
                     default_user=default_user,
                     default_pass=default_pass,
-                    customer_name=cust.nama
+                    customer_name=cust.nama,
+                    default_credentials=default_creds_list
                 )
 
                 # Evaluasi hasil scraping
@@ -258,6 +268,15 @@ class MonitoringScheduler:
 
             default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
             default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
+            raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]")
+            default_creds_list = []
+            try:
+                import json
+                p_creds = json.loads(raw_creds)
+                if isinstance(p_creds, list):
+                    default_creds_list = [(c.get("username", ""), c.get("password", "")) for c in p_creds if c.get("username")]
+            except Exception:
+                default_creds_list = []
 
             scrape_res = ONTScraperService.scrape_ont(
                 ip=cust.ip_router,
@@ -265,7 +284,8 @@ class MonitoringScheduler:
                 customer_pass=cust.pass_admin,
                 default_user=default_user,
                 default_pass=default_pass,
-                customer_name=cust.nama
+                customer_name=cust.nama,
+                default_credentials=default_creds_list
             )
 
             if scrape_res["success"] and scrape_res["rx_power"] is not None:

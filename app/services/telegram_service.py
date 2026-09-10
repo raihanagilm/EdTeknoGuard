@@ -75,23 +75,43 @@ class TelegramService:
 
     @classmethod
     def format_alert_message(cls, pelanggan: Pelanggan, log_entry: LogPerformaONT) -> str:
-        icon = "⚠️" if log_entry.status_koneksi == "WARNING" else "🚨"
-        status_label = "REDAMAN DROP (WARNING)" if log_entry.status_koneksi == "WARNING" else f"GANGGUAN {log_entry.status_koneksi}"
+        rx = log_entry.rx_power
+        is_los = (log_entry.status_koneksi == "LOS" or rx is None)
+        is_critical = is_los or (rx is not None and rx <= -27.0)
 
-        rx_display = f"{log_entry.rx_power:.2f} dBm" if log_entry.rx_power is not None else "LOSS OF SIGNAL (LOS)"
         waktu_str = log_entry.waktu_cek.strftime("%d/%m/%Y %H:%M:%S")
 
-        msg = (
-            f"{icon} <b>[EdTeknoGuard] PERINGATAN {status_label}!</b>\n\n"
-            f"👤 <b>Pelanggan:</b> {pelanggan.nama} (ID: <code>{pelanggan.id_pelanggan}</code>)\n"
-            f"📍 <b>POP:</b> {pelanggan.pop}\n"
-            f"🌐 <b>IP ONT:</b> <code>{pelanggan.ip_router}</code>\n"
-            f"📟 <b>Jenis Modem:</b> {pelanggan.jenis_modem}\n"
-            f"📊 <b>Redaman Terdeteksi:</b> <b>{rx_display}</b>\n"
-            f"⚡ <b>Batas Aman:</b> &gt; {settings.WARNING_THRESHOLD_DBM:.1f} dBm\n"
-            f"⏰ <b>Waktu Cek:</b> {waktu_str} WIB\n\n"
-            f"<i>Tindakan: Mohon tim teknisi mengecek bending dropcore atau kebersihan konektor optik di lokasi.</i>"
-        )
+        if is_critical:
+            # Notifikasi Merah Kritis
+            rx_display = f"{rx:.2f} dBm" if rx is not None else "LOSS OF SIGNAL (LOS)"
+            msg = (
+                f"🚨🔴 <b>[NOTIFIKASI MERAH - SEGERA DICEK!]</b>\n\n"
+                f"⚠️ <i>Terdeteksi redaman optik kritis &le; -27.0 dBm yang berisiko tinggi pemutusan koneksi internet pelanggan!</i>\n\n"
+                f"👤 <b>Pelanggan:</b> {pelanggan.nama} (ID: <code>{pelanggan.id_pelanggan}</code>)\n"
+                f"📍 <b>POP:</b> {pelanggan.pop}\n"
+                f"🌐 <b>IP ONT:</b> <code>{pelanggan.ip_router}</code>\n"
+                f"📟 <b>Jenis Modem:</b> {pelanggan.jenis_modem}\n"
+                f"📊 <b>Redaman Terukur:</b> <b>{rx_display}</b>\n"
+                f"🔴 <b>Ambang Batas Kritis:</b> &le; -27.0 dBm\n"
+                f"⏰ <b>Waktu Deteksi:</b> {waktu_str} WIB\n\n"
+                f"⚡ <b>INSTRUKSI TINDAKAN:</b>\n"
+                f"Mohon teknisi piket lapangan untuk <b>SEGERA melakukan pengecekan fisik</b> kabel dropcore, sambungan fusion/fast connector, dan patchcord pelanggan!"
+            )
+        else:
+            # Peringatan Ringan (Warning Dini)
+            rx_display = f"{rx:.2f} dBm" if rx is not None else "-26.xx dBm"
+            msg = (
+                f"⚠️ <b>[PERINGATAN RINGAN - PERINGATAN DINI]</b>\n\n"
+                f"ℹ️ <i>Sinyal optik mulai menurun menyentuh batas peringatan dini -26.0 dBm.</i>\n\n"
+                f"👤 <b>Pelanggan:</b> {pelanggan.nama} (ID: <code>{pelanggan.id_pelanggan}</code>)\n"
+                f"📍 <b>POP:</b> {pelanggan.pop}\n"
+                f"🌐 <b>IP ONT:</b> <code>{pelanggan.ip_router}</code>\n"
+                f"📟 <b>Jenis Modem:</b> {pelanggan.jenis_modem}\n"
+                f"📊 <b>Redaman Terukur:</b> <b>{rx_display}</b>\n"
+                f"⚠️ <b>Ambang Peringatan Dini:</b> &le; -26.0 dBm (Toleransi s/d -27.0 dBm)\n"
+                f"⏰ <b>Waktu Deteksi:</b> {waktu_str} WIB\n\n"
+                f"<i>Catatan: Masih dalam batas operasional, mohon jadwalkan pemantauan berkala.</i>"
+            )
         return msg
 
     @classmethod

@@ -8,7 +8,7 @@ import html
 import logging
 import re
 import time
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 import requests
 
 from app.core.config import settings
@@ -187,11 +187,12 @@ class ONTScraperService:
         customer_pass: Optional[str],
         default_user: str = "admin",
         default_pass: str = "tekno2024",
-        customer_name: str = "Pelanggan"
+        customer_name: str = "Pelanggan",
+        default_credentials: Optional[List[Tuple[str, str]]] = None
     ) -> Dict[str, Any]:
         """
         Melakukan scraping lengkap ke satu perangkat modem ONT.
-        Menguji kredensial pelanggan terlebih dahulu. Jika gagal, mencoba kredensial default.
+        Menguji kredensial pelanggan terlebih dahulu. Jika gagal, mencoba kredensial default (multi-list).
         """
         host = ip.strip()
         base_url = f"http://{host}"
@@ -224,14 +225,21 @@ class ONTScraperService:
         if c_u and c_p:
             credentials_to_try.append((c_u, c_p, "CUSTOMER"))
 
-        # Tambahkan default kredensial jika berbeda
-        d_u = default_user.strip() if default_user else "admin"
-        d_p = default_pass.strip() if default_pass else "tekno2024"
-        if (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
-            credentials_to_try.append((d_u, d_p, "DEFAULT"))
+        # Tambahkan multi default kredensial jika ada
+        if default_credentials:
+            for d_u, d_p in default_credentials:
+                d_u = (d_u or "").strip()
+                d_p = (d_p or "").strip()
+                if d_u and (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
+                    credentials_to_try.append((d_u, d_p, "DEFAULT"))
+        else:
+            d_u = default_user.strip() if default_user else "admin"
+            d_p = default_pass.strip() if default_pass else "tekno2024"
+            if (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
+                credentials_to_try.append((d_u, d_p, "DEFAULT"))
 
         # Cadangan tambahan umum GM220-S
-        fallback_common = [("admin", "admin"), ("tekno", "tekno2025")]
+        fallback_common = [("admin", "tekno2024"), ("admin", "admin"), ("tekno", "tekno2025")]
         for u, p in fallback_common:
             if (u, p) not in [(x, y) for x, y, _ in credentials_to_try]:
                 credentials_to_try.append((u, p, "COMMON_FALLBACK"))
