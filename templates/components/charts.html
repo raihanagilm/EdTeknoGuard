@@ -1,39 +1,101 @@
 <!-- Visualisasi Grafik Riwayat Redaman (Chart.js) -->
 <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm mb-6">
     
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
         <div>
-            <div class="flex items-center gap-2">
-                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Tren Riwayat Kualitas Redaman (dBm)</h3>
+            <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                    </svg>
+                    Tren Riwayat Kualitas Redaman (dBm)
+                </h3>
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
                     Batas Peringatan: -26.0 dBm
                 </span>
             </div>
-            <p class="text-xs text-slate-500 mt-0.5">Memantau fluktuasi sinyal optik rata-rata jaringan ISP dari tabel log TiDB</p>
+            <p class="text-xs text-slate-500 mt-0.5">Memantau kurva fluktuasi sinyal optik rata-rata jaringan ISP dari tabel log TiDB</p>
         </div>
 
-        <!-- Rentang Waktu (Tabs) -->
-        <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 self-stretch sm:self-auto">
-            <button @click="switchChartRange('today')"
-                    :class="chartRange === 'today' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none">
-                Hari Ini
-            </button>
-            <button @click="switchChartRange('week')"
-                    :class="chartRange === 'week' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none">
-                7 Hari
-            </button>
-            <button @click="switchChartRange('month')"
-                    :class="chartRange === 'month' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                    class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none">
-                30 Hari
-            </button>
+        <!-- Filter Tanggal & Rentang Waktu -->
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <!-- Date Picker -->
+            <div class="relative flex-1 sm:flex-none">
+                <input type="date"
+                       x-model="selectedDate"
+                       :min="minDate"
+                       :max="todayDate"
+                       @change="onDateSelect()"
+                       title="Pilih tanggal spesifik untuk melihat tren grafik (sebelum data pertama didisable)"
+                       class="px-3 py-1.5 text-xs bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[36px] font-medium transition cursor-pointer">
+            </div>
+
+            <!-- Preset Buttons -->
+            <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 flex-1 sm:flex-none">
+                <button @click="switchChartRange('today')"
+                        :class="chartRange === 'today' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                        class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none min-h-[32px]">
+                    Hari Ini
+                </button>
+                <button @click="switchChartRange('yesterday')"
+                        :class="chartRange === 'yesterday' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                        class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none min-h-[32px]">
+                    Kemarin
+                </button>
+                <button @click="switchChartRange('week')"
+                        :class="chartRange === 'week' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                        class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none min-h-[32px]">
+                    7 Hari
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Summary Chips (Menampilkan Statistik Riil Grafik) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 p-3 bg-slate-50/70 rounded-xl border border-slate-100 text-xs">
+        <div class="flex items-center gap-2">
+            <div class="p-1.5 rounded-lg bg-indigo-100/60 text-indigo-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            </div>
+            <div>
+                <span class="text-[10px] text-slate-400 font-medium block">Rata-rata Terukur:</span>
+                <span class="font-bold text-slate-800" x-text="chartStats.avg_dbm !== null ? chartStats.avg_dbm + ' dBm' : '-'"></span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <div class="p-1.5 rounded-lg bg-emerald-100/60 text-emerald-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+            </div>
+            <div>
+                <span class="text-[10px] text-slate-400 font-medium block">Sinyal Terbaik:</span>
+                <span class="font-bold text-emerald-600" x-text="chartStats.min_dbm !== null ? chartStats.min_dbm + ' dBm' : '-'"></span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <div class="p-1.5 rounded-lg bg-amber-100/60 text-amber-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+            </div>
+            <div>
+                <span class="text-[10px] text-slate-400 font-medium block">Sinyal Terendah:</span>
+                <span class="font-bold text-amber-600" x-text="chartStats.max_dbm !== null ? chartStats.max_dbm + ' dBm' : '-'"></span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <div class="p-1.5 rounded-lg bg-slate-200/60 text-slate-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
+            <div>
+                <span class="text-[10px] text-slate-400 font-medium block">Poin Pengawasan:</span>
+                <span class="font-bold text-slate-800" x-text="chartStats.total_points + ' Scan'"></span>
+            </div>
         </div>
     </div>
 
     <!-- Chart Canvas Container -->
-    <div class="relative w-full h-[240px] sm:h-[280px]">
+    <div class="relative w-full h-[250px] sm:h-[290px]">
         <canvas id="redamanChart"></canvas>
     </div>
 
@@ -54,3 +116,4 @@
     </div>
 
 </div>
+

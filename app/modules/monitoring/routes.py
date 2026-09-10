@@ -52,10 +52,11 @@ def get_kpi_metrics(db: Session = Depends(get_db)):
 @router.get("/chart-data")
 def get_chart_data(
     range_type: str = Query("today", alias="range"),
+    date_filter: Optional[str] = Query(None, alias="date"),
     id_pelanggan: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Route data historis redaman optik untuk Chart.js (today, week, month)"""
+    """Route data historis redaman optik untuk Chart.js dengan filter tanggal (date=YYYY-MM-DD) atau range (today, yesterday, week, month)"""
     return MonitoringController.get_chart_data(
-        db=db, range_type=range_type, id_pelanggan=id_pelanggan
+        db=db, range_type=range_type, date_filter=date_filter, id_pelanggan=id_pelanggan
     )

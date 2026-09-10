@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
-from app.db.models import Pelanggan, SystemSetting
+from app.db.models import Pelanggan, SystemSetting, LogPerformaONT
 from app.core.config import settings
 
 class DashboardService:
@@ -18,6 +18,9 @@ class DashboardService:
         last_scan_setting = db.query(SystemSetting).filter(SystemSetting.key_name == "last_scan_time").first()
         last_scan_time = last_scan_setting.value_text if last_scan_setting else "-"
 
+        earliest = db.query(LogPerformaONT.waktu_cek).order_by(LogPerformaONT.waktu_cek.asc()).first()
+        min_date = earliest[0].strftime("%Y-%m-%d") if (earliest and earliest[0]) else "2026-09-01"
+
         return {
             "app_name": settings.APP_NAME,
             "total_customers": total_customers,
@@ -26,5 +29,6 @@ class DashboardService:
             "last_scan_time": last_scan_time,
             "warning_threshold": settings.WARNING_THRESHOLD_DBM,
             "critical_threshold": settings.CRITICAL_THRESHOLD_DBM,
-            "polling_interval": settings.POLLING_INTERVAL_MINUTES
+            "polling_interval": settings.POLLING_INTERVAL_MINUTES,
+            "min_date": min_date
         }

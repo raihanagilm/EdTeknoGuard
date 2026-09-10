@@ -80,54 +80,132 @@ class MonitoringService:
         }
 
     @staticmethod
-    def get_chart_data(db: Session, range_type: str = "today", id_pelanggan: Optional[str] = None) -> Dict[str, Any]:
+    def get_chart_data(
+        db: Session,
+        range_type: str = "today",
+        date_filter: Optional[str] = None,
+        id_pelanggan: Optional[str] = None
+    ) -> Dict[str, Any]:
         now = datetime.now()
-        if range_type == "today":
+
+        # Menentukan rentang tanggal
+        if date_filter:
+            try:
+                target_date = datetime.strptime(date_filter, "%Y-%m-%d")
+                start_date = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                end_date = target_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+                range_mode = "single_day"
+            except ValueError:
+                start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+                end_date = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+                range_mode = "single_day"
+        elif range_type == "yesterday":
+            yesterday = now - timedelta(days=1)
+            start_date = yesterday.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = yesterday.replace(hour=23, minute=59, second=59, microsecond=999999)
+            range_mode = "single_day"
+        elif range_type == "today":
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+            range_mode = "single_day"
         elif range_type == "week":
             start_date = now - timedelta(days=7)
+            end_date = now
+            range_mode = "multi_day"
         elif range_type == "month":
             start_date = now - timedelta(days=30)
+            end_date = now
+            range_mode = "multi_day"
         else:
-            start_date = now - timedelta(days=7)
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+            range_mode = "single_day"
 
+        # Query dasar log
         query = db.query(LogPerformaONT).filter(
             LogPerformaONT.waktu_cek >= start_date,
+            LogPerformaONT.waktu_cek <= end_date,
             LogPerformaONT.rx_power != None
         )
 
         if id_pelanggan:
+            # Mode satu pelanggan spesifik
             query = query.filter(LogPerformaONT.id_pelanggan == id_pelanggan)
+            logs = query.order_by(LogPerformaONT.waktu_cek.asc()).all()
 
-        logs = query.order_by(LogPerformaONT.waktu_cek.asc()).all()
+            if not logs:
+                return {
+                    "labels": ["Tidak ada data pada rentang ini"],
+                    "values": [None],
+                    "threshold": settings.WARNING_THRESHOLD_DBM,
+                    "avg_dbm": None,
+                    "min_dbm": None,
+                    "max_dbm": None,
+                    "total_points": 0,
+                    "date": start_date.strftime("%Y-%m-%d")
+                }
 
-        if not logs:
-            return {
-                "labels": ["Belum ada data"],
-                "values": [-22.0],
-                "threshold": settings.WARNING_THRESHOLD_DBM
-            }
-
-        labels = []
-        values = []
-        for l in logs:
-            if range_type == "today":
-                lbl = l.waktu_cek.strftime("%H:%M")
-            elif range_type == "week":
-                lbl = l.waktu_cek.strftime("%d/%m %H:%M")
+            labels = [
+                l.waktu_cek.strftime("%H:%M" if range_mode == "single_day" else "%d/%m %H:%M")
+                for l in logs
+            ]
+            values = [float(l.rx_power) for l in logs]
+        else:
+            # Mode agregasi rata-rata jaringan (Dashboard)
+            # Kelompokkan per batch scan (menit atau jam)
+            if range_mode == "single_day":
+                time_fmt = "%H:%i"
             else:
-                lbl = l.waktu_cek.strftime("%d/%m")
+                time_fmt = "%d/%m %H:%i"
 
-            labels.append(lbl)
-            values.append(float(l.rx_power))
+            grouped_rows = (
+                db.query(
+                    func.date_format(LogPerformaONT.waktu_cek, time_fmt).label("time_label"),
+                    func.round(func.avg(LogPerformaONT.rx_power), 2).label("avg_rx"),
+                    func.min(LogPerformaONT.rx_power).label("min_rx"),
+                    func.max(LogPerformaONT.rx_power).label("max_rx"),
+                    func.count(LogPerformaONT.id).label("ont_count"),
+                    func.min(LogPerformaONT.waktu_cek).label("min_waktu")
+                )
+                .filter(
+                    LogPerformaONT.waktu_cek >= start_date,
+                    LogPerformaONT.waktu_cek <= end_date,
+                    LogPerformaONT.rx_power != None
+                )
+                .group_by(func.date_format(LogPerformaONT.waktu_cek, time_fmt))
+                .order_by("min_waktu")
+                .all()
+            )
 
-        if len(labels) > 60:
-            step = len(labels) // 60
-            labels = labels[::step]
-            values = values[::step]
+            if not grouped_rows:
+                return {
+                    "labels": ["Belum ada log pada tanggal ini"],
+                    "values": [None],
+                    "threshold": settings.WARNING_THRESHOLD_DBM,
+                    "avg_dbm": None,
+                    "min_dbm": None,
+                    "max_dbm": None,
+                    "total_points": 0,
+                    "date": start_date.strftime("%Y-%m-%d")
+                }
+
+            labels = [r[0] for r in grouped_rows]
+            values = [float(r[1]) if r[1] is not None else None for r in grouped_rows]
+
+        # Ringkasan statistik
+        valid_vals = [v for v in values if v is not None]
+        avg_dbm = round(sum(valid_vals) / len(valid_vals), 2) if valid_vals else None
+        min_dbm = round(max(valid_vals), 2) if valid_vals else None # terbagus (paling mendekati 0)
+        max_dbm = round(min(valid_vals), 2) if valid_vals else None # terburuk (paling drop/minus besar)
 
         return {
             "labels": labels,
             "values": values,
-            "threshold": settings.WARNING_THRESHOLD_DBM
+            "threshold": settings.WARNING_THRESHOLD_DBM,
+            "avg_dbm": avg_dbm,
+            "min_dbm": min_dbm,
+            "max_dbm": max_dbm,
+            "total_points": len(values),
+            "date": start_date.strftime("%Y-%m-%d")
         }
+

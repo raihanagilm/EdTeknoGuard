@@ -24,6 +24,7 @@ class Pelanggan(Base):
     password_wifi = Column(String(100), nullable=True)
     user_admin = Column(String(50), nullable=True)
     pass_admin = Column(String(100), nullable=True)
+    status_kredensial = Column(String(20), default="UNTESTED", nullable=False, index=True) # VALID, INVALID, UNTESTED
     snmp_community = Column(String(50), default="public")
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

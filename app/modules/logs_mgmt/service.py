@@ -8,6 +8,13 @@ from app.db.models import LogPerformaONT, Pelanggan
 class LogsMgmtService:
 
     @staticmethod
+    def get_min_date(db: Session) -> str:
+        earliest = db.query(LogPerformaONT.waktu_cek).order_by(LogPerformaONT.waktu_cek.asc()).first()
+        if earliest and earliest[0]:
+            return earliest[0].strftime("%Y-%m-%d")
+        return "2026-09-01"
+
+    @staticmethod
     def get_logs(
         db: Session,
         q: Optional[str] = None,
@@ -15,6 +22,8 @@ class LogsMgmtService:
         range_type: str = "today",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        sort_by: Optional[str] = "waktu_cek",
+        sort_dir: str = "desc",
         page: int = 1,
         limit: int = 50
     ) -> Tuple[int, List[Dict[str, Any]], Dict[str, Any]]:
@@ -65,8 +74,26 @@ class LogsMgmtService:
         total_records = summary_query[0] if summary_query else 0
         avg_rx = round(float(summary_query[1]), 2) if (summary_query and summary_query[1] is not None) else None
 
+        # Sorting logic
+        sort_column_map = {
+            "waktu_cek": LogPerformaONT.waktu_cek,
+            "nama": Pelanggan.nama,
+            "pop": Pelanggan.pop,
+            "ip_router": Pelanggan.ip_router,
+            "jenis_modem": Pelanggan.jenis_modem,
+            "rx_power": LogPerformaONT.rx_power,
+            "suhu_ont": LogPerformaONT.suhu_ont,
+            "latency_ms": LogPerformaONT.latency_ms,
+            "status_koneksi": LogPerformaONT.status_koneksi
+        }
+        col = sort_column_map.get(sort_by, LogPerformaONT.waktu_cek)
+        if sort_dir.lower() == "asc":
+            query = query.order_by(col.asc())
+        else:
+            query = query.order_by(col.desc())
+
         offset = (page - 1) * limit
-        rows = query.order_by(desc(LogPerformaONT.waktu_cek)).offset(offset).limit(limit).all()
+        rows = query.offset(offset).limit(limit).all()
 
         data = []
         for log_entry, cust in rows:

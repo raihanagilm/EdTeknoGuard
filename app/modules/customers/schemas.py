@@ -36,3 +36,6 @@ class CustomerUpdate(BaseModel):
     pass_admin: Optional[str] = None
     snmp_community: Optional[str] = None
     is_active: Optional[bool] = None
+
+class BulkDeleteSchema(BaseModel):
+    ids: list[str] = Field(..., description="Daftar ID pelanggan yang akan dihapus")

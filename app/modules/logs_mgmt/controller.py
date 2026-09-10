@@ -13,12 +13,14 @@ class LogsMgmtController:
     @staticmethod
     def render_logs_page(request: Request, db: Session):
         total, data, summary = LogsMgmtService.get_logs(db=db, page=1, limit=50)
+        min_date = LogsMgmtService.get_min_date(db)
         return templates.TemplateResponse(
             request=request,
             name="logs/index.html",
             context={
                 "app_name": settings.APP_NAME,
                 "summary": summary,
+                "min_date": min_date,
                 "request": request
             }
         )
@@ -31,6 +33,8 @@ class LogsMgmtController:
         range_type: str = "today",
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        sort_by: Optional[str] = "waktu_cek",
+        sort_dir: str = "desc",
         page: int = 1,
         limit: int = 50
     ) -> Dict[str, Any]:
@@ -41,6 +45,8 @@ class LogsMgmtController:
             range_type=range_type,
             start_date=start_date,
             end_date=end_date,
+            sort_by=sort_by,
+            sort_dir=sort_dir,
             page=page,
             limit=limit
         )
@@ -49,5 +55,6 @@ class LogsMgmtController:
             "page": page,
             "limit": limit,
             "data": data,
-            "summary": summary
+            "summary": summary,
+            "min_date": LogsMgmtService.get_min_date(db)
         }

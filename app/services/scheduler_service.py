@@ -9,6 +9,7 @@ from app.core.database import SessionLocal
 from app.core.config import settings
 from app.db.models import Pelanggan, LogPerformaONT, SystemSetting
 from app.services.snmp_service import SNMPService
+from app.services.ont_scraper_service import ONTScraperService
 from app.services.telegram_service import TelegramService
 
 logger = logging.getLogger("scheduler_service")
@@ -141,13 +142,43 @@ class MonitoringScheduler:
             los_count = 0
             los_by_pop = {}
 
+            default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
+            default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
+
             for cust in pelanggan_list:
-                res = SNMPService.query_ont(
+                # 1. Coba Scraping Live ONT GM220-S via HTTP
+                scrape_res = ONTScraperService.scrape_ont(
                     ip=cust.ip_router,
-                    community=cust.snmp_community,
-                    modem_type=cust.jenis_modem,
-                    baseline_rx=float(cust.redaman_baseline) if cust.redaman_baseline else None
+                    customer_user=cust.user_admin,
+                    customer_pass=cust.pass_admin,
+                    default_user=default_user,
+                    default_pass=default_pass,
+                    customer_name=cust.nama
                 )
+
+                # Evaluasi hasil scraping
+                if scrape_res["success"] and scrape_res["rx_power"] is not None:
+                    res = scrape_res
+                    cust.status_kredensial = "VALID"
+                    # Jika berhasil via kredensial default, sinkronkan ke pelanggan
+                    if scrape_res.get("updated_user") and scrape_res.get("updated_pass"):
+                        cust.user_admin = scrape_res["updated_user"]
+                        cust.pass_admin = scrape_res["updated_pass"]
+                    ket = f"Live Scraping OK ({res.get('gpon_state', 'Normal')})"
+                elif scrape_res.get("error_type") == "AUTH_FAILED":
+                    cust.status_kredensial = "INVALID"
+                    res = scrape_res
+                    ket = "Login Gagal (User/Pass Salah)"
+                elif settings.SNMP_SIMULATION_MODE and scrape_res.get("error_type") == "UNREACHABLE":
+                    # Fallback ke simulasi hanya untuk host lab yang tidak aktif
+                    res = SNMPService.query_ont_simulated(
+                        baseline_rx=float(cust.redaman_baseline) if cust.redaman_baseline else None,
+                        modem_type=cust.jenis_modem
+                    )
+                    ket = "Simulasi (Lab Host Unreachable)"
+                else:
+                    res = scrape_res
+                    ket = f"Error: {scrape_res.get('message', 'Unreachable')}"
 
                 log_entry = LogPerformaONT(
                     id_pelanggan=cust.id_pelanggan,
@@ -155,13 +186,13 @@ class MonitoringScheduler:
                     rx_power=res.get("rx_power"),
                     suhu_ont=res.get("suhu_ont"),
                     uptime=res.get("uptime"),
-                    status_koneksi=res.get("status_koneksi"),
+                    status_koneksi=res.get("status_koneksi") or "LOS",
                     latency_ms=res.get("latency_ms"),
-                    keterangan="Periodic 5m Check"
+                    keterangan=ket
                 )
                 db.add(log_entry)
 
-                st = res.get("status_koneksi")
+                st = res.get("status_koneksi") or "LOS"
                 if st == "WARNING":
                     warning_count += 1
                 elif st == "CRITICAL":
@@ -185,7 +216,9 @@ class MonitoringScheduler:
                     "id_pelanggan": cust.id_pelanggan,
                     "nama": cust.nama,
                     "rx_power": res.get("rx_power"),
-                    "status": st
+                    "status": st,
+                    "kredensial": cust.status_kredensial,
+                    "keterangan": ket
                 })
 
             # Evaluasi Gangguan Massal (>= 3 ONT LOS di POP yang sama sesuai PRD Section 4.4)
@@ -223,12 +256,38 @@ class MonitoringScheduler:
             if not cust:
                 return None
 
-            res = SNMPService.query_ont(
+            default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
+            default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
+
+            scrape_res = ONTScraperService.scrape_ont(
                 ip=cust.ip_router,
-                community=cust.snmp_community,
-                modem_type=cust.jenis_modem,
-                baseline_rx=float(cust.redaman_baseline) if cust.redaman_baseline else None
+                customer_user=cust.user_admin,
+                customer_pass=cust.pass_admin,
+                default_user=default_user,
+                default_pass=default_pass,
+                customer_name=cust.nama
             )
+
+            if scrape_res["success"] and scrape_res["rx_power"] is not None:
+                res = scrape_res
+                cust.status_kredensial = "VALID"
+                if scrape_res.get("updated_user") and scrape_res.get("updated_pass"):
+                    cust.user_admin = scrape_res["updated_user"]
+                    cust.pass_admin = scrape_res["updated_pass"]
+                ket = f"Live Single Check OK ({res.get('gpon_state', 'Normal')})"
+            elif scrape_res.get("error_type") == "AUTH_FAILED":
+                cust.status_kredensial = "INVALID"
+                res = scrape_res
+                ket = "Login Gagal (User/Pass Salah)"
+            elif settings.SNMP_SIMULATION_MODE and scrape_res.get("error_type") == "UNREACHABLE":
+                res = SNMPService.query_ont_simulated(
+                    baseline_rx=float(cust.redaman_baseline) if cust.redaman_baseline else None,
+                    modem_type=cust.jenis_modem
+                )
+                ket = "Simulasi Manual Check"
+            else:
+                res = scrape_res
+                ket = f"Single Check Error: {scrape_res.get('message', 'Unreachable')}"
 
             now = datetime.now()
             log_entry = LogPerformaONT(
@@ -237,9 +296,9 @@ class MonitoringScheduler:
                 rx_power=res.get("rx_power"),
                 suhu_ont=res.get("suhu_ont"),
                 uptime=res.get("uptime"),
-                status_koneksi=res.get("status_koneksi"),
+                status_koneksi=res.get("status_koneksi") or "LOS",
                 latency_ms=res.get("latency_ms"),
-                keterangan="Manual Single Check"
+                keterangan=ket
             )
             db.add(log_entry)
             db.commit()
@@ -251,8 +310,10 @@ class MonitoringScheduler:
                 "rx_power": res.get("rx_power"),
                 "suhu_ont": res.get("suhu_ont"),
                 "uptime": res.get("uptime"),
-                "status_koneksi": res.get("status_koneksi"),
+                "status_koneksi": res.get("status_koneksi") or "LOS",
+                "status_kredensial": cust.status_kredensial,
                 "latency_ms": res.get("latency_ms"),
+                "keterangan": ket,
                 "waktu_cek": now.strftime("%Y-%m-%d %H:%M:%S")
             }
         finally:

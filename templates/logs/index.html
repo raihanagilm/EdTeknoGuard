@@ -123,13 +123,22 @@
              class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3 text-xs">
             <span class="font-semibold text-slate-600">Pilih Rentang Tanggal:</span>
             <div class="flex items-center gap-2">
-                <input type="date" x-model="customStartDate" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px]">
+                <input type="date"
+                       x-model="customStartDate"
+                       :min="minDate"
+                       :max="todayDate"
+                       class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500">
                 <span class="text-slate-400">s/d</span>
-                <input type="date" x-model="customEndDate" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px]">
+                <input type="date"
+                       x-model="customEndDate"
+                       :min="minDate"
+                       :max="todayDate"
+                       class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500">
                 <button @click="fetchLogs(1)" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs min-h-[40px]">
                     Terapkan
                 </button>
             </div>
+            <span class="text-[11px] text-slate-400">Tanggal sebelum data pertama di database otomatis dinonaktifkan.</span>
         </div>
     </div>
 
@@ -140,15 +149,135 @@
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
-                    <tr class="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
-                        <th class="py-3 px-4">Waktu Cek</th>
-                        <th class="py-3 px-4">Pelanggan</th>
-                        <th class="py-3 px-4">POP &amp; IP Router</th>
-                        <th class="py-3 px-4">Modem</th>
-                        <th class="py-3 px-4 text-center">Rx Power</th>
-                        <th class="py-3 px-4 text-center">Suhu</th>
-                        <th class="py-3 px-4 text-center">Latency</th>
-                        <th class="py-3 px-4 text-center">Status</th>
+                    <tr class="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-bold uppercase tracking-wider text-[11px] select-none">
+                        <!-- Waktu Cek -->
+                        <th @click="sortTable('waktu_cek')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Waktu Cek</span>
+                                <template x-if="sortBy === 'waktu_cek'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'waktu_cek'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Pelanggan -->
+                        <th @click="sortTable('nama')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Pelanggan</span>
+                                <template x-if="sortBy === 'nama'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'nama'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- POP & IP Router -->
+                        <th @click="sortTable('pop')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>POP &amp; IP Router</span>
+                                <template x-if="sortBy === 'pop'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'pop'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Modem -->
+                        <th @click="sortTable('jenis_modem')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Modem</span>
+                                <template x-if="sortBy === 'jenis_modem'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'jenis_modem'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Rx Power -->
+                        <th @click="sortTable('rx_power')" class="py-3 px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center justify-center gap-1">
+                                <span>Rx Power</span>
+                                <template x-if="sortBy === 'rx_power'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'rx_power'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Suhu -->
+                        <th @click="sortTable('suhu_ont')" class="py-3 px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center justify-center gap-1">
+                                <span>Suhu</span>
+                                <template x-if="sortBy === 'suhu_ont'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'suhu_ont'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Latency -->
+                        <th @click="sortTable('latency_ms')" class="py-3 px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center justify-center gap-1">
+                                <span>Latency</span>
+                                <template x-if="sortBy === 'latency_ms'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'latency_ms'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Status -->
+                        <th @click="sortTable('status_koneksi')" class="py-3 px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center justify-center gap-1">
+                                <span>Status</span>
+                                <template x-if="sortBy === 'status_koneksi'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'status_koneksi'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
                         <th class="py-3 px-4">Keterangan</th>
                     </tr>
                 </thead>
@@ -302,6 +431,7 @@
     <div id="logs-summary-data"
          data-total="{{ summary.total_records if summary else 0 }}"
          data-avg="{{ summary.avg_rx_power if summary and summary.avg_rx_power is not none else '' }}"
+         data-min-date="{{ min_date }}"
          class="hidden"></div>
 
 </div>
@@ -313,6 +443,8 @@ function logsApp() {
     const el = document.getElementById('logs-summary-data');
     const initTotal = el ? (Number(el.dataset.total) || 0) : 0;
     const initAvg = el && el.dataset.avg ? Number(el.dataset.avg) : null;
+    const initMinDate = el && el.dataset.minDate ? el.dataset.minDate : '2026-09-01';
+    const todayStr = new Date().toISOString().split('T')[0];
 
     return {
         logs: [],
@@ -325,6 +457,10 @@ function logsApp() {
         filterRange: 'today',
         customStartDate: '',
         customEndDate: '',
+        minDate: initMinDate,
+        todayDate: todayStr,
+        sortBy: 'waktu_cek',
+        sortDir: 'desc',
         loading: false,
         summary: {
             total_records: initTotal,
@@ -341,11 +477,21 @@ function logsApp() {
             }
         },
 
+        sortTable(column) {
+            if (this.sortBy === column) {
+                this.sortDir = (this.sortDir === 'asc' ? 'desc' : 'asc');
+            } else {
+                this.sortBy = column;
+                this.sortDir = (column === 'waktu_cek' ? 'desc' : 'asc');
+            }
+            this.fetchLogs(1);
+        },
+
         async fetchLogs(page = 1) {
             this.loading = true;
             this.currentPage = page;
             try {
-                let url = `/api/logs?page=${page}&limit=${this.limit}&range=${this.filterRange}`;
+                let url = `/api/logs?page=${page}&limit=${this.limit}&range=${this.filterRange}&sort_by=${this.sortBy}&sort_dir=${this.sortDir}`;
                 if (this.searchQuery) url += `&q=${encodeURIComponent(this.searchQuery)}`;
                 if (this.filterStatus) url += `&status=${encodeURIComponent(this.filterStatus)}`;
                 if (this.filterRange === 'custom' && this.customStartDate && this.customEndDate) {
@@ -360,6 +506,9 @@ function logsApp() {
                     this.totalPages = Math.ceil(this.totalRecords / this.limit) || 1;
                     if (json.summary) {
                         this.summary = json.summary;
+                    }
+                    if (json.min_date) {
+                        this.minDate = json.min_date;
                     }
                 }
             } catch (err) {

@@ -15,7 +15,9 @@ class SystemSettingsService:
             "polling_interval_minutes",
             "warning_threshold_dbm",
             "critical_threshold_dbm",
-            "scheduler_status"
+            "scheduler_status",
+            "default_modem_user",
+            "default_modem_pass"
         ]
         db_settings = {}
         rows = db.query(SystemSetting).filter(SystemSetting.key_name.in_(keys)).all()
@@ -38,12 +40,16 @@ class SystemSettingsService:
             critical_threshold = -32.0
 
         scheduler_status = db_settings.get("scheduler_status", "RUNNING")
+        default_user = db_settings.get("default_modem_user", "admin")
+        default_pass = db_settings.get("default_modem_pass", "tekno2024")
 
         return {
             "polling_interval_minutes": polling_interval,
             "warning_threshold_dbm": warning_threshold,
             "critical_threshold_dbm": critical_threshold,
-            "scheduler_status": scheduler_status
+            "scheduler_status": scheduler_status,
+            "default_modem_user": default_user,
+            "default_modem_pass": default_pass
         }
 
     @staticmethod
@@ -53,7 +59,9 @@ class SystemSettingsService:
             "polling_interval_minutes": str(data.polling_interval_minutes),
             "warning_threshold_dbm": str(data.warning_threshold_dbm),
             "critical_threshold_dbm": str(data.critical_threshold_dbm),
-            "scheduler_status": data.scheduler_status or "RUNNING"
+            "scheduler_status": data.scheduler_status or "RUNNING",
+            "default_modem_user": (data.default_modem_user or "admin").strip(),
+            "default_modem_pass": (data.default_modem_pass or "tekno2024").strip()
         }
 
         for k, v in pairs.items():
@@ -63,6 +71,18 @@ class SystemSettingsService:
                 item.updated_at = datetime.now()
             else:
                 db.add(SystemSetting(key_name=k, value_text=v))
+
+        # 2. Jika opsi sinkronisasi diaktifkan:
+        # Ubah username & password HANYA untuk pelanggan yang status_kredensial != 'VALID'
+        updated_cust_count = 0
+        if data.apply_to_invalid_customers:
+            from app.db.models import Pelanggan
+            target_customers = db.query(Pelanggan).filter(Pelanggan.status_kredensial != "VALID").all()
+            for c in target_customers:
+                c.user_admin = pairs["default_modem_user"]
+                c.pass_admin = pairs["default_modem_pass"]
+                c.updated_at = datetime.now()
+                updated_cust_count += 1
 
         db.commit()
 

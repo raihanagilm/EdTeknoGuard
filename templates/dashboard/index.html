@@ -3,7 +3,7 @@
 {% block title %}Dashboard NOC — EdTeknoGuard{% endblock %}
 
 {% block content %}
-<div x-data="dashboardApp">
+<div x-data="dashboardApp" id="dashboard-container" data-min-date="{{ min_date }}">
 
     <!-- Hero Title & Ringkasan NOC -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -36,12 +36,14 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
         <a href="/pelanggan" class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition flex items-center justify-between group">
             <div class="flex items-center gap-3.5">
-                <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl group-hover:scale-105 transition">
-                    👥
+                <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
                 </div>
                 <div>
                     <h3 class="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition">Kelola Data Pelanggan</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Lihat tabel seluruh ONT, filter per POP, dan jalankan cek redaman live</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Lihat tabel seluruh ONT, filter per POP, import CSV, dan eksekusi aksi</p>
                 </div>
             </div>
             <svg class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -49,8 +51,10 @@
 
         <a href="/logs" class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition flex items-center justify-between group">
             <div class="flex items-center gap-3.5">
-                <div class="h-11 w-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xl group-hover:scale-105 transition">
-                    📜
+                <div class="h-11 w-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:scale-105 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
                 </div>
                 <div>
                     <h3 class="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition">Riwayat Log Pemeriksaan</h3>
@@ -60,6 +64,7 @@
             <svg class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
     </div>
+
 
 </div>
 {% endblock %}

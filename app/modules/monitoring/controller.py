@@ -31,5 +31,12 @@ class MonitoringController:
         return MonitoringService.get_kpi_metrics(db=db)
 
     @staticmethod
-    def get_chart_data(db: Session, range_type: str = "today", id_pelanggan: Optional[str] = None) -> Dict[str, Any]:
-        return MonitoringService.get_chart_data(db=db, range_type=range_type, id_pelanggan=id_pelanggan)
+    def get_chart_data(
+        db: Session,
+        range_type: str = "today",
+        date_filter: Optional[str] = None,
+        id_pelanggan: Optional[str] = None
+    ) -> Dict[str, Any]:
+        return MonitoringService.get_chart_data(
+            db=db, range_type=range_type, date_filter=date_filter, id_pelanggan=id_pelanggan
+        )

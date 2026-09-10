@@ -8,28 +8,47 @@
     <!-- Page Header & Action Buttons -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                👥 Manajemen Pelanggan ONT
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                <div class="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                <span>Manajemen Pelanggan ONT</span>
             </h1>
-            <p class="text-sm text-slate-500 mt-1">
-                Kelola data pelanggan, parameter IP router, jenis modem, serta baseline redaman fiber optik.
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Kelola data pelanggan, parameter IP router, tipe ONT modem, serta batas redaman baseline fiber optik.
             </p>
         </div>
 
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <!-- Tombol Import CSV -->
+            <button @click="openImportModal()"
+                    class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold border border-slate-200 shadow-sm transition flex items-center gap-2 min-h-[44px]">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                <span>Import CSV</span>
+            </button>
+
+            <!-- Tombol Tambah Pelanggan -->
             <button @click="openCreateModal()"
                     class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Tambah Pelanggan
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>Tambah Pelanggan</span>
             </button>
         </div>
     </div>
 
-    <!-- Quick Stats Cards -->
+    <!-- Quick Stats Cards (Clean SVG Icons) -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
-            <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
-                👥
+            <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Total Pelanggan</div>
@@ -38,8 +57,10 @@
         </div>
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
-            <div class="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
-                ⚡
+            <div class="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Status Normal</div>
@@ -48,8 +69,10 @@
         </div>
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
-            <div class="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">
-                ⚠️
+            <div class="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Warning (&le; -26 dBm)</div>
@@ -58,13 +81,48 @@
         </div>
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
-            <div class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg">
-                🚨
+            <div class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Kritis / LOS</div>
                 <div class="text-xl font-extrabold text-rose-600" x-text="countByStatus('CRITICAL') + countByStatus('LOS')"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Floating Bulk Actions Bar (Muncul saat ada checkbox terpilih) -->
+    <div x-show="selectedIds.length > 0"
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-2"
+         class="p-4 bg-indigo-900 text-white rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-3 border border-indigo-700">
+        <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-lg bg-indigo-800 flex items-center justify-center font-bold text-sm text-indigo-200" x-text="selectedIds.length"></div>
+            <div>
+                <h4 class="text-xs font-bold text-white">Pelanggan Terpilih</h4>
+                <p class="text-[11px] text-indigo-300">Siap untuk dilakukan tindakan massal</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button @click="selectedIds = []"
+                    class="px-3 py-1.5 rounded-xl bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white text-xs font-semibold transition min-h-[36px]">
+                Batalkan Pilihan
+            </button>
+            <button @click="confirmBulkDelete()"
+                    class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 min-h-[36px]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Hapus <span x-text="selectedIds.length"></span> Terpilih</span>
+            </button>
         </div>
     </div>
 
@@ -100,7 +158,7 @@
             <button @click="fetchCustomers(currentPage)"
                     class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition min-h-[44px]">
                 <svg class="w-4 h-4" :class="{'animate-spin': loading}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                Refresh
+                <span>Refresh</span>
             </button>
         </div>
     </div>
@@ -110,12 +168,111 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
-                    <tr class="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
-                        <th class="py-3 px-4">Pelanggan</th>
-                        <th class="py-3 px-4">Lokasi & POP</th>
-                        <th class="py-3 px-4">IP ONT / MAC</th>
-                        <th class="py-3 px-4">Modem & Paket</th>
-                        <th class="py-3 px-4 text-center">Baseline</th>
+                    <tr class="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-bold uppercase tracking-wider text-[11px] select-none">
+                        <!-- Checkbox Select All -->
+                        <th class="py-3 px-3 text-center w-10">
+                            <input type="checkbox"
+                                   @change="toggleSelectAll()"
+                                   :checked="isAllSelected"
+                                   title="Pilih semua pelanggan di halaman ini"
+                                   class="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 border-slate-300 cursor-pointer">
+                        </th>
+
+                        <!-- Pelanggan -->
+                        <th @click="sortTable('nama')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Pelanggan</span>
+                                <template x-if="sortBy === 'nama'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'nama'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Lokasi & POP -->
+                        <th @click="sortTable('pop')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Lokasi &amp; POP</span>
+                                <template x-if="sortBy === 'pop'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'pop'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- IP ONT / MAC -->
+                        <th @click="sortTable('ip_router')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>IP ONT / MAC</span>
+                                <template x-if="sortBy === 'ip_router'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'ip_router'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Modem & Paket -->
+                        <th @click="sortTable('jenis_modem')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Modem &amp; Paket</span>
+                                <template x-if="sortBy === 'jenis_modem'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'jenis_modem'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Status Kredensial -->
+                        <th @click="sortTable('status_kredensial')" class="py-3 px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center justify-center gap-1">
+                                <span>Kredensial ONT</span>
+                                <template x-if="sortBy === 'status_kredensial'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'status_kredensial'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <th @click="sortTable('redaman_baseline')" class="py-3 px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center justify-center gap-1">
+                                <span>Baseline</span>
+                                <template x-if="sortBy === 'redaman_baseline'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'redaman_baseline'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                </template>
+                            </div>
+                        </th>
+
                         <th class="py-3 px-4 text-center">Rx Power Saat Ini</th>
                         <th class="py-3 px-4 text-center">Status</th>
                         <th class="py-3 px-4 text-right">Aksi</th>
@@ -123,7 +280,14 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     <template x-for="c in customers" :key="c.id_pelanggan">
-                        <tr class="hover:bg-slate-50/80 transition">
+                        <tr class="hover:bg-slate-50/80 transition" :class="selectedIds.includes(c.id_pelanggan) ? 'bg-indigo-50/40' : ''">
+                            <!-- Checkbox per Baris -->
+                            <td class="py-3 px-3 text-center">
+                                <input type="checkbox"
+                                       :value="c.id_pelanggan"
+                                       x-model="selectedIds"
+                                       class="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 border-slate-300 cursor-pointer">
+                            </td>
                             <td class="py-3 px-4">
                                 <div class="font-bold text-slate-900" x-text="c.nama"></div>
                                 <div class="text-[11px] text-slate-400 font-mono" x-text="c.id_pelanggan"></div>
@@ -141,6 +305,26 @@
                                 <div class="text-slate-700 font-medium" x-text="c.jenis_modem"></div>
                                 <div class="text-[11px] text-slate-400" x-text="c.paket"></div>
                             </td>
+
+                            <!-- Status Kredensial Modem ONT -->
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 border"
+                                      :class="{
+                                          'bg-emerald-50 text-emerald-700 border-emerald-200': c.status_kredensial === 'VALID',
+                                          'bg-rose-50 text-rose-700 border-rose-200': c.status_kredensial === 'INVALID',
+                                          'bg-slate-100 text-slate-600 border-slate-200': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
+                                      }"
+                                      :title="c.status_kredensial === 'VALID' ? 'Kredensial login modem terverifikasi valid' : (c.status_kredensial === 'INVALID' ? 'Gagal login: Username/Password modem salah' : 'Belum pernah dilakukan verifikasi login')">
+                                    <span class="w-1.5 h-1.5 rounded-full"
+                                          :class="{
+                                              'bg-emerald-500': c.status_kredensial === 'VALID',
+                                              'bg-rose-500': c.status_kredensial === 'INVALID',
+                                              'bg-slate-400': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
+                                          }"></span>
+                                    <span x-text="c.status_kredensial || 'UNTESTED'"></span>
+                                </span>
+                            </td>
+
                             <td class="py-3 px-4 text-center font-mono text-slate-600">
                                 <span x-text="c.redaman_baseline ? c.redaman_baseline + ' dBm' : '-'"></span>
                             </td>
@@ -170,21 +354,35 @@
                             </td>
                             <td class="py-3 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
+                                    <!-- Cek Live -->
                                     <button @click="probeSingle(c)"
                                             title="Cek Live Redaman ONT Sekarang"
                                             :disabled="probingId === c.id_pelanggan"
                                             class="p-2 rounded-lg text-indigo-600 hover:bg-indigo-50 border border-indigo-100 transition disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center">
                                         <svg class="w-4 h-4" :class="{'animate-spin': probingId === c.id_pelanggan}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     </button>
+
+                                    <!-- Edit -->
                                     <button @click="openEditModal(c)"
                                             title="Edit Data Pelanggan"
                                             class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-200 transition min-h-[36px] min-w-[36px] flex items-center justify-center">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </button>
+
+                                    <!-- Detail -->
                                     <button @click="openDetailModal(c.id_pelanggan)"
                                             title="Lihat Detail & Riwayat Log"
                                             class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-200 transition min-h-[36px] min-w-[36px] flex items-center justify-center">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+
+                                    <!-- Hapus (Ikon Sampah) -->
+                                    <button @click="confirmDeleteSingle(c)"
+                                            title="Hapus Pelanggan"
+                                            class="p-2 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-100 transition min-h-[36px] min-w-[36px] flex items-center justify-center">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
                                     </button>
                                 </div>
                             </td>
@@ -192,12 +390,12 @@
                     </template>
 
                     <tr x-show="customers.length === 0 && !loading">
-                        <td colspan="8" class="py-12 text-center text-slate-400">
+                        <td colspan="9" class="py-12 text-center text-slate-400">
                             Tidak ditemukan pelanggan yang cocok dengan pencarian / filter.
                         </td>
                     </tr>
                     <tr x-show="loading">
-                        <td colspan="8" class="py-12 text-center text-slate-400">
+                        <td colspan="9" class="py-12 text-center text-slate-400">
                             <div class="inline-flex items-center gap-2 font-medium">
                                 <svg class="w-5 h-5 animate-spin text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 Memuat data pelanggan dari TiDB Cloud...
@@ -230,7 +428,7 @@
         </div>
     </div>
 
-    <!-- MODAL: Tambah / Edit Pelanggan -->
+    <!-- MODAL 1: Tambah / Edit Pelanggan -->
     <div x-show="formModalOpen"
          style="display: none;"
          class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
@@ -240,62 +438,57 @@
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 class="text-lg font-bold text-slate-900" x-text="isEditMode ? 'Edit Data Pelanggan' : 'Tambah Pelanggan Baru'"></h3>
                 <button @click="formModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
-                    ✕
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <form @submit.prevent="submitCustomerForm()" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <form @submit.prevent="onCustomerFormSubmit()" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
                     <label class="font-bold text-slate-700 block mb-1">ID Pelanggan</label>
-                    <input type="text" x-model="formData.id_pelanggan" :disabled="isEditMode" placeholder="Misal: CUST-TIJ-001 (auto jika kosong)"
-                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-100 min-h-[42px]">
+                    <input type="text" x-model="formData.id_pelanggan" :disabled="isEditMode" placeholder="Misal: CUST-001 (auto jika kosong)"
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 min-h-[42px]">
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">Nama Pelanggan <span class="text-rose-500">*</span></label>
-                    <input type="text" x-model="formData.nama" required placeholder="Nama lengkap"
+                    <label class="font-bold text-slate-700 block mb-1">Nama Lengkap *</label>
+                    <input type="text" x-model="formData.nama" required placeholder="Nama pelanggan"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">Point of Presence (POP) <span class="text-rose-500">*</span></label>
-                    <input type="text" x-model="formData.pop" required placeholder="Misal: Server Cabang / TIJ 1"
+                    <label class="font-bold text-slate-700 block mb-1">Point of Presence (POP) *</label>
+                    <input type="text" x-model="formData.pop" required placeholder="Server Cabang"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">IP Router / ONT <span class="text-rose-500">*</span></label>
-                    <input type="text" x-model="formData.ip_router" required placeholder="192.168.100.x atau 10.x.x.x"
+                    <label class="font-bold text-slate-700 block mb-1">IP Router ONT *</label>
+                    <input type="text" x-model="formData.ip_router" required placeholder="10.10.x.x"
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px] font-mono">
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-700 block mb-1">Paket Bandwidth</label>
+                    <input type="text" x-model="formData.paket" placeholder="10MB CAB / 20MB Residential"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">Jenis Modem</label>
-                    <select x-model="formData.jenis_modem" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
-                        <option value="GM220-S">Fiberhome GM220-S</option>
-                        <option value="HG6821M">Fiberhome HG6821M</option>
-                        <option value="F609">ZTE F609</option>
-                        <option value="F670L">ZTE F670L</option>
-                        <option value="EG8145V5">Huawei EG8145V5</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="font-bold text-slate-700 block mb-1">Redaman Baseline (dBm)</label>
-                    <input type="number" step="0.01" x-model.number="formData.redaman_baseline" placeholder="Misal: -21.50"
+                    <label class="font-bold text-slate-700 block mb-1">Tipe / Model ONT</label>
+                    <input type="text" x-model="formData.jenis_modem" placeholder="GM220-S / GM220-S XPON"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
                 </div>
 
                 <div>
                     <label class="font-bold text-slate-700 block mb-1">MAC Address</label>
-                    <input type="text" x-model="formData.mac_address" placeholder="XX:XX:XX:XX:XX:XX"
-                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
+                    <input type="text" x-model="formData.mac_address" placeholder="44:22:95:xx:xx:xx"
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px] font-mono">
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">Paket Bandwidth</label>
-                    <input type="text" x-model="formData.paket" placeholder="Misal: 20 Mbps Home"
-                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
+                    <label class="font-bold text-slate-700 block mb-1">Redaman Baseline (dBm)</label>
+                    <input type="number" step="0.01" x-model="formData.redaman_baseline" placeholder="-21.50"
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px] font-mono">
                 </div>
 
                 <div>
@@ -305,8 +498,8 @@
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">SNMP Community</label>
-                    <input type="text" x-model="formData.snmp_community" placeholder="public"
+                    <label class="font-bold text-slate-700 block mb-1">SSID WiFi</label>
+                    <input type="text" x-model="formData.nama_wifi" placeholder="Nama WiFi Pelanggan"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
                 </div>
 
@@ -328,7 +521,209 @@
         </div>
     </div>
 
-    <!-- MODAL: Detail & Riwayat Log -->
+    <!-- MODAL 2: Konfirmasi Perubahan / Simpan Edit Pelanggan -->
+    <div x-show="confirmEditModalOpen"
+         style="display: none;"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="confirmEditModalOpen = false"
+             class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center gap-3.5">
+                <div class="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Konfirmasi Simpan Perubahan</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Periksa kembali data sebelum diperbarui</p>
+                </div>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-xl text-xs text-slate-700 border border-slate-100 space-y-1">
+                <div><span class="text-slate-400">Pelanggan:</span> <strong x-text="formData.nama"></strong></div>
+                <div><span class="text-slate-400">ID:</span> <span class="font-mono" x-text="formData.id_pelanggan"></span></div>
+                <div><span class="text-slate-400">IP Router:</span> <span class="font-mono font-bold" x-text="formData.ip_router"></span></div>
+                <div><span class="text-slate-400">POP:</span> <span x-text="formData.pop"></span></div>
+            </div>
+
+            <p class="text-xs text-slate-600">
+                Apakah Anda yakin ingin menyimpan seluruh perubahan pada data pelanggan ini?
+            </p>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button @click="confirmEditModalOpen = false" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
+                    Batal
+                </button>
+                <button @click="executeSaveCustomerForm()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition min-h-[40px]">
+                    Ya, Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Konfirmasi Hapus Tunggal Pelanggan -->
+    <div x-show="confirmDeleteModalOpen"
+         style="display: none;"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="confirmDeleteModalOpen = false"
+             class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center gap-3.5">
+                <div class="h-12 w-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Konfirmasi Hapus Pelanggan</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Tindakan ini tidak dapat dibatalkan</p>
+                </div>
+            </div>
+
+            <div class="p-3 bg-rose-50/50 rounded-xl text-xs text-slate-700 border border-rose-100 space-y-1">
+                <div><span class="text-slate-400">Nama Pelanggan:</span> <strong class="text-slate-900" x-text="customerToDelete?.nama"></strong></div>
+                <div><span class="text-slate-400">ID Pelanggan:</span> <span class="font-mono text-slate-800" x-text="customerToDelete?.id_pelanggan"></span></div>
+                <div><span class="text-slate-400">IP Router:</span> <span class="font-mono font-bold text-slate-800" x-text="customerToDelete?.ip_router"></span></div>
+            </div>
+
+            <p class="text-xs text-slate-600">
+                Apakah Anda yakin ingin menghapus pelanggan ini? ONT pelanggan ini akan dinonaktifkan dari jadwal monitoring berkala.
+            </p>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button @click="confirmDeleteModalOpen = false" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
+                    Batal
+                </button>
+                <button @click="executeDeleteSingle()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-100 transition min-h-[40px]">
+                    Ya, Hapus Pelanggan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Konfirmasi Hapus Massal (Bulk Delete) -->
+    <div x-show="confirmBulkDeleteModalOpen"
+         style="display: none;"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="confirmBulkDeleteModalOpen = false"
+             class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center gap-3.5">
+                <div class="h-12 w-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Konfirmasi Hapus Massal</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Menghapus banyak data pelanggan sekaligus</p>
+                </div>
+            </div>
+
+            <div class="p-3.5 bg-rose-50 rounded-xl text-xs border border-rose-100 text-rose-900 font-semibold">
+                Perhatian: Anda akan menghapus <span class="font-extrabold text-rose-700" x-text="selectedIds.length"></span> pelanggan yang sedang dicentang.
+            </div>
+
+            <p class="text-xs text-slate-600">
+                Seluruh pelanggan terpilih akan dinonaktifkan dari sistem pemantauan. Apakah Anda yakin ingin melanjutkan?
+            </p>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button @click="confirmBulkDeleteModalOpen = false" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
+                    Batal
+                </button>
+                <button @click="executeBulkDelete()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-100 transition min-h-[40px]">
+                    Ya, Hapus Semua Terpilih
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: Import Data Pelanggan CSV -->
+    <div x-show="importModalOpen"
+         style="display: none;"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="importModalOpen = false"
+             class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Import Data Pelanggan (CSV)</h3>
+                        <p class="text-xs text-slate-500">Unggah berkas CSV untuk menambah atau memperbarui data secara massal</p>
+                    </div>
+                </div>
+                <button @click="importModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Petunjuk & Download Template -->
+            <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 text-xs">
+                <div>
+                    <span class="font-bold text-slate-800 block">Butuh contoh format berkas?</span>
+                    <span class="text-slate-500 text-[11px]">Gunakan template resmi untuk format kolom yang sesuai.</span>
+                </div>
+                <a href="/api/customers/template-csv"
+                   download="template_pelanggan_edteknoguard.csv"
+                   class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-indigo-600 border border-slate-200 font-bold text-xs flex items-center gap-1.5 transition min-h-[36px]">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Unduh Template
+                </a>
+            </div>
+
+            <!-- Drag-and-drop / File Input Area -->
+            <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition cursor-pointer bg-slate-50/50"
+                 @click="$refs.csvFileInput.click()">
+                <input type="file"
+                       x-ref="csvFileInput"
+                       @change="onFileSelected($event)"
+                       accept=".csv"
+                       class="hidden">
+                
+                <div class="flex flex-col items-center justify-center gap-2">
+                    <div class="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font-bold text-slate-800 text-xs block" x-text="selectedCsvFile ? selectedCsvFile.name : 'Klik untuk memilih berkas CSV'"></span>
+                        <span class="text-slate-400 text-[11px]" x-text="selectedCsvFile ? (selectedCsvFile.size / 1024).toFixed(1) + ' KB' : 'Mendukung pemisah koma (,) maupun titik-koma (;)'"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import Result Summary -->
+            <div x-show="importResult" class="p-3.5 bg-emerald-50 rounded-xl border border-emerald-100 text-xs space-y-1">
+                <div class="font-bold text-emerald-800" x-text="importResult?.message"></div>
+                <div class="text-[11px] text-emerald-700 flex gap-3">
+                    <span>Baru: <strong x-text="importResult?.result?.imported || 0"></strong></span>
+                    <span>Diperbarui: <strong x-text="importResult?.result?.updated || 0"></strong></span>
+                    <span>Gagal: <strong x-text="importResult?.result?.failed || 0"></strong></span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button @click="importModalOpen = false" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
+                    Tutup
+                </button>
+                <button @click="executeImportCsv()"
+                        :disabled="!selectedCsvFile || isImporting"
+                        class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center gap-2 min-h-[40px]">
+                    <svg x-show="isImporting" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span x-text="isImporting ? 'Memproses...' : 'Proses Import CSV'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: Detail & Riwayat Log -->
     <div x-show="detailModalOpen"
          style="display: none;"
          class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
@@ -341,7 +736,7 @@
                     <p class="text-xs text-slate-400 font-mono" x-text="selectedCustomer?.id_pelanggan + ' • ' + selectedCustomer?.pop"></p>
                 </div>
                 <button @click="detailModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
-                    ✕
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
@@ -411,7 +806,7 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
+    <!-- TOAST NOTIFICATION (Clean SVG) -->
     <div x-show="toast.show"
          style="display: none;"
          x-transition:enter="transition ease-out duration-200"
@@ -422,9 +817,20 @@
          x-transition:leave-end="opacity-0 translate-y-4"
          class="fixed bottom-20 md:bottom-6 right-6 z-50 max-w-sm rounded-2xl p-4 shadow-2xl border text-xs font-semibold flex items-center gap-3"
          :class="toast.type === 'success' ? 'bg-emerald-900 text-emerald-100 border-emerald-700' : 'bg-rose-900 text-rose-100 border-rose-700'">
-        <span x-text="toast.type === 'success' ? '✅' : '❌'"></span>
+        
+        <div class="flex-shrink-0">
+            <template x-if="toast.type === 'success'">
+                <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </template>
+            <template x-if="toast.type !== 'success'">
+                <svg class="w-5 h-5 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </template>
+        </div>
+
         <span class="flex-1" x-text="toast.message"></span>
-        <button @click="toast.show = false" class="opacity-70 hover:opacity-100">✕</button>
+        <button @click="toast.show = false" class="opacity-70 hover:opacity-100 p-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
     </div>
 
 </div>
@@ -445,15 +851,54 @@ function customerApp() {
         loading: false,
         probingId: null,
 
+        // Sorting
+        sortBy: 'id',
+        sortDir: 'asc',
+
         // Stats
         stats: { total: 0 },
+
+        // Bulk Selection
+        selectedIds: [],
+        get isAllSelected() {
+            return this.customers.length > 0 && this.selectedIds.length === this.customers.length;
+        },
+        toggleSelectAll() {
+            if (this.isAllSelected) {
+                this.selectedIds = [];
+            } else {
+                this.selectedIds = this.customers.map(c => c.id_pelanggan);
+            }
+        },
+
+        sortTable(column) {
+            if (this.sortBy === column) {
+                this.sortDir = (this.sortDir === 'asc' ? 'desc' : 'asc');
+            } else {
+                this.sortBy = column;
+                this.sortDir = 'asc';
+            }
+            this.fetchCustomers(1);
+        },
 
         // Modals
         formModalOpen: false,
         isEditMode: false,
         detailModalOpen: false,
+        confirmEditModalOpen: false,
+        confirmDeleteModalOpen: false,
+        confirmBulkDeleteModalOpen: false,
+        importModalOpen: false,
+
+        // Selected Targets
         selectedCustomer: null,
         selectedLogs: [],
+        customerToDelete: null,
+
+        // Import CSV State
+        selectedCsvFile: null,
+        isImporting: false,
+        importResult: null,
 
         // Form state
         formData: {
@@ -491,8 +936,9 @@ function customerApp() {
         async fetchCustomers(page = 1) {
             this.loading = true;
             this.currentPage = page;
+            this.selectedIds = []; // reset pilihan setiap ganti page / filter
             try {
-                let url = `/api/customers?page=${page}&limit=${this.limit}`;
+                let url = `/api/customers?page=${page}&limit=${this.limit}&sort_by=${this.sortBy}&sort_dir=${this.sortDir}`;
                 if (this.searchQuery) url += `&q=${encodeURIComponent(this.searchQuery)}`;
                 if (this.filterPop && this.filterPop !== 'Semua POP') url += `&pop=${encodeURIComponent(this.filterPop)}`;
                 if (this.filterStatus && this.filterStatus !== 'Semua Status') url += `&status=${encodeURIComponent(this.filterStatus)}`;
@@ -562,12 +1008,24 @@ function customerApp() {
                 jenis_modem: c.jenis_modem,
                 mac_address: c.mac_address === '-' ? '' : c.mac_address,
                 redaman_baseline: c.redaman_baseline,
+                nama_wifi: c.nama_wifi || '',
                 snmp_community: 'public'
             };
             this.formModalOpen = true;
         },
 
-        async submitCustomerForm() {
+        onCustomerFormSubmit() {
+            if (this.isEditMode) {
+                // Tampilkan popup konfirmasi edit
+                this.confirmEditModalOpen = true;
+            } else {
+                // Tambah baru langsung eksekusi
+                this.executeSaveCustomerForm();
+            }
+        },
+
+        async executeSaveCustomerForm() {
+            this.confirmEditModalOpen = false;
             try {
                 let url = '/api/customers';
                 let method = 'POST';
@@ -593,6 +1051,100 @@ function customerApp() {
                 }
             } catch (err) {
                 this.showToast("Terjadi kesalahan sistem", "error");
+            }
+        },
+
+        confirmDeleteSingle(c) {
+            this.customerToDelete = c;
+            this.confirmDeleteModalOpen = true;
+        },
+
+        async executeDeleteSingle() {
+            if (!this.customerToDelete) return;
+            const id = this.customerToDelete.id_pelanggan;
+            this.confirmDeleteModalOpen = false;
+            try {
+                const res = await fetch(`/api/customers/${id}`, { method: 'DELETE' });
+                const json = await res.json();
+                if (res.ok) {
+                    this.showToast(json.message || "Pelanggan berhasil dihapus");
+                    this.fetchCustomers(this.currentPage);
+                } else {
+                    this.showToast(json.detail || "Gagal menghapus pelanggan", "error");
+                }
+            } catch (err) {
+                this.showToast("Terjadi kesalahan sistem saat menghapus", "error");
+            } finally {
+                this.customerToDelete = null;
+            }
+        },
+
+        confirmBulkDelete() {
+            if (this.selectedIds.length === 0) return;
+            this.confirmBulkDeleteModalOpen = true;
+        },
+
+        async executeBulkDelete() {
+            this.confirmBulkDeleteModalOpen = false;
+            try {
+                const res = await fetch('/api/customers/bulk-delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: this.selectedIds })
+                });
+                const json = await res.json();
+                if (res.ok) {
+                    this.showToast(json.message || `${this.selectedIds.length} pelanggan berhasil dihapus`);
+                    this.selectedIds = [];
+                    this.fetchCustomers(this.currentPage);
+                } else {
+                    this.showToast(json.detail || "Gagal menghapus pelanggan terpilih", "error");
+                }
+            } catch (err) {
+                this.showToast("Terjadi kesalahan sistem", "error");
+            }
+        },
+
+        openImportModal() {
+            this.selectedCsvFile = null;
+            this.importResult = null;
+            this.isImporting = false;
+            this.importModalOpen = true;
+        },
+
+        onFileSelected(event) {
+            const files = event.target.files;
+            if (files && files.length > 0) {
+                this.selectedCsvFile = files[0];
+            }
+        },
+
+        async executeImportCsv() {
+            if (!this.selectedCsvFile) return;
+            this.isImporting = true;
+            this.importResult = null;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', this.selectedCsvFile);
+
+                const res = await fetch('/api/customers/import-csv', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const json = await res.json();
+                if (res.ok) {
+                    this.importResult = json;
+                    this.showToast(json.message);
+                    this.fetchCustomers(1);
+                } else {
+                    this.showToast(json.detail || "Gagal memproses import CSV", "error");
+                }
+            } catch (err) {
+                this.showToast("Gagal mengunggah file CSV", "error");
+            } finally {
+                this.isImporting = false;
             }
         },
 

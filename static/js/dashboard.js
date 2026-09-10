@@ -17,7 +17,16 @@ document.addEventListener('alpine:init', () => {
         },
 
         chartRange: 'today',
+        selectedDate: new Date().toISOString().split('T')[0],
+        todayDate: new Date().toISOString().split('T')[0],
+        minDate: document.getElementById('dashboard-container')?.dataset?.minDate || '2026-09-01',
         chartInstance: null,
+        chartStats: {
+            avg_dbm: null,
+            min_dbm: null,
+            max_dbm: null,
+            total_points: 0
+        },
 
         customers: [],
         totalCustomers: 0,
@@ -235,21 +244,49 @@ document.addEventListener('alpine:init', () => {
 
         async switchChartRange(range) {
             this.chartRange = range;
+            const now = new Date();
+            if (range === 'today') {
+                this.selectedDate = now.toISOString().split('T')[0];
+            } else if (range === 'yesterday') {
+                const y = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                this.selectedDate = y.toISOString().split('T')[0];
+            }
             await this.loadChartData();
+        },
+
+        async onDateSelect() {
+            if (this.selectedDate) {
+                this.chartRange = 'custom';
+                await this.loadChartData();
+            }
         },
 
         async loadChartData() {
             if (!this.chartInstance) return;
             try {
-                const res = await fetch(`/api/monitoring/chart-data?range=${this.chartRange}`);
+                let url = `/api/monitoring/chart-data?range=${encodeURIComponent(this.chartRange)}`;
+                if (this.selectedDate) {
+                    url += `&date=${encodeURIComponent(this.selectedDate)}`;
+                }
+
+                const res = await fetch(url);
                 if (res.ok) {
                     const json = await res.json();
-                    this.chartInstance.data.labels = json.labels;
-                    this.chartInstance.data.datasets[0].data = json.values;
+                    this.chartInstance.data.labels = json.labels || [];
+                    this.chartInstance.data.datasets[0].data = json.values || [];
                     
                     // Garis horizontal threshold -26.0 dBm
-                    this.chartInstance.data.datasets[1].data = new Array(json.labels.length).fill(json.threshold || -26.0);
+                    const th = json.threshold !== undefined ? json.threshold : -26.0;
+                    this.chartInstance.data.datasets[1].data = new Array((json.labels || []).length).fill(th);
                     
+                    // Update metadata statistik grafik
+                    this.chartStats = {
+                        avg_dbm: json.avg_dbm,
+                        min_dbm: json.min_dbm,
+                        max_dbm: json.max_dbm,
+                        total_points: json.total_points || 0
+                    };
+
                     this.chartInstance.update();
                 }
             } catch (err) {

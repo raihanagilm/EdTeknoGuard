@@ -1,5 +1,5 @@
-from typing import Optional, Dict, Any
-from fastapi import HTTPException, Request
+from typing import Optional, Dict, Any, List
+from fastapi import HTTPException, Request, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -34,11 +34,13 @@ class CustomerController:
         q: Optional[str] = None,
         pop: Optional[str] = None,
         status: Optional[str] = None,
+        sort_by: Optional[str] = "id",
+        sort_dir: str = "asc",
         page: int = 1,
         limit: int = 25
     ) -> Dict[str, Any]:
         total, data = CustomerService.get_customers(
-            db=db, q=q, pop=pop, status=status, page=page, limit=limit
+            db=db, q=q, pop=pop, status=status, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
         )
         return {
             "total": total,
@@ -114,5 +116,38 @@ class CustomerController:
             raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
         return {
             "status": "success",
-            "message": f"Pelanggan dengan ID '{id_pelanggan}' berhasil dinonaktifkan."
+            "message": f"Pelanggan dengan ID '{id_pelanggan}' berhasil dihapus."
         }
+
+    @staticmethod
+    def bulk_delete(db: Session, ids: List[str]) -> Dict[str, Any]:
+        affected = CustomerService.bulk_delete_customers(db=db, id_list=ids)
+        return {
+            "status": "success",
+            "message": f"{affected} pelanggan berhasil dihapus.",
+            "deleted_count": affected
+        }
+
+    @staticmethod
+    def import_csv(db: Session, file_content: bytes) -> Dict[str, Any]:
+        try:
+            res = CustomerService.import_customers_from_csv(db=db, file_content=file_content)
+            return {
+                "status": "success",
+                "message": f"Berhasil memproses {res['total_processed']} baris ({res['imported']} baru, {res['updated']} diperbarui, {res['failed']} gagal).",
+                "result": res
+            }
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Gagal memproses import CSV: {e}")
+
+    @staticmethod
+    def download_template() -> Response:
+        content = CustomerService.generate_csv_template()
+        return Response(
+            content=content,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=template_pelanggan_edteknoguard.csv"}
+        )
+
