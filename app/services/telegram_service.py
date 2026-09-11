@@ -55,9 +55,10 @@ class TelegramService:
             return False
 
     @classmethod
-    def should_suppress_alert(cls, id_pelanggan: str, status: str, db: Session, debounce_minutes: int = 30) -> bool:
-        """Cek apakah alert serupa baru saja dikirim dalam rentang 30 menit terakhir"""
-        cutoff = datetime.utcnow() - timedelta(minutes=debounce_minutes)
+    def should_suppress_alert(cls, id_pelanggan: str, status: str, db: Session, debounce_minutes: int = 30, ref_time: Optional[datetime] = None) -> bool:
+        """Cek apakah alert serupa baru saja dikirim dalam rentang debounce_minutes terakhir"""
+        now = ref_time or datetime.now()
+        cutoff = now - timedelta(minutes=debounce_minutes)
         recent_alert = (
             db.query(AlertLog)
             .filter(AlertLog.id_pelanggan == id_pelanggan, AlertLog.waktu_kirim >= cutoff)
@@ -67,7 +68,7 @@ class TelegramService:
         if not recent_alert:
             return False
 
-        # Jika sebelumnya hanya WARNING dan sekarang menjadi CRITICAL/LOS, jangan suppress
+        # Jika sebelumnya hanya WARNING dan sekarang menjadi CRITICAL/LOS, jangan suppress (eskalasi darurat)
         if recent_alert.tipe_alert == "WARNING" and status in ["CRITICAL", "LOS"]:
             return False
 
@@ -119,8 +120,13 @@ class TelegramService:
         if log_entry.status_koneksi not in ["WARNING", "CRITICAL", "LOS"]:
             return False
 
-        if cls.should_suppress_alert(pelanggan.id_pelanggan, log_entry.status_koneksi, db):
-            logger.info(f"Alert untuk {pelanggan.nama} di-suppress (debounce anti-spam).")
+        # Ambil setting debounce dari database jika ada
+        from app.db.models import SystemSetting
+        s_item = db.query(SystemSetting).filter(SystemSetting.key_name == "alert_debounce_minutes").first()
+        debounce_mins = int(s_item.value_text) if s_item and s_item.value_text.isdigit() else settings.ALERT_DEBOUNCE_MINUTES
+
+        if cls.should_suppress_alert(pelanggan.id_pelanggan, log_entry.status_koneksi, db, debounce_minutes=debounce_mins, ref_time=log_entry.waktu_cek):
+            logger.info(f"Alert untuk {pelanggan.nama} di-suppress (debounce anti-spam {debounce_mins} menit).")
             return False
 
         recipients = settings.telegram_recipient_list
@@ -145,7 +151,7 @@ class TelegramService:
             pesan=message,
             target_recipients=target_list_str,
             status_kirim="SUCCESS" if sent_any else "FAILED",
-            waktu_kirim=datetime.utcnow()
+            waktu_kirim=log_entry.waktu_cek or datetime.now()
         )
         db.add(new_alert)
         db.commit()
@@ -157,8 +163,13 @@ class TelegramService:
         if log_entry.status_koneksi not in ["WARNING", "CRITICAL", "LOS"]:
             return False
 
-        if cls.should_suppress_alert(pelanggan.id_pelanggan, log_entry.status_koneksi, db, debounce_minutes=settings.ALERT_DEBOUNCE_MINUTES):
-            logger.info(f"Alert untuk {pelanggan.nama} di-suppress (anti-spam debounce {settings.ALERT_DEBOUNCE_MINUTES} menit).")
+        # Ambil setting debounce dari database jika ada
+        from app.db.models import SystemSetting
+        s_item = db.query(SystemSetting).filter(SystemSetting.key_name == "alert_debounce_minutes").first()
+        debounce_mins = int(s_item.value_text) if s_item and s_item.value_text.isdigit() else settings.ALERT_DEBOUNCE_MINUTES
+
+        if cls.should_suppress_alert(pelanggan.id_pelanggan, log_entry.status_koneksi, db, debounce_minutes=debounce_mins, ref_time=log_entry.waktu_cek):
+            logger.info(f"Alert untuk {pelanggan.nama} di-suppress (anti-spam debounce {debounce_mins} menit).")
             return False
 
         recipients = settings.telegram_recipient_list
@@ -182,11 +193,10 @@ class TelegramService:
             pesan=message,
             target_recipients=target_list_str,
             status_kirim="SUCCESS" if sent_any else "FAILED",
-            waktu_kirim=datetime.utcnow()
+            waktu_kirim=log_entry.waktu_cek or datetime.now()
         )
         db.add(new_alert)
         db.commit()
-
         return sent_any
 
     @classmethod
