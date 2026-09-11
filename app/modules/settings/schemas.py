@@ -17,3 +17,7 @@ class SystemSettingsSchema(BaseModel):
         description="Daftar pasangan username & password modem ONT"
     )
     apply_to_invalid_customers: Optional[bool] = Field(False, description="Sinkronkan kredensial ke pelanggan berstatus INVALID/UNTESTED")
+    telegram_alert_interval_hours: Optional[float] = Field(1.0, ge=0.1, le=72.0, description="Interval pengulangan pengiriman notifikasi ke Telegram (Jam)")
+    telegram_night_mode_enabled: Optional[bool] = Field(False, description="Aktifkan Mode Malam untuk notifikasi senyap")
+    telegram_night_mode_start: Optional[str] = Field("22:00", description="Jam mulai mode malam (HH:MM)")
+    telegram_night_mode_end: Optional[str] = Field("06:00", description="Jam selesai mode malam (HH:MM)")

@@ -349,40 +349,116 @@
                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
-                            <span>Pengaturan Bot Telegram &amp; Penerima Notifikasi</span>
+                            <span>Pengaturan Notifikasi Bot Telegram &amp; Jadwal Kirim</span>
                         </h2>
                         <p class="text-xs text-slate-500 mt-1">
-                            Notifikasi alert dikirimkan otomatis saat ONT redaman drop ke <strong>-26.0 dBm (Peringatan Ringan)</strong> atau <strong>-27.0 dBm (Notifikasi Merah Segera Dicek)</strong>.
+                            Notifikasi darurat otomatis dikirimkan ke tim teknisi saat redaman mencapai batas <strong>Peringatan Ringan</strong> (<span x-text="Number(form.warning_threshold_dbm).toFixed(1) + ' dBm'"></span>) atau <strong>Notifikasi Merah Kritis</strong> (&le; <span x-text="Number(form.critical_threshold_dbm).toFixed(1) + ' dBm'"></span>).
                         </p>
                     </div>
 
-                    <div class="p-4 rounded-2xl border bg-slate-50 text-xs space-y-4">
+                    <!-- Informasi Kredensial Bot Telegram Terpusat di .env -->
+                    <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 text-xs space-y-3">
                         <div class="flex items-center justify-between">
-                            <div>
-                                <span class="font-bold text-slate-800 block text-sm">Status Bot Telegram</span>
-                                <span class="text-[11px] text-slate-400">Terhubung ke Telegram API via TiDB Settings</span>
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="font-bold text-slate-800 text-xs">Kredensial Bot Telegram (Terpusat di .env)</span>
                             </div>
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span>Bot Aktif (@TeknoToTo_bot)</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                Terkonfigurasi Aman
                             </span>
                         </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] pt-2 border-t border-slate-200/60">
+                            <div class="p-2.5 bg-white rounded-xl border border-slate-200">
+                                <span class="text-slate-400 block text-[10px]">TELEGRAM_BOT_TOKEN:</span>
+                                <span class="font-mono font-bold text-slate-700" x-text="telegramInfo.tokenMasked || 'Terkonfigurasi di .env'"></span>
+                            </div>
+                            <div class="p-2.5 bg-white rounded-xl border border-slate-200">
+                                <span class="text-slate-400 block text-[10px]">TELEGRAM_CHAT_IDS (Recipient):</span>
+                                <span class="font-mono font-bold text-slate-700" x-text="telegramInfo.chatIds || 'Terkonfigurasi di .env'"></span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-500 italic">
+                            Token bot dan Chat ID dikelola langsung melalui file konfigurasi lingkungan <code>.env</code> server untuk menjaga keamanan kredensial.
+                        </p>
+                    </div>
 
-                        <div class="pt-2 border-t border-slate-200/60 flex flex-wrap gap-3">
-                            <a href="/telegram"
-                               class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition inline-flex items-center gap-2 min-h-[44px]">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                <span>Buka Halaman Manajemen Telegram Lengkap</span>
-                            </a>
-                            <button type="button"
-                                    @click="triggerTelegramTest()"
-                                    :disabled="testingTelegram"
-                                    class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 shadow-xs transition inline-flex items-center gap-2 min-h-[44px]">
-                                <svg class="w-4 h-4 text-indigo-600" :class="{'animate-spin': testingTelegram}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                <span x-text="testingTelegram ? 'Mengirim...' : 'Kirim Uji Coba Pesan'"></span>
+                    <!-- Form Pengaturan Frekuensi Notifikasi & Mode Malam -->
+                    <form @submit.prevent="confirmSaveSettings()" class="space-y-5 text-xs">
+                        
+                        <!-- 1. Interval Pengulangan Kirim Notifikasi (Jam Sekali) -->
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                            <label class="block font-bold text-slate-800">
+                                Interval Kirim Ulang Notifikasi Peringatan (Jam Sekali)
+                            </label>
+                            <div class="relative max-w-xs">
+                                <input type="number"
+                                       step="0.5"
+                                       min="0.5"
+                                       max="24"
+                                       x-model.number="form.telegram_alert_interval_hours"
+                                       required
+                                       placeholder="1.0"
+                                       class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                <span class="absolute right-3.5 top-3 text-slate-400 font-bold">Jam Sekali</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500">
+                                Menentukan jeda waktu pengiriman pesan alert berulang ke grup Telegram jika ONT pelanggan masih mengalami gangguan (misal: diisi <strong>1.0</strong> jam sekali, <strong>2.0</strong> jam sekali, dsb. untuk mencegah spam).
+                            </p>
+                        </div>
+
+                        <!-- 2. Mode Malam (Quiet Hours / Silent Notification) -->
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label class="block font-bold text-slate-800">
+                                        Mode Malam (Quiet Hours / Notifikasi Senyap)
+                                    </label>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">
+                                        Kirimkan alert Telegram secara senyap (tanpa suara getar/dering) pada jam istirahat malam.
+                                    </p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="form.telegram_night_mode_enabled" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+
+                            <!-- Jam Rentang Mode Malam -->
+                            <div x-show="form.telegram_night_mode_enabled"
+                                 x-transition
+                                 class="pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                        Jam Mulai Mode Malam (WIB):
+                                    </label>
+                                    <input type="time"
+                                           x-model="form.telegram_night_mode_start"
+                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                                        Jam Selesai Mode Malam (WIB):
+                                    </label>
+                                    <input type="time"
+                                           x-model="form.telegram_night_mode_end"
+                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                </div>
+                                <div class="sm:col-span-2 text-[11px] text-indigo-700 bg-indigo-50 p-2.5 rounded-xl border border-indigo-100 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-indigo-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Pesan alert Telegram antara pukul <strong x-text="form.telegram_night_mode_start || '22:00'"></strong> s/d <strong x-text="form.telegram_night_mode_end || '06:00'"></strong> akan dikirimkan dengan flag <em>Silent Notification</em> tanpa membunyikan nada dering teknisi.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="flex items-center justify-end pt-2">
+                            <button type="submit"
+                                    class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Simpan Pengaturan Notifikasi Telegram</span>
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -391,19 +467,19 @@
         <!-- Sidebar Panduan Teknis & Ringkasan SOP (1 Kolom) -->
         <div class="space-y-6">
 
-            <!-- Card Standar Redaman Baru -->
+            <!-- Card Standar Redaman Baru (Dinamis Mengikuti Input Form) -->
             <div class="bg-indigo-50/75 rounded-2xl border border-indigo-100 p-5 space-y-3.5 text-xs text-indigo-950">
                 <h3 class="font-bold text-indigo-900 flex items-center gap-2 text-sm">
                     <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span>Ketentuan Ambang Batas Redaman</span>
+                    <span>Ketentuan Ambang Batas Redaman (Aktif)</span>
                 </h3>
                 <div class="space-y-2.5 text-[11px] leading-relaxed">
                     <div class="p-3 bg-white rounded-xl border border-emerald-200 shadow-xs">
                         <div class="flex items-center justify-between font-bold text-emerald-800">
                             <span>Sinyal Optimal</span>
-                            <span class="font-mono">&gt; -26.0 dBm</span>
+                            <span class="font-mono" x-text="'> ' + Number(form.warning_threshold_dbm).toFixed(1) + ' dBm'"></span>
                         </div>
                         <p class="text-slate-500 mt-1">Koneksi prima, throughput lancar, dan modul optik dalam batas toleransi aman.</p>
                     </div>
@@ -411,17 +487,21 @@
                     <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 shadow-xs">
                         <div class="flex items-center justify-between font-bold text-amber-800">
                             <span>⚠️ Peringatan Ringan</span>
-                            <span class="font-mono">&le; -26.0 dBm</span>
+                            <span class="font-mono" x-text="'&le; ' + Number(form.warning_threshold_dbm).toFixed(1) + ' dBm'"></span>
                         </div>
-                        <p class="text-amber-900 mt-1">Deteksi dini redaman optik mulai memburuk. Masih dalam batas toleransi koneksi pelanggan.</p>
+                        <p class="text-amber-900 mt-1">
+                            Deteksi dini redaman optik mulai menurun menyentuh <strong x-text="Number(form.warning_threshold_dbm).toFixed(1) + ' dBm'"></strong>. Masih dalam batas toleransi pelanggan.
+                        </p>
                     </div>
 
                     <div class="p-3 bg-rose-50 rounded-xl border border-rose-200 shadow-xs">
                         <div class="flex items-center justify-between font-bold text-rose-800">
                             <span>🚨🔴 Notifikasi Merah (Segera Dicek)</span>
-                            <span class="font-mono">&le; -27.0 dBm</span>
+                            <span class="font-mono" x-text="'&le; ' + Number(form.critical_threshold_dbm).toFixed(1) + ' dBm'"></span>
                         </div>
-                        <p class="text-rose-900 mt-1">Gangguan serius! Berisiko tinggi LOS (*Loss of Signal*). Tim teknisi harus segera memeriksa fisik kabel/konektor.</p>
+                        <p class="text-rose-900 mt-1">
+                            Gangguan serius &le; <strong x-text="Number(form.critical_threshold_dbm).toFixed(1) + ' dBm'"></strong>! Berisiko tinggi LOS (*Loss of Signal*). Tim teknisi harus segera memeriksa fisik kabel/konektor.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -469,7 +549,7 @@
 
             <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs space-y-2">
                 <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
-                    <span class="text-slate-500">Interval Pengecekan:</span>
+                    <span class="text-slate-500">Interval Pemindaian ONT:</span>
                     <strong class="font-mono text-indigo-700" x-text="form.polling_interval_minutes + ' Menit Sekali'"></strong>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
@@ -481,7 +561,15 @@
                     <strong class="font-mono text-rose-700" x-text="form.critical_threshold_dbm + ' dBm'"></strong>
                 </div>
                 <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
-                    <span class="text-slate-500">Total Kredensial Modem:</span>
+                    <span class="text-slate-500">Kirim Ulang Alert Telegram:</span>
+                    <strong class="font-mono text-indigo-700" x-text="form.telegram_alert_interval_hours + ' Jam Sekali'"></strong>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+                    <span class="text-slate-500">Mode Malam (Notifikasi Senyap):</span>
+                    <strong class="text-slate-800" x-text="form.telegram_night_mode_enabled ? ('Aktif (' + (form.telegram_night_mode_start || '22:00') + ' - ' + (form.telegram_night_mode_end || '06:00') + ')') : 'Nonaktif'"></strong>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+                    <span class="text-slate-500">Total Kredensial ONT:</span>
                     <span class="font-mono font-bold text-slate-800" x-text="form.default_modem_credentials.length + ' Pasangan User/Pass'"></span>
                 </div>
                 <template x-if="form.apply_to_invalid_customers">
@@ -493,7 +581,7 @@
             </div>
 
             <p class="text-xs text-slate-600 leading-relaxed">
-                Apakah Anda yakin ingin menerapkan perubahan ini ke TiDB Cloud? Background scheduler akan langsung menyesuaikan interval pemindaian secara realtime.
+                Apakah Anda yakin ingin menerapkan perubahan ini ke TiDB Cloud? Background scheduler dan bot Telegram akan langsung menyesuaikan aturan secara realtime.
             </p>
 
             <div class="flex items-center justify-end gap-2.5 pt-2">
@@ -516,6 +604,12 @@
          data-warning="{{ config.warning_threshold_dbm }}"
          data-critical="{{ config.critical_threshold_dbm }}"
          data-creds='{{ config.default_modem_credentials | tojson | safe }}'
+         data-tg-interval="{{ config.telegram_alert_interval_hours }}"
+         data-tg-night-enabled="{{ 'true' if config.telegram_night_mode_enabled else 'false' }}"
+         data-tg-night-start="{{ config.telegram_night_mode_start }}"
+         data-tg-night-end="{{ config.telegram_night_mode_end }}"
+         data-tg-token-masked="{{ config.telegram_bot_token_masked }}"
+         data-tg-chat-ids="{{ config.telegram_chat_ids_display }}"
          class="hidden"></div>
 
     <!-- TOAST NOTIFICATION (Clean SVG) -->
@@ -555,6 +649,12 @@ function settingsApp() {
     const initInterval = el ? (Number(el.dataset.interval) || 5) : 5;
     const initWarning = el ? (Number(el.dataset.warning) || -26.0) : -26.0;
     const initCritical = el ? (Number(el.dataset.critical) || -27.0) : -27.0;
+    const initTgInterval = el ? (Number(el.dataset.tgInterval) || 1.0) : 1.0;
+    const initTgNightEnabled = el ? (el.dataset.tgNightEnabled === 'true') : true;
+    const initTgNightStart = el ? (el.dataset.tgNightStart || '22:00') : '22:00';
+    const initTgNightEnd = el ? (el.dataset.tgNightEnd || '06:00') : '06:00';
+    const initTgTokenMasked = el ? el.dataset.tgTokenMasked : '';
+    const initTgChatIds = el ? el.dataset.tgChatIds : '';
 
     let initCreds = [];
     try {
@@ -580,20 +680,23 @@ function settingsApp() {
             warning_threshold_dbm: initWarning,
             critical_threshold_dbm: initCritical,
             default_modem_credentials: initCreds,
-            apply_to_invalid_customers: false
+            apply_to_invalid_customers: false,
+            telegram_alert_interval_hours: initTgInterval,
+            telegram_night_mode_enabled: initTgNightEnabled,
+            telegram_night_mode_start: initTgNightStart,
+            telegram_night_mode_end: initTgNightEnd
+        },
+        telegramInfo: {
+            tokenMasked: initTgTokenMasked,
+            chatIds: initTgChatIds
         },
         confirmModalOpen: false,
         saving: false,
-        testingTelegram: false,
         toast: { show: false, message: '', type: 'success' },
 
         // State Drag and Drop Kredensial
         draggedIdx: null,
         dragOverIdx: null,
-
-        initData() {
-            // Inisialisasi awal
-        },
 
         // Drag and Drop Handlers
         onDragStart(e, idx) {
@@ -699,7 +802,11 @@ function settingsApp() {
                         warning_threshold_dbm: Number(this.form.warning_threshold_dbm),
                         critical_threshold_dbm: Number(this.form.critical_threshold_dbm),
                         default_modem_credentials: this.form.default_modem_credentials,
-                        apply_to_invalid_customers: Boolean(this.form.apply_to_invalid_customers)
+                        apply_to_invalid_customers: Boolean(this.form.apply_to_invalid_customers),
+                        telegram_alert_interval_hours: Number(this.form.telegram_alert_interval_hours),
+                        telegram_night_mode_enabled: Boolean(this.form.telegram_night_mode_enabled),
+                        telegram_night_mode_start: this.form.telegram_night_mode_start,
+                        telegram_night_mode_end: this.form.telegram_night_mode_end
                     })
                 });
                 const json = await res.json();
@@ -712,6 +819,18 @@ function settingsApp() {
                         if (json.data.default_modem_credentials && json.data.default_modem_credentials.length > 0) {
                             this.form.default_modem_credentials = json.data.default_modem_credentials;
                         }
+                        if (json.data.telegram_alert_interval_hours !== undefined) {
+                            this.form.telegram_alert_interval_hours = json.data.telegram_alert_interval_hours;
+                        }
+                        if (json.data.telegram_night_mode_enabled !== undefined) {
+                            this.form.telegram_night_mode_enabled = json.data.telegram_night_mode_enabled;
+                        }
+                        if (json.data.telegram_night_mode_start) {
+                            this.form.telegram_night_mode_start = json.data.telegram_night_mode_start;
+                        }
+                        if (json.data.telegram_night_mode_end) {
+                            this.form.telegram_night_mode_end = json.data.telegram_night_mode_end;
+                        }
                     }
                 } else {
                     this.showToast(json.detail || "Gagal menyimpan pengaturan", "error");
@@ -721,29 +840,8 @@ function settingsApp() {
             } finally {
                 this.saving = false;
             }
-        },
-
-        async triggerTelegramTest() {
-            this.testingTelegram = true;
-            try {
-                const res = await fetch('/api/telegram/test-alert', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
-                });
-                const json = await res.json();
-                if (res.ok && json.status === 'success') {
-                    this.showToast("Pesan uji coba Telegram berhasil dikirim!");
-                } else {
-                    this.showToast(json.message || "Gagal mengirim pesan uji coba", "error");
-                }
-            } catch (err) {
-                this.showToast("Gagal menghubungi server Telegram", "error");
-            } finally {
-                this.testingTelegram = false;
-            }
         }
-    }
+    };
 }
 </script>
 {% endblock %}

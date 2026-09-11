@@ -44,6 +44,14 @@ def download_customers_template_csv(
     """Unduh format contoh berkas CSV data pelanggan"""
     return CustomerController.download_template()
 
+@router.get("/api/customers/export-excel")
+def export_customers_excel(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Ekspor seluruh data pelanggan ke format spreadsheet Excel (.xlsx)"""
+    return CustomerController.export_excel(db=db)
+
 @router.get("/api/customers/{id_pelanggan}")
 def get_customer_detail(
     id_pelanggan: str,

@@ -83,11 +83,6 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                             Pelanggan
                         </a>
-                        <a href="/telegram"
-                           class="px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if request.url.path.startswith('/telegram') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-600 hover:text-indigo-600 hover:bg-slate-50{% endif %}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                            Bot Telegram
-                        </a>
                         <a href="/logs"
                            class="px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if request.url.path.startswith('/logs') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-600 hover:text-indigo-600 hover:bg-slate-50{% endif %}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -162,7 +157,7 @@
     </main>
 
     <!-- Mobile Bottom Navigation Bar (Fixed on Mobile, touch target >= 44px) -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 grid grid-cols-5 md:hidden py-1 shadow-lg">
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 grid grid-cols-4 md:hidden py-1 shadow-lg">
         <a href="/"
            class="flex flex-col items-center justify-center py-1 min-h-[48px] {% if request.url.path == '/' %}text-indigo-600 font-bold{% else %}text-slate-500 hover:text-slate-800{% endif %}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -172,11 +167,6 @@
            class="flex flex-col items-center justify-center py-1 min-h-[48px] {% if request.url.path.startswith('/pelanggan') %}text-indigo-600 font-bold{% else %}text-slate-500 hover:text-slate-800{% endif %}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             <span class="text-[10px] mt-0.5">Pelanggan</span>
-        </a>
-        <a href="/telegram"
-           class="flex flex-col items-center justify-center py-1 min-h-[48px] {% if request.url.path.startswith('/telegram') %}text-indigo-600 font-bold{% else %}text-slate-500 hover:text-slate-800{% endif %}">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-            <span class="text-[10px] mt-0.5">Telegram</span>
         </a>
         <a href="/logs"
            class="flex flex-col items-center justify-center py-1 min-h-[48px] {% if request.url.path.startswith('/logs') %}text-indigo-600 font-bold{% else %}text-slate-500 hover:text-slate-800{% endif %}">

@@ -19,7 +19,11 @@ class SystemSettingsService:
             "scheduler_status",
             "default_modem_user",
             "default_modem_pass",
-            "default_modem_credentials"
+            "default_modem_credentials",
+            "telegram_alert_interval_hours",
+            "telegram_night_mode_enabled",
+            "telegram_night_mode_start",
+            "telegram_night_mode_end"
         ]
         db_settings = {}
         rows = db.query(SystemSetting).filter(SystemSetting.key_name.in_(keys)).all()
@@ -40,6 +44,15 @@ class SystemSettingsService:
             critical_threshold = float(db_settings.get("critical_threshold_dbm", settings.CRITICAL_THRESHOLD_DBM))
         except (ValueError, TypeError):
             critical_threshold = -27.0
+
+        try:
+            tg_interval_hours = float(db_settings.get("telegram_alert_interval_hours", "1.0"))
+        except (ValueError, TypeError):
+            tg_interval_hours = 1.0
+
+        tg_night_enabled = db_settings.get("telegram_night_mode_enabled", "false").lower() in ["true", "1", "yes"]
+        tg_night_start = db_settings.get("telegram_night_mode_start", "22:00")
+        tg_night_end = db_settings.get("telegram_night_mode_end", "06:00")
 
         scheduler_status = db_settings.get("scheduler_status", "RUNNING")
         default_user = db_settings.get("default_modem_user", "admin")
@@ -68,6 +81,10 @@ class SystemSettingsService:
                 {"username": "tekno", "password": "tekno2025"}
             ]
 
+        # Status token dari .env
+        bot_token = settings.TELEGRAM_BOT_TOKEN or ""
+        masked_token = f"{bot_token[:6]}...{bot_token[-4:]}" if len(bot_token) > 10 else ("Terkonfigurasi" if bot_token else "Belum diisi di .env")
+
         return {
             "polling_interval_minutes": polling_interval,
             "warning_threshold_dbm": warning_threshold,
@@ -75,7 +92,14 @@ class SystemSettingsService:
             "scheduler_status": scheduler_status,
             "default_modem_user": credentials_list[0]["username"] if credentials_list else default_user,
             "default_modem_pass": credentials_list[0]["password"] if credentials_list else default_pass,
-            "default_modem_credentials": credentials_list
+            "default_modem_credentials": credentials_list,
+            "telegram_alert_interval_hours": tg_interval_hours,
+            "telegram_night_mode_enabled": tg_night_enabled,
+            "telegram_night_mode_start": tg_night_start,
+            "telegram_night_mode_end": tg_night_end,
+            "telegram_token_configured": bool(settings.TELEGRAM_BOT_TOKEN),
+            "telegram_token_masked": masked_token,
+            "telegram_chat_ids_configured": settings.TELEGRAM_CHAT_IDS or "-"
         }
 
     @staticmethod
@@ -98,6 +122,10 @@ class SystemSettingsService:
         primary_user = creds_to_save[0]["username"] if creds_to_save else "admin"
         primary_pass = creds_to_save[0]["password"] if creds_to_save else "tekno2024"
 
+        # Konversi interval jam ke menit untuk debounce
+        tg_interval_hours = data.telegram_alert_interval_hours if data.telegram_alert_interval_hours is not None else 1.0
+        debounce_minutes = max(1, int(tg_interval_hours * 60))
+
         # 1. Simpan ke database TiDB Cloud
         pairs = {
             "polling_interval_minutes": str(data.polling_interval_minutes),
@@ -106,7 +134,12 @@ class SystemSettingsService:
             "scheduler_status": data.scheduler_status or "RUNNING",
             "default_modem_user": primary_user,
             "default_modem_pass": primary_pass,
-            "default_modem_credentials": json.dumps(creds_to_save)
+            "default_modem_credentials": json.dumps(creds_to_save),
+            "telegram_alert_interval_hours": str(tg_interval_hours),
+            "alert_debounce_minutes": str(debounce_minutes),
+            "telegram_night_mode_enabled": "true" if data.telegram_night_mode_enabled else "false",
+            "telegram_night_mode_start": (data.telegram_night_mode_start or "22:00").strip(),
+            "telegram_night_mode_end": (data.telegram_night_mode_end or "06:00").strip()
         }
 
         for k, v in pairs.items():

@@ -226,13 +226,13 @@ document.addEventListener('alpine:init', () => {
                     },
                     scales: {
                         y: {
-                            // Orientasi NOC: angka kecil (-10 dBm) di bawah, angka besar (-35 dBm) di atas (kecil ke besar)
+                            // Orientasi NOC: angka kecil (-25 dBm) di bawah, angka drop/kritis (-28 dBm) di atas
                             reverse: true,
-                            min: -35,
-                            max: -10,
+                            min: -28.0,
+                            max: -25.0,
                             ticks: {
-                                stepSize: 5,
-                                callback: val => val + ' dBm',
+                                stepSize: 0.5,
+                                callback: val => Number(val).toFixed(1) + ' dBm',
                                 color: '#64748B',
                                 font: { size: 11, family: 'Plus Jakarta Sans', weight: '600' }
                             },
@@ -327,18 +327,41 @@ document.addEventListener('alpine:init', () => {
                     redamanChart.data.labels = rawLabels;
                     redamanChart.data.datasets[0].data = rawValues;
 
-                    // 2. Garis Ambang Batas Warning (-26.0 dBm) & Kritis (-27.0 dBm)
+                    // 2. Garis Ambang Batas Warning & Kritis
                     const count = rawLabels.length;
+                    const warnThreshold = json.threshold !== undefined ? json.threshold : -26.0;
+                    const critThreshold = json.critical_threshold !== undefined ? json.critical_threshold : -27.0;
+
                     if (count > 0) {
-                        const warnThreshold = json.threshold !== undefined ? json.threshold : -26.0;
+                        redamanChart.data.datasets[1].label = `Garis Warning (${Number(warnThreshold).toFixed(1)} dBm)`;
                         redamanChart.data.datasets[1].data = new Array(count).fill(warnThreshold);
-                        redamanChart.data.datasets[2].data = new Array(count).fill(-27.0);
+                        redamanChart.data.datasets[2].label = `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`;
+                        redamanChart.data.datasets[2].data = new Array(count).fill(critThreshold);
                     } else {
                         redamanChart.data.datasets[1].data = [];
                         redamanChart.data.datasets[2].data = [];
                     }
 
-                    // 3. Update metadata statistik grafik di chip
+                    // 3. Atur Rentang Sumbu Y secara presisi & lebar (step 0.5 dBm: -25.5, -26.0, -26.5, -27.0, dst.)
+                    const validData = rawValues.filter(v => v !== null && !isNaN(v) && typeof v === 'number');
+                    let targetMin = -28.0; // Paling drop/kritis
+                    let targetMax = -25.0; // Paling optimal/bagus
+
+                    if (validData.length > 0) {
+                        const dataMin = Math.min(...validData);
+                        const dataMax = Math.max(...validData);
+                        if (dataMin < targetMin) {
+                            targetMin = Math.floor(dataMin * 2) / 2;
+                        }
+                        if (dataMax > targetMax) {
+                            targetMax = Math.ceil(dataMax * 2) / 2;
+                        }
+                    }
+
+                    redamanChart.options.scales.y.min = targetMin;
+                    redamanChart.options.scales.y.max = targetMax;
+
+                    // 4. Update metadata statistik grafik di chip
                     this.chartStats = {
                         avg_dbm: json.avg_dbm,
                         min_dbm: json.min_dbm,

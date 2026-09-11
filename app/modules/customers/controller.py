@@ -151,3 +151,12 @@ class CustomerController:
             headers={"Content-Disposition": "attachment; filename=template_pelanggan_edteknoguard.csv"}
         )
 
+    @staticmethod
+    def export_excel(db: Session) -> Response:
+        excel_bytes = CustomerService.generate_excel_export(db=db)
+        return Response(
+            content=excel_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=data_pelanggan_edteknoguard.xlsx"}
+        )
+

@@ -8,6 +8,8 @@ from app.modules.telegram_mgmt.schemas import TelegramSettingsSchema, TelegramTe
 
 router = APIRouter(tags=["telegram"])
 
+from fastapi.responses import RedirectResponse
+
 # ----------------- HTML PAGE ROUTE -----------------
 @router.get("/telegram")
 def render_telegram_page(
@@ -15,8 +17,8 @@ def render_telegram_page(
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
-    """Halaman Manajemen & Konfigurasi Bot Telegram (Protected NOC Admin)"""
-    return TelegramMgmtController.render_telegram_page(request=request, db=db)
+    """Halaman Bot Telegram dialihkan ke Tab Pengaturan Terpusat"""
+    return RedirectResponse(url="/settings", status_code=302)
 
 
 # ----------------- REST API ROUTES -----------------

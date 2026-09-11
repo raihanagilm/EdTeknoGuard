@@ -22,6 +22,16 @@
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap">
+            <!-- Tombol Export Excel -->
+            <a href="/api/customers/export-excel"
+               download="data_pelanggan_edteknoguard.xlsx"
+               class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-100 transition flex items-center gap-2 min-h-[44px]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>Export Excel</span>
+            </a>
+
             <!-- Tombol Import CSV -->
             <button @click="openImportModal()"
                     class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold border border-slate-200 shadow-sm transition flex items-center gap-2 min-h-[44px]">
@@ -178,10 +188,10 @@
                                    class="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 border-slate-300 cursor-pointer">
                         </th>
 
-                        <!-- Pelanggan -->
+                        <!-- 1. Nama Pelanggan -->
                         <th @click="sortTable('nama')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
                             <div class="flex items-center gap-1">
-                                <span>Pelanggan</span>
+                                <span>Nama Pelanggan</span>
                                 <template x-if="sortBy === 'nama'">
                                     <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
@@ -194,10 +204,13 @@
                             </div>
                         </th>
 
-                        <!-- Lokasi & POP -->
+                        <!-- 2. Alamat -->
+                        <th class="py-3 px-4">Alamat</th>
+
+                        <!-- 3. POP -->
                         <th @click="sortTable('pop')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
                             <div class="flex items-center gap-1">
-                                <span>Lokasi &amp; POP</span>
+                                <span>POP</span>
                                 <template x-if="sortBy === 'pop'">
                                     <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
@@ -210,26 +223,26 @@
                             </div>
                         </th>
 
-                        <!-- IP ONT / MAC -->
-                        <th @click="sortTable('ip_router')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                        <!-- 4. Paket Bandwidth -->
+                        <th @click="sortTable('paket')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
                             <div class="flex items-center gap-1">
-                                <span>IP ONT / MAC</span>
-                                <template x-if="sortBy === 'ip_router'">
+                                <span>Paket Bandwidth</span>
+                                <template x-if="sortBy === 'paket'">
                                     <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                                         <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                     </svg>
                                 </template>
-                                <template x-if="sortBy !== 'ip_router'">
+                                <template x-if="sortBy !== 'paket'">
                                     <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
                                 </template>
                             </div>
                         </th>
 
-                        <!-- Modem & Paket -->
+                        <!-- 5. Tipe Modem / IP -->
                         <th @click="sortTable('jenis_modem')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
                             <div class="flex items-center gap-1">
-                                <span>Modem &amp; Paket</span>
+                                <span>Tipe Modem &amp; IP</span>
                                 <template x-if="sortBy === 'jenis_modem'">
                                     <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
@@ -242,7 +255,7 @@
                             </div>
                         </th>
 
-                        <!-- Status Kredensial -->
+                        <!-- 6. Kredensial ONT -->
                         <th @click="sortTable('status_kredensial')" class="py-3 px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
                             <div class="flex items-center justify-center gap-1">
                                 <span>Kredensial ONT</span>
@@ -258,23 +271,13 @@
                             </div>
                         </th>
 
-                        <th @click="sortTable('redaman_baseline')" class="py-3 px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
-                            <div class="flex items-center justify-center gap-1">
-                                <span>Baseline</span>
-                                <template x-if="sortBy === 'redaman_baseline'">
-                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </template>
-                                <template x-if="sortBy !== 'redaman_baseline'">
-                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
-                                </template>
-                            </div>
-                        </th>
-
+                        <!-- 7. Rx Power Saat Ini -->
                         <th class="py-3 px-4 text-center">Rx Power Saat Ini</th>
+
+                        <!-- 8. Status -->
                         <th class="py-3 px-4 text-center">Status</th>
+
+                        <!-- 9. Aksi -->
                         <th class="py-3 px-4 text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -288,46 +291,59 @@
                                        x-model="selectedIds"
                                        class="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 border-slate-300 cursor-pointer">
                             </td>
+
+                            <!-- 1. Nama Pelanggan -->
                             <td class="py-3 px-4">
                                 <div class="font-bold text-slate-900" x-text="c.nama"></div>
                                 <div class="text-[11px] text-slate-400 font-mono" x-text="c.id_pelanggan"></div>
                                 <div class="text-[11px] text-slate-400" x-show="c.no_hp && c.no_hp !== '-'" x-text="c.no_hp"></div>
                             </td>
+
+                            <!-- 2. Alamat -->
+                            <td class="py-3 px-4">
+                                <div class="text-xs text-slate-700 max-w-[200px] line-clamp-2" :title="c.alamat" x-text="c.alamat || '-'"></div>
+                            </td>
+
+                            <!-- 3. POP -->
                             <td class="py-3 px-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100" x-text="c.pop"></span>
-                                <div class="text-[11px] text-slate-500 truncate max-w-[180px] mt-0.5" :title="c.alamat" x-text="c.alamat"></div>
                             </td>
-                            <td class="py-3 px-4 font-mono">
-                                <div class="text-slate-800 font-semibold" x-text="c.ip_router"></div>
-                                <div class="text-[11px] text-slate-400" x-text="c.mac_address"></div>
-                            </td>
+
+                            <!-- 4. Paket Bandwidth -->
                             <td class="py-3 px-4">
-                                <div class="text-slate-700 font-medium" x-text="c.jenis_modem"></div>
-                                <div class="text-[11px] text-slate-400" x-text="c.paket"></div>
+                                <span class="text-xs font-semibold text-slate-800" x-text="c.paket || '-'"></span>
                             </td>
 
-                            <!-- Status Kredensial Modem ONT -->
+                            <!-- 5. Tipe Modem & IP -->
+                            <td class="py-3 px-4">
+                                <div class="text-slate-800 font-semibold text-xs" x-text="c.jenis_modem"></div>
+                                <div class="text-[11px] font-mono text-indigo-600" x-text="c.ip_router"></div>
+                                <div class="text-[10px] text-slate-400 font-mono" x-show="c.mac_address && c.mac_address !== '-'" x-text="c.mac_address"></div>
+                            </td>
+
+                            <!-- 6. Status Kredensial Modem ONT -->
                             <td class="py-3 px-4 text-center">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 border"
-                                      :class="{
-                                          'bg-emerald-50 text-emerald-700 border-emerald-200': c.status_kredensial === 'VALID',
-                                          'bg-rose-50 text-rose-700 border-rose-200': c.status_kredensial === 'INVALID',
-                                          'bg-slate-100 text-slate-600 border-slate-200': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
-                                      }"
-                                      :title="c.status_kredensial === 'VALID' ? 'Kredensial login modem terverifikasi valid' : (c.status_kredensial === 'INVALID' ? 'Gagal login: Username/Password modem salah' : 'Belum pernah dilakukan verifikasi login')">
-                                    <span class="w-1.5 h-1.5 rounded-full"
+                                <div class="inline-flex flex-col items-center gap-1">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 border"
                                           :class="{
-                                              'bg-emerald-500': c.status_kredensial === 'VALID',
-                                              'bg-rose-500': c.status_kredensial === 'INVALID',
-                                              'bg-slate-400': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
-                                          }"></span>
-                                    <span x-text="c.status_kredensial || 'UNTESTED'"></span>
-                                </span>
+                                              'bg-emerald-50 text-emerald-700 border-emerald-200': c.status_kredensial === 'VALID',
+                                              'bg-rose-50 text-rose-700 border-rose-200': c.status_kredensial === 'INVALID',
+                                              'bg-slate-100 text-slate-600 border-slate-200': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
+                                          }"
+                                          :title="c.status_kredensial === 'VALID' ? 'Kredensial login modem terverifikasi valid' : (c.status_kredensial === 'INVALID' ? 'Gagal login: Username/Password modem salah' : 'Belum pernah dilakukan verifikasi login')">
+                                        <span class="w-1.5 h-1.5 rounded-full"
+                                              :class="{
+                                                  'bg-emerald-500': c.status_kredensial === 'VALID',
+                                                  'bg-rose-500': c.status_kredensial === 'INVALID',
+                                                  'bg-slate-400': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
+                                              }"></span>
+                                        <span x-text="c.status_kredensial || 'UNTESTED'"></span>
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 font-mono" x-show="c.user_admin && c.user_admin !== '-'" x-text="'user: ' + c.user_admin"></span>
+                                </div>
                             </td>
 
-                            <td class="py-3 px-4 text-center font-mono text-slate-600">
-                                <span x-text="c.redaman_baseline ? c.redaman_baseline + ' dBm' : '-'"></span>
-                            </td>
+                            <!-- 7. Rx Power Saat Ini -->
                             <td class="py-3 px-4 text-center font-mono font-bold">
                                 <span :class="{
                                     'text-emerald-600': c.status === 'NORMAL',
@@ -336,6 +352,8 @@
                                 }" x-text="c.redaman_current !== null ? c.redaman_current + ' dBm' : 'LOS'"></span>
                                 <div class="text-[10px] text-slate-400 font-sans" x-text="c.last_check"></div>
                             </td>
+
+                            <!-- 8. Status -->
                             <td class="py-3 px-4 text-center">
                                 <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1"
                                       :class="{
