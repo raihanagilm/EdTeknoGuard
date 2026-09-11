@@ -234,51 +234,8 @@ class ONTScraperService:
         if not res["mac_address"]:
             res["mac_address"] = cls.get_mac_from_arp(host)
 
-        # 2. SSID dari net_wlan_essid_t.gch (Format Transfer_meaning ZTE)
-        for essid_path in ["/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch", "/getpage.gch?pid=1002&nextpage=net_wlan_basic_t.gch"]:
-            try:
-                r_essid = session.get(f"{base_url}{essid_path}", headers=headers, timeout=8)
-                if r_essid.status_code == 200:
-                    txt_essid = html.unescape(r_essid.text)
-                    m_tm_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_essid)
-                    if m_tm_essid:
-                        for item in m_tm_essid:
-                            if item.strip():
-                                res["nama_wifi"] = item.strip()
-                                break
-                    if not res["nama_wifi"]:
-                        m_var = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_essid, re.I)
-                        if m_var and m_var.group(1).strip():
-                            res["nama_wifi"] = m_var.group(1).strip()
-                if res["nama_wifi"]:
-                    break
-            except Exception:
-                pass
-
-        # 3. Password WiFi dari net_wlan_secrity_t.gch (Format Transfer_meaning ZTE)
-        for sec_path in ["/getpage.gch?pid=1002&nextpage=net_wlan_secrity_t.gch", "/getpage.gch?pid=1002&nextpage=net_wlan_security_t.gch"]:
-            try:
-                r_sec = session.get(f"{base_url}{sec_path}", headers=headers, timeout=8)
-                if r_sec.status_code == 200:
-                    txt_sec = html.unescape(r_sec.text)
-                    m_tm_pass = re.findall(r"Transfer_meaning\s*\(\s*['\"](?:KeyPassphrase|PreSharedKey)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
-                    if m_tm_pass:
-                        for item in m_tm_pass:
-                            if item.strip():
-                                res["password_wifi"] = item.strip()
-                                break
-                    if not res["nama_wifi"]:
-                        m_tm_essid2 = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
-                        if m_tm_essid2:
-                            for item in m_tm_essid2:
-                                if item.strip():
-                                    res["nama_wifi"] = item.strip()
-                                    break
-                if res["password_wifi"]:
-                    break
-            except Exception:
-                pass
-
+        # Catatan: SSID dan Password WiFi diatur secara manual oleh teknisi
+        # karena modem di lapangan sering menggunakan router/AP eksternal atau konfigurasi terpisah.
         return res
 
     @classmethod

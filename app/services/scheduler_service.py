@@ -217,13 +217,9 @@ class MonitoringScheduler:
                     res = scrape_res
                     ket = f"Error: {scrape_res.get('message', 'Gagal')}"
 
-                # Auto-deteksi: Simpan MAC Address & Kredensial WiFi jika berhasil terbaca
+                # Auto-deteksi: Hanya simpan MAC Address jika berhasil terbaca (WiFi diatur manual)
                 if res.get("mac_address"):
                     cust.mac_address = res["mac_address"]
-                if res.get("nama_wifi"):
-                    cust.nama_wifi = res["nama_wifi"]
-                if res.get("password_wifi"):
-                    cust.password_wifi = res["password_wifi"]
 
                 log_entry = LogPerformaONT(
                     id_pelanggan=cust.id_pelanggan,
@@ -368,13 +364,9 @@ class MonitoringScheduler:
                 res = scrape_res
                 ket = f"Single Check Error: {scrape_res.get('message', 'Unreachable')}"
 
-            # Auto-deteksi: Update MAC Address & Kredensial WiFi jika terdeteksi
+            # Auto-deteksi: Update MAC Address jika terdeteksi (WiFi manual)
             if res.get("mac_address"):
                 cust.mac_address = res["mac_address"]
-            if res.get("nama_wifi"):
-                cust.nama_wifi = res["nama_wifi"]
-            if res.get("password_wifi"):
-                cust.password_wifi = res["password_wifi"]
 
             now = datetime.now()
             log_entry = LogPerformaONT(

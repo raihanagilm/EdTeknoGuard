@@ -399,15 +399,14 @@ def main():
     sw_ver = device_wifi.get("software_version") or "N/A"
     model = device_wifi.get("model_name") or "GM220-S XPON"
 
-    print("--- [1. INFORMASI PERANGKAT & WIFI PELANGGAN] ---")
+    print("--- [1. IDENTITAS PERANGKAT ONT] ---")
     print(f"  • Model ONT            : {model}")
     print(f"  • Kredensial Login OK  : {authenticated_user} / {authenticated_pass}")
-    print(f"  • MAC Address ONT      : {mac} {mac_src}")
-    print(f"  • Nama / SSID WiFi     : {ssid}")
-    print(f"  • Password WiFi        : {wifipass}")
+    print(f"  • MAC Address ONT      : {mac} {mac_src} [AUTO TERDETEKSI]")
     print(f"  • PON Serial Number    : {sn}")
     if sw_ver != "N/A":
         print(f"  • Software Version     : {sw_ver}")
+    print("  • Info WiFi Pelanggan  : Dikonfigurasi secara manual oleh teknisi")
     print("-" * 65)
 
     # Bagian B: Parameter Optik

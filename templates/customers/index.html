@@ -540,7 +540,7 @@
 
                 <div>
                     <label class="font-bold text-slate-700 block mb-1">MAC Address (Opsional)</label>
-                    <input type="text" x-model="formData.mac_address" placeholder="44:22:95:xx:xx:xx (auto deteksi)"
+                    <input type="text" x-model="formData.mac_address" placeholder="8C:8F:8B:xx:xx:xx (auto deteksi saat scan)"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px] font-mono">
                 </div>
 
@@ -548,6 +548,18 @@
                     <label class="font-bold text-slate-700 block mb-1">No. HP / WA</label>
                     <input type="text" x-model="formData.no_hp" placeholder="08xxxxxxxxxx"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-700 block mb-1">Nama / SSID WiFi (Manual)</label>
+                    <input type="text" x-model="formData.nama_wifi" placeholder="Nama WiFi pelanggan"
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]">
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-700 block mb-1">Password WiFi (Manual)</label>
+                    <input type="text" x-model="formData.password_wifi" placeholder="Password WiFi pelanggan"
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px] font-mono">
                 </div>
 
                 <div class="sm:col-span-2">
@@ -789,7 +801,7 @@
 
             <!-- Detail Cards: Kredensial WiFi & Parameter Perangkat ONT -->
             <div class="space-y-3">
-                <!-- Card 1: Informasi Kredensial WiFi Pelanggan (Auto Deteksi) -->
+                <!-- Card 1: Informasi Kredensial WiFi Pelanggan (Input Manual) -->
                 <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-50/80 to-blue-50/60 border border-indigo-100 shadow-xs">
                     <div class="flex items-center justify-between gap-2 mb-2.5">
                         <div class="flex items-center gap-2">
@@ -800,11 +812,11 @@
                             </div>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Kredensial WiFi Pelanggan</h4>
-                                <p class="text-[10px] text-slate-500">Otomatis terdeteksi dari konfigurasi WLAN ONT</p>
+                                <p class="text-[10px] text-slate-500">Dikonfigurasi manual oleh teknisi</p>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
-                            Auto Deteksi
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                            Manual
                         </span>
                     </div>
 
@@ -812,7 +824,7 @@
                         <div class="bg-white/80 p-3 rounded-xl border border-indigo-100 flex items-center justify-between">
                             <div>
                                 <span class="text-[10px] font-bold text-slate-400 uppercase block">SSID WiFi</span>
-                                <span class="font-bold text-slate-900 text-sm" x-text="selectedCustomer?.nama_wifi && selectedCustomer?.nama_wifi !== '-' ? selectedCustomer?.nama_wifi : 'Belum Terdeteksi'"></span>
+                                <span class="font-bold text-slate-900 text-sm" x-text="selectedCustomer?.nama_wifi && selectedCustomer?.nama_wifi !== '-' ? selectedCustomer?.nama_wifi : 'Belum Diatur'"></span>
                             </div>
                             <button type="button"
                                     x-show="selectedCustomer?.nama_wifi && selectedCustomer?.nama_wifi !== '-'"
@@ -837,7 +849,7 @@
                                         </div>
                                     </template>
                                     <template x-if="!selectedCustomer?.password_wifi || selectedCustomer?.password_wifi === '-'">
-                                        <span class="text-slate-400 italic text-xs">Belum Terdeteksi</span>
+                                        <span class="text-slate-400 italic text-xs">Belum Diatur</span>
                                     </template>
                                 </div>
                             </div>
@@ -1111,8 +1123,6 @@ function customerApp() {
                     customer.status = probe.status;
                     customer.last_check = "Baru saja";
                     if (probe.mac_address) customer.mac_address = probe.mac_address;
-                    if (probe.nama_wifi) customer.nama_wifi = probe.nama_wifi;
-                    if (probe.password_wifi) customer.password_wifi = probe.password_wifi;
                     if (probe.status_kredensial) customer.status_kredensial = probe.status_kredensial;
                     this.showToast(`Probe ONT ${customer.nama}: ${probe.rx_power} dBm (${probe.status})`);
                 } else {
@@ -1137,6 +1147,8 @@ function customerApp() {
                 paket: '20 Mbps Home',
                 jenis_modem: 'GM220-S',
                 mac_address: '',
+                nama_wifi: '',
+                password_wifi: '',
                 user_admin: 'admin',
                 pass_admin: '',
                 snmp_community: 'public'
@@ -1156,6 +1168,8 @@ function customerApp() {
                 paket: c.paket === '-' ? '' : c.paket,
                 jenis_modem: c.jenis_modem,
                 mac_address: c.mac_address === '-' ? '' : c.mac_address,
+                nama_wifi: c.nama_wifi === '-' ? '' : (c.nama_wifi || ''),
+                password_wifi: c.password_wifi === '-' ? '' : (c.password_wifi || ''),
                 user_admin: c.user_admin === '-' ? 'admin' : (c.user_admin || 'admin'),
                 pass_admin: c.pass_admin === '-' ? '' : (c.pass_admin || ''),
                 snmp_community: 'public'
