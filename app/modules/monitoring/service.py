@@ -191,6 +191,7 @@ class MonitoringService:
 
             labels = [r[0] for r in grouped_rows]
             values = [float(r[1]) if r[1] is not None else None for r in grouped_rows]
+            counts = [int(r[4]) if r[4] is not None else 1 for r in grouped_rows]
 
         # Ringkasan statistik
         valid_vals = [v for v in values if v is not None]
@@ -201,6 +202,7 @@ class MonitoringService:
         return {
             "labels": labels,
             "values": values,
+            "counts": counts if not id_pelanggan else [1] * len(values),
             "threshold": settings.WARNING_THRESHOLD_DBM,
             "avg_dbm": avg_dbm,
             "min_dbm": min_dbm,

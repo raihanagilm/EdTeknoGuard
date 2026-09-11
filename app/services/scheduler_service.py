@@ -18,6 +18,7 @@ class MonitoringScheduler:
     _instance = None
     _scheduler: Optional[BackgroundScheduler] = None
     _is_scanning: bool = False
+    _is_network_error: bool = False
 
     def __new__(cls):
         if cls._instance is None:
@@ -107,8 +108,10 @@ class MonitoringScheduler:
             status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
             interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
             last_scan = self.get_setting_from_db(db, "last_scan_time", "-")
+            net_err_str = self.get_setting_from_db(db, "is_network_error", "false")
             total_customers = db.query(Pelanggan).count()
             interval = int(interval_str) if interval_str.isdigit() else settings.POLLING_INTERVAL_MINUTES
+            is_net_err = (net_err_str.lower() == "true") or self._is_network_error
         finally:
             db.close()
 
@@ -117,6 +120,7 @@ class MonitoringScheduler:
             "interval_minutes": interval,
             "last_scan_time": last_scan,
             "is_scanning": self._is_scanning,
+            "is_network_error": is_net_err,
             "total_customers": total_customers
         }
 
@@ -161,6 +165,7 @@ class MonitoringScheduler:
             except Exception:
                 default_creds_list = []
 
+            unreachable_count = 0
             for cust in pelanggan_list:
                 # 1. Coba Scraping Live ONT GM220-S via HTTP
                 scrape_res = ONTScraperService.scrape_ont(
@@ -186,16 +191,13 @@ class MonitoringScheduler:
                     cust.status_kredensial = "INVALID"
                     res = scrape_res
                     ket = "Login Gagal (User/Pass Salah)"
-                elif settings.SNMP_SIMULATION_MODE and scrape_res.get("error_type") == "UNREACHABLE":
-                    # Fallback ke simulasi hanya untuk host lab yang tidak aktif
-                    res = SNMPService.query_ont_simulated(
-                        baseline_rx=float(cust.redaman_baseline) if cust.redaman_baseline else None,
-                        modem_type=cust.jenis_modem
-                    )
-                    ket = "Simulasi (Lab Host Unreachable)"
+                elif scrape_res.get("error_type") == "UNREACHABLE":
+                    unreachable_count += 1
+                    res = scrape_res
+                    ket = "Gagal Terhubung (Unreachable - Cek Jaringan Lokal)"
                 else:
                     res = scrape_res
-                    ket = f"Error: {scrape_res.get('message', 'Unreachable')}"
+                    ket = f"Error: {scrape_res.get('message', 'Gagal')}"
 
                 log_entry = LogPerformaONT(
                     id_pelanggan=cust.id_pelanggan,
@@ -251,6 +253,26 @@ class MonitoringScheduler:
             self.set_setting_in_db(db, "last_scan_time", now.strftime("%Y-%m-%d %H:%M:%S"))
             db.commit()
 
+            # Deteksi apakah server terputus dari jaringan lokal ISP / VLAN ONT
+            if len(pelanggan_list) > 0 and unreachable_count == len(pelanggan_list):
+                self._is_network_error = True
+                self.set_setting_in_db(db, "is_network_error", "true")
+                db.commit()
+                return {
+                    "status": "error",
+                    "error_type": "NETWORK_UNREACHABLE",
+                    "is_network_error": True,
+                    "message": "Koneksi Gagal: Server tidak terhubung ke jaringan lokal / VLAN ISP ONT (10.10.x.x). Pemindaian dihentikan!",
+                    "scanned_total": len(pelanggan_list),
+                    "warning_count": warning_count,
+                    "critical_count": critical_count,
+                    "los_count": los_count,
+                    "scan_time": now.strftime("%Y-%m-%d %H:%M:%S")
+                }
+
+            self._is_network_error = False
+            self.set_setting_in_db(db, "is_network_error", "false")
+            db.commit()
             return {
                 "status": "success",
                 "scanned_total": len(pelanggan_list),

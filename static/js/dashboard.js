@@ -1,4 +1,7 @@
-// EdTeknoGuard Dashboard Alpine.js Application (v2.2)
+// Instance Chart.js disimpan di luar objek reaktif Alpine.js
+// untuk mencegah RangeError (Maximum call stack size exceeded akibat Proxy wrapper Alpine)
+let redamanChart = null;
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('dashboardApp', () => ({
         // State Engine & Kontrol
@@ -27,7 +30,7 @@ document.addEventListener('alpine:init', () => {
         selectedDate: new Date().toISOString().split('T')[0],
         todayDate: new Date().toISOString().split('T')[0],
         minDate: document.getElementById('dashboard-container')?.dataset?.minDate || '2026-09-01',
-        chartInstance: null,
+        chartCounts: [],
         chartStats: {
             avg_dbm: null,
             min_dbm: null,
@@ -70,6 +73,9 @@ document.addEventListener('alpine:init', () => {
                     this.engineStatus = data.status || 'RUNNING';
                     this.lastScanTime = data.last_scan_time || '-';
                     this.isScanning = data.is_scanning || false;
+                    if (data.is_network_error !== undefined) {
+                        this.isNetworkError = Boolean(data.is_network_error) || (this.kpi.total_monitored > 0 && this.kpi.los === this.kpi.total_monitored);
+                    }
                     if (data.interval_minutes) {
                         this.intervalMinutes = data.interval_minutes;
                     }
@@ -86,11 +92,9 @@ document.addEventListener('alpine:init', () => {
                 if (res.ok) {
                     const data = await res.json();
                     this.kpi = data;
-                    // Jika ada total pelanggan tapi semua LOS dan error, tandai network error
+                    // Jika ada pelanggan terpantau dan semuanya mengalami LOS, atau terdeteksi network error
                     if (this.kpi.total_monitored > 0 && this.kpi.los === this.kpi.total_monitored) {
                         this.isNetworkError = true;
-                    } else {
-                        this.isNetworkError = false;
                     }
                 }
             } catch (err) {
@@ -137,20 +141,28 @@ document.addEventListener('alpine:init', () => {
             this.isScanning = true;
             try {
                 const res = await fetch('/api/monitoring/scan-all', { method: 'POST' });
-                if (res.ok) {
+                const data = await res.json();
+
+                if (data.status === 'error' && data.error_type === 'NETWORK_UNREACHABLE') {
+                    this.isNetworkError = true;
+                    this.showToast(data.message || 'Koneksi Gagal: Server tidak terhubung ke jaringan lokal/VLAN ISP ONT (10.10.x.x)!', 'error');
+                } else if (res.ok && data.status !== 'error') {
+                    this.isNetworkError = false;
                     await this.fetchStatus();
                     await this.fetchKpi();
                     await this.loadChartData();
                     this.showToast('Pemindaian seluruh ONT jaringan selesai!', 'success');
                 } else {
-                    this.showToast('Pemindaian sedang berjalan di latar belakang', 'info');
+                    this.showToast(data.message || 'Pemindaian sedang berjalan di latar belakang', 'info');
                 }
             } catch (err) {
                 console.error('Gagal scan all:', err);
-                this.showToast('Gagal memicu pemindaian ONT (Periksa koneksi jaringan lokal)', 'error');
+                this.showToast('Koneksi Gagal: Tidak dapat menghubungi server / jaringan lokal ONT (10.10.x.x)', 'error');
                 this.isNetworkError = true;
             } finally {
                 this.isScanning = false;
+                await this.fetchStatus();
+                await this.fetchKpi();
             }
         },
 
@@ -158,8 +170,10 @@ document.addEventListener('alpine:init', () => {
             const ctx = document.getElementById('redamanChart');
             if (!ctx) return;
 
-            // Inisialisasi Chart.js dengan 3 dataset native (Data Riwayat Log, Garis Warning, Garis Kritis)
-            this.chartInstance = new Chart(ctx, {
+            const self = this;
+
+            // Inisialisasi Chart.js menggunakan variabel modul non-reaktif (redamanChart)
+            redamanChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: [],
@@ -168,7 +182,7 @@ document.addEventListener('alpine:init', () => {
                             label: 'Nilai Redaman Rata-rata',
                             data: [],
                             borderColor: '#4F46E5',
-                            backgroundColor: 'rgba(79, 70, 229, 0.14)',
+                            backgroundColor: 'rgba(79, 70, 229, 0.12)',
                             borderWidth: 3,
                             fill: true,
                             tension: 0.35,
@@ -212,8 +226,8 @@ document.addEventListener('alpine:init', () => {
                     },
                     scales: {
                         y: {
-                            // Orientasi telekomunikasi standar: -10 dBm (bagus) di atas, -35 dBm (drop) di bawah
-                            reverse: false,
+                            // Orientasi NOC: angka kecil (-10 dBm) di bawah, angka besar (-35 dBm) di atas (kecil ke besar)
+                            reverse: true,
                             min: -35,
                             max: -10,
                             ticks: {
@@ -242,15 +256,27 @@ document.addEventListener('alpine:init', () => {
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#0F172A',
-                            titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 'bold' },
-                            bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
-                            padding: 12,
-                            cornerRadius: 10,
+                            backgroundColor: 'rgba(15, 23, 42, 0.94)',
+                            titleFont: { family: 'Plus Jakarta Sans', size: 11, weight: 'bold' },
+                            bodyFont: { family: 'Plus Jakarta Sans', size: 10, weight: '500' },
+                            padding: { top: 8, bottom: 8, left: 10, right: 10 },
+                            cornerRadius: 8,
+                            displayColors: false,
+                            filter: tooltipItem => tooltipItem.datasetIndex === 0,
                             callbacks: {
+                                title: items => {
+                                    if (!items || !items.length) return '';
+                                    return `Waktu Scan: ${items[0].label} WIB`;
+                                },
                                 label: ctx => {
-                                    if (ctx.parsed.y === null || isNaN(ctx.parsed.y)) return `${ctx.dataset.label}: Tidak ada data`;
-                                    return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} dBm`;
+                                    const idx = ctx.dataIndex;
+                                    const count = (self.chartCounts && self.chartCounts[idx]) ? self.chartCounts[idx] : 1;
+                                    const val = ctx.parsed.y;
+                                    const valStr = (val !== null && !isNaN(val)) ? `${val.toFixed(2)} dBm` : '-';
+                                    return [
+                                        `Jumlah Pelanggan: ${count} Pelanggan`,
+                                        `Rata-rata Redaman: ${valStr}`
+                                    ];
                                 }
                             }
                         }
@@ -281,7 +307,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         async loadChartData() {
-            if (!this.chartInstance) return;
+            if (!redamanChart) return;
             try {
                 let url = `/api/monitoring/chart-data?range=${encodeURIComponent(this.chartRange)}`;
                 if (this.selectedDate) {
@@ -294,19 +320,22 @@ document.addEventListener('alpine:init', () => {
                     const rawLabels = json.labels || [];
                     const rawValues = json.values || [];
 
+                    // Simpan counts untuk tooltip
+                    this.chartCounts = json.counts || [];
+
                     // 1. Update Labels & Dataset Redaman
-                    this.chartInstance.data.labels = rawLabels;
-                    this.chartInstance.data.datasets[0].data = rawValues;
+                    redamanChart.data.labels = rawLabels;
+                    redamanChart.data.datasets[0].data = rawValues;
 
                     // 2. Garis Ambang Batas Warning (-26.0 dBm) & Kritis (-27.0 dBm)
                     const count = rawLabels.length;
                     if (count > 0) {
                         const warnThreshold = json.threshold !== undefined ? json.threshold : -26.0;
-                        this.chartInstance.data.datasets[1].data = new Array(count).fill(warnThreshold);
-                        this.chartInstance.data.datasets[2].data = new Array(count).fill(-27.0);
+                        redamanChart.data.datasets[1].data = new Array(count).fill(warnThreshold);
+                        redamanChart.data.datasets[2].data = new Array(count).fill(-27.0);
                     } else {
-                        this.chartInstance.data.datasets[1].data = [];
-                        this.chartInstance.data.datasets[2].data = [];
+                        redamanChart.data.datasets[1].data = [];
+                        redamanChart.data.datasets[2].data = [];
                     }
 
                     // 3. Update metadata statistik grafik di chip
@@ -317,7 +346,7 @@ document.addEventListener('alpine:init', () => {
                         total_points: json.total_points || 0
                     };
 
-                    this.chartInstance.update();
+                    redamanChart.update();
                 }
             } catch (err) {
                 console.error('Gagal memuat data grafik:', err);

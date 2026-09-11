@@ -197,10 +197,38 @@ class ONTScraperService:
         host = ip.strip()
         base_url = f"http://{host}"
         session = requests.Session()
-        session.headers.update({"Connection": "close"})
+        # 1. Quick probe jangkauan host (Connect timeout 2.5 detik, Read 4.0 detik)
+        # Jika server tidak terhubung ke jaringan lokal/VLAN ONT, langsung fail-fast tanpa menunggu lama
+        r_probe = None
+        try:
+            r_probe = session.get(f"{base_url}/", timeout=(2.5, 4.0), headers={"Connection": "close"})
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            print(f"[-] [UNREACHABLE] ONT {host} ({customer_name}): Tidak dapat dijangkau ({e.__class__.__name__}). Periksa koneksi LAN/VLAN.")
+            return {
+                "success": False,
+                "error_type": "UNREACHABLE",
+                "message": "Host tidak terjangkau (Periksa koneksi jaringan lokal/VLAN)",
+                "status_kredensial": "UNTESTED",
+                "status_koneksi": "LOS",
+                "rx_power": None,
+                "suhu_ont": None,
+                "uptime": None,
+                "latency_ms": None
+            }
+        except Exception:
+            pass
 
-        # Cek status lockout
-        is_locked, rem_secs = cls.check_lockout_status(session, base_url)
+        # 2. Cek status lockout dari probe text
+        is_locked = False
+        rem_secs = 0
+        if r_probe is not None:
+            m_time = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', r_probe.text)
+            if m_time:
+                rem = int(m_time.group(1)) + 60 - int(m_time.group(2))
+                if rem > 0:
+                    is_locked = True
+                    rem_secs = rem
+
         if is_locked and rem_secs > 10:
             print(f"[-] [LOCKOUT] ONT {host} ({customer_name}): Modem sedang lockout ({rem_secs}s).")
             return {
