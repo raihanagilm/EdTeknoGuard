@@ -222,7 +222,7 @@
                         <div class="space-y-3">
                             <p class="text-[11px] text-slate-500 italic flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
-                                <span>Tarik &amp; lepas (drag and drop) ikon ⠿ atau gunakan tombol panah untuk memindahkan urutan prioritas autentikasi modem.</span>
+                                <span>Tarik &amp; lepas (drag and drop) ikon ⠿ untuk memindahkan urutan prioritas autentikasi modem ONT.</span>
                             </p>
 
                             <template x-for="(cred, index) in form.default_modem_credentials" :key="index">
@@ -268,23 +268,7 @@
                                             </template>
                                         </div>
 
-                                        <!-- Tombol Reorder Cepat (Up / Down) -->
-                                        <div class="flex items-center gap-0.5 ml-1">
-                                            <button type="button"
-                                                    x-show="index > 0"
-                                                    @click="moveUp(index)"
-                                                    title="Pindahkan ke atas (naik prioritas)"
-                                                    class="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition border border-transparent hover:border-slate-200">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                                            </button>
-                                            <button type="button"
-                                                    x-show="index < form.default_modem_credentials.length - 1"
-                                                    @click="moveDown(index)"
-                                                    title="Pindahkan ke bawah (turun prioritas)"
-                                                    class="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition border border-transparent hover:border-slate-200">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                            </button>
-                                        </div>
+
 
                                         <!-- Tombol Hapus (Mobile View) -->
                                         <button type="button"

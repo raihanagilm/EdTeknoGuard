@@ -12,7 +12,7 @@
                 Monitoring &amp; Deteksi Dini ONT
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-                Pengawasan berkala setiap <strong class="text-indigo-600 font-bold" x-text="intervalMinutes ? intervalMinutes + ' menit' : '{{ polling_interval }} menit'">{{ polling_interval }} menit</strong> ke seluruh perangkat ONT jaringan ISP lokal
+                Pengawasan berkala setiap <strong class="text-indigo-600 font-bold"><span x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</span> menit</strong> ke seluruh perangkat ONT jaringan ISP lokal
             </p>
         </div>
         <div class="flex items-center gap-2">
@@ -99,5 +99,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/dashboard.js?v=2.2"></script>
 {% endblock %}

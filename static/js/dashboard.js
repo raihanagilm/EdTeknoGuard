@@ -1,12 +1,13 @@
-// EdTeknoGuard Dashboard Alpine.js Application
+// EdTeknoGuard Dashboard Alpine.js Application (v2.2)
 document.addEventListener('alpine:init', () => {
     Alpine.data('dashboardApp', () => ({
         // State Engine & Kontrol
         engineStatus: 'RUNNING',
         lastScanTime: '',
-        intervalMinutes: Number(document.getElementById('dashboard-container')?.dataset?.pollingInterval) || 5,
+        intervalMinutes: Number(document.getElementById('dashboard-container')?.dataset?.pollingInterval) || 10,
         isScanning: false,
         isToggling: false,
+        isNetworkError: false,
         scanningSingleId: null,
 
         // Toast Notification State
@@ -35,6 +36,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         init() {
+            // Inisialisasi awal
+            const initInterval = Number(document.getElementById('dashboard-container')?.dataset?.pollingInterval);
+            if (initInterval) {
+                this.intervalMinutes = initInterval;
+            }
+
             this.fetchStatus();
             this.fetchKpi();
             this.initChart();
@@ -69,6 +76,7 @@ document.addEventListener('alpine:init', () => {
                 }
             } catch (err) {
                 console.error('Gagal mengambil status engine:', err);
+                this.isNetworkError = true;
             }
         },
 
@@ -78,6 +86,12 @@ document.addEventListener('alpine:init', () => {
                 if (res.ok) {
                     const data = await res.json();
                     this.kpi = data;
+                    // Jika ada total pelanggan tapi semua LOS dan error, tandai network error
+                    if (this.kpi.total_monitored > 0 && this.kpi.los === this.kpi.total_monitored) {
+                        this.isNetworkError = true;
+                    } else {
+                        this.isNetworkError = false;
+                    }
                 }
             } catch (err) {
                 console.error('Gagal mengambil metrik KPI:', err);
@@ -133,7 +147,8 @@ document.addEventListener('alpine:init', () => {
                 }
             } catch (err) {
                 console.error('Gagal scan all:', err);
-                this.showToast('Gagal memicu pemindaian ONT', 'error');
+                this.showToast('Gagal memicu pemindaian ONT (Periksa koneksi jaringan lokal)', 'error');
+                this.isNetworkError = true;
             } finally {
                 this.isScanning = false;
             }
@@ -143,54 +158,7 @@ document.addEventListener('alpine:init', () => {
             const ctx = document.getElementById('redamanChart');
             if (!ctx) return;
 
-            // Plugin garis ambang batas horizontal (-26.0 dBm Warning & -27.0 dBm Kritis)
-            const horizontalThresholdPlugin = {
-                id: 'horizontalThresholdPlugin',
-                afterDraw(chart) {
-                    const { ctx, chartArea, scales: { y } } = chart;
-                    if (!chartArea || !y) return;
-                    const { left, right } = chartArea;
-
-                    ctx.save();
-
-                    // 1. Garis Warning (-26.0 dBm)
-                    const yWarn = y.getPixelForValue(-26.0);
-                    if (yWarn >= chartArea.top && yWarn <= chartArea.bottom) {
-                        ctx.strokeStyle = '#F59E0B'; // Amber
-                        ctx.lineWidth = 1.5;
-                        ctx.setLineDash([5, 5]);
-                        ctx.beginPath();
-                        ctx.moveTo(left, yWarn);
-                        ctx.lineTo(right, yWarn);
-                        ctx.stroke();
-
-                        ctx.fillStyle = '#D97706';
-                        ctx.font = 'bold 10px "Plus Jakarta Sans", sans-serif';
-                        ctx.textAlign = 'right';
-                        ctx.fillText('Warning: -26.0 dBm', right - 10, yWarn - 5);
-                    }
-
-                    // 2. Garis Kritis / Bahaya (-27.0 dBm)
-                    const yCrit = y.getPixelForValue(-27.0);
-                    if (yCrit >= chartArea.top && yCrit <= chartArea.bottom) {
-                        ctx.strokeStyle = '#EF4444'; // Rose / Merah
-                        ctx.lineWidth = 1.5;
-                        ctx.setLineDash([3, 3]);
-                        ctx.beginPath();
-                        ctx.moveTo(left, yCrit);
-                        ctx.lineTo(right, yCrit);
-                        ctx.stroke();
-
-                        ctx.fillStyle = '#DC2626';
-                        ctx.font = 'bold 10px "Plus Jakarta Sans", sans-serif';
-                        ctx.textAlign = 'right';
-                        ctx.fillText('Kritis: -27.0 dBm', right - 10, yCrit + 13);
-                    }
-
-                    ctx.restore();
-                }
-            };
-
+            // Inisialisasi Chart.js dengan 3 dataset native (Data Riwayat Log, Garis Warning, Garis Kritis)
             this.chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -200,8 +168,8 @@ document.addEventListener('alpine:init', () => {
                             label: 'Nilai Redaman Rata-rata',
                             data: [],
                             borderColor: '#4F46E5',
-                            backgroundColor: 'rgba(79, 70, 229, 0.12)',
-                            borderWidth: 2.5,
+                            backgroundColor: 'rgba(79, 70, 229, 0.14)',
+                            borderWidth: 3,
                             fill: true,
                             tension: 0.35,
                             pointRadius: 6,
@@ -210,6 +178,28 @@ document.addEventListener('alpine:init', () => {
                             pointBorderColor: '#FFFFFF',
                             pointBorderWidth: 2.5,
                             showLine: true
+                        },
+                        {
+                            label: 'Garis Warning (-26.0 dBm)',
+                            data: [],
+                            borderColor: '#F59E0B',
+                            borderWidth: 2,
+                            borderDash: [6, 6],
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            fill: false,
+                            tension: 0
+                        },
+                        {
+                            label: 'Garis Kritis (-27.0 dBm)',
+                            data: [],
+                            borderColor: '#EF4444',
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            fill: false,
+                            tension: 0
                         }
                     ]
                 },
@@ -259,14 +249,13 @@ document.addEventListener('alpine:init', () => {
                             cornerRadius: 10,
                             callbacks: {
                                 label: ctx => {
-                                    if (ctx.parsed.y === null || isNaN(ctx.parsed.y)) return 'Tidak ada data';
-                                    return `Rata-rata: ${ctx.parsed.y.toFixed(2)} dBm`;
+                                    if (ctx.parsed.y === null || isNaN(ctx.parsed.y)) return `${ctx.dataset.label}: Tidak ada data`;
+                                    return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} dBm`;
                                 }
                             }
                         }
                     }
-                },
-                plugins: [horizontalThresholdPlugin]
+                }
             });
 
             this.loadChartData();
@@ -305,10 +294,22 @@ document.addEventListener('alpine:init', () => {
                     const rawLabels = json.labels || [];
                     const rawValues = json.values || [];
 
+                    // 1. Update Labels & Dataset Redaman
                     this.chartInstance.data.labels = rawLabels;
                     this.chartInstance.data.datasets[0].data = rawValues;
 
-                    // Update metadata statistik grafik
+                    // 2. Garis Ambang Batas Warning (-26.0 dBm) & Kritis (-27.0 dBm)
+                    const count = rawLabels.length;
+                    if (count > 0) {
+                        const warnThreshold = json.threshold !== undefined ? json.threshold : -26.0;
+                        this.chartInstance.data.datasets[1].data = new Array(count).fill(warnThreshold);
+                        this.chartInstance.data.datasets[2].data = new Array(count).fill(-27.0);
+                    } else {
+                        this.chartInstance.data.datasets[1].data = [];
+                        this.chartInstance.data.datasets[2].data = [];
+                    }
+
+                    // 3. Update metadata statistik grafik di chip
                     this.chartStats = {
                         avg_dbm: json.avg_dbm,
                         min_dbm: json.min_dbm,

@@ -238,11 +238,12 @@ class ONTScraperService:
             if (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
                 credentials_to_try.append((d_u, d_p, "DEFAULT"))
 
-        # Cadangan tambahan umum GM220-S
-        fallback_common = [("admin", "tekno2024"), ("admin", "admin"), ("tekno", "tekno2025")]
-        for u, p in fallback_common:
-            if (u, p) not in [(x, y) for x, y, _ in credentials_to_try]:
-                credentials_to_try.append((u, p, "COMMON_FALLBACK"))
+        # PROTEKSI ANTI-LOCKOUT (Penggabungan Opsi 1 & 3):
+        # Firmware ZTE GM220-S mengunci web selama 60 detik jika ada 3 kali kegagalan password berbeda.
+        # Oleh karena itu, kita batasi maksimal HANYA 2 kredensial unik per siklus pengecekan:
+        # 1. Kredensial Pelanggan (dengan 2x attempt + session reset)
+        # 2. Kredensial Default Prioritas Utama #1 (dengan 2x attempt + session reset)
+        credentials_to_try = credentials_to_try[:2]
 
         authenticated = False
         active_user = None
@@ -253,15 +254,26 @@ class ONTScraperService:
         start_time = time.time()
 
         for u, p, source in credentials_to_try:
+            # Percobaan 1: Coba login normal
             ok, resp = cls.attempt_login(session, base_url, host, u, p)
             last_resp = resp
+
+            # Jika percobaan 1 gagal dan modem masih merespon (bukan timeout),
+            # lakukan Clean Session Reset & Refresh Token lalu coba sekali lagi.
+            # Ini menyelesaikan masalah firmware ZTE GM220-S yang sering me-reject login pertama karena session semaphore / stale token.
+            if not ok and resp is not None and "SetDisabled()" not in resp.text:
+                time.sleep(0.8) # Jeda pendinginan modem
+                session.cookies.clear() # Bersihkan sesi lama
+                ok, resp = cls.attempt_login(session, base_url, host, u, p)
+                last_resp = resp
+
             if ok:
                 authenticated = True
                 active_user = u
                 active_pass = p
                 auth_source = source
                 break
-            time.sleep(1)
+            time.sleep(0.8)
 
         latency = int((time.time() - start_time) * 1000)
 
