@@ -105,27 +105,15 @@ class SNMPService:
         uptime = random.randint(3600, 1200000)
         latency = random.randint(3, 25)
 
-        # Generate MAC Address OUI ZTE realistis
-        if ip:
-            octets = [int(o) for o in ip.split('.') if o.isdigit()]
-            hex_tail = ":".join(f"{b:02X}" for b in octets[-3:]) if len(octets) >= 3 else "0A:0B:0C"
-            sim_mac = f"48:D2:42:{hex_tail}"
-        else:
-            sim_mac = f"48:D2:42:{random.randint(10,99):02X}:{random.randint(10,99):02X}:{random.randint(10,99):02X}"
-
-        clean_name = "".join(filter(str.isalnum, customer_name or "Home"))[:10]
-        sim_ssid = f"EdTekno_{clean_name}"
-        sim_pass = f"wifi{clean_name.lower()}123"
-
         return {
             "rx_power": rx,
             "suhu_ont": suhu,
             "uptime": uptime,
             "latency_ms": latency,
             "status_koneksi": status,
-            "mac_address": sim_mac,
-            "nama_wifi": sim_ssid,
-            "password_wifi": sim_pass
+            "mac_address": None,
+            "nama_wifi": None,
+            "password_wifi": None
         }
 
     @classmethod
