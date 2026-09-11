@@ -1,0 +1,103 @@
+{
+  "status_optic_info_t.gch": {
+    "status": 200,
+    "length": 125311,
+    "id_vals": {
+      "+ cellId;\n}\nif(": "\");\n}\nelse\n{\nreturn (\"\");\n}\n}\nfunction getImagefrmClass(ImgClass, strmethod, id)\n{\nvar imageHTML = \"\";\nreturn (imageHTML);\n}\nfunction getXMLHTTPObj()\n{\nvar xmlHttp = null;\ntry\n{\n\nxmlHttp=new XMLHttpRequest();\n}\ncatch (e)\n{\ntry\n{\nxmlHttp=new ActiveXObject(\"Msxml2.XMLHTTP\");\n}\ncatch (e)\n{\ntry\n{\nxmlHttp=new ActiveXObject(\"Microsoft.XMLHTTP\");\n}\ncatch (e){}\n}\n}\nreturn xmlHttp;\n}\nvar xmlHTTPStatus = new Array();\nxmlHTTPStatus['Uninitialized']  = 0;\nxmlHTTPStatus['Open']           = 1;\nxmlHTTPStatus['Sent']           = 2;\nxmlHTTPStatus['Receiving']      = 3;\nxmlHTTPStatus['Loaded']         = 4;\nfunction AJAXObj()\n{\nthis.obj = getXMLHTTPObj();\nthis.postStr = \"\";\nthis.addPostItem = function(name, value)\n{\nthis.postStr += name + \"=\" + value + \"&\";\n};\nthis.post = function(requestURL, responseFunc)\n{\nthis.obj.open(\"POST\", requestURL, true);\nthis.obj.onreadystatechange = responseFunc;\nthis.obj.send(this.postStr);\nthis.postStr = \"\";\n};\nthis.getResponseText = function()\n{\nreturn this.obj.responseText;\n};\nthis.getReadyState = function()\n{\nreturn this.obj.readyState;\n};\nthis.getStatus = function()\n{\nreturn this.obj.status;\n};\n}\nfunction getXMLDoc(xmlStr)\n{\nvar xmlDoc;\ntry\n{\nxmlDoc=new ActiveXObject(\"Microsoft.XMLDOM\");\nxmlDoc.async=\"false\";\nxmlDoc.loadXML(xmlStr);\nreturn(xmlDoc);\n}\ncatch(e)\n{\ntry\n{\nparser=new DOMParser();\nxmlDoc=parser.parseFromString(xmlStr,\"text/xml\");\nreturn(xmlDoc);\n}\ncatch(e)\n{\n}\n}\nreturn(null);\n}\nfunction getAJAXResponseXMLDoc(xmlStr)\n{\nif (xmlStr.match(/^\\s*/m) != null)\n{\nreturn getXMLDoc(xmlStr);\n}\nreturn null;\n}\nfunction XMLDocObj(xmlStr)\n{\nthis.xmlDoc = getAJAXResponseXMLDoc(xmlStr);\nthis.getXMLNodeValue = function(nodeName)\n{\nvar nodeValue = \"\";\ntry\n{\nnodeValue = this.xmlDoc.getElementsByTagName(nodeName)[0].childNodes[0].nodeValue;\n}\ncatch(e)\n{\n}\nreturn nodeValue;\n};\nthis.getXMLNode = function(nodeName)\n{\nreturn this.xmlDoc.getElementsByTagName(nodeName)[0];\n};\nthis.getCMAPIParaValue = function(OBJNAME, instID, paraName)\n{\nvar paraValue = \"\";\nvar instObj   = null;\nvar o = this.getXMLNode(OBJNAME);\nvar insts = o.childNodes;\nfor (var i=0; i 0)\n{\no.removeChild(clds[0]);\n}\n}\nfunction checkSameInput(fid)\n{\nvar o = getObj(fid);\nif (o != null)\n{\nvar is = o.getElementByTagName(\"input\");\nvar il = is.length;\nfor (var i=0; i0)\n{\nvar c_start=document.cookie.indexOf(c_name + \"=\");\nif ( -1 != c_start )\n{\nc_start = c_start + c_name.length + 1;\nvar c_end=document.cookie.indexOf(\";\", c_start);\nif ( c_end == -1 )\n{\nc_end=document.cookie.length;\n}\nreturn unescape( document.cookie.substring(c_start, c_end) );\n}\n}\nreturn null;\n}\nfunction setCookie(c_name,value,expiredays)\n{\nvar exdate = new Date();\nexdate.setDate( exdate.getDate() + expiredays );\nvar cookieContent = c_name + \"=\" + escape(value);\nif ( null != expiredays )\n{\ncookieContent += \"; expires=\" + exdate.toGMTString();\n}\ndocument.cookie = cookieContent;\n}\nfunction HTMLEnCode(str)\n{\nstr = str.replace(/&/g, \"&\");\nstr = str.replace(//g, \">\");\nstr = str.replace(/ /g, \" \");\nstr = str.replace(/\\\"/g, \"\"\");\nreturn str;\n}\nfunction HTMLDeCode(str)\n{\nstr = str.replace(//g, \">\");\nstr = str.replace(/ /g, \" \");\nstr = str.replace(/\"/g, \"\\\"\");\nstr = str.replace(/&/g, \"&\");\nreturn str;\n}\nfunction HTMLAddBr(str, wdth)\n{\nvar str1 = \"\";\nfor (var i=0; i\";\n}\n}\nreturn str1;\n}\nfunction CheckLen(obj,val)\n{\nif (val.length == obj.maxLength)\n{\nvar curIndex = obj.id.match(/\\d+$/);\nvar nextIndex = parseInt(curIndex, 10)+1;\nvar nextID = obj.id.replace(/\\d+$/,\"\")+nextIndex;\nif (getObj(nextID) == null)\n{\nreturn;\n}\ndocument.getElementById(nextID).focus();\ndocument.getElementById(nextID).select();\n}\nelse if (val.length == 0)\n{\nvar curIndex = obj.id.match(/\\d+$/);\nvar prevIndex = parseInt(curIndex, 10);\nif (prevIndex > 1)\n{\nprevIndex = prevIndex - 1;\n}\nvar prevID = obj.id.replace(/\\d+$/,\"\")+prevIndex;\nif (getObj(prevID) == null)\n{\nreturn;\n}\ndocument.getElementById(prevID).focus();\ndocument.getElementById(prevID).select();\n}\nelse\n{\nreturn;\n}\n}\nfunction myTrim(str, chr)\n{\nvar reg=new RegExp('((' + chr + ')*$)','g');\nreturn str.replace(reg,\"\");\n}\nfunction calcSubNet(ipaddr, netmask)\n{\nvar ips = ipaddr.split(\".\");\nvar ns  = netmask.split(\".\");\nvar sub = \"\";\nif(ips.length != 4 || ns.length != 4)\nreturn \"0.0.0.0\";\nfor(var i = 0; i  255)\n{\nreturn false;\n}\n}\nreturn true;\n}\nfunction in_array(needle, haystack)\n{\nfor(var key in haystack)\n{\nif(needle === haystack[key])\n{\nreturn true;\n}\n}\nreturn false;\n}\nfunction checkStrLengthRange(value, min, max)\n{\nif(checkNull(value) == false)\n{\nreturn -1;\n}\nvar len = value.length;\nif((len  max))\n{\nreturn -3;\n}\nreturn true;\n}\nfunction checkInteger(str)\n{\nif(str.match(\"^[-]{0,1}[0-9]{1,}$\"))\nreturn true;\nreturn false;\n}\nfunction checkIntegerRange(value, minValue, maxValue)\n{\nif(checkNull(value) == false)\n{\nreturn -1;\n}\nif(checkInteger(value) != true)\nreturn -2;\nif (value  maxValue)\n{\nreturn -3;\n}\nreturn true;\n}\nfunction checkIntegerRangeById(FrmId, minValue, maxValue)\n{\nReSetValueRmZero(FrmId);\nvar val = getValue(FrmId);\nreturn checkIntegerRange(val , minValue, maxValue);\n}\nfunction checkGenInt(str)\n{\nif(checkIntegerRange(str, -2147483648, 2147483647) != true)\nreturn false;\nreturn true;\n}\nfunction checkUnSingleInt(str)\n{\nif(checkIntegerRange(str, 0, 4294967295) != true)\nreturn false;\nreturn true;\n}\nfunction checkName(strName, iLeng)\n{\nvar len       = strName.length;\nvar firstChar = strName.substr(0,1);\nvar lastChar  = strName.substr(len-1,1);\nvar leftChar  = \"\";\nvar rightChar = \"\";\nvar iDotCount = 0;\nvar i         = 0;\nvar preDotPos = 0;\nvar statu = checkStrLengthRange(strName, 1, iLeng);\nif(statu != true)\n{\nreturn statu;\n}\nif (strName.match(\"[^0-9a-zA-Z.-]\") != null)\n{\nreturn false;\n}\nif(firstChar.match(\"[^0-9a-zA-Z]\") != null)\n{\nreturn false;\n}\nif(lastChar.match(\"[^0-9a-zA-Z]\") != null)\n{\nreturn false;\n}\nvar pos = strName.lastIndexOf(\".\");\nif(pos == -1)\n{\nvar str = strName;\nvar len = strName.length;\nfor(var i=0;i 126)\n{\nreturn false;\n}\n}\nreturn true;\n}\nfunction checkURL(url)\n{\nvar statu = checkStrLengthRange(url, 1, 256);\nif(statu != true)\n{\nreturn statu;\n}\nif (url.match(\"[^0-9a-zA-Z.:;,!@%#?_/&=+*'$()\\\\[\\\\]-]\") != null)\n{\nreturn false;\n}\nreturn true;\n}\nfunction checkIpAddress(value, num)\n{\nvar ipaddr = value;\nvar re     = /^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$/;\nif(re.test(ipaddr) == true)\n{\nvar parts = ipaddr.split(\".\");\nfor(var i=0; i 1)\nreturn false;\nif (parseInt((parts[i]),10) > 255 || parseInt((parts[i]),10)  223)\nreturn false ;\n}\nif(num == 3)\n{\nfor(var i=0; i8)\n{\nreturn false;\n}\nelse if(Doublecolon.length==1&&ipv4Parts.length==1&&addrParts.length!=8)\n{\nreturn false;\n}\nelse if(Doublecolon.length==1&&ipv4Parts.length>1&&addrParts.length!=6)\n{\nreturn false;\n}\nelse if(Doublecolon.length>1&&ipv4Parts.length>1&&addrParts.length>6)\n{\nreturn false;\n}\nelse if(Doublecolon.length>2||str.split(':::').length>1)\n{\nreturn false;\n}\nelse\n{\nif(addrParts[0]==\"\"&&addrParts[1]!=\"\")\n{\nreturn false;\n}\nfor(var i=0;i4 && addrParts[i].split('.').length1)\n{\nvar ipv4=str.substring(pos+1,str.length);\nif(true != checkIpAddress(ipv4,\"\"))\n{\nreturn false;\n}\n}\nreturn true;\n}\nfunction checkGateway(Address)\n{\nvar address = Address.match(\"^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$\");\nvar digits;\nvar i;\nif(address == null)\n{\nreturn false;\n}\ndigits = address[0].split(\".\");\nif (digits.length != 4 )\n{\nreturn false;\n}\nfor(i=0; i  255 )||\n(Number(digits[i])  223))\n{\nreturn false;\n}\n}\nreturn true;\n}\nfunction checkMACAddress(Addr)\n{\nvar pattern = /^\\s*([A-Fa-f0-9]{2}\\:){5}[A-Fa-f0-9]{2}\\s*$/;\nif(Addr==\"00:00:00:00:00:00\")\n{\nreturn false;\n}\nif(!pattern.test(Addr))\n{\nreturn false;\n}\nreturn true;\n}\nfunction checkMaskAddress(MaskAddr)\n{\nvar mask = MaskAddr.match(\"^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$\");\nvar digits;\nvar bMask = 0;\nvar watch = false;\nvar i;\nvar error=null;\nif(mask == null)\n{\nreturn false;\n}\ndigits = mask[0].split(\".\");\nif (digits.length != 4 )\n{\nreturn false;\n}\nfor(i=0; i  255 ) || (Number(digits[i])  1)\n)\n{\nreturn false;\n}\nbMask = (bMask > 1;\nif((bMask & 0x01) == 1)\nwatch=true;\n}\nreturn true;\n}\nfunction checkIPNet(ipaddr, netmask)\n{\nvar ret = checkIpAddress(ipaddr);\nif(ret != true)\nreturn ret;\nif (netmask == null)\nreturn null;\nret = checkMaskAddress(netmask);\nif(ret != null)\nreturn ret;\nvar ips = ipaddr.split(\".\");\nvar subnet = calcSubNet(ipaddr, netmask);\nvar subs = subnet.split(\".\");\nvar s = \"\";\nfor(var i = 0; i \";\ntemp+=\"\"+msgJSONData.title+\"",
+      "htmlBody": "Error\n\n\n\n \n\n\n\n\n\n\n\n\n\n\n\n Help",
+      "container": "-->\n -->\n\n\nGM220-S XPON",
+      "class2": "Logout\n\n\n\n\n\n\n\n\n \n\n\n2025-2034 Corporation. All rights reserved..\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nvar x,y,z,obj;\nvar down=false;\nvar browser=navigator.appName;\nvar b_version=navigator.appVersion;\nvar version=b_version.split(\";\");\nvar trim_Version = \"\";\nif(null != version[1])\n{\ntrim_Version=version[1].replace(/[ ]/g,\"\");\n}\nfunction setinner(type)\n{\nif(browser==\"Microsoft Internet Explorer\" && trim_Version==\"MSIE6.0\")\n{\ndocument.getElementById(\"myLayer\").style.visibility = type;\n}\nelse\n{\ndocument.getElementById(\"myLayer\").style.visibility = type ;\n}\n}\nfunction setinnerHidden()\n{\nif(browser==\"Microsoft Internet Explorer\" && trim_Version==\"MSIE6.0\")\n{\ndocument.getElementById(\"myLayer\").style.visibility = \"hidden\";\n}\nelse\n{\ndocument.getElementById(\"myLayer\").style.visibility = \"hidden\" ;\n}\n}\nfunction init()\n{\nif(browser==\"Microsoft Internet Explorer\" && trim_Version==\"MSIE6.0\")\n{\nobj=event.srcElement;\nobj.setCapture();\nz=obj.style.zIndex;\nobj.style.zIndex=100 ;\nx=event.offsetX;\ny=event.offsetY ;\ndown=true;\n}\n}\nfunction moveit()\n{\nif(browser==\"Microsoft Internet Explorer\" && trim_Version==\"MSIE6.0\")\n{\nif(down&&event.srcElement==obj)\n{\nwith(obj.style)\n{\nposLeft=document.body.scrollLeft+event.x-x;\nposTop=document.body.scrollTop+event.y-y;\n}\n}\n}\n}\nfunction stopdrag()\n{\nif(browser==\"Microsoft Internet Explorer\" && trim_Version==\"MSIE6.0\")\n{\ndown=false;\nobj.style.zIndex=z ;\nobj.releaseCapture();\n}\n}\n\nfunction framedispalay(id)\n{\nif(browser==\"Microsoft Internet Explorer\" && trim_Version==\"MSIE6.0\")\n{\n}\nelse\n{\ngetObj(id).style.display=\"none\";\n}\n}\n\n\nfunction hideHelp()\n{\ngetObj(\"alertFram\").style.display = \"none\";\n};\nvar ie=document.all;\nvar nn6=document.getElementById&&!document.all;\nvar isdrag=false;\nvar y,x;\nvar oDragObj;\nfunction moveMouse(e)\n{\nif (isdrag)\n{\noDragObj.style.top  =  (nn6 ? nTY + e.clientY - y : nTY + event.clientY - y)+\"px\";\noDragObj.style.left  =  (nn6 ? nTX + e.clientX - x : nTX + event.clientX - x)+\"px\";\nreturn false;\n}\n}\nfunction initDrag2(o,s)\n{\nif (typeof(o) == \"string\") o = document.getElementById(o);\no.orig_x = parseInt(o.style.left) - document.body.scrollLeft;\no.orig_y = parseInt(o.style.top) - document.body.scrollTop;\no.orig_index = o.style.zIndex;\no.onmousedown = function(evt)\n{\nthis.style.cursor = \"move\";\n\nvar d=document;\nevt = evt || window.event;\nvar x = evt.clientX+d.body.scrollLeft-o.offsetLeft;\nvar y = evt.clientY+d.body.scrollTop-o.offsetTop;\nd.ondragstart = \"return false;\";\nd.onselectstart = \"return false;\";\nd.onselect = \"document.selection.empty();\";\nif(o.setCapture)\no.setCapture();\nelse if(window.captureEvents)\nwindow.captureEvents(Event.MOUSEMOVE|Event.MOUSEUP);\nd.onmousemove = function(evt)\n{\nevt = evt || window.event;\no.style.left = evt.clientX+document.body.scrollLeft-x +\"px\";\no.style.top = evt.clientY+document.body.scrollTop-y +\"px\";\no.orig_x = parseInt(o.style.left) - document.body.scrollLeft;\no.orig_y = parseInt(o.style.top) - document.body.scrollTop;\n};\nd.onmouseup = function()\n{\nif(o.releaseCapture)\no.releaseCapture();\nelse if(window.captureEvents)\nwindow.captureEvents(Event.MOUSEMOVE|Event.MOUSEUP);\nd.onmousemove = null;\nd.onmouseup = null;\nd.ondragstart = null;\nd.onselectstart = null;\nd.onselect = null;\no.style.cursor = \"normal\";\no.style.zIndex = o.orig_index;\n};\n};\nif (s)\n{\nvar orig_scroll = window.onscroll?window.onscroll:function (){};\nwindow.onscroll = function ()\n{\norig_scroll();\no.style.left = o.orig_x + document.body.scrollLeft;\no.style.top = o.orig_y + document.body.scrollTop;\n};\n}\n}\nfunction initDrag(e)\n{\nvar oDragHandle = nn6 ? e.target : event.srcElement;\nvar topElement = \"HTML\";\nif( oDragHandle.tagName )\n{\n\nwhile (oDragHandle.tagName != topElement && oDragHandle.className != \"dragAble\")\n{\noDragHandle = nn6 ? oDragHandle.parentNode : oDragHandle.parentElement;\n}\nif (oDragHandle.className==\"dragAble\")\n{\nisdrag = true;\noDragObj = oDragHandle;\nnTY = parseInt(oDragObj.style.top+0);\ny = nn6 ? e.clientY : event.clientY;\nnTX = parseInt(oDragObj.style.left+0);\nx = nn6 ? e.clientX : event.clientX;\ndocument.onmousemove=moveMouse;\nreturn false;\n}\n}\n}\n\n\n\nfunction showHelp()\n{\n\ngetObj(\"alertFram\").style.display = \"block\";\nvar helpiframe = document.getElementById('helpiframe');\nhelpiframe.setAttribute('height', document.getElementById('dragAble').scrollHeight);\nframedispalay(\"helpiframe\");\ninitDrag2('dragAble');\n}\n\n\nfunction jump()\n{\ntop.location.href = \"/\";\n}\n\nfunction AutoRelogin(type)\n{\nvar timeout;\nif ((type == \"restart\") || (type == \"upgconfig\"))\n{\ntimeout = 3;\n}\nelse if (type == \"restore\")\n{\ntimeout = 3;\n}\nelse if (type == \"upgversion\")\n{\ntimeout = 5;\n}\nelse\n{\nreturn;\n}\nsetTimeout(\"jump()\", timeout*60*1000+5000);\n}\n\n\nfunction OldProcessRet(errstr, errpara)\n{\nif(\"Current operation is ineffective, please check whether \" == errstr && \"SUCC\" == errpara)\n{\nerrstr = \"FAIL\";\n}\nProcessRet(errstr, errpara);\n}\nfunction ProcessRet(errstr, errpara)\n{\nvar errtype=getValue(\"IF_ERRORTYPE\");\nif (errstr != \"SUCC\")\n{\nif(errpara != \"SUCC\")\n{\nvar param = document.getElementById(\"Fnt_\"+errpara);\nif ( param== null)\n{\nShowErrorForCom(null, null, \"Current operation is ineffective, please check configuration parameters.\");\n}\nelse\n{\nmsg = \"Current operation is ineffective, please check whether \" + param.innerHTML + \" is legal.\";\nShowErrorForCom(\"Frm_\"+errpara, null, msg);\n}\n}\nelse\n{\nif (errstr == \"FAIL\")\n{\nerrstr = \"Current operation is ineffective, please check configuration parameters.\";\n}\nif ((errtype&1) == 1)\n{\nShowNote(\"Notice\", errstr);\n}\nelse if((errtype&2) == 2)\n{\nShowErrorForCom(null, null, errstr);\n}\nelse if((errtype&4) == 4)\n{\n}\nelse\n{\nShowErrorForCom(null, null, errstr);\n}\n}\n}\n}\n\n\n\ntext = \"\"\n+\"\"\n+\"",
+      "Fnt_": "\"\n+ meta_menu[supId]['langName']\n+ \""
+    },
+    "inputs": [
+      "<input type=\\\"text\\\" class=\\\"uiNoBorder\\\" value=\\\"\"\n+ HTMLEnCode(value) + \"\\\"  id=\\\"\" + id + \"\\\"  readonly>",
+      "<input type=\\\"text\\\" class=\\\"uiNoBorder\\\" value=\\\"\"\n+ value + \"\\\"  id=\\\"\" + id + \"\\\"  readonly>",
+      "<input type=\\\"button\\\" id=\\\"\"\n+ id\n+ \"\\\" onclick=\\\"\"\n+ strmethod\n+ \"\\\" class =\\\"multiImg\\\" \"\n+ \"style=\\\"background:url(\" + src + \");\\\">",
+      "<input type=\\\"image\\\" src=\\\"img/enable.gif\\\" style=\\\"cursor:default\\\" \" + strId + \">",
+      "<input type=\\\"image\\\" src=\\\"img/disable.gif\\\" style=\\\"cursor:default\\\" \" + strId + \">",
+      "<input type=\\\"button\\\" id=\\\"\"\n+ id\n+ \"\\\" onclick=\\\"\"\n+ strmethod\n+ \"\\\" class =\\\"\"\n+ ImgClass\n+ \"\\\" >",
+      "<input name=\\\"msgconfirmb\\\" type=\\\"button\\\" class=\\\"msgbutton\\\" id=\\\"msgconfirmb\\\" value=\\\"\" + msgJSONData.confirmLabel + \"\\\" onclick=\\\"remove_msgbox();\"+msgJSONData.confirmCallback+\";\\\">",
+      "<input name=\\\"msgcancelb\\\" type=\\\"button\\\" class=\\\"msgbutton\\\" id=\\\"msgcancelb\\\" value=\\\"\" + msgJSONData.cancelLabel + \"\\\" onclick=\\\"remove_msgbox();\\\">",
+      "<input name=\"help_info\" type=\"button\" onclick=\"onClickSetLang()\" class=\"help_button\" id=\"lang_button\" value=\"����\"/>",
+      "<input name=\"help_info\" type=\"button\" onclick=\"showHelp('', 'Help')\" class=\"help_button\" id=\"help_button\" value=\"Help\"/>",
+      "<input name=\"help_info\" type=\"button\" onclick=\"onClickLogout()\" class=\"help_button\" id=\"exit_button\" value=\"Logout\"/>",
+      "<input type=\"hidden\" id=\"IF_UPLOADING\" name=\"IF_UPLOADING\" value=\"N/A\">",
+      "<input type=\"hidden\" id=\"temClickURL\" name=\"temClickURL\" value=\"\">",
+      "<input type=\"hidden\" name=\"logout\" id=\"logout\" value=\"\" >",
+      "<input type=\"hidden\" name=\"_lang\" id=\"_lang\" value=\"\">",
+      "<input type=\"hidden\" name=\"action\" id=\"action\" value=\"\">"
+    ],
+    "table_rows": [
+      [
+        "\"+msgJSONData.title+\""
+      ],
+      [
+        "\"+msgJSONData.content+\""
+      ],
+      [
+        "\";\nif(\"yes\"==msgJSONData.cancelDisplay){temp+=\""
+      ],
+      [
+        "Help"
+      ],
+      [
+        "\"\n\n+\""
+      ],
+      [
+        "\"\n+ \"\"\n+ \"\";\nfor (var supId in meta_menu)\n{\ntext += \"\"\n+ \"",
+        "\";\nif ( true == isMetaMenuWithChild(supId) )\n{\nif ( supId == selectSupId  )\n{\ntext += \"-\";\n}\nelse\n{\ntext += \"+\";\n}\n}\nelse\n{\nif ( meta_menu[supId]['page'] == selectPage )\n{\ngetObj(\"title_path\").innerHTML = \"Path:\"\n+ meta_menu[supId]['langName'];\n}\n}\ntext += \"\"\n+ meta_menu[supId]['langName']\n+ \""
+      ],
+      [
+        "\"\n+ \"\"\n+ menu_items[supId][midId]['langName']\n+ \""
+      ],
+      [
+        "\"\n+ \"\"\n+ menu_items[supId][midId]['langName']\n+ \""
+      ],
+      [
+        "\"\n+ \"+\"\n+ \"\"\n+ menu_items[supId][midId]['langName']\n+ \""
+      ],
+      [
+        "\"\n+ \"-\"\n+ \"\"\n+ menu_items[supId][midId]['langName']\n+ \""
+      ],
+      [
+        "\"\n+ \"\"\n+ menu_subitems[supId][midId][subId]['langName']\n+ \""
+      ],
+      [
+        "\"\n+ \"\"\n+ menu_subitems[supId][midId][subId]['langName']\n+ \""
+      ],
+      [
+        "\"\n+ \"\"\n+ \"\"\n+ \"\"\n+ \"\"\n+ \"\"\n+ \"\"\n+ \"\"\n+ \""
+      ]
+    ]
+  },
+  "status_wlaninfo_t.gch": {
+    "status": 200,
+    "length": 686,
+    "id_vals": {},
+    "inputs": [
+      "<input type=\"hidden\" name=\"logout\" id=\"logout\" value=\"1\">",
+      "<input type=\"hidden\" name=\"logout_from\" id=\"logout_from\" value=\"login_timeout\">"
+    ],
+    "table_rows": []
+  },
+  "net_wlan_essid_t.gch": {
+    "status": 200,
+    "length": 686,
+    "id_vals": {},
+    "inputs": [
+      "<input type=\"hidden\" name=\"logout\" id=\"logout\" value=\"1\">",
+      "<input type=\"hidden\" name=\"logout_from\" id=\"logout_from\" value=\"login_timeout\">"
+    ],
+    "table_rows": []
+  },
+  "net_wlan_secrity_t.gch": {
+    "status": 200,
+    "length": 686,
+    "id_vals": {},
+    "inputs": [
+      "<input type=\"hidden\" name=\"logout\" id=\"logout\" value=\"1\">",
+      "<input type=\"hidden\" name=\"logout_from\" id=\"logout_from\" value=\"login_timeout\">"
+    ],
+    "table_rows": []
+  }
+}

@@ -1,0 +1,134 @@
+L806: .notewlan {
+L818: .notewlan1 {
+L3268: function checkEssid(value)
+L4095: <td onclick='hideHelp();' class="help_close">
+L4101: SSID name, hiding SSID, Enable, SSID priority, etc.
+L4132: <input name="help_info" type="button" onclick="showHelp('SSID name, hiding SSID, Enable, SSID priority, etc.', 'Help')" class="help_button" id="help_b
+L4173: <INPUT type='hidden' name=WLAN_SSID0 ID=WLAN_SSID0 value=''>
+L4174: <script language=javascript>Transfer_meaning('WLAN_SSID0','IGD\x2eLD1\x2eWLAN1');</script>
+L4175: <INPUT type='hidden' name=WLAN_SSID1 ID=WLAN_SSID1 value=''>
+L4176: <script language=javascript>Transfer_meaning('WLAN_SSID1','IGD\x2eLD1\x2eWLAN2');</script>
+L4177: <INPUT type='hidden' name=WLAN_SSID2 ID=WLAN_SSID2 value=''>
+L4178: <script language=javascript>Transfer_meaning('WLAN_SSID2','IGD\x2eLD1\x2eWLAN3');</script>
+L4179: <INPUT type='hidden' name=WLAN_SSID3 ID=WLAN_SSID3 value=''>
+L4180: <script language=javascript>Transfer_meaning('WLAN_SSID3','IGD\x2eLD1\x2eWLAN4');</script>
+L4181: <INPUT type='hidden' name=WLAN_INSTNUM ID=WLAN_INSTNUM value=''>
+L4182: <script language=javascript>Transfer_meaning('WLAN_INSTNUM','4');</script>
+L4183: <INPUT type='hidden' name=IF_SSIDATTR ID=IF_SSIDATTR value=''>
+L4184: <script language=javascript>Transfer_meaning('IF_SSIDATTR','2');</script>
+L4188: <script language=javascript>Transfer_meaning('IF_VIEWID','IGD\x2eLD1\x2eWLAN1');</script>
+L4211: <INPUT type='hidden' name=ESSID   ID=ESSID value=''>
+L4212: <script language=javascript>Transfer_meaning('ESSID','');</script>
+L4213: <INPUT type='hidden' name=ESSIDPrefix   ID=ESSIDPrefix value=''>
+L4214: <script language=javascript>Transfer_meaning('ESSIDPrefix','');</script>
+L4251: <INPUT type='hidden' name=ESSIDHideEnable   ID=ESSIDHideEnable value=''>
+L4252: <script language=javascript>Transfer_meaning('ESSIDHideEnable','');</script>
+L4255: <INPUT type='hidden' name=WlanMode   ID=WlanMode value=''>
+L4256: <script language=javascript>Transfer_meaning('WlanMode','');</script>
+L4259: <INPUT type='hidden' name=PeerBSSID   ID=PeerBSSID value=''>
+L4260: <script language=javascript>Transfer_meaning('PeerBSSID','');</script>
+L4279: <INPUT type='hidden' name=SSIDIsolationEnable   ID=SSIDIsolationEnable value=''>
+L4280: <script language=javascript>Transfer_meaning('SSIDIsolationEnable','');</script>
+L4331: <script language=javascript>Transfer_meaning('ESSID','Punkbayz');</script>
+L4332: <script language=javascript>Transfer_meaning('ESSIDPrefix','');</script>
+L4351: <script language=javascript>Transfer_meaning('ESSIDHideEnable','0');</script>
+L4353: <script language=javascript>Transfer_meaning('WlanMode','InfrastructureAccessPoint');</script>
+L4355: <script language=javascript>Transfer_meaning('PeerBSSID','00\x3a00\x3a00\x3a00\x3a00\x3a00');</script>
+L4365: <script language=javascript>Transfer_meaning('SSIDIsolationEnable','0');</script>
+L4395: <INPUT type='hidden' name=Bssid   ID=Bssid value=''>
+L4396: <script language=javascript>Transfer_meaning('Bssid','');</script>
+L4439: <script language=javascript>Transfer_meaning('Name','wlan0');</script>
+L4443: <script language=javascript>Transfer_meaning('Bssid','8C\x3a8F\x3a8B\x3a55\x3aB9\x3a7D');</script>
+L4484: "ESSID",
+L4485: "ESSIDPrefix",
+L4504: "ESSIDHideEnable",
+L4506: "WlanMode",
+L4508: "PeerBSSID",
+L4518: "SSIDIsolationEnable",
+L4523: var gp_ssidPre = "";
+L4530: str[3]   = new Array(113, " is error, please input legal SSID Name.");
+L4544: jslEnable("Frm_SSID_SET","Frm_ESSIDHideEnable","Frm_Enable","Frm_ESSID",
+L4547: ESSID_Enable();
+L4552: jslDisable("Frm_SSID_SET","Frm_ESSIDHideEnable","Frm_Enable","Frm_ESSID",
+L4557: function ESSID_Enable()
+L4561: jslDisable("Frm_ESSIDHideEnable","Frm_ESSID","Frm_Priority",
+L4566: jslEnable("Frm_ESSIDHideEnable","Frm_ESSID","Frm_Priority",
+L4568: SSIDAttrInfo();
+L4600: function ESSIDCheck()
+L4609: check = checkEssid(getValue("ESSIDPrefix")+getValue("Frm_ESSID"));
+L4613: ShowErrorForCom("Frm_ESSID","Fnt_ESSID",msg);
+L4619: ShowErrorForCom("Frm_ESSID","Fnt_ESSID",msg);
+L4625: ShowErrorForCom("Frm_ESSID","Fnt_ESSID",msg);
+L4636: if (ESSIDCheck() == false)
+L4642: function ESSID_Choose()
+L4644: setValue("IF_VIEWID", getValue("Frm_SSID_SET"));
+L4657: function SSIDAttrInfo()
+L4659: var attr = getValue("IF_SSIDATTR");
+L4662: jslDisable("Frm_ESSID");
+L4666: jslEnable("Frm_ESSID");
+L4683: jslSetValue("Frm_SSID_SET","IF_VIEWID");
+L4684: if(getValue("ESSIDHideEnable") == "1")
+L4686: setChecked("Frm_ESSIDHideEnable", true);
+L4690: setChecked("Frm_ESSIDHideEnable", false);
+L4709: gp_ssidPre = getValue("ESSIDPrefix");
+L4710: getObj("ssid_header").innerHTML = gp_ssidPre;
+L4711: var tmplen    = getValue("ESSIDPrefix").length;
+L4712: var tmpvalue  = getValue("ESSID");
+L4716: getObj("Frm_ESSID").maxLength = 32 - tmplen;
+L4717: setValue("Frm_ESSID", tmpvalue.substring(tmplen, 32));
+L4722: getObj("Frm_ESSID").maxLength = 32;
+L4723: jslSetValue("Frm_ESSID","ESSID");
+L4726: rangehtml += " ~ " + getObj("Frm_ESSID").maxLength + " Char)";
+L4727: getObj("Frm_SSIDRANGE").innerHTML = rangehtml;
+L4744: setValue("ESSID", gp_ssidPre+getValue("Frm_ESSID"));
+L4745: if(getChecked("Frm_ESSIDHideEnable") == true)
+L4747: setValue("ESSIDHideEnable", "1");
+L4751: setValue("ESSIDHideEnable", "0");
+L4779: setValue("IF_VIEWID", getValue("Frm_SSID_SET"));
+L4807: <td class="td1">Choose SSID</td>
+L4809: <select name="" size="1" tabIndex="1"  class="list_1" id="Frm_SSID_SET" onchange="ESSID_Choose()"/>
+L4811: <option value ="IGD.LD1.WLAN1" id="Frm_SSID_SET0">SSID1</option>
+L4813: <option value ="IGD.LD1.WLAN2" id="Frm_SSID_SET1">SSID2</option>
+L4815: <option value ="IGD.LD1.WLAN3" id="Frm_SSID_SET2">SSID3</option>
+L4817: <option value ="IGD.LD1.WLAN4" id="Frm_SSID_SET3">SSID4</option>
+L4822: <td class="td1">Broadcast Disable </td>
+L4823: <td class="td2"><input name="" type="checkbox" value=""  id="Frm_ESSIDHideEnable"/></td>
+L4825: <tr id="ssidenable">
+L4826: <td class="td1">SSIDEnable</td>
+L4827: <td class="td2"><input name="" type="checkbox" value="" checked="checked" id="Frm_Enable"  onclick="ESSID_Enable()"/></td>
+L4830: <td class="td1">Enable SSID Isolation</td>
+L4838: <td class="td1"><font id="Fnt_ESSID">SSID Name</font></td>
+L4839: <td class="td2"><span id="ssid_header"></span><input name="" type="text" class="inputId8"  value="" size="20"  id="Frm_ESSID"/> <span id="Frm_SSIDRANG
+L4858: var wlanportnum = 4;
+L4859: var instNum = getValue("WLAN_INSTNUM");
+L4860: var instFlag = new Array(wlanportnum);
+L4861: for (var i=0; i<wlanportnum; i++)
+L4868: var viewName = getValue("WLAN_SSID"+i);
+L4881: var ssidObj = getObj("Frm_SSID_SET");
+L4882: for (var i=0; i<parseInt(wlanportnum); i++)
+L4887: var ssidOptObj = getObj("Frm_SSID_SET"+i);
+L4888: ssidObj.removeChild(ssidOptObj);
+L4996: function hideHelp()
+L5247: menu_subitems['mmStatus']['smLanStatu']['Menu3_SL_WLANinfo'] = new Array();
+L5248: menu_subitems['mmStatus']['smLanStatu']['Menu3_SL_WLANinfo']['langName'] = 'WLAN Radio2.4G';
+L5249: menu_subitems['mmStatus']['smLanStatu']['Menu3_SL_WLANinfo']['page'] = 'status_wlaninfo_t.gch';
+L5250: menu_subitems['mmStatus']['smLanStatu']['Menu3_SL_WLANinfo']['URL'] = 'getpage.gch?pid=1002&nextpage=status_wlaninfo_t.gch';
+L5358: menu_items['mmNet']['smWLAN'] = new Array();
+L5359: menu_items['mmNet']['smWLAN']['langName'] = 'WLAN Radio2.4G';
+L5360: menu_subitems['mmNet']['smWLAN'] = new Array();
+L5361: menu_items['mmNet']['smWLAN']['page'] = 'net_11n_conf_t.gch';
+L5362: menu_items['mmNet']['smWLAN']['URL'] =                             'getpage.gch?pid=1002&nextpage=net_11n_conf_t.gch';
+L5363: menu_subitems['mmNet']['smWLAN']['ssmWLANBasic'] = new Array();
+L5364: menu_subitems['mmNet']['smWLAN']['ssmWLANBasic']['langName'] = 'Basic';
+L5365: menu_subitems['mmNet']['smWLAN']['ssmWLANBasic']['page'] = 'net_11n_conf_t.gch';
+L5366: menu_subitems['mmNet']['smWLAN']['ssmWLANBasic']['URL'] = 'getpage.gch?pid=1002&nextpage=net_11n_conf_t.gch';
+L5367: menu_subitems['mmNet']['smWLAN']['ssmWLANMul'] = new Array();
+L5368: menu_subitems['mmNet']['smWLAN']['ssmWLANMul']['langName'] = 'SSID Settings';
+L5369: menu_subitems['mmNet']['smWLAN']['ssmWLANMul']['page'] = 'net_wlan_essid_t.gch';
+L5370: menu_subitems['mmNet']['smWLAN']['ssmWLANMul']['URL'] = 'getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch';
+L5371: menu_subitems['mmNet']['smWLAN']['ssmWLANSec'] = new Array();
+L5372: menu_subitems['mmNet']['smWLAN']['ssmWLANSec']['langName'] = 'Security';
+L5373: menu_subitems['mmNet']['smWLAN']['ssmWLANSec']['page'] = 'net_wlan_secrity_t.gch';
+L5374: menu_subitems['mmNet']['smWLAN']['ssmWLANSec']['URL'] = 'getpage.gch?pid=1002&nextpage=net_wlan_secrity_t.gch';
+L5792: var selectPage  = "net_wlan_essid_t.gch";
+L6072: pageLoad(getURL("net_wlan_essid_t.gch"));

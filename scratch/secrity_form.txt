@@ -1,0 +1,7 @@
+<form name="flogout" id="flogout" method="post"  onsubmit="return false;" action="/" target="_top">
+<input type="hidden" name="logout" id="logout" value="" >
+</form>
+<form name="fLangSet" id="fLangSet" method="post"  onsubmit="return false;" action="/">
+<input type="hidden" name="_lang" id="_lang" value="">
+<input type="hidden" name="action" id="action" value="">
+</form>
