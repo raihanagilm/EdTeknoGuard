@@ -2,6 +2,36 @@
 // untuk mencegah RangeError (Maximum call stack size exceeded akibat Proxy wrapper Alpine)
 let redamanChart = null;
 
+// Transformasi Non-linear Sumbu Y (Piecewise Stretched Scale)
+// Rentang normal dari 0 s/d -32 dBm, dengan rentang -25.0 s/d -27.0 dBm dibuat lebar/renggang
+const TICK_DBM_LIST = [0, 5, 10, 15, 20, 24, 25.0, 25.5, 26.0, 26.5, 27.0, 28.0, 30.0, 32.0];
+
+function transformDbm(val) {
+    if (val === null || val === undefined || isNaN(val)) return null;
+    const v = Math.abs(Number(val));
+    if (v <= 25.0) {
+        // 0 s/d 25 dBm menempati 0 s/d 30 unit (normal)
+        return (v / 25.0) * 30.0;
+    } else if (v <= 27.0) {
+        // 25 s/d 27 dBm menempati 30 s/d 75 unit (45% tinggi grafik - SANGAT LEBAR & RENGGANG)
+        return 30.0 + ((v - 25.0) / 2.0) * 45.0;
+    } else {
+        // 27 s/d 32 dBm menempati 75 s/d 100 unit
+        const clamped = Math.min(v, 32.0);
+        return 75.0 + ((clamped - 27.0) / 5.0) * 25.0;
+    }
+}
+
+function inverseTransformDbm(u) {
+    if (u <= 30.0) {
+        return (u / 30.0) * 25.0;
+    } else if (u <= 75.0) {
+        return 25.0 + ((u - 30.0) / 45.0) * 2.0;
+    } else {
+        return 27.0 + ((u - 75.0) / 25.0) * 5.0;
+    }
+}
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('dashboardApp', () => ({
         // State Engine & Kontrol
@@ -31,6 +61,7 @@ document.addEventListener('alpine:init', () => {
         todayDate: new Date().toISOString().split('T')[0],
         minDate: document.getElementById('dashboard-container')?.dataset?.minDate || '2026-09-01',
         chartCounts: [],
+        rawChartValues: [],
         chartStats: {
             avg_dbm: null,
             min_dbm: null,
@@ -226,18 +257,31 @@ document.addEventListener('alpine:init', () => {
                     },
                     scales: {
                         y: {
-                            // Orientasi NOC: angka kecil (-25 dBm) di bawah, angka drop/kritis (-28 dBm) di atas
-                            reverse: true,
-                            min: -28.0,
-                            max: -25.0,
+                            min: 0,
+                            max: 100,
+                            afterBuildTicks: (axis) => {
+                                axis.ticks = TICK_DBM_LIST.map(val => ({
+                                    value: transformDbm(val)
+                                }));
+                            },
                             ticks: {
-                                stepSize: 0.5,
-                                callback: val => Number(val).toFixed(1) + ' dBm',
+                                callback: val => {
+                                    const dbm = inverseTransformDbm(val);
+                                    if (Math.abs(dbm) < 0.05) return '0 dBm';
+                                    const isRound = Math.abs(dbm - Math.round(dbm)) < 0.05;
+                                    return `-${dbm.toFixed(isRound ? 0 : 1)} dBm`;
+                                },
                                 color: '#64748B',
-                                font: { size: 11, family: 'Plus Jakarta Sans', weight: '600' }
+                                font: { size: 10.5, family: 'Plus Jakarta Sans', weight: '600' }
                             },
                             grid: {
-                                color: '#F1F5F9'
+                                color: (ctx) => {
+                                    if (!ctx.tick) return '#F1F5F9';
+                                    const dbm = inverseTransformDbm(ctx.tick.value);
+                                    if (Math.abs(dbm - 26.0) < 0.05) return 'rgba(245, 158, 11, 0.35)';
+                                    if (Math.abs(dbm - 27.0) < 0.05) return 'rgba(239, 68, 68, 0.35)';
+                                    return '#F1F5F9';
+                                }
                             }
                         },
                         x: {
@@ -271,8 +315,11 @@ document.addEventListener('alpine:init', () => {
                                 label: ctx => {
                                     const idx = ctx.dataIndex;
                                     const count = (self.chartCounts && self.chartCounts[idx]) ? self.chartCounts[idx] : 1;
-                                    const val = ctx.parsed.y;
-                                    const valStr = (val !== null && !isNaN(val)) ? `${val.toFixed(2)} dBm` : '-';
+                                    const rawVal = (self.rawChartValues && self.rawChartValues[idx] !== undefined) ? self.rawChartValues[idx] : null;
+                                    let valStr = '-';
+                                    if (rawVal !== null && rawVal !== undefined && !isNaN(rawVal)) {
+                                        valStr = `${Number(rawVal).toFixed(2)} dBm`;
+                                    }
                                     return [
                                         `Jumlah Pelanggan: ${count} Pelanggan`,
                                         `Rata-rata Redaman: ${valStr}`
@@ -320,46 +367,38 @@ document.addEventListener('alpine:init', () => {
                     const rawLabels = json.labels || [];
                     const rawValues = json.values || [];
 
-                    // Simpan counts untuk tooltip
+                    // Simpan data mentah & counts untuk tooltip
+                    this.rawChartValues = rawValues;
                     this.chartCounts = json.counts || [];
+
+                    // Transformasi data redaman ke skala non-linear
+                    const transformedValues = rawValues.map(v => (v !== null && !isNaN(v) && typeof v === 'number') ? transformDbm(v) : null);
 
                     // 1. Update Labels & Dataset Redaman
                     redamanChart.data.labels = rawLabels;
-                    redamanChart.data.datasets[0].data = rawValues;
+                    redamanChart.data.datasets[0].data = transformedValues;
 
                     // 2. Garis Ambang Batas Warning & Kritis
                     const count = rawLabels.length;
                     const warnThreshold = json.threshold !== undefined ? json.threshold : -26.0;
                     const critThreshold = json.critical_threshold !== undefined ? json.critical_threshold : -27.0;
 
+                    const warnVal = transformDbm(Math.abs(warnThreshold));
+                    const critVal = transformDbm(Math.abs(critThreshold));
+
                     if (count > 0) {
                         redamanChart.data.datasets[1].label = `Garis Warning (${Number(warnThreshold).toFixed(1)} dBm)`;
-                        redamanChart.data.datasets[1].data = new Array(count).fill(warnThreshold);
+                        redamanChart.data.datasets[1].data = new Array(count).fill(warnVal);
                         redamanChart.data.datasets[2].label = `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`;
-                        redamanChart.data.datasets[2].data = new Array(count).fill(critThreshold);
+                        redamanChart.data.datasets[2].data = new Array(count).fill(critVal);
                     } else {
                         redamanChart.data.datasets[1].data = [];
                         redamanChart.data.datasets[2].data = [];
                     }
 
-                    // 3. Atur Rentang Sumbu Y secara presisi & lebar (step 0.5 dBm: -25.5, -26.0, -26.5, -27.0, dst.)
-                    const validData = rawValues.filter(v => v !== null && !isNaN(v) && typeof v === 'number');
-                    let targetMin = -28.0; // Paling drop/kritis
-                    let targetMax = -25.0; // Paling optimal/bagus
-
-                    if (validData.length > 0) {
-                        const dataMin = Math.min(...validData);
-                        const dataMax = Math.max(...validData);
-                        if (dataMin < targetMin) {
-                            targetMin = Math.floor(dataMin * 2) / 2;
-                        }
-                        if (dataMax > targetMax) {
-                            targetMax = Math.ceil(dataMax * 2) / 2;
-                        }
-                    }
-
-                    redamanChart.options.scales.y.min = targetMin;
-                    redamanChart.options.scales.y.max = targetMax;
+                    // 3. Rentang Sumbu Y tetap 0 - 100 (mewakili 0 s/d 32 dBm dengan rentang 25-27 dBm sangat lebar)
+                    redamanChart.options.scales.y.min = 0;
+                    redamanChart.options.scales.y.max = 100;
 
                     // 4. Update metadata statistik grafik di chip
                     this.chartStats = {

@@ -7,6 +7,7 @@ secara live dari perangkat modem ONT.
 import html
 import logging
 import re
+import subprocess
 import time
 from typing import Dict, Any, Optional, Tuple, List
 import requests
@@ -178,6 +179,70 @@ class ONTScraperService:
             results["pon_sn"] = None
 
         return results
+
+    @staticmethod
+    def get_mac_from_arp(ip: str) -> Optional[str]:
+        """Membaca cache ARP OS untuk IP tertentu sebagai auto-deteksi MAC."""
+        try:
+            out = subprocess.check_output(["arp", "-a", ip], text=True, timeout=1.5, stderr=subprocess.DEVNULL)
+            m = re.search(r'([0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2})', out)
+            if m:
+                return m.group(1).replace("-", ":").upper()
+        except Exception:
+            pass
+        return None
+
+    @classmethod
+    def extract_device_and_wifi_data(cls, session: requests.Session, base_url: str, host: str) -> Dict[str, Optional[str]]:
+        """Mengekstrak MAC Address, SSID WiFi, dan Password WiFi dari Web GUI ONT."""
+        headers = {
+            "Host": host,
+            "Referer": f"{base_url}/template.gch",
+            "Connection": "close",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+        res = {"mac_address": None, "nama_wifi": None, "password_wifi": None}
+        
+        # 1. MAC Address dari Status Device Info
+        try:
+            r_dev = session.get(f"{base_url}{STATUS_DEV_PATH}", headers=headers, timeout=8)
+            if r_dev.status_code == 200:
+                m_mac = re.search(r'id=["\'](?:Frm_MACAddress|Frm_PonMac|Frm_EthMac)["\'][^>]*>(.*?)</td>', r_dev.text, re.I)
+                if not m_mac:
+                    m_mac = re.search(r'MAC\s*Address[^<]*</td>\s*<td[^>]*>\s*([0-9a-fA-F:]{17}|[0-9a-fA-F-]{17})', r_dev.text, re.I)
+                if m_mac:
+                    res["mac_address"] = m_mac.group(1).replace("-", ":").upper().strip()
+        except Exception:
+            pass
+
+        # Fallback ARP jika web belum mengembalikan MAC
+        if not res["mac_address"]:
+            res["mac_address"] = cls.get_mac_from_arp(host)
+
+        # 2. SSID & Password WiFi dari Web GUI WLAN GM220-S
+        for wlan_path in ["/getpage.gch?pid=1002&nextpage=net_wlan_security_t.gch", "/getpage.gch?pid=1002&nextpage=net_wlan_basic_t.gch"]:
+            try:
+                r_wlan = session.get(f"{base_url}{wlan_path}", headers=headers, timeout=8)
+                if r_wlan.status_code == 200:
+                    # Cari SSID
+                    if not res["nama_wifi"]:
+                        m_ssid = re.search(r'id=["\']Frm_Essid["\'][^>]*value=["\']([^"\']+)["\']', r_wlan.text, re.I)
+                        if not m_ssid:
+                            m_ssid = re.search(r'var\s+Essid\s*=\s*["\']([^"\']+)["\']', r_wlan.text, re.I)
+                        if m_ssid:
+                            res["nama_wifi"] = m_ssid.group(1).strip()
+
+                    # Cari Password WiFi (WPA PreSharedKey)
+                    if not res["password_wifi"]:
+                        m_pwd = re.search(r'id=["\'](?:Frm_KeyPassphrase|Frm_Passphrase|Frm_Key1Str)["\'][^>]*value=["\']([^"\']+)["\']', r_wlan.text, re.I)
+                        if not m_pwd:
+                            m_pwd = re.search(r'var\s+(?:WpaPsk|Key1Str)\s*=\s*["\']([^"\']+)["\']', r_wlan.text, re.I)
+                        if m_pwd:
+                            res["password_wifi"] = m_pwd.group(1).strip()
+            except Exception:
+                pass
+
+        return res
 
     @classmethod
     def scrape_ont(
@@ -368,7 +433,10 @@ class ONTScraperService:
         else:
             status_koneksi = "NORMAL"
 
-        print(f"[+] [SUCCESS] ONT {host} ({customer_name}): Rx {rx} dBm | Tx {opt_data.get('tx_power')} dBm | Suhu {suhu}°C | Status: {status_koneksi} | Auth: {active_user} ({auth_source})")
+        # Ambil MAC Address & Detail WiFi ONT secara live
+        device_wifi = cls.extract_device_and_wifi_data(session, base_url, host)
+
+        print(f"[+] [SUCCESS] ONT {host} ({customer_name}): Rx {rx} dBm | Tx {opt_data.get('tx_power')} dBm | Suhu {suhu}°C | MAC: {device_wifi.get('mac_address')} | Status: {status_koneksi} | Auth: {active_user} ({auth_source})")
 
         return {
             "success": True,
@@ -383,6 +451,9 @@ class ONTScraperService:
             "bias_current_ma": opt_data.get("bias_current_ma"),
             "gpon_state": opt_data.get("gpon_state"),
             "pon_sn": opt_data.get("pon_sn"),
+            "mac_address": device_wifi.get("mac_address"),
+            "nama_wifi": device_wifi.get("nama_wifi"),
+            "password_wifi": device_wifi.get("password_wifi"),
             "uptime": 86400,
             "latency_ms": latency,
             "message": "Pengecekan live optik berhasil"

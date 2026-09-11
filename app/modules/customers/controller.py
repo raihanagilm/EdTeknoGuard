@@ -68,8 +68,11 @@ class CustomerController:
                 "jenis_modem": cust.jenis_modem,
                 "mac_address": cust.mac_address,
                 "redaman_baseline": float(cust.redaman_baseline) if cust.redaman_baseline else None,
-                "nama_wifi": cust.nama_wifi,
-                "user_admin": cust.user_admin,
+                "nama_wifi": cust.nama_wifi or "-",
+                "password_wifi": cust.password_wifi or "-",
+                "user_admin": cust.user_admin or "-",
+                "pass_admin": cust.pass_admin or "-",
+                "status_kredensial": getattr(cust, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "snmp_community": cust.snmp_community
             },
             "recent_logs": [

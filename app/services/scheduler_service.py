@@ -1,13 +1,13 @@
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
 from app.core.config import settings
-from app.db.models import Pelanggan, LogPerformaONT, SystemSetting
+from app.db.models import Pelanggan, LogPerformaONT, SystemSetting, AlertLog
 from app.services.snmp_service import SNMPService
 from app.services.ont_scraper_service import ONTScraperService
 from app.services.telegram_service import TelegramService
@@ -25,6 +25,22 @@ class MonitoringScheduler:
             cls._instance = super(MonitoringScheduler, cls).__new__(cls)
             cls._instance._scheduler = BackgroundScheduler(daemon=True)
         return cls._instance
+
+    @classmethod
+    def cleanup_old_logs(cls, db: Session, days: int = 30) -> int:
+        """Menghapus riwayat log performa ONT dan alert logs yang berusia lebih dari 30 hari (1 bulan)."""
+        try:
+            cutoff = datetime.utcnow() - timedelta(days=days)
+            deleted_logs = db.query(LogPerformaONT).filter(LogPerformaONT.waktu_cek < cutoff).delete(synchronize_session=False)
+            deleted_alerts = db.query(AlertLog).filter(AlertLog.waktu_kirim < cutoff).delete(synchronize_session=False)
+            db.commit()
+            if deleted_logs > 0 or deleted_alerts > 0:
+                logger.info(f"[CLEANUP] Berhasil membersihkan {deleted_logs} log performa dan {deleted_alerts} log alert lama (> {days} hari).")
+            return deleted_logs
+        except Exception as e:
+            logger.error(f"[CLEANUP] Gagal membersihkan log lama: {e}")
+            db.rollback()
+            return 0
 
     @classmethod
     def get_setting_from_db(cls, db: Session, key: str, default: str) -> str:
@@ -47,6 +63,8 @@ class MonitoringScheduler:
                 interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
                 interval = int(interval_str)
                 current_status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
+                # Pembersihan log lama > 30 hari otomatis saat startup
+                self.cleanup_old_logs(db, days=30)
             except Exception:
                 interval = settings.POLLING_INTERVAL_MINUTES
                 current_status = "RUNNING"
@@ -199,6 +217,14 @@ class MonitoringScheduler:
                     res = scrape_res
                     ket = f"Error: {scrape_res.get('message', 'Gagal')}"
 
+                # Auto-deteksi: Simpan MAC Address & Kredensial WiFi jika berhasil terbaca
+                if res.get("mac_address"):
+                    cust.mac_address = res["mac_address"]
+                if res.get("nama_wifi"):
+                    cust.nama_wifi = res["nama_wifi"]
+                if res.get("password_wifi"):
+                    cust.password_wifi = res["password_wifi"]
+
                 log_entry = LogPerformaONT(
                     id_pelanggan=cust.id_pelanggan,
                     waktu_cek=now,
@@ -251,6 +277,8 @@ class MonitoringScheduler:
                     )
 
             self.set_setting_in_db(db, "last_scan_time", now.strftime("%Y-%m-%d %H:%M:%S"))
+            # Pembersihan log > 30 hari berkala
+            self.cleanup_old_logs(db, days=30)
             db.commit()
 
             # Deteksi apakah server terputus dari jaringan lokal ISP / VLAN ONT
@@ -331,12 +359,22 @@ class MonitoringScheduler:
             elif settings.SNMP_SIMULATION_MODE and scrape_res.get("error_type") == "UNREACHABLE":
                 res = SNMPService.query_ont_simulated(
                     baseline_rx=float(cust.redaman_baseline) if cust.redaman_baseline else None,
-                    modem_type=cust.jenis_modem
+                    modem_type=cust.jenis_modem,
+                    ip=cust.ip_router,
+                    customer_name=cust.nama
                 )
                 ket = "Simulasi Manual Check"
             else:
                 res = scrape_res
                 ket = f"Single Check Error: {scrape_res.get('message', 'Unreachable')}"
+
+            # Auto-deteksi: Update MAC Address & Kredensial WiFi jika terdeteksi
+            if res.get("mac_address"):
+                cust.mac_address = res["mac_address"]
+            if res.get("nama_wifi"):
+                cust.nama_wifi = res["nama_wifi"]
+            if res.get("password_wifi"):
+                cust.password_wifi = res["password_wifi"]
 
             now = datetime.now()
             log_entry = LogPerformaONT(
@@ -361,6 +399,9 @@ class MonitoringScheduler:
                 "uptime": res.get("uptime"),
                 "status_koneksi": res.get("status_koneksi") or "LOS",
                 "status_kredensial": cust.status_kredensial,
+                "mac_address": cust.mac_address,
+                "nama_wifi": cust.nama_wifi,
+                "password_wifi": cust.password_wifi,
                 "latency_ms": res.get("latency_ms"),
                 "keterangan": ket,
                 "waktu_cek": now.strftime("%Y-%m-%d %H:%M:%S")

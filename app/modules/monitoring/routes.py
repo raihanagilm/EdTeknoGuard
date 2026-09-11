@@ -39,6 +39,10 @@ def check_single_alias(id_pelanggan: str):
             "rx_power": res.get("rx_power"),
             "suhu_ont": res.get("suhu_ont"),
             "status": res.get("status_koneksi"),
+            "mac_address": res.get("mac_address"),
+            "nama_wifi": res.get("nama_wifi"),
+            "password_wifi": res.get("password_wifi"),
+            "status_kredensial": res.get("status_kredensial"),
             "latency_ms": res.get("latency_ms"),
             "waktu_cek": res.get("waktu_cek")
         }

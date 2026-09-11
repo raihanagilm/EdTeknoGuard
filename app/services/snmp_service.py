@@ -73,7 +73,13 @@ class SNMPService:
             return None
 
     @classmethod
-    def query_ont_simulated(cls, baseline_rx: Optional[float], modem_type: str) -> Dict[str, Any]:
+    def query_ont_simulated(
+        cls,
+        baseline_rx: Optional[float],
+        modem_type: str,
+        ip: Optional[str] = None,
+        customer_name: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Mode simulasi realistis untuk pengujian di luar jaringan VPN ISP"""
         # 3% chance LOS (simulasi modem mati/kabel putus)
         if random.random() < 0.03:
@@ -99,19 +105,34 @@ class SNMPService:
         uptime = random.randint(3600, 1200000)
         latency = random.randint(3, 25)
 
+        # Generate MAC Address OUI ZTE realistis
+        if ip:
+            octets = [int(o) for o in ip.split('.') if o.isdigit()]
+            hex_tail = ":".join(f"{b:02X}" for b in octets[-3:]) if len(octets) >= 3 else "0A:0B:0C"
+            sim_mac = f"48:D2:42:{hex_tail}"
+        else:
+            sim_mac = f"48:D2:42:{random.randint(10,99):02X}:{random.randint(10,99):02X}:{random.randint(10,99):02X}"
+
+        clean_name = "".join(filter(str.isalnum, customer_name or "Home"))[:10]
+        sim_ssid = f"EdTekno_{clean_name}"
+        sim_pass = f"wifi{clean_name.lower()}123"
+
         return {
             "rx_power": rx,
             "suhu_ont": suhu,
             "uptime": uptime,
             "latency_ms": latency,
-            "status_koneksi": status
+            "status_koneksi": status,
+            "mac_address": sim_mac,
+            "nama_wifi": sim_ssid,
+            "password_wifi": sim_pass
         }
 
     @classmethod
     def query_ont(cls, ip: str, community: str, modem_type: str, baseline_rx: Optional[float] = None) -> Dict[str, Any]:
         """Entry point terpadu query ONT (otomatis switch simulasi vs live)"""
         if settings.SNMP_SIMULATION_MODE:
-            return cls.query_ont_simulated(baseline_rx, modem_type)
+            return cls.query_ont_simulated(baseline_rx, modem_type, ip=ip)
         else:
             live_result = cls.query_ont_live(ip, community, modem_type)
             if live_result is None:

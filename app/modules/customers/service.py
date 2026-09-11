@@ -97,6 +97,7 @@ class CustomerService:
                 "status": current_status,
                 "last_check": last_check,
                 "nama_wifi": c.nama_wifi or "-",
+                "password_wifi": c.password_wifi or "-",
                 "user_admin": c.user_admin or "-",
                 "pass_admin": c.pass_admin or "-",
                 "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED"
