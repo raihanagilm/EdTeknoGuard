@@ -3,22 +3,22 @@
 let redamanChart = null;
 
 // Transformasi Non-linear Sumbu Y (Piecewise Stretched Scale)
-// Rentang normal dari 0 s/d -32 dBm, dengan rentang -25.0 s/d -27.0 dBm dibuat lebar/renggang
-const TICK_DBM_LIST = [0, 5, 10, 15, 20, 24, 25.0, 25.5, 26.0, 26.5, 27.0, 28.0, 30.0, 32.0];
+// Rentang 0 s/d 25 step 5 (-5, -10, -15, -20, -25.0), rentang kritis 25.0 s/d 27.0 step 0.5 sangat lebar, lalu 30.0 - 35.0
+const TICK_DBM_LIST = [0, 5, 10, 15, 20, 25.0, 25.5, 26.0, 26.5, 27.0, 30.0, 35.0];
 
 function transformDbm(val) {
     if (val === null || val === undefined || isNaN(val)) return null;
     const v = Math.abs(Number(val));
     if (v <= 25.0) {
-        // 0 s/d 25 dBm menempati 0 s/d 30 unit (normal)
+        // 0 s/d 25 dBm menempati 0 s/d 30 unit (step 5 dBm = 6 unit konsisten)
         return (v / 25.0) * 30.0;
     } else if (v <= 27.0) {
-        // 25 s/d 27 dBm menempati 30 s/d 75 unit (45% tinggi grafik - SANGAT LEBAR & RENGGANG)
+        // 25.0 s/d 27.0 dBm menempati 30 s/d 75 unit (45% tinggi grafik - SANGAT LEBAR & RENGGANG)
         return 30.0 + ((v - 25.0) / 2.0) * 45.0;
     } else {
-        // 27 s/d 32 dBm menempati 75 s/d 100 unit
-        const clamped = Math.min(v, 32.0);
-        return 75.0 + ((clamped - 27.0) / 5.0) * 25.0;
+        // 27.0 s/d 35.0 dBm menempati 75 s/d 100 unit
+        const clamped = Math.min(v, 35.0);
+        return 75.0 + ((clamped - 27.0) / 8.0) * 25.0;
     }
 }
 
@@ -28,7 +28,7 @@ function inverseTransformDbm(u) {
     } else if (u <= 75.0) {
         return 25.0 + ((u - 30.0) / 45.0) * 2.0;
     } else {
-        return 27.0 + ((u - 75.0) / 25.0) * 5.0;
+        return 27.0 + ((u - 75.0) / 25.0) * 8.0;
     }
 }
 
@@ -268,8 +268,10 @@ document.addEventListener('alpine:init', () => {
                                 callback: val => {
                                     const dbm = inverseTransformDbm(val);
                                     if (Math.abs(dbm) < 0.05) return '0 dBm';
-                                    const isRound = Math.abs(dbm - Math.round(dbm)) < 0.05;
-                                    return `-${dbm.toFixed(isRound ? 0 : 1)} dBm`;
+                                    if (dbm >= 24.9) {
+                                        return `-${dbm.toFixed(1)} dBm`;
+                                    }
+                                    return `-${Math.round(dbm)} dBm`;
                                 },
                                 color: '#64748B',
                                 font: { size: 10.5, family: 'Plus Jakarta Sans', weight: '600' }
