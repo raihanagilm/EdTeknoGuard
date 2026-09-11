@@ -1,15 +1,15 @@
 """
 test.py - Script Diagnostik & Pengecekan Lengkap Modem ONT ZTE GM220-S & XPON
-Menguji:
-1. Autentikasi Login Admin ONT (Multi-Kredensial)
-2. Redaman Optik (Rx Power dBm, Tx, Suhu, Status GPON, Alarm LOS)
-3. Deteksi MAC Address Perangkat (Web GUI & Cache ARP)
-4. Deteksi SSID / Nama WiFi Pelanggan
-5. Deteksi Password WiFi Pelanggan (WPA Key / PreSharedKey)
+Menguji pembacaan asli dari modem fisik:
+1. Autentikasi Login Admin ONT
+2. MAC Address Asli Perangkat ONT
+3. Nama / SSID WiFi Asli Pelanggan
+4. Password WiFi Asli Pelanggan
+5. Nilai Redaman Optik Rx Power (dBm), Tx Power, Bias Current, dan Alarm LOS
 
 Penggunaan:
-  python test.py                (Default IP: 10.10.12.13)
-  python test.py 10.10.0.142    (Uji ke IP spesifik)
+  python test.py                (Default IP: 10.10.0.142)
+  python test.py 10.10.12.18    (Uji ke IP modem lain)
 """
 
 import html
@@ -21,8 +21,8 @@ import time
 from typing import Dict, Any, Optional
 import requests
 
-# Penentuan Target Host (Bisa diisi argumen CLI atau default)
-TARGET_HOST = "10.10.12.13"
+# Penentuan Target Host (Bisa melalui argumen CLI atau default)
+TARGET_HOST = "10.10.0.142"
 if len(sys.argv) > 1 and sys.argv[1].replace(".", "").isdigit():
     TARGET_HOST = sys.argv[1].strip()
 
@@ -30,29 +30,22 @@ BASE_URL = f"http://{TARGET_HOST}"
 
 # Daftar Kredensial Uji Modem ONT ZTE GM220-S
 CREDENTIAL_CANDIDATES = [
-    ("admin", "tekno2024"),
     ("admin", "admin"),
+    ("admin", "tekno2024"),
     ("tekno", "tekno2025"),
 ]
 
 # Jalur Endpoint Web GUI ZTE GM220-S
-PON_STATUS_PATH = "/getpage.gch?pid=1002&nextpage=gpon_status_link_t.gch"
 STATUS_DEV_PATH = "/getpage.gch?pid=1002&nextpage=status_dev_info_t.gch"
-
-WLAN_PATHS = [
-    ("/getpage.gch?pid=1002&nextpage=net_wlan_security_t.gch", "WLAN Security"),
-    ("/getpage.gch?pid=1002&nextpage=net_wlan_basic_t.gch", "WLAN Basic"),
-    ("/getpage.gch?pid=1002&nextpage=net_wlan_multi_ssid_t.gch", "WLAN Multi SSID"),
-    ("/getpage.gch?pid=1002&nextpage=net_wlan_mssid_security_t.gch", "WLAN MSSID Security"),
-    ("/getpage.gch?pid=1002&nextpage=wlan_security_t.gch", "WLAN Security Alt"),
-    ("/getpage.gch?pid=1002&nextpage=wlan_basic_t.gch", "WLAN Basic Alt")
-]
+GPON_STATUS_PATH = "/getpage.gch?pid=1002&nextpage=gpon_status_link_t.gch"
+WLAN_ESSID_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch"
+WLAN_SECURITY_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_secrity_t.gch"
 
 
 def check_and_wait_lockout(session: requests.Session) -> bool:
     """Mengecek apakah modem ONT sedang dalam status lockout (60 detik akibat 3x salah password)."""
     try:
-        r = session.get(f"{BASE_URL}/", timeout=6, headers={"Connection": "close"})
+        r = session.get(f"{BASE_URL}/", timeout=6, headers={"Connection": "keep-alive"})
         m_time = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', r.text)
         if m_time:
             rem = int(m_time.group(1)) + 60 - int(m_time.group(2))
@@ -74,7 +67,7 @@ def check_and_wait_lockout(session: requests.Session) -> bool:
 def get_login_token(session: requests.Session) -> str:
     """Mengekstrak Frm_Logintoken dinamis yang diatur oleh fungsi dosubmit() di javascript."""
     try:
-        r = session.get(f"{BASE_URL}/", timeout=6, headers={"Connection": "close"})
+        r = session.get(f"{BASE_URL}/", timeout=6, headers={"Connection": "keep-alive"})
         m = re.search(r'Frm_Logintoken.*?\.value\s*=\s*["\'](\w+)["\']', r.text)
         return m.group(1) if m else "5"
     except Exception:
@@ -97,7 +90,7 @@ def attempt_login(session: requests.Session, username: str, password: str):
         "Host": TARGET_HOST,
         "Referer": f"{BASE_URL}/",
         "Origin": BASE_URL,
-        "Connection": "close",
+        "Connection": "keep-alive",
         "Content-Type": "application/x-www-form-urlencoded",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
@@ -122,6 +115,14 @@ def attempt_login(session: requests.Session, username: str, password: str):
         )
     )
 
+    # Handshake navigasi ke template.gch untuk menstabilkan sesi
+    if is_success:
+        try:
+            headers["Referer"] = f"{BASE_URL}/"
+            session.get(f"{BASE_URL}/template.gch", headers=headers, timeout=6)
+        except Exception:
+            pass
+
     return is_success, r
 
 
@@ -145,7 +146,7 @@ def extract_device_and_wifi(session: requests.Session) -> Dict[str, Any]:
     headers = {
         "Host": TARGET_HOST,
         "Referer": f"{BASE_URL}/template.gch",
-        "Connection": "close",
+        "Connection": "keep-alive",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
 
@@ -155,123 +156,145 @@ def extract_device_and_wifi(session: requests.Session) -> Dict[str, Any]:
         "nama_wifi": None,
         "password_wifi": None,
         "pon_sn": None,
-        "hardware_version": None,
+        "model_name": None,
         "software_version": None
     }
 
-    # 1. Ambil MAC Address & Device Version dari status_dev_info_t.gch
+    # 1. MAC Address, Serial Number, Software Version dari status_dev_info_t.gch
     try:
         r_dev = session.get(f"{BASE_URL}{STATUS_DEV_PATH}", headers=headers, timeout=10)
         if r_dev.status_code == 200:
-            content = r_dev.text
+            content = html.unescape(r_dev.text)
 
-            # Serial Number PON
+            # A. PON Serial Number
             m_sn = re.search(r'id=["\'](?:Frm_PonSerialNumber|Frm_SN)["\'][^>]*>(.*?)</td>', content, re.I)
             if m_sn:
-                info["pon_sn"] = html.unescape(m_sn.group(1).strip())
+                info["pon_sn"] = re.sub(r'<[^>]+>', '', m_sn.group(1)).strip()
 
-            # MAC Address
-            m_mac = re.search(r'id=["\'](?:Frm_MACAddress|Frm_PonMac|Frm_EthMac|Frm_Bssid)["\'][^>]*>(.*?)</td>', content, re.I)
-            if not m_mac:
-                m_mac = re.search(r'MAC\s*Address[^<]*</td>\s*<td[^>]*>\s*([0-9a-fA-F:]{17}|[0-9a-fA-F-]{17})', content, re.I)
-            if m_mac:
-                raw_mac = m_mac.group(1).strip()
-                # Bersihkan tag html jika ada
-                clean_mac = re.sub(r'<[^>]+>', '', raw_mac).replace("-", ":").upper()
-                if len(clean_mac) == 17:
-                    info["mac_address"] = clean_mac
-                    info["mac_source"] = "Web GUI (status_dev_info)"
-
-            # Versi Software / Firmware
+            # B. Versi Software
             m_ver = re.search(r'id=["\']Frm_SoftwareVer["\'][^>]*>(.*?)</td>', content, re.I)
             if m_ver:
-                info["software_version"] = html.unescape(m_ver.group(1).strip())
+                info["software_version"] = re.sub(r'<[^>]+>', '', m_ver.group(1)).strip()
+
+            # C. Model
+            m_mod = re.search(r'id=["\']Frm_ModelName["\'][^>]*>(.*?)</td>', content, re.I)
+            if m_mod:
+                info["model_name"] = re.sub(r'<[^>]+>', '', m_mod.group(1)).strip()
+
+            # D. MAC Address (Mendeteksi format sel tabel MAC di firmware ZTE GM220)
+            # Contoh: <td class="tdleft">MAC</td> <td class="tdright">&#56;&#67;...</td>
+            m_mac_cell = re.search(r'>\s*MAC\s*</td>\s*<td[^>]*>(.*?)</td>', content, re.I | re.S)
+            if m_mac_cell:
+                raw_cell = html.unescape(m_mac_cell.group(1))
+                clean_mac = re.sub(r'<[^>]+>', '', raw_cell).strip().replace("-", ":").upper()
+                m_found = re.search(r'([0-9A-F]{2}(?::[0-9A-F]{2}){5})', clean_mac)
+                if m_found:
+                    info["mac_address"] = m_found.group(1)
+                    info["mac_source"] = "Web GUI (status_dev_info)"
+
+            # Alternatif pencarian MAC dengan regex global
+            if not info["mac_address"]:
+                m_gen = re.search(r'([0-9A-F]{2}(?::[0-9A-F]{2}){5})', content, re.I)
+                if m_gen and m_gen.group(1) != "00:00:00:00:00:00":
+                    info["mac_address"] = m_gen.group(1).upper()
+                    info["mac_source"] = "Web GUI"
     except Exception as e:
         print(f"    [-] Gagal membaca status dev info: {e}")
 
-    # Fallback MAC dari cache ARP jika Web GUI tidak menampilkan teks MAC
+    # Fallback MAC dari cache ARP jika Web GUI tidak memuat MAC
     if not info["mac_address"]:
         arp_mac = get_mac_from_arp(TARGET_HOST)
         if arp_mac:
             info["mac_address"] = arp_mac
             info["mac_source"] = "OS ARP Table Cache"
 
-    # 2. Ambil SSID & Password WiFi dari halaman WLAN
-    for path, desc in WLAN_PATHS:
-        try:
-            r_w = session.get(f"{BASE_URL}{path}", headers=headers, timeout=8)
-            if r_w.status_code == 200:
-                txt = r_w.text
+    # 2. SSID (Nama WiFi) dari net_wlan_essid_t.gch
+    try:
+        r_essid = session.get(f"{BASE_URL}{WLAN_ESSID_PATH}", headers=headers, timeout=8)
+        if r_essid.status_code == 200:
+            txt_essid = html.unescape(r_essid.text)
+            # Cari Transfer_meaning('ESSID', 'NamaWiFi')
+            m_tm_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_essid)
+            if m_tm_essid:
+                # Ambil ESSID non-kosong pertama
+                for item in m_tm_essid:
+                    if item.strip():
+                        info["nama_wifi"] = item.strip()
+                        break
+            
+            # Fallback input / var
+            if not info["nama_wifi"]:
+                m_var = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_essid, re.I)
+                if m_var and m_var.group(1).strip():
+                    info["nama_wifi"] = m_var.group(1).strip()
+    except Exception as e:
+        print(f"    [-] Gagal membaca WLAN ESSID: {e}")
 
-                # A. Cari SSID (Nama WiFi)
-                if not info["nama_wifi"]:
-                    m_ssid = re.search(r'id=["\'](?:Frm_Essid|Frm_SSID|Frm_WlanSsid|Frm_SsidName)["\'][^>]*value=["\']([^"\']+)["\']', txt, re.I)
-                    if not m_ssid:
-                        m_ssid = re.search(r'var\s+(?:Essid|ESSID|WlanSsid|SSID1)\s*=\s*["\']([^"\']+)["\']', txt, re.I)
-                    if not m_ssid:
-                        m_ssid = re.search(r'name=["\'](?:Essid|SSID)["\'][^>]*value=["\']([^"\']+)["\']', txt, re.I)
+    # 3. Password WiFi (WPA PreSharedKey) dari net_wlan_secrity_t.gch
+    try:
+        r_sec = session.get(f"{BASE_URL}{WLAN_SECURITY_PATH}", headers=headers, timeout=8)
+        if r_sec.status_code == 200:
+            txt_sec = html.unescape(r_sec.text)
 
-                    if m_ssid:
-                        val = m_ssid.group(1).strip()
-                        if val and val != "undefined" and val != "null":
-                            info["nama_wifi"] = html.unescape(val)
+            # Cari Transfer_meaning('KeyPassphrase', 'PasswordWiFi')
+            m_tm_pass = re.findall(r"Transfer_meaning\s*\(\s*['\"](?:KeyPassphrase|PreSharedKey)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
+            if m_tm_pass:
+                for item in m_tm_pass:
+                    if item.strip():
+                        info["password_wifi"] = item.strip()
+                        break
 
-                # B. Cari Password WiFi (WPA PreSharedKey / KeyPassphrase)
-                if not info["password_wifi"]:
-                    m_pass = re.search(r'id=["\'](?:Frm_KeyPassphrase|Frm_Passphrase|Frm_Key1Str|Frm_WpaKey|Frm_PresharedKey)["\'][^>]*value=["\']([^"\']+)["\']', txt, re.I)
-                    if not m_pass:
-                        m_pass = re.search(r'var\s+(?:WpaPsk|KeyPassphrase|Key1Str|PreSharedKey|WpaKey)\s*=\s*["\']([^"\']+)["\']', txt, re.I)
-                    if not m_pass:
-                        m_pass = re.search(r'name=["\'](?:KeyPassphrase|Passphrase|Key1Str)["\'][^>]*value=["\']([^"\']+)["\']', txt, re.I)
+            # Jika SSID belum terbaca dari halaman essid, coba dari security
+            if not info["nama_wifi"]:
+                m_tm_essid2 = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
+                if m_tm_essid2:
+                    for item in m_tm_essid2:
+                        if item.strip():
+                            info["nama_wifi"] = item.strip()
+                            break
 
-                    if m_pass:
-                        pval = m_pass.group(1).strip()
-                        if pval and pval != "undefined" and pval != "null":
-                            info["password_wifi"] = html.unescape(pval)
-
-            if info["nama_wifi"] and info["password_wifi"]:
-                break
-        except Exception:
-            continue
+            # Fallback jika password diinput langsung
+            if not info["password_wifi"]:
+                m_wpa_inp = re.search(r'id=["\'](?:Frm_KeyPassphrase|Frm_Passphrase)["\'][^>]*value=["\']([^"\']+)["\']', txt_sec, re.I)
+                if m_wpa_inp and m_wpa_inp.group(1).strip():
+                    info["password_wifi"] = m_wpa_inp.group(1).strip()
+    except Exception as e:
+        print(f"    [-] Gagal membaca WLAN Security: {e}")
 
     return info
 
 
 def extract_pon_data(session: requests.Session):
     """Mengambil halaman gpon_status_link_t.gch dan mengekstrak data optik lengkap."""
-    url = f"{BASE_URL}{PON_STATUS_PATH}"
+    url = f"{BASE_URL}{GPON_STATUS_PATH}"
     headers = {
         "Host": TARGET_HOST,
         "Referer": f"{BASE_URL}/template.gch",
-        "Connection": "close",
+        "Connection": "keep-alive",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
 
     r = None
     for attempt in range(1, 3):
         try:
-            print(f"    (Menghubungi modul optik modem... percobaan {attempt}/2, timeout 25s)")
-            r = session.get(url, headers=headers, timeout=25)
-            if r.status_code == 200:
+            r = session.get(url, headers=headers, timeout=12)
+            if r.status_code == 200 and len(r.text) > 1000:
                 break
         except requests.exceptions.Timeout:
-            print("    [!] Modem membutuhkan waktu lebih lama untuk membaca sensor optik (timeout). Mengulang...")
-            time.sleep(2)
-        except Exception as e:
-            print(f"[-] Gagal menghubungi {url}: {e}")
+            time.sleep(1)
+        except Exception:
             time.sleep(1)
 
     if not r or r.status_code != 200:
-        print(f"[-] Tidak mendapat respon valid dari {url}")
         return None
 
     page_content = r.text
     results = {}
 
-    m_rx = re.search(r'var\s+RxPower\s*=\s*["\']([+-]?\d+)["\']', page_content)
-    m_tx = re.search(r'var\s+TxPower\s*=\s*["\']([+-]?\d+)["\']', page_content)
-    m_cur = re.search(r'var\s+Current\s*=\s*["\']([+-]?\d+)["\']', page_content)
-    m_los = re.search(r'var\s+LosInfo\s*=\s*["\'](\d+)["\']', page_content)
+    m_rx = re.search(r'var\s+RxPower\s*=\s*["\']?([+-]?\d+)["\']?', page_content)
+    m_tx = re.search(r'var\s+TxPower\s*=\s*["\']?([+-]?\d+)["\']?', page_content)
+    m_cur = re.search(r'var\s+Current\s*=\s*["\']?([+-]?\d+)["\']?', page_content)
+    m_los = re.search(r'var\s+LosInfo\s*=\s*["\']?(\d+)["\']?', page_content)
 
     if m_rx:
         raw_rx = float(m_rx.group(1))
@@ -294,26 +317,20 @@ def extract_pon_data(session: requests.Session):
         m_cur_html = re.search(r'Optical\s*Transmitter\s*Bias\s*Current\(uA\)[^<]*</td>\s*<td[^>]*>\s*(\d+)', page_content, re.IGNORECASE)
         results["bias_current_ma"] = round(float(m_cur_html.group(1)) / 1000.0, 2) if m_cur_html else None
 
-    m_volt = re.search(r'Optical\s*Module\s*Supply\s*Voltage\(uV\)[^<]*</td>\s*<td[^>]*>\s*(\d+)', page_content, re.IGNORECASE)
-    results["supply_voltage_v"] = round(float(m_volt.group(1)) / 1000000.0, 2) if m_volt else None
-
-    m_temp = re.search(r'Operating\s*Temperature[^<]*</td>\s*<td[^>]*>\s*([+-]?\d+\.?\d*)', page_content, re.IGNORECASE)
-    results["temperature_c"] = float(m_temp.group(1)) if m_temp else None
-
-    m_loid = re.search(r'id=["\']LoidState["\'][^>]*value=["\'](\d+)["\']', page_content)
+    # LoidState / GPON State
+    m_loid = re.search(r"Transfer_meaning\s*\(\s*['\"]LoidState['\"]\s*,\s*['\"](\d+)['\"]\s*\)", page_content)
     loid_map = {
         "0": "Init State",
-        "1": "LOID is Right",
+        "1": "LOID is Right (Authentication Successful)",
         "2": "LOID is Wrong",
         "3": "Password is Wrong",
-        "4": "Authentication is Successful",
+        "4": "Authentication Successful",
         "5": "Init State"
     }
     if m_loid and m_loid.group(1) in loid_map:
         results["gpon_state"] = loid_map[m_loid.group(1)]
     else:
-        m_state = re.search(r'GPON\s*State[^<]*</td>\s*<td[^>]*>\s*([^<]+)', page_content, re.IGNORECASE)
-        results["gpon_state"] = m_state.group(1).strip() if m_state else "Normal"
+        results["gpon_state"] = "Normal"
 
     results["los_alarm"] = (m_los.group(1) == "1") if m_los else False
 
@@ -375,13 +392,15 @@ def main():
 
     # Bagian A: Identitas & WiFi
     mac = device_wifi.get("mac_address") or "Tidak Terbaca (-)"
-    mac_src = f"({device_wifi.get('mac_source')})" if device_wifi.get("mac_source") else ""
+    mac_src = f"[{device_wifi.get('mac_source')}]" if device_wifi.get("mac_source") else ""
     ssid = device_wifi.get("nama_wifi") or "Tidak Terbaca (-)"
     wifipass = device_wifi.get("password_wifi") or "Tidak Terbaca (-)"
     sn = device_wifi.get("pon_sn") or "N/A"
     sw_ver = device_wifi.get("software_version") or "N/A"
+    model = device_wifi.get("model_name") or "GM220-S XPON"
 
     print("--- [1. INFORMASI PERANGKAT & WIFI PELANGGAN] ---")
+    print(f"  • Model ONT            : {model}")
     print(f"  • Kredensial Login OK  : {authenticated_user} / {authenticated_pass}")
     print(f"  • MAC Address ONT      : {mac} {mac_src}")
     print(f"  • Nama / SSID WiFi     : {ssid}")
@@ -399,16 +418,10 @@ def main():
         cur = pon_data.get("bias_current_ma")
         los = pon_data.get("los_alarm")
         state = pon_data.get("gpon_state")
-        volt = pon_data.get("supply_voltage_v")
-        temp = pon_data.get("temperature_c")
 
         print(f"  • Rx Optical Power     : {rx} dBm  <=== [NILAI REDAMAN ASLI]")
         print(f"  • Tx Optical Power     : {tx} dBm")
         print(f"  • Bias Current         : {cur} mA")
-        if volt is not None:
-            print(f"  • Supply Voltage       : {volt} V")
-        if temp is not None:
-            print(f"  • Suhu Modem ONT       : {temp} °C")
         print(f"  • Status GPON State    : {state}")
         print(f"  • Status Alarm LOS     : {'LOSS OF SIGNAL (Alarm Aktif)' if los else 'Normal (Tidak Ada LOS)'}")
     else:

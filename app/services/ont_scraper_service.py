@@ -198,7 +198,7 @@ class ONTScraperService:
         headers = {
             "Host": host,
             "Referer": f"{base_url}/template.gch",
-            "Connection": "close",
+            "Connection": "keep-alive",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         }
         res = {"mac_address": None, "nama_wifi": None, "password_wifi": None}
@@ -207,11 +207,26 @@ class ONTScraperService:
         try:
             r_dev = session.get(f"{base_url}{STATUS_DEV_PATH}", headers=headers, timeout=8)
             if r_dev.status_code == 200:
-                m_mac = re.search(r'id=["\'](?:Frm_MACAddress|Frm_PonMac|Frm_EthMac)["\'][^>]*>(.*?)</td>', r_dev.text, re.I)
-                if not m_mac:
-                    m_mac = re.search(r'MAC\s*Address[^<]*</td>\s*<td[^>]*>\s*([0-9a-fA-F:]{17}|[0-9a-fA-F-]{17})', r_dev.text, re.I)
-                if m_mac:
-                    res["mac_address"] = m_mac.group(1).replace("-", ":").upper().strip()
+                content = html.unescape(r_dev.text)
+
+                # Format tabel MAC ZTE GM220: <td class="tdleft">MAC</td> <td class="tdright">&#56;&#67;...</td>
+                m_mac_cell = re.search(r'>\s*MAC\s*</td>\s*<td[^>]*>(.*?)</td>', content, re.I | re.S)
+                if m_mac_cell:
+                    raw_cell = html.unescape(m_mac_cell.group(1))
+                    clean_mac = re.sub(r'<[^>]+>', '', raw_cell).strip().replace("-", ":").upper()
+                    m_found = re.search(r'([0-9A-F]{2}(?::[0-9A-F]{2}){5})', clean_mac)
+                    if m_found:
+                        res["mac_address"] = m_found.group(1)
+
+                # Alternatif pencarian MAC
+                if not res["mac_address"]:
+                    m_mac = re.search(r'id=["\'](?:Frm_MACAddress|Frm_PonMac|Frm_EthMac)["\'][^>]*>(.*?)</td>', content, re.I)
+                    if m_mac:
+                        raw_cell = html.unescape(m_mac.group(1))
+                        clean_mac = re.sub(r'<[^>]+>', '', raw_cell).strip().replace("-", ":").upper()
+                        m_found = re.search(r'([0-9A-F]{2}(?::[0-9A-F]{2}){5})', clean_mac)
+                        if m_found:
+                            res["mac_address"] = m_found.group(1)
         except Exception:
             pass
 
@@ -219,26 +234,48 @@ class ONTScraperService:
         if not res["mac_address"]:
             res["mac_address"] = cls.get_mac_from_arp(host)
 
-        # 2. SSID & Password WiFi dari Web GUI WLAN GM220-S
-        for wlan_path in ["/getpage.gch?pid=1002&nextpage=net_wlan_security_t.gch", "/getpage.gch?pid=1002&nextpage=net_wlan_basic_t.gch"]:
+        # 2. SSID dari net_wlan_essid_t.gch (Format Transfer_meaning ZTE)
+        for essid_path in ["/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch", "/getpage.gch?pid=1002&nextpage=net_wlan_basic_t.gch"]:
             try:
-                r_wlan = session.get(f"{base_url}{wlan_path}", headers=headers, timeout=8)
-                if r_wlan.status_code == 200:
-                    # Cari SSID
+                r_essid = session.get(f"{base_url}{essid_path}", headers=headers, timeout=8)
+                if r_essid.status_code == 200:
+                    txt_essid = html.unescape(r_essid.text)
+                    m_tm_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_essid)
+                    if m_tm_essid:
+                        for item in m_tm_essid:
+                            if item.strip():
+                                res["nama_wifi"] = item.strip()
+                                break
                     if not res["nama_wifi"]:
-                        m_ssid = re.search(r'id=["\']Frm_Essid["\'][^>]*value=["\']([^"\']+)["\']', r_wlan.text, re.I)
-                        if not m_ssid:
-                            m_ssid = re.search(r'var\s+Essid\s*=\s*["\']([^"\']+)["\']', r_wlan.text, re.I)
-                        if m_ssid:
-                            res["nama_wifi"] = m_ssid.group(1).strip()
+                        m_var = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_essid, re.I)
+                        if m_var and m_var.group(1).strip():
+                            res["nama_wifi"] = m_var.group(1).strip()
+                if res["nama_wifi"]:
+                    break
+            except Exception:
+                pass
 
-                    # Cari Password WiFi (WPA PreSharedKey)
-                    if not res["password_wifi"]:
-                        m_pwd = re.search(r'id=["\'](?:Frm_KeyPassphrase|Frm_Passphrase|Frm_Key1Str)["\'][^>]*value=["\']([^"\']+)["\']', r_wlan.text, re.I)
-                        if not m_pwd:
-                            m_pwd = re.search(r'var\s+(?:WpaPsk|Key1Str)\s*=\s*["\']([^"\']+)["\']', r_wlan.text, re.I)
-                        if m_pwd:
-                            res["password_wifi"] = m_pwd.group(1).strip()
+        # 3. Password WiFi dari net_wlan_secrity_t.gch (Format Transfer_meaning ZTE)
+        for sec_path in ["/getpage.gch?pid=1002&nextpage=net_wlan_secrity_t.gch", "/getpage.gch?pid=1002&nextpage=net_wlan_security_t.gch"]:
+            try:
+                r_sec = session.get(f"{base_url}{sec_path}", headers=headers, timeout=8)
+                if r_sec.status_code == 200:
+                    txt_sec = html.unescape(r_sec.text)
+                    m_tm_pass = re.findall(r"Transfer_meaning\s*\(\s*['\"](?:KeyPassphrase|PreSharedKey)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
+                    if m_tm_pass:
+                        for item in m_tm_pass:
+                            if item.strip():
+                                res["password_wifi"] = item.strip()
+                                break
+                    if not res["nama_wifi"]:
+                        m_tm_essid2 = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
+                        if m_tm_essid2:
+                            for item in m_tm_essid2:
+                                if item.strip():
+                                    res["nama_wifi"] = item.strip()
+                                    break
+                if res["password_wifi"]:
+                    break
             except Exception:
                 pass
 

@@ -54,20 +54,20 @@ python -m pip install -r requirements.txt
 ### 2. Konfigurasi Lingkungan (`.env`)
 Buat file `.env` berdasarkan template `.env.example`:
 ```ini
-APP_NAME=EdTeknoGuard
-APP_ENV=development
-APP_PORT=8000
+APP_NAME=
+APP_ENV=
+APP_PORT=
 
 # TiDB Cloud Database
-DB_HOST=gateway01.ap-southeast-1.prod.aws.tidbcloud.com
-DB_PORT=4000
-DB_USER=VXH7qwuAhDTaE6d.root
-DB_PASSWORD=pEPqz1Tx8GiX7ePQ
-DB_NAME=EdTeknoGuard
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
 
 # Telegram Bot Alerting
 TELEGRAM_BOT_TOKEN=your_bot_token_here
-TELEGRAM_CHAT_IDS=12345678,87654321,-100123456789
+TELEGRAM_CHAT_IDS=
 
 # Monitoring Settings
 POLLING_INTERVAL_MINUTES=5
