@@ -45,8 +45,10 @@ class MonitoringScheduler:
             try:
                 interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
                 interval = int(interval_str)
+                current_status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
             except Exception:
                 interval = settings.POLLING_INTERVAL_MINUTES
+                current_status = "RUNNING"
             finally:
                 db.close()
 
@@ -59,7 +61,10 @@ class MonitoringScheduler:
                 replace_existing=True
             )
             self._scheduler.start()
-            logger.info(f"Scheduler pemantau ONT dimulai (Interval: {interval} menit).")
+            if current_status == "STOPPED":
+                logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: STOPPED (Jeda Pemantauan) sesuai status terakhir.")
+            else:
+                logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: RUNNING (Interval: {interval} menit) sesuai status terakhir.")
 
     def update_interval(self, minutes: int):
         db = SessionLocal()
@@ -86,7 +91,7 @@ class MonitoringScheduler:
             self.set_setting_in_db(db, "scheduler_status", "STOPPED")
         finally:
             db.close()
-        logger.info("Pemantauan otomatis ONT dijeda (STOPPED).")
+        logger.info("Pemantauan otomatis ONT dijeda (STOPPED) dan disimpan permanen.")
 
     def resume(self):
         db = SessionLocal()
@@ -94,20 +99,22 @@ class MonitoringScheduler:
             self.set_setting_in_db(db, "scheduler_status", "RUNNING")
         finally:
             db.close()
-        logger.info("Pemantauan otomatis ONT dilanjutkan (RUNNING).")
+        logger.info("Pemantauan otomatis ONT dilanjutkan (RUNNING) dan disimpan permanen.")
 
     def get_status(self) -> Dict[str, Any]:
         db = SessionLocal()
         try:
             status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
+            interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
             last_scan = self.get_setting_from_db(db, "last_scan_time", "-")
             total_customers = db.query(Pelanggan).count()
+            interval = int(interval_str) if interval_str.isdigit() else settings.POLLING_INTERVAL_MINUTES
         finally:
             db.close()
 
         return {
             "status": status,
-            "interval_minutes": settings.POLLING_INTERVAL_MINUTES,
+            "interval_minutes": interval,
             "last_scan_time": last_scan,
             "is_scanning": self._is_scanning,
             "total_customers": total_customers

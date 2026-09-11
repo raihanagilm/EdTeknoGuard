@@ -218,21 +218,79 @@
 
                     <form @submit.prevent="confirmSaveSettings()" class="space-y-5 text-xs">
 
-                        <!-- Tabel Repeater Multi-Kredensial -->
+                        <!-- Tabel Repeater Multi-Kredensial dengan Drag and Drop & Reorder -->
                         <div class="space-y-3">
+                            <p class="text-[11px] text-slate-500 italic flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                <span>Tarik &amp; lepas (drag and drop) ikon ⠿ atau gunakan tombol panah untuk memindahkan urutan prioritas autentikasi modem.</span>
+                            </p>
+
                             <template x-for="(cred, index) in form.default_modem_credentials" :key="index">
-                                <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 transition hover:border-slate-300">
+                                <div draggable="true"
+                                     @dragstart="onDragStart($event, index)"
+                                     @dragover.prevent="onDragOver($event, index)"
+                                     @dragleave="onDragLeave(index)"
+                                     @drop="onDrop($event, index)"
+                                     @dragend="onDragEnd()"
+                                     class="p-3.5 bg-slate-50 rounded-2xl border transition-all duration-150 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 select-none"
+                                     :class="{
+                                         'border-indigo-500 bg-indigo-50/70 shadow-lg scale-[0.99] border-dashed': draggedIdx === index,
+                                         'border-indigo-400 ring-2 ring-indigo-300 bg-indigo-50/40': dragOverIdx === index && draggedIdx !== index,
+                                         'border-slate-200/80 hover:border-slate-300 hover:shadow-xs': draggedIdx !== index && dragOverIdx !== index
+                                     }">
                                     
-                                    <!-- Nomor Urut Prioritas -->
+                                    <!-- Sisi Kiri: Drag Handle, Nomor Urut Prioritas & Tombol Panah Mobile -->
                                     <div class="flex items-center justify-between sm:justify-start gap-2 flex-shrink-0">
-                                        <span class="h-8 w-8 rounded-xl bg-white border border-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shadow-xs"
-                                              x-text="'#' + (index + 1)"></span>
-                                        <span class="sm:hidden font-semibold text-slate-500 text-[11px]" x-text="index === 0 ? 'Kredensial Utama' : 'Kredensial Alternatif'"></span>
+                                        
+                                        <!-- Grip Handle (Drag & Drop) -->
+                                        <div class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-white cursor-grab active:cursor-grabbing transition"
+                                             title="Klik dan geser untuk memindahkan prioritas">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01"/>
+                                            </svg>
+                                        </div>
+
+                                        <!-- Badge Prioritas -->
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="h-8 w-8 rounded-xl font-bold text-xs flex items-center justify-center border shadow-xs"
+                                                  :class="index === 0 ? 'bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-200' : 'bg-white text-slate-700 border-slate-200'"
+                                                  x-text="'#' + (index + 1)"></span>
+                                            
+                                            <template x-if="index === 0">
+                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                    Prioritas Utama
+                                                </span>
+                                            </template>
+                                            <template x-if="index > 0">
+                                                <span class="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500"
+                                                      x-text="'Alternatif ke-' + index">
+                                                </span>
+                                            </template>
+                                        </div>
+
+                                        <!-- Tombol Reorder Cepat (Up / Down) -->
+                                        <div class="flex items-center gap-0.5 ml-1">
+                                            <button type="button"
+                                                    x-show="index > 0"
+                                                    @click="moveUp(index)"
+                                                    title="Pindahkan ke atas (naik prioritas)"
+                                                    class="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition border border-transparent hover:border-slate-200">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                            </button>
+                                            <button type="button"
+                                                    x-show="index < form.default_modem_credentials.length - 1"
+                                                    @click="moveDown(index)"
+                                                    title="Pindahkan ke bawah (turun prioritas)"
+                                                    class="p-1 rounded-md text-slate-500 hover:text-indigo-600 hover:bg-white transition border border-transparent hover:border-slate-200">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                            </button>
+                                        </div>
+
                                         <!-- Tombol Hapus (Mobile View) -->
                                         <button type="button"
                                                 x-show="form.default_modem_credentials.length > 1"
                                                 @click="removeCredentialRow(index)"
-                                                class="sm:hidden p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-transparent">
+                                                class="sm:hidden p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-transparent ml-auto">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </div>
@@ -545,17 +603,83 @@ function settingsApp() {
         testingTelegram: false,
         toast: { show: false, message: '', type: 'success' },
 
+        // State Drag and Drop Kredensial
+        draggedIdx: null,
+        dragOverIdx: null,
+
         initData() {
             // Inisialisasi awal
         },
 
+        // Drag and Drop Handlers
+        onDragStart(e, idx) {
+            this.draggedIdx = idx;
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', String(idx));
+            }
+        },
+
+        onDragOver(e, idx) {
+            e.preventDefault();
+            this.dragOverIdx = idx;
+        },
+
+        onDragLeave(idx) {
+            if (this.dragOverIdx === idx) {
+                this.dragOverIdx = null;
+            }
+        },
+
+        onDrop(e, targetIdx) {
+            e.preventDefault();
+            if (this.draggedIdx === null || this.draggedIdx === targetIdx) {
+                this.draggedIdx = null;
+                this.dragOverIdx = null;
+                return;
+            }
+            const item = this.form.default_modem_credentials.splice(this.draggedIdx, 1)[0];
+            this.form.default_modem_credentials.splice(targetIdx, 0, item);
+            const name = item.username ? `"${item.username}"` : `Kredensial`;
+            this.showToast(`${name} berhasil dipindahkan ke Prioritas #${targetIdx + 1}`);
+            this.draggedIdx = null;
+            this.dragOverIdx = null;
+        },
+
+        onDragEnd() {
+            this.draggedIdx = null;
+            this.dragOverIdx = null;
+        },
+
+        // Move Up / Down (Alternatif Mobile & Keyboard)
+        moveUp(idx) {
+            if (idx > 0) {
+                const item = this.form.default_modem_credentials.splice(idx, 1)[0];
+                this.form.default_modem_credentials.splice(idx - 1, 0, item);
+                const name = item.username ? `"${item.username}"` : `Kredensial`;
+                this.showToast(`${name} dinaikkan ke Prioritas #${idx}`);
+            }
+        },
+
+        moveDown(idx) {
+            if (idx < this.form.default_modem_credentials.length - 1) {
+                const item = this.form.default_modem_credentials.splice(idx, 1)[0];
+                this.form.default_modem_credentials.splice(idx + 1, 0, item);
+                const name = item.username ? `"${item.username}"` : `Kredensial`;
+                this.showToast(`${name} diturunkan ke Prioritas #${idx + 2}`);
+            }
+        },
+
         addCredentialRow() {
             this.form.default_modem_credentials.push({ username: '', password: '' });
+            this.showToast(`Baris kredensial baru #${this.form.default_modem_credentials.length} ditambahkan`);
         },
 
         removeCredentialRow(idx) {
             if (this.form.default_modem_credentials.length > 1) {
-                this.form.default_modem_credentials.splice(idx, 1);
+                const removed = this.form.default_modem_credentials.splice(idx, 1)[0];
+                const name = removed.username ? `"${removed.username}"` : `#${idx + 1}`;
+                this.showToast(`Kredensial ${name} telah dihapus dari daftar`, 'info');
             }
         },
 

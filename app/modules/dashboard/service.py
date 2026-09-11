@@ -21,6 +21,12 @@ class DashboardService:
         earliest = db.query(LogPerformaONT.waktu_cek).order_by(LogPerformaONT.waktu_cek.asc()).first()
         min_date = earliest[0].strftime("%Y-%m-%d") if (earliest and earliest[0]) else "2026-09-01"
 
+        interval_setting = db.query(SystemSetting).filter(SystemSetting.key_name == "polling_interval_minutes").first()
+        try:
+            polling_interval = int(interval_setting.value_text) if interval_setting else settings.POLLING_INTERVAL_MINUTES
+        except Exception:
+            polling_interval = settings.POLLING_INTERVAL_MINUTES
+
         return {
             "app_name": settings.APP_NAME,
             "total_customers": total_customers,
@@ -29,6 +35,6 @@ class DashboardService:
             "last_scan_time": last_scan_time,
             "warning_threshold": settings.WARNING_THRESHOLD_DBM,
             "critical_threshold": settings.CRITICAL_THRESHOLD_DBM,
-            "polling_interval": settings.POLLING_INTERVAL_MINUTES,
+            "polling_interval": polling_interval,
             "min_date": min_date
         }
