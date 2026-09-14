@@ -8,8 +8,13 @@
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                📜 Riwayat Log Performa ONT
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                <div class="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <span>Riwayat Log Performa ONT</span>
             </h1>
             <p class="text-sm text-slate-500 mt-1">
                 Audit time-series hasil pengukuran sinyal optik (Rx Power), suhu, uptime, dan status seluruh modem ONT.
@@ -24,11 +29,17 @@
         </div>
     </div>
 
-    <!-- Summary KPI Cards -->
+    <!-- Summary KPI Cards (Interaktif: Klik untuk Filter Log Tabel) -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
-            <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
-                📊
+        <!-- Card 1: Total Log -->
+        <div @click="filterByCard('')"
+             title="Klik untuk melihat semua log"
+             class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5 cursor-pointer hover:shadow-md hover:border-indigo-300 transition-all select-none"
+             :class="{'ring-2 ring-indigo-500 border-transparent bg-indigo-50/20': !filterStatus}">
+            <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Total Log Terekam</div>
@@ -36,9 +47,15 @@
             </div>
         </div>
 
-        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
-            <div class="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
-                ⚡
+        <!-- Card 2: Status Normal -->
+        <div @click="filterByCard('NORMAL')"
+             title="Klik untuk memfilter log status NORMAL"
+             class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5 cursor-pointer hover:shadow-md hover:border-emerald-300 transition-all select-none"
+             :class="{'ring-2 ring-emerald-500 border-transparent bg-emerald-50/20': filterStatus === 'NORMAL'}">
+            <div class="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Rata-rata Redaman</div>
@@ -46,9 +63,15 @@
             </div>
         </div>
 
-        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
-            <div class="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">
-                ⚠️
+        <!-- Card 3: Status Warning -->
+        <div @click="filterByCard('WARNING')"
+             title="Klik untuk memfilter log status WARNING (<= -26.0 dBm)"
+             class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5 cursor-pointer hover:shadow-md hover:border-amber-300 transition-all select-none"
+             :class="{'ring-2 ring-amber-500 border-transparent bg-amber-50/20': filterStatus === 'WARNING'}">
+            <div class="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Batas Warning</div>
@@ -56,13 +79,19 @@
             </div>
         </div>
 
-        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5">
-            <div class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg">
-                🚨
+        <!-- Card 4: Status Kritis / LOS -->
+        <div @click="filterByCard('CRITICAL')"
+             title="Klik untuk memfilter log status Kritis & LOS"
+             class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center gap-3.5 cursor-pointer hover:shadow-md hover:border-rose-300 transition-all select-none"
+             :class="{'ring-2 ring-rose-500 border-transparent bg-rose-50/20': filterStatus === 'CRITICAL' || filterStatus === 'LOS'}">
+            <div class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Batas Kritis / LOS</div>
-                <div class="text-xl font-extrabold text-rose-600">&le; -32.0 dBm</div>
+                <div class="text-xl font-extrabold text-rose-600">&le; -27.0 dBm</div>
             </div>
         </div>
     </div>
@@ -534,6 +563,15 @@ function logsApp() {
             if (this.filterRange !== 'custom') {
                 this.fetchLogs(1);
             }
+        },
+
+        filterByCard(status) {
+            if (this.filterStatus === status) {
+                this.filterStatus = '';
+            } else {
+                this.filterStatus = status;
+            }
+            this.fetchLogs(1);
         },
 
         sortTable(column) {

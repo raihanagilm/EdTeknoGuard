@@ -43,6 +43,17 @@ document.addEventListener('alpine:init', () => {
         isNetworkError: false,
         scanningSingleId: null,
 
+        // State Progres Pemindaian & Estimasi Waktu
+        scanProgress: {
+            current: 0,
+            total: 0,
+            percent: 0,
+            is_scanning: false,
+            elapsed_seconds: 0,
+            estimated_total_seconds: 0,
+            last_scan_duration: 0
+        },
+
         // Toast Notification State
         toast: { show: false, message: '', type: 'success' },
 
@@ -82,9 +93,18 @@ document.addEventListener('alpine:init', () => {
 
             // Refresh status berkala tiap 30 detik
             setInterval(() => {
-                this.fetchStatus();
-                this.fetchKpi();
+                if (!this.isScanning) {
+                    this.fetchStatus();
+                    this.fetchKpi();
+                }
             }, 30000);
+
+            // Polling cepat tiap 1.5 detik ketika sedang ada pemindaian aktif
+            setInterval(() => {
+                if (this.isScanning || (this.scanProgress && this.scanProgress.is_scanning)) {
+                    this.fetchStatus();
+                }
+            }, 1500);
         },
 
         showToast(message, type = 'success') {
@@ -104,6 +124,12 @@ document.addEventListener('alpine:init', () => {
                     this.engineStatus = data.status || 'RUNNING';
                     this.lastScanTime = data.last_scan_time || '-';
                     this.isScanning = data.is_scanning || false;
+                    if (data.scan_progress) {
+                        this.scanProgress = data.scan_progress;
+                        if (data.scan_progress.is_scanning) {
+                            this.isScanning = true;
+                        }
+                    }
                     if (data.is_network_error !== undefined) {
                         this.isNetworkError = Boolean(data.is_network_error) || (this.kpi.total_monitored > 0 && this.kpi.los === this.kpi.total_monitored);
                     }

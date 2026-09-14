@@ -325,13 +325,7 @@ class ONTScraperService:
             if (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
                 credentials_to_try.append((d_u, d_p, "DEFAULT"))
 
-        # PROTEKSI ANTI-LOCKOUT (Penggabungan Opsi 1 & 3):
-        # Firmware ZTE GM220-S mengunci web selama 60 detik jika ada 3 kali kegagalan password berbeda.
-        # Oleh karena itu, kita batasi maksimal HANYA 2 kredensial unik per siklus pengecekan:
-        # 1. Kredensial Pelanggan (dengan 2x attempt + session reset)
-        # 2. Kredensial Default Prioritas Utama #1 (dengan 2x attempt + session reset)
-        credentials_to_try = credentials_to_try[:2]
-
+        # Coba seluruh kredensial (kredensial pelanggan diikuti semua kredensial default dari pengaturan)
         authenticated = False
         active_user = None
         active_pass = None

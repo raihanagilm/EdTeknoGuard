@@ -1,4 +1,5 @@
 import asyncio
+import time
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
@@ -19,11 +20,21 @@ class MonitoringScheduler:
     _scheduler: Optional[BackgroundScheduler] = None
     _is_scanning: bool = False
     _is_network_error: bool = False
+    _scan_current: int = 0
+    _scan_total: int = 0
+    _scan_start_time: float = 0.0
+    _last_scan_duration: float = 0.0
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(MonitoringScheduler, cls).__new__(cls)
             cls._instance._scheduler = BackgroundScheduler(daemon=True)
+            cls._instance._is_scanning = False
+            cls._instance._is_network_error = False
+            cls._instance._scan_current = 0
+            cls._instance._scan_total = 0
+            cls._instance._scan_start_time = 0.0
+            cls._instance._last_scan_duration = 0.0
         return cls._instance
 
     @classmethod
@@ -130,8 +141,28 @@ class MonitoringScheduler:
             total_customers = db.query(Pelanggan).count()
             interval = int(interval_str) if interval_str.isdigit() else settings.POLLING_INTERVAL_MINUTES
             is_net_err = (net_err_str.lower() == "true") or self._is_network_error
+            last_duration_str = self.get_setting_from_db(db, "last_scan_duration", str(self._last_scan_duration or 0.0))
+            last_duration = float(last_duration_str) if last_duration_str.replace('.', '', 1).isdigit() else (self._last_scan_duration or 0.0)
         finally:
             db.close()
+
+        # Hitung estimasi waktu pemindaian real-time
+        elapsed = round(time.time() - self._scan_start_time, 1) if (self._is_scanning and self._scan_start_time > 0) else 0.0
+        if self._is_scanning and self._scan_current > 0 and self._scan_total > 0:
+            avg_per_ont = (time.time() - self._scan_start_time) / self._scan_current
+            est_total = round(avg_per_ont * self._scan_total, 1)
+        else:
+            est_total = last_duration if last_duration > 0 else 0.0
+
+        scan_progress = {
+            "current": self._scan_current,
+            "total": self._scan_total,
+            "percent": int((self._scan_current / self._scan_total) * 100) if self._scan_total > 0 else 0,
+            "is_scanning": self._is_scanning,
+            "elapsed_seconds": elapsed,
+            "estimated_total_seconds": est_total,
+            "last_scan_duration": last_duration
+        }
 
         return {
             "status": status,
@@ -139,7 +170,8 @@ class MonitoringScheduler:
             "last_scan_time": last_scan,
             "is_scanning": self._is_scanning,
             "is_network_error": is_net_err,
-            "total_customers": total_customers
+            "total_customers": total_customers,
+            "scan_progress": scan_progress
         }
 
     def scheduled_job_wrapper(self):
@@ -161,9 +193,12 @@ class MonitoringScheduler:
             return {"status": "busy", "message": "Proses pemindaian sedang berjalan."}
 
         self._is_scanning = True
+        self._scan_start_time = time.time()
+        self._scan_current = 0
         db = SessionLocal()
         try:
             pelanggan_list = db.query(Pelanggan).filter(Pelanggan.is_active == True).all()
+            self._scan_total = len(pelanggan_list)
             now = datetime.now()
             results = []
             warning_count = 0
@@ -185,6 +220,7 @@ class MonitoringScheduler:
 
             unreachable_count = 0
             for cust in pelanggan_list:
+                self._scan_current += 1
                 # 1. Coba Scraping Live ONT GM220-S via HTTP
                 scrape_res = ONTScraperService.scrape_ont(
                     ip=cust.ip_router,
@@ -233,6 +269,15 @@ class MonitoringScheduler:
                 )
                 db.add(log_entry)
 
+                # Cek apakah kegagalan ini disebabkan oleh kredensial / gagal login
+                is_auth_failure = (
+                    res.get("error_type") == "AUTH_FAILED"
+                    or cust.status_kredensial == "INVALID"
+                    or "login gagal" in ket.lower()
+                    or "kredensial" in ket.lower()
+                    or "ditolak" in ket.lower()
+                )
+
                 st = res.get("status_koneksi") or "LOS"
                 if st == "WARNING":
                     warning_count += 1
@@ -240,13 +285,15 @@ class MonitoringScheduler:
                     critical_count += 1
                 elif st == "LOS":
                     los_count += 1
-                    pop_name = cust.pop or "Server Cabang"
-                    if pop_name not in los_by_pop:
-                        los_by_pop[pop_name] = []
-                    los_by_pop[pop_name].append(cust.nama)
+                    # Hanya kelompokkan ke deteksi pemadaman massal jika bukan gagal login
+                    if not is_auth_failure:
+                        pop_name = cust.pop or "Server Cabang"
+                        if pop_name not in los_by_pop:
+                            los_by_pop[pop_name] = []
+                        los_by_pop[pop_name].append(cust.nama)
 
-                # Kirim telegram alert jika warning/critical/LOS dengan anti-spam debounce
-                if st in ["WARNING", "CRITICAL", "LOS"]:
+                # Kirim telegram alert jika warning/critical/LOS HANYA JIKA BUKAN GAGAL LOGIN (Gambar 2 SOP)
+                if st in ["WARNING", "CRITICAL", "LOS"] and not is_auth_failure:
                     TelegramService.process_and_send_alert_sync(
                         pelanggan=cust,
                         log_entry=log_entry,
@@ -309,6 +356,14 @@ class MonitoringScheduler:
             logger.error(f"Error saat scan all: {e}")
             return {"status": "error", "message": str(e)}
         finally:
+            if self._scan_start_time > 0:
+                self._last_scan_duration = round(time.time() - self._scan_start_time, 1)
+                try:
+                    s_db = SessionLocal()
+                    self.set_setting_in_db(s_db, "last_scan_duration", str(self._last_scan_duration))
+                    s_db.close()
+                except Exception:
+                    pass
             self._is_scanning = False
             db.close()
 

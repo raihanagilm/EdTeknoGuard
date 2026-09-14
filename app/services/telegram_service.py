@@ -144,6 +144,19 @@ class TelegramService:
         if log_entry.status_koneksi not in ["WARNING", "CRITICAL", "LOS"]:
             return False
 
+        # JANGAN kirim alert ke Bot Telegram jika kegagalan disebabkan oleh kredensial / gagal login (Gambar 2 SOP)
+        ket_lower = (log_entry.keterangan or "").lower()
+        if (
+            pelanggan.status_kredensial == "INVALID"
+            or "kredensial" in ket_lower
+            or "login gagal" in ket_lower
+            or "auth_failed" in ket_lower
+            or "auth failed" in ket_lower
+            or "ditolak" in ket_lower
+        ):
+            logger.info(f"Alert Telegram untuk {pelanggan.nama} dibatalkan karena kegagalan autentikasi/kredensial: {log_entry.keterangan}")
+            return False
+
         # Ambil setting debounce dan ambang batas dinamis dari database jika ada
         from app.db.models import SystemSetting
         s_item = db.query(SystemSetting).filter(SystemSetting.key_name == "alert_debounce_minutes").first()
