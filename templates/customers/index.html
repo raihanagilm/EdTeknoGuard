@@ -722,14 +722,15 @@
         </div>
     </div>
 
-    <!-- MODAL 5: Import Data Pelanggan CSV -->
+    <!-- MODAL 5: Wizard Import Data Pelanggan (Excel/CSV) -->
     <div x-show="importModalOpen"
          style="display: none;"
          class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="importModalOpen = false"
-             class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+        <div @click.away="if (!duplicateModalOpen) importModalOpen = false"
+             class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-slate-200 flex flex-col max-h-[90vh]">
             
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <!-- Header Modal -->
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="p-2 rounded-xl bg-emerald-50 text-emerald-600">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -737,8 +738,12 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-slate-900">Import Data Pelanggan (CSV)</h3>
-                        <p class="text-xs text-slate-500">Unggah berkas CSV untuk menambah atau memperbarui data secara massal</p>
+                        <h3 class="text-base font-bold text-slate-900">Import Data Pelanggan (Excel / CSV)</h3>
+                        <p class="text-xs text-slate-500">
+                            <span x-show="importStep === 1">Langkah 1: Unggah Berkas & Pilih Sheet Spesifik</span>
+                            <span x-show="importStep === 2">Langkah 2: Pemetaan Kolom Database</span>
+                            <span x-show="importStep === 3">Langkah 3: Pratinjau & Validasi Data</span>
+                        </p>
                     </div>
                 </div>
                 <button @click="importModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
@@ -746,63 +751,412 @@
                 </button>
             </div>
 
-            <!-- Petunjuk & Download Template -->
-            <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 text-xs">
-                <div>
-                    <span class="font-bold text-slate-800 block">Butuh contoh format berkas?</span>
-                    <span class="text-slate-500 text-[11px]">Gunakan template resmi untuk format kolom yang sesuai.</span>
+            <!-- Stepper Progress Bar -->
+            <div class="flex items-center justify-between mb-4 px-2 shrink-0">
+                <div class="flex items-center gap-2" :class="importStep >= 1 ? 'text-indigo-600 font-bold' : 'text-slate-400'">
+                    <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs" :class="importStep >= 1 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'">1</span>
+                    <span class="text-xs">Unggah & Pilih Sheet</span>
                 </div>
-                <a href="/api/customers/template-csv"
-                   download="template_pelanggan_edteknoguard.csv"
-                   class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-indigo-600 border border-slate-200 font-bold text-xs flex items-center gap-1.5 transition min-h-[36px]">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Unduh Template
-                </a>
+                <div class="flex-1 h-0.5 mx-3" :class="importStep >= 2 ? 'bg-indigo-600' : 'bg-slate-200'"></div>
+                <div class="flex items-center gap-2" :class="importStep >= 2 ? 'text-indigo-600 font-bold' : 'text-slate-400'">
+                    <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs" :class="importStep >= 2 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'">2</span>
+                    <span class="text-xs">Pemetaan Kolom</span>
+                </div>
+                <div class="flex-1 h-0.5 mx-3" :class="importStep >= 3 ? 'bg-indigo-600' : 'bg-slate-200'"></div>
+                <div class="flex items-center gap-2" :class="importStep >= 3 ? 'text-indigo-600 font-bold' : 'text-slate-400'">
+                    <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs" :class="importStep >= 3 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'">3</span>
+                    <span class="text-xs">Pratinjau & Simpan</span>
+                </div>
             </div>
 
-            <!-- Drag-and-drop / File Input Area -->
-            <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition cursor-pointer bg-slate-50/50"
-                 @click="$refs.csvFileInput.click()">
-                <input type="file"
-                       x-ref="csvFileInput"
-                       @change="onFileSelected($event)"
-                       accept=".csv"
-                       class="hidden">
-                
-                <div class="flex flex-col items-center justify-center gap-2">
-                    <div class="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            <div class="overflow-y-auto flex-1 pr-2 space-y-4">
+                <!-- LANGKAH 1: UPLOAD & PILIH SHEET -->
+                <div x-show="importStep === 1" class="space-y-4">
+                    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 text-xs">
+                        <div>
+                            <span class="font-bold text-slate-800 block">Butuh contoh format berkas resmi?</span>
+                            <span class="text-slate-500 text-[11px]">Gunakan template Excel (.xlsx) resmi untuk susunan kolom yang 100% selaras.</span>
+                        </div>
+                        <a href="/api/customers/template-excel"
+                           download="template_import_pelanggan.xlsx"
+                           class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-indigo-600 border border-slate-200 font-bold text-xs flex items-center gap-1.5 transition min-h-[36px] shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Unduh Template (.xlsx)
+                        </a>
+                    </div>
+
+                    <!-- Area Dropzone Berkas -->
+                    <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition cursor-pointer bg-slate-50/50"
+                         @click="$refs.excelFileInput.click()">
+                        <input type="file"
+                               x-ref="excelFileInput"
+                               @change="onImportFileSelected($event)"
+                               accept=".xlsx, .xls, .csv"
+                               class="hidden">
+                        
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <div class="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs block" x-text="importFile ? importFile.name : 'Klik untuk memilih berkas Excel atau CSV'"></span>
+                                <span class="text-slate-400 text-[11px]" x-text="importFile ? (importFile.size / 1024).toFixed(1) + ' KB' : 'Mendukung berkas format .xlsx, .xls, atau .csv (Maks 10MB)'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pilihan Sheet Spesifik (Wajib Jika Excel) -->
+                    <div x-show="isExcelFile && importSheets.length > 0" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="font-bold text-slate-800 text-xs block">
+                                Pilih Sheet / Tabel Spesifik yang Akan Diimpor <span class="text-rose-500">*</span>:
+                            </label>
+                            <span class="text-[11px] text-slate-500" x-text="importSheets.length + ' sheet terdeteksi'"></span>
+                        </div>
+                        <select x-model="importSelectedSheet"
+                                @change="onSheetChanged()"
+                                class="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-800">
+                            <option value="" disabled selected>-- Pilih Sheet / Tabel Spesifik (Wajib) --</option>
+                            <template x-for="sheet in importSheets" :key="sheet.name">
+                                <option :value="sheet.name" x-text="sheet.name + ' (' + sheet.row_count + ' baris, ' + sheet.columns.length + ' kolom)'"></option>
+                            </template>
+                        </select>
+                        <p class="text-[11px] text-slate-500">
+                            Sistem tidak mengimpor seluruh sheet secara acak. Harap tentukan sheet spesifik (seperti sheet <em>PELANGGAN PUSAT</em>, <em>PELANGGAN CABANG</em>, atau <em>PELANGGAN BMS</em>).
+                        </p>
+
+                        <!-- Peringatan Jika Sheet Terpilih Kosong -->
+                        <div x-show="isCurrentSheetEmpty"
+                             class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>Sheet ini kosong atau tidak memiliki kolom data yang terdeteksi. Silakan pilih sheet lain yang memuat data pelanggan.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LANGKAH 2: PEMETAAN KOLOM -->
+                <div x-show="importStep === 2" class="space-y-4">
+                    <div class="bg-indigo-50 p-3.5 rounded-2xl border border-indigo-100 flex items-center justify-between gap-3 text-xs text-indigo-900">
+                        <div>
+                            <span>Memetakan kolom dari sheet: </span>
+                            <span class="font-bold underline" x-text="importSelectedSheet || (importFile ? importFile.name : '')"></span>
+                            <span class="text-indigo-600 block text-[11px] mt-0.5">Pastikan kolom wajib bertanda (*) terpasangkan dengan benar.</span>
+                        </div>
+                        <button type="button" @click="autoMapColumns()" class="px-3 py-1.5 rounded-xl bg-white text-indigo-700 font-bold border border-indigo-200 hover:bg-indigo-100 transition shrink-0">
+                            ⚡ Reset Pemetaan Otomatis
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+                        <template x-for="field in dbImportFields" :key="field.key">
+                            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-1">
+                                <label class="font-bold text-slate-700 flex items-center justify-between">
+                                    <span x-text="field.label"></span>
+                                    <span x-show="field.required" class="text-rose-600 text-[10px] font-extrabold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">* Wajib</span>
+                                </label>
+                                <select x-model="importMapping[field.key]"
+                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs text-slate-800">
+                                    <option value="">-- Abaikan (Tidak Di-import) --</option>
+                                    <template x-for="col in importCurrentColumns" :key="col">
+                                        <option :value="col" x-text="col"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- LANGKAH 3: PRATINJAU & KOREKSI -->
+                <div x-show="importStep === 3" class="space-y-4">
+                    <!-- Kartu Ringkasan Status -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 text-xs flex items-center justify-between">
+                            <div>
+                                <span class="text-emerald-700 font-bold block">Data Baru (Siap Import)</span>
+                                <span class="text-[11px] text-emerald-600">ID unik belum ada di sistem</span>
+                            </div>
+                            <span class="text-xl font-black text-emerald-700" x-text="importPreviewValid.length"></span>
+                        </div>
+                        <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 text-xs flex items-center justify-between">
+                            <div>
+                                <span class="text-amber-800 font-bold block">Duplikasi ID Pelanggan</span>
+                                <span class="text-[11px] text-amber-600">ID sudah ada di database</span>
+                            </div>
+                            <span class="text-xl font-black text-amber-700" x-text="importPreviewDuplicates.length"></span>
+                        </div>
+                        <div class="bg-rose-50 p-3 rounded-2xl border border-rose-200 text-xs flex items-center justify-between">
+                            <div>
+                                <span class="text-rose-800 font-bold block">Error / Tidak Lengkap</span>
+                                <span class="text-[11px] text-rose-600">Kolom wajib kosong</span>
+                            </div>
+                            <span class="text-xl font-black text-rose-700" x-text="importPreviewErrors.length"></span>
+                        </div>
+                    </div>
+
+                    <!-- Banner Alert Duplikasi Khusus -->
+                    <div x-show="importPreviewDuplicates.length > 0"
+                         class="p-4 bg-amber-500/10 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                        <div class="flex items-start gap-2.5">
+                            <div class="p-1.5 rounded-lg bg-amber-500 text-white shrink-0 mt-0.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-amber-900">Perhatian: Terdeteksi <span x-text="importPreviewDuplicates.length"></span> Data Duplikasi!</h4>
+                                <p class="text-amber-700 text-[11px]">ID pelanggan pada baris tersebut sudah terdaftar di database. Anda dapat menimpa, melewati, atau mengoreksi ID di pop-up.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap shrink-0">
+                            <button type="button" @click="setAllDuplicatesAction('update')" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] transition">
+                                Timpa Semua
+                            </button>
+                            <button type="button" @click="setAllDuplicatesAction('skip')" class="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[11px] transition">
+                                Abaikan Semua
+                            </button>
+                            <button type="button" @click="openDuplicateModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-sm">
+                                ⚙️ Buka Fitur Koreksi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Pratinjau Interaktif -->
+                    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                        <div class="overflow-x-auto max-h-72">
+                            <table class="w-full text-left text-xs whitespace-nowrap">
+                                <thead class="bg-slate-100 text-slate-700 sticky top-0 font-bold uppercase text-[10px] tracking-wider z-10">
+                                    <tr>
+                                        <th class="py-2.5 px-3">Status</th>
+                                        <th class="py-2.5 px-3">Aksi</th>
+                                        <th class="py-2.5 px-3">ID Pelanggan (Editable)</th>
+                                        <th class="py-2.5 px-3">Nama Pelanggan</th>
+                                        <th class="py-2.5 px-3">IP Router</th>
+                                        <th class="py-2.5 px-3">POP / Cabang</th>
+                                        <th class="py-2.5 px-3">WiFi (SSID / Pass)</th>
+                                        <th class="py-2.5 px-3 text-center">Hapus</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <template x-for="(row, idx) in importPreviewData" :key="idx">
+                                        <tr :class="{
+                                            'bg-emerald-50/25': row._status === 'valid',
+                                            'bg-amber-50/30': row._status === 'duplicate',
+                                            'bg-rose-50/30': row._status === 'error'
+                                        }">
+                                            <!-- Status Tag -->
+                                            <td class="py-2 px-3">
+                                                <span x-show="row._status === 'valid'" class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-md text-[10px] font-bold">BARU</span>
+                                                <span x-show="row._status === 'duplicate'" class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md text-[10px] font-bold">DUPLIKAT</span>
+                                                <span x-show="row._status === 'error'" class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-md text-[10px] font-bold">ERROR</span>
+                                            </td>
+                                            
+                                            <!-- Aksi Tindakan -->
+                                            <td class="py-2 px-3">
+                                                <span x-show="row._status === 'valid'" class="text-emerald-600 text-[11px] font-semibold">Simpan Baru</span>
+                                                <template x-if="row._status === 'duplicate'">
+                                                    <select x-model="row._action" class="px-2 py-1 text-[11px] font-bold rounded-lg border border-amber-300 bg-white" :class="row._action === 'update' ? 'text-amber-800' : 'text-slate-500'">
+                                                        <option value="update">Timpa Data</option>
+                                                        <option value="skip">Abaikan (Skip)</option>
+                                                    </select>
+                                                </template>
+                                                <span x-show="row._status === 'error'" class="text-rose-600 text-[10px]" x-text="row._message"></span>
+                                            </td>
+
+                                            <!-- ID Pelanggan Editable -->
+                                            <td class="py-2 px-3 font-mono">
+                                                <input x-model="row.data.id_pelanggan"
+                                                       @input="onRowIdChanged(row)"
+                                                       class="w-32 px-2 py-1 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500 font-bold"
+                                                       :class="{'border-rose-400 bg-rose-50': !row.data.id_pelanggan}">
+                                            </td>
+
+                                            <!-- Nama Editable -->
+                                            <td class="py-2 px-3">
+                                                <input x-model="row.data.nama"
+                                                       @input="updatePreviewStats()"
+                                                       class="w-36 px-2 py-1 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500"
+                                                       :class="{'border-rose-400 bg-rose-50': !row.data.nama}">
+                                            </td>
+
+                                            <!-- IP Router Editable -->
+                                            <td class="py-2 px-3 font-mono">
+                                                <input x-model="row.data.ip_router"
+                                                       @input="updatePreviewStats()"
+                                                       class="w-32 px-2 py-1 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500"
+                                                       :class="{'border-rose-400 bg-rose-50': !row.data.ip_router}">
+                                            </td>
+
+                                            <!-- POP / OLT -->
+                                            <td class="py-2 px-3 text-slate-600" x-text="row.data.pop || 'Server Cabang'"></td>
+
+                                            <!-- WiFi -->
+                                            <td class="py-2 px-3 text-slate-600">
+                                                <span class="font-bold text-slate-800" x-text="row.data.nama_wifi || '-'"></span>
+                                                <span x-show="row.data.password_wifi" class="text-slate-400 font-mono text-[10px]" x-text="' / ' + row.data.password_wifi"></span>
+                                            </td>
+
+                                            <!-- Aksi Hapus Baris -->
+                                            <td class="py-2 px-3 text-center">
+                                                <button type="button" @click="importPreviewData.splice(idx, 1); updatePreviewStats();" class="text-slate-400 hover:text-rose-600 transition p-1" title="Hapus Baris Ini">
+                                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Controls -->
+            <div class="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 shrink-0">
+                <button @click="importModalOpen = false" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
+                    Batal
+                </button>
+
+                <div class="flex gap-2">
+                    <button x-show="importStep > 1" @click="importStep--" class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold text-xs min-h-[40px]">
+                        &larr; Kembali
+                    </button>
+                    
+                    <button x-show="importStep === 1"
+                            @click="proceedToStep2()"
+                            :disabled="!canProceedToStep2 || isImporting"
+                            class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-indigo-100 transition min-h-[40px] flex items-center gap-2">
+                        <svg x-show="isImporting" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span x-text="isImporting ? 'Menganalisis...' : 'Lanjut ke Pemetaan &rarr;'"></span>
+                    </button>
+
+                    <button x-show="importStep === 2"
+                            @click="previewImportData()"
+                            :disabled="!canProceedToStep3 || isImporting"
+                            class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-indigo-100 transition min-h-[40px] flex items-center gap-2">
+                        <svg x-show="isImporting" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span x-text="isImporting ? 'Membuat Pratinjau...' : 'Lihat Pratinjau Data &rarr;'"></span>
+                    </button>
+
+                    <button x-show="importStep === 3"
+                            @click="executeImportData()"
+                            :disabled="getActiveImportCount() === 0 || isImporting"
+                            class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-emerald-100 transition min-h-[40px] flex items-center gap-2">
+                        <svg x-show="isImporting" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span x-show="!isImporting">Simpan ke Database (<span x-text="getActiveImportCount()"></span> Data)</span>
+                        <span x-show="isImporting">Menyimpan...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5B: Pop-up Khusus Duplikasi & Fitur Koreksi -->
+    <div x-show="duplicateModalOpen"
+         style="display: none;"
+         class="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="duplicateModalOpen = false"
+             class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-amber-200 flex flex-col max-h-[90vh] space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 rounded-xl bg-amber-50 text-amber-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                         </svg>
                     </div>
                     <div>
-                        <span class="font-bold text-slate-800 text-xs block" x-text="selectedCsvFile ? selectedCsvFile.name : 'Klik untuk memilih berkas CSV'"></span>
-                        <span class="text-slate-400 text-[11px]" x-text="selectedCsvFile ? (selectedCsvFile.size / 1024).toFixed(1) + ' KB' : 'Mendukung pemisah koma (,) maupun titik-koma (;)'"></span>
+                        <h3 class="text-base font-bold text-slate-900">Pop-up Duplikasi & Fitur Koreksi ID</h3>
+                        <p class="text-xs text-slate-500">Ubah ID pelanggan yang bentrok atau tentukan aksi Timpa / Skip sebelum dieksekusi</p>
                     </div>
                 </div>
+                <button @click="duplicateModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
 
-            <!-- Import Result Summary -->
-            <div x-show="importResult" class="p-3.5 bg-emerald-50 rounded-xl border border-emerald-100 text-xs space-y-1">
-                <div class="font-bold text-emerald-800" x-text="importResult?.message"></div>
-                <div class="text-[11px] text-emerald-700 flex gap-3">
-                    <span>Baru: <strong x-text="importResult?.result?.imported || 0"></strong></span>
-                    <span>Diperbarui: <strong x-text="importResult?.result?.updated || 0"></strong></span>
-                    <span>Gagal: <strong x-text="importResult?.result?.failed || 0"></strong></span>
+            <!-- Toolbar Aksi Cepat Global -->
+            <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="text-amber-900">
+                    <span>Ditemukan </span>
+                    <strong x-text="importPreviewDuplicates.length"></strong>
+                    <span> baris yang memiliki ID terdaftar di database.</span>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" @click="setAllDuplicatesAction('update')" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold transition text-xs shadow-xs">
+                        🔄 Timpa Semua Data
+                    </button>
+                    <button type="button" @click="setAllDuplicatesAction('skip')" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition text-xs">
+                        ⏭️ Abaikan Semua (Skip)
+                    </button>
+                    <button type="button" @click="autoGenerateUniqueDuplicateIds()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition text-xs shadow-xs flex items-center gap-1">
+                        ⚡ Auto-Generate ID Unik
+                    </button>
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2.5 pt-2">
-                <button @click="importModalOpen = false" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
-                    Tutup
-                </button>
-                <button @click="executeImportCsv()"
-                        :disabled="!selectedCsvFile || isImporting"
-                        class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center gap-2 min-h-[40px]">
-                    <svg x-show="isImporting" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    <span x-text="isImporting ? 'Memproses...' : 'Proses Import CSV'"></span>
+            <!-- Tabel Baris Duplikat yang Dapat Diedit -->
+            <div class="border border-slate-200 rounded-2xl overflow-hidden flex-1 flex flex-col">
+                <div class="overflow-y-auto max-h-72">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-slate-100 text-slate-700 sticky top-0 font-bold uppercase text-[10px] tracking-wider z-10">
+                            <tr>
+                                <th class="py-2.5 px-3">No</th>
+                                <th class="py-2.5 px-3">ID Pelanggan (Bisa Diubah)</th>
+                                <th class="py-2.5 px-3">Nama Pelanggan</th>
+                                <th class="py-2.5 px-3">IP Router</th>
+                                <th class="py-2.5 px-3">Pilihan Tindakan</th>
+                                <th class="py-2.5 px-3 text-center">Aksi Cepat</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <template x-for="(row, dIdx) in importPreviewDuplicates" :key="dIdx">
+                                <tr class="hover:bg-amber-50/40">
+                                    <td class="py-2 px-3 text-slate-500 font-mono" x-text="dIdx + 1"></td>
+                                    
+                                    <!-- ID Pelanggan Editable Langsung -->
+                                    <td class="py-2 px-3 font-mono">
+                                        <div class="flex items-center gap-1.5">
+                                            <input x-model="row.data.id_pelanggan"
+                                                   @input="onRowIdChanged(row)"
+                                                   class="w-36 px-2.5 py-1.5 border border-amber-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 rounded-lg text-xs font-bold bg-white text-slate-900"
+                                                   placeholder="Masukkan ID Baru">
+                                        </div>
+                                    </td>
+
+                                    <!-- Nama Pelanggan -->
+                                    <td class="py-2 px-3 font-medium text-slate-800" x-text="row.data.nama"></td>
+
+                                    <!-- IP Router -->
+                                    <td class="py-2 px-3 font-mono text-slate-600" x-text="row.data.ip_router"></td>
+
+                                    <!-- Tindakan Per Baris -->
+                                    <td class="py-2 px-3">
+                                        <select x-model="row._action" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-white" :class="row._action === 'update' ? 'text-amber-800' : 'text-slate-500'">
+                                            <option value="update">Timpa Profil Database</option>
+                                            <option value="skip">Abaikan (Jangan Simpan)</option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Tombol Auto-Unik Per Baris -->
+                                    <td class="py-2 px-3 text-center">
+                                        <button type="button" @click="makeRowUnique(row)" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition" title="Tambahkan kode unik agar menjadi ID baru">
+                                            Jadikan ID Unik
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer Pop-up Duplikasi -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                <span class="text-xs text-slate-500">Perubahan ID yang disimpan otomatis diperbarui pada tabel pratinjau.</span>
+                <button @click="duplicateModalOpen = false" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition">
+                    Simpan Keputusan & Kembali ke Pratinjau
                 </button>
             </div>
         </div>
@@ -904,8 +1258,10 @@
                                     </template>
                                 </div>
                             </div>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                            </button>
+                            <!-- Edit Mode -->
+                            <div x-show="isEditingWifi" class="w-full">
+                                <input type="text" x-model="editWifiData.password_wifi" class="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Masukkan Password WiFi">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -979,7 +1335,6 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION (Clean SVG) -->
     <div x-show="toast.show"
          style="display: none;"
          x-transition:enter="transition ease-out duration-200"
@@ -1095,16 +1450,59 @@ function customerApp() {
         confirmDeleteModalOpen: false,
         confirmBulkDeleteModalOpen: false,
         importModalOpen: false,
+        duplicateModalOpen: false,
+        // State Import Wizard (Multi-langkah)
+        importStep: 1, // 1: Upload, 2: Mapping, 3: Preview
+        importFile: null,
+        importSheets: [],
+        importSelectedSheet: '',
+        importCurrentColumns: [],
+        importMapping: {},
+        importPreviewData: [],
+        importPreviewValid: [],
+        importPreviewDuplicates: [],
+        importPreviewErrors: [],
+        existingDbIds: [],
+        isImporting: false,
+        dbImportFields: [
+            { key: 'id_pelanggan', label: 'ID Pelanggan (Otomatis jika kosong)', required: false },
+            { key: 'nama', label: 'Nama Pelanggan', required: true },
+            { key: 'ip_router', label: 'IP Router', required: true },
+            { key: 'pop', label: 'POP / Cabang', required: false },
+            { key: 'nama_wifi', label: 'Nama WiFi (SSID)', required: false },
+            { key: 'password_wifi', label: 'Password WiFi', required: false },
+            { key: 'user_admin', label: 'User Admin ONT', required: false },
+            { key: 'pass_admin', label: 'Password Admin ONT', required: false },
+            { key: 'jenis_modem', label: 'Tipe Modem', required: false },
+            { key: 'paket', label: 'Paket Bandwidth', required: false },
+            { key: 'mac_address', label: 'MAC Address', required: false },
+            { key: 'alamat', label: 'Alamat Pemasangan', required: false },
+            { key: 'no_hp', label: 'No HP / WhatsApp', required: false }
+        ],
+
+        get isExcelFile() {
+            return !!(this.importFile && this.importFile.name && this.importFile.name.match(/\.(xlsx|xls)$/i));
+        },
+        get isCurrentSheetEmpty() {
+            if (!this.isExcelFile || !this.importSelectedSheet) return false;
+            const sheet = this.importSheets.find(s => s.name === this.importSelectedSheet);
+            return sheet ? (sheet.columns.length === 0 || sheet.row_count === 0) : false;
+        },
+        get canProceedToStep2() {
+            if (!this.importFile) return false;
+            if (this.isExcelFile) {
+                return !!(this.importSelectedSheet && !this.isCurrentSheetEmpty);
+            }
+            return true;
+        },
+        get canProceedToStep3() {
+            return !!(this.importMapping && this.importMapping.nama && this.importMapping.ip_router);
+        },
 
         // Selected Targets
         selectedCustomer: null,
         selectedLogs: [],
         customerToDelete: null,
-
-        // Import CSV State
-        selectedCsvFile: null,
-        isImporting: false,
-        importResult: null,
 
         // State Tampilan Kredensial
         showOntPass: {},
@@ -1403,43 +1801,320 @@ function customerApp() {
         },
 
         openImportModal() {
-            this.selectedCsvFile = null;
-            this.importResult = null;
+            this.importStep = 1;
+            this.importFile = null;
+            this.importSheets = [];
+            this.importSelectedSheet = '';
+            this.importCurrentColumns = [];
+            this.importMapping = {};
+            this.importPreviewData = [];
+            this.importPreviewValid = [];
+            this.importPreviewDuplicates = [];
+            this.importPreviewErrors = [];
+            this.existingDbIds = [];
+            this.duplicateModalOpen = false;
             this.isImporting = false;
+            if (this.$refs.excelFileInput) {
+                this.$refs.excelFileInput.value = '';
+            }
             this.importModalOpen = true;
         },
 
-        onFileSelected(event) {
+        async onImportFileSelected(event) {
             const files = event.target.files;
             if (files && files.length > 0) {
-                this.selectedCsvFile = files[0];
+                this.importFile = files[0];
+                this.importSheets = [];
+                this.importSelectedSheet = '';
+                this.importCurrentColumns = [];
+                this.importMapping = {};
+                this.importPreviewData = [];
+                this.existingDbIds = [];
+                await this.analyzeImportFile();
             }
         },
 
-        async executeImportCsv() {
-            if (!this.selectedCsvFile) return;
+        async analyzeImportFile() {
+            if (!this.importFile) return;
             this.isImporting = true;
-            this.importResult = null;
-
             try {
                 const formData = new FormData();
-                formData.append('file', this.selectedCsvFile);
+                formData.append('file', this.importFile);
 
-                const res = await fetch('/api/customers/import-csv', {
+                const res = await fetch('/api/customers/import/analyze', {
                     method: 'POST',
                     body: formData
                 });
-
                 const json = await res.json();
-                if (res.ok) {
-                    this.importResult = json;
-                    this.showToast(json.message);
-                    this.fetchCustomers(1);
+                
+                if (res.ok && json.result) {
+                    this.importSheets = json.result.sheets || [];
+                    if (this.importSheets.length === 1) {
+                        this.importSelectedSheet = this.importSheets[0].name;
+                        this.onSheetChanged();
+                    } else {
+                        this.importSelectedSheet = '';
+                        this.importCurrentColumns = [];
+                    }
+                    this.showToast(`Berkas berhasil dianalisis: ${this.importSheets.length} sheet terdeteksi`, 'success');
                 } else {
-                    this.showToast(json.detail || "Gagal memproses import CSV", "error");
+                    this.showToast(json.detail || "Gagal menganalisis berkas", "error");
                 }
             } catch (err) {
-                this.showToast("Gagal mengunggah file CSV", "error");
+                console.error("Error saat analisis file:", err);
+                this.showToast("Terjadi kesalahan saat membaca berkas", "error");
+            } finally {
+                this.isImporting = false;
+            }
+        },
+
+        onSheetChanged() {
+            const sheet = this.importSheets.find(s => s.name === this.importSelectedSheet);
+            if (sheet) {
+                this.importCurrentColumns = sheet.columns || [];
+                this.autoMapColumns();
+            } else {
+                this.importCurrentColumns = [];
+                this.importMapping = {};
+            }
+        },
+
+        proceedToStep2() {
+            if (!this.canProceedToStep2) {
+                if (this.isExcelFile && !this.importSelectedSheet) {
+                    this.showToast("Silakan pilih sheet/tabel yang akan diimpor terlebih dahulu", "error");
+                } else if (this.isCurrentSheetEmpty) {
+                    this.showToast("Sheet terpilih tidak memuat data yang valid", "error");
+                }
+                return;
+            }
+            if (Object.keys(this.importMapping).length === 0 || !this.importMapping.nama) {
+                this.autoMapColumns();
+            }
+            this.importStep = 2;
+        },
+
+        autoMapColumns() {
+            if (!this.importCurrentColumns || this.importCurrentColumns.length === 0) return;
+            this.importMapping = {};
+            
+            const cleanStr = (s) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            const aliases = {
+                id_pelanggan: ['idpelanggan', 'id', 'cid', 'nopelanggan', 'nomerpelanggan', 'no'],
+                nama: ['nama', 'namapelanggan', 'customer', 'name', 'client', 'namalengkap'],
+                ip_router: ['iprouter', 'ip', 'ipaddress', 'ipont', 'ipmodem'],
+                pop: ['pop', 'cabang', 'area', 'olt', 'odpbaru', 'odplama', 'odp', 'lokasi', 'server'],
+                nama_wifi: ['namawifi', 'wifi', 'ssid', 'wifibaru', 'namassid', 'ssidwifi'],
+                password_wifi: ['passwordwifi', 'passwifi', 'pswd', 'passbaru', 'sandiwifi', 'passwordwifibaru', 'pass'],
+                user_admin: ['useradmin', 'user', 'username', 'adminuser', 'userlogin', 'useront'],
+                pass_admin: ['passadmin', 'pass', 'password', 'adminpass', 'passlogin', 'passont'],
+                jenis_modem: ['jenismodem', 'tipemodem', 'modem', 'type', 'tipe', 'onttype'],
+                paket: ['paket', 'profile', 'bandwidth', 'speed', 'layanan', 'paketinternet'],
+                mac_address: ['macaddress', 'mac', 'sn', 'serialnumber', 'gponsn'],
+                alamat: ['alamat', 'alamatpasang', 'address', 'lokasipasang'],
+                no_hp: ['nohp', 'hp', 'telepon', 'whatsapp', 'wa', 'telp', 'phone', 'nomorhp']
+            };
+
+            this.dbImportFields.forEach(field => {
+                const targetKey = field.key;
+                const matchPatterns = aliases[targetKey] || [cleanStr(field.label)];
+                let matchedCol = '';
+
+                // Prioritas 1: Exact match atau alias match
+                for (const col of this.importCurrentColumns) {
+                    const normCol = cleanStr(col);
+                    if (matchPatterns.includes(normCol)) {
+                        matchedCol = col;
+                        break;
+                    }
+                }
+
+                // Prioritas 2: Substring match jika belum cocok
+                if (!matchedCol) {
+                    for (const col of this.importCurrentColumns) {
+                        const normCol = cleanStr(col);
+                        for (const pat of matchPatterns) {
+                            if (normCol.length >= 3 && (normCol.includes(pat) || (pat.length >= 3 && pat.includes(normCol)))) {
+                                matchedCol = col;
+                                break;
+                            }
+                        }
+                        if (matchedCol) break;
+                    }
+                }
+
+                this.importMapping[targetKey] = matchedCol || '';
+            });
+            this.showToast("Pemetaan kolom diperbarui secara otomatis");
+        },
+
+        async previewImportData() {
+            if (!this.canProceedToStep3) {
+                this.showToast("Kolom Nama Pelanggan dan IP Router wajib dipetakan", "error");
+                return;
+            }
+            this.isImporting = true;
+            try {
+                const formData = new FormData();
+                formData.append('file', this.importFile);
+                formData.append('sheet_name', this.importSelectedSheet || '');
+                formData.append('mapping', JSON.stringify(this.importMapping));
+
+                const res = await fetch('/api/customers/import/preview', {
+                    method: 'POST',
+                    body: formData
+                });
+                const json = await res.json();
+                
+                if (res.ok && json.result) {
+                    this.importPreviewData = json.result.preview_data || [];
+                    this.existingDbIds = json.result.existing_ids || [];
+                    this.updatePreviewStats();
+                    this.importStep = 3;
+                    this.showToast(`Pratinjau siap: ${this.importPreviewData.length} baris data dimuat`, 'success');
+                } else {
+                    this.showToast(json.detail || "Gagal membuat pratinjau data", "error");
+                }
+            } catch (err) {
+                console.error("Error preview data:", err);
+                this.showToast("Terjadi kesalahan sistem saat memproses pratinjau", "error");
+            } finally {
+                this.isImporting = false;
+            }
+        },
+
+        updatePreviewStats() {
+            this.importPreviewValid = [];
+            this.importPreviewDuplicates = [];
+            this.importPreviewErrors = [];
+            const seenBatch = new Set();
+
+            this.importPreviewData.forEach(row => {
+                const d = row.data || row;
+                const id = (d.id_pelanggan || '').toString().trim();
+                const nama = (d.nama || '').toString().trim();
+                const ip = (d.ip_router || '').toString().trim();
+
+                if (!nama || !ip) {
+                    row._status = 'error';
+                    row._message = 'Nama Pelanggan dan IP Router wajib diisi';
+                    this.importPreviewErrors.push(row);
+                } else if (!id) {
+                    row._status = 'error';
+                    row._message = 'ID Pelanggan tidak boleh kosong';
+                    this.importPreviewErrors.push(row);
+                } else if (this.existingDbIds.includes(id)) {
+                    row._status = 'duplicate';
+                    if (!row._action || row._action === 'insert') {
+                        row._action = 'update';
+                    }
+                    row._message = `ID '${id}' sudah terdaftar di database`;
+                    this.importPreviewDuplicates.push(row);
+                } else if (seenBatch.has(id)) {
+                    row._status = 'duplicate';
+                    if (!row._action || row._action === 'insert') {
+                        row._action = 'update';
+                    }
+                    row._message = `ID '${id}' duplikat di dalam berkas`;
+                    this.importPreviewDuplicates.push(row);
+                } else {
+                    seenBatch.add(id);
+                    row._status = 'valid';
+                    if (row._action === 'update') row._action = 'insert';
+                    row._message = 'Data baru siap di-import';
+                    this.importPreviewValid.push(row);
+                }
+            });
+        },
+
+        onRowIdChanged(row) {
+            this.updatePreviewStats();
+        },
+
+        openDuplicateModal() {
+            this.duplicateModalOpen = true;
+        },
+
+        closeDuplicateModal() {
+            this.duplicateModalOpen = false;
+        },
+
+        setAllDuplicatesAction(action) {
+            this.importPreviewData.forEach(r => {
+                if (r._status === 'duplicate') {
+                    r._action = action;
+                }
+            });
+            this.showToast(`Aksi semua data duplikat diatur ke: ${action === 'update' ? 'Timpa Data' : 'Abaikan (Skip)'}`);
+        },
+
+        makeRowUnique(row) {
+            const d = row.data || row;
+            let currentId = (d.id_pelanggan || 'PLG').toString().replace(/_NEW\d*$/i, '');
+            let count = 1;
+            let candidate = `${currentId}_NEW${count}`;
+            const allIds = new Set([
+                ...this.existingDbIds,
+                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan)
+            ]);
+            while (allIds.has(candidate)) {
+                count++;
+                candidate = `${currentId}_NEW${count}`;
+            }
+            d.id_pelanggan = candidate;
+            row._status = 'valid';
+            row._action = 'insert';
+            row._message = `ID diubah menjadi ${candidate} (Unik)`;
+            this.updatePreviewStats();
+            this.showToast(`ID berhasil diubah menjadi ${candidate}`);
+        },
+
+        autoGenerateUniqueDuplicateIds() {
+            let changed = 0;
+            this.importPreviewData.forEach(r => {
+                if (r._status === 'duplicate') {
+                    this.makeRowUnique(r);
+                    changed++;
+                }
+            });
+            this.showToast(`${changed} data duplikat berhasil diperbarui dengan ID unik baru!`, 'success');
+            if (this.importPreviewDuplicates.length === 0) {
+                this.duplicateModalOpen = false;
+            }
+        },
+
+        getActiveImportCount() {
+            return this.importPreviewData.filter(r => r._status !== 'error' && r._action !== 'skip').length;
+        },
+
+        async executeImportData() {
+            const dataToImport = this.importPreviewData.filter(r => r._status !== 'error' && r._action !== 'skip');
+            if (dataToImport.length === 0) {
+                this.showToast("Tidak ada data yang valid untuk di-import", "error");
+                return;
+            }
+
+            this.isImporting = true;
+            try {
+                const res = await fetch('/api/customers/import/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: dataToImport })
+                });
+                const json = await res.json();
+                
+                if (res.ok) {
+                    this.showToast(json.message || "Import data berhasil diproses!", "success");
+                    this.importModalOpen = false;
+                    this.duplicateModalOpen = false;
+                    this.fetchCustomers(1);
+                } else {
+                    this.showToast(json.detail || "Gagal menyimpan data import", "error");
+                }
+            } catch (err) {
+                console.error("Error eksekusi import:", err);
+                this.showToast("Terjadi kesalahan sistem saat menyimpan import", "error");
             } finally {
                 this.isImporting = false;
             }

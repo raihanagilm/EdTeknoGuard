@@ -146,12 +146,12 @@ class CustomerController:
             raise HTTPException(status_code=500, detail=f"Gagal memproses import CSV: {e}")
 
     @staticmethod
-    def download_template() -> Response:
-        content = CustomerService.generate_csv_template()
+    def download_template_excel() -> Response:
+        content = CustomerService.generate_excel_template()
         return Response(
             content=content,
-            media_type="text/csv",
-            headers={"Content-Disposition": "attachment; filename=template_pelanggan_edteknoguard.csv"}
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=template_import_pelanggan.xlsx"}
         )
 
     @staticmethod
@@ -162,4 +162,50 @@ class CustomerController:
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers={"Content-Disposition": "attachment; filename=data_pelanggan_edteknoguard.xlsx"}
         )
+
+    @staticmethod
+    def analyze_import(file_content: bytes, filename: str) -> Dict[str, Any]:
+        try:
+            res = CustomerService.analyze_import_file(file_content=file_content, filename=filename)
+            return {
+                "status": "success",
+                "result": res
+            }
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Gagal menganalisis file: {e}")
+
+    @staticmethod
+    def preview_import(db: Session, file_content: bytes, filename: str, sheet_name: str, mapping: dict) -> Dict[str, Any]:
+        try:
+            res = CustomerService.preview_import_file(
+                file_content=file_content, 
+                filename=filename, 
+                sheet_name=sheet_name, 
+                mapping=mapping, 
+                db=db
+            )
+            return {
+                "status": "success",
+                "result": res
+            }
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Gagal memproses preview: {e}")
+
+    @staticmethod
+    def execute_import(db: Session, data_list: list) -> Dict[str, Any]:
+        try:
+            res = CustomerService.execute_json_import(db=db, data_list=data_list)
+            return {
+                "status": "success",
+                "message": f"Berhasil memproses {res['total_processed']} baris ({res['imported']} baru, {res['updated']} diperbarui, {res['failed']} gagal).",
+                "result": res
+            }
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Gagal mengeksekusi import: {e}")
 

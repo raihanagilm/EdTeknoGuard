@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
 
 import openpyxl
+import pandas as pd
+import json
+
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
@@ -14,6 +17,294 @@ from app.db.models import Pelanggan, LogPerformaONT
 from app.modules.customers.schemas import CustomerCreate, CustomerUpdate
 
 class CustomerService:
+
+    @staticmethod
+    def analyze_import_file(file_content: bytes, filename: str) -> dict:
+        import io
+        import pandas as pd
+
+        filename_lower = filename.lower()
+        if filename_lower.endswith('.csv'):
+            try:
+                # Coba deteksi delimiter (; atau ,)
+                sample = file_content[:4096].decode('utf-8', errors='ignore')
+                sep = ';' if sample.count(';') > sample.count(',') else ','
+                df = pd.read_csv(io.BytesIO(file_content), sep=sep, nrows=10)
+                cols = [str(c).strip() for c in df.columns if str(c).strip() and not str(c).startswith('Unnamed:')]
+                
+                # Hitung total baris
+                df_full = pd.read_csv(io.BytesIO(file_content), sep=sep)
+                return {
+                    "is_excel": False,
+                    "sheets": [{
+                        "name": "CSV Data",
+                        "columns": cols,
+                        "header_row": 0,
+                        "row_count": len(df_full)
+                    }]
+                }
+            except Exception as e:
+                raise ValueError(f"Gagal membaca file CSV: {str(e)}")
+        elif filename_lower.endswith(('.xls', '.xlsx')):
+            try:
+                excel = pd.ExcelFile(io.BytesIO(file_content))
+                sheets_data = []
+                for sheet in excel.sheet_names:
+                    # Deteksi baris header secara cerdas (periksa 10 baris pertama)
+                    df_raw = pd.read_excel(excel, sheet_name=sheet, header=None, nrows=10)
+                    if df_raw.empty:
+                        sheets_data.append({
+                            "name": sheet,
+                            "columns": [],
+                            "header_row": 0,
+                            "row_count": 0
+                        })
+                        continue
+
+                    best_row = 0
+                    max_non_null = 0
+                    for r in range(min(len(df_raw), 8)):
+                        row_vals = [
+                            str(x).strip() for x in df_raw.iloc[r] 
+                            if pd.notna(x) and str(x).strip() != '' and not str(x).startswith('Unnamed:')
+                        ]
+                        if len(row_vals) > max_non_null:
+                            max_non_null = len(row_vals)
+                            best_row = r
+
+                    cols = [
+                        str(x).strip() for x in df_raw.iloc[best_row] 
+                        if pd.notna(x) and str(x).strip() != '' and not str(x).startswith('Unnamed:')
+                    ]
+
+                    # Hitung estimasi baris data
+                    df_full = pd.read_excel(excel, sheet_name=sheet, header=best_row)
+                    row_count = len(df_full)
+
+                    sheets_data.append({
+                        "name": sheet,
+                        "columns": cols,
+                        "header_row": best_row,
+                        "row_count": row_count
+                    })
+
+                return {
+                    "is_excel": True,
+                    "sheets": sheets_data
+                }
+            except Exception as e:
+                raise ValueError(f"Gagal membaca file Excel: {str(e)}")
+        else:
+            raise ValueError("Format file tidak didukung. Harap gunakan berkas .xlsx, .xls, atau .csv")
+
+    @staticmethod
+    def preview_import_file(file_content: bytes, filename: str, sheet_name: str, mapping: dict, db: Session) -> dict:
+        import io
+        import math
+        import pandas as pd
+        from app.db.models import Pelanggan
+
+        filename_lower = filename.lower()
+        try:
+            if filename_lower.endswith('.csv'):
+                sample = file_content[:4096].decode('utf-8', errors='ignore')
+                sep = ';' if sample.count(';') > sample.count(',') else ','
+                df = pd.read_csv(io.BytesIO(file_content), sep=sep)
+            else:
+                # Deteksi header row
+                excel = pd.ExcelFile(io.BytesIO(file_content))
+                target_sheet = sheet_name if sheet_name in excel.sheet_names else excel.sheet_names[0]
+                df_raw = pd.read_excel(excel, sheet_name=target_sheet, header=None, nrows=10)
+                best_row = 0
+                max_non_null = 0
+                for r in range(min(len(df_raw), 8)):
+                    row_vals = [
+                        str(x).strip() for x in df_raw.iloc[r] 
+                        if pd.notna(x) and str(x).strip() != '' and not str(x).startswith('Unnamed:')
+                    ]
+                    if len(row_vals) > max_non_null:
+                        max_non_null = len(row_vals)
+                        best_row = r
+
+                df = pd.read_excel(excel, sheet_name=target_sheet, header=best_row)
+
+            # Normalisasi kolom
+            df.columns = [str(c).strip() for c in df.columns]
+            df = df.fillna("")
+
+            existing_ids = {row[0] for row in db.query(Pelanggan.id_pelanggan).all()}
+            seen_in_batch = set()
+            mapped_data = []
+
+            for index, row in df.iterrows():
+                row_dict = row.to_dict()
+                mapped_row = {}
+                has_any_data = False
+
+                for db_field, excel_col in mapping.items():
+                    if excel_col and excel_col in row_dict:
+                        val = row_dict[excel_col]
+                        if isinstance(val, float) and math.isnan(val):
+                            val = ""
+                        val = str(val).strip()
+                        if val.endswith('.0') and db_field in ['id_pelanggan', 'no_hp', 'ip_router']:
+                            # Menangani angka format float pandas misalnya 2072026320.0
+                            val = val[:-2]
+                        mapped_row[db_field] = val
+                        if val:
+                            has_any_data = True
+                    else:
+                        mapped_row[db_field] = ""
+
+                # Lewati baris yang benar-benar kosong
+                if not has_any_data:
+                    continue
+
+                # Cek ID pelanggan
+                id_pel = mapped_row.get('id_pelanggan', '').strip()
+                if not id_pel:
+                    # Auto-generate temporary ID jika kosong
+                    sheet_prefix = re.sub(r'[^A-Za-z0-9]', '', sheet_name)[:4].upper() if sheet_name else "PLG"
+                    id_pel = f"{sheet_prefix}-{index + 1:04d}"
+                    mapped_row['id_pelanggan'] = id_pel
+
+                nama = mapped_row.get('nama', '').strip()
+                ip_router = mapped_row.get('ip_router', '').strip()
+
+                _status = "valid"
+                _message = "Data baru siap di-import"
+
+                if not nama or not ip_router:
+                    _status = "error"
+                    _message = "Nama Pelanggan dan IP Router wajib diisi"
+                elif id_pel in existing_ids:
+                    _status = "duplicate"
+                    _message = f"ID '{id_pel}' sudah ada di database (akan menimpa data jika dilanjutkan)"
+                elif id_pel in seen_in_batch:
+                    _status = "duplicate"
+                    _message = f"ID '{id_pel}' duplikat dalam file ini"
+                else:
+                    seen_in_batch.add(id_pel)
+
+                mapped_data.append({
+                    "original_row": index + 1,
+                    "data": mapped_row,
+                    "_status": _status,
+                    "_action": "update" if _status == "duplicate" else "insert",
+                    "_message": _message
+                })
+
+            valid_count = sum(1 for r in mapped_data if r["_status"] == "valid")
+            dup_count = sum(1 for r in mapped_data if r["_status"] == "duplicate")
+            err_count = sum(1 for r in mapped_data if r["_status"] == "error")
+
+            return {
+                "total_rows": len(mapped_data),
+                "valid_count": valid_count,
+                "duplicates_count": dup_count,
+                "errors_count": err_count,
+                "preview_data": mapped_data,
+                "existing_ids": list(existing_ids)
+            }
+        except Exception as e:
+            raise ValueError(f"Gagal memproses file untuk preview: {str(e)}")
+
+    @staticmethod
+    def execute_json_import(db: Session, data_list: list) -> dict:
+        from app.db.models import Pelanggan
+        imported_count = 0
+        updated_count = 0
+        skipped_count = 0
+        failed_count = 0
+        errors = []
+
+        for item in data_list:
+            try:
+                # Dukung format payload langsung maupun terbungkus {data: ...}
+                row_data = item.get("data", item)
+                action = item.get("_action", "insert")
+                status = item.get("_status", "valid")
+
+                if action == "skip" or status == "error":
+                    skipped_count += 1
+                    continue
+
+                id_pel = str(row_data.get("id_pelanggan", "")).strip()
+                nama = str(row_data.get("nama", "")).strip()
+                ip_router = str(row_data.get("ip_router", "")).strip()
+
+                if not id_pel or not nama or not ip_router:
+                    failed_count += 1
+                    errors.append(f"Baris tidak lengkap: ID='{id_pel}', Nama='{nama}', IP='{ip_router}'")
+                    continue
+
+                existing = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if existing:
+                    existing.nama = nama
+                    if row_data.get("alamat"): existing.alamat = str(row_data["alamat"]).strip()
+                    if row_data.get("no_hp"): existing.no_hp = str(row_data["no_hp"]).strip()
+                    if row_data.get("pop"): existing.pop = str(row_data["pop"]).strip()
+                    existing.ip_router = ip_router
+                    if row_data.get("paket"): existing.paket = str(row_data["paket"]).strip()
+                    if row_data.get("jenis_modem"): existing.jenis_modem = str(row_data["jenis_modem"]).strip()
+                    if row_data.get("mac_address"): existing.mac_address = str(row_data["mac_address"]).strip()
+                    
+                    if row_data.get("redaman_baseline"):
+                        try:
+                            existing.redaman_baseline = float(row_data["redaman_baseline"])
+                        except (ValueError, TypeError):
+                            pass
+                            
+                    if row_data.get("nama_wifi"): existing.nama_wifi = str(row_data["nama_wifi"]).strip()
+                    if row_data.get("password_wifi"): existing.password_wifi = str(row_data["password_wifi"]).strip()
+                    if row_data.get("user_admin"): existing.user_admin = str(row_data["user_admin"]).strip()
+                    if row_data.get("pass_admin"): existing.pass_admin = str(row_data["pass_admin"]).strip()
+                    existing.status_kredensial = "UNTESTED"
+                    existing.is_active = True
+                    
+                    updated_count += 1
+                else:
+                    redaman_baseline = None
+                    if row_data.get("redaman_baseline"):
+                        try:
+                            redaman_baseline = float(row_data["redaman_baseline"])
+                        except (ValueError, TypeError):
+                            pass
+                            
+                    new_pelanggan = Pelanggan(
+                        id_pelanggan=id_pel,
+                        nama=nama,
+                        alamat=str(row_data.get("alamat", "")).strip() or None,
+                        no_hp=str(row_data.get("no_hp", "")).strip() or None,
+                        pop=str(row_data.get("pop", "Server Cabang")).strip() or "Server Cabang",
+                        ip_router=ip_router,
+                        paket=str(row_data.get("paket", "")).strip() or None,
+                        jenis_modem=str(row_data.get("jenis_modem", "GM220-S")).strip() or "GM220-S",
+                        mac_address=str(row_data.get("mac_address", "")).strip() or None,
+                        redaman_baseline=redaman_baseline,
+                        nama_wifi=str(row_data.get("nama_wifi", "")).strip() or None,
+                        password_wifi=str(row_data.get("password_wifi", "")).strip() or None,
+                        user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
+                        pass_admin=str(row_data.get("pass_admin", "")).strip() or None,
+                        status_kredensial="UNTESTED",
+                        is_active=True
+                    )
+                    db.add(new_pelanggan)
+                    imported_count += 1
+            except Exception as e:
+                failed_count += 1
+                errors.append(f"Gagal memproses ID {row_data.get('id_pelanggan', 'Unknown')}: {str(e)}")
+
+        db.commit()
+
+        return {
+            "total_processed": imported_count + updated_count + skipped_count + failed_count,
+            "imported": imported_count,
+            "updated": updated_count,
+            "skipped": skipped_count,
+            "failed": failed_count,
+            "errors": errors[:5]
+        }
 
     @staticmethod
     def get_customers(
@@ -431,10 +722,11 @@ class CustomerService:
         cell_border = Border(top=thin_side, left=thin_side, right=thin_side, bottom=thin_side)
 
         headers = [
-            "No", "ID Pelanggan", "Nama Pelanggan", "Alamat", "No. HP",
-            "POP / OLT", "Paket Bandwidth", "Tipe Modem", "IP Router / ONT",
-            "MAC Address", "User Admin", "Status Kredensial",
-            "Redaman Baseline (dBm)", "Rx Power Terakhir (dBm)", "Status Koneksi", "Pengecekan Terakhir"
+            "ID Pelanggan (Wajib)", "Nama Pelanggan (Wajib)", "Alamat", "No. HP",
+            "POP / OLT", "IP Router / ONT (Wajib)", "Paket Bandwidth", "Tipe Modem",
+            "MAC Address", "Redaman Baseline (dBm)", "Nama WiFi", "Password WiFi",
+            "User Admin", "Pass Admin",
+            "Status Kredensial", "Rx Power Terakhir (dBm)", "Status Koneksi", "Pengecekan Terakhir"
         ]
 
         # Tulis Header
@@ -445,6 +737,8 @@ class CustomerService:
             cell.font = header_font
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             cell.border = cell_border
+            # Adjust column width
+            ws.column_dimensions[openpyxl.utils.get_column_letter(col_num)].width = 25
         ws.row_dimensions[1].height = 28
 
         # Query Seluruh Data Pelanggan Aktif
@@ -462,19 +756,21 @@ class CustomerService:
             last_check = latest_log.waktu_cek.strftime("%d/%m/%Y %H:%M") if latest_log else "-"
 
             row_data = [
-                idx,
                 c.id_pelanggan,
                 c.nama,
                 c.alamat or "-",
                 c.no_hp or "-",
                 c.pop or "-",
+                c.ip_router,
                 c.paket or "-",
                 c.jenis_modem or "-",
-                c.ip_router,
                 c.mac_address or "-",
-                c.user_admin or "-",
-                c.status_kredensial or "UNTESTED",
                 float(c.redaman_baseline) if c.redaman_baseline else "-",
+                c.nama_wifi or "-",
+                c.password_wifi or "-",
+                c.user_admin or "-",
+                c.pass_admin or "-",
+                c.status_kredensial or "UNTESTED",
                 rx_val,
                 status_val,
                 last_check
@@ -508,10 +804,54 @@ class CustomerService:
                     max_len = len(val_str)
             ws.column_dimensions[col_letter].width = max(max_len + 3, 11)
 
-        buffer = io.BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-        return buffer.getvalue()
+        out = io.BytesIO()
+        wb.save(out)
+        return out.getvalue()
+
+    @staticmethod
+    def generate_excel_template() -> bytes:
+        """
+        Menghasilkan file template Excel (.xlsx) kosong dengan format kolom standar.
+        """
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Template Import Pelanggan"
+        ws.views.sheetView[0].showGridLines = True
+
+        header_fill = PatternFill(start_color="1E1B4B", end_color="1E1B4B", fill_type="solid")
+        header_font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
+        thin_side = Side(border_style="thin", color="CBD5E1")
+        cell_border = Border(top=thin_side, left=thin_side, right=thin_side, bottom=thin_side)
+
+        headers = [
+            "ID Pelanggan (Wajib)", "Nama Pelanggan (Wajib)", "Alamat", "No. HP",
+            "POP / OLT", "IP Router / ONT (Wajib)", "Paket Bandwidth", "Tipe Modem",
+            "MAC Address", "Redaman Baseline (dBm)", "Nama WiFi", "Password WiFi",
+            "User Admin", "Pass Admin"
+        ]
+
+        ws.append(headers)
+        for col_num in range(1, len(headers) + 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.border = cell_border
+            ws.column_dimensions[openpyxl.utils.get_column_letter(col_num)].width = 25
+        ws.row_dimensions[1].height = 28
+
+        # Tambahkan satu baris sampel sebagai contoh
+        sample_row = [
+            "P-001", "Budi Santoso", "Jl. Merdeka No 1", "081234567890",
+            "Server Pusat", "192.168.1.100", "20Mbps", "GM220-S",
+            "AA:BB:CC:DD:EE:FF", "-23.5", "Budi_WiFi", "password123",
+            "admin", "admin123"
+        ]
+        ws.append(sample_row)
+
+        out = io.BytesIO()
+        wb.save(out)
+        return out.getvalue()
 
     @staticmethod
     def generate_csv_template() -> str:

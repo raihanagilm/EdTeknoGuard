@@ -37,12 +37,12 @@ def list_customers(
         db=db, q=q, pop=pop, status=status, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
     )
 
-@router.get("/api/customers/template-csv")
-def download_customers_template_csv(
+@router.get("/api/customers/template-excel")
+def download_customers_template_excel(
     user: dict = Depends(require_admin)
 ):
-    """Unduh format contoh berkas CSV data pelanggan"""
-    return CustomerController.download_template()
+    """Unduh format contoh berkas Excel data pelanggan"""
+    return CustomerController.download_template_excel()
 
 @router.get("/api/customers/export-excel")
 def export_customers_excel(
@@ -109,4 +109,55 @@ async def import_customers_csv(
     """Import data pelanggan via upload berkas CSV"""
     content = await file.read()
     return CustomerController.import_csv(db=db, file_content=content)
+
+@router.post("/api/customers/import/analyze")
+async def analyze_import(
+    file: UploadFile = File(...),
+    user: dict = Depends(require_admin)
+):
+    """Analisis file Excel/CSV untuk mendapatkan daftar sheet dan headers"""
+    content = await file.read()
+    return CustomerController.analyze_import(file_content=content, filename=file.filename)
+
+@router.post("/api/customers/import/preview")
+async def preview_import(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Preview pemetaan data Excel/CSV ke database"""
+    form = await request.form()
+    file = form.get("file")
+    sheet_name = form.get("sheet_name", "")
+    mapping_str = form.get("mapping", "{}")
+    
+    if not file or not mapping_str:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="File atau mapping tidak valid")
+        
+    import json
+    mapping = json.loads(mapping_str)
+    content = await file.read()
+    
+    return CustomerController.preview_import(
+        db=db,
+        file_content=content, 
+        filename=file.filename,
+        sheet_name=sheet_name,
+        mapping=mapping
+    )
+
+@router.post("/api/customers/import/execute")
+async def execute_import(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Eksekusi import ke database dari data preview"""
+    data = await request.json()
+    if not data or "data" not in data:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Data import tidak valid")
+        
+    return CustomerController.execute_import(db=db, data_list=data["data"])
 
