@@ -406,8 +406,20 @@
 
         <!-- Pagination Bar -->
         <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <div>
-                Menampilkan <span class="font-bold text-slate-800" x-text="logs.length"></span> dari <span class="font-bold text-slate-800" x-text="totalRecords"></span> entri log
+            <div class="flex items-center gap-3">
+                <div>
+                    Menampilkan <span class="font-bold text-slate-800" x-text="logs.length"></span> dari <span class="font-bold text-slate-800" x-text="totalRecords"></span> entri log
+                </div>
+                <!-- Dropdown Limit -->
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500">Per Halaman:</span>
+                    <select x-model="limit" @change="fetchLogs(1)" class="px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
             </div>
 
             <div class="flex items-center gap-2">
@@ -416,7 +428,21 @@
                         class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[38px]">
                     &larr; Sebelumnya
                 </button>
-                <span class="px-3 py-1 font-bold text-slate-700">Halaman <span x-text="currentPage"></span> / <span x-text="totalPages"></span></span>
+
+                <div class="hidden sm:flex items-center gap-1">
+                    <template x-for="page in getPageNumbers()" :key="page">
+                        <button @click="typeof page === 'number' ? fetchLogs(page) : null"
+                                :disabled="typeof page !== 'number' || loading"
+                                class="px-3 py-1.5 rounded-lg border transition font-semibold min-h-[38px]"
+                                :class="page === currentPage ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : (typeof page !== 'number' ? 'border-transparent text-slate-400 bg-transparent' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700')">
+                            <span x-text="page"></span>
+                        </button>
+                    </template>
+                </div>
+                <div class="sm:hidden font-bold text-slate-700">
+                    <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
+                </div>
+
                 <button @click="fetchLogs(currentPage + 1)"
                         :disabled="currentPage >= totalPages || loading"
                         class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[38px]">
@@ -451,7 +477,7 @@ function logsApp() {
         totalRecords: 0,
         currentPage: 1,
         totalPages: 1,
-        limit: 50,
+        limit: 25,
         searchQuery: '',
         filterStatus: '',
         filterRange: 'today',
@@ -469,6 +495,39 @@ function logsApp() {
 
         initData() {
             this.fetchLogs(1);
+        },
+
+        getPageNumbers() {
+            const pages = [];
+            const maxVisible = 5;
+            
+            if (this.totalPages <= maxVisible + 2) {
+                for (let i = 1; i <= this.totalPages; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                
+                let start = Math.max(2, this.currentPage - 1);
+                let end = Math.min(this.totalPages - 1, this.currentPage + 1);
+                
+                if (this.currentPage <= 3) {
+                    end = 4;
+                } else if (this.currentPage >= this.totalPages - 2) {
+                    start = this.totalPages - 3;
+                }
+                
+                if (start > 2) pages.push('...');
+                
+                for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                }
+                
+                if (end < this.totalPages - 1) pages.push('...');
+                
+                if (this.totalPages > 1) {
+                    pages.push(this.totalPages);
+                }
+            }
+            return pages;
         },
 
         onRangeChange() {

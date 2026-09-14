@@ -39,3 +39,9 @@ class CustomerUpdate(BaseModel):
 
 class BulkDeleteSchema(BaseModel):
     ids: list[str] = Field(..., description="Daftar ID pelanggan yang akan dihapus")
+
+class DynamicImportSchema(BaseModel):
+    file_id: str = Field(..., description="ID unik file yang diupload sementara")
+    sheet_name: Optional[str] = Field(None, description="Nama sheet jika menggunakan Excel")
+    mapping: dict = Field(..., description="Dictionary mapping {field_db: nama_kolom_excel}")
+    skip_duplicates: bool = Field(True, description="Lewati jika id_pelanggan sudah ada")
