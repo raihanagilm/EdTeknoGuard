@@ -31,7 +31,8 @@ class TelegramMgmtController:
         return TelegramMgmtService.get_settings(db)
 
     @staticmethod
-    def update_settings(db: Session, data: TelegramSettingsSchema) -> Dict[str, Any]:
+    def update_settings(db: Session, data: TelegramSettingsSchema, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
         try:
             cfg = TelegramMgmtService.update_settings(
                 db=db,
@@ -40,19 +41,45 @@ class TelegramMgmtController:
                 warning_threshold_dbm=data.warning_threshold_dbm,
                 debounce_minutes=data.debounce_minutes
             )
+            if request:
+                chat_info = ", ".join(data.chat_ids) if isinstance(data.chat_ids, list) else str(data.chat_ids)
+                ActivityLogService.log_from_request(
+                    db=db,
+                    request=request,
+                    action="UPDATE_SETTINGS",
+                    status="SUCCESS",
+                    keterangan=f"Ubah Pengaturan Bot Telegram: Debounce {data.debounce_minutes}m, Target Chat: {chat_info}",
+                    user=user
+                )
             return {
                 "status": "success",
                 "message": "Pengaturan Bot Telegram & Ambang Batas Redaman berhasil diperbarui.",
                 "config": cfg
             }
         except Exception as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="UPDATE_SETTINGS", status="FAILED",
+                    keterangan=f"Gagal ubah pengaturan Telegram: {str(e)}", user=user
+                )
             raise HTTPException(status_code=500, detail=f"Gagal menyimpan pengaturan: {e}")
 
     @staticmethod
-    async def send_test_alert(db: Session, req: TelegramTestAlertRequest) -> Dict[str, Any]:
+    async def send_test_alert(db: Session, req: TelegramTestAlertRequest, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
         result = await TelegramMgmtService.send_test_alert(db=db, custom_chat_id=req.custom_chat_id)
         if result["status"] == "error":
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="UPDATE_SETTINGS", status="FAILED",
+                    keterangan=f"Uji coba alert Telegram gagal: {result.get('message')}", user=user
+                )
             raise HTTPException(status_code=400, detail=result["message"])
+        if request:
+            ActivityLogService.log_from_request(
+                db=db, request=request, action="UPDATE_SETTINGS", status="SUCCESS",
+                keterangan=f"Uji coba alert Telegram berhasil dikirim ke {req.custom_chat_id or 'default recipients'}", user=user
+            )
         return result
 
     @staticmethod

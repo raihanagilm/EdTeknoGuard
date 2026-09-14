@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -13,14 +13,14 @@ def get_monitoring_status():
     return MonitoringController.get_status()
 
 @router.post("/toggle-scheduler")
-def toggle_scheduler():
+def toggle_scheduler(request: Request, db: Session = Depends(get_db)):
     """Route toggle scheduler antara RUNNING dan STOPPED"""
-    return MonitoringController.toggle_scheduler()
+    return MonitoringController.toggle_scheduler(request=request, db=db)
 
 @router.post("/scan-all")
-def trigger_scan_all():
+def trigger_scan_all(request: Request, db: Session = Depends(get_db)):
     """Route trigger pemindaian manual seluruh ONT"""
-    return MonitoringController.trigger_scan_all()
+    return MonitoringController.trigger_scan_all(request=request, db=db)
 
 @router.post("/scan/{id_pelanggan}")
 def trigger_scan_single(id_pelanggan: str):

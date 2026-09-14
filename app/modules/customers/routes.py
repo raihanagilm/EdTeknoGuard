@@ -65,50 +65,55 @@ def get_customer_detail(
 
 @router.post("/api/customers")
 def create_customer(
+    request: Request,
     data: CustomerCreate,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Tambah data pelanggan baru"""
-    return CustomerController.create_customer(db=db, data=data)
+    return CustomerController.create_customer(db=db, data=data, request=request, user=user)
 
 @router.put("/api/customers/{id_pelanggan}")
 def update_customer(
+    request: Request,
     id_pelanggan: str,
     data: CustomerUpdate,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Update data informasi pelanggan"""
-    return CustomerController.update_customer(db=db, id_pelanggan=id_pelanggan, data=data)
+    return CustomerController.update_customer(db=db, id_pelanggan=id_pelanggan, data=data, request=request, user=user)
 
 @router.delete("/api/customers/{id_pelanggan}")
 def delete_customer(
+    request: Request,
     id_pelanggan: str,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Hapus pelanggan (Soft Delete)"""
-    return CustomerController.delete_customer(db=db, id_pelanggan=id_pelanggan)
+    return CustomerController.delete_customer(db=db, id_pelanggan=id_pelanggan, request=request, user=user)
 
 @router.post("/api/customers/bulk-delete")
 def bulk_delete_customers(
+    request: Request,
     payload: BulkDeleteSchema,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Hapus massal pelanggan (Bulk Soft Delete)"""
-    return CustomerController.bulk_delete(db=db, ids=payload.ids)
+    return CustomerController.bulk_delete(db=db, ids=payload.ids, request=request, user=user)
 
 @router.post("/api/customers/import-csv")
 async def import_customers_csv(
+    request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Import data pelanggan via upload berkas CSV"""
     content = await file.read()
-    return CustomerController.import_csv(db=db, file_content=content)
+    return CustomerController.import_csv(db=db, file_content=content, filename=file.filename, request=request, user=user)
 
 @router.post("/api/customers/import/analyze")
 async def analyze_import(
@@ -159,5 +164,5 @@ async def execute_import(
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="Data import tidak valid")
         
-    return CustomerController.execute_import(db=db, data_list=data["data"])
+    return CustomerController.execute_import(db=db, data_list=data["data"], request=request, user=user)
 

@@ -32,21 +32,23 @@ def get_telegram_settings(
 
 @router.post("/api/telegram/settings")
 def update_telegram_settings(
+    request: Request,
     data: TelegramSettingsSchema,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Simpan konfigurasi baru bot telegram & parameter alert"""
-    return TelegramMgmtController.update_settings(db=db, data=data)
+    return TelegramMgmtController.update_settings(db=db, data=data, request=request, user=user)
 
 @router.post("/api/telegram/test")
 async def send_test_alert(
+    request: Request,
     req: TelegramTestAlertRequest,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Uji coba pengiriman pesan instan ke bot telegram"""
-    return await TelegramMgmtController.send_test_alert(db=db, req=req)
+    return await TelegramMgmtController.send_test_alert(db=db, req=req, request=request, user=user)
 
 @router.get("/api/telegram/history")
 def get_alert_history(

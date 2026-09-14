@@ -88,50 +88,115 @@ class CustomerController:
         }
 
     @staticmethod
-    def create_customer(db: Session, data: CustomerCreate) -> Dict[str, Any]:
+    def create_customer(db: Session, data: CustomerCreate, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
         try:
             new_cust = CustomerService.create_customer(db=db, data=data)
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db,
+                    request=request,
+                    action="TAMBAH_PELANGGAN",
+                    status="SUCCESS",
+                    keterangan=f"Menambahkan pelanggan baru: {new_cust.nama} (ID: {new_cust.id_pelanggan}, IP: {new_cust.ip_router}, POP: {new_cust.pop})",
+                    user=user
+                )
             return {
                 "status": "success",
                 "message": f"Pelanggan '{new_cust.nama}' berhasil ditambahkan",
                 "id_pelanggan": new_cust.id_pelanggan
             }
         except ValueError as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="TAMBAH_PELANGGAN", status="FAILED",
+                    keterangan=f"Gagal tambah pelanggan: {str(e)}", user=user
+                )
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="TAMBAH_PELANGGAN", status="FAILED",
+                    keterangan=f"Gagal tambah pelanggan: {str(e)}", user=user
+                )
             raise HTTPException(status_code=500, detail=f"Gagal menambahkan pelanggan: {e}")
 
     @staticmethod
-    def update_customer(db: Session, id_pelanggan: str, data: CustomerUpdate) -> Dict[str, Any]:
+    def update_customer(db: Session, id_pelanggan: str, data: CustomerUpdate, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
         try:
             cust = CustomerService.update_customer(db=db, id_pelanggan=id_pelanggan, data=data)
             if not cust:
                 raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db,
+                    request=request,
+                    action="EDIT_PELANGGAN",
+                    status="SUCCESS",
+                    keterangan=f"Memperbarui data pelanggan: {cust.nama} (ID: {cust.id_pelanggan}, IP: {cust.ip_router}, Paket: {cust.paket})",
+                    user=user
+                )
             return {
                 "status": "success",
                 "message": f"Data pelanggan '{cust.nama}' berhasil diperbarui",
                 "id_pelanggan": cust.id_pelanggan
             }
         except ValueError as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="EDIT_PELANGGAN", status="FAILED",
+                    keterangan=f"Gagal update pelanggan {id_pelanggan}: {str(e)}", user=user
+                )
             raise HTTPException(status_code=400, detail=str(e))
         except HTTPException:
             raise
         except Exception as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="EDIT_PELANGGAN", status="FAILED",
+                    keterangan=f"Gagal update pelanggan {id_pelanggan}: {str(e)}", user=user
+                )
             raise HTTPException(status_code=500, detail=f"Gagal memperbarui pelanggan: {e}")
 
     @staticmethod
-    def delete_customer(db: Session, id_pelanggan: str) -> Dict[str, Any]:
+    def delete_customer(db: Session, id_pelanggan: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
+        detail = CustomerService.get_customer_detail(db=db, id_pelanggan=id_pelanggan)
+        cust_name = detail[0].nama if detail and detail[0] else id_pelanggan
         success = CustomerService.delete_customer(db=db, id_pelanggan=id_pelanggan)
         if not success:
             raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+        if request:
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="HAPUS_PELANGGAN",
+                status="SUCCESS",
+                keterangan=f"Menghapus data pelanggan: {cust_name} (ID: {id_pelanggan})",
+                user=user
+            )
         return {
             "status": "success",
             "message": f"Pelanggan dengan ID '{id_pelanggan}' berhasil dihapus."
         }
 
     @staticmethod
-    def bulk_delete(db: Session, ids: List[str]) -> Dict[str, Any]:
+    def bulk_delete(db: Session, ids: List[str], request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
         affected = CustomerService.bulk_delete_customers(db=db, id_list=ids)
+        if request:
+            sample_ids = ", ".join(ids[:5])
+            if len(ids) > 5:
+                sample_ids += f" (+{len(ids)-5} lainnya)"
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="HAPUS_PELANGGAN_MASSAL",
+                status="SUCCESS",
+                keterangan=f"Menghapus massal {affected} data pelanggan (Daftar ID: {sample_ids})",
+                user=user
+            )
         return {
             "status": "success",
             "message": f"{affected} pelanggan berhasil dihapus.",
@@ -139,17 +204,37 @@ class CustomerController:
         }
 
     @staticmethod
-    def import_csv(db: Session, file_content: bytes) -> Dict[str, Any]:
+    def import_csv(db: Session, file_content: bytes, filename: str = "pelanggan.csv", request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
         try:
             res = CustomerService.import_customers_from_csv(db=db, file_content=file_content)
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db,
+                    request=request,
+                    action="IMPORT_PELANGGAN",
+                    status="SUCCESS",
+                    keterangan=f"Import CSV berhasil ({filename}): {res['imported']} baru, {res['updated']} diperbarui dari total {res['total_processed']} baris",
+                    user=user
+                )
             return {
                 "status": "success",
                 "message": f"Berhasil memproses {res['total_processed']} baris ({res['imported']} baru, {res['updated']} diperbarui, {res['failed']} gagal).",
                 "result": res
             }
         except ValueError as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="IMPORT_PELANGGAN", status="FAILED",
+                    keterangan=f"Gagal import CSV ({filename}): {str(e)}", user=user
+                )
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="IMPORT_PELANGGAN", status="FAILED",
+                    keterangan=f"Gagal import CSV ({filename}): {str(e)}", user=user
+                )
             raise HTTPException(status_code=500, detail=f"Gagal memproses import CSV: {e}")
 
     @staticmethod
@@ -203,16 +288,36 @@ class CustomerController:
             raise HTTPException(status_code=500, detail=f"Gagal memproses preview: {e}")
 
     @staticmethod
-    def execute_import(db: Session, data_list: list) -> Dict[str, Any]:
+    def execute_import(db: Session, data_list: list, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
         try:
             res = CustomerService.execute_json_import(db=db, data_list=data_list)
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db,
+                    request=request,
+                    action="IMPORT_PELANGGAN",
+                    status="SUCCESS",
+                    keterangan=f"Import berhasil: {res['imported']} baru, {res['updated']} diperbarui, {res['failed']} gagal dari total {res['total_processed']} baris",
+                    user=user
+                )
             return {
                 "status": "success",
                 "message": f"Berhasil memproses {res['total_processed']} baris ({res['imported']} baru, {res['updated']} diperbarui, {res['failed']} gagal).",
                 "result": res
             }
         except ValueError as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="IMPORT_PELANGGAN", status="FAILED",
+                    keterangan=f"Gagal import data pelanggan: {str(e)}", user=user
+                )
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
+            if request:
+                ActivityLogService.log_from_request(
+                    db=db, request=request, action="IMPORT_PELANGGAN", status="FAILED",
+                    keterangan=f"Gagal mengeksekusi import pelanggan: {str(e)}", user=user
+                )
             raise HTTPException(status_code=500, detail=f"Gagal mengeksekusi import: {e}")
 

@@ -31,9 +31,10 @@ def get_system_settings(
 
 @router.post("/api/settings")
 def update_system_settings(
+    request: Request,
     data: SystemSettingsSchema,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Simpan perubahan interval monitoring dan ambang batas redaman"""
-    return SystemSettingsController.update_settings(db=db, data=data)
+    return SystemSettingsController.update_settings(db=db, data=data, request=request, user=user)

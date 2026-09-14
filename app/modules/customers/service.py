@@ -528,6 +528,12 @@ class CustomerService:
 
     @staticmethod
     def create_customer(db: Session, data: CustomerCreate) -> Pelanggan:
+        if not data.id_pelanggan or not str(data.id_pelanggan).strip():
+            # Cari urutan sequence untuk IP router terkait jika sudah ada di DB
+            clean_ip = "".join(filter(str.isdigit, str(data.ip_router or "0")))
+            existing_count = db.query(Pelanggan).filter(Pelanggan.id_pelanggan.like(f"P{clean_ip}%")).count()
+            data.id_pelanggan = CustomerService.generate_customer_id_from_ip(data.ip_router or "10.10.0.1", existing_count + 1)
+
         # Validasi duplikasi ID Pelanggan
         existing_id = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == data.id_pelanggan).first()
         if existing_id:

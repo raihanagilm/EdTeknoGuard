@@ -11,13 +11,36 @@ class MonitoringController:
         return MonitoringService.get_status()
 
     @staticmethod
-    def toggle_scheduler() -> Dict[str, Any]:
+    def toggle_scheduler(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         new_status = MonitoringService.toggle_scheduler()
+        if request and db:
+            from app.modules.activity_logs.service import ActivityLogService
+            action = "START_MONITORING" if new_status == "RUNNING" else "PAUSE_MONITORING"
+            ket = "Memulai pemantauan otomatis (scheduler ONT diaktifkan)" if new_status == "RUNNING" else "Menjeda pemantauan otomatis (scheduler ONT dihentikan sementara)"
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action=action,
+                status="SUCCESS",
+                keterangan=ket,
+                user=user
+            )
         return {"status": "success", "scheduler_status": new_status}
 
     @staticmethod
-    def trigger_scan_all() -> Dict[str, Any]:
-        return MonitoringService.scan_all()
+    def trigger_scan_all(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        res = MonitoringService.scan_all()
+        if request and db:
+            from app.modules.activity_logs.service import ActivityLogService
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="START_MONITORING",
+                status="SUCCESS",
+                keterangan="Memulai pemindaian serentak seluruh ONT jaringan pelanggan",
+                user=user
+            )
+        return res
 
     @staticmethod
     def trigger_scan_single(id_pelanggan: str) -> Dict[str, Any]:

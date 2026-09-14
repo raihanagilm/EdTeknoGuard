@@ -18,7 +18,7 @@ class ActivityLogService:
         user_agent: Optional[str] = None,
         status: str = "SUCCESS",
         keterangan: Optional[str] = None
-    ) -> UserActivityLog:
+    ) -> Optional[UserActivityLog]:
         """Mencatat entri aktivitas pengguna ke dalam database"""
         try:
             log_entry = UserActivityLog(
@@ -39,6 +39,62 @@ class ActivityLogService:
         except Exception as e:
             db.rollback()
             print(f"[ActivityLogService] Gagal mencatat log aktivitas: {e}")
+            return None
+
+    @staticmethod
+    def extract_client_info(request: Any, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Ekstraksi IP Address, User Agent, Username, dan Role dari Request FastAPI"""
+        ip = "unknown"
+        if hasattr(request, "client") and request.client and getattr(request.client, "host", None):
+            ip = request.client.host
+        if hasattr(request, "headers"):
+            forwarded_for = request.headers.get("x-forwarded-for")
+            if forwarded_for:
+                ip = forwarded_for.split(",")[0].strip()
+            user_agent = request.headers.get("user-agent")
+        else:
+            user_agent = None
+
+        if not user and hasattr(request, "cookies"):
+            from app.core.security import get_current_user_optional
+            user = get_current_user_optional(request)
+
+        username = user.get("user", "admin") if user else "admin"
+        role = user.get("role", "admin") if user else "admin"
+        nama_karyawan = "Administrator NOC" if username == "admin" else username.title()
+        return {
+            "username": username,
+            "nama_karyawan": nama_karyawan,
+            "role": role,
+            "ip_address": ip,
+            "user_agent": user_agent
+        }
+
+    @staticmethod
+    def log_from_request(
+        db: Session,
+        request: Any,
+        action: str,
+        status: str = "SUCCESS",
+        keterangan: Optional[str] = None,
+        user: Optional[Dict[str, Any]] = None
+    ) -> Optional[UserActivityLog]:
+        """Helper ringkas untuk mencatat aktivitas langsung dari objek Request FastAPI"""
+        try:
+            info = ActivityLogService.extract_client_info(request, user)
+            return ActivityLogService.log_activity(
+                db=db,
+                username=info["username"],
+                action=action,
+                nama_karyawan=info["nama_karyawan"],
+                role=info["role"],
+                ip_address=info["ip_address"],
+                user_agent=info["user_agent"],
+                status=status,
+                keterangan=keterangan
+            )
+        except Exception as e:
+            print(f"[ActivityLogService] log_from_request error: {e}")
             return None
 
     @staticmethod
