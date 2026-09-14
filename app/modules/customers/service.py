@@ -413,7 +413,22 @@ class CustomerService:
         page: int = 1,
         limit: int = 25
     ) -> Tuple[int, List[Dict[str, Any]]]:
-        query = db.query(Pelanggan).filter(Pelanggan.is_active == True)
+        # Subquery ID log terbaru per id_pelanggan
+        subq = (
+            db.query(
+                LogPerformaONT.id_pelanggan,
+                func.max(LogPerformaONT.id).label('max_log_id')
+            )
+            .group_by(LogPerformaONT.id_pelanggan)
+            .subquery()
+        )
+
+        query = (
+            db.query(Pelanggan, LogPerformaONT)
+            .outerjoin(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
+            .filter(Pelanggan.is_active == True)
+        )
 
         if q:
             search_pattern = f"%{q.strip()}%"
@@ -429,6 +444,16 @@ class CustomerService:
         if pop and pop != "Semua POP":
             query = query.filter(Pelanggan.pop == pop)
 
+        if status and status != "Semua Status":
+            if status == "NORMAL":
+                query = query.filter(or_(LogPerformaONT.status_koneksi == "NORMAL", LogPerformaONT.status_koneksi == None))
+            elif status == "WARNING":
+                query = query.filter(LogPerformaONT.status_koneksi == "WARNING")
+            elif status in ("CRITICAL", "LOS"):
+                query = query.filter(or_(LogPerformaONT.status_koneksi == "CRITICAL", LogPerformaONT.status_koneksi == "LOS"))
+            else:
+                query = query.filter(LogPerformaONT.status_koneksi == status)
+
         total_count = query.count()
 
         # Dynamic sorting
@@ -441,6 +466,8 @@ class CustomerService:
             "jenis_modem": Pelanggan.jenis_modem,
             "redaman_baseline": Pelanggan.redaman_baseline,
             "status_kredensial": Pelanggan.status_kredensial,
+            "redaman_current": LogPerformaONT.rx_power,
+            "status": LogPerformaONT.status_koneksi,
             "id": Pelanggan.id
         }
         target_col = col_map.get(sort_by, Pelanggan.id)
@@ -450,24 +477,13 @@ class CustomerService:
             query = query.order_by(target_col.asc())
 
         offset = (page - 1) * limit
-        customers = query.offset(offset).limit(limit).all()
+        rows = query.offset(offset).limit(limit).all()
 
         result = []
-        for c in customers:
-            latest_log = (
-                db.query(LogPerformaONT)
-                .filter(LogPerformaONT.id_pelanggan == c.id_pelanggan)
-                .order_by(LogPerformaONT.waktu_cek.desc())
-                .first()
-            )
-            
+        for c, latest_log in rows:
             current_status = latest_log.status_koneksi if latest_log else "NORMAL"
             current_rx = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else (float(c.redaman_baseline) if c.redaman_baseline else None)
             last_check = latest_log.waktu_cek.strftime("%d/%m %H:%M") if latest_log else "-"
-
-            if status and status != "Semua Status":
-                if current_status != status:
-                    continue
 
             result.append({
                 "id_pelanggan": c.id_pelanggan,
@@ -521,8 +537,44 @@ class CustomerService:
             .group_by(Pelanggan.pop)
             .all()
         )
+
+        subq = (
+            db.query(
+                LogPerformaONT.id_pelanggan,
+                func.max(LogPerformaONT.id).label('max_log_id')
+            )
+            .group_by(LogPerformaONT.id_pelanggan)
+            .subquery()
+        )
+
+        status_counts = (
+            db.query(
+                LogPerformaONT.status_koneksi,
+                func.count(Pelanggan.id)
+            )
+            .join(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
+            .join(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
+            .filter(Pelanggan.is_active == True)
+            .group_by(LogPerformaONT.status_koneksi)
+            .all()
+        )
+        status_dict = {s[0]: s[1] for s in status_counts}
+        normal_count = status_dict.get("NORMAL", 0)
+        warning_count = status_dict.get("WARNING", 0)
+        critical_count = status_dict.get("CRITICAL", 0)
+        los_count = status_dict.get("LOS", 0)
+
+        total_with_logs = sum(status_dict.values())
+        if total_pelanggan > total_with_logs:
+            normal_count += (total_pelanggan - total_with_logs)
+
         return {
             "total": total_pelanggan,
+            "normal": normal_count,
+            "warning": warning_count,
+            "critical": critical_count,
+            "los": los_count,
+            "critical_los": critical_count + los_count,
             "pop_distribution": [{"pop": p[0], "count": p[1]} for p in pop_counts]
         }
 

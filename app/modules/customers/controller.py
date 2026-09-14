@@ -42,11 +42,13 @@ class CustomerController:
         total, data = CustomerService.get_customers(
             db=db, q=q, pop=pop, status=status, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
         )
+        stats = CustomerService.get_customer_stats(db)
         return {
             "total": total,
             "page": page,
             "limit": limit,
-            "data": data
+            "data": data,
+            "stats": stats
         }
 
     @staticmethod

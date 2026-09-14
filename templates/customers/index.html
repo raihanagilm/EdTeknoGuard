@@ -66,7 +66,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Total Pelanggan</div>
-                <div class="text-xl font-extrabold text-slate-900" x-text="stats.total || {{ stats.total }}"></div>
+                <div class="text-xl font-extrabold text-slate-900" x-text="stats.total"></div>
             </div>
         </div>
 
@@ -82,7 +82,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Status Normal</div>
-                <div class="text-xl font-extrabold text-emerald-600" x-text="countByStatus('NORMAL')"></div>
+                <div class="text-xl font-extrabold text-emerald-600" x-text="stats.normal"></div>
             </div>
         </div>
 
@@ -98,7 +98,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Warning (&le; -26 dBm)</div>
-                <div class="text-xl font-extrabold text-amber-600" x-text="countByStatus('WARNING')"></div>
+                <div class="text-xl font-extrabold text-amber-600" x-text="stats.warning"></div>
             </div>
         </div>
 
@@ -114,7 +114,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Kritis / LOS</div>
-                <div class="text-xl font-extrabold text-rose-600" x-text="countByStatus('CRITICAL') + countByStatus('LOS')"></div>
+                <div class="text-xl font-extrabold text-rose-600" x-text="stats.critical_los"></div>
             </div>
         </div>
     </div>
@@ -1783,12 +1783,32 @@
         </button>
     </div>
 
+    <!-- Data Helper for Initial Global Stats -->
+    <div id="customer-stats-data"
+         data-total="{{ stats.total if stats and stats.total is not none else 0 }}"
+         data-normal="{{ stats.normal if stats and stats.normal is not none else 0 }}"
+         data-warning="{{ stats.warning if stats and stats.warning is not none else 0 }}"
+         data-critical="{{ stats.critical if stats and stats.critical is not none else 0 }}"
+         data-los="{{ stats.los if stats and stats.los is not none else 0 }}"
+         data-critical-los="{{ stats.critical_los if stats and stats.critical_los is not none else 0 }}"
+         class="hidden"></div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 function customerApp() {
+    const statsEl = document.getElementById('customer-stats-data');
+    const initStats = {
+        total: statsEl ? (Number(statsEl.dataset.total) || 0) : 0,
+        normal: statsEl ? (Number(statsEl.dataset.normal) || 0) : 0,
+        warning: statsEl ? (Number(statsEl.dataset.warning) || 0) : 0,
+        critical: statsEl ? (Number(statsEl.dataset.critical) || 0) : 0,
+        los: statsEl ? (Number(statsEl.dataset.los) || 0) : 0,
+        critical_los: statsEl ? (Number(statsEl.dataset.criticalLos) || 0) : 0
+    };
+
     return {
         customers: [],
         totalCustomers: 0,
@@ -1805,8 +1825,8 @@ function customerApp() {
         sortBy: 'id',
         sortDir: 'asc',
 
-        // Stats
-        stats: { total: 0 },
+        // Stats (Global counts across all customers)
+        stats: initStats,
 
         // Bulk Selection
         selectedIds: [],
@@ -1985,6 +2005,11 @@ function customerApp() {
         toast: { show: false, message: '', type: 'success' },
 
         initData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const q = urlParams.get('q');
+            if (q) {
+                this.searchQuery = q;
+            }
             this.fetchCustomers(1);
         },
         
@@ -2094,6 +2119,9 @@ function customerApp() {
                 this.customers = json.data || [];
                 this.totalCustomers = json.total || 0;
                 this.totalPages = Math.ceil(this.totalCustomers / this.limit) || 1;
+                if (json.stats) {
+                    this.stats = json.stats;
+                }
             } catch (err) {
                 console.error("Gagal mengambil pelanggan:", err);
                 this.showToast("Gagal memuat data pelanggan", "error");
