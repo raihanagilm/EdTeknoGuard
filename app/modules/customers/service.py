@@ -19,28 +19,70 @@ from app.modules.customers.schemas import CustomerCreate, CustomerUpdate
 class CustomerService:
 
     @staticmethod
-    def analyze_import_file(file_content: bytes, filename: str) -> dict:
-        import io
-        import pandas as pd
+    def read_csv_safely(file_content: bytes) -> pd.DataFrame:
+        """
+        Membaca file CSV dengan multi-encoding (utf-8-sig, utf-8, cp1252, latin-1)
+        dan auto-detect delimiter (; , \\t |), serta membersihkan BOM header.
+        """
+        encodings_to_try = ['utf-8-sig', 'utf-8', 'cp1252', 'latin-1', 'iso-8859-1']
+        decoded_text = None
+        for enc in encodings_to_try:
+            try:
+                decoded_text = file_content.decode(enc)
+                break
+            except (UnicodeDecodeError, LookupError):
+                continue
+        if decoded_text is None:
+            decoded_text = file_content.decode('utf-8', errors='ignore')
 
+        # Deteksi delimiter terbaik berdasarkan baris pertama data
+        sample = decoded_text[:8192]
+        lines = [l for l in sample.splitlines() if l.strip()]
+        first_line = lines[0] if lines else ""
+
+        candidates = [';', ',', '\t', '|']
+        counts = {c: first_line.count(c) for c in candidates}
+        best_sep = max(counts, key=counts.get)
+        if counts[best_sep] == 0:
+            try:
+                dialect = csv.Sniffer().sniff(sample)
+                best_sep = dialect.delimiter
+            except Exception:
+                best_sep = ','
+
+        df = pd.read_csv(io.StringIO(decoded_text), sep=best_sep, dtype=str)
+        # Bersihkan BOM, spasi, dan quotes tersembunyi pada header
+        df.columns = [str(c).replace('\ufeff', '').strip().strip('"').strip("'") for c in df.columns]
+        return df
+
+    @staticmethod
+    def generate_customer_id_from_ip(ip: str, sequence: int = 1) -> str:
+        """
+        Menghasilkan ID pelanggan dengan format P(idrouter)00001
+        Contoh: IP 10.10.7.62 -> P101076200001
+        Jika IP kosong -> PLG00001
+        """
+        clean_ip = re.sub(r'[^0-9]', '', str(ip or ''))
+        seq_str = f"{sequence:05d}"
+        if clean_ip:
+            return f"P{clean_ip}{seq_str}"
+        return f"PLG{seq_str}"
+
+    @staticmethod
+    def analyze_import_file(file_content: bytes, filename: str) -> dict:
         filename_lower = filename.lower()
         if filename_lower.endswith('.csv'):
             try:
-                # Coba deteksi delimiter (; atau ,)
-                sample = file_content[:4096].decode('utf-8', errors='ignore')
-                sep = ';' if sample.count(';') > sample.count(',') else ','
-                df = pd.read_csv(io.BytesIO(file_content), sep=sep, nrows=10)
+                df = CustomerService.read_csv_safely(file_content)
                 cols = [str(c).strip() for c in df.columns if str(c).strip() and not str(c).startswith('Unnamed:')]
                 
-                # Hitung total baris
-                df_full = pd.read_csv(io.BytesIO(file_content), sep=sep)
                 return {
                     "is_excel": False,
                     "sheets": [{
                         "name": "CSV Data",
                         "columns": cols,
                         "header_row": 0,
-                        "row_count": len(df_full)
+                        "row_count": len(df)
                     }]
                 }
             except Exception as e:
@@ -99,19 +141,14 @@ class CustomerService:
 
     @staticmethod
     def preview_import_file(file_content: bytes, filename: str, sheet_name: str, mapping: dict, db: Session) -> dict:
-        import io
         import math
-        import pandas as pd
         from app.db.models import Pelanggan
 
         filename_lower = filename.lower()
         try:
             if filename_lower.endswith('.csv'):
-                sample = file_content[:4096].decode('utf-8', errors='ignore')
-                sep = ';' if sample.count(';') > sample.count(',') else ','
-                df = pd.read_csv(io.BytesIO(file_content), sep=sep)
+                df = CustomerService.read_csv_safely(file_content)
             else:
-                # Deteksi header row
                 excel = pd.ExcelFile(io.BytesIO(file_content))
                 target_sheet = sheet_name if sheet_name in excel.sheet_names else excel.sheet_names[0]
                 df_raw = pd.read_excel(excel, sheet_name=target_sheet, header=None, nrows=10)
@@ -132,8 +169,15 @@ class CustomerService:
             df.columns = [str(c).strip() for c in df.columns]
             df = df.fillna("")
 
-            existing_ids = {row[0] for row in db.query(Pelanggan.id_pelanggan).all()}
-            seen_in_batch = set()
+            # Query data existing di database untuk deteksi ID dan IP unik
+            existing_customers = db.query(Pelanggan.id_pelanggan, Pelanggan.ip_router, Pelanggan.nama).filter(Pelanggan.is_active == True).all()
+            existing_ids = {row[0] for row in existing_customers if row[0]}
+            existing_ips = {row[1]: (row[0], row[2]) for row in existing_customers if row[1]}
+
+            seen_ids_in_batch = {} # id_pelanggan -> original_row
+            seen_ips_in_batch = {}  # ip_router -> original_row
+            ip_sequence_counter = {} # clean_ip -> sequence
+
             mapped_data = []
 
             for index, row in df.iterrows():
@@ -148,7 +192,6 @@ class CustomerService:
                             val = ""
                         val = str(val).strip()
                         if val.endswith('.0') and db_field in ['id_pelanggan', 'no_hp', 'ip_router']:
-                            # Menangani angka format float pandas misalnya 2072026320.0
                             val = val[:-2]
                         mapped_row[db_field] = val
                         if val:
@@ -160,16 +203,17 @@ class CustomerService:
                 if not has_any_data:
                     continue
 
-                # Cek ID pelanggan
-                id_pel = mapped_row.get('id_pelanggan', '').strip()
-                if not id_pel:
-                    # Auto-generate temporary ID jika kosong
-                    sheet_prefix = re.sub(r'[^A-Za-z0-9]', '', sheet_name)[:4].upper() if sheet_name else "PLG"
-                    id_pel = f"{sheet_prefix}-{index + 1:04d}"
-                    mapped_row['id_pelanggan'] = id_pel
-
                 nama = mapped_row.get('nama', '').strip()
                 ip_router = mapped_row.get('ip_router', '').strip()
+
+                # Cek ID pelanggan: Jika kosong, buat format P(idrouter)00001
+                id_pel = mapped_row.get('id_pelanggan', '').strip()
+                if not id_pel:
+                    clean_ip = re.sub(r'[^0-9]', '', ip_router)
+                    ip_key = clean_ip if clean_ip else "PLG"
+                    ip_sequence_counter[ip_key] = ip_sequence_counter.get(ip_key, 0) + 1
+                    id_pel = CustomerService.generate_customer_id_from_ip(ip_router, ip_sequence_counter[ip_key])
+                    mapped_row['id_pelanggan'] = id_pel
 
                 _status = "valid"
                 _message = "Data baru siap di-import"
@@ -177,14 +221,30 @@ class CustomerService:
                 if not nama or not ip_router:
                     _status = "error"
                     _message = "Nama Pelanggan dan IP Router wajib diisi"
+                # 1. Pengecekan Duplikat IP Router (Prioritas Utama)
+                elif ip_router in existing_ips:
+                    _status = "duplicate"
+                    ex_id, ex_name = existing_ips[ip_router]
+                    _message = f"IP Router '{ip_router}' sudah terdaftar di database (Pelanggan: {ex_name} [{ex_id}])"
+                elif ip_router in seen_ips_in_batch:
+                    _status = "duplicate"
+                    _message = f"IP Router '{ip_router}' duplikat di berkas ini (sama dengan baris {seen_ips_in_batch[ip_router]})"
+                # 2. Pengecekan Duplikat ID Pelanggan
                 elif id_pel in existing_ids:
                     _status = "duplicate"
-                    _message = f"ID '{id_pel}' sudah ada di database (akan menimpa data jika dilanjutkan)"
-                elif id_pel in seen_in_batch:
+                    _message = f"ID Pelanggan '{id_pel}' sudah terdaftar di database"
+                elif id_pel in seen_ids_in_batch:
                     _status = "duplicate"
-                    _message = f"ID '{id_pel}' duplikat dalam file ini"
+                    _message = f"ID Pelanggan '{id_pel}' duplikat di berkas ini (sama dengan baris {seen_ids_in_batch[id_pel]})"
                 else:
-                    seen_in_batch.add(id_pel)
+                    seen_ids_in_batch[id_pel] = index + 1
+                    seen_ips_in_batch[ip_router] = index + 1
+
+                # Catat ke seen_batch jika duplikat agar baris berikutnya juga terdeteksi
+                if ip_router and ip_router not in seen_ips_in_batch:
+                    seen_ips_in_batch[ip_router] = index + 1
+                if id_pel and id_pel not in seen_ids_in_batch:
+                    seen_ids_in_batch[id_pel] = index + 1
 
                 mapped_data.append({
                     "original_row": index + 1,
@@ -204,7 +264,8 @@ class CustomerService:
                 "duplicates_count": dup_count,
                 "errors_count": err_count,
                 "preview_data": mapped_data,
-                "existing_ids": list(existing_ids)
+                "existing_ids": list(existing_ids),
+                "existing_ips": list(existing_ips.keys())
             }
         except Exception as e:
             raise ValueError(f"Gagal memproses file untuk preview: {str(e)}")
@@ -212,6 +273,41 @@ class CustomerService:
     @staticmethod
     def execute_json_import(db: Session, data_list: list) -> dict:
         from app.db.models import Pelanggan
+
+        # 1. Validasi Ketat: Tolak eksekusi jika terdapat duplikasi IP Router atau ID Pelanggan
+        active_items = [item for item in data_list if item.get("_action") != "skip" and item.get("_status") != "error"]
+        
+        batch_ids = []
+        batch_ips = []
+        duplicate_reasons = []
+
+        # Ambil IP yang sudah aktif di DB untuk verifikasi tabrakan IP
+        db_ips = {row[0]: row[1] for row in db.query(Pelanggan.ip_router, Pelanggan.id_pelanggan).filter(Pelanggan.is_active == True).all() if row[0]}
+
+        for item in active_items:
+            row_data = item.get("data", item)
+            id_pel = str(row_data.get("id_pelanggan", "")).strip()
+            ip_r = str(row_data.get("ip_router", "")).strip()
+
+            if id_pel:
+                if id_pel in batch_ids:
+                    duplicate_reasons.append(f"ID Pelanggan ganda di dalam data: '{id_pel}'")
+                batch_ids.append(id_pel)
+
+            if ip_r:
+                if ip_r in batch_ips:
+                    duplicate_reasons.append(f"IP Router ganda di dalam data: '{ip_r}'")
+                batch_ips.append(ip_r)
+                # Jika baris ini baru (insert) tapi IP-nya sudah dipakai ID lain di DB
+                if ip_r in db_ips and db_ips[ip_r] != id_pel:
+                    duplicate_reasons.append(f"IP Router '{ip_r}' sudah digunakan oleh pelanggan lain di database (ID: {db_ips[ip_r]})")
+
+        if duplicate_reasons:
+            reasons_summary = "; ".join(duplicate_reasons[:3])
+            if len(duplicate_reasons) > 3:
+                reasons_summary += f" ... dan {len(duplicate_reasons) - 3} lainnya"
+            raise ValueError(f"Eksekusi Ditolak: Ditemukan duplikasi ({reasons_summary}). Seluruh ID Pelanggan dan IP Router yang bertabrakan WAJIB dibenarkan terlebih dahulu sebelum import dapat dieksekusi!")
+
         imported_count = 0
         updated_count = 0
         skipped_count = 0
@@ -475,6 +571,18 @@ class CustomerService:
             return None
 
         update_dict = data.dict(exclude_unset=True)
+
+        if "ip_router" in update_dict and update_dict["ip_router"]:
+            new_ip = str(update_dict["ip_router"]).strip()
+            # Periksa apakah IP sudah digunakan oleh pelanggan aktif lain
+            existing_ip = db.query(Pelanggan).filter(
+                Pelanggan.ip_router == new_ip,
+                Pelanggan.is_active == True,
+                Pelanggan.id_pelanggan != id_pelanggan
+            ).first()
+            if existing_ip:
+                raise ValueError(f"IP Router '{new_ip}' sudah digunakan oleh pelanggan '{existing_ip.nama}' (ID: {existing_ip.id_pelanggan})")
+
         for field, val in update_dict.items():
             if hasattr(cust, field) and val is not None:
                 setattr(cust, field, val)

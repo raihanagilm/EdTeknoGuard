@@ -1,0 +1,437 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Log Aktivitas Karyawan — EdTeknoGuard{% endblock %}
+
+{% block content %}
+<div class="space-y-6" x-data="activityLogsApp()" x-init="initData()">
+
+    <!-- Header Halaman -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                <div class="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                    <!-- SVG Clipboard Document List -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                </div>
+                <span>Audit Log Aktivitas Karyawan / User</span>
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Pantau riwayat masuk (login), keluar (logout), serta tindakan operasional yang dilakukan oleh admin atau karyawan di sistem.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Tombol Refresh Data -->
+            <button @click="fetchLogs(1)"
+                    :disabled="isLoading"
+                    class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold border border-slate-200 shadow-sm transition flex items-center gap-2 min-h-[44px]">
+                <svg class="w-4 h-4 text-indigo-600" :class="{'animate-spin': isLoading}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Muat Ulang</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            
+            <!-- Filter Karyawan / User -->
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Filter Karyawan / User</label>
+                <div class="relative">
+                    <select x-model="filterUser"
+                            @change="fetchLogs(1)"
+                            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-8">
+                        <option value="all">Semua Karyawan / User</option>
+                        {% for u in users %}
+                        <option value="{{ u.username }}">{{ u.nama_karyawan }} ({{ u.username }})</option>
+                        {% endfor %}
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Status -->
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Status Aktivitas</label>
+                <div class="relative">
+                    <select x-model="filterStatus"
+                            @change="fetchLogs(1)"
+                            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-8">
+                        <option value="all">Semua Status</option>
+                        <option value="SUCCESS">Berhasil (SUCCESS)</option>
+                        <option value="FAILED">Gagal (FAILED)</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Jenis Aksi -->
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Aktivitas</label>
+                <div class="relative">
+                    <select x-model="filterAction"
+                            @change="fetchLogs(1)"
+                            class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-8">
+                        <option value="all">Semua Jenis Aksi</option>
+                        <option value="LOGIN">LOGIN</option>
+                        <option value="LOGOUT">LOGOUT</option>
+                        <option value="LOGIN_FAILED">LOGIN GAGAL</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Box -->
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Pencarian Cepat</label>
+                <div class="relative">
+                    <input type="text"
+                           x-model="searchQuery"
+                           @input.debounce.400ms="fetchLogs(1)"
+                           placeholder="Cari user, IP, aktivitas..."
+                           class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Tabel Data Log Aktivitas -->
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+                <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider select-none border-b border-slate-200">
+                    <tr>
+                        <!-- Kolom No -->
+                        <th class="py-3 px-4 w-12 text-center">No</th>
+                        
+                        <!-- Waktu (Sortable) -->
+                        <th @click="sortByColumn('created_at')" class="py-3 px-4 cursor-pointer hover:bg-slate-200 transition">
+                            <div class="flex items-center gap-1.5">
+                                <span>Waktu (WIB)</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400" :class="{'text-indigo-600': sortBy === 'created_at'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="sortBy === 'created_at' && sortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                </svg>
+                            </div>
+                        </th>
+
+                        <!-- Karyawan / User (Sortable) -->
+                        <th @click="sortByColumn('nama_karyawan')" class="py-3 px-4 cursor-pointer hover:bg-slate-200 transition">
+                            <div class="flex items-center gap-1.5">
+                                <span>Karyawan / User</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400" :class="{'text-indigo-600': sortBy === 'nama_karyawan'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="sortBy === 'nama_karyawan' && sortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                </svg>
+                            </div>
+                        </th>
+
+                        <!-- Role (Sortable) -->
+                        <th @click="sortByColumn('role')" class="py-3 px-4 cursor-pointer hover:bg-slate-200 transition">
+                            <div class="flex items-center gap-1.5">
+                                <span>Role</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400" :class="{'text-indigo-600': sortBy === 'role'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="sortBy === 'role' && sortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                </svg>
+                            </div>
+                        </th>
+
+                        <!-- IP Address (Sortable) -->
+                        <th @click="sortByColumn('ip_address')" class="py-3 px-4 cursor-pointer hover:bg-slate-200 transition">
+                            <div class="flex items-center gap-1.5">
+                                <span>IP Address</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400" :class="{'text-indigo-600': sortBy === 'ip_address'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="sortBy === 'ip_address' && sortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                </svg>
+                            </div>
+                        </th>
+
+                        <!-- Aktivitas (Sortable) -->
+                        <th @click="sortByColumn('action')" class="py-3 px-4 cursor-pointer hover:bg-slate-200 transition">
+                            <div class="flex items-center gap-1.5">
+                                <span>Aktivitas</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400" :class="{'text-indigo-600': sortBy === 'action'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="sortBy === 'action' && sortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                </svg>
+                            </div>
+                        </th>
+
+                        <!-- Status (Sortable) -->
+                        <th @click="sortByColumn('status')" class="py-3 px-4 cursor-pointer hover:bg-slate-200 transition">
+                            <div class="flex items-center gap-1.5">
+                                <span>Status</span>
+                                <svg class="w-3.5 h-3.5 text-slate-400" :class="{'text-indigo-600': sortBy === 'status'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="sortBy === 'status' && sortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                </svg>
+                            </div>
+                        </th>
+
+                        <!-- Keterangan -->
+                        <th class="py-3 px-4">Keterangan</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                    <template x-for="(log, idx) in logs" :key="log.id || idx">
+                        <tr class="hover:bg-slate-50 transition">
+                            <!-- Nomor -->
+                            <td class="py-3 px-4 text-center text-slate-400 font-mono text-[11px]" x-text="(currentPage - 1) * limit + idx + 1"></td>
+
+                            <!-- Waktu -->
+                            <td class="py-3 px-4 text-slate-600 font-mono text-xs" x-text="log.waktu"></td>
+
+                            <!-- Karyawan / Username -->
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px] uppercase shrink-0">
+                                        <span x-text="(log.nama_karyawan || log.username || 'U').substring(0, 2)"></span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-slate-900" x-text="log.nama_karyawan"></div>
+                                        <div class="text-[10px] text-slate-400 font-mono" x-text="'@' + log.username"></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Role -->
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200" x-text="log.role"></span>
+                            </td>
+
+                            <!-- IP Address -->
+                            <td class="py-3 px-4 font-mono text-slate-600" x-text="log.ip_address"></td>
+
+                            <!-- Aktivitas (Badge Aksi) -->
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold"
+                                      :class="{
+                                          'bg-indigo-50 text-indigo-700 border border-indigo-200': log.action === 'LOGIN',
+                                          'bg-slate-100 text-slate-700 border border-slate-200': log.action === 'LOGOUT',
+                                          'bg-rose-50 text-rose-700 border border-rose-200': log.action === 'LOGIN_FAILED'
+                                      }">
+                                    <!-- SVG Login -->
+                                    <template x-if="log.action === 'LOGIN'">
+                                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                    </template>
+                                    <!-- SVG Logout -->
+                                    <template x-if="log.action === 'LOGOUT'">
+                                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    </template>
+                                    <!-- SVG Failed -->
+                                    <template x-if="log.action === 'LOGIN_FAILED'">
+                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    </template>
+                                    <span x-text="log.action"></span>
+                                </span>
+                            </td>
+
+                            <!-- Status -->
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                                      :class="log.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
+                                    <span class="w-1.5 h-1.5 rounded-full" :class="log.status === 'SUCCESS' ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                                    <span x-text="log.status"></span>
+                                </span>
+                            </td>
+
+                            <!-- Keterangan -->
+                            <td class="py-3 px-4 text-slate-500 max-w-xs truncate" :title="log.keterangan" x-text="log.keterangan"></td>
+                        </tr>
+                    </template>
+
+                    <!-- Loading State -->
+                    <tr x-show="isLoading && logs.length === 0">
+                        <td colspan="8" class="py-12 text-center text-slate-400">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <svg class="w-6 h-6 animate-spin text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Memuat data log aktivitas...</span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Empty State -->
+                    <tr x-show="!isLoading && logs.length === 0">
+                        <td colspan="8" class="py-12 text-center text-slate-400">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                <span class="font-medium text-slate-500">Belum ada data log aktivitas yang cocok dengan filter.</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Bar (25, 50, 75, 100 & Page 1, 2, 3... 10) -->
+        <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-3">
+                <div>
+                    Menampilkan <span class="font-bold text-slate-800" x-text="logs.length"></span> dari <span class="font-bold text-slate-800" x-text="totalRecords"></span> Total Log
+                </div>
+
+                <!-- Dropdown Pilihan Limit (25 - 100) -->
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500">Per Halaman:</span>
+                    <select x-model.number="limit"
+                            @change="fetchLogs(1)"
+                            class="px-2.5 py-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold cursor-pointer">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Tombol Sebelumnya -->
+                <button type="button"
+                        @click="fetchLogs(currentPage - 1)"
+                        :disabled="currentPage <= 1 || isLoading"
+                        class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold min-h-[36px] flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    <span>Sebelumnya</span>
+                </button>
+
+                <!-- Nomor Halaman (1, 2, 3... 10) -->
+                <div class="hidden sm:flex items-center gap-1">
+                    <template x-for="p in getPageNumbers()" :key="p">
+                        <button type="button"
+                                @click="typeof p === 'number' ? fetchLogs(p) : null"
+                                :disabled="typeof p !== 'number' || isLoading"
+                                class="px-3 py-1.5 rounded-lg border transition font-semibold min-h-[36px]"
+                                :class="p === currentPage ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : (typeof p !== 'number' ? 'border-transparent text-slate-400 bg-transparent cursor-default' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700')">
+                            <span x-text="p"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Info Halaman di Mobile -->
+                <div class="sm:hidden font-bold text-slate-700">
+                    <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
+                </div>
+
+                <!-- Tombol Selanjutnya -->
+                <button type="button"
+                        @click="fetchLogs(currentPage + 1)"
+                        :disabled="currentPage >= totalPages || isLoading"
+                        class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold min-h-[36px] flex items-center gap-1">
+                    <span>Selanjutnya</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function activityLogsApp() {
+    return {
+        logs: [],
+        totalRecords: 0,
+        currentPage: 1,
+        limit: 25,
+        isLoading: false,
+
+        // Filters
+        filterUser: 'all',
+        filterStatus: 'all',
+        filterAction: 'all',
+        searchQuery: '',
+
+        // Sorting
+        sortBy: 'created_at',
+        sortDir: 'desc',
+
+        initData() {
+            this.fetchLogs(1);
+        },
+
+        async fetchLogs(page = 1) {
+            this.currentPage = page;
+            this.isLoading = true;
+
+            try {
+                const params = new URLSearchParams({
+                    page: this.currentPage,
+                    limit: this.limit,
+                    sort_by: this.sortBy,
+                    sort_dir: this.sortDir
+                });
+
+                if (this.filterUser !== 'all') params.append('username', this.filterUser);
+                if (this.filterStatus !== 'all') params.append('status', this.filterStatus);
+                if (this.filterAction !== 'all') params.append('action', this.filterAction);
+                if (this.searchQuery.trim()) params.append('q', this.searchQuery.trim());
+
+                const res = await fetch(`/api/activity-logs?${params.toString()}`);
+                const json = await res.json();
+
+                if (res.ok) {
+                    this.logs = json.data || [];
+                    this.totalRecords = json.total || 0;
+                }
+            } catch (err) {
+                console.error("Gagal mengambil log aktivitas:", err);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        sortByColumn(column) {
+            if (this.sortBy === column) {
+                this.sortDir = (this.sortDir === 'asc' ? 'desc' : 'asc');
+            } else {
+                this.sortBy = column;
+                this.sortDir = 'asc';
+            }
+            this.fetchLogs(1);
+        },
+
+        get totalPages() {
+            return Math.max(1, Math.ceil(this.totalRecords / this.limit));
+        },
+
+        getPageNumbers() {
+            const pages = [];
+            const total = this.totalPages;
+            const maxVisible = 5;
+
+            if (total <= maxVisible + 2) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                let start = Math.max(2, this.currentPage - 1);
+                let end = Math.min(total - 1, this.currentPage + 1);
+
+                if (this.currentPage <= 3) {
+                    end = 4;
+                } else if (this.currentPage >= total - 2) {
+                    start = total - 3;
+                }
+
+                if (start > 2) pages.push('...');
+                for (let i = start; i <= end; i++) pages.push(i);
+                if (end < total - 1) pages.push('...');
+                if (total > 1) pages.push(total);
+            }
+            return pages;
+        }
+    };
+}
+</script>
+{% endblock %}

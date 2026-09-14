@@ -103,14 +103,21 @@ class CustomerController:
 
     @staticmethod
     def update_customer(db: Session, id_pelanggan: str, data: CustomerUpdate) -> Dict[str, Any]:
-        cust = CustomerService.update_customer(db=db, id_pelanggan=id_pelanggan, data=data)
-        if not cust:
-            raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
-        return {
-            "status": "success",
-            "message": f"Data pelanggan '{cust.nama}' berhasil diperbarui",
-            "id_pelanggan": cust.id_pelanggan
-        }
+        try:
+            cust = CustomerService.update_customer(db=db, id_pelanggan=id_pelanggan, data=data)
+            if not cust:
+                raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+            return {
+                "status": "success",
+                "message": f"Data pelanggan '{cust.nama}' berhasil diperbarui",
+                "id_pelanggan": cust.id_pelanggan
+            }
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Gagal memperbarui pelanggan: {e}")
 
     @staticmethod
     def delete_customer(db: Session, id_pelanggan: str) -> Dict[str, Any]:

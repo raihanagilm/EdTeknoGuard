@@ -23,6 +23,7 @@ from app.modules.customers.routes import router as customers_router
 from app.modules.telegram_mgmt.routes import router as telegram_router
 from app.modules.logs_mgmt.routes import router as logs_router
 from app.modules.settings.routes import router as settings_router
+from app.modules.activity_logs.routes import router as activity_logs_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -71,6 +72,7 @@ app.include_router(customers_router)
 app.include_router(telegram_router)
 app.include_router(logs_router)
 app.include_router(settings_router)
+app.include_router(activity_logs_router)
 
 if __name__ == "__main__":
     import uvicorn

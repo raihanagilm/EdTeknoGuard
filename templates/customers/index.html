@@ -934,16 +934,19 @@
                         </button>
                     </div>
 
-                    <!-- Banner Alert Duplikasi Khusus -->
+                    <!-- Banner Perhatian Duplikasi (Jika Ada) -->
                     <div x-show="importPreviewDuplicates.length > 0"
-                         class="p-4 bg-amber-500/10 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="p-4 rounded-2xl bg-amber-50 border border-amber-300 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                         <div class="flex items-start gap-2.5">
                             <div class="p-1.5 rounded-lg bg-amber-500 text-white shrink-0 mt-0.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             </div>
                             <div>
                                 <h4 class="font-bold text-amber-900">Perhatian: Terdeteksi <span x-text="importPreviewDuplicates.length"></span> Data Duplikasi!</h4>
-                                <p class="text-amber-700 text-[11px]">ID pelanggan pada baris tersebut sudah terdaftar di database. Anda dapat menimpa, melewati, atau mengoreksi ID di pop-up.</p>
+                                <p class="text-amber-700 text-[11px]">ID Pelanggan atau IP Router pada baris tersebut sudah terdaftar di database atau ganda di berkas. <strong>Seluruh duplikasi wajib dibenarkan atau diabaikan</strong> sebelum data dapat disimpan ke database.</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap shrink-0">
@@ -1239,8 +1242,9 @@
 
                     <button x-show="importStep === 3"
                             @click="executeImportData()"
-                            :disabled="getActiveImportCount() === 0 || isImporting"
-                            class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-emerald-100 transition min-h-[40px] flex items-center gap-2">
+                            :disabled="getActiveImportCount() === 0 || importPreviewDuplicates.length > 0 || isImporting"
+                            class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-emerald-100 transition min-h-[40px] flex items-center gap-2"
+                            :title="importPreviewDuplicates.length > 0 ? 'Harap benarkan atau selesaikan seluruh data duplikat terlebih dahulu sebelum menyimpan!' : 'Simpan data ke database'">
                         <svg x-show="isImporting" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         <span x-show="!isImporting">Simpan ke Database (<span x-text="getActiveImportCount()"></span> Data)</span>
                         <span x-show="isImporting">Menyimpan...</span>
@@ -1268,7 +1272,7 @@
                         <p class="text-xs text-slate-500">Ubah ID pelanggan yang bentrok atau tentukan aksi Timpa / Skip sebelum dieksekusi</p>
                     </div>
                 </div>
-                <button type="button" @click.stop="closeDuplicateModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                <button type="button" @click.stop="cancelDuplicateModal()" class="text-slate-400 hover:text-slate-600 p-1" title="Tutup tanpa menyimpan perubahan">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -1520,13 +1524,20 @@
 
             <!-- Footer Pop-up Duplikasi -->
             <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                <span class="text-xs text-slate-500">Perubahan ID otomatis disinkronkan ke tabel pratinjau langkah 3.</span>
-                <button type="button"
-                        @click.stop="closeDuplicateModal()"
-                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    <span>Simpan Keputusan & Kembali ke Pratinjau</span>
-                </button>
+                <span class="text-xs text-slate-500">Perubahan hanya akan diterapkan jika tombol simpan diklik.</span>
+                <div class="flex items-center gap-2">
+                    <button type="button"
+                            @click.stop="cancelDuplicateModal()"
+                            class="px-4 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl text-xs font-bold transition">
+                        Batal
+                    </button>
+                    <button type="button"
+                            @click.stop="saveDuplicateDecisions()"
+                            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Simpan Keputusan & Kembali ke Pratinjau</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1832,6 +1843,7 @@ function customerApp() {
         importPreviewDuplicates: [],
         importPreviewErrors: [],
         existingDbIds: [],
+        existingDbIps: [],
         isImporting: false,
 
         // State Sorting & Pagination Pratinjau (Langkah 3)
@@ -1848,6 +1860,8 @@ function customerApp() {
 
         // State Sorting & Pagination Duplikasi (Modal 5B)
         duplicateRows: [],
+        duplicateDraftRows: [],
+        initialDuplicateSnapshotUids: [],
         duplicateSortBy: 'id_pelanggan',
         duplicateSortDir: 'asc',
         duplicatePage: 1,
@@ -2379,10 +2393,12 @@ function customerApp() {
                         return r;
                     });
                     this.existingDbIds = json.result.existing_ids || [];
+                    this.existingDbIps = json.result.existing_ips || [];
                     this.previewStatusFilter = 'all';
                     this.previewPage = 1;
                     this.previewSelectedUids = [];
                     this.duplicateRows = [];
+                    this.duplicateDraftRows = [];
                     this.updatePreviewStats();
                     this.importStep = 3;
                     this.showToast(`Pratinjau siap: ${this.importPreviewData.length} baris data dimuat`, 'success');
@@ -2397,13 +2413,26 @@ function customerApp() {
             }
         },
 
+        generateCustomerIdFromIp(ip, sequence = 1) {
+            const cleanIp = (ip || '').toString().replace(/[^0-9]/g, '');
+            const seqStr = String(sequence).padStart(5, '0');
+            if (cleanIp) {
+                return `P${cleanIp}${seqStr}`;
+            }
+            return `PLG${seqStr}`;
+        },
+
         updatePreviewStats() {
             this.importPreviewValid = [];
             this.importPreviewDuplicates = [];
             this.importPreviewErrors = [];
-            const seenBatch = new Set();
+            const seenBatchIds = new Map();
+            const seenBatchIps = new Map();
 
-            this.importPreviewData.forEach(row => {
+            const dbIps = this.existingDbIps || [];
+            const dbIds = this.existingDbIds || [];
+
+            this.importPreviewData.forEach((row, idx) => {
                 const d = row.data || row;
                 const id = (d.id_pelanggan || '').toString().trim();
                 const nama = (d.nama || '').toString().trim();
@@ -2417,32 +2446,50 @@ function customerApp() {
                     row._status = 'error';
                     row._message = 'ID Pelanggan tidak boleh kosong';
                     this.importPreviewErrors.push(row);
-                } else if (this.existingDbIds.includes(id)) {
+                } else if (dbIps.includes(ip)) {
                     row._status = 'duplicate';
                     if (!row._action || row._action === 'insert') {
                         row._action = 'update';
                     }
-                    row._message = `ID '${id}' sudah terdaftar di database`;
+                    row._message = `IP Router '${ip}' sudah terdaftar di database`;
                     this.importPreviewDuplicates.push(row);
-                } else if (seenBatch.has(id)) {
+                } else if (seenBatchIps.has(ip)) {
                     row._status = 'duplicate';
                     if (!row._action || row._action === 'insert') {
                         row._action = 'update';
                     }
-                    row._message = `ID '${id}' duplikat di dalam berkas`;
+                    row._message = `IP Router '${ip}' duplikat di berkas ini (baris ${seenBatchIps.get(ip)})`;
+                    this.importPreviewDuplicates.push(row);
+                } else if (dbIds.includes(id)) {
+                    row._status = 'duplicate';
+                    if (!row._action || row._action === 'insert') {
+                        row._action = 'update';
+                    }
+                    row._message = `ID Pelanggan '${id}' sudah terdaftar di database`;
+                    this.importPreviewDuplicates.push(row);
+                } else if (seenBatchIds.has(id)) {
+                    row._status = 'duplicate';
+                    if (!row._action || row._action === 'insert') {
+                        row._action = 'update';
+                    }
+                    row._message = `ID Pelanggan '${id}' duplikat di berkas ini (baris ${seenBatchIds.get(id)})`;
                     this.importPreviewDuplicates.push(row);
                 } else {
-                    seenBatch.add(id);
+                    seenBatchIds.set(id, idx + 1);
+                    seenBatchIps.set(ip, idx + 1);
                     row._status = 'valid';
                     if (row._action === 'update' && !row._wasDuplicate) row._action = 'insert';
                     if (row._autoGenerated) {
                         row._action = 'insert';
-                        row._message = 'ID Baru Di-generate';
+                        row._message = `ID Unik: ${id}`;
                     } else {
                         row._message = 'Data baru siap di-import';
                     }
                     this.importPreviewValid.push(row);
                 }
+
+                if (ip && !seenBatchIps.has(ip)) seenBatchIps.set(ip, idx + 1);
+                if (id && !seenBatchIds.has(id)) seenBatchIds.set(id, idx + 1);
             });
         },
 
@@ -2619,16 +2666,62 @@ function customerApp() {
         },
 
         openDuplicateModal() {
-            // Populate duplicateRows dari baris yang duplikat saat ini atau yang sebelumnya duplikat
-            this.duplicateRows = this.importPreviewData.filter(r => r._status === 'duplicate' || r._wasDuplicate);
+            // Snapshot mendalam (deep clone) baris duplikat sebagai draft kerja terisolasi
+            const targetRows = this.importPreviewData.filter(r => r._status === 'duplicate' || r._wasDuplicate);
+            this.initialDuplicateSnapshotUids = targetRows.map(r => r._uid);
+            this.duplicateDraftRows = JSON.parse(JSON.stringify(targetRows));
+            this.duplicateRows = this.duplicateDraftRows;
             this.duplicatePage = 1;
             this.duplicateSelectedUids = [];
             this.duplicateModalOpen = true;
         },
 
-        closeDuplicateModal() {
+        cancelDuplicateModal() {
+            // Buang seluruh perubahan draft tanpa memutasi data pratinjau asli
+            this.duplicateDraftRows = [];
+            this.duplicateRows = [];
+            this.duplicateSelectedUids = [];
             this.duplicateModalOpen = false;
+            this.showToast("Perubahan duplikasi dibatalkan. Data pratinjau tidak berubah.");
+        },
+
+        saveDuplicateDecisions() {
+            // Terapkan seluruh keputusan draft ke tabel pratinjau asli
+            const draftMap = new Map();
+            this.duplicateDraftRows.forEach(r => {
+                draftMap.set(r._uid, r);
+            });
+
+            this.importPreviewData.forEach(r => {
+                if (draftMap.has(r._uid)) {
+                    const draft = draftMap.get(r._uid);
+                    const rData = r.data || r;
+                    const dData = draft.data || draft;
+                    rData.id_pelanggan = dData.id_pelanggan;
+                    r._status = draft._status;
+                    r._action = draft._action;
+                    r._autoGenerated = draft._autoGenerated;
+                    r._wasDuplicate = draft._wasDuplicate;
+                    r._message = draft._message;
+                }
+            });
+
+            // Hapus baris dari pratinjau jika baris tersebut dihapus pada modal duplikasi
+            const remainingDraftUids = new Set(this.duplicateDraftRows.map(r => r._uid));
+            const initialUids = new Set(this.initialDuplicateSnapshotUids || []);
+            this.importPreviewData = this.importPreviewData.filter(r => {
+                if (initialUids.has(r._uid) && !remainingDraftUids.has(r._uid)) {
+                    return false;
+                }
+                return true;
+            });
+
             this.updatePreviewStats();
+            this.duplicateDraftRows = [];
+            this.duplicateRows = [];
+            this.duplicateSelectedUids = [];
+            this.duplicateModalOpen = false;
+            this.showToast("Keputusan duplikasi berhasil disimpan ke pratinjau!", "success");
         },
 
         toggleSelectAllDuplicate() {
@@ -2645,14 +2738,13 @@ function customerApp() {
             if (this.duplicateSelectedUids.length === 0) return;
             const count = this.duplicateSelectedUids.length;
             const selectedSet = new Set(this.duplicateSelectedUids);
-            this.importPreviewData = this.importPreviewData.filter(r => !selectedSet.has(r._uid));
             this.duplicateRows = this.duplicateRows.filter(r => !selectedSet.has(r._uid));
+            this.duplicateDraftRows = this.duplicateRows;
             this.duplicateSelectedUids = [];
-            this.updatePreviewStats();
             if (this.duplicatePage > this.duplicateTotalPages) {
                 this.duplicatePage = Math.max(1, this.duplicateTotalPages);
             }
-            this.showToast(`${count} baris duplikat berhasil dihapus`, 'success');
+            this.showToast(`${count} baris duplikat dihapus dari daftar draft`, 'success');
         },
 
         autoGenerateSelectedDuplicateIds() {
@@ -2660,20 +2752,27 @@ function customerApp() {
             const selectedSet = new Set(this.duplicateSelectedUids);
             const allIds = new Set([
                 ...this.existingDbIds,
-                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan)
+                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan),
+                ...this.duplicateRows.map(r => (r.data || r).id_pelanggan)
             ]);
             let count = 0;
+            const ipSeqMap = {};
+
             this.duplicateRows.forEach(r => {
                 if (selectedSet.has(r._uid)) {
                     const d = r.data || r;
-                    let currentId = (d.id_pelanggan || 'PLG').toString().replace(/_NEW\d*$/i, '');
-                    let c = 1;
-                    let candidate = `${currentId}_NEW${c}`;
+                    const ip = d.ip_router || '';
+                    const cleanIp = ip.replace(/[^0-9]/g, '') || 'PLG';
+                    
+                    let seq = ipSeqMap[cleanIp] || 1;
+                    let candidate = this.generateCustomerIdFromIp(ip, seq);
                     while (allIds.has(candidate)) {
-                        c++;
-                        candidate = `${currentId}_NEW${c}`;
+                        seq++;
+                        candidate = this.generateCustomerIdFromIp(ip, seq);
                     }
+                    ipSeqMap[cleanIp] = seq + 1;
                     allIds.add(candidate);
+
                     d.id_pelanggan = candidate;
                     r._status = 'valid';
                     r._action = 'insert';
@@ -2683,8 +2782,7 @@ function customerApp() {
                     count++;
                 }
             });
-            this.updatePreviewStats();
-            this.showToast(`${count} baris duplikat terpilih berhasil diubah menjadi ID unik!`, 'success');
+            this.showToast(`${count} baris duplikat terpilih berhasil diubah ke format ID unik P(idrouter)00001!`, 'success');
         },
 
         setSelectedDuplicateAction(action) {
@@ -2701,20 +2799,16 @@ function customerApp() {
         },
 
         removeDuplicateRow(row) {
-            const pIdx = this.importPreviewData.indexOf(row);
-            if (pIdx > -1) {
-                this.importPreviewData.splice(pIdx, 1);
-            }
             const dIdx = this.duplicateRows.indexOf(row);
             if (dIdx > -1) {
                 this.duplicateRows.splice(dIdx, 1);
             }
+            this.duplicateDraftRows = this.duplicateRows;
             this.duplicateSelectedUids = this.duplicateSelectedUids.filter(id => id !== row._uid);
-            this.updatePreviewStats();
             if (this.duplicatePage > this.duplicateTotalPages) {
                 this.duplicatePage = Math.max(1, this.duplicateTotalPages);
             }
-            this.showToast("Baris duplikat berhasil dihapus");
+            this.showToast("Baris duplikat dihapus dari daftar draft");
         },
 
         sortDuplicateTable(col) {
@@ -2809,34 +2903,43 @@ function customerApp() {
                     r._action = action;
                 }
             });
-            this.importPreviewData.forEach(r => {
-                if (r._status === 'duplicate' && !r._autoGenerated) {
-                    r._action = action;
-                }
-            });
-            this.showToast(`Aksi semua data duplikat diatur ke: ${action === 'update' ? 'Timpa Data' : 'Abaikan (Skip)'}`);
+            if (!this.duplicateModalOpen) {
+                this.importPreviewData.forEach(r => {
+                    if (r._status === 'duplicate' && !r._autoGenerated) {
+                        r._action = action;
+                    }
+                });
+                this.updatePreviewStats();
+            }
+            this.showToast(`Aksi data duplikat diatur ke: ${action === 'update' ? 'Timpa Data' : 'Abaikan (Skip)'}`);
         },
 
         makeRowUnique(row) {
             const d = row.data || row;
-            let currentId = (d.id_pelanggan || 'PLG').toString().replace(/_NEW\d*$/i, '');
-            let count = 1;
-            let candidate = `${currentId}_NEW${count}`;
+            const ip = d.ip_router || '';
             const allIds = new Set([
                 ...this.existingDbIds,
-                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan)
+                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan),
+                ...this.duplicateRows.map(r => (r.data || r).id_pelanggan)
             ]);
+
+            let seq = 1;
+            let candidate = this.generateCustomerIdFromIp(ip, seq);
             while (allIds.has(candidate)) {
-                count++;
-                candidate = `${currentId}_NEW${count}`;
+                seq++;
+                candidate = this.generateCustomerIdFromIp(ip, seq);
             }
+            allIds.add(candidate);
+
             d.id_pelanggan = candidate;
             row._status = 'valid';
             row._action = 'insert';
             row._autoGenerated = true;
             row._wasDuplicate = true;
             row._message = `ID diubah menjadi ${candidate} (Unik)`;
-            this.updatePreviewStats();
+            if (!this.duplicateModalOpen) {
+                this.updatePreviewStats();
+            }
             this.showToast(`ID berhasil diubah menjadi ${candidate} (Unik)`);
         },
 
@@ -2844,20 +2947,26 @@ function customerApp() {
             let changed = 0;
             const allIds = new Set([
                 ...this.existingDbIds,
-                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan)
+                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan),
+                ...this.duplicateRows.map(r => (r.data || r).id_pelanggan)
             ]);
+            const ipSeqMap = {};
 
             this.duplicateRows.forEach(r => {
                 if (r._status === 'duplicate' || !r._autoGenerated) {
                     const d = r.data || r;
-                    let currentId = (d.id_pelanggan || 'PLG').toString().replace(/_NEW\d*$/i, '');
-                    let count = 1;
-                    let candidate = `${currentId}_NEW${count}`;
+                    const ip = d.ip_router || '';
+                    const cleanIp = ip.replace(/[^0-9]/g, '') || 'PLG';
+
+                    let seq = ipSeqMap[cleanIp] || 1;
+                    let candidate = this.generateCustomerIdFromIp(ip, seq);
                     while (allIds.has(candidate)) {
-                        count++;
-                        candidate = `${currentId}_NEW${count}`;
+                        seq++;
+                        candidate = this.generateCustomerIdFromIp(ip, seq);
                     }
+                    ipSeqMap[cleanIp] = seq + 1;
                     allIds.add(candidate);
+
                     d.id_pelanggan = candidate;
                     r._status = 'valid';
                     r._action = 'insert';
@@ -2868,8 +2977,7 @@ function customerApp() {
                 }
             });
 
-            this.updatePreviewStats();
-            this.showToast(`${changed} data duplikat berhasil diperbarui dengan ID unik baru di halaman ini!`, 'success');
+            this.showToast(`${changed} data duplikat berhasil diperbarui dengan format ID unik P(idrouter)00001!`, 'success');
         },
 
         getActiveImportCount() {
@@ -2877,6 +2985,11 @@ function customerApp() {
         },
 
         async executeImportData() {
+            if (this.importPreviewDuplicates.length > 0) {
+                this.showToast(`Ditolak: Masih terdapat ${this.importPreviewDuplicates.length} data duplikat! Seluruh ID Pelanggan dan IP Router duplikat WAJIB diselesaikan terlebih dahulu.`, 'error');
+                return;
+            }
+
             const dataToImport = this.importPreviewData.filter(r => r._status !== 'error' && r._action !== 'skip');
             if (dataToImport.length === 0) {
                 this.showToast("Tidak ada data yang valid untuk di-import", "error");

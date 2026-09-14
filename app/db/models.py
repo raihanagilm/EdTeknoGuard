@@ -74,3 +74,19 @@ class SystemSetting(Base):
     key_name = Column(String(50), unique=True, nullable=False, index=True)
     value_text = Column(Text, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class UserActivityLog(Base):
+    __tablename__ = "user_activity_logs"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    username = Column(String(100), nullable=False, index=True)
+    nama_karyawan = Column(String(150), nullable=True)
+    role = Column(String(50), default="admin", nullable=False)
+    action = Column(String(100), nullable=False, index=True)  # LOGIN, LOGOUT, LOGIN_FAILED, IMPORT_PELANGGAN, HAPUS_PELANGGAN, EDIT_PELANGGAN
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(Text, nullable=True)
+    status = Column(String(20), nullable=False, default="SUCCESS")  # SUCCESS, FAILED
+    keterangan = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
