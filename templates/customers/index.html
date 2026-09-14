@@ -726,8 +726,7 @@
     <div x-show="importModalOpen"
          style="display: none;"
          class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="if (!duplicateModalOpen) importModalOpen = false"
-             class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-slate-200 flex flex-col max-h-[90vh]">
+        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-slate-200 flex flex-col max-h-[90vh]">
             
             <!-- Header Modal -->
             <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
@@ -846,8 +845,9 @@
                             <span class="font-bold underline" x-text="importSelectedSheet || (importFile ? importFile.name : '')"></span>
                             <span class="text-indigo-600 block text-[11px] mt-0.5">Pastikan kolom wajib bertanda (*) terpasangkan dengan benar.</span>
                         </div>
-                        <button type="button" @click="autoMapColumns()" class="px-3 py-1.5 rounded-xl bg-white text-indigo-700 font-bold border border-indigo-200 hover:bg-indigo-100 transition shrink-0">
-                            ⚡ Reset Pemetaan Otomatis
+                        <button type="button" @click="autoMapColumns()" class="px-3 py-1.5 rounded-xl bg-white text-indigo-700 font-bold border border-indigo-200 hover:bg-indigo-100 transition shrink-0 flex items-center gap-1.5 shadow-xs">
+                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span>Reset Pemetaan Otomatis</span>
                         </button>
                     </div>
                     
@@ -872,29 +872,66 @@
 
                 <!-- LANGKAH 3: PRATINJAU & KOREKSI -->
                 <div x-show="importStep === 3" class="space-y-4">
-                    <!-- Kartu Ringkasan Status -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 text-xs flex items-center justify-between">
+                    <!-- Kartu Ringkasan Status (Bisa Diklik Sebagai Filter) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 select-none">
+                        <div @click="setPreviewFilter('valid')"
+                             class="p-3 rounded-2xl border text-xs flex items-center justify-between transition cursor-pointer"
+                             :class="previewStatusFilter === 'valid' ? 'bg-emerald-100 border-emerald-400 ring-2 ring-emerald-500 shadow-xs' : 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100/60'">
                             <div>
-                                <span class="text-emerald-700 font-bold block">Data Baru (Siap Import)</span>
+                                <span class="text-emerald-800 font-bold block flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    Data Baru (Siap Import)
+                                </span>
                                 <span class="text-[11px] text-emerald-600">ID unik belum ada di sistem</span>
                             </div>
                             <span class="text-xl font-black text-emerald-700" x-text="importPreviewValid.length"></span>
                         </div>
-                        <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 text-xs flex items-center justify-between">
+
+                        <div @click="setPreviewFilter('duplicate')"
+                             class="p-3 rounded-2xl border text-xs flex items-center justify-between transition cursor-pointer"
+                             :class="previewStatusFilter === 'duplicate' ? 'bg-amber-100 border-amber-400 ring-2 ring-amber-500 shadow-xs' : 'bg-amber-50 border-amber-200 hover:bg-amber-100/60'">
                             <div>
-                                <span class="text-amber-800 font-bold block">Duplikasi ID Pelanggan</span>
-                                <span class="text-[11px] text-amber-600">ID sudah ada di database</span>
+                                <span class="text-amber-900 font-bold block flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                    Duplikasi ID Pelanggan
+                                </span>
+                                <span class="text-[11px] text-amber-700">ID sudah ada di database</span>
                             </div>
-                            <span class="text-xl font-black text-amber-700" x-text="importPreviewDuplicates.length"></span>
+                            <span class="text-xl font-black text-amber-800" x-text="importPreviewDuplicates.length"></span>
                         </div>
-                        <div class="bg-rose-50 p-3 rounded-2xl border border-rose-200 text-xs flex items-center justify-between">
+
+                        <div @click="setPreviewFilter('error')"
+                             class="p-3 rounded-2xl border text-xs flex items-center justify-between transition cursor-pointer"
+                             :class="previewStatusFilter === 'error' ? 'bg-rose-100 border-rose-400 ring-2 ring-rose-500 shadow-xs' : 'bg-rose-50 border-rose-200 hover:bg-rose-100/60'">
                             <div>
-                                <span class="text-rose-800 font-bold block">Error / Tidak Lengkap</span>
-                                <span class="text-[11px] text-rose-600">Kolom wajib kosong</span>
+                                <span class="text-rose-900 font-bold block flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    Error / Tidak Lengkap
+                                </span>
+                                <span class="text-[11px] text-rose-700">Kolom wajib kosong</span>
                             </div>
-                            <span class="text-xl font-black text-rose-700" x-text="importPreviewErrors.length"></span>
+                            <span class="text-xl font-black text-rose-800" x-text="importPreviewErrors.length"></span>
                         </div>
+                    </div>
+
+                    <!-- Filter Active Bar (Jika filter status aktif) -->
+                    <div x-show="previewStatusFilter !== 'all'"
+                         class="px-3 py-1.5 bg-slate-100 rounded-xl flex items-center justify-between text-xs text-slate-600 border border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <span>Menyaring berdasarkan: </span>
+                            <span class="px-2 py-0.5 rounded-md font-bold uppercase text-[10px]"
+                                  :class="{
+                                      'bg-emerald-100 text-emerald-800 border border-emerald-300': previewStatusFilter === 'valid',
+                                      'bg-amber-100 text-amber-800 border border-amber-300': previewStatusFilter === 'duplicate',
+                                      'bg-rose-100 text-rose-800 border border-rose-300': previewStatusFilter === 'error'
+                                  }"
+                                  x-text="previewStatusFilter === 'valid' ? 'Data Baru' : (previewStatusFilter === 'duplicate' ? 'Duplikasi ID' : 'Data Error')"></span>
+                            <span class="text-slate-400 font-sans" x-text="'(' + previewTotalCount + ' data)'"></span>
+                        </div>
+                        <button type="button" @click="setPreviewFilter('all')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Tampilkan Semua Data
+                        </button>
                     </div>
 
                     <!-- Banner Alert Duplikasi Khusus -->
@@ -916,8 +953,41 @@
                             <button type="button" @click="setAllDuplicatesAction('skip')" class="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[11px] transition">
                                 Abaikan Semua
                             </button>
-                            <button type="button" @click="openDuplicateModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-sm">
-                                ⚙️ Buka Fitur Koreksi
+                            <button type="button" @click="openDuplicateModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition flex items-center gap-1.5 shadow-xs">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span>Buka Fitur Koreksi</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bar Aksi Massal Checklist Pratinjau (Langkah 3) -->
+                    <div x-show="previewSelectedUids.length > 0"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="p-2.5 bg-indigo-50/90 border border-indigo-200 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs shadow-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-indigo-600 text-white font-bold text-[10px]" x-text="previewSelectedUids.length"></span>
+                            <span class="font-bold text-indigo-900">Baris Terpilih</span>
+                            <span class="text-slate-300 text-xs">|</span>
+                            <button type="button" @click="previewSelectedUids = []" class="text-indigo-600 hover:text-indigo-800 font-semibold underline text-[11px]">Batal Pilih</button>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" @click="deleteSelectedPreviewRows()" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs" title="Hapus seluruh baris yang dicentang">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                <span>Hapus Terpilih</span>
+                            </button>
+                            <button type="button" @click="makeSelectedPreviewUnique()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs" title="Generate ID Unik untuk baris yang dicentang">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                <span>Auto-ID Terpilih</span>
+                            </button>
+                            <button type="button" @click="setSelectedPreviewAction('update')" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs" title="Set aksi ke Timpa Data">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Timpa</span>
+                            </button>
+                            <button type="button" @click="setSelectedPreviewAction('skip')" class="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[11px] transition flex items-center gap-1" title="Set aksi ke Abaikan (Skip)">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                <span>Abaikan</span>
                             </button>
                         </div>
                     </div>
@@ -926,25 +996,98 @@
                     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
                         <div class="overflow-x-auto max-h-72">
                             <table class="w-full text-left text-xs whitespace-nowrap">
-                                <thead class="bg-slate-100 text-slate-700 sticky top-0 font-bold uppercase text-[10px] tracking-wider z-10">
+                                <thead class="bg-slate-100 text-slate-700 sticky top-0 font-bold uppercase text-[10px] tracking-wider z-10 select-none">
                                     <tr>
-                                        <th class="py-2.5 px-3">Status</th>
-                                        <th class="py-2.5 px-3">Aksi</th>
-                                        <th class="py-2.5 px-3">ID Pelanggan (Editable)</th>
-                                        <th class="py-2.5 px-3">Nama Pelanggan</th>
-                                        <th class="py-2.5 px-3">IP Router</th>
-                                        <th class="py-2.5 px-3">POP / Cabang</th>
-                                        <th class="py-2.5 px-3">WiFi (SSID / Pass)</th>
+                                        <!-- Checkbox Select All -->
+                                        <th class="py-2.5 px-3 text-center w-10">
+                                            <input type="checkbox"
+                                                   @change="toggleSelectAllPreview()"
+                                                   :checked="isAllPreviewSelected"
+                                                   class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+                                                   title="Pilih Semua di Halaman Ini">
+                                        </th>
+                                        <!-- Status Sortable -->
+                                        <th @click="sortPreviewTable('status')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                            <div class="flex items-center gap-1">
+                                                <span>Status</span>
+                                                <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': previewSortBy === 'status'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="previewSortBy === 'status' && previewSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                                </svg>
+                                            </div>
+                                        </th>
+                                        <!-- Aksi Sortable -->
+                                        <th @click="sortPreviewTable('aksi')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                            <div class="flex items-center gap-1">
+                                                <span>Aksi</span>
+                                                <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': previewSortBy === 'aksi'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="previewSortBy === 'aksi' && previewSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                                </svg>
+                                            </div>
+                                        </th>
+                                        <!-- ID Pelanggan Sortable -->
+                                        <th @click="sortPreviewTable('id_pelanggan')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                            <div class="flex items-center gap-1">
+                                                <span>ID Pelanggan (Editable)</span>
+                                                <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': previewSortBy === 'id_pelanggan'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="previewSortBy === 'id_pelanggan' && previewSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                                </svg>
+                                            </div>
+                                        </th>
+                                        <!-- Nama Pelanggan Sortable -->
+                                        <th @click="sortPreviewTable('nama')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                            <div class="flex items-center gap-1">
+                                                <span>Nama Pelanggan</span>
+                                                <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': previewSortBy === 'nama'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="previewSortBy === 'nama' && previewSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                                </svg>
+                                            </div>
+                                        </th>
+                                        <!-- IP Router Sortable -->
+                                        <th @click="sortPreviewTable('ip_router')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                            <div class="flex items-center gap-1">
+                                                <span>IP Router</span>
+                                                <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': previewSortBy === 'ip_router'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="previewSortBy === 'ip_router' && previewSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                                </svg>
+                                            </div>
+                                        </th>
+                                        <!-- POP Sortable -->
+                                        <th @click="sortPreviewTable('pop')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                            <div class="flex items-center gap-1">
+                                                <span>POP / Cabang</span>
+                                                <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': previewSortBy === 'pop'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="previewSortBy === 'pop' && previewSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                                </svg>
+                                            </div>
+                                        </th>
+                                        <!-- WiFi Sortable -->
+                                        <th @click="sortPreviewTable('wifi')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                            <div class="flex items-center gap-1">
+                                                <span>WiFi (SSID / Pass)</span>
+                                                <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': previewSortBy === 'wifi'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="previewSortBy === 'wifi' && previewSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                                </svg>
+                                            </div>
+                                        </th>
                                         <th class="py-2.5 px-3 text-center">Hapus</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
-                                    <template x-for="(row, idx) in importPreviewData" :key="idx">
+                                    <template x-for="(row, idx) in paginatedPreviewData" :key="row._uid || idx">
                                         <tr :class="{
-                                            'bg-emerald-50/25': row._status === 'valid',
-                                            'bg-amber-50/30': row._status === 'duplicate',
-                                            'bg-rose-50/30': row._status === 'error'
+                                            'bg-indigo-50/70 ring-1 ring-inset ring-indigo-200': previewSelectedUids.includes(row._uid),
+                                            'bg-emerald-50/25': row._status === 'valid' && !previewSelectedUids.includes(row._uid),
+                                            'bg-amber-50/30': row._status === 'duplicate' && !previewSelectedUids.includes(row._uid),
+                                            'bg-rose-50/30': row._status === 'error' && !previewSelectedUids.includes(row._uid)
                                         }">
+                                            <!-- Checkbox Baris -->
+                                            <td class="py-2 px-3 text-center">
+                                                <input type="checkbox"
+                                                       :value="row._uid"
+                                                       x-model="previewSelectedUids"
+                                                       class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer">
+                                            </td>
+
                                             <!-- Status Tag -->
                                             <td class="py-2 px-3">
                                                 <span x-show="row._status === 'valid'" class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-md text-[10px] font-bold">BARU</span>
@@ -999,14 +1142,69 @@
 
                                             <!-- Aksi Hapus Baris -->
                                             <td class="py-2 px-3 text-center">
-                                                <button type="button" @click="importPreviewData.splice(idx, 1); updatePreviewStats();" class="text-slate-400 hover:text-rose-600 transition p-1" title="Hapus Baris Ini">
+                                                <button type="button" @click="removePreviewRow(row)" class="text-slate-400 hover:text-rose-600 transition p-1" title="Hapus Baris Ini">
                                                     <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 </button>
                                             </td>
                                         </tr>
                                     </template>
+                                    <tr x-show="paginatedPreviewData.length === 0">
+                                        <td colspan="9" class="py-8 text-center text-slate-400">
+                                            Tidak ada data pratinjau yang cocok dengan filter.
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Pagination Bar Langkah 3 -->
+                        <div class="p-3 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 rounded-b-2xl">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    Menampilkan <span class="font-bold text-slate-800" x-text="paginatedPreviewData.length"></span> dari <span class="font-bold text-slate-800" x-text="previewTotalCount"></span> Data
+                                </div>
+                                <!-- Dropdown Limit -->
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-500">Per Halaman:</span>
+                                    <select x-model.number="previewLimit" @change="previewPage = 1" class="px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="75">75</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button type="button"
+                                        @click="previewPage--"
+                                        :disabled="previewPage <= 1"
+                                        class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[32px]">
+                                    &larr; Sebelumnya
+                                </button>
+
+                                <div class="hidden sm:flex items-center gap-1">
+                                    <template x-for="p in getPreviewPageNumbers()" :key="p">
+                                        <button type="button"
+                                                @click="typeof p === 'number' ? previewPage = p : null"
+                                                :disabled="typeof p !== 'number'"
+                                                class="px-2.5 py-1 rounded-lg border transition font-semibold min-h-[32px]"
+                                                :class="p === previewPage ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : (typeof p !== 'number' ? 'border-transparent text-slate-400 bg-transparent' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700')">
+                                            <span x-text="p"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                                <div class="sm:hidden font-bold text-slate-700">
+                                    <span x-text="previewPage"></span> / <span x-text="previewTotalPages"></span>
+                                </div>
+
+                                <button type="button"
+                                        @click="previewPage++"
+                                        :disabled="previewPage >= previewTotalPages"
+                                        class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[32px]">
+                                    Selanjutnya &rarr;
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1056,8 +1254,7 @@
     <div x-show="duplicateModalOpen"
          style="display: none;"
          class="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="duplicateModalOpen = false"
-             class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-amber-200 flex flex-col max-h-[90vh] space-y-4">
+        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-amber-200 flex flex-col max-h-[90vh] space-y-4">
             
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div class="flex items-center gap-2.5">
@@ -1071,57 +1268,149 @@
                         <p class="text-xs text-slate-500">Ubah ID pelanggan yang bentrok atau tentukan aksi Timpa / Skip sebelum dieksekusi</p>
                     </div>
                 </div>
-                <button @click="duplicateModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
+                <button type="button" @click.stop="closeDuplicateModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <!-- Toolbar Aksi Cepat Global -->
+            <!-- Toolbar Aksi Cepat Global (Pure SVG Icons) -->
             <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div class="text-amber-900">
                     <span>Ditemukan </span>
-                    <strong x-text="importPreviewDuplicates.length"></strong>
-                    <span> baris yang memiliki ID terdaftar di database.</span>
+                    <strong x-text="duplicateTotalCount"></strong>
+                    <span> baris data duplikat yang dapat dikoreksi.</span>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <button type="button" @click="setAllDuplicatesAction('update')" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold transition text-xs shadow-xs">
-                        🔄 Timpa Semua Data
+                    <button type="button" @click="setAllDuplicatesAction('update')" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold transition text-xs shadow-xs flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>Timpa Semua Data</span>
                     </button>
-                    <button type="button" @click="setAllDuplicatesAction('skip')" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition text-xs">
-                        ⏭️ Abaikan Semua (Skip)
+                    <button type="button" @click="setAllDuplicatesAction('skip')" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition text-xs flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                        <span>Abaikan Semua (Skip)</span>
                     </button>
-                    <button type="button" @click="autoGenerateUniqueDuplicateIds()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition text-xs shadow-xs flex items-center gap-1">
-                        ⚡ Auto-Generate ID Unik
+                    <button type="button" @click="autoGenerateUniqueDuplicateIds()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition text-xs shadow-xs flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Auto-Generate ID Unik</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Tabel Baris Duplikat yang Dapat Diedit -->
-            <div class="border border-slate-200 rounded-2xl overflow-hidden flex-1 flex flex-col">
+            <!-- Bar Aksi Massal Checklist Duplikat (Modal 5B) -->
+            <div x-show="duplicateSelectedUids.length > 0"
+                 x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 -translate-y-1"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="p-2.5 bg-indigo-50/90 border border-indigo-200 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs shadow-xs">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-indigo-600 text-white font-bold text-[10px]" x-text="duplicateSelectedUids.length"></span>
+                    <span class="font-bold text-indigo-900">Baris Duplikat Terpilih</span>
+                    <span class="text-slate-300 text-xs">|</span>
+                    <button type="button" @click="duplicateSelectedUids = []" class="text-indigo-600 hover:text-indigo-800 font-semibold underline text-[11px]">Batal Pilih</button>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <button type="button" @click="deleteSelectedDuplicateRows()" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs" title="Hapus baris duplikat yang dicentang">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <span>Hapus Terpilih</span>
+                    </button>
+                    <button type="button" @click="autoGenerateSelectedDuplicateIds()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs" title="Auto-Generate ID Unik untuk baris yang dicentang">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Auto-ID Terpilih</span>
+                    </button>
+                    <button type="button" @click="setSelectedDuplicateAction('update')" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs" title="Set tindakan ke Timpa Profil">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>Timpa</span>
+                    </button>
+                    <button type="button" @click="setSelectedDuplicateAction('skip')" class="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[11px] transition flex items-center gap-1" title="Set tindakan ke Abaikan (Skip)">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                        <span>Abaikan</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabel Baris Duplikat yang Dapat Diedit & Di-Sort -->
+            <div class="border border-slate-200 rounded-2xl overflow-hidden flex-1 flex flex-col bg-white">
                 <div class="overflow-y-auto max-h-72">
                     <table class="w-full text-left text-xs whitespace-nowrap">
-                        <thead class="bg-slate-100 text-slate-700 sticky top-0 font-bold uppercase text-[10px] tracking-wider z-10">
+                        <thead class="bg-slate-100 text-slate-700 sticky top-0 font-bold uppercase text-[10px] tracking-wider z-10 select-none">
                             <tr>
-                                <th class="py-2.5 px-3">No</th>
-                                <th class="py-2.5 px-3">ID Pelanggan (Bisa Diubah)</th>
-                                <th class="py-2.5 px-3">Nama Pelanggan</th>
-                                <th class="py-2.5 px-3">IP Router</th>
-                                <th class="py-2.5 px-3">Pilihan Tindakan</th>
+                                <!-- Checkbox Select All Duplikat -->
+                                <th class="py-2.5 px-3 text-center w-10">
+                                    <input type="checkbox"
+                                           @change="toggleSelectAllDuplicate()"
+                                           :checked="isAllDuplicateSelected"
+                                           class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+                                           title="Pilih Semua di Halaman Ini">
+                                </th>
+                                <th @click="sortDuplicateTable('no')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                    <div class="flex items-center gap-1">
+                                        <span>No</span>
+                                        <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': duplicateSortBy === 'no'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="duplicateSortBy === 'no' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th @click="sortDuplicateTable('id_pelanggan')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                    <div class="flex items-center gap-1">
+                                        <span>ID Pelanggan (Bisa Diubah)</span>
+                                        <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': duplicateSortBy === 'id_pelanggan'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="duplicateSortBy === 'id_pelanggan' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th @click="sortDuplicateTable('nama')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                    <div class="flex items-center gap-1">
+                                        <span>Nama Pelanggan</span>
+                                        <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': duplicateSortBy === 'nama'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="duplicateSortBy === 'nama' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th @click="sortDuplicateTable('ip_router')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                    <div class="flex items-center gap-1">
+                                        <span>IP Router</span>
+                                        <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': duplicateSortBy === 'ip_router'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="duplicateSortBy === 'ip_router' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th @click="sortDuplicateTable('action')" class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition">
+                                    <div class="flex items-center gap-1">
+                                        <span>Pilihan Tindakan</span>
+                                        <svg class="w-3 h-3 text-slate-400" :class="{'text-indigo-600': duplicateSortBy === 'action'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="duplicateSortBy === 'action' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"/>
+                                        </svg>
+                                    </div>
+                                </th>
                                 <th class="py-2.5 px-3 text-center">Aksi Cepat</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <template x-for="(row, dIdx) in importPreviewDuplicates" :key="dIdx">
-                                <tr class="hover:bg-amber-50/40">
-                                    <td class="py-2 px-3 text-slate-500 font-mono" x-text="dIdx + 1"></td>
+                            <template x-for="(row, dIdx) in paginatedDuplicateRows" :key="row._uid || dIdx">
+                                <tr :class="{
+                                    'bg-indigo-50/70 ring-1 ring-inset ring-indigo-200': duplicateSelectedUids.includes(row._uid),
+                                    'bg-emerald-50/30': (row._autoGenerated || row._status === 'valid') && !duplicateSelectedUids.includes(row._uid),
+                                    'hover:bg-amber-50/40': !(row._autoGenerated || row._status === 'valid') && !duplicateSelectedUids.includes(row._uid)
+                                }">
+                                    <!-- Checkbox Baris Duplikat -->
+                                    <td class="py-2 px-3 text-center">
+                                        <input type="checkbox"
+                                               :value="row._uid"
+                                               x-model="duplicateSelectedUids"
+                                               class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer">
+                                    </td>
+
+                                    <td class="py-2 px-3 text-slate-500 font-mono" x-text="(duplicatePage - 1) * duplicateLimit + dIdx + 1"></td>
                                     
                                     <!-- ID Pelanggan Editable Langsung -->
                                     <td class="py-2 px-3 font-mono">
                                         <div class="flex items-center gap-1.5">
                                             <input x-model="row.data.id_pelanggan"
                                                    @input="onRowIdChanged(row)"
-                                                   class="w-36 px-2.5 py-1.5 border border-amber-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 rounded-lg text-xs font-bold bg-white text-slate-900"
+                                                   class="w-40 px-2.5 py-1.5 border rounded-lg text-xs font-bold text-slate-900 transition"
+                                                   :class="row._autoGenerated || row._status === 'valid' ? 'border-emerald-400 bg-emerald-50/60 focus:ring-2 focus:ring-emerald-500' : 'border-amber-300 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500'"
                                                    placeholder="Masukkan ID Baru">
+                                            <span x-show="row._autoGenerated || row._status === 'valid'" class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200">UNIK</span>
                                         </div>
                                     </td>
 
@@ -1133,30 +1422,110 @@
 
                                     <!-- Tindakan Per Baris -->
                                     <td class="py-2 px-3">
-                                        <select x-model="row._action" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-white" :class="row._action === 'update' ? 'text-amber-800' : 'text-slate-500'">
-                                            <option value="update">Timpa Profil Database</option>
-                                            <option value="skip">Abaikan (Jangan Simpan)</option>
-                                        </select>
+                                        <template x-if="row._autoGenerated || row._status === 'valid'">
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                Simpan Baru (ID Unik)
+                                            </span>
+                                        </template>
+                                        <template x-if="!row._autoGenerated && row._status === 'duplicate'">
+                                            <select x-model="row._action" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-white" :class="row._action === 'update' ? 'text-amber-800' : 'text-slate-500'">
+                                                <option value="update">Timpa Profil Database</option>
+                                                <option value="skip">Abaikan (Jangan Simpan)</option>
+                                            </select>
+                                        </template>
                                     </td>
 
-                                    <!-- Tombol Auto-Unik Per Baris -->
+                                    <!-- Tombol Auto-Unik / Status & Hapus Per Baris -->
                                     <td class="py-2 px-3 text-center">
-                                        <button type="button" @click="makeRowUnique(row)" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition" title="Tambahkan kode unik agar menjadi ID baru">
-                                            Jadikan ID Unik
-                                        </button>
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <template x-if="row._autoGenerated || row._status === 'valid'">
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200">
+                                                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    Terselesaikan
+                                                </span>
+                                            </template>
+                                            <template x-if="!row._autoGenerated && row._status === 'duplicate'">
+                                                <button type="button" @click="makeRowUnique(row)" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition flex items-center gap-1" title="Tambahkan kode unik agar menjadi ID baru">
+                                                    <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                    <span>Jadikan ID Unik</span>
+                                                </button>
+                                            </template>
+                                            <button type="button" @click="removeDuplicateRow(row)" class="text-slate-400 hover:text-rose-600 transition p-1" title="Hapus baris duplikat ini">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             </template>
+                            <tr x-show="paginatedDuplicateRows.length === 0">
+                                <td colspan="7" class="py-8 text-center text-slate-400">
+                                    Tidak ada data duplikasi yang ditemukan.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination Bar Pop-up Duplikasi -->
+                <div class="p-3 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 rounded-b-2xl">
+                    <div class="flex items-center gap-3">
+                        <div>
+                            Menampilkan <span class="font-bold text-slate-800" x-text="paginatedDuplicateRows.length"></span> dari <span class="font-bold text-slate-800" x-text="duplicateTotalCount"></span> Data Duplikat
+                        </div>
+                        <!-- Dropdown Limit -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-500">Per Halaman:</span>
+                            <select x-model.number="duplicateLimit" @change="duplicatePage = 1" class="px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="75">75</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button"
+                                @click="duplicatePage--"
+                                :disabled="duplicatePage <= 1"
+                                class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[32px]">
+                            &larr; Sebelumnya
+                        </button>
+
+                        <div class="hidden sm:flex items-center gap-1">
+                            <template x-for="p in getDuplicatePageNumbers()" :key="p">
+                                <button type="button"
+                                        @click="typeof p === 'number' ? duplicatePage = p : null"
+                                        :disabled="typeof p !== 'number'"
+                                        class="px-2.5 py-1 rounded-lg border transition font-semibold min-h-[32px]"
+                                        :class="p === duplicatePage ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : (typeof p !== 'number' ? 'border-transparent text-slate-400 bg-transparent' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700')">
+                                    <span x-text="p"></span>
+                                </button>
+                            </template>
+                        </div>
+                        <div class="sm:hidden font-bold text-slate-700">
+                            <span x-text="duplicatePage"></span> / <span x-text="duplicateTotalPages"></span>
+                        </div>
+
+                        <button type="button"
+                                @click="duplicatePage++"
+                                :disabled="duplicatePage >= duplicateTotalPages"
+                                class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[32px]">
+                            Selanjutnya &rarr;
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Footer Pop-up Duplikasi -->
             <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                <span class="text-xs text-slate-500">Perubahan ID yang disimpan otomatis diperbarui pada tabel pratinjau.</span>
-                <button @click="duplicateModalOpen = false" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition">
-                    Simpan Keputusan & Kembali ke Pratinjau
+                <span class="text-xs text-slate-500">Perubahan ID otomatis disinkronkan ke tabel pratinjau langkah 3.</span>
+                <button type="button"
+                        @click.stop="closeDuplicateModal()"
+                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Simpan Keputusan & Kembali ke Pratinjau</span>
                 </button>
             </div>
         </div>
@@ -1464,6 +1833,30 @@ function customerApp() {
         importPreviewErrors: [],
         existingDbIds: [],
         isImporting: false,
+
+        // State Sorting & Pagination Pratinjau (Langkah 3)
+        previewStatusFilter: 'all', // 'all', 'valid', 'duplicate', 'error'
+        previewSortBy: 'id_pelanggan',
+        previewSortDir: 'asc',
+        previewPage: 1,
+        previewLimit: 25,
+        previewSelectedUids: [],
+        get isAllPreviewSelected() {
+            if (!this.paginatedPreviewData || this.paginatedPreviewData.length === 0) return false;
+            return this.paginatedPreviewData.every(r => this.previewSelectedUids.includes(r._uid));
+        },
+
+        // State Sorting & Pagination Duplikasi (Modal 5B)
+        duplicateRows: [],
+        duplicateSortBy: 'id_pelanggan',
+        duplicateSortDir: 'asc',
+        duplicatePage: 1,
+        duplicateLimit: 25,
+        duplicateSelectedUids: [],
+        get isAllDuplicateSelected() {
+            if (!this.paginatedDuplicateRows || this.paginatedDuplicateRows.length === 0) return false;
+            return this.paginatedDuplicateRows.every(r => this.duplicateSelectedUids.includes(r._uid));
+        },
         dbImportFields: [
             { key: 'id_pelanggan', label: 'ID Pelanggan (Otomatis jika kosong)', required: false },
             { key: 'nama', label: 'Nama Pelanggan', required: true },
@@ -1814,6 +2207,18 @@ function customerApp() {
             this.existingDbIds = [];
             this.duplicateModalOpen = false;
             this.isImporting = false;
+            this.previewStatusFilter = 'all';
+            this.previewSortBy = 'id_pelanggan';
+            this.previewSortDir = 'asc';
+            this.previewPage = 1;
+            this.previewLimit = 25;
+            this.previewSelectedUids = [];
+            this.duplicateRows = [];
+            this.duplicateSortBy = 'id_pelanggan';
+            this.duplicateSortDir = 'asc';
+            this.duplicatePage = 1;
+            this.duplicateLimit = 25;
+            this.duplicateSelectedUids = [];
             if (this.$refs.excelFileInput) {
                 this.$refs.excelFileInput.value = '';
             }
@@ -1968,8 +2373,16 @@ function customerApp() {
                 const json = await res.json();
                 
                 if (res.ok && json.result) {
-                    this.importPreviewData = json.result.preview_data || [];
+                    let counter = 1;
+                    this.importPreviewData = (json.result.preview_data || []).map(r => {
+                        r._uid = 'row_' + (counter++);
+                        return r;
+                    });
                     this.existingDbIds = json.result.existing_ids || [];
+                    this.previewStatusFilter = 'all';
+                    this.previewPage = 1;
+                    this.previewSelectedUids = [];
+                    this.duplicateRows = [];
                     this.updatePreviewStats();
                     this.importStep = 3;
                     this.showToast(`Pratinjau siap: ${this.importPreviewData.length} baris data dimuat`, 'success');
@@ -2021,8 +2434,13 @@ function customerApp() {
                 } else {
                     seenBatch.add(id);
                     row._status = 'valid';
-                    if (row._action === 'update') row._action = 'insert';
-                    row._message = 'Data baru siap di-import';
+                    if (row._action === 'update' && !row._wasDuplicate) row._action = 'insert';
+                    if (row._autoGenerated) {
+                        row._action = 'insert';
+                        row._message = 'ID Baru Di-generate';
+                    } else {
+                        row._message = 'Data baru siap di-import';
+                    }
                     this.importPreviewValid.push(row);
                 }
             });
@@ -2032,17 +2450,367 @@ function customerApp() {
             this.updatePreviewStats();
         },
 
+        setPreviewFilter(status) {
+            if (this.previewStatusFilter === status) {
+                this.previewStatusFilter = 'all';
+            } else {
+                this.previewStatusFilter = status;
+            }
+            this.previewPage = 1;
+        },
+
+        sortPreviewTable(col) {
+            if (this.previewSortBy === col) {
+                this.previewSortDir = (this.previewSortDir === 'asc' ? 'desc' : 'asc');
+            } else {
+                this.previewSortBy = col;
+                this.previewSortDir = 'asc';
+            }
+            this.previewPage = 1;
+        },
+
+        get filteredSortedPreviewData() {
+            let list = this.importPreviewData;
+            if (this.previewStatusFilter !== 'all') {
+                list = list.filter(r => r._status === this.previewStatusFilter);
+            }
+            const dir = this.previewSortDir === 'asc' ? 1 : -1;
+            const col = this.previewSortBy;
+
+            return [...list].sort((a, b) => {
+                const da = a.data || a;
+                const db = b.data || b;
+                let va = '';
+                let vb = '';
+
+                if (col === 'status') {
+                    va = (a._status || '').toLowerCase();
+                    vb = (b._status || '').toLowerCase();
+                } else if (col === 'aksi') {
+                    va = (a._action || '').toLowerCase();
+                    vb = (b._action || '').toLowerCase();
+                } else if (col === 'id_pelanggan') {
+                    va = (da.id_pelanggan || '').toString();
+                    vb = (db.id_pelanggan || '').toString();
+                    return va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' }) * dir;
+                } else if (col === 'nama') {
+                    va = (da.nama || '').toString().toLowerCase();
+                    vb = (db.nama || '').toString().toLowerCase();
+                } else if (col === 'ip_router') {
+                    va = (da.ip_router || '').toString();
+                    vb = (db.ip_router || '').toString();
+                    return va.localeCompare(vb, undefined, { numeric: true }) * dir;
+                } else if (col === 'pop') {
+                    va = (da.pop || '').toString().toLowerCase();
+                    vb = (db.pop || '').toString().toLowerCase();
+                } else if (col === 'wifi') {
+                    va = (da.nama_wifi || '').toString().toLowerCase();
+                    vb = (db.nama_wifi || '').toString().toLowerCase();
+                } else {
+                    va = (da[col] || '').toString().toLowerCase();
+                    vb = (db[col] || '').toString().toLowerCase();
+                }
+
+                if (va < vb) return -1 * dir;
+                if (va > vb) return 1 * dir;
+                return 0;
+            });
+        },
+
+        get previewTotalCount() {
+            return this.filteredSortedPreviewData.length;
+        },
+
+        get previewTotalPages() {
+            return Math.max(1, Math.ceil(this.previewTotalCount / this.previewLimit));
+        },
+
+        get paginatedPreviewData() {
+            const start = (this.previewPage - 1) * this.previewLimit;
+            return this.filteredSortedPreviewData.slice(start, start + this.previewLimit);
+        },
+
+        getPreviewPageNumbers() {
+            const pages = [];
+            const total = this.previewTotalPages;
+            const maxVisible = 5;
+            
+            if (total <= maxVisible + 2) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                let start = Math.max(2, this.previewPage - 1);
+                let end = Math.min(total - 1, this.previewPage + 1);
+                
+                if (this.previewPage <= 3) {
+                    end = 4;
+                } else if (this.previewPage >= total - 2) {
+                    start = total - 3;
+                }
+                
+                if (start > 2) pages.push('...');
+                for (let i = start; i <= end; i++) pages.push(i);
+                if (end < total - 1) pages.push('...');
+                if (total > 1) pages.push(total);
+            }
+            return pages;
+        },
+
+        removePreviewRow(row) {
+            const index = this.importPreviewData.indexOf(row);
+            if (index > -1) {
+                this.importPreviewData.splice(index, 1);
+                this.previewSelectedUids = this.previewSelectedUids.filter(id => id !== row._uid);
+                this.updatePreviewStats();
+                if (this.previewPage > this.previewTotalPages) {
+                    this.previewPage = this.previewTotalPages;
+                }
+            }
+        },
+
+        toggleSelectAllPreview() {
+            if (this.isAllPreviewSelected) {
+                const currentUids = new Set(this.paginatedPreviewData.map(r => r._uid));
+                this.previewSelectedUids = this.previewSelectedUids.filter(id => !currentUids.has(id));
+            } else {
+                const uidsToAdd = this.paginatedPreviewData.map(r => r._uid);
+                this.previewSelectedUids = Array.from(new Set([...this.previewSelectedUids, ...uidsToAdd]));
+            }
+        },
+
+        deleteSelectedPreviewRows() {
+            if (this.previewSelectedUids.length === 0) return;
+            const count = this.previewSelectedUids.length;
+            const selectedSet = new Set(this.previewSelectedUids);
+            this.importPreviewData = this.importPreviewData.filter(r => !selectedSet.has(r._uid));
+            this.duplicateRows = this.duplicateRows.filter(r => !selectedSet.has(r._uid));
+            this.previewSelectedUids = [];
+            this.updatePreviewStats();
+            if (this.previewPage > this.previewTotalPages) {
+                this.previewPage = Math.max(1, this.previewTotalPages);
+            }
+            this.showToast(`${count} baris data berhasil dihapus dari pratinjau`, 'success');
+        },
+
+        makeSelectedPreviewUnique() {
+            if (this.previewSelectedUids.length === 0) return;
+            const selectedSet = new Set(this.previewSelectedUids);
+            let count = 0;
+            this.importPreviewData.forEach(r => {
+                if (selectedSet.has(r._uid)) {
+                    this.makeRowUnique(r);
+                    count++;
+                }
+            });
+            this.showToast(`${count} baris terpilih berhasil diubah menjadi ID unik!`, 'success');
+        },
+
+        setSelectedPreviewAction(action) {
+            if (this.previewSelectedUids.length === 0) return;
+            const selectedSet = new Set(this.previewSelectedUids);
+            let count = 0;
+            this.importPreviewData.forEach(r => {
+                if (selectedSet.has(r._uid)) {
+                    r._action = action;
+                    count++;
+                }
+            });
+            this.showToast(`${count} baris terpilih diatur ke: ${action === 'update' ? 'Timpa Data' : 'Abaikan (Skip)'}`);
+        },
+
         openDuplicateModal() {
+            // Populate duplicateRows dari baris yang duplikat saat ini atau yang sebelumnya duplikat
+            this.duplicateRows = this.importPreviewData.filter(r => r._status === 'duplicate' || r._wasDuplicate);
+            this.duplicatePage = 1;
+            this.duplicateSelectedUids = [];
             this.duplicateModalOpen = true;
         },
 
         closeDuplicateModal() {
             this.duplicateModalOpen = false;
+            this.updatePreviewStats();
+        },
+
+        toggleSelectAllDuplicate() {
+            if (this.isAllDuplicateSelected) {
+                const currentUids = new Set(this.paginatedDuplicateRows.map(r => r._uid));
+                this.duplicateSelectedUids = this.duplicateSelectedUids.filter(id => !currentUids.has(id));
+            } else {
+                const uidsToAdd = this.paginatedDuplicateRows.map(r => r._uid);
+                this.duplicateSelectedUids = Array.from(new Set([...this.duplicateSelectedUids, ...uidsToAdd]));
+            }
+        },
+
+        deleteSelectedDuplicateRows() {
+            if (this.duplicateSelectedUids.length === 0) return;
+            const count = this.duplicateSelectedUids.length;
+            const selectedSet = new Set(this.duplicateSelectedUids);
+            this.importPreviewData = this.importPreviewData.filter(r => !selectedSet.has(r._uid));
+            this.duplicateRows = this.duplicateRows.filter(r => !selectedSet.has(r._uid));
+            this.duplicateSelectedUids = [];
+            this.updatePreviewStats();
+            if (this.duplicatePage > this.duplicateTotalPages) {
+                this.duplicatePage = Math.max(1, this.duplicateTotalPages);
+            }
+            this.showToast(`${count} baris duplikat berhasil dihapus`, 'success');
+        },
+
+        autoGenerateSelectedDuplicateIds() {
+            if (this.duplicateSelectedUids.length === 0) return;
+            const selectedSet = new Set(this.duplicateSelectedUids);
+            const allIds = new Set([
+                ...this.existingDbIds,
+                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan)
+            ]);
+            let count = 0;
+            this.duplicateRows.forEach(r => {
+                if (selectedSet.has(r._uid)) {
+                    const d = r.data || r;
+                    let currentId = (d.id_pelanggan || 'PLG').toString().replace(/_NEW\d*$/i, '');
+                    let c = 1;
+                    let candidate = `${currentId}_NEW${c}`;
+                    while (allIds.has(candidate)) {
+                        c++;
+                        candidate = `${currentId}_NEW${c}`;
+                    }
+                    allIds.add(candidate);
+                    d.id_pelanggan = candidate;
+                    r._status = 'valid';
+                    r._action = 'insert';
+                    r._autoGenerated = true;
+                    r._wasDuplicate = true;
+                    r._message = `ID diubah menjadi ${candidate} (Unik)`;
+                    count++;
+                }
+            });
+            this.updatePreviewStats();
+            this.showToast(`${count} baris duplikat terpilih berhasil diubah menjadi ID unik!`, 'success');
+        },
+
+        setSelectedDuplicateAction(action) {
+            if (this.duplicateSelectedUids.length === 0) return;
+            const selectedSet = new Set(this.duplicateSelectedUids);
+            let count = 0;
+            this.duplicateRows.forEach(r => {
+                if (selectedSet.has(r._uid)) {
+                    r._action = action;
+                    count++;
+                }
+            });
+            this.showToast(`${count} baris terpilih diatur ke: ${action === 'update' ? 'Timpa Data' : 'Abaikan'}`);
+        },
+
+        removeDuplicateRow(row) {
+            const pIdx = this.importPreviewData.indexOf(row);
+            if (pIdx > -1) {
+                this.importPreviewData.splice(pIdx, 1);
+            }
+            const dIdx = this.duplicateRows.indexOf(row);
+            if (dIdx > -1) {
+                this.duplicateRows.splice(dIdx, 1);
+            }
+            this.duplicateSelectedUids = this.duplicateSelectedUids.filter(id => id !== row._uid);
+            this.updatePreviewStats();
+            if (this.duplicatePage > this.duplicateTotalPages) {
+                this.duplicatePage = Math.max(1, this.duplicateTotalPages);
+            }
+            this.showToast("Baris duplikat berhasil dihapus");
+        },
+
+        sortDuplicateTable(col) {
+            if (this.duplicateSortBy === col) {
+                this.duplicateSortDir = (this.duplicateSortDir === 'asc' ? 'desc' : 'asc');
+            } else {
+                this.duplicateSortBy = col;
+                this.duplicateSortDir = 'asc';
+            }
+            this.duplicatePage = 1;
+        },
+
+        get sortedDuplicateRows() {
+            const dir = this.duplicateSortDir === 'asc' ? 1 : -1;
+            const col = this.duplicateSortBy;
+
+            return [...this.duplicateRows].sort((a, b) => {
+                const da = a.data || a;
+                const db = b.data || b;
+                let va = '';
+                let vb = '';
+
+                if (col === 'no') {
+                    return (this.duplicateRows.indexOf(a) - this.duplicateRows.indexOf(b)) * dir;
+                } else if (col === 'id_pelanggan') {
+                    va = (da.id_pelanggan || '').toString();
+                    vb = (db.id_pelanggan || '').toString();
+                    return va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' }) * dir;
+                } else if (col === 'nama') {
+                    va = (da.nama || '').toString().toLowerCase();
+                    vb = (db.nama || '').toString().toLowerCase();
+                } else if (col === 'ip_router') {
+                    va = (da.ip_router || '').toString();
+                    vb = (db.ip_router || '').toString();
+                    return va.localeCompare(vb, undefined, { numeric: true }) * dir;
+                } else if (col === 'action') {
+                    va = (a._action || '').toString().toLowerCase();
+                    vb = (b._action || '').toString().toLowerCase();
+                } else {
+                    va = (da[col] || '').toString().toLowerCase();
+                    vb = (db[col] || '').toString().toLowerCase();
+                }
+
+                if (va < vb) return -1 * dir;
+                if (va > vb) return 1 * dir;
+                return 0;
+            });
+        },
+
+        get duplicateTotalCount() {
+            return this.sortedDuplicateRows.length;
+        },
+
+        get duplicateTotalPages() {
+            return Math.max(1, Math.ceil(this.duplicateTotalCount / this.duplicateLimit));
+        },
+
+        get paginatedDuplicateRows() {
+            const start = (this.duplicatePage - 1) * this.duplicateLimit;
+            return this.sortedDuplicateRows.slice(start, start + this.duplicateLimit);
+        },
+
+        getDuplicatePageNumbers() {
+            const pages = [];
+            const total = this.duplicateTotalPages;
+            const maxVisible = 5;
+            
+            if (total <= maxVisible + 2) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                let start = Math.max(2, this.duplicatePage - 1);
+                let end = Math.min(total - 1, this.duplicatePage + 1);
+                
+                if (this.duplicatePage <= 3) {
+                    end = 4;
+                } else if (this.duplicatePage >= total - 2) {
+                    start = total - 3;
+                }
+                
+                if (start > 2) pages.push('...');
+                for (let i = start; i <= end; i++) pages.push(i);
+                if (end < total - 1) pages.push('...');
+                if (total > 1) pages.push(total);
+            }
+            return pages;
         },
 
         setAllDuplicatesAction(action) {
+            this.duplicateRows.forEach(r => {
+                if (r._status === 'duplicate' && !r._autoGenerated) {
+                    r._action = action;
+                }
+            });
             this.importPreviewData.forEach(r => {
-                if (r._status === 'duplicate') {
+                if (r._status === 'duplicate' && !r._autoGenerated) {
                     r._action = action;
                 }
             });
@@ -2065,23 +2833,43 @@ function customerApp() {
             d.id_pelanggan = candidate;
             row._status = 'valid';
             row._action = 'insert';
+            row._autoGenerated = true;
+            row._wasDuplicate = true;
             row._message = `ID diubah menjadi ${candidate} (Unik)`;
             this.updatePreviewStats();
-            this.showToast(`ID berhasil diubah menjadi ${candidate}`);
+            this.showToast(`ID berhasil diubah menjadi ${candidate} (Unik)`);
         },
 
         autoGenerateUniqueDuplicateIds() {
             let changed = 0;
-            this.importPreviewData.forEach(r => {
-                if (r._status === 'duplicate') {
-                    this.makeRowUnique(r);
+            const allIds = new Set([
+                ...this.existingDbIds,
+                ...this.importPreviewData.map(r => (r.data || r).id_pelanggan)
+            ]);
+
+            this.duplicateRows.forEach(r => {
+                if (r._status === 'duplicate' || !r._autoGenerated) {
+                    const d = r.data || r;
+                    let currentId = (d.id_pelanggan || 'PLG').toString().replace(/_NEW\d*$/i, '');
+                    let count = 1;
+                    let candidate = `${currentId}_NEW${count}`;
+                    while (allIds.has(candidate)) {
+                        count++;
+                        candidate = `${currentId}_NEW${count}`;
+                    }
+                    allIds.add(candidate);
+                    d.id_pelanggan = candidate;
+                    r._status = 'valid';
+                    r._action = 'insert';
+                    r._autoGenerated = true;
+                    r._wasDuplicate = true;
+                    r._message = `ID diubah menjadi ${candidate} (Unik)`;
                     changed++;
                 }
             });
-            this.showToast(`${changed} data duplikat berhasil diperbarui dengan ID unik baru!`, 'success');
-            if (this.importPreviewDuplicates.length === 0) {
-                this.duplicateModalOpen = false;
-            }
+
+            this.updatePreviewStats();
+            this.showToast(`${changed} data duplikat berhasil diperbarui dengan ID unik baru di halaman ini!`, 'success');
         },
 
         getActiveImportCount() {

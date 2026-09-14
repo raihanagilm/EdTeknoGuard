@@ -27,7 +27,7 @@ Dokumen ini adalah acuan arsitektur dan pedoman sistem (*System Instruction / Ru
 | **Styling** | Tailwind CSS (Mobile-First responsive) |
 | **Interaktivitas UI** | Alpine.js 3.x (Reaktif ringan tanpa build tools kompleks) |
 | **Visualisasi Grafik** | Chart.js |
-| **Ikon UI** | Standar SVG inline bersih (bebas ketergantungan library luar) |
+| **Ikon UI** | Standar SVG inline murni bersih (bebas ketergantungan library eksternal, DILARANG KERAS memakai emoji/font icons) |
 | **Integrasi Eksternal** | Telegram Bot API (`requests` / `httpx`) & HTTP Scraper Modem ONT |
 
 ---
@@ -131,3 +131,7 @@ EdTeknoGuard/
    - Setiap aksi modifikasi penting (hapus data pelanggan, bulk delete, dan simpan pengaturan) **WAJIB** menampilkan modal pop-up konfirmasi sebelum eksekusi.
 4. **Anti-Spam Alert Debounce**:
    - Sistem memiliki mekanisme debounce menit (default 30 menit) di `telegram_service.py` untuk mencegah pengiriman alert berulang ke teknisi jika modem masih dalam status gangguan yang sama.
+5. **Standar Ikon UI Wajib SVG Inline Bersih**:
+   - Seluruh ikon antarmuka (tombol, badge, header modal, indikator sorting, dan aksi tabel) **WAJIB** menggunakan standar SVG inline bersih dengan atribut stroke/fill yang konsisten.
+   - **DILARANG KERAS** menggunakan emoji (seperti ⚡, 🔄, ⏭️, ⚙️, 🚨, dsb.) atau library icon eksternal sebagai ikon tombol/tabel UI.
+

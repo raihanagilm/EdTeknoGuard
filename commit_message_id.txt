@@ -1,0 +1,5 @@
+feat: tambahkan filter status pratinjau dan ganti ikon emoji dengan SVG
+
+- Ganti ikon emoji pada modal impor dengan ikon SVG inline yang bersih
+- Jadikan kartu ringkasan status dapat diklik untuk memfilter baris pratinjau
+- Perbarui AGENTS.md untuk menegakkan standar ikon SVG
