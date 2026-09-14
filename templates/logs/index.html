@@ -43,6 +43,10 @@
         </div>
 
         <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Live Real-Time</span>
+            </span>
             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                 <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                 <span>Time-Series TiDB</span>
@@ -627,6 +631,14 @@ function logsApp() {
 
         initData() {
             this.fetchLogs(1);
+
+            // Auto-refresh realtime berkala tiap 10 detik (silent DOM update)
+            setInterval(() => {
+                if (document.hidden) return;
+                // Jangan auto-refresh jika user sedang memilih rentang kustom historis atau sedang probing
+                if (this.filterRange === 'custom' || this.probingId) return;
+                this.fetchLogs(this.currentPage, true);
+            }, 10000);
         },
 
         getPageNumbers() {
@@ -687,8 +699,10 @@ function logsApp() {
             this.fetchLogs(1);
         },
 
-        async fetchLogs(page = 1) {
-            this.loading = true;
+        async fetchLogs(page = 1, silent = false) {
+            if (!silent) {
+                this.loading = true;
+            }
             this.currentPage = page;
             try {
                 let url = `/api/logs?page=${page}&limit=${this.limit}&range=${this.filterRange}&sort_by=${this.sortBy}&sort_dir=${this.sortDir}`;
@@ -714,7 +728,9 @@ function logsApp() {
             } catch (err) {
                 console.error("Gagal mengambil data log:", err);
             } finally {
-                this.loading = false;
+                if (!silent) {
+                    this.loading = false;
+                }
             }
         }
     }

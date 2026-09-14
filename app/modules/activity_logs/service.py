@@ -59,9 +59,23 @@ class ActivityLogService:
             from app.core.security import get_current_user_optional
             user = get_current_user_optional(request)
 
-        username = user.get("user", "admin") if user else "admin"
-        role = user.get("role", "admin") if user else "admin"
-        nama_karyawan = "Administrator NOC" if username == "admin" else username.title()
+        if isinstance(user, dict):
+            raw_user = user.get("user") or user.get("username") or "admin"
+            if isinstance(raw_user, dict):
+                username = str(raw_user.get("username") or raw_user.get("user") or "admin")
+            else:
+                username = str(raw_user)
+            role = str(user.get("role", "admin"))
+            nama_karyawan = user.get("nama_karyawan") or ("Administrator NOC" if username == "admin" else username.title())
+        elif isinstance(user, str):
+            username = user
+            role = "admin"
+            nama_karyawan = "Administrator NOC" if username == "admin" else username.title()
+        else:
+            username = "admin"
+            role = "admin"
+            nama_karyawan = "Administrator NOC"
+
         return {
             "username": username,
             "nama_karyawan": nama_karyawan,

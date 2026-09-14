@@ -144,6 +144,11 @@ class TelegramService:
         if log_entry.status_koneksi not in ["WARNING", "CRITICAL", "LOS"]:
             return False
 
+        # JANGAN kirim alert ke Bot Telegram jika pemantauan dinonaktifkan (is_monitored=False)
+        if getattr(pelanggan, "is_monitored", True) is False:
+            logger.info(f"Alert Telegram untuk {pelanggan.nama} dibatalkan karena pemantauan dinonaktifkan (is_monitored=False).")
+            return False
+
         # JANGAN kirim alert ke Bot Telegram jika kegagalan disebabkan oleh kredensial / gagal login (Gambar 2 SOP)
         ket_lower = (log_entry.keterangan or "").lower()
         if (
@@ -204,6 +209,11 @@ class TelegramService:
     @classmethod
     def process_and_send_alert_sync(cls, pelanggan: Pelanggan, log_entry: LogPerformaONT, db: Session) -> bool:
         if log_entry.status_koneksi not in ["WARNING", "CRITICAL", "LOS"]:
+            return False
+
+        # JANGAN kirim alert ke Bot Telegram jika pemantauan dinonaktifkan (is_monitored=False)
+        if getattr(pelanggan, "is_monitored", True) is False:
+            logger.info(f"Alert Telegram untuk {pelanggan.nama} dibatalkan karena pemantauan dinonaktifkan (is_monitored=False).")
             return False
 
         # Ambil setting debounce dari database jika ada

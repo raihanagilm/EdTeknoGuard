@@ -12,9 +12,12 @@
         <div class="flex items-baseline gap-2">
             <span class="text-2xl sm:text-3xl font-extrabold text-slate-900" x-text="kpi.total_monitored">111</span>
             <span class="text-xs text-slate-500 font-medium">Modem</span>
+            <span x-show="kpi.monitored_inactive > 0" class="text-[11px] font-semibold text-slate-400" :title="kpi.monitored_inactive + ' pelanggan dinonaktifkan (OFF)'">
+                (<span x-text="kpi.monitored_inactive"></span> OFF)
+            </span>
         </div>
         <div class="mt-2 text-[11px] text-slate-500">
-            Aktif di database TiDB
+            Dipantau aktif di TiDB
         </div>
     </div>
 

@@ -33,12 +33,21 @@ class MonitoringService:
 
     @staticmethod
     def get_kpi_metrics(db: Session) -> Dict[str, Any]:
-        total_customers = db.query(Pelanggan).filter(Pelanggan.is_active == True).count()
+        # Hanya hitung pelanggan yang aktif dan berstatus dipantau (is_monitored == True)
+        total_customers = db.query(Pelanggan).filter(
+            Pelanggan.is_active == True,
+            Pelanggan.is_monitored == True
+        ).count()
 
         subq = (
             db.query(
                 LogPerformaONT.id_pelanggan,
                 func.max(LogPerformaONT.waktu_cek).label("max_waktu")
+            )
+            .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
+            .filter(
+                Pelanggan.is_active == True,
+                Pelanggan.is_monitored == True
             )
             .group_by(LogPerformaONT.id_pelanggan)
             .subquery()
@@ -69,8 +78,17 @@ class MonitoringService:
             elif l.status_koneksi == "LOS":
                 los_count += 1
 
+        total_with_logs = normal_count + warning_count + critical_count + los_count
+        if total_customers > total_with_logs:
+            normal_count += (total_customers - total_with_logs)
+
+        total_all = db.query(Pelanggan).filter(Pelanggan.is_active == True).count()
+        monitored_inactive = total_all - total_customers
+
         return {
             "total_monitored": total_customers,
+            "total_all": total_all,
+            "monitored_inactive": monitored_inactive,
             "normal": normal_count,
             "warning": warning_count,
             "critical": critical_count,

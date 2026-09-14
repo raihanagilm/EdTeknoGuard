@@ -408,6 +408,7 @@ class CustomerService:
         q: Optional[str] = None,
         pop: Optional[str] = None,
         status: Optional[str] = None,
+        monitoring: Optional[str] = None,
         sort_by: Optional[str] = "id",
         sort_dir: str = "asc",
         page: int = 1,
@@ -451,8 +452,16 @@ class CustomerService:
                 query = query.filter(LogPerformaONT.status_koneksi == "WARNING")
             elif status in ("CRITICAL", "LOS"):
                 query = query.filter(or_(LogPerformaONT.status_koneksi == "CRITICAL", LogPerformaONT.status_koneksi == "LOS"))
+            elif status in ("NONAKTIF", "OFF"):
+                query = query.filter(Pelanggan.is_monitored == False)
             else:
                 query = query.filter(LogPerformaONT.status_koneksi == status)
+
+        if monitoring and monitoring != "all":
+            if monitoring in ("active", "true", "1"):
+                query = query.filter(Pelanggan.is_monitored == True)
+            elif monitoring in ("inactive", "false", "0"):
+                query = query.filter(Pelanggan.is_monitored == False)
 
         total_count = query.count()
 
@@ -468,6 +477,7 @@ class CustomerService:
             "status_kredensial": Pelanggan.status_kredensial,
             "redaman_current": LogPerformaONT.rx_power,
             "status": LogPerformaONT.status_koneksi,
+            "is_monitored": Pelanggan.is_monitored,
             "id": Pelanggan.id
         }
         target_col = col_map.get(sort_by, Pelanggan.id)
@@ -503,10 +513,24 @@ class CustomerService:
                 "password_wifi": c.password_wifi or "-",
                 "user_admin": c.user_admin or "-",
                 "pass_admin": c.pass_admin or "-",
-                "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED"
+                "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED",
+                "is_monitored": bool(getattr(c, "is_monitored", True))
             })
 
         return total_count, result
+
+    @staticmethod
+    def toggle_monitoring(db: Session, id_pelanggan: str, is_monitored: Optional[bool] = None) -> Optional[Pelanggan]:
+        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+        if not cust:
+            return None
+        if is_monitored is not None:
+            cust.is_monitored = bool(is_monitored)
+        else:
+            cust.is_monitored = not bool(getattr(cust, "is_monitored", True))
+        db.commit()
+        db.refresh(cust)
+        return cust
 
     @staticmethod
     def get_customer_detail(db: Session, id_pelanggan: str) -> Optional[Tuple[Pelanggan, List[LogPerformaONT]]]:
@@ -530,10 +554,25 @@ class CustomerService:
 
     @staticmethod
     def get_customer_stats(db: Session) -> Dict[str, Any]:
-        total_pelanggan = db.query(Pelanggan).filter(Pelanggan.is_active == True).count()
+        # Hanya hitung pelanggan yang aktif dan dipantau (is_monitored == True) di card
+        monitored_active = db.query(Pelanggan).filter(
+            Pelanggan.is_active == True,
+            Pelanggan.is_monitored == True
+        ).count()
+        monitored_inactive = db.query(Pelanggan).filter(
+            Pelanggan.is_active == True,
+            Pelanggan.is_monitored == False
+        ).count()
+        total_all = db.query(Pelanggan).filter(Pelanggan.is_active == True).count()
+
+        total_pelanggan = monitored_active  # Nilai card dikurangi pelanggan yang OFF
+
         pop_counts = (
             db.query(Pelanggan.pop, func.count(Pelanggan.id))
-            .filter(Pelanggan.is_active == True)
+            .filter(
+                Pelanggan.is_active == True,
+                Pelanggan.is_monitored == True
+            )
             .group_by(Pelanggan.pop)
             .all()
         )
@@ -542,6 +581,11 @@ class CustomerService:
             db.query(
                 LogPerformaONT.id_pelanggan,
                 func.max(LogPerformaONT.id).label('max_log_id')
+            )
+            .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
+            .filter(
+                Pelanggan.is_active == True,
+                Pelanggan.is_monitored == True
             )
             .group_by(LogPerformaONT.id_pelanggan)
             .subquery()
@@ -554,7 +598,10 @@ class CustomerService:
             )
             .join(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
             .join(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
-            .filter(Pelanggan.is_active == True)
+            .filter(
+                Pelanggan.is_active == True,
+                Pelanggan.is_monitored == True
+            )
             .group_by(LogPerformaONT.status_koneksi)
             .all()
         )
@@ -570,11 +617,14 @@ class CustomerService:
 
         return {
             "total": total_pelanggan,
+            "total_all": total_all,
             "normal": normal_count,
             "warning": warning_count,
             "critical": critical_count,
             "los": los_count,
             "critical_los": critical_count + los_count,
+            "monitored_active": monitored_active,
+            "monitored_inactive": monitored_inactive,
             "pop_distribution": [{"pop": p[0], "count": p[1]} for p in pop_counts]
         }
 
@@ -615,6 +665,7 @@ class CustomerService:
             user_admin=data.user_admin,
             pass_admin=data.pass_admin,
             snmp_community=data.snmp_community,
+            is_monitored=getattr(data, "is_monitored", True) if getattr(data, "is_monitored", None) is not None else True,
             is_active=True
         )
         db.add(new_cust)

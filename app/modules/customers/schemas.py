@@ -16,6 +16,7 @@ class CustomerBase(BaseModel):
     user_admin: Optional[str] = Field("admin", max_length=50, description="Username admin web GUI modem")
     pass_admin: Optional[str] = Field(None, max_length=100, description="Password admin web GUI modem")
     snmp_community: Optional[str] = Field("public", max_length=50, description="SNMP Community String")
+    is_monitored: Optional[bool] = Field(True, description="Status pemantauan berkala (True = Aktif, False = Nonaktif/Diabaikan)")
 
 class CustomerCreate(CustomerBase):
     id_pelanggan: Optional[str] = Field(None, description="ID Pelanggan (otomatis di-generate jika kosong)")
@@ -35,6 +36,7 @@ class CustomerUpdate(BaseModel):
     user_admin: Optional[str] = None
     pass_admin: Optional[str] = None
     snmp_community: Optional[str] = None
+    is_monitored: Optional[bool] = None
     is_active: Optional[bool] = None
 
 class BulkDeleteSchema(BaseModel):

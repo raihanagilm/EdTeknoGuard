@@ -34,13 +34,14 @@ class CustomerController:
         q: Optional[str] = None,
         pop: Optional[str] = None,
         status: Optional[str] = None,
+        monitoring: Optional[str] = None,
         sort_by: Optional[str] = "id",
         sort_dir: str = "asc",
         page: int = 1,
         limit: int = 25
     ) -> Dict[str, Any]:
         total, data = CustomerService.get_customers(
-            db=db, q=q, pop=pop, status=status, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
+            db=db, q=q, pop=pop, status=status, monitoring=monitoring, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
         )
         stats = CustomerService.get_customer_stats(db)
         return {
@@ -49,6 +50,39 @@ class CustomerController:
             "limit": limit,
             "data": data,
             "stats": stats
+        }
+
+    @staticmethod
+    def toggle_customer_monitoring(db: Session, id_pelanggan: str, user: dict, request: Request) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
+        cust = CustomerService.toggle_monitoring(db=db, id_pelanggan=id_pelanggan)
+        if not cust:
+            raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+
+        action = "AKTIFKAN_PEMANTAUAN" if cust.is_monitored else "NONAKTIFKAN_PEMANTAUAN"
+        ket = f"Pemantauan pelanggan '{cust.nama}' (IP: {cust.ip_router}) diubah menjadi {'AKTIF (Discan)' if cust.is_monitored else 'NONAKTIF (Tidak Discan/Abaikan)'}"
+        
+        try:
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action=action,
+                status="SUCCESS",
+                keterangan=ket,
+                user=user
+            )
+        except Exception:
+            pass
+
+        stats = CustomerService.get_customer_stats(db)
+
+        return {
+            "status": "success",
+            "id_pelanggan": cust.id_pelanggan,
+            "nama": cust.nama,
+            "is_monitored": cust.is_monitored,
+            "stats": stats,
+            "message": f"Pemantauan {cust.nama} berhasil {'diaktifkan kembali' if cust.is_monitored else 'dinonaktifkan (tidak discan & tidak kirim notifikasi Telegram)'}"
         }
 
     @staticmethod
@@ -75,6 +109,7 @@ class CustomerController:
                 "user_admin": cust.user_admin or "-",
                 "pass_admin": cust.pass_admin or "-",
                 "status_kredensial": getattr(cust, "status_kredensial", "UNTESTED") or "UNTESTED",
+                "is_monitored": bool(getattr(cust, "is_monitored", True)),
                 "snmp_community": cust.snmp_community
             },
             "recent_logs": [

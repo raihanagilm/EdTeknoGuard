@@ -23,6 +23,11 @@
         </div>
 
         <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 min-h-[44px]">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Live Real-Time</span>
+            </span>
+
             <!-- Tombol Refresh Data -->
             <button @click="fetchLogs(1)"
                     :disabled="isLoading"
@@ -406,11 +411,19 @@ function activityLogsApp() {
 
         initData() {
             this.fetchLogs(1);
+
+            // Auto-refresh realtime berkala tiap 10 detik (silent DOM update)
+            setInterval(() => {
+                if (document.hidden) return;
+                this.fetchLogs(this.currentPage, true);
+            }, 10000);
         },
 
-        async fetchLogs(page = 1) {
+        async fetchLogs(page = 1, silent = false) {
             this.currentPage = page;
-            this.isLoading = true;
+            if (!silent) {
+                this.isLoading = true;
+            }
 
             try {
                 const params = new URLSearchParams({
@@ -435,7 +448,9 @@ function activityLogsApp() {
             } catch (err) {
                 console.error("Gagal mengambil log aktivitas:", err);
             } finally {
-                this.isLoading = false;
+                if (!silent) {
+                    this.isLoading = false;
+                }
             }
         },
 

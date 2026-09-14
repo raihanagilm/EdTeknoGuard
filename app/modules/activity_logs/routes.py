@@ -9,6 +9,7 @@ from app.modules.activity_logs.controller import ActivityLogController
 router = APIRouter(tags=["activity_logs"])
 
 @router.get("/user-logs")
+@router.get("/log-aktivitas")
 def get_user_logs_page(
     request: Request,
     db: Session = Depends(get_db),

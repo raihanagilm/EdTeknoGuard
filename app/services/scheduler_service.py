@@ -197,7 +197,10 @@ class MonitoringScheduler:
         self._scan_current = 0
         db = SessionLocal()
         try:
-            pelanggan_list = db.query(Pelanggan).filter(Pelanggan.is_active == True).all()
+            pelanggan_list = db.query(Pelanggan).filter(
+                Pelanggan.is_active == True,
+                Pelanggan.is_monitored == True
+            ).all()
             self._scan_total = len(pelanggan_list)
             now = datetime.now()
             results = []

@@ -91,16 +91,21 @@ document.addEventListener('alpine:init', () => {
             this.fetchKpi();
             this.initChart();
 
-            // Refresh status berkala tiap 30 detik
+            // Refresh status & data grafik berkala tiap 8 detik secara realtime
             setInterval(() => {
+                if (document.hidden) return;
                 if (!this.isScanning) {
                     this.fetchStatus();
                     this.fetchKpi();
+                    if (this.chartRange === 'today') {
+                        this.loadChartData();
+                    }
                 }
-            }, 30000);
+            }, 8000);
 
             // Polling cepat tiap 1.5 detik ketika sedang ada pemindaian aktif
             setInterval(() => {
+                if (document.hidden) return;
                 if (this.isScanning || (this.scanProgress && this.scanProgress.is_scanning)) {
                     this.fetchStatus();
                 }
@@ -121,6 +126,7 @@ document.addEventListener('alpine:init', () => {
                 const res = await fetch('/api/monitoring/status');
                 if (res.ok) {
                     const data = await res.json();
+                    const wasScanning = this.isScanning;
                     this.engineStatus = data.status || 'RUNNING';
                     this.lastScanTime = data.last_scan_time || '-';
                     this.isScanning = data.is_scanning || false;
@@ -128,6 +134,13 @@ document.addEventListener('alpine:init', () => {
                         this.scanProgress = data.scan_progress;
                         if (data.scan_progress.is_scanning) {
                             this.isScanning = true;
+                        }
+                    }
+                    // Jika pemindaian baru saja selesai, langsung mutakhirkan KPI & grafik
+                    if (wasScanning && !this.isScanning) {
+                        this.fetchKpi();
+                        if (this.chartRange === 'today') {
+                            this.loadChartData();
                         }
                     }
                     if (data.is_network_error !== undefined) {
@@ -436,7 +449,7 @@ document.addEventListener('alpine:init', () => {
                         total_points: json.total_points || 0
                     };
 
-                    redamanChart.update();
+                    redamanChart.update('none');
                 }
             } catch (err) {
                 console.error('Gagal memuat data grafik:', err);

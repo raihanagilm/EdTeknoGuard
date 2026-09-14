@@ -25,8 +25,9 @@ def render_customers_page(
 def list_customers(
     q: Optional[str] = Query(None, description="Pencarian nama, IP, MAC, atau ID"),
     pop: Optional[str] = Query(None, description="Filter POP"),
-    status: Optional[str] = Query(None, description="Filter status NORMAL, WARNING, CRITICAL, LOS"),
-    sort_by: Optional[str] = Query("id", description="Kolom urutan: id, nama, pop, ip_router, jenis_modem, redaman_baseline, status_kredensial"),
+    status: Optional[str] = Query(None, description="Filter status NORMAL, WARNING, CRITICAL, LOS, NONAKTIF"),
+    monitoring: Optional[str] = Query(None, description="Filter pemantauan: all, active, inactive"),
+    sort_by: Optional[str] = Query("id", description="Kolom urutan: id, nama, pop, ip_router, jenis_modem, redaman_baseline, status_kredensial, is_monitored"),
     sort_dir: str = Query("asc", description="Arah urutan: asc atau desc"),
     page: int = Query(1, ge=1),
     limit: int = Query(25, ge=5, le=200),
@@ -34,7 +35,7 @@ def list_customers(
 ):
     """Route untuk mendapatkan daftar pelanggan dengan filter, sorting, dan pagination"""
     return CustomerController.list_customers(
-        db=db, q=q, pop=pop, status=status, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
+        db=db, q=q, pop=pop, status=status, monitoring=monitoring, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
     )
 
 @router.get("/api/customers/template-excel")
@@ -93,6 +94,19 @@ def delete_customer(
 ):
     """Hapus pelanggan (Soft Delete)"""
     return CustomerController.delete_customer(db=db, id_pelanggan=id_pelanggan, request=request, user=user)
+
+@router.post("/api/customers/{id_pelanggan}/toggle-monitoring")
+@router.patch("/api/customers/{id_pelanggan}/toggle-monitoring")
+def toggle_customer_monitoring(
+    request: Request,
+    id_pelanggan: str,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Route untuk mengubah toggle status pemantauan berkala pelanggan (ON / OFF)"""
+    return CustomerController.toggle_customer_monitoring(
+        db=db, id_pelanggan=id_pelanggan, user=user, request=request
+    )
 
 @router.post("/api/customers/bulk-delete")
 def bulk_delete_customers(

@@ -7,9 +7,15 @@ class DashboardService:
 
     @staticmethod
     def get_dashboard_data(db: Session) -> Dict[str, Any]:
-        total_customers = db.query(Pelanggan).filter(Pelanggan.is_active == True).count()
+        total_customers = db.query(Pelanggan).filter(
+            Pelanggan.is_active == True,
+            Pelanggan.is_monitored == True
+        ).count()
         
-        pops_raw = db.query(Pelanggan.pop).distinct().all()
+        pops_raw = db.query(Pelanggan.pop).filter(
+            Pelanggan.is_active == True,
+            Pelanggan.is_monitored == True
+        ).distinct().all()
         unique_pops = [p[0] for p in pops_raw if p[0]]
 
         setting_status = db.query(SystemSetting).filter(SystemSetting.key_name == "scheduler_status").first()
