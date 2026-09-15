@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func, desc
+from sqlalchemy import or_, func, desc, case
 
 from app.db.models import LogPerformaONT, Pelanggan
 
@@ -49,8 +49,14 @@ class LogsMgmtService:
             except ValueError:
                 pass
 
+        # Simpan state query sebelum difilter oleh status dan search untuk keperluan summary
+        summary_base_query = query
+
         if status and status != "Semua Status":
-            query = query.filter(LogPerformaONT.status_koneksi == status)
+            if status == "CRITICAL_LOS":
+                query = query.filter(LogPerformaONT.status_koneksi.in_(['CRITICAL', 'LOS']))
+            else:
+                query = query.filter(LogPerformaONT.status_koneksi == status)
 
         if q:
             search_pattern = f"%{q.strip()}%"
@@ -65,14 +71,18 @@ class LogsMgmtService:
 
         total_count = query.count()
 
-        # Calculate quick summary metrics
-        summary_query = query.with_entities(
+        # Calculate quick summary metrics based on date range ONLY (ignore status and search query)
+        summary_stats = summary_base_query.with_entities(
             func.count(LogPerformaONT.id),
-            func.avg(LogPerformaONT.rx_power)
+            func.sum(case((LogPerformaONT.status_koneksi == 'NORMAL', 1), else_=0)),
+            func.sum(case((LogPerformaONT.status_koneksi == 'WARNING', 1), else_=0)),
+            func.sum(case((LogPerformaONT.status_koneksi.in_(['CRITICAL', 'LOS']), 1), else_=0)),
         ).first()
 
-        total_records = summary_query[0] if summary_query else 0
-        avg_rx = round(float(summary_query[1]), 2) if (summary_query and summary_query[1] is not None) else None
+        total_records = summary_stats[0] if summary_stats and summary_stats[0] else 0
+        normal_count = summary_stats[1] if summary_stats and summary_stats[1] else 0
+        warning_count = summary_stats[2] if summary_stats and summary_stats[2] else 0
+        kritis_los_count = summary_stats[3] if summary_stats and summary_stats[3] else 0
 
         # Sorting logic
         sort_column_map = {
@@ -115,7 +125,9 @@ class LogsMgmtService:
 
         summary = {
             "total_records": total_records,
-            "avg_rx_power": avg_rx
+            "normal": int(normal_count),
+            "warning": int(warning_count),
+            "kritis_los": int(kritis_los_count)
         }
 
         return total_count, data, summary

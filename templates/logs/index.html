@@ -68,7 +68,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-bold uppercase text-slate-400">Total Log Terekam</div>
-                <div class="text-xl font-extrabold text-slate-900" x-text="summary.total_records || '0'"></div>
+                <div class="text-xl font-extrabold text-slate-900" x-text="summary.total_records ?? '0'"></div>
             </div>
         </div>
 
@@ -83,8 +83,8 @@
                 </svg>
             </div>
             <div>
-                <div class="text-[11px] font-bold uppercase text-slate-400">Rata-rata Redaman</div>
-                <div class="text-xl font-extrabold text-emerald-600" x-text="summary.avg_rx_power ? summary.avg_rx_power + ' dBm' : '-'"></div>
+                <div class="text-[11px] font-bold uppercase text-slate-400">Normal</div>
+                <div class="text-xl font-extrabold text-emerald-600" x-text="summary.normal ?? '0'"></div>
             </div>
         </div>
 
@@ -99,8 +99,8 @@
                 </svg>
             </div>
             <div>
-                <div class="text-[11px] font-bold uppercase text-slate-400">Batas Warning</div>
-                <div class="text-xl font-extrabold text-amber-600">&le; -26.0 dBm</div>
+                <div class="text-[11px] font-bold uppercase text-slate-400">Warning</div>
+                <div class="text-xl font-extrabold text-amber-600" x-text="summary.warning ?? '0'"></div>
             </div>
         </div>
 
@@ -115,8 +115,8 @@
                 </svg>
             </div>
             <div>
-                <div class="text-[11px] font-bold uppercase text-slate-400">Batas Kritis / LOS</div>
-                <div class="text-xl font-extrabold text-rose-600">&le; -27.0 dBm</div>
+                <div class="text-[11px] font-bold uppercase text-slate-400">Kritis / LOS</div>
+                <div class="text-xl font-extrabold text-rose-600" x-text="summary.kritis_los ?? '0'"></div>
             </div>
         </div>
     </div>
@@ -204,6 +204,9 @@
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-bold uppercase tracking-wider text-[11px] select-none">
+                        <!-- No. -->
+                        <th class="py-3 px-4 text-center w-12 rounded-tl-lg">No.</th>
+
                         <!-- Waktu Cek -->
                         <th @click="sortTable('waktu_cek')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
                             <div class="flex items-center gap-1">
@@ -339,8 +342,11 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <template x-for="l in logs" :key="l.id">
+                    <template x-for="(l, index) in logs" :key="l.id">
                         <tr class="hover:bg-slate-50/80 transition">
+                            <!-- No. -->
+                            <td class="py-3 px-4 text-center font-mono text-slate-500" x-text="(currentPage - 1) * limit + index + 1"></td>
+
                             <!-- Waktu Cek -->
                             <td class="py-3 px-4 font-mono text-slate-600 whitespace-nowrap" x-text="l.waktu_cek"></td>
 
@@ -439,11 +445,13 @@
 
         <!-- 2. Mobile Cards -->
         <div class="block md:hidden divide-y divide-slate-100">
-            <template x-for="l in logs" :key="l.id">
+            <template x-for="(l, index) in logs" :key="l.id">
                 <div class="p-4 hover:bg-slate-50 transition">
                     <div class="flex items-start justify-between gap-2 mb-1.5">
-                        <div>
-                            <!-- Nama Pelanggan Link Mobile -->
+                        <div class="flex items-start gap-2">
+                            <span class="font-mono text-[11px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded mt-0.5" x-text="(currentPage - 1) * limit + index + 1"></span>
+                            <div>
+                                <!-- Nama Pelanggan Link Mobile -->
                             <a :href="'/pelanggan?q=' + encodeURIComponent(l.ip_router || l.nama)"
                                class="font-bold text-slate-900 text-sm hover:text-indigo-600 inline-flex items-center gap-1">
                                 <span x-text="l.nama"></span>
@@ -452,6 +460,7 @@
                                 </svg>
                             </a>
                             <div class="text-[11px] text-slate-400 font-mono" x-text="l.id_pelanggan + ' • ' + l.pop"></div>
+                            </div>
                         </div>
                         <span class="font-mono font-extrabold text-sm px-2.5 py-1 rounded-lg"
                               :class="{
@@ -544,7 +553,9 @@
     <!-- Summary Data Helper for Alpine -->
     <div id="logs-summary-data"
          data-total="{{ summary.total_records if summary else 0 }}"
-         data-avg="{{ summary.avg_rx_power if summary and summary.avg_rx_power is not none else '' }}"
+         data-normal="{{ summary.normal if summary else 0 }}"
+         data-warning="{{ summary.warning if summary else 0 }}"
+         data-kritis-los="{{ summary.kritis_los if summary else 0 }}"
          data-min-date="{{ min_date }}"
          class="hidden"></div>
 
@@ -556,7 +567,9 @@
 function logsApp() {
     const el = document.getElementById('logs-summary-data');
     const initTotal = el ? (Number(el.dataset.total) || 0) : 0;
-    const initAvg = el && el.dataset.avg ? Number(el.dataset.avg) : null;
+    const initNormal = el ? (Number(el.dataset.normal) || 0) : 0;
+    const initWarning = el ? (Number(el.dataset.warning) || 0) : 0;
+    const initKritisLos = el ? (Number(el.dataset.kritisLos) || 0) : 0;
     const initMinDate = el && el.dataset.minDate ? el.dataset.minDate : '2026-09-01';
     const todayStr = new Date().toISOString().split('T')[0];
 
@@ -584,7 +597,9 @@ function logsApp() {
         },
         summary: {
             total_records: initTotal,
-            avg_rx_power: initAvg
+            normal: initNormal,
+            warning: initWarning,
+            kritis_los: initKritisLos
         },
 
         showToast(message, type = 'success') {

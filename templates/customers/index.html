@@ -424,6 +424,9 @@ EdTeknoGuard{% endblock %} {% block content %}
               />
             </th>
 
+            <!-- No. -->
+            <th class="py-3 px-2 sm:px-3 text-center w-12">No.</th>
+
             <!-- 1. Nama Pelanggan -->
             <th
               @click="sortTable('nama')"
@@ -821,7 +824,7 @@ EdTeknoGuard{% endblock %} {% block content %}
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <template x-for="c in customers" :key="c.id_pelanggan">
+          <template x-for="(c, index) in customers" :key="c.id_pelanggan">
             <tr
               class="hover:bg-slate-50/80 transition"
               :class="selectedIds.includes(c.id_pelanggan) ? 'bg-indigo-50/40' : ''"
@@ -835,6 +838,9 @@ EdTeknoGuard{% endblock %} {% block content %}
                   class="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4 border-slate-300 cursor-pointer"
                 />
               </td>
+
+              <!-- No. -->
+              <td class="py-3 px-2 sm:px-3 text-center font-semibold text-slate-500" x-text="(currentPage - 1) * limit + index + 1"></td>
 
               <!-- 1. Nama Pelanggan -->
               <td class="py-3 px-2 sm:px-4">
