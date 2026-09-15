@@ -24,6 +24,7 @@ class MonitoringScheduler:
     _scan_total: int = 0
     _scan_start_time: float = 0.0
     _last_scan_duration: float = 0.0
+    _resume_index: int = 0
 
     def __new__(cls):
         if cls._instance is None:
@@ -35,6 +36,7 @@ class MonitoringScheduler:
             cls._instance._scan_total = 0
             cls._instance._scan_start_time = 0.0
             cls._instance._last_scan_duration = 0.0
+            cls._instance._resume_index = 0
         return cls._instance
 
     @classmethod
@@ -74,11 +76,16 @@ class MonitoringScheduler:
                 interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
                 interval = int(interval_str)
                 current_status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
-                # Pembersihan log lama > 30 hari otomatis saat startup
-                self.cleanup_old_logs(db, days=30)
-            except Exception:
+            except Exception as e:
+                logger.error(f"Gagal membaca pengaturan scheduler dari DB: {e}")
                 interval = settings.POLLING_INTERVAL_MINUTES
                 current_status = "RUNNING"
+                
+            try:
+                # Pembersihan log lama > 30 hari otomatis saat startup
+                self.cleanup_old_logs(db, days=30)
+            except Exception as e:
+                logger.error(f"Gagal membersihkan log lama: {e}")
             finally:
                 db.close()
 
@@ -194,7 +201,7 @@ class MonitoringScheduler:
 
         self._is_scanning = True
         self._scan_start_time = time.time()
-        self._scan_current = 0
+        
         db = SessionLocal()
         try:
             pelanggan_list = db.query(Pelanggan).filter(
@@ -202,6 +209,13 @@ class MonitoringScheduler:
                 Pelanggan.is_monitored == True
             ).all()
             self._scan_total = len(pelanggan_list)
+            
+            if self._resume_index >= self._scan_total:
+                self._resume_index = 0
+                
+            self._scan_current = self._resume_index
+            pelanggan_to_scan = pelanggan_list[self._resume_index:]
+
             now = datetime.now()
             results = []
             warning_count = 0
@@ -222,7 +236,7 @@ class MonitoringScheduler:
                 default_creds_list = []
 
             unreachable_count = 0
-            for cust in pelanggan_list:
+            for cust in pelanggan_to_scan:
                 self._scan_current += 1
                 # 1. Coba Scraping Live ONT GM220-S via HTTP
                 scrape_res = ONTScraperService.scrape_ont(
@@ -284,24 +298,36 @@ class MonitoringScheduler:
                 st = res.get("status_koneksi") or "LOS"
                 if st == "WARNING":
                     warning_count += 1
+                    cust.los_count = 0
                 elif st == "CRITICAL":
                     critical_count += 1
+                    cust.los_count = 0
                 elif st == "LOS":
                     los_count += 1
                     # Hanya kelompokkan ke deteksi pemadaman massal jika bukan gagal login
                     if not is_auth_failure:
+                        cust.los_count += 1
                         pop_name = cust.pop or "Server Cabang"
                         if pop_name not in los_by_pop:
                             los_by_pop[pop_name] = []
                         los_by_pop[pop_name].append(cust.nama)
+                else:
+                    cust.los_count = 0
 
                 # Kirim telegram alert jika warning/critical/LOS HANYA JIKA BUKAN GAGAL LOGIN (Gambar 2 SOP)
-                if st in ["WARNING", "CRITICAL", "LOS"] and not is_auth_failure:
-                    TelegramService.process_and_send_alert_sync(
-                        pelanggan=cust,
-                        log_entry=log_entry,
-                        db=db
-                    )
+                if not is_auth_failure:
+                    if st in ["WARNING", "CRITICAL"]:
+                        TelegramService.process_and_send_alert_sync(
+                            pelanggan=cust,
+                            log_entry=log_entry,
+                            db=db
+                        )
+                    elif st == "LOS" and cust.los_count >= 3:
+                        TelegramService.process_and_send_alert_sync(
+                            pelanggan=cust,
+                            log_entry=log_entry,
+                            db=db
+                        )
 
                 results.append({
                     "id_pelanggan": cust.id_pelanggan,
@@ -311,6 +337,13 @@ class MonitoringScheduler:
                     "kredensial": cust.status_kredensial,
                     "keterangan": ket
                 })
+                
+                try:
+                    db.commit()
+                except Exception as inner_e:
+                    db.rollback()
+                    self._resume_index = self._scan_current - 1
+                    raise inner_e
 
             # Evaluasi Gangguan Massal (>= 3 ONT LOS di POP yang sama sesuai PRD Section 4.4)
             for pop_name, affected_names in los_by_pop.items():
@@ -326,6 +359,9 @@ class MonitoringScheduler:
             # Pembersihan log > 30 hari berkala
             self.cleanup_old_logs(db, days=30)
             db.commit()
+            
+            # Jika berhasil selesai semuanya, reset resume_index
+            self._resume_index = 0
 
             # Deteksi apakah server terputus dari jaringan lokal ISP / VLAN ONT
             if len(pelanggan_list) > 0 and unreachable_count == len(pelanggan_list):
@@ -357,6 +393,8 @@ class MonitoringScheduler:
             }
         except Exception as e:
             logger.error(f"Error saat scan all: {e}")
+            if self._scan_current > 0 and self._scan_current <= self._scan_total:
+                self._resume_index = self._scan_current - 1
             return {"status": "error", "message": str(e)}
         finally:
             if self._scan_start_time > 0:

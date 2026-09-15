@@ -128,10 +128,10 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-2.5 text-slate-600 text-[11px]">
-                    <span>Waktu Berjalan: <strong class="text-slate-900 font-mono" x-text="(scanProgress.elapsed_seconds || 0) + ' dtk'">0 dtk</strong></span>
+                    <span>Waktu Berjalan: <strong class="text-slate-900 font-mono" x-text="formatTime(scanProgress.elapsed_seconds)">0 dtk</strong></span>
                     <span class="text-indigo-300">•</span>
                     <span class="bg-white/80 px-2 py-0.5 rounded-md border border-indigo-200 text-indigo-900">
-                        Estimasi Total Pemindaian: <strong class="text-indigo-700 font-mono font-bold" x-text="'~' + (scanProgress.estimated_total_seconds || 0) + ' detik'">~0 detik</strong>
+                        Estimasi Total Pemindaian: <strong class="text-indigo-700 font-mono font-bold" x-text="'~' + formatTime(scanProgress.estimated_total_seconds)">~0 dtk</strong>
                     </span>
                 </div>
             </div>
@@ -149,7 +149,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <span>Durasi Pemindaian Terakhir:</span>
-                <strong class="text-slate-800 font-bold font-mono" x-text="scanProgress.last_scan_duration > 0 ? (scanProgress.last_scan_duration + ' detik / 1 kali pemindaian') : 'Belum ada riwayat pemindaian'">Belum ada riwayat pemindaian</strong>
+                <strong class="text-slate-800 font-bold font-mono" x-text="scanProgress.last_scan_duration > 0 ? (formatTime(scanProgress.last_scan_duration) + ' / 1 kali pemindaian') : 'Belum ada riwayat pemindaian'">Belum ada riwayat pemindaian</strong>
             </div>
             <div class="text-[11px] text-slate-400">
                 <span x-text="'Kapasitas: ' + (scanProgress.total || kpi.total_monitored || 0) + ' Modem ONT Terdaftar'"></span>

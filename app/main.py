@@ -24,6 +24,7 @@ from app.modules.telegram_mgmt.routes import router as telegram_router
 from app.modules.logs_mgmt.routes import router as logs_router
 from app.modules.settings.routes import router as settings_router
 from app.modules.activity_logs.routes import router as activity_logs_router
+from app.modules.users.routes import router as users_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -61,6 +62,13 @@ async def custom_http_exception_handler(request: Request, exc: StarletteHTTPExce
         return RedirectResponse(url=exc.headers["Location"], status_code=303)
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
+@app.middleware("http")
+async def inject_current_user_middleware(request: Request, call_next):
+    from app.core.security import get_current_user_optional
+    request.state.current_user = get_current_user_optional(request)
+    response = await call_next(request)
+    return response
+
 # Mount folder static
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -73,6 +81,7 @@ app.include_router(telegram_router)
 app.include_router(logs_router)
 app.include_router(settings_router)
 app.include_router(activity_logs_router)
+app.include_router(users_router)
 
 if __name__ == "__main__":
     import uvicorn

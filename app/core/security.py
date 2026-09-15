@@ -4,13 +4,24 @@ from fastapi import Request, HTTPException, status
 from fastapi.responses import RedirectResponse
 from app.core.config import settings
 
+import bcrypt
+
 SESSION_COOKIE_NAME = "edteknoguard_session"
 MAX_SESSION_AGE = 86400 * 7  # 7 hari
 
 _serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
 
-def create_session_token(username: str) -> str:
-    return _serializer.dumps({"user": username, "role": "admin"})
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    try:
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    except ValueError:
+        return False
+
+def get_password_hash(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def create_session_token(username: str, role: str = "admin") -> str:
+    return _serializer.dumps({"user": username, "role": role})
 
 def verify_session_token(token: str) -> Optional[Dict[str, Any]]:
     if not token:

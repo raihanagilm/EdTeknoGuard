@@ -36,7 +36,7 @@ class AuthController:
             ip = forwarded_for.split(",")[0].strip()
         user_agent = request.headers.get("user-agent")
 
-        token = AuthService.authenticate(username, password)
+        token = AuthService.authenticate(db, username, password)
         if not token:
             ActivityLogService.log_activity(
                 db=db,

@@ -1,14 +1,14 @@
 from typing import Optional
-from app.core.security import create_session_token
-
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "agiltampan"
+from sqlalchemy.orm import Session
+from app.core.security import create_session_token, verify_password
+from app.db.models import User
 
 class AuthService:
 
     @staticmethod
-    def authenticate(username: str, password: str) -> Optional[str]:
-        """Validasi kredensial admin dan kembalikan token sesi jika valid"""
-        if username.strip() == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            return create_session_token(username.strip())
+    def authenticate(db: Session, username: str, password: str) -> Optional[str]:
+        """Validasi kredensial user dari database dan kembalikan token sesi jika valid"""
+        user = db.query(User).filter(User.username == username, User.is_active == True).first()
+        if user and verify_password(password, user.hashed_password):
+            return create_session_token(user.username, role=user.role)
         return None

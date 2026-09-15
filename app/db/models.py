@@ -26,6 +26,7 @@ class Pelanggan(Base):
     pass_admin = Column(String(100), nullable=True)
     status_kredensial = Column(String(20), default="UNTESTED", nullable=False, index=True) # VALID, INVALID, UNTESTED
     snmp_community = Column(String(50), default="public")
+    los_count = Column(Integer, default=0, nullable=False)
     is_monitored = Column(Boolean, default=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -91,3 +92,15 @@ class UserActivityLog(Base):
     keterangan = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
 
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(100), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=False)
+    nama_karyawan = Column(String(150), nullable=True)
+    role = Column(String(50), default="operator", nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
