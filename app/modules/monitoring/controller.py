@@ -12,6 +12,9 @@ class MonitoringController:
 
     @staticmethod
     def toggle_scheduler(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "karyawan":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan mengubah status pemantauan")
+        
         new_status = MonitoringService.toggle_scheduler()
         if request and db:
             from app.modules.activity_logs.service import ActivityLogService
@@ -29,6 +32,9 @@ class MonitoringController:
 
     @staticmethod
     def trigger_scan_all(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "karyawan":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan memulai pemindaian")
+        
         res = MonitoringService.scan_all()
         if request and db:
             from app.modules.activity_logs.service import ActivityLogService

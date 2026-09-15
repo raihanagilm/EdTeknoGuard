@@ -36,8 +36,8 @@ class AuthController:
             ip = forwarded_for.split(",")[0].strip()
         user_agent = request.headers.get("user-agent")
 
-        token = AuthService.authenticate(db, username, password)
-        if not token:
+        auth_result = AuthService.authenticate(db, username, password)
+        if not auth_result:
             ActivityLogService.log_activity(
                 db=db,
                 username=username,
@@ -52,16 +52,18 @@ class AuthController:
                 error="Username atau password yang Anda masukkan salah!"
             )
 
+        token, user = auth_result
+
         ActivityLogService.log_activity(
             db=db,
             username=username,
-            nama_karyawan="Administrator NOC",
-            role="admin",
+            nama_karyawan=user.nama_karyawan or username,
+            role=user.role or "operator",
             action="LOGIN",
             ip_address=ip,
             user_agent=user_agent,
             status="SUCCESS",
-            keterangan="Admin berhasil login ke dashboard EdTeknoGuard"
+            keterangan=f"{user.role.title() if user.role else 'User'} berhasil login ke dashboard EdTeknoGuard"
         )
 
         response = RedirectResponse("/", status_code=303)

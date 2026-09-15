@@ -16,7 +16,7 @@ class UsersController:
     @staticmethod
     def render_users_page(request: Request, db: Session):
         user_session = require_admin(request)
-        if user_session.get("role") != "admin":
+        if user_session.get("role") not in ["super admin", "admin"]:
             return RedirectResponse("/", status_code=303)
             
         users = db.query(User).all()
@@ -35,7 +35,7 @@ class UsersController:
     @staticmethod
     def handle_add_user(request: Request, username: str, password: str, nama_karyawan: str, role: str, db: Session):
         user_session = require_admin(request)
-        if user_session.get("role") != "admin":
+        if user_session.get("role") not in ["super admin", "admin"]:
             return RedirectResponse("/", status_code=303)
             
         try:
@@ -75,11 +75,14 @@ class UsersController:
     @staticmethod
     def handle_edit_user(request: Request, user_id: int, username: str, password: str, nama_karyawan: str, role: str, db: Session):
         user_session = require_admin(request)
-        if user_session.get("role") != "admin":
+        if user_session.get("role") not in ["super admin", "admin"]:
             return RedirectResponse("/", status_code=303)
             
         user = db.query(User).filter(User.id == user_id).first()
         if user:
+            if user_session.get("role") == "admin" and (user.role == "super admin" or user.username == "admin"):
+                return RedirectResponse("/users", status_code=303)
+
             user.username = username
             user.nama_karyawan = nama_karyawan
             user.role = role
@@ -102,11 +105,14 @@ class UsersController:
     @staticmethod
     def handle_toggle_user(request: Request, user_id: int, is_active: bool, db: Session):
         user_session = require_admin(request)
-        if user_session.get("role") != "admin":
+        if user_session.get("role") not in ["super admin", "admin"]:
             return RedirectResponse("/", status_code=303)
             
         user = db.query(User).filter(User.id == user_id).first()
         if user and user.username != "admin":  # Prevent toggling the main admin
+            if user_session.get("role") == "admin" and user.role == "super admin":
+                return RedirectResponse("/users", status_code=303)
+
             user.is_active = is_active
             db.commit()
             

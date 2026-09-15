@@ -98,7 +98,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             Pengaturan
                         </a>
-                        {% if request.state.current_user and request.state.current_user.get('role') == 'admin' %}
+                        {% if request.state.current_user and request.state.current_user.get('role') in ['super admin', 'admin'] %}
                         <a href="/users"
                            class="px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if request.url.path.startswith('/users') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-600 hover:text-indigo-600 hover:bg-slate-50{% endif %}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -120,10 +120,10 @@
                         <button @click="profileMenuOpen = !profileMenuOpen"
                                 class="flex items-center gap-2.5 pl-2 sm:border-l sm:border-slate-200 hover:opacity-80 transition min-h-[44px]">
                             <div class="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
-                                AD
+                                {{ request.state.current_user.get('username')[:2].upper() if request.state.current_user else 'U' }}
                             </div>
                             <div class="hidden sm:block text-left">
-                                <div class="text-xs font-bold text-slate-900">Admin NOC</div>
+                                <div class="text-xs font-bold text-slate-900">{{ request.state.current_user.get('nama_karyawan') if request.state.current_user else 'User' }}</div>
                                 <div class="text-[10px] text-emerald-600 font-medium">● Online</div>
                             </div>
                             <svg class="w-4 h-4 text-slate-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -139,8 +139,8 @@
                              x-transition:leave-end="transform opacity-0 scale-95"
                              class="absolute right-0 mt-2 w-52 rounded-2xl bg-white border border-slate-200 shadow-xl py-2 z-50 text-xs">
                             <div class="px-4 py-2 border-b border-slate-100">
-                                <span class="font-bold text-slate-800 block">Administrator</span>
-                                <span class="text-slate-400 text-[11px]">NOC Team</span>
+                                <span class="font-bold text-slate-800 block">{{ request.state.current_user.get('nama_karyawan') if request.state.current_user else 'User' }}</span>
+                                <span class="text-slate-400 text-[11px] capitalize">{{ request.state.current_user.get('role') if request.state.current_user else 'Unknown' }}</span>
                             </div>
                             <a href="/logout" class="flex items-center gap-2 px-4 py-2.5 text-rose-600 hover:bg-rose-50 font-semibold transition">
                                 <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -187,7 +187,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             <span class="text-[10px] mt-0.5 truncate">Settings</span>
         </a>
-        {% if request.state.current_user and request.state.current_user.get('role') == 'admin' %}
+        {% if request.state.current_user and request.state.current_user.get('role') in ['super admin', 'admin'] %}
         <a href="/users"
            class="flex flex-col items-center justify-center py-1 flex-1 min-h-[48px] {% if request.url.path.startswith('/users') %}text-indigo-600 font-bold{% else %}text-slate-500 hover:text-slate-800{% endif %}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>

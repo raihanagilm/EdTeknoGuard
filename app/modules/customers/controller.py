@@ -54,6 +54,9 @@ class CustomerController:
 
     @staticmethod
     def toggle_customer_monitoring(db: Session, id_pelanggan: str, user: dict, request: Request) -> Dict[str, Any]:
+        if user and user.get("role") == "karyawan":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan mengubah status pemantauan")
+        
         from app.modules.activity_logs.service import ActivityLogService
         cust = CustomerService.toggle_monitoring(db=db, id_pelanggan=id_pelanggan)
         if not cust:
@@ -198,6 +201,9 @@ class CustomerController:
 
     @staticmethod
     def delete_customer(db: Session, id_pelanggan: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "karyawan":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan menghapus data pelanggan")
+        
         from app.modules.activity_logs.service import ActivityLogService
         detail = CustomerService.get_customer_detail(db=db, id_pelanggan=id_pelanggan)
         cust_name = detail[0].nama if detail and detail[0] else id_pelanggan
@@ -220,6 +226,9 @@ class CustomerController:
 
     @staticmethod
     def bulk_delete(db: Session, ids: List[str], request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "karyawan":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan menghapus data pelanggan")
+        
         from app.modules.activity_logs.service import ActivityLogService
         affected = CustomerService.bulk_delete_customers(db=db, id_list=ids)
         if request:

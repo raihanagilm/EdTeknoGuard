@@ -69,6 +69,7 @@
         </div>
 
         <!-- Sisi Kanan: Tombol Kontrol Tunggal Cerdas (Mulai/Cek vs Jeda) -->
+        {% if current_user.get('role') in ['admin', 'super admin'] %}
         <div class="flex items-center gap-2.5 flex-shrink-0">
             <button @click="handleSmartControl()"
                     :disabled="isScanning || isToggling"
@@ -109,6 +110,7 @@
                 <span x-show="isToggling && !isScanning">Menyimpan status...</span>
             </button>
         </div>
+        {% endif %}
 
     </div>
 

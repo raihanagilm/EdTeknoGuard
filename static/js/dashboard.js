@@ -59,6 +59,7 @@ document.addEventListener('alpine:init', () => {
 
         formatTime(seconds) {
             if (!seconds || isNaN(seconds)) return '0 dtk';
+            seconds = Math.floor(seconds);
             if (seconds < 60) return seconds + ' dtk';
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);

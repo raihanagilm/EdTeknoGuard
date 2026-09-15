@@ -20,8 +20,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-def create_session_token(username: str, role: str = "admin") -> str:
-    return _serializer.dumps({"user": username, "role": role})
+def create_session_token(username: str, role: str = "admin", nama_karyawan: str = "User") -> str:
+    return _serializer.dumps({"user": username, "role": role, "nama_karyawan": nama_karyawan})
 
 def verify_session_token(token: str) -> Optional[Dict[str, Any]]:
     if not token:

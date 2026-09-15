@@ -17,16 +17,75 @@
         </div>
     </div>
 
-    <!-- Table Users -->
+    <!-- List Users (Desktop Table & Mobile Cards) -->
     <div class="mt-8 flex flex-col">
-        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <!-- Mobile View (Cards) -->
+        <div class="block sm:hidden space-y-4">
+            {% for user in users %}
+            <div class="bg-white shadow rounded-lg px-4 py-5 border border-gray-200 relative">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="text-sm font-medium text-gray-900 truncate pr-2">
+                        <span class="text-gray-500 mr-1">{{ loop.index }}.</span>{{ user.username }}
+                    </div>
+                    <div class="flex-shrink-0">
+                        {% if user.is_active %}
+                            <span class="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold leading-5 text-green-800">Aktif</span>
+                        {% else %}
+                            <span class="inline-flex rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold leading-5 text-red-800">Nonaktif</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500 mb-1 truncate">
+                    <span class="font-medium text-gray-700">Nama:</span> {{ user.nama_karyawan }}
+                </div>
+                <div class="text-sm text-gray-500 mb-4">
+                    <span class="font-medium text-gray-700">Role:</span> 
+                    <span class="capitalize inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium 
+                        {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-700/10
+                        {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10
+                        {% else %}bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/10{% endif %}">
+                        {{ user.role }}
+                    </span>
+                </div>
+                <div class="flex justify-end space-x-4 border-t border-gray-100 pt-3">
+                    {% if current_user.get('role') == 'super admin' or user.role not in ['admin', 'super admin'] %}
+                    <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan }}', '{{ user.role }}')" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        Edit
+                    </button>
+                    
+                    {% if user.username != 'admin' and user.role != 'super admin' %}
+                    <form action="/users/toggle/{{ user.id }}" method="POST" class="inline m-0">
+                        <input type="hidden" name="is_active" value="{% if user.is_active %}False{% else %}True{% endif %}">
+                        <button type="submit" class="font-medium text-sm flex items-center {% if user.is_active %}text-red-600 hover:text-red-900{% else %}text-green-600 hover:text-green-900{% endif %}">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {% if user.is_active %}
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                {% else %}
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                {% endif %}
+                            </svg>
+                            {% if user.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Desktop View (Table) -->
+        <div class="hidden sm:block -my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                 <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                     <table class="min-w-full divide-y divide-gray-300">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Username</th>
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-16">No</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Username</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama Lengkap</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Role</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                     <span class="sr-only">Aksi</span>
@@ -36,25 +95,38 @@
                         <tbody class="divide-y divide-gray-200 bg-white">
                             {% for user in users %}
                             <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ user.username }}</td>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">{{ loop.index }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">{{ user.username }}</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ user.nama_karyawan }}</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    <span class="capitalize inline-flex items-center rounded-md px-2 py-1 text-xs font-medium 
+                                        {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-700/10
+                                        {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10
+                                        {% else %}bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/10{% endif %}">
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {% if user.is_active %}
-                                        <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">Aktif</span>
+                                        <span class="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold leading-5 text-green-800">Aktif</span>
                                     {% else %}
-                                        <span class="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">Nonaktif</span>
+                                        <span class="inline-flex rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold leading-5 text-red-800">Nonaktif</span>
                                     {% endif %}
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                    <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan }}', '{{ user.role }}')" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
+                                    {% if current_user.get('role') == 'super admin' or user.role not in ['admin', 'super admin'] %}
+                                    <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan }}', '{{ user.role }}')" class="text-indigo-600 hover:text-indigo-900 mr-4 font-medium flex-inline items-center">
+                                        Edit
+                                    </button>
                                     
-                                    {% if user.username != 'admin' %}
+                                    {% if user.username != 'admin' and user.role != 'super admin' %}
                                     <form action="/users/toggle/{{ user.id }}" method="POST" class="inline">
                                         <input type="hidden" name="is_active" value="{% if user.is_active %}False{% else %}True{% endif %}">
                                         <button type="submit" class="{% if user.is_active %}text-red-600 hover:text-red-900{% else %}text-green-600 hover:text-green-900{% endif %}">
                                             {% if user.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}
                                         </button>
                                     </form>
+                                    {% endif %}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -97,7 +169,16 @@
                                             <input type="text" name="nama_karyawan" id="nama_karyawan" x-model="form.nama_karyawan" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         </div>
                                     </div>
-                                            <input type="hidden" name="role" x-model="form.role">
+                                    <div>
+                                        <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                                        <div class="mt-1">
+                                            <select name="role" id="role" x-model="form.role" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                                <option value="karyawan">Karyawan</option>
+                                                <option value="admin">Admin</option>
+                                                <option value="super admin">Super Admin</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div>
                                         <label for="password" class="block text-sm font-medium text-gray-700">
                                             Password <span x-show="isEdit" class="text-xs text-gray-500 font-normal">(Kosongkan jika tidak ingin mengubah)</span>
@@ -132,13 +213,13 @@
                 id: null,
                 username: '',
                 nama_karyawan: '',
-                role: 'operator'
+                role: 'karyawan'
             },
             openAddModal() {
                 this.isEdit = false;
                 this.modalTitle = 'Tambah User Baru';
                 this.formAction = '/users/add';
-                this.form = { id: null, username: '', nama_karyawan: '', role: 'operator' };
+                this.form = { id: null, username: '', nama_karyawan: '', role: 'karyawan' };
                 this.isModalOpen = true;
             },
             openEditModal(id, username, nama_karyawan, role) {
