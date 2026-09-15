@@ -135,3 +135,12 @@ EdTeknoGuard/
    - Seluruh ikon antarmuka (tombol, badge, header modal, indikator sorting, dan aksi tabel) **WAJIB** menggunakan standar SVG inline bersih dengan atribut stroke/fill yang konsisten.
    - **DILARANG KERAS** menggunakan emoji (seperti ⚡, 🔄, ⏭️, ⚙️, 🚨, dsb.) atau library icon eksternal sebagai ikon tombol/tabel UI.
 
+---
+
+## 7. Standar Agen AI & Manajemen Dokumen
+
+1. **Sinkronisasi Dokumen Markdown**:
+   - Setiap AI Agent **WAJIB** membaca dan memahami file markdown (`.md`) seperti `AGENTS.md`, `README.md`, dan dokumen lainnya di proyek untuk menjaga konteks tetap konsisten antar sesi.
+   - Jika ada perubahan arsitektur, fitur, atau aturan baru, agen **WAJIB** memperbarui dokumen `.md` ini agar saling terhubung dan selalu *up-to-date*.
+2. **Implementasi Mobile-First**:
+   - Setiap kali pengguna menginstruksikan pendekatan **mobile first**, agen **WAJIB** menggunakan MCP atau skill dari `appllama-skills` (yang telah dipasang secara global) sebagai referensi dan alat bantu.

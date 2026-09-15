@@ -54,8 +54,8 @@ class CustomerController:
 
     @staticmethod
     def toggle_customer_monitoring(db: Session, id_pelanggan: str, user: dict, request: Request) -> Dict[str, Any]:
-        if user and user.get("role") == "karyawan":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan mengubah status pemantauan")
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan mengubah status pemantauan")
         
         from app.modules.activity_logs.service import ActivityLogService
         cust = CustomerService.toggle_monitoring(db=db, id_pelanggan=id_pelanggan)
@@ -129,6 +129,9 @@ class CustomerController:
 
     @staticmethod
     def create_customer(db: Session, data: CustomerCreate, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan menambahkan pelanggan")
+            
         from app.modules.activity_logs.service import ActivityLogService
         try:
             new_cust = CustomerService.create_customer(db=db, data=data)
@@ -201,8 +204,8 @@ class CustomerController:
 
     @staticmethod
     def delete_customer(db: Session, id_pelanggan: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "karyawan":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan menghapus data pelanggan")
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan menghapus data pelanggan")
         
         from app.modules.activity_logs.service import ActivityLogService
         detail = CustomerService.get_customer_detail(db=db, id_pelanggan=id_pelanggan)
@@ -226,8 +229,8 @@ class CustomerController:
 
     @staticmethod
     def bulk_delete(db: Session, ids: List[str], request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "karyawan":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan menghapus data pelanggan")
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan menghapus data pelanggan")
         
         from app.modules.activity_logs.service import ActivityLogService
         affected = CustomerService.bulk_delete_customers(db=db, id_list=ids)
@@ -251,6 +254,9 @@ class CustomerController:
 
     @staticmethod
     def import_csv(db: Session, file_content: bytes, filename: str = "pelanggan.csv", request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan melakukan import pelanggan")
+            
         from app.modules.activity_logs.service import ActivityLogService
         try:
             res = CustomerService.import_customers_from_csv(db=db, file_content=file_content)
@@ -335,6 +341,9 @@ class CustomerController:
 
     @staticmethod
     def execute_import(db: Session, data_list: list, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan mengeksekusi import pelanggan")
+            
         from app.modules.activity_logs.service import ActivityLogService
         try:
             res = CustomerService.execute_json_import(db=db, data_list=data_list)

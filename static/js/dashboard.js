@@ -58,14 +58,14 @@ document.addEventListener('alpine:init', () => {
         toast: { show: false, message: '', type: 'success' },
 
         formatTime(seconds) {
-            if (!seconds || isNaN(seconds)) return '0 dtk';
+            if (!seconds || isNaN(seconds)) return '00:00';
             seconds = Math.floor(seconds);
-            if (seconds < 60) return seconds + ' dtk';
             const h = Math.floor(seconds / 3600);
             const m = Math.floor((seconds % 3600) / 60);
             const s = seconds % 60;
-            if (h > 0) return `${h} jam ${m} mnt ${s} dtk`;
-            return `${m} mnt ${s} dtk`;
+            const pad = num => num.toString().padStart(2, '0');
+            if (h > 0) return `${pad(h)}:${pad(m)}:${pad(s)}`;
+            return `${pad(m)}:${pad(s)}`;
         },
 
         // Metrik KPI
@@ -183,17 +183,19 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        // Tombol Kontrol Tunggal Cerdas (Start/Scan vs Jeda)
-        async handleSmartControl() {
+        async actionToggleEngine() {
             if (this.isScanning || this.isToggling) return;
-
-            if (this.engineStatus === 'RUNNING') {
-                // Sedang berjalan -> Jeda engine
-                await this.toggleEngine();
+            
+            // Simpan status lama sebelum toggle
+            const wasRunning = this.engineStatus === 'RUNNING';
+            
+            await this.toggleEngine(); // ini akan memanggil endpoint /api/monitoring/toggle-scheduler
+            
+            if (wasRunning) {
+                // Berarti sekarang jadi STOPPED
                 this.showToast('Pemantauan otomatis dijeda (STOPPED)', 'info');
             } else {
-                // Sedang berhenti -> Aktifkan engine dan langsung jalankan scan
-                await this.toggleEngine();
+                // Berarti sekarang jadi RUNNING
                 this.showToast('Pemantauan otomatis diaktifkan dan pemindaian dimulai!', 'success');
                 await this.triggerScanAll();
             }

@@ -30,9 +30,9 @@ class SystemSettingsController:
 
     @staticmethod
     def update_settings(db: Session, data: SystemSettingsSchema, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "karyawan":
+        if user and user.get("role") == "operator":
             from fastapi import HTTPException
-            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan hanya dapat melihat pengaturan")
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator hanya dapat melihat pengaturan")
             
         updated = SystemSettingsService.update_settings(db=db, data=data)
         if request:

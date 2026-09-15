@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import require_admin
 from app.modules.monitoring.controller import MonitoringController
 
 router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
@@ -13,24 +14,24 @@ def get_monitoring_status():
     return MonitoringController.get_status()
 
 @router.post("/toggle-scheduler")
-def toggle_scheduler(request: Request, db: Session = Depends(get_db)):
+def toggle_scheduler(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
     """Route toggle scheduler antara RUNNING dan STOPPED"""
-    return MonitoringController.toggle_scheduler(request=request, db=db)
+    return MonitoringController.toggle_scheduler(request=request, db=db, user=user)
 
 @router.post("/scan-all")
-def trigger_scan_all(request: Request, db: Session = Depends(get_db)):
+def trigger_scan_all(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
     """Route trigger pemindaian manual seluruh ONT"""
-    return MonitoringController.trigger_scan_all(request=request, db=db)
+    return MonitoringController.trigger_scan_all(request=request, db=db, user=user)
 
 @router.post("/scan/{id_pelanggan}")
-def trigger_scan_single(id_pelanggan: str):
+def trigger_scan_single(id_pelanggan: str, user: dict = Depends(require_admin)):
     """Route trigger pemindaian on-demand untuk satu ONT pelanggan"""
-    return MonitoringController.trigger_scan_single(id_pelanggan=id_pelanggan)
+    return MonitoringController.trigger_scan_single(id_pelanggan=id_pelanggan, user=user)
 
 @router.post("/check-single/{id_pelanggan}")
-def check_single_alias(id_pelanggan: str):
+def check_single_alias(id_pelanggan: str, user: dict = Depends(require_admin)):
     """Alias route probe single ONT untuk kompatibilitas frontend"""
-    res = MonitoringController.trigger_scan_single(id_pelanggan=id_pelanggan)
+    res = MonitoringController.trigger_scan_single(id_pelanggan=id_pelanggan, user=user)
     return {
         "status": "success",
         "probe_result": {

@@ -12,8 +12,8 @@ class MonitoringController:
 
     @staticmethod
     def toggle_scheduler(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "karyawan":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan mengubah status pemantauan")
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan mengubah status pemantauan")
         
         new_status = MonitoringService.toggle_scheduler()
         if request and db:
@@ -32,8 +32,8 @@ class MonitoringController:
 
     @staticmethod
     def trigger_scan_all(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "karyawan":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Karyawan tidak diizinkan memulai pemindaian")
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan memulai pemindaian")
         
         res = MonitoringService.scan_all()
         if request and db:
@@ -49,7 +49,9 @@ class MonitoringController:
         return res
 
     @staticmethod
-    def trigger_scan_single(id_pelanggan: str) -> Dict[str, Any]:
+    def trigger_scan_single(id_pelanggan: str, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan memulai pemindaian")
         res = MonitoringService.scan_single(id_pelanggan)
         if not res:
             raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
