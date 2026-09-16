@@ -102,9 +102,9 @@
     <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
         <div class="flex flex-wrap items-center gap-3">
             <!-- Dynamic Dataset Legend (Multi-Series) -->
-            <template x-for="(ds, idx) in activeDatasets" :key="idx">
+            <template x-for="(ds, idx) in activeDatasets.filter(d => !d.isThreshold)" :key="idx">
                 <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition select-none"
-                     @click="toggleDatasetVisibility(idx)"
+                     @click="toggleDatasetVisibility(ds.index)"
                      :title="'Klik untuk menampilkan/menyembunyikan garis ' + ds.label">
                     <span class="h-2.5 w-2.5 rounded-full inline-block flex-shrink-0" :style="'background-color: ' + ds.color"></span>
                     <span class="font-medium text-slate-700" :class="ds.hidden ? 'line-through opacity-40' : ''" x-text="ds.label"></span>

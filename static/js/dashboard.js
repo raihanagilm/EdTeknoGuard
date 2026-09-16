@@ -329,7 +329,7 @@ document.addEventListener('alpine:init', () => {
                             backgroundColor: 'rgba(79, 70, 229, 0.12)',
                             borderWidth: 3,
                             fill: true,
-                            tension: 0.35,
+                            tension: 0.12,
                             pointRadius: 6,
                             pointHoverRadius: 9,
                             pointBackgroundColor: '#4F46E5',
@@ -459,13 +459,8 @@ document.addEventListener('alpine:init', () => {
 
         async switchChartRange(range) {
             this.chartRange = range;
-            const now = new Date();
-            if (range === 'today') {
-                this.selectedDate = now.toISOString().split('T')[0];
-            } else if (range === 'yesterday') {
-                const y = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-                this.selectedDate = y.toISOString().split('T')[0];
-            }
+            // Gunakan tanggal hari ini sebagai anchor acuan agar label perbandingan selalu tepat
+            this.selectedDate = this.todayDate;
             await this.loadChartData();
         },
 
@@ -514,8 +509,8 @@ document.addEventListener('alpine:init', () => {
                                 backgroundColor: (!isMulti) ? 'rgba(79, 70, 229, 0.12)' : 'transparent',
                                 borderWidth: json.datasets.length > 2 ? 2 : 2.5,
                                 fill: !isMulti,
-                                tension: 0.35,
-                                pointRadius: json.datasets.length > 2 ? 3 : 5,
+                                tension: 0.12,
+                                pointRadius: json.datasets.length > 2 ? 3.5 : 5,
                                 pointHoverRadius: json.datasets.length > 2 ? 6 : 8,
                                 pointBackgroundColor: ds.color || '#4F46E5',
                                 pointBorderColor: '#FFFFFF',
@@ -537,7 +532,7 @@ document.addEventListener('alpine:init', () => {
                             backgroundColor: 'rgba(79, 70, 229, 0.12)',
                             borderWidth: 2.5,
                             fill: true,
-                            tension: 0.35,
+                            tension: 0.12,
                             pointRadius: 5,
                             pointHoverRadius: 8,
                             pointBackgroundColor: '#4F46E5',

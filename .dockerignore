@@ -1,0 +1,42 @@
+# Version control
+.git
+.gitignore
+.kilo
+
+# Secrets & environment (jangan masuk ke image; pakai env_file compose)
+.env
+.env.*
+*.key
+*.pem
+cookie.txt
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+venv/
+.venv/
+
+# Development / not-for-production
+scratch/
+tests/
+test.py
+test_users.py
+test.db
+
+# Dokumentasi & file data sumber
+README.md
+AGENTS.md
+*.md
+*.xlsx
+*.csv
+*.docx
+template_test.xlsx
+
+# Runtime data (di-mount via volume)
+data/
+
+# Build artifacts (image dibangun dari Dockerfile ini)
+Dockerfile
+docker-compose.yml
+.dockerignore

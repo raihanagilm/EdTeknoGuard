@@ -1,0 +1,17 @@
+# EdTeknoGuard - Docker Compose (Produksi)
+# Data disimpan di TiDB Cloud (remote), jadi tidak perlu container DB.
+# Hanya folder /app/data (scan_state.json) yang dipersistenkan.
+services:
+  edteknoguard:
+    build: .
+    image: edteknoguard:latest
+    container_name: edteknoguard
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - APP_URL=${APP_URL:-http://localhost:8000}
+    ports:
+      - "8000:8000"   # Local network access; Cloudflare Tunnel di depan
+    volumes:
+      - ./data:/app/data   # persist scan_state.json & file runtime

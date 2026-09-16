@@ -123,12 +123,13 @@ class MonitoringService:
         warning_th = getattr(settings, "WARNING_THRESHOLD_DBM", -26.0)
         critical_th = getattr(settings, "CRITICAL_THRESHOLD_DBM", -27.0)
 
-        # Helper query data hourly untuk 1 hari tertentu
-        def query_day_hourly(target_d):
-            d_start = datetime.combine(target_d, datetime.min.time())
-            d_end = datetime.combine(target_d, datetime.max.time())
+        # Helper query data hourly multi-hari dalam 1 roundtrip database
+        def query_range_hourly(start_d, end_d):
+            d_start = datetime.combine(start_d, datetime.min.time())
+            d_end = datetime.combine(end_d, datetime.max.time())
             q = (
                 db.query(
+                    func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d').label('day_key'),
                     func.date_format(LogPerformaONT.waktu_cek, '%H:00').label('hour_label'),
                     func.round(func.avg(LogPerformaONT.rx_power), 2).label('avg_rx'),
                     func.count(LogPerformaONT.id).label('total_count'),
@@ -143,19 +144,26 @@ class MonitoringService:
             )
             if id_pelanggan:
                 q = q.filter(LogPerformaONT.id_pelanggan == id_pelanggan)
-            rows = q.group_by(func.date_format(LogPerformaONT.waktu_cek, '%H:00')).all()
-            
+            rows = q.group_by(
+                func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d'),
+                func.date_format(LogPerformaONT.waktu_cek, '%H:00')
+            ).all()
+
             res = {}
             for r in rows:
-                res[r[0]] = {
-                    "avg": float(r[1]) if r[1] is not None else None,
-                    "total": int(r[2]) if r[2] is not None else 0,
-                    "normal": int(r[3]) if r[3] is not None else 0,
-                    "warning": int(r[4]) if r[4] is not None else 0,
-                    "critical": int(r[5]) if r[5] is not None else 0,
-                    "los": int(r[6]) if r[6] is not None else 0,
-                    "min_rx": float(r[7]) if r[7] is not None else None,
-                    "max_rx": float(r[8]) if r[8] is not None else None
+                d_key = r[0]
+                h_key = r[1]
+                if d_key not in res:
+                    res[d_key] = {}
+                res[d_key][h_key] = {
+                    "avg": float(r[2]) if r[2] is not None else None,
+                    "total": int(r[3]) if r[3] is not None else 0,
+                    "normal": int(r[4]) if r[4] is not None else 0,
+                    "warning": int(r[5]) if r[5] is not None else 0,
+                    "critical": int(r[6]) if r[6] is not None else 0,
+                    "los": int(r[7]) if r[7] is not None else 0,
+                    "min_rx": float(r[8]) if r[8] is not None else None,
+                    "max_rx": float(r[9]) if r[9] is not None else None
                 }
             return res
 
@@ -167,15 +175,30 @@ class MonitoringService:
         else:
             anchor_date = today
 
-        # Skenario 1: Kemarin (2 Garis: Hari Ini & Kemarin diplot pada sumbu jam 24 jam)
+        # Skenario 1: Kemarin (2 Garis: Hari Ini & Kemarin diplot pada sumbu jam riil)
         if range_type == "yesterday" and not id_pelanggan:
             day_target = anchor_date
             yesterday = day_target - timedelta(days=1)
-            data_today = query_day_hourly(day_target)
-            data_yesterday = query_day_hourly(yesterday)
+            range_data = query_range_hourly(yesterday, day_target)
+            data_today = range_data.get(day_target.strftime("%Y-%m-%d"), {})
+            data_yesterday = range_data.get(yesterday.strftime("%Y-%m-%d"), {})
 
-            # Buat 24 jam label 00:00 s/d 23:00
-            hours_labels = [f"{h:02d}:00" for h in range(24)]
+            # Cari jam paling awal dan jam paling akhir yang memiliki data riil
+            active_hours = set()
+            for d_map in [data_today, data_yesterday]:
+                for h_str, h_val in d_map.items():
+                    if h_val.get("avg") is not None or h_val.get("total", 0) > 0:
+                        try:
+                            active_hours.add(int(h_str.split(":")[0]))
+                        except Exception:
+                            pass
+
+            if active_hours:
+                min_hour = min(active_hours)
+                max_hour = max(active_hours)
+                hours_labels = [f"{h:02d}:00" for h in range(min_hour, max_hour + 1)]
+            else:
+                hours_labels = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"]
             
             today_values = []
             today_details = []
@@ -239,7 +262,7 @@ class MonitoringService:
                 "date": day_target.strftime("%Y-%m-%d")
             }
 
-        # Skenario 2: 7 Hari (7 Garis: H-6 s/d H diplot pada sumbu jam 24 jam)
+        # Skenario 2: 7 Hari (7 Garis: H-6 s/d H diplot pada rentang jam riil terukur)
         elif range_type == "week" and not id_pelanggan:
             colors = [
                 "#4F46E5", # Hari Ini (Indigo)
@@ -250,13 +273,33 @@ class MonitoringService:
                 "#EC4899", # H-5 (Pink)
                 "#64748B"  # H-6 (Slate)
             ]
-            hours_labels = [f"{h:02d}:00" for h in range(24)]
+            start_7d = anchor_date - timedelta(days=6)
+            range_data = query_range_hourly(start_7d, anchor_date)
+            
+            # Cari jam paling awal dan jam paling akhir yang memiliki data riil di seluruh 7 hari
+            active_hours = set()
+            for d_map in range_data.values():
+                for h_str, h_val in d_map.items():
+                    if h_val.get("avg") is not None or h_val.get("total", 0) > 0:
+                        try:
+                            active_hours.add(int(h_str.split(":")[0]))
+                        except Exception:
+                            pass
+
+            if active_hours:
+                min_hour = min(active_hours)
+                max_hour = max(active_hours)
+                hours_labels = [f"{h:02d}:00" for h in range(min_hour, max_hour + 1)]
+            else:
+                hours_labels = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"]
+
             datasets = []
             all_valid = []
 
             for i in range(7):
                 d_target = anchor_date - timedelta(days=i)
-                d_data = query_day_hourly(d_target)
+                d_key = d_target.strftime("%Y-%m-%d")
+                d_data = range_data.get(d_key, {})
                 d_values = []
                 d_details = []
 
