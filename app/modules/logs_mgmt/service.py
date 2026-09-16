@@ -53,7 +53,8 @@ class LogsMgmtService:
         summary_base_query = query
 
         if status and status != "Semua Status":
-            if status == "CRITICAL_LOS":
+            # Saat filter CRITICAL, ikutkan juga LOS karena keduanya masuk kategori Kritis
+            if status == 'CRITICAL':
                 query = query.filter(LogPerformaONT.status_koneksi.in_(['CRITICAL', 'LOS']))
             else:
                 query = query.filter(LogPerformaONT.status_koneksi == status)

@@ -27,7 +27,10 @@ def list_customers(
     pop: Optional[str] = Query(None, description="Filter POP"),
     status: Optional[str] = Query(None, description="Filter status NORMAL, WARNING, CRITICAL, LOS, NONAKTIF"),
     monitoring: Optional[str] = Query(None, description="Filter pemantauan: all, active, inactive"),
-    sort_by: Optional[str] = Query("id", description="Kolom urutan: id, nama, pop, ip_router, jenis_modem, redaman_baseline, status_kredensial, is_monitored"),
+    range: Optional[str] = Query("all", description="Filter rentang waktu: all, today, 7d, 30d, custom"),
+    start_date: Optional[str] = Query(None, description="Tanggal awal (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="Tanggal akhir (YYYY-MM-DD)"),
+    sort_by: Optional[str] = Query("id", description="Kolom urutan: id, nama, pop, ip_router, jenis_modem, redaman_baseline, status_kredensial, is_monitored, waktu_cek"),
     sort_dir: str = Query("asc", description="Arah urutan: asc atau desc"),
     page: int = Query(1, ge=1),
     limit: int = Query(25, ge=5, le=200),
@@ -35,7 +38,9 @@ def list_customers(
 ):
     """Route untuk mendapatkan daftar pelanggan dengan filter, sorting, dan pagination"""
     return CustomerController.list_customers(
-        db=db, q=q, pop=pop, status=status, monitoring=monitoring, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
+        db=db, q=q, pop=pop, status=status, monitoring=monitoring,
+        range_type=range, start_date=start_date, end_date=end_date,
+        sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
     )
 
 @router.get("/api/customers/template-excel")

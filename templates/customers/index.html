@@ -380,6 +380,19 @@ EdTeknoGuard{% endblock %} {% block content %}
         <option value="inactive">Pemantauan OFF (Nonaktif)</option>
       </select>
 
+      <!-- Filter Rentang Waktu Tanggal -->
+      <select
+        x-model="filterRange"
+        @change="onRangeChange()"
+        class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
+      >
+        <option value="all">Semua Tanggal</option>
+        <option value="today">Hari Ini</option>
+        <option value="7d">7 Hari Terakhir</option>
+        <option value="30d">30 Hari Terakhir</option>
+        <option value="custom">Kustom Tanggal</option>
+      </select>
+
       <button
         @click="fetchCustomers(currentPage)"
         class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition min-h-[44px]"
@@ -401,6 +414,41 @@ EdTeknoGuard{% endblock %} {% block content %}
         <span>Refresh</span>
       </button>
     </div>
+  </div>
+
+  <!-- Custom Date Range Row (Show only when custom selected) -->
+  <div
+    x-show="filterRange === 'custom'"
+    x-transition
+    class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-3 text-xs"
+  >
+    <span class="font-semibold text-slate-600">Pilih Rentang Tanggal:</span>
+    <div class="flex items-center gap-2">
+      <input
+        type="date"
+        x-model="customStartDate"
+        :min="minDate"
+        :max="todayDate"
+        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+      />
+      <span class="text-slate-400">s/d</span>
+      <input
+        type="date"
+        x-model="customEndDate"
+        :min="minDate"
+        :max="todayDate"
+        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+      />
+      <button
+        @click="fetchCustomers(1)"
+        class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs min-h-[40px] transition"
+      >
+        Terapkan
+      </button>
+    </div>
+    <span class="text-[11px] text-slate-400"
+      >Tanggal sebelum data pertama di database otomatis dinonaktifkan.</span
+    >
   </div>
 
   <!-- Customer Table Card -->
@@ -1031,7 +1079,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                     @click.stop="toggleMonitoring(c)"
                     :disabled="togglingMonitoringId === c.id_pelanggan"
                     :title="c.is_monitored ? 'Pemantauan AKTIF: Modem discan berkala & dikirimi alert Telegram. Klik untuk nonaktifkan.' : 'Pemantauan NONAKTIF: Modem dilewati saat scanning & tidak dikirim alert Telegram. Klik untuk aktifkan.'"
-                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-50"
                     :class="c.is_monitored ? 'bg-emerald-500' : 'bg-slate-300'"
                   >
                     <span class="sr-only">Toggle Pemantauan</span>
@@ -4151,6 +4199,7 @@ EdTeknoGuard{% endblock %} {% block content %}
     data-los="{{ stats.los if stats and stats.los is not none else 0 }}"
     data-critical-los="{{ stats.critical_los if stats and stats.critical_los is not none else 0 }}"
     data-monitored-inactive="{{ stats.monitored_inactive if stats and stats.monitored_inactive is not none else 0 }}"
+    data-min-date="{{ min_date if min_date else '2026-09-01' }}"
     class="hidden"
   ></div>
 </div>
@@ -4180,9 +4229,22 @@ EdTeknoGuard{% endblock %} {% block content %}
       filterPop: "Semua POP",
       filterStatus: "Semua Status",
       filterMonitoring: "all",
+      filterRange: "all",
+      customStartDate: "",
+      customEndDate: "",
+      todayDate: new Date().toISOString().split("T")[0],
+      minDate: statsEl && statsEl.dataset.minDate ? statsEl.dataset.minDate : "2026-09-01",
       loading: false,
       probingId: null,
       togglingMonitoringId: null,
+
+      onRangeChange() {
+        if (this.filterRange !== "custom") {
+          this.customStartDate = "";
+          this.customEndDate = "";
+          this.fetchCustomers(1);
+        }
+      },
 
       // Sorting
       sortBy: "id",
@@ -4421,7 +4483,8 @@ EdTeknoGuard{% endblock %} {% block content %}
             this.detailModalOpen ||
             this.isEditingWifi ||
             this.selectedIds.length > 0 ||
-            this.probingId
+            this.probingId ||
+            this.filterRange === "custom"
           ) {
             return;
           }
@@ -4559,6 +4622,11 @@ EdTeknoGuard{% endblock %} {% block content %}
             url += `&status=${encodeURIComponent(this.filterStatus)}`;
           if (this.filterMonitoring && this.filterMonitoring !== "all")
             url += `&monitoring=${encodeURIComponent(this.filterMonitoring)}`;
+          if (this.filterRange && this.filterRange !== "all")
+            url += `&range=${encodeURIComponent(this.filterRange)}`;
+          if (this.filterRange === "custom" && this.customStartDate && this.customEndDate) {
+            url += `&start_date=${encodeURIComponent(this.customStartDate)}&end_date=${encodeURIComponent(this.customEndDate)}`;
+          }
 
           const res = await fetch(url);
           const json = await res.json();

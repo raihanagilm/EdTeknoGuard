@@ -75,17 +75,27 @@ class UsersController:
     @staticmethod
     def handle_edit_user(request: Request, user_id: int, username: str, password: str, nama_karyawan: str, role: str, db: Session):
         user_session = require_admin(request)
-        if user_session.get("role") not in ["super admin", "admin"]:
+        current_role = user_session.get("role")
+
+        if current_role not in ["super admin", "admin"]:
             return RedirectResponse("/", status_code=303)
             
         user = db.query(User).filter(User.id == user_id).first()
         if user:
-            if user_session.get("role") == "admin" and (user.role == "super admin" or user.username == "admin"):
+            # Admin biasa tidak bisa edit super admin atau akun 'admin' utama
+            if current_role == "admin" and (user.role == "super admin" or user.username == "admin"):
+                return RedirectResponse("/users", status_code=303)
+
+            # Super admin bisa edit siapapun, termasuk dirinya sendiri
+            # Tapi tidak bisa mengubah role akun 'admin' utama
+            if user.username == "admin" and current_role != "super admin":
                 return RedirectResponse("/users", status_code=303)
 
             user.username = username
             user.nama_karyawan = nama_karyawan
-            user.role = role
+            # Super admin bisa mengubah role siapapun; admin hanya bisa set ke non-super admin
+            if current_role == "super admin" or role != "super admin":
+                user.role = role
             
             if password:
                 user.hashed_password = get_password_hash(password)
@@ -105,12 +115,15 @@ class UsersController:
     @staticmethod
     def handle_toggle_user(request: Request, user_id: int, is_active: bool, db: Session):
         user_session = require_admin(request)
-        if user_session.get("role") not in ["super admin", "admin"]:
+        current_role = user_session.get("role")
+
+        if current_role not in ["super admin", "admin"]:
             return RedirectResponse("/", status_code=303)
             
         user = db.query(User).filter(User.id == user_id).first()
         if user and user.username != "admin":  # Prevent toggling the main admin
-            if user_session.get("role") == "admin" and user.role == "super admin":
+            # Admin biasa tidak bisa toggle super admin
+            if current_role == "admin" and user.role == "super admin":
                 return RedirectResponse("/users", status_code=303)
 
             user.is_active = is_active
@@ -124,6 +137,40 @@ class UsersController:
                 ip_address=request.client.host if request.client else "unknown",
                 status="SUCCESS",
                 keterangan=f"Berhasil mengubah status user {user.username} menjadi {status_str}"
+            )
+            
+        return RedirectResponse("/users", status_code=303)
+
+    @staticmethod
+    def handle_delete_user(request: Request, user_id: int, db: Session):
+        user_session = require_admin(request)
+        current_role = user_session.get("role")
+
+        # Hanya super admin yang bisa delete user
+        if current_role != "super admin":
+            return RedirectResponse("/users", status_code=303)
+            
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            # Tidak bisa menghapus akun 'admin' utama
+            if user.username == "admin":
+                return RedirectResponse("/users", status_code=303)
+            
+            # Super admin tidak bisa menghapus dirinya sendiri
+            if user.username == user_session.get("user"):
+                return RedirectResponse("/users", status_code=303)
+
+            deleted_username = user.username
+            db.delete(user)
+            db.commit()
+            
+            ActivityLogService.log_activity(
+                db=db,
+                username=user_session.get("user"),
+                action="DELETE_USER",
+                ip_address=request.client.host if request.client else "unknown",
+                status="SUCCESS",
+                keterangan=f"Berhasil menghapus user: {deleted_username}"
             )
             
         return RedirectResponse("/users", status_code=303)

@@ -301,3 +301,56 @@ class TelegramService:
         db.add(log_entry)
         db.commit()
         return sent_any
+
+    @classmethod
+    def send_batch_los_alert_sync(cls, alerts: list, scan_time: "datetime", db: Session) -> bool:
+        """
+        Kirim 1 pesan batch ke Telegram berisi semua ONT yang LOS dalam satu siklus scan.
+        Dipanggil saat jumlah LOS >= 5 (berlaku kelipatan: 5, 10, 15, dst → tetap 1 pesan).
+        """
+        recipients = settings.telegram_recipient_list
+        if not recipients or not alerts:
+            return False
+
+        is_silent = cls.is_in_night_mode(db, scan_time)
+        now_str = scan_time.strftime("%d/%m/%Y %H:%M:%S")
+        total = len(alerts)
+
+        # Susun daftar ONT LOS
+        lines = []
+        for idx, (cust, le) in enumerate(alerts, 1):
+            rx_str = f"{le.rx_power:.2f} dBm" if le.rx_power is not None else "LOS"
+            lines.append(f"  {idx}. <b>{cust.nama}</b> — {cust.pop} | <code>{cust.ip_router}</code> | {rx_str}")
+
+        detail_block = "\n".join(lines)
+
+        msg = (
+            f"🚨🔴 <b>[NOTIFIKASI BATCH LOS — {total} PELANGGAN]</b>\n\n"
+            f"⚠️ <i>Terdeteksi {total} ONT dalam kondisi LOS / Redaman Kritis pada siklus scan terakhir.</i>\n\n"
+            f"📋 <b>Daftar Pelanggan Terdampak:</b>\n"
+            f"{detail_block}\n\n"
+            f"⏰ <b>Waktu Scan:</b> {now_str} WIB\n\n"
+            f"⚡ <b>INSTRUKSI:</b> Mohon teknisi piket lapangan segera melakukan pengecekan fisik "
+            f"kabel dropcore, sambungan fusion/fast connector, dan patchcord pelanggan yang terdampak!"
+        )
+
+        sent_any = False
+        target_list_str = ",".join(recipients)
+        for chat_id in recipients:
+            if cls.send_message_sync(chat_id, msg, disable_notification=is_silent):
+                sent_any = True
+
+        # Catat satu alert log untuk seluruh batch
+        batch_log = AlertLog(
+            id_pelanggan=f"BATCH_LOS_{scan_time.strftime('%Y%m%d%H%M%S')}",
+            tipe_alert="BATCH_LOS",
+            rx_power=None,
+            pesan=msg,
+            target_recipients=target_list_str,
+            status_kirim="SUCCESS" if sent_any else "FAILED",
+            waktu_kirim=scan_time
+        )
+        db.add(batch_log)
+        db.commit()
+        logger.info(f"[BATCH_LOS] Pesan batch {total} ONT LOS dikirim ke {len(recipients)} penerima. Status: {'OK' if sent_any else 'GAGAL'}")
+        return sent_any

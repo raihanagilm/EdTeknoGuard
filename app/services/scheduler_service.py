@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
 from app.core.config import settings
-from app.db.models import Pelanggan, LogPerformaONT, SystemSetting, AlertLog
+from app.db.models import Pelanggan, LogPerformaONT, SystemSetting, AlertLog, UserActivityLog
 from app.services.snmp_service import SNMPService
 from app.services.ont_scraper_service import ONTScraperService
 from app.services.telegram_service import TelegramService
@@ -41,19 +41,55 @@ class MonitoringScheduler:
 
     @classmethod
     def cleanup_old_logs(cls, db: Session, days: int = 30) -> int:
-        """Menghapus riwayat log performa ONT dan alert logs yang berusia lebih dari 30 hari (1 bulan)."""
+        """Menghapus riwayat log performa ONT yang berusia lebih dari 30 hari."""
         try:
             cutoff = datetime.utcnow() - timedelta(days=days)
             deleted_logs = db.query(LogPerformaONT).filter(LogPerformaONT.waktu_cek < cutoff).delete(synchronize_session=False)
-            deleted_alerts = db.query(AlertLog).filter(AlertLog.waktu_kirim < cutoff).delete(synchronize_session=False)
             db.commit()
-            if deleted_logs > 0 or deleted_alerts > 0:
-                logger.info(f"[CLEANUP] Berhasil membersihkan {deleted_logs} log performa dan {deleted_alerts} log alert lama (> {days} hari).")
+            if deleted_logs > 0:
+                logger.info(f"[CLEANUP] Berhasil membersihkan {deleted_logs} log performa ONT lama (> {days} hari).")
             return deleted_logs
         except Exception as e:
-            logger.error(f"[CLEANUP] Gagal membersihkan log lama: {e}")
+            logger.error(f"[CLEANUP] Gagal membersihkan log performa ONT lama: {e}")
             db.rollback()
             return 0
+
+    @classmethod
+    def cleanup_alert_logs(cls, days: int = 7) -> int:
+        """Menghapus alert_logs yang berusia lebih dari 7 hari. Dipanggil dari job scheduler harian."""
+        db = SessionLocal()
+        try:
+            cutoff = datetime.utcnow() - timedelta(days=days)
+            deleted = db.query(AlertLog).filter(AlertLog.waktu_kirim < cutoff).delete(synchronize_session=False)
+            db.commit()
+            if deleted > 0:
+                logger.info(f"[CLEANUP] Berhasil membersihkan {deleted} alert log lama (> {days} hari).")
+            return deleted
+        except Exception as e:
+            logger.error(f"[CLEANUP] Gagal membersihkan alert log lama: {e}")
+            db.rollback()
+            return 0
+        finally:
+            db.close()
+
+    @classmethod
+    def cleanup_activity_logs(cls, days: int = 60) -> int:
+        """Menghapus user_activity_logs yang berusia lebih dari 60 hari (2 bulan). Dipanggil dari job scheduler bulanan."""
+        db = SessionLocal()
+        try:
+            cutoff = datetime.utcnow() - timedelta(days=days)
+            deleted = db.query(UserActivityLog).filter(UserActivityLog.created_at < cutoff).delete(synchronize_session=False)
+            db.commit()
+            if deleted > 0:
+                logger.info(f"[CLEANUP] Berhasil membersihkan {deleted} log aktivitas lama (> {days} hari / 2 bulan).")
+            return deleted
+        except Exception as e:
+            logger.error(f"[CLEANUP] Gagal membersihkan log aktivitas lama: {e}")
+            db.rollback()
+            return 0
+        finally:
+            db.close()
+
 
     @classmethod
     def get_setting_from_db(cls, db: Session, key: str, default: str) -> str:
@@ -97,11 +133,30 @@ class MonitoringScheduler:
                 id="ont_monitoring_job",
                 replace_existing=True
             )
+            # Job cleanup alert_logs: hapus otomatis tiap 7 hari (jalan setiap hari pukul 02:00)
+            self._scheduler.add_job(
+                self.cleanup_alert_logs,
+                "cron",
+                hour=2,
+                minute=0,
+                id="cleanup_alert_logs_job",
+                replace_existing=True
+            )
+            # Job cleanup activity_logs: hapus otomatis tiap 2 bulan (jalan setiap hari pukul 02:30)
+            self._scheduler.add_job(
+                self.cleanup_activity_logs,
+                "cron",
+                hour=2,
+                minute=30,
+                id="cleanup_activity_logs_job",
+                replace_existing=True
+            )
             self._scheduler.start()
             if current_status == "STOPPED":
                 logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: STOPPED (Jeda Pemantauan) sesuai status terakhir.")
             else:
                 logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: RUNNING (Interval: {interval} menit) sesuai status terakhir.")
+            logger.info("[CLEANUP] Job cleanup alert_logs (setiap hari, >7 hari) & activity_logs (setiap hari, >60 hari) aktif.")
 
     def update_interval(self, minutes: int):
         db = SessionLocal()
@@ -222,6 +277,8 @@ class MonitoringScheduler:
             critical_count = 0
             los_count = 0
             los_by_pop = {}
+            # Buffer LOS alerts — dikirim setelah scan selesai (batch jika >= 5)
+            los_pending_alerts = []  # list of (cust, log_entry)
 
             default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
             default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
@@ -314,7 +371,8 @@ class MonitoringScheduler:
                 else:
                     cust.los_count = 0
 
-                # Kirim telegram alert jika warning/critical/LOS HANYA JIKA BUKAN GAGAL LOGIN (Gambar 2 SOP)
+                # Kirim telegram alert jika warning/critical LANGSUNG per perangkat
+                # LOS dikumpulkan dan dikirim setelah scan selesai (batch jika >= 5)
                 if not is_auth_failure:
                     if st in ["WARNING", "CRITICAL"]:
                         TelegramService.process_and_send_alert_sync(
@@ -323,11 +381,7 @@ class MonitoringScheduler:
                             db=db
                         )
                     elif st == "LOS" and cust.los_count >= 3:
-                        TelegramService.process_and_send_alert_sync(
-                            pelanggan=cust,
-                            log_entry=log_entry,
-                            db=db
-                        )
+                        los_pending_alerts.append((cust, log_entry))
 
                 results.append({
                     "id_pelanggan": cust.id_pelanggan,
@@ -345,7 +399,7 @@ class MonitoringScheduler:
                     self._resume_index = self._scan_current - 1
                     raise inner_e
 
-            # Evaluasi Gangguan Massal (>= 3 ONT LOS di POP yang sama sesuai PRD Section 4.4)
+            # Evaluasi Gangguan Massal (>= 3 ONT LOS di POP yang sama)
             for pop_name, affected_names in los_by_pop.items():
                 if len(affected_names) >= 3:
                     TelegramService.send_mass_outage_alert_sync(
@@ -354,6 +408,25 @@ class MonitoringScheduler:
                         customer_names=affected_names,
                         db=db
                     )
+
+            # == Kirim LOS alerts setelah scan selesai (batch jika >= 5) ==
+            if los_pending_alerts:
+                if len(los_pending_alerts) >= 5:
+                    # >= 5 ONT LOS: gabung semua jadi 1 notif batch (berlaku kelipatan)
+                    TelegramService.send_batch_los_alert_sync(
+                        alerts=los_pending_alerts,
+                        scan_time=now,
+                        db=db
+                    )
+                else:
+                    # < 5 -> kirim individual seperti biasa
+                    for c_obj, le_obj in los_pending_alerts:
+                        TelegramService.process_and_send_alert_sync(
+                            pelanggan=c_obj,
+                            log_entry=le_obj,
+                            db=db
+                        )
+
 
             self.set_setting_in_db(db, "last_scan_time", now.strftime("%Y-%m-%d %H:%M:%S"))
             # Pembersihan log > 30 hari berkala

@@ -2,6 +2,7 @@ import uuid
 import csv
 import io
 import re
+from datetime import datetime, timedelta
 from typing import Optional, List, Tuple, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
@@ -409,6 +410,9 @@ class CustomerService:
         pop: Optional[str] = None,
         status: Optional[str] = None,
         monitoring: Optional[str] = None,
+        range_type: Optional[str] = "all",
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
         sort_by: Optional[str] = "id",
         sort_dir: str = "asc",
         page: int = 1,
@@ -463,6 +467,26 @@ class CustomerService:
             elif monitoring in ("inactive", "false", "0"):
                 query = query.filter(Pelanggan.is_monitored == False)
 
+        # Filter Rentang Waktu Tanggal (Berdasarkan waktu cek log terakhir atau tanggal terdaftar)
+        now = datetime.utcnow()
+        date_col = func.coalesce(LogPerformaONT.waktu_cek, Pelanggan.created_at)
+        if range_type == "today":
+            cutoff = datetime(now.year, now.month, now.day)
+            query = query.filter(date_col >= cutoff)
+        elif range_type == "7d":
+            cutoff = now - timedelta(days=7)
+            query = query.filter(date_col >= cutoff)
+        elif range_type == "30d":
+            cutoff = now - timedelta(days=30)
+            query = query.filter(date_col >= cutoff)
+        elif range_type == "custom" and start_date and end_date:
+            try:
+                s_dt = datetime.strptime(start_date.strip(), "%Y-%m-%d")
+                e_dt = datetime.strptime(end_date.strip(), "%Y-%m-%d") + timedelta(days=1)
+                query = query.filter(date_col >= s_dt, date_col < e_dt)
+            except ValueError:
+                pass
+
         total_count = query.count()
 
         # Dynamic sorting
@@ -478,6 +502,8 @@ class CustomerService:
             "redaman_current": LogPerformaONT.rx_power,
             "status": LogPerformaONT.status_koneksi,
             "is_monitored": Pelanggan.is_monitored,
+            "waktu_cek": LogPerformaONT.waktu_cek,
+            "created_at": Pelanggan.created_at,
             "id": Pelanggan.id
         }
         target_col = col_map.get(sort_by, Pelanggan.id)
@@ -546,6 +572,15 @@ class CustomerService:
             .all()
         )
         return cust, logs
+
+    @staticmethod
+    def get_min_date(db: Session) -> str:
+        earliest_log = db.query(func.min(LogPerformaONT.waktu_cek)).scalar()
+        earliest_cust = db.query(func.min(Pelanggan.created_at)).scalar()
+        dates = [d for d in [earliest_log, earliest_cust] if d is not None]
+        if dates:
+            return min(dates).strftime("%Y-%m-%d")
+        return "2026-09-01"
 
     @staticmethod
     def get_pop_list(db: Session) -> List[str]:

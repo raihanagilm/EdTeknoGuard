@@ -16,6 +16,7 @@ class CustomerController:
         """Render antarmuka manajemen pelanggan (templates/customers/index.html)"""
         pops = CustomerService.get_pop_list(db)
         stats = CustomerService.get_customer_stats(db)
+        min_date = CustomerService.get_min_date(db)
         return templates.TemplateResponse(
             request=request,
             name="customers/index.html",
@@ -23,6 +24,7 @@ class CustomerController:
                 "app_name": settings.APP_NAME,
                 "pops": pops,
                 "stats": stats,
+                "min_date": min_date,
                 "warning_threshold": settings.WARNING_THRESHOLD_DBM,
                 "request": request
             }
@@ -35,13 +37,18 @@ class CustomerController:
         pop: Optional[str] = None,
         status: Optional[str] = None,
         monitoring: Optional[str] = None,
+        range_type: Optional[str] = "all",
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
         sort_by: Optional[str] = "id",
         sort_dir: str = "asc",
         page: int = 1,
         limit: int = 25
     ) -> Dict[str, Any]:
         total, data = CustomerService.get_customers(
-            db=db, q=q, pop=pop, status=status, monitoring=monitoring, sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
+            db=db, q=q, pop=pop, status=status, monitoring=monitoring,
+            range_type=range_type, start_date=start_date, end_date=end_date,
+            sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
         )
         stats = CustomerService.get_customer_stats(db)
         return {

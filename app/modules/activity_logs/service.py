@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional, List, Tuple, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc, asc
+from sqlalchemy import or_, desc, asc, func, text
 
 from app.db.models import UserActivityLog
 
@@ -126,19 +126,65 @@ class ActivityLogService:
         ]
 
     @staticmethod
+    def get_distinct_dates(db: Session) -> List[str]:
+        """Mendapatkan daftar tanggal unik yang ada di database untuk filter dropdown"""
+        try:
+            rows = (
+                db.query(func.date(UserActivityLog.created_at).label("log_date"))
+                .distinct()
+                .order_by(desc("log_date"))
+                .all()
+            )
+            return [str(r[0]) for r in rows if r[0]]
+        except Exception as e:
+            print(f"[ActivityLogService] get_distinct_dates error: {e}")
+            return []
+
+    @staticmethod
     def get_activity_logs(
         db: Session,
         username: Optional[str] = None,
         q: Optional[str] = None,
         action: Optional[str] = None,
-        status: Optional[str] = None,
+        range_type: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        date: Optional[str] = None,
         sort_by: str = "created_at",
         sort_dir: str = "desc",
         page: int = 1,
         limit: int = 25
-    ) -> Tuple[int, List[Dict[str, Any]]]:
-        """Mengambil data log aktivitas dengan filter, sorting dinamis, dan pagination"""
+    ) -> Tuple[int, List[Dict[str, Any]], Optional[str]]:
+        """Mengambil data log aktivitas dengan filter rentang waktu/kustom tanggal, sorting dinamis, dan pagination"""
         query = db.query(UserActivityLog)
+
+        now = datetime.datetime.utcnow()
+        if range_type == "today":
+            cutoff = datetime.datetime(now.year, now.month, now.day)
+            query = query.filter(UserActivityLog.created_at >= cutoff)
+        elif range_type == "7d":
+            cutoff = now - datetime.timedelta(days=7)
+            query = query.filter(UserActivityLog.created_at >= cutoff)
+        elif range_type == "30d":
+            cutoff = now - datetime.timedelta(days=30)
+            query = query.filter(UserActivityLog.created_at >= cutoff)
+        elif range_type == "custom" and start_date and end_date:
+            try:
+                s_dt = datetime.datetime.strptime(start_date.strip(), "%Y-%m-%d")
+                e_dt = datetime.datetime.strptime(end_date.strip(), "%Y-%m-%d") + datetime.timedelta(days=1)
+                query = query.filter(UserActivityLog.created_at >= s_dt, UserActivityLog.created_at < e_dt)
+            except ValueError:
+                pass
+        elif date and date != "all":
+            try:
+                target_date = datetime.date.fromisoformat(date.strip())
+                next_day = target_date + datetime.timedelta(days=1)
+                query = query.filter(
+                    UserActivityLog.created_at >= datetime.datetime.combine(target_date, datetime.time.min),
+                    UserActivityLog.created_at < datetime.datetime.combine(next_day, datetime.time.min)
+                )
+            except ValueError:
+                pass  # Abaikan format tanggal yang tidak valid
 
         # Filter berdasarkan username/karyawan tertentu
         if username and username != "all":
@@ -147,10 +193,6 @@ class ActivityLogService:
         # Filter berdasarkan aksi
         if action and action != "all":
             query = query.filter(UserActivityLog.action == action.strip().upper())
-
-        # Filter status
-        if status and status != "all":
-            query = query.filter(UserActivityLog.status == status.strip().upper())
 
         # Pencarian fleksibel
         if q:
@@ -202,4 +244,20 @@ class ActivityLogService:
                 "waktu": l.created_at.strftime("%Y-%m-%d %H:%M:%S") if l.created_at else "-"
             })
 
-        return total_count, results
+        earliest = db.query(func.min(UserActivityLog.created_at)).scalar()
+        min_date_str = earliest.strftime("%Y-%m-%d") if earliest else datetime.date.today().strftime("%Y-%m-%d")
+        return total_count, results, min_date_str
+
+    @staticmethod
+    def cleanup_old_activity_logs(db: Session, days: int = 60) -> int:
+        """Hapus log aktivitas yang lebih lama dari `days` hari. Default 60 hari (2 bulan)."""
+        try:
+            cutoff = datetime.datetime.utcnow() - datetime.timedelta(days=days)
+            deleted = db.query(UserActivityLog).filter(UserActivityLog.created_at < cutoff).delete()
+            db.commit()
+            print(f"[ActivityLogService] Cleanup: {deleted} log aktivitas lama dihapus (> {days} hari)")
+            return deleted
+        except Exception as e:
+            db.rollback()
+            print(f"[ActivityLogService] cleanup_old_activity_logs error: {e}")
+            return 0

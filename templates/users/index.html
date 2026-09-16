@@ -1,73 +1,269 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Manajemen User - {{ app_name }}{% endblock %}
+{% block title %}Manajemen User — {{ app_name }}{% endblock %}
 
 {% block content %}
-<div class="px-4 sm:px-6 lg:px-8 py-8" x-data="userManagement()">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-xl font-semibold text-gray-900">Manajemen User</h1>
-            <p class="mt-2 text-sm text-gray-700">Daftar pengguna yang memiliki akses ke sistem EdTeknoGuard.</p>
+<div class="space-y-6" x-data="userManagement()">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                <div class="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </div>
+                <span>Manajemen User</span>
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Daftar pengguna yang memiliki akses ke sistem EdTeknoGuard.
+            </p>
         </div>
-        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <button type="button" @click="openAddModal()" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
-                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                Tambah User
+        <div>
+            <button type="button" @click="openAddModal()"
+                    class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>Tambah User</span>
             </button>
         </div>
     </div>
 
-    <!-- List Users (Desktop Table & Mobile Cards) -->
-    <div class="mt-8 flex flex-col">
-        <!-- Mobile View (Cards) -->
-        <div class="block sm:hidden space-y-4">
+    <!-- Table Card -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+        <!-- Desktop Table -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-bold uppercase tracking-wider text-[11px] select-none">
+                        <!-- No. -->
+                        <th class="py-3 px-4 text-center w-12">No.</th>
+
+                        <!-- Username sortir -->
+                        <th @click="sortTable('username')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Username</span>
+                                <template x-if="sortBy === 'username'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'username'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Nama Lengkap sortir -->
+                        <th @click="sortTable('nama')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Nama Lengkap</span>
+                                <template x-if="sortBy === 'nama'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'nama'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Role sortir -->
+                        <th @click="sortTable('role')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Role</span>
+                                <template x-if="sortBy === 'role'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'role'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Status sortir -->
+                        <th @click="sortTable('status')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
+                            <div class="flex items-center gap-1">
+                                <span>Status</span>
+                                <template x-if="sortBy === 'status'">
+                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path x-show="sortDir === 'asc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        <path x-show="sortDir === 'desc'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="sortBy !== 'status'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                    </svg>
+                                </template>
+                            </div>
+                        </th>
+
+                        <!-- Aksi -->
+                        <th class="py-3 px-4 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="usersTableBody">
+                    {% for user in users %}
+                    <tr class="hover:bg-slate-50/80 transition user-row"
+                        data-username="{{ user.username|lower }}"
+                        data-nama="{{ user.nama_karyawan|lower }}"
+                        data-role="{{ user.role|lower }}"
+                        data-status="{{ 'aktif' if user.is_active else 'nonaktif' }}">
+
+                        <!-- No. -->
+                        <td class="py-3 px-4 text-center font-mono text-slate-400 text-xs">{{ loop.index }}</td>
+
+                        <!-- Username -->
+                        <td class="py-3 px-4">
+                            <span class="font-bold text-slate-900 text-xs">{{ user.username }}</span>
+                        </td>
+
+                        <!-- Nama Lengkap -->
+                        <td class="py-3 px-4 text-slate-600 text-xs">{{ user.nama_karyawan or '-' }}</td>
+
+                        <!-- Role Badge -->
+                        <td class="py-3 px-4">
+                            <span class="capitalize inline-flex items-center rounded-lg px-2.5 py-1 text-[11px] font-semibold
+                                {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 border border-purple-200
+                                {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 border border-blue-200
+                                {% else %}bg-slate-100 text-slate-600 border border-slate-200{% endif %}">
+                                {{ user.role | title }}
+                            </span>
+                        </td>
+
+                        <!-- Status Badge -->
+                        <td class="py-3 px-4">
+                            {% if user.is_active %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>Nonaktif
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Aksi -->
+                        <td class="py-3 px-4 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                {% if current_user.get('role') == 'super admin' or user.role != 'super admin' %}
+
+                                <!-- Tombol Edit (Pensil) -->
+                                <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan or '' }}', '{{ user.role }}')"
+                                        title="Edit user {{ user.username }}"
+                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200 transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+
+                                {% if user.username != 'admin' and user.role != 'super admin' %}
+                                <!-- Toggle Switch Aktif/Nonaktif -->
+                                <button type="button"
+                                        @click="openToggleModal({{ user.id }}, '{{ user.username }}', {{ 'true' if user.is_active else 'false' }})"
+                                        title="{% if user.is_active %}Klik untuk nonaktifkan{% else %}Klik untuk aktifkan{% endif %}"
+                                        class="relative inline-flex items-center h-5 w-9 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
+                                        {% if user.is_active %}bg-indigo-600 hover:bg-indigo-700{% else %}bg-slate-200 hover:bg-slate-300{% endif %}">
+                                    <span class="sr-only">{% if user.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}</span>
+                                    <span class="inline-block w-3.5 h-3.5 transform rounded-full bg-white shadow transition-transform
+                                        {% if user.is_active %}translate-x-4{% else %}translate-x-1{% endif %}"></span>
+                                </button>
+                                {% else %}
+                                <span class="inline-block w-9"></span>
+                                {% endif %}
+
+                                <!-- Tombol Delete (Tempat Sampah) — hanya Super Admin, tidak untuk akun 'admin' & dirinya sendiri -->
+                                {% if current_user.get('role') == 'super admin' and user.username != 'admin' and user.username != current_user.get('user') %}
+                                <button @click="openDeleteModal({{ user.id }}, '{{ user.username }}')"
+                                        title="Hapus user {{ user.username }}"
+                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                                {% endif %}
+
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="block md:hidden divide-y divide-slate-100">
             {% for user in users %}
-            <div class="bg-white shadow rounded-lg px-4 py-5 border border-gray-200 relative">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-sm font-medium text-gray-900 truncate pr-2">
-                        <span class="text-gray-500 mr-1">{{ loop.index }}.</span>{{ user.username }}
+            <div class="p-4 hover:bg-slate-50 transition">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                    <div>
+                        <div class="font-bold text-slate-900 text-sm">
+                            <span class="text-slate-400 text-xs mr-1">{{ loop.index }}.</span>{{ user.username }}
+                        </div>
+                        <div class="text-xs text-slate-500 mt-0.5">{{ user.nama_karyawan or '-' }}</div>
                     </div>
-                    <div class="flex-shrink-0">
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <span class="capitalize inline-flex items-center rounded-lg px-2 py-0.5 text-[11px] font-semibold
+                            {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 border border-purple-200
+                            {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 border border-blue-200
+                            {% else %}bg-slate-100 text-slate-600 border border-slate-200{% endif %}">
+                            {{ user.role | title }}
+                        </span>
                         {% if user.is_active %}
-                            <span class="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold leading-5 text-green-800">Aktif</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                            </span>
                         {% else %}
-                            <span class="inline-flex rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold leading-5 text-red-800">Nonaktif</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>Nonaktif
+                            </span>
                         {% endif %}
                     </div>
                 </div>
-                <div class="text-sm text-gray-500 mb-1 truncate">
-                    <span class="font-medium text-gray-700">Nama:</span> {{ user.nama_karyawan }}
-                </div>
-                <div class="text-sm text-gray-500 mb-4">
-                    <span class="font-medium text-gray-700">Role:</span> 
-                    <span class="capitalize inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium 
-                        {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-700/10
-                        {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10
-                        {% else %}bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/10{% endif %}">
-                        {{ user.role }}
-                    </span>
-                </div>
-                <div class="flex justify-end space-x-4 border-t border-gray-100 pt-3">
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                     {% if current_user.get('role') == 'super admin' or user.role != 'super admin' %}
-                    <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan }}', '{{ user.role }}')" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan or '' }}', '{{ user.role }}')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold hover:bg-indigo-100 transition min-h-[36px]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
                         Edit
                     </button>
-                    
                     {% if user.username != 'admin' and user.role != 'super admin' %}
-                    <form action="/users/toggle/{{ user.id }}" method="POST" class="inline m-0">
-                        <input type="hidden" name="is_active" value="{% if user.is_active %}False{% else %}True{% endif %}">
-                        <button type="submit" class="font-medium text-sm flex items-center {% if user.is_active %}text-red-600 hover:text-red-900{% else %}text-green-600 hover:text-green-900{% endif %}">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                {% if user.is_active %}
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
-                                {% else %}
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                {% endif %}
-                            </svg>
-                            {% if user.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}
-                        </button>
-                    </form>
+                    <button type="button"
+                            @click="openToggleModal({{ user.id }}, '{{ user.username }}', {{ 'true' if user.is_active else 'false' }})"
+                            class="relative inline-flex items-center h-6 w-11 rounded-full transition-colors
+                            {% if user.is_active %}bg-indigo-600{% else %}bg-slate-200{% endif %}">
+                        <span class="inline-block w-4 h-4 transform rounded-full bg-white shadow transition-transform
+                            {% if user.is_active %}translate-x-6{% else %}translate-x-1{% endif %}"></span>
+                    </button>
+                    {% endif %}
+                    {% if current_user.get('role') == 'super admin' and user.username != 'admin' and user.username != current_user.get('user') %}
+                    <button @click="openDeleteModal({{ user.id }}, '{{ user.username }}')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition min-h-[36px]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Hapus
+                    </button>
                     {% endif %}
                     {% endif %}
                 </div>
@@ -75,126 +271,95 @@
             {% endfor %}
         </div>
 
-        <!-- Desktop View (Table) -->
-        <div class="hidden sm:block -my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-300">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-16">No</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Username</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama Lengkap</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Role</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                    <span class="sr-only">Aksi</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            {% for user in users %}
-                            <tr>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">{{ loop.index }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">{{ user.username }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ user.nama_karyawan }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <span class="capitalize inline-flex items-center rounded-md px-2 py-1 text-xs font-medium 
-                                        {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-700/10
-                                        {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10
-                                        {% else %}bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/10{% endif %}">
-                                        {{ user.role }}
-                                    </span>
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {% if user.is_active %}
-                                        <span class="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold leading-5 text-green-800">Aktif</span>
-                                    {% else %}
-                                        <span class="inline-flex rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold leading-5 text-red-800">Nonaktif</span>
-                                    {% endif %}
-                                </td>
-                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                    {% if current_user.get('role') == 'super admin' or user.role != 'super admin' %}
-                                    <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan }}', '{{ user.role }}')" class="text-indigo-600 hover:text-indigo-900 mr-4 font-medium flex-inline items-center">
-                                        Edit
-                                    </button>
-                                    
-                                    {% if user.username != 'admin' and user.role != 'super admin' %}
-                                    <form action="/users/toggle/{{ user.id }}" method="POST" class="inline">
-                                        <input type="hidden" name="is_active" value="{% if user.is_active %}False{% else %}True{% endif %}">
-                                        <button type="submit" class="{% if user.is_active %}text-red-600 hover:text-red-900{% else %}text-green-600 hover:text-green-900{% endif %}">
-                                            {% if user.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Modal Tambah/Edit User -->
-    <div x-show="isModalOpen" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
-        <div x-show="isModalOpen" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <!-- ===== Modal Form Tambah/Edit User ===== -->
+    <div x-show="isModalOpen" class="relative z-10" role="dialog" aria-modal="true" style="display: none;">
+        <div x-show="isModalOpen" x-transition.opacity class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
         <div class="fixed inset-0 z-10 overflow-y-auto">
-            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div x-show="isModalOpen" 
-                     x-transition:enter="ease-out duration-300" 
-                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-                     x-transition:leave="ease-in duration-200" 
-                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
-                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                     class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                    
-                    <form :action="formAction" method="POST">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title" x-text="modalTitle"></h3>
-                                <div class="mt-4 space-y-4">
-                                    <div>
-                                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                                        <div class="mt-1">
-                                            <input type="text" name="username" id="username" x-model="form.username" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="nama_karyawan" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                                        <div class="mt-1">
-                                            <input type="text" name="nama_karyawan" id="nama_karyawan" x-model="form.nama_karyawan" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                                        <div class="mt-1">
-                                            <select name="role" id="role" x-model="form.role" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                                <option value="karyawan">Karyawan</option>
-                                                <option value="admin">Admin</option>
-                                                {% if current_user.get('role') == 'super admin' %}
-                                                <option value="super admin">Super Admin</option>
-                                                {% endif %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="password" class="block text-sm font-medium text-gray-700">
-                                            Password <span x-show="isEdit" class="text-xs text-gray-500 font-normal">(Kosongkan jika tidak ingin mengubah)</span>
-                                        </label>
-                                        <div class="mt-1">
-                                            <input type="password" name="password" id="password" :required="!isEdit" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        </div>
-                                    </div>
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div x-show="isModalOpen"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 border border-slate-200">
+
+                    <form id="userMainForm" :action="formAction" method="POST" @submit.prevent="requestSaveConfirm()">
+                        <!-- Header Modal -->
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="text-lg font-extrabold text-slate-900" x-text="modalTitle"></h3>
+                            <button type="button" @click="isModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- Username -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">Username</label>
+                                <input type="text" name="username" x-model="form.username" required
+                                       class="block w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            </div>
+
+                            <!-- Nama Lengkap -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">Nama Lengkap</label>
+                                <input type="text" name="nama_karyawan" x-model="form.nama_karyawan"
+                                       class="block w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            </div>
+
+                            <!-- Role -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">Role</label>
+                                <select name="role" x-model="form.role"
+                                        class="block w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <option value="karyawan">Karyawan</option>
+                                    <option value="admin">Admin</option>
+                                    {% if current_user.get('role') == 'super admin' %}
+                                    <option value="super admin">Super Admin</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+
+                            <!-- Password -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">
+                                    Password
+                                    <span x-show="isEdit" class="text-[11px] font-normal text-slate-400">(Kosongkan jika tidak ingin mengubah)</span>
+                                </label>
+                                <div class="relative">
+                                    <input :type="showPassword ? 'text' : 'password'"
+                                           name="password"
+                                           x-model="form.password"
+                                           :required="!isEdit"
+                                           class="block w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <button type="button" @click="showPassword = !showPassword"
+                                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors">
+                                        <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        <svg x-show="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                            <button type="submit" class="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
-                            <button type="button" @click="isModalOpen = false" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm">Batal</button>
+
+                        <!-- Footer Modal -->
+                        <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+                            <button type="button" @click="isModalOpen = false"
+                                    class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 transition min-h-[44px]">
+                                Batal
+                            </button>
+                            <button type="submit"
+                                    class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-md shadow-indigo-100 transition min-h-[44px]">
+                                Simpan
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -202,36 +367,271 @@
         </div>
     </div>
 
+    <!-- ===== MODAL POP-UP: Konfirmasi Simpan User (Tambah / Edit) ===== -->
+    <div x-show="isConfirmSaveModalOpen"
+         style="display: none;"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="isConfirmSaveModalOpen = false"
+             class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+
+            <div class="flex items-center gap-3.5">
+                <div class="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900" x-text="isEdit ? 'Konfirmasi Simpan Perubahan' : 'Konfirmasi Tambah User Baru'"></h3>
+                    <p class="text-xs text-slate-500 mt-0.5" x-text="isEdit ? 'Tinjau kembali data sebelum perubahan disimpan' : 'Pastikan data user baru sudah benar sebelum ditambahkan'"></p>
+                </div>
+            </div>
+
+            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs space-y-2">
+                <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+                    <span class="text-slate-500">Username:</span>
+                    <strong class="font-mono text-indigo-700" x-text="form.username"></strong>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+                    <span class="text-slate-500">Nama Lengkap:</span>
+                    <span class="font-semibold text-slate-800" x-text="form.nama_karyawan || '-'"></span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+                    <span class="text-slate-500">Role Akses:</span>
+                    <span class="font-bold uppercase text-indigo-600" x-text="form.role"></span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-slate-500">Kata Sandi:</span>
+                    <span class="text-slate-500" x-text="isEdit ? (form.password ? 'Diperbarui' : 'Tidak diubah') : 'Tersimpan (Terenkripsi)'"></span>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600" x-text="isEdit ? 'Apakah Anda yakin ingin menyimpan seluruh perubahan pada user ini?' : 'Apakah Anda yakin ingin menambahkan user baru ini ke sistem?'"></p>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button type="button"
+                        @click="isConfirmSaveModalOpen = false"
+                        class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
+                    Batal
+                </button>
+                <button type="button"
+                        @click="executeSubmitForm()"
+                        class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition min-h-[40px]">
+                    Ya, Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL POP-UP: Konfirmasi Toggle Status Aktif/Nonaktif User ===== -->
+    <div x-show="isToggleModalOpen"
+         style="display: none;"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="isToggleModalOpen = false"
+             class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+
+            <div class="flex items-center gap-3.5">
+                <div class="h-12 w-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                     :class="toggleTarget.isActive ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900" x-text="toggleTarget.isActive ? 'Konfirmasi Nonaktifkan User' : 'Konfirmasi Aktifkan User'"></h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Ubah hak akses login pengguna ke sistem</p>
+                </div>
+            </div>
+
+            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs space-y-2">
+                <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+                    <span class="text-slate-500">Username:</span>
+                    <strong class="font-mono text-indigo-700" x-text="toggleTarget.username"></strong>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-slate-500">Status Akses:</span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                          :class="toggleTarget.isActive ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
+                          x-text="toggleTarget.isActive ? 'Akan Dinonaktifkan' : 'Akan Diaktifkan'"></span>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600" x-text="toggleTarget.isActive ? 'Apakah Anda yakin ingin menonaktifkan akun user ini? Pengguna tidak akan dapat masuk ke sistem.' : 'Apakah Anda yakin ingin mengaktifkan kembali akun user ini?'"></p>
+
+            <form :action="'/users/toggle/' + toggleTarget.id" method="POST">
+                <input type="hidden" name="is_active" :value="toggleTarget.isActive ? 'False' : 'True'">
+                <div class="flex items-center justify-end gap-2.5 pt-2">
+                    <button type="button"
+                            @click="isToggleModalOpen = false"
+                            class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 rounded-xl text-white font-bold text-xs shadow-md transition min-h-[40px]"
+                            :class="toggleTarget.isActive ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'"
+                            x-text="toggleTarget.isActive ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan'">
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL POP-UP: Konfirmasi Hapus User ===== -->
+    <div x-show="isDeleteModalOpen"
+         style="display: none;"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="isDeleteModalOpen = false"
+             class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+
+            <!-- Header Modal -->
+            <div class="flex items-center gap-3.5">
+                <div class="h-12 w-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Konfirmasi Hapus User</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Penghapusan akun bersifat permanen</p>
+                </div>
+            </div>
+
+            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs space-y-2">
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-slate-500">Username yang dihapus:</span>
+                    <strong class="font-mono text-rose-700" x-text="deleteTarget.username"></strong>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600">
+                Apakah Anda yakin ingin menghapus user <span class="font-bold text-rose-600" x-text="'&quot;' + deleteTarget.username + '&quot;'"></span>? Tindakan ini tidak dapat dibatalkan.
+            </p>
+
+            <form :action="'/users/delete/' + deleteTarget.id" method="POST">
+                <div class="flex items-center justify-end gap-2.5 pt-2">
+                    <button type="button" @click="isDeleteModalOpen = false"
+                            class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition min-h-[40px] flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span>Ya, Hapus Permanen</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <script>
-    function userManagement() {
-        return {
-            isModalOpen: false,
-            isEdit: false,
-            modalTitle: 'Tambah User Baru',
-            formAction: '/users/add',
-            form: {
-                id: null,
-                username: '',
-                nama_karyawan: '',
-                role: 'karyawan'
-            },
-            openAddModal() {
-                this.isEdit = false;
-                this.modalTitle = 'Tambah User Baru';
-                this.formAction = '/users/add';
-                this.form = { id: null, username: '', nama_karyawan: '', role: 'karyawan' };
-                this.isModalOpen = true;
-            },
-            openEditModal(id, username, nama_karyawan, role) {
-                this.isEdit = true;
-                this.modalTitle = 'Edit User';
-                this.formAction = '/users/edit/' + id;
-                this.form = { id, username, nama_karyawan, role };
-                this.isModalOpen = true;
+function userManagement() {
+    return {
+        isModalOpen: false,
+        isConfirmSaveModalOpen: false,
+        isToggleModalOpen: false,
+        isDeleteModalOpen: false,
+        isEdit: false,
+        showPassword: false,
+        modalTitle: 'Tambah User Baru',
+        formAction: '/users/add',
+        sortBy: 'username',
+        sortDir: 'asc',
+        form: {
+            id: null,
+            username: '',
+            nama_karyawan: '',
+            role: 'karyawan',
+            password: ''
+        },
+        toggleTarget: {
+            id: null,
+            username: '',
+            isActive: false
+        },
+        deleteTarget: {
+            id: null,
+            username: ''
+        },
+
+        sortTable(column) {
+            if (this.sortBy === column) {
+                this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortBy = column;
+                this.sortDir = 'asc';
+            }
+            this.doSort();
+        },
+
+        doSort() {
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+            const rows = Array.from(tbody.querySelectorAll('tr.user-row'));
+            const col = this.sortBy;
+            const dir = this.sortDir;
+
+            rows.sort((a, b) => {
+                let valA = (a.dataset[col === 'nama' ? 'nama' : col] || '').toLowerCase();
+                let valB = (b.dataset[col === 'nama' ? 'nama' : col] || '').toLowerCase();
+                if (valA < valB) return dir === 'asc' ? -1 : 1;
+                if (valA > valB) return dir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            rows.forEach((row, i) => {
+                const noCell = row.querySelector('td:first-child');
+                if (noCell) noCell.textContent = i + 1;
+                tbody.appendChild(row);
+            });
+        },
+
+        openAddModal() {
+            this.isEdit = false;
+            this.showPassword = false;
+            this.modalTitle = 'Tambah User Baru';
+            this.formAction = '/users/add';
+            this.form = { id: null, username: '', nama_karyawan: '', role: 'karyawan', password: '' };
+            this.isModalOpen = true;
+        },
+
+        openEditModal(id, username, nama_karyawan, role) {
+            this.isEdit = true;
+            this.showPassword = false;
+            this.modalTitle = 'Edit User';
+            this.formAction = '/users/edit/' + id;
+            this.form = { id, username, nama_karyawan, role, password: '' };
+            this.isModalOpen = true;
+        },
+
+        openToggleModal(id, username, isActive) {
+            this.toggleTarget = { id, username, isActive: Boolean(isActive) };
+            this.isToggleModalOpen = true;
+        },
+
+        openDeleteModal(id, username) {
+            this.deleteTarget = { id, username };
+            this.isDeleteModalOpen = true;
+        },
+
+        requestSaveConfirm() {
+            const formEl = document.getElementById('userMainForm');
+            if (formEl && !formEl.reportValidity()) {
+                return;
+            }
+            this.isConfirmSaveModalOpen = true;
+        },
+
+        executeSubmitForm() {
+            const formEl = document.getElementById('userMainForm');
+            if (formEl) {
+                this.isConfirmSaveModalOpen = false;
+                formEl.submit();
             }
         }
     }
+}
 </script>
 {% endblock %}

@@ -42,3 +42,11 @@ async def toggle_user(
     db: Session = Depends(get_db)
 ):
     return UsersController.handle_toggle_user(request, user_id, is_active, db)
+
+@router.post("/delete/{user_id}")
+async def delete_user(
+    request: Request,
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    return UsersController.handle_delete_user(request, user_id, db)
