@@ -84,6 +84,8 @@ document.addEventListener('alpine:init', () => {
         minDate: document.getElementById('dashboard-container')?.dataset?.minDate || '2026-09-01',
         chartCounts: [],
         rawChartValues: [],
+        chartDetails: [],
+        activeDatasets: [],
         chartStats: {
             avg_dbm: null,
             min_dbm: null,
@@ -183,21 +185,72 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        async actionStartScan() {
+            if (this.isScanning) return;
+            this.showToast('Memulai pemindaian manual seluruh ONT...', 'info');
+            await this.triggerScanAll();
+        },
+
+        async actionPauseScan() {
+            try {
+                const res = await fetch('/api/monitoring/scan-pause', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status !== 'error') {
+                    this.showToast('Pemindaian dijeda. Progres tersimpan ke sistem.', 'info');
+                    await this.fetchStatus();
+                } else {
+                    this.showToast(data.message || 'Gagal menjeda pemindaian', 'error');
+                }
+            } catch (err) {
+                console.error('Gagal pause scan:', err);
+                this.showToast('Gagal menjeda pemindaian', 'error');
+            }
+        },
+
+        async actionResumeScan() {
+            try {
+                const res = await fetch('/api/monitoring/scan-resume', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status !== 'error') {
+                    this.showToast('Melanjutkan pemindaian ONT dari posisi jeda...', 'success');
+                    this.isScanning = true;
+                    await this.fetchStatus();
+                } else {
+                    this.showToast(data.message || 'Gagal melanjutkan pemindaian', 'error');
+                }
+            } catch (err) {
+                console.error('Gagal resume scan:', err);
+                this.showToast('Gagal melanjutkan pemindaian', 'error');
+            }
+        },
+
+        async actionStopScan() {
+            if (!confirm('Hentikan paksa pemindaian? Progres pemindaian saat ini akan direset ke awal.')) return;
+            try {
+                const res = await fetch('/api/monitoring/scan-stop', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.status !== 'error') {
+                    this.showToast('Pemindaian dihentikan paksa. Data progres dibersihkan.', 'info');
+                    this.isScanning = false;
+                    await this.fetchStatus();
+                    await this.fetchKpi();
+                } else {
+                    this.showToast(data.message || 'Gagal menghentikan pemindaian', 'error');
+                }
+            } catch (err) {
+                console.error('Gagal stop scan:', err);
+                this.showToast('Gagal menghentikan pemindaian', 'error');
+            }
+        },
+
         async actionToggleEngine() {
             if (this.isScanning || this.isToggling) return;
-            
-            // Simpan status lama sebelum toggle
             const wasRunning = this.engineStatus === 'RUNNING';
-            
-            await this.toggleEngine(); // ini akan memanggil endpoint /api/monitoring/toggle-scheduler
-            
+            await this.toggleEngine();
             if (wasRunning) {
-                // Berarti sekarang jadi STOPPED
-                this.showToast('Pemantauan otomatis dijeda (STOPPED)', 'info');
+                this.showToast('Jadwal pemantauan otomatis dijeda (STOPPED)', 'info');
             } else {
-                // Berarti sekarang jadi RUNNING
-                this.showToast('Pemantauan otomatis diaktifkan dan pemindaian dimulai!', 'success');
-                await this.triggerScanAll();
+                this.showToast('Jadwal pemantauan otomatis diaktifkan (RUNNING)', 'success');
             }
         },
 
@@ -247,6 +300,14 @@ document.addEventListener('alpine:init', () => {
                 await this.fetchStatus();
                 await this.fetchKpi();
             }
+        },
+
+        toggleDatasetVisibility(idx) {
+            if (!redamanChart || !this.activeDatasets[idx]) return;
+            const isHidden = !this.activeDatasets[idx].hidden;
+            this.activeDatasets[idx].hidden = isHidden;
+            redamanChart.setDatasetVisibility(idx, !isHidden);
+            redamanChart.update('none');
         },
 
         initChart() {
@@ -360,24 +421,32 @@ document.addEventListener('alpine:init', () => {
                             padding: { top: 8, bottom: 8, left: 10, right: 10 },
                             cornerRadius: 8,
                             displayColors: false,
-                            filter: tooltipItem => tooltipItem.datasetIndex === 0,
+                            filter: tooltipItem => !tooltipItem.dataset.isThreshold,
                             callbacks: {
                                 title: items => {
                                     if (!items || !items.length) return '';
-                                    return `Waktu Scan: ${items[0].label} WIB`;
+                                    return `Waktu: ${items[0].label} WIB`;
                                 },
                                 label: ctx => {
+                                    const ds = ctx.dataset;
                                     const idx = ctx.dataIndex;
-                                    const count = (self.chartCounts && self.chartCounts[idx]) ? self.chartCounts[idx] : 1;
-                                    const rawVal = (self.rawChartValues && self.rawChartValues[idx] !== undefined) ? self.rawChartValues[idx] : null;
+                                    const rawVal = ds.rawValues ? ds.rawValues[idx] : null;
                                     let valStr = '-';
                                     if (rawVal !== null && rawVal !== undefined && !isNaN(rawVal)) {
                                         valStr = `${Number(rawVal).toFixed(2)} dBm`;
                                     }
-                                    return [
-                                        `Jumlah Pelanggan: ${count} Pelanggan`,
-                                        `Rata-rata Redaman: ${valStr}`
-                                    ];
+                                    const lines = [`${ds.label}: ${valStr}`];
+                                    
+                                    // Option B: Jika ada rincian status (Normal, Warning, Kritis, LOS)
+                                    if (ds.details && ds.details[idx]) {
+                                        const d = ds.details[idx];
+                                        lines.push(`Total Terpantau: ${d.total} ONT`);
+                                        lines.push(`• Normal: ${d.normal} | Warning: ${d.warning}`);
+                                        lines.push(`• Kritis: ${d.critical} | LOS: ${d.los}`);
+                                    } else if (self.chartCounts && self.chartCounts[idx]) {
+                                        lines.push(`Total ONT: ${self.chartCounts[idx]} Pelanggan`);
+                                    }
+                                    return lines;
                                 }
                             }
                         }
@@ -419,42 +488,112 @@ document.addEventListener('alpine:init', () => {
                 if (res.ok) {
                     const json = await res.json();
                     const rawLabels = json.labels || [];
-                    const rawValues = json.values || [];
-
-                    // Simpan data mentah & counts untuk tooltip
-                    this.rawChartValues = rawValues;
                     this.chartCounts = json.counts || [];
+                    this.rawChartValues = json.values || [];
+                    this.chartDetails = json.details || [];
 
-                    // Transformasi data redaman ke skala non-linear
-                    const transformedValues = rawValues.map(v => (v !== null && !isNaN(v) && typeof v === 'number') ? transformDbm(v) : null);
-
-                    // 1. Update Labels & Dataset Redaman
-                    redamanChart.data.labels = rawLabels;
-                    redamanChart.data.datasets[0].data = transformedValues;
-
-                    // 2. Garis Ambang Batas Warning & Kritis
                     const count = rawLabels.length;
                     const warnThreshold = json.threshold !== undefined ? json.threshold : -26.0;
                     const critThreshold = json.critical_threshold !== undefined ? json.critical_threshold : -27.0;
-
                     const warnVal = transformDbm(Math.abs(warnThreshold));
                     const critVal = transformDbm(Math.abs(critThreshold));
 
-                    if (count > 0) {
-                        redamanChart.data.datasets[1].label = `Garis Warning (${Number(warnThreshold).toFixed(1)} dBm)`;
-                        redamanChart.data.datasets[1].data = new Array(count).fill(warnVal);
-                        redamanChart.data.datasets[2].label = `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`;
-                        redamanChart.data.datasets[2].data = new Array(count).fill(critVal);
+                    let datasets = [];
+
+                    // Jika backend mengembalikan json.datasets (1, 2, atau 7 garis perbandingan)
+                    if (json.datasets && json.datasets.length > 0) {
+                        const isMulti = json.datasets.length > 1;
+                        datasets = json.datasets.map(ds => {
+                            const transformed = (ds.values || []).map(v => (v !== null && !isNaN(v) && typeof v === 'number') ? transformDbm(v) : null);
+                            return {
+                                label: ds.label,
+                                data: transformed,
+                                rawValues: ds.values || [],
+                                details: ds.details || [],
+                                borderColor: ds.color || '#4F46E5',
+                                backgroundColor: (!isMulti) ? 'rgba(79, 70, 229, 0.12)' : 'transparent',
+                                borderWidth: json.datasets.length > 2 ? 2 : 2.5,
+                                fill: !isMulti,
+                                tension: 0.35,
+                                pointRadius: json.datasets.length > 2 ? 3 : 5,
+                                pointHoverRadius: json.datasets.length > 2 ? 6 : 8,
+                                pointBackgroundColor: ds.color || '#4F46E5',
+                                pointBorderColor: '#FFFFFF',
+                                pointBorderWidth: 2,
+                                showLine: true,
+                                spanGaps: true,
+                                isThreshold: false
+                            };
+                        });
                     } else {
-                        redamanChart.data.datasets[1].data = [];
-                        redamanChart.data.datasets[2].data = [];
+                        // Fallback single dataset
+                        const transformedValues = (json.values || []).map(v => (v !== null && !isNaN(v) && typeof v === 'number') ? transformDbm(v) : null);
+                        datasets.push({
+                            label: 'Nilai Redaman Rata-rata',
+                            data: transformedValues,
+                            rawValues: json.values || [],
+                            details: json.details || [],
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.12)',
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: '#4F46E5',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            showLine: true,
+                            spanGaps: true,
+                            isThreshold: false
+                        });
                     }
 
-                    // 3. Rentang Sumbu Y tetap 0 - 100 (mewakili 0 s/d 32 dBm dengan rentang 25-27 dBm sangat lebar)
+                    // Tambahkan 2 garis ambang batas warning & kritis
+                    datasets.push({
+                        label: `Garis Warning (${Number(warnThreshold).toFixed(1)} dBm)`,
+                        data: count > 0 ? new Array(count).fill(warnVal) : [],
+                        borderColor: '#F59E0B',
+                        borderWidth: 2,
+                        borderDash: [6, 6],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        fill: false,
+                        tension: 0,
+                        isThreshold: true
+                    });
+
+                    datasets.push({
+                        label: `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`,
+                        data: count > 0 ? new Array(count).fill(critVal) : [],
+                        borderColor: '#EF4444',
+                        borderWidth: 2,
+                        borderDash: [4, 4],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        fill: false,
+                        tension: 0,
+                        isThreshold: true
+                    });
+
+                    redamanChart.data.labels = rawLabels;
+                    redamanChart.data.datasets = datasets;
+
+                    // Update activeDatasets untuk kontrol custom legend di bawah grafik
+                    this.activeDatasets = datasets.map((d, i) => ({
+                        index: i,
+                        label: d.label,
+                        color: d.borderColor,
+                        isThreshold: Boolean(d.isThreshold),
+                        borderDash: Boolean(d.borderDash),
+                        hidden: false
+                    }));
+
+                    // Rentang Sumbu Y tetap 0 - 100
                     redamanChart.options.scales.y.min = 0;
                     redamanChart.options.scales.y.max = 100;
 
-                    // 4. Update metadata statistik grafik di chip
+                    // Update metadata statistik grafik di chip
                     this.chartStats = {
                         avg_dbm: json.avg_dbm,
                         min_dbm: json.min_dbm,

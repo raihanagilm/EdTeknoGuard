@@ -1,4 +1,6 @@
 import asyncio
+import os
+import json
 import time
 import logging
 from datetime import datetime, timedelta
@@ -19,6 +21,8 @@ class MonitoringScheduler:
     _instance = None
     _scheduler: Optional[BackgroundScheduler] = None
     _is_scanning: bool = False
+    _is_paused: bool = False
+    _stop_requested: bool = False
     _is_network_error: bool = False
     _scan_current: int = 0
     _scan_total: int = 0
@@ -31,6 +35,8 @@ class MonitoringScheduler:
             cls._instance = super(MonitoringScheduler, cls).__new__(cls)
             cls._instance._scheduler = BackgroundScheduler(daemon=True)
             cls._instance._is_scanning = False
+            cls._instance._is_paused = False
+            cls._instance._stop_requested = False
             cls._instance._is_network_error = False
             cls._instance._scan_current = 0
             cls._instance._scan_total = 0
@@ -38,6 +44,49 @@ class MonitoringScheduler:
             cls._instance._last_scan_duration = 0.0
             cls._instance._resume_index = 0
         return cls._instance
+
+    @classmethod
+    def get_state_file_path(cls) -> str:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        data_dir = os.path.join(base_dir, "data")
+        os.makedirs(data_dir, exist_ok=True)
+        return os.path.join(data_dir, "scan_state.json")
+
+    @classmethod
+    def save_scan_state(cls, current_index: int, total: int):
+        try:
+            filepath = cls.get_state_file_path()
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump({
+                    "status": "PAUSED",
+                    "current_index": current_index,
+                    "total": total,
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }, f, indent=2)
+            logger.info(f"[STATE] State pemindaian disimpan ke JSON: {current_index}/{total}")
+        except Exception as e:
+            logger.error(f"[STATE] Gagal menyimpan scan_state.json: {e}")
+
+    @classmethod
+    def load_scan_state(cls) -> Optional[Dict[str, Any]]:
+        try:
+            filepath = cls.get_state_file_path()
+            if os.path.exists(filepath):
+                with open(filepath, "r", encoding="utf-8") as f:
+                    return json.load(f)
+        except Exception as e:
+            logger.error(f"[STATE] Gagal membaca scan_state.json: {e}")
+        return None
+
+    @classmethod
+    def delete_scan_state(cls):
+        try:
+            filepath = cls.get_state_file_path()
+            if os.path.exists(filepath):
+                os.remove(filepath)
+                logger.info("[STATE] State file scan_state.json berhasil dihapus.")
+        except Exception as e:
+            logger.error(f"[STATE] Gagal menghapus scan_state.json: {e}")
 
     @classmethod
     def cleanup_old_logs(cls, db: Session, days: int = 30) -> int:
@@ -193,6 +242,38 @@ class MonitoringScheduler:
             db.close()
         logger.info("Pemantauan otomatis ONT dilanjutkan (RUNNING) dan disimpan permanen.")
 
+    def pause_scan(self) -> Dict[str, Any]:
+        """Menjeda pemindaian manual/berkala yang sedang aktif berjalan."""
+        if not self._is_scanning:
+            return {"status": "error", "message": "Tidak ada proses pemindaian yang sedang berjalan untuk dijeda."}
+        self._is_paused = True
+        logger.info("[SCAN] Sinyal jeda pemindaian diterima.")
+        return {"status": "success", "message": "Sinyal jeda dikirim, pemindaian akan dijeda setelah modem saat ini."}
+
+    def stop_scan(self) -> Dict[str, Any]:
+        """Menghentikan paksa pemindaian yang sedang berjalan atau membatalkan yang dijeda."""
+        self._stop_requested = True
+        self._is_paused = False
+        self.delete_scan_state()
+        if not self._is_scanning:
+            self._resume_index = 0
+            self._scan_current = 0
+            self._stop_requested = False
+        logger.info("[SCAN] Sinyal berhenti paksa pemindaian diterima.")
+        return {"status": "success", "message": "Pemindaian dihentikan paksa dan progres dibersihkan."}
+
+    def resume_scan(self) -> Dict[str, Any]:
+        """Melanjutkan pemindaian yang dijeda dari checkpoint JSON."""
+        if self._is_scanning:
+            return {"status": "busy", "message": "Proses pemindaian sedang berjalan."}
+        state = self.load_scan_state()
+        if state and state.get("current_index") is not None:
+            self._resume_index = state.get("current_index", 0)
+        self._is_paused = False
+        self._stop_requested = False
+        logger.info(f"[SCAN] Melanjutkan pemindaian dari indeks ke-{self._resume_index}...")
+        return self.execute_scan_sync()
+
     def get_status(self) -> Dict[str, Any]:
         db = SessionLocal()
         try:
@@ -208,6 +289,10 @@ class MonitoringScheduler:
         finally:
             db.close()
 
+        state = self.load_scan_state()
+        has_saved_state = state is not None and state.get("status") == "PAUSED"
+        is_paused = self._is_paused or (has_saved_state and not self._is_scanning)
+
         # Hitung estimasi waktu pemindaian real-time
         elapsed = round(time.time() - self._scan_start_time, 1) if (self._is_scanning and self._scan_start_time > 0) else 0.0
         if self._is_scanning and self._scan_current > 0 and self._scan_total > 0:
@@ -216,11 +301,20 @@ class MonitoringScheduler:
         else:
             est_total = last_duration if last_duration > 0 else 0.0
 
+        scan_current_val = self._scan_current
+        if not self._is_scanning and has_saved_state:
+            scan_current_val = state.get("current_index", self._scan_current)
+            if self._scan_total == 0:
+                self._scan_total = state.get("total", total_customers)
+
         scan_progress = {
-            "current": self._scan_current,
+            "current": scan_current_val,
             "total": self._scan_total,
-            "percent": int((self._scan_current / self._scan_total) * 100) if self._scan_total > 0 else 0,
+            "percent": int((scan_current_val / self._scan_total) * 100) if self._scan_total > 0 else 0,
             "is_scanning": self._is_scanning,
+            "is_paused": is_paused,
+            "can_resume": is_paused and not self._is_scanning,
+            "can_stop": self._is_scanning or is_paused,
             "elapsed_seconds": elapsed,
             "estimated_total_seconds": est_total,
             "last_scan_duration": last_duration
@@ -231,6 +325,9 @@ class MonitoringScheduler:
             "interval_minutes": interval,
             "last_scan_time": last_scan,
             "is_scanning": self._is_scanning,
+            "is_paused": is_paused,
+            "can_resume": is_paused and not self._is_scanning,
+            "can_stop": self._is_scanning or is_paused,
             "is_network_error": is_net_err,
             "total_customers": total_customers,
             "scan_progress": scan_progress
@@ -254,7 +351,14 @@ class MonitoringScheduler:
         if self._is_scanning:
             return {"status": "busy", "message": "Proses pemindaian sedang berjalan."}
 
+        # Cek jika ada state tersimpan di JSON jika resume_index belum diset
+        state = self.load_scan_state()
+        if state and state.get("current_index") is not None and self._resume_index == 0:
+            self._resume_index = state.get("current_index", 0)
+
         self._is_scanning = True
+        self._is_paused = False
+        self._stop_requested = False
         self._scan_start_time = time.time()
         
         db = SessionLocal()
@@ -267,6 +371,7 @@ class MonitoringScheduler:
             
             if self._resume_index >= self._scan_total:
                 self._resume_index = 0
+                self.delete_scan_state()
                 
             self._scan_current = self._resume_index
             pelanggan_to_scan = pelanggan_list[self._resume_index:]
@@ -294,6 +399,30 @@ class MonitoringScheduler:
 
             unreachable_count = 0
             for cust in pelanggan_to_scan:
+                # 0. Cek interupsi STOP (Berhenti Paksa)
+                if self._stop_requested:
+                    logger.info("[SCAN] Pemindaian dihentikan paksa (STOP).")
+                    self.delete_scan_state()
+                    self._is_scanning = False
+                    self._is_paused = False
+                    self._stop_requested = False
+                    self._resume_index = 0
+                    self._scan_current = 0
+                    return {"status": "stopped", "message": "Pemindaian dihentikan paksa oleh Admin."}
+
+                # 0. Cek interupsi JEDA (Pause)
+                if self._is_paused:
+                    logger.info(f"[SCAN] Pemindaian dijeda pada pelanggan ke-{self._scan_current} dari {self._scan_total}.")
+                    self._is_scanning = False
+                    self._resume_index = self._scan_current
+                    self.save_scan_state(current_index=self._resume_index, total=self._scan_total)
+                    return {
+                        "status": "paused",
+                        "message": f"Pemindaian dijeda pada pelanggan ke-{self._resume_index} dari {self._scan_total}.",
+                        "current_index": self._resume_index,
+                        "total": self._scan_total
+                    }
+
                 self._scan_current += 1
                 # 1. Coba Scraping Live ONT GM220-S via HTTP
                 scrape_res = ONTScraperService.scrape_ont(
@@ -433,8 +562,10 @@ class MonitoringScheduler:
             self.cleanup_old_logs(db, days=30)
             db.commit()
             
-            # Jika berhasil selesai semuanya, reset resume_index
+            # Jika berhasil selesai semuanya, reset resume_index & hapus state file JSON
+            self.delete_scan_state()
             self._resume_index = 0
+            self._is_paused = False
 
             # Deteksi apakah server terputus dari jaringan lokal ISP / VLAN ONT
             if len(pelanggan_list) > 0 and unreachable_count == len(pelanggan_list):

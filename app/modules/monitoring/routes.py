@@ -23,6 +23,21 @@ def trigger_scan_all(request: Request, db: Session = Depends(get_db), user: dict
     """Route trigger pemindaian manual seluruh ONT"""
     return MonitoringController.trigger_scan_all(request=request, db=db, user=user)
 
+@router.post("/scan-pause")
+def trigger_scan_pause(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    """Route menjeda pemindaian aktif ONT dan menyimpan checkpoint ke JSON"""
+    return MonitoringController.trigger_scan_pause(request=request, db=db, user=user)
+
+@router.post("/scan-resume")
+def trigger_scan_resume(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    """Route melanjutkan pemindaian ONT dari checkpoint JSON"""
+    return MonitoringController.trigger_scan_resume(request=request, db=db, user=user)
+
+@router.post("/scan-stop")
+def trigger_scan_stop(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    """Route berhenti paksa pemindaian ONT dan menghapus file JSON"""
+    return MonitoringController.trigger_scan_stop(request=request, db=db, user=user)
+
 @router.post("/scan/{id_pelanggan}")
 def trigger_scan_single(id_pelanggan: str, user: dict = Depends(require_admin)):
     """Route trigger pemindaian on-demand untuk satu ONT pelanggan"""

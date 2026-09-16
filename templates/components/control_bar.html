@@ -68,10 +68,10 @@
             </div>
         </div>
 
-        <!-- Sisi Kanan: Tombol Kontrol Tunggal Cerdas (Mulai/Cek vs Jeda) -->
+        <!-- Sisi Kanan: Tombol Kontrol Cerdas (Mulai, Jeda, Lanjut, Stop) -->
         {% if current_user.get('role') in ['admin', 'super admin'] %}
         <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
-            <!-- Indikator Proses -->
+            <!-- Indikator Animasi Memuat -->
             <div x-show="isScanning || isToggling" class="flex items-center gap-1.5 mr-1 text-slate-500 text-xs font-semibold">
                 <svg class="animate-spin h-3.5 w-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -80,25 +80,83 @@
                 <span x-text="isScanning ? 'Memindai...' : 'Menyimpan...'"></span>
             </div>
 
-            <!-- Tombol Toggle Jeda / Lanjut -->
-            <button @click="actionToggleEngine()"
-                    :disabled="isScanning || isToggling"
-                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-white border"
-                    :class="engineStatus === 'RUNNING' ? 'bg-amber-500 hover:bg-amber-600 border-amber-500 shadow-amber-200/50' : 'bg-emerald-600 hover:bg-emerald-700 border-emerald-600 shadow-emerald-200/50'">
-                
-                <!-- Icon Jeda (Tampil saat RUNNING) -->
-                <svg x-show="engineStatus === 'RUNNING'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                
-                <!-- Icon Lanjut (Tampil saat STOPPED) -->
-                <svg x-show="engineStatus !== 'RUNNING'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                
-                <span x-text="engineStatus === 'RUNNING' ? 'Jeda' : 'Lanjut'"></span>
-            </button>
+            <!-- KONDISI 1: STANDBY / IDLE (Tidak sedang scan dan tidak dijeda) -->
+            <template x-if="!isScanning && (!scanProgress || !scanProgress.is_paused)">
+                <div class="flex items-center gap-2">
+                    <!-- Tombol Biru: Mulai Pemantauan -->
+                    <button @click="actionStartScan()"
+                            :disabled="isToggling"
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 shadow-indigo-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Mulai Pemantauan</span>
+                    </button>
+
+                    <!-- Tombol Toggle Scheduler: Jeda/Lanjut Jadwal Otomatis -->
+                    <button @click="actionToggleEngine()"
+                            :disabled="isToggling"
+                            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl font-bold text-xs transition-all duration-200 border"
+                            :class="engineStatus === 'RUNNING' ? 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'"
+                            :title="engineStatus === 'RUNNING' ? 'Klik untuk menjeda jadwal pemindaian otomatis tiap 20 menit' : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis'">
+                        <svg x-show="engineStatus === 'RUNNING'" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <svg x-show="engineStatus !== 'RUNNING'" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span x-text="engineStatus === 'RUNNING' ? 'Jeda Jadwal' : 'Aktifkan Jadwal'"></span>
+                    </button>
+                </div>
+            </template>
+
+            <!-- KONDISI 2: SEDANG MEMINDAI (isScanning) -->
+            <template x-if="isScanning">
+                <div class="flex items-center gap-2">
+                    <!-- Tombol Kuning: Jeda (Aktif bisa diklik) -->
+                    <button @click="actionPauseScan()"
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-amber-500 hover:bg-amber-600 border border-amber-500 shadow-amber-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Jeda</span>
+                    </button>
+
+                    <!-- Tombol Merah: Stop (Berhenti Paksa) -->
+                    <button @click="actionStopScan()"
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-rose-600 hover:bg-rose-700 border border-rose-600 shadow-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="6" y="6" width="12" height="12" rx="2" stroke-width="2" stroke="currentColor" fill="currentColor"/>
+                        </svg>
+                        <span>Stop</span>
+                    </button>
+                </div>
+            </template>
+
+            <!-- KONDISI 3: PEMINDAIAN DIJEDA (scanProgress.is_paused) -->
+            <template x-if="!isScanning && scanProgress && scanProgress.is_paused">
+                <div class="flex items-center gap-2">
+                    <!-- Tombol Hijau: Lanjut (Melanjutkan dari JSON) -->
+                    <button @click="actionResumeScan()"
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 shadow-emerald-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Lanjut</span>
+                    </button>
+
+                    <!-- Tombol Merah: Stop (Batalkan pemindaian dan buang JSON) -->
+                    <button @click="actionStopScan()"
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-rose-600 hover:bg-rose-700 border border-rose-600 shadow-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="6" y="6" width="12" height="12" rx="2" stroke-width="2" stroke="currentColor" fill="currentColor"/>
+                        </svg>
+                        <span>Stop</span>
+                    </button>
+                </div>
+            </template>
         </div>
         {% endif %}
 
@@ -134,8 +192,25 @@
             </div>
         </div>
 
-        <!-- Kondisi 2: Sedang Standby (Menampilkan Informasi Durasi Siklus Pemindaian Terakhir) -->
-        <div x-show="!isScanning && (!scanProgress || !scanProgress.is_scanning)" class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 bg-slate-50/60 px-3.5 py-2 rounded-xl border border-slate-100">
+        <!-- Kondisi 2: Pemindaian Sedang Dijeda (Paused) -->
+        <div x-show="!isScanning && scanProgress && scanProgress.is_paused" class="space-y-2 bg-amber-50 border border-amber-200 p-3.5 rounded-xl shadow-inner">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
+                <div class="flex items-center gap-2 text-amber-900 font-bold">
+                    <span class="h-2.5 w-2.5 rounded-full bg-amber-500 inline-block"></span>
+                    <span>Pemindaian Terjeda: <span class="font-mono text-amber-700 font-extrabold" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span> <span x-text="' (' + (scanProgress.percent || 0) + '%)'">(0%)</span></span>
+                </div>
+                <div class="text-[11px] text-amber-800">
+                    Checkpoint tersimpan di JSON. Klik <strong>Lanjut</strong> untuk meneruskan atau <strong>Stop</strong> untuk membatalkan.
+                </div>
+            </div>
+            <div class="w-full bg-amber-200/60 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-amber-500 h-2.5 rounded-full transition-all duration-300 ease-out"
+                     :style="'width: ' + Math.max(scanProgress.percent || 3, 3) + '%'"></div>
+            </div>
+        </div>
+
+        <!-- Kondisi 3: Sedang Standby (Menampilkan Informasi Durasi Siklus Pemindaian Terakhir) -->
+        <div x-show="!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused))" class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 bg-slate-50/60 px-3.5 py-2 rounded-xl border border-slate-100">
             <div class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>

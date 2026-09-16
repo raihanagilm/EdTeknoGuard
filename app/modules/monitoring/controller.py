@@ -49,6 +49,56 @@ class MonitoringController:
         return res
 
     @staticmethod
+    def trigger_scan_pause(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan menjeda pemindaian")
+        res = MonitoringService.pause_scan()
+        if request and db and res.get("status") == "success":
+            from app.modules.activity_logs.service import ActivityLogService
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="PAUSE_MONITORING",
+                status="SUCCESS",
+                keterangan="Menjeda proses pemindaian aktif ONT",
+                user=user
+            )
+        return res
+
+    @staticmethod
+    def trigger_scan_resume(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan melanjutkan pemindaian")
+        if request and db:
+            from app.modules.activity_logs.service import ActivityLogService
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="START_MONITORING",
+                status="SUCCESS",
+                keterangan="Melanjutkan pemindaian ONT yang terjeda dari checkpoint JSON",
+                user=user
+            )
+        return MonitoringService.resume_scan()
+
+    @staticmethod
+    def trigger_scan_stop(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") == "operator":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan menghentikan pemindaian")
+        res = MonitoringService.stop_scan()
+        if request and db:
+            from app.modules.activity_logs.service import ActivityLogService
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="STOP_MONITORING",
+                status="SUCCESS",
+                keterangan="Menghentikan paksa proses pemindaian ONT dan membersihkan antrean",
+                user=user
+            )
+        return res
+
+    @staticmethod
     def trigger_scan_single(id_pelanggan: str, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if user and user.get("role") == "operator":
             raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan memulai pemindaian")
