@@ -41,3 +41,9 @@
 {"level":"info","run_id":"02c456bc-7531-4daf-a076-58a900c3f728","component":"Cloudflare API","target":"api.cloudflare.com:443","status":"pass","details":"API is reachable","time":"2026-09-16T06:50:39Z","message":"precheck"}
 {"level":"info","run_id":"02c456bc-7531-4daf-a076-58a900c3f728","hard_fail":false,"suggested_protocol":"quic","time":"2026-09-16T06:50:39Z","message":"precheck complete"}
 {"level":"info","event":0,"connection":"3436fcb8-0739-4198-8ccc-fb678434a91e","connIndex":0,"location":"sin08","ip":"198.41.192.57","protocol":"quic","time":"2026-09-16T06:50:40Z","message":"Registered tunnel connection"}
+{"level":"info","time":"2026-09-16T09:09:38Z","message":"Initiating graceful shutdown due to signal terminated ..."}
+{"level":"info","event":0,"ip":"198.41.192.57","connIndex":0,"time":"2026-09-16T09:09:38Z","message":"Retrying connection in up to 1s"}
+{"level":"error","connIndex":0,"time":"2026-09-16T09:09:38Z","message":"Connection terminated"}
+{"level":"error","time":"2026-09-16T09:09:38Z","message":"no more connections active and exiting"}
+{"level":"info","time":"2026-09-16T09:09:38Z","message":"Tunnel server stopped"}
+{"level":"info","time":"2026-09-16T09:09:38Z","message":"Metrics server stopped"}

@@ -12,6 +12,24 @@ services:
     environment:
       - APP_URL=${APP_URL:-http://localhost:8000}
     ports:
-      - "8000:8000"   # Local network access; Cloudflare Tunnel di depan
+      - "8000:8000"   # Local network access
     volumes:
       - ./data:/app/data   # persist scan_state.json & file runtime
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok-edtekno
+    restart: unless-stopped
+    env_file:
+      - .env
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ -n "$$NGROK_DOMAIN" ]; then
+          exec ngrok http edteknoguard:8000 --url "$$NGROK_DOMAIN" --log stdout
+        else
+          exec ngrok http edteknoguard:8000 --log stdout
+        fi
+    depends_on:
+      - edteknoguard
