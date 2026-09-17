@@ -4,6 +4,7 @@ from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.timezone import get_now_wib
 from app.db.models import SystemSetting
 from app.services.scheduler_service import scheduler
 from app.modules.settings.schemas import SystemSettingsSchema
@@ -146,7 +147,7 @@ class SystemSettingsService:
             item = db.query(SystemSetting).filter(SystemSetting.key_name == k).first()
             if item:
                 item.value_text = v
-                item.updated_at = datetime.now()
+                item.updated_at = get_now_wib()
             else:
                 db.add(SystemSetting(key_name=k, value_text=v))
 
@@ -158,7 +159,7 @@ class SystemSettingsService:
             for c in target_customers:
                 c.user_admin = primary_user
                 c.pass_admin = primary_pass
-                c.updated_at = datetime.now()
+                c.updated_at = get_now_wib()
 
         db.commit()
 

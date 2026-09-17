@@ -5,6 +5,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+from app.core.timezone import get_now_wib
 
 class Pelanggan(Base):
     __tablename__ = "pelanggan"
@@ -29,8 +30,8 @@ class Pelanggan(Base):
     los_count = Column(Integer, default=0, nullable=False)
     is_monitored = Column(Boolean, default=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False)
+    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
     # Relasi ke log performa
     logs = relationship("LogPerformaONT", back_populates="pelanggan", cascade="all, delete-orphan")
@@ -41,7 +42,7 @@ class LogPerformaONT(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
-    waktu_cek = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    waktu_cek = Column(DateTime, default=get_now_wib, nullable=False, index=True)
     rx_power = Column(Numeric(5, 2), nullable=True)
     suhu_ont = Column(Numeric(4, 1), nullable=True)
     uptime = Column(BigInteger, nullable=True)
@@ -66,7 +67,7 @@ class AlertLog(Base):
     pesan = Column(Text, nullable=False)
     target_recipients = Column(Text, nullable=False)
     status_kirim = Column(String(20), nullable=False, default="SUCCESS")
-    waktu_kirim = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    waktu_kirim = Column(DateTime, default=get_now_wib, nullable=False, index=True)
 
 
 class SystemSetting(Base):
@@ -75,7 +76,7 @@ class SystemSetting(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     key_name = Column(String(50), unique=True, nullable=False, index=True)
     value_text = Column(Text, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
 
 class UserActivityLog(Base):
@@ -90,7 +91,7 @@ class UserActivityLog(Base):
     user_agent = Column(Text, nullable=True)
     status = Column(String(20), nullable=False, default="SUCCESS")  # SUCCESS, FAILED
     keterangan = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False, index=True)
 
 
 class User(Base):
@@ -102,5 +103,5 @@ class User(Base):
     nama_karyawan = Column(String(150), nullable=True)
     role = Column(String(50), default="operator", nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False)
+    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)

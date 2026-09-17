@@ -5,6 +5,7 @@ import httpx
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.timezone import get_now_wib
 from app.db.models import SystemSetting, AlertLog
 
 logger = logging.getLogger("telegram_mgmt_service")
@@ -61,7 +62,7 @@ class TelegramMgmtService:
             existing = db.query(SystemSetting).filter(SystemSetting.key_name == k).first()
             if existing:
                 existing.value_text = v
-                existing.updated_at = datetime.utcnow()
+                existing.updated_at = get_now_wib()
             else:
                 db.add(SystemSetting(key_name=k, value_text=v))
 
@@ -97,7 +98,7 @@ class TelegramMgmtService:
                 "message": "Belum ada Chat ID Telegram tujuan yang ditentukan."
             }
 
-        now_str = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        now_str = get_now_wib().strftime("%d/%m/%Y %H:%M:%S")
         test_msg = (
             f"🧪 <b>[EdTeknoGuard] TEST NOTIFIKASI TELEGRAM BERHASIL</b>\n\n"
             f"✅ Bot Telegram NOC EdTeknoGuard telah terhubung dengan baik!\n"
@@ -139,7 +140,7 @@ class TelegramMgmtService:
             pesan=test_msg,
             target_recipients=",".join(recipients),
             status_kirim="SUCCESS" if sent_any else "FAILED",
-            waktu_kirim=datetime.utcnow()
+            waktu_kirim=get_now_wib()
         )
         db.add(log_entry)
         db.commit()

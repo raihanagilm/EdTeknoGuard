@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+from app.core.timezone import get_now_wib, get_today_wib
 from app.db.models import Pelanggan, LogPerformaONT
 from app.services.scheduler_service import scheduler
 from app.core.config import settings
@@ -117,8 +118,8 @@ class MonitoringService:
         id_pelanggan: Optional[str] = None
     ) -> Dict[str, Any]:
         from sqlalchemy import case
-        now = datetime.now()
-        today = now.date()
+        now = get_now_wib()
+        today = get_today_wib()
 
         warning_th = getattr(settings, "WARNING_THRESHOLD_DBM", -26.0)
         critical_th = getattr(settings, "CRITICAL_THRESHOLD_DBM", -27.0)

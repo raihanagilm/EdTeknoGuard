@@ -3,6 +3,7 @@ from typing import Optional, List, Dict, Any, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func, desc, case
 
+from app.core.timezone import get_now_wib
 from app.db.models import LogPerformaONT, Pelanggan
 
 class LogsMgmtService:
@@ -31,7 +32,7 @@ class LogsMgmtService:
             Pelanggan, LogPerformaONT.id_pelanggan == Pelanggan.id_pelanggan
         )
 
-        now = datetime.utcnow()
+        now = get_now_wib()
         if range_type == "today":
             cutoff = datetime(now.year, now.month, now.day)
             query = query.filter(LogPerformaONT.waktu_cek >= cutoff)

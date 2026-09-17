@@ -3,6 +3,7 @@ from typing import Optional, List, Tuple, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc, asc, func, text
 
+from app.core.timezone import get_now_wib, get_today_wib
 from app.db.models import UserActivityLog
 
 class ActivityLogService:
@@ -30,7 +31,7 @@ class ActivityLogService:
                 user_agent=user_agent[:500] if user_agent else None,
                 status=status.upper(),
                 keterangan=keterangan,
-                created_at=datetime.datetime.utcnow()
+                created_at=get_now_wib()
             )
             db.add(log_entry)
             db.commit()
@@ -158,7 +159,7 @@ class ActivityLogService:
         """Mengambil data log aktivitas dengan filter rentang waktu/kustom tanggal, sorting dinamis, dan pagination"""
         query = db.query(UserActivityLog)
 
-        now = datetime.datetime.utcnow()
+        now = get_now_wib()
         if range_type == "today":
             cutoff = datetime.datetime(now.year, now.month, now.day)
             query = query.filter(UserActivityLog.created_at >= cutoff)
@@ -245,14 +246,14 @@ class ActivityLogService:
             })
 
         earliest = db.query(func.min(UserActivityLog.created_at)).scalar()
-        min_date_str = earliest.strftime("%Y-%m-%d") if earliest else datetime.date.today().strftime("%Y-%m-%d")
+        min_date_str = earliest.strftime("%Y-%m-%d") if earliest else get_today_wib().strftime("%Y-%m-%d")
         return total_count, results, min_date_str
 
     @staticmethod
     def cleanup_old_activity_logs(db: Session, days: int = 60) -> int:
         """Hapus log aktivitas yang lebih lama dari `days` hari. Default 60 hari (2 bulan)."""
         try:
-            cutoff = datetime.datetime.utcnow() - datetime.timedelta(days=days)
+            cutoff = get_now_wib() - datetime.timedelta(days=days)
             deleted = db.query(UserActivityLog).filter(UserActivityLog.created_at < cutoff).delete()
             db.commit()
             print(f"[ActivityLogService] Cleanup: {deleted} log aktivitas lama dihapus (> {days} hari)")

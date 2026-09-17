@@ -4,6 +4,7 @@ from typing import List, Optional
 import httpx
 from sqlalchemy.orm import Session
 from app.core.config import settings
+from app.core.timezone import get_now_wib
 from app.db.models import AlertLog, Pelanggan, LogPerformaONT
 
 logger = logging.getLogger("telegram_service")
@@ -69,7 +70,7 @@ class TelegramService:
         start_str = s_start.value_text if s_start and s_start.value_text else "22:00"
         end_str = s_end.value_text if s_end and s_end.value_text else "06:00"
 
-        now = now_time or datetime.now()
+        now = now_time or get_now_wib()
         current_hm = now.strftime("%H:%M")
 
         if start_str <= end_str:
@@ -81,7 +82,7 @@ class TelegramService:
     @classmethod
     def should_suppress_alert(cls, id_pelanggan: str, status: str, db: Session, debounce_minutes: int = 30, ref_time: Optional[datetime] = None) -> bool:
         """Cek apakah alert serupa baru saja dikirim dalam rentang debounce_minutes terakhir"""
-        now = ref_time or datetime.now()
+        now = ref_time or get_now_wib()
         cutoff = now - timedelta(minutes=debounce_minutes)
         recent_alert = (
             db.query(AlertLog)
@@ -199,7 +200,7 @@ class TelegramService:
             pesan=message,
             target_recipients=target_list_str,
             status_kirim="SUCCESS" if sent_any else "FAILED",
-            waktu_kirim=log_entry.waktu_cek or datetime.now()
+            waktu_kirim=log_entry.waktu_cek or get_now_wib()
         )
         db.add(new_alert)
         db.commit()
@@ -252,7 +253,7 @@ class TelegramService:
             pesan=message,
             target_recipients=target_list_str,
             status_kirim="SUCCESS" if sent_any else "FAILED",
-            waktu_kirim=log_entry.waktu_cek or datetime.now()
+            waktu_kirim=log_entry.waktu_cek or get_now_wib()
         )
         db.add(new_alert)
         db.commit()
@@ -261,7 +262,7 @@ class TelegramService:
     @classmethod
     def send_mass_outage_alert_sync(cls, pop: str, count: int, customer_names: List[str], db: Session) -> bool:
         """Kirim alert jika terdeteksi gangguan massal (>= 3 ONT LOS di POP yang sama)"""
-        cutoff = datetime.utcnow() - timedelta(minutes=settings.ALERT_DEBOUNCE_MINUTES)
+        cutoff = get_now_wib() - timedelta(minutes=settings.ALERT_DEBOUNCE_MINUTES)
         existing = db.query(AlertLog).filter(
             AlertLog.id_pelanggan == f"MASS_OUTAGE_{pop}",
             AlertLog.waktu_kirim >= cutoff
@@ -273,7 +274,7 @@ class TelegramService:
         if not recipients:
             return False
 
-        now_str = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        now_str = get_now_wib().strftime("%d/%m/%Y %H:%M:%S")
         names_str = ", ".join(customer_names[:5]) + ("..." if len(customer_names) > 5 else "")
         msg = (
             f"🚨🚨 <b>[EdTeknoGuard] PERINGATAN GANGGUAN MASSAL!</b>\n\n"
@@ -296,7 +297,7 @@ class TelegramService:
             pesan=msg,
             target_recipients=",".join(recipients),
             status_kirim="SUCCESS" if sent_any else "FAILED",
-            waktu_kirim=datetime.utcnow()
+            waktu_kirim=get_now_wib()
         )
         db.add(log_entry)
         db.commit()
@@ -312,6 +313,7 @@ class TelegramService:
         if not recipients or not alerts:
             return False
 
+        scan_time = scan_time or get_now_wib()
         is_silent = cls.is_in_night_mode(db, scan_time)
         now_str = scan_time.strftime("%d/%m/%Y %H:%M:%S")
         total = len(alerts)

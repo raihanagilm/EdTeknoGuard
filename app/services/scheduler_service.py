@@ -8,6 +8,8 @@ from typing import Dict, Any, Optional
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
+from app.core.timezone import get_now_wib, get_today_wib
+
 from app.core.database import SessionLocal
 from app.core.config import settings
 from app.db.models import Pelanggan, LogPerformaONT, SystemSetting, AlertLog, UserActivityLog
@@ -61,7 +63,7 @@ class MonitoringScheduler:
                     "status": "PAUSED",
                     "current_index": current_index,
                     "total": total,
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    "timestamp": get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
                 }, f, indent=2)
             logger.info(f"[STATE] State pemindaian disimpan ke JSON: {current_index}/{total}")
         except Exception as e:
@@ -92,7 +94,7 @@ class MonitoringScheduler:
     def cleanup_old_logs(cls, db: Session, days: int = 30) -> int:
         """Menghapus riwayat log performa ONT yang berusia lebih dari 30 hari."""
         try:
-            cutoff = datetime.utcnow() - timedelta(days=days)
+            cutoff = get_now_wib() - timedelta(days=days)
             deleted_logs = db.query(LogPerformaONT).filter(LogPerformaONT.waktu_cek < cutoff).delete(synchronize_session=False)
             db.commit()
             if deleted_logs > 0:
@@ -108,7 +110,7 @@ class MonitoringScheduler:
         """Menghapus alert_logs yang berusia lebih dari 7 hari. Dipanggil dari job scheduler harian."""
         db = SessionLocal()
         try:
-            cutoff = datetime.utcnow() - timedelta(days=days)
+            cutoff = get_now_wib() - timedelta(days=days)
             deleted = db.query(AlertLog).filter(AlertLog.waktu_kirim < cutoff).delete(synchronize_session=False)
             db.commit()
             if deleted > 0:
@@ -126,7 +128,7 @@ class MonitoringScheduler:
         """Menghapus user_activity_logs yang berusia lebih dari 60 hari (2 bulan). Dipanggil dari job scheduler bulanan."""
         db = SessionLocal()
         try:
-            cutoff = datetime.utcnow() - timedelta(days=days)
+            cutoff = get_now_wib() - timedelta(days=days)
             deleted = db.query(UserActivityLog).filter(UserActivityLog.created_at < cutoff).delete(synchronize_session=False)
             db.commit()
             if deleted > 0:
@@ -376,7 +378,7 @@ class MonitoringScheduler:
             self._scan_current = self._resume_index
             pelanggan_to_scan = pelanggan_list[self._resume_index:]
 
-            now = datetime.now()
+            now = get_now_wib()
             results = []
             warning_count = 0
             critical_count = 0
@@ -668,7 +670,7 @@ class MonitoringScheduler:
             if res.get("mac_address"):
                 cust.mac_address = res["mac_address"]
 
-            now = datetime.now()
+            now = get_now_wib()
             log_entry = LogPerformaONT(
                 id_pelanggan=cust.id_pelanggan,
                 waktu_cek=now,

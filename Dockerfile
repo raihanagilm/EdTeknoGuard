@@ -4,10 +4,18 @@ FROM python:3.10-slim
 
 # - PYTHONDONTWRITEBYTECODE: cegah file .pyc dalam image
 # - PYTHONUNBUFFERED: log langsung keluar (docker logs)
+# - TZ: zona waktu Waktu Indonesia Barat (WIB)
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    TZ=Asia/Jakarta
 
 WORKDIR /app
+
+# Atur zona waktu OS ke Asia/Jakarta (WIB)
+RUN apt-get update && apt-get install -y --no-install-recommends tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && rm -rf /var/lib/apt/lists/*
 
 # Salin & install dependensi lebih dulu untuk memanfaatkan layer cache
 COPY requirements.txt .

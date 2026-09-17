@@ -14,6 +14,7 @@ import json
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
+from app.core.timezone import get_now_wib
 from app.db.models import Pelanggan, LogPerformaONT
 from app.modules.customers.schemas import CustomerCreate, CustomerUpdate
 
@@ -468,7 +469,7 @@ class CustomerService:
                 query = query.filter(Pelanggan.is_monitored == False)
 
         # Filter Rentang Waktu Tanggal (Berdasarkan waktu cek log terakhir atau tanggal terdaftar)
-        now = datetime.utcnow()
+        now = get_now_wib()
         date_col = func.coalesce(LogPerformaONT.waktu_cek, Pelanggan.created_at)
         if range_type == "today":
             cutoff = datetime(now.year, now.month, now.day)

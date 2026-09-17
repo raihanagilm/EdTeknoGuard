@@ -2,6 +2,7 @@ import os
 import sys
 import random
 from datetime import datetime, timedelta
+from app.core.timezone import get_now_wib
 from app.core.database import engine, Base, SessionLocal
 from app.db.models import Pelanggan, LogPerformaONT, AlertLog, SystemSetting
 from app.services.importer_service import ImporterService
@@ -26,7 +27,7 @@ def init_db():
             "polling_interval_minutes": str(settings.POLLING_INTERVAL_MINUTES),
             "warning_threshold_dbm": str(settings.WARNING_THRESHOLD_DBM),
             "critical_threshold_dbm": str(settings.CRITICAL_THRESHOLD_DBM),
-            "last_scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "last_scan_time": get_now_wib().strftime("%Y-%m-%d %H:%M:%S"),
             "telegram_chat_ids": settings.TELEGRAM_CHAT_IDS or ""
         }
         for k, v in default_settings.items():
@@ -54,7 +55,7 @@ def init_db():
         if log_count == 0:
             print("[SEED] Menghasilkan log historis awal untuk grafik (7 hari terakhir)...")
             customers = db.query(Pelanggan).limit(30).all()
-            now = datetime.now()
+            now = get_now_wib()
             logs_to_add = []
 
             for cust in customers:

@@ -15,13 +15,14 @@ class ActivityLogController:
         """Merender antarmuka web log aktivitas pengguna (templates/activity_logs/index.html)"""
         import datetime
         from sqlalchemy import func
+        from app.core.timezone import get_today_wib
         from app.db.models import UserActivityLog
 
         users = ActivityLogService.get_distinct_users(db)
         dates = ActivityLogService.get_distinct_dates(db)
         earliest_log = db.query(func.min(UserActivityLog.created_at)).scalar()
-        min_date_str = earliest_log.strftime("%Y-%m-%d") if earliest_log else datetime.date.today().strftime("%Y-%m-%d")
-        today_str = datetime.date.today().strftime("%Y-%m-%d")
+        min_date_str = earliest_log.strftime("%Y-%m-%d") if earliest_log else get_today_wib().strftime("%Y-%m-%d")
+        today_str = get_today_wib().strftime("%Y-%m-%d")
 
         return templates.TemplateResponse(
             request=request,

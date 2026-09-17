@@ -16,3 +16,4 @@ passlib[bcrypt]>=1.7.4
 bcrypt>=5.0.0
 itsdangerous>=2.2.0
 requests>=2.31.0
+tzdata>=2026.4
