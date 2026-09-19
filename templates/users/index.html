@@ -96,6 +96,9 @@
                             </div>
                         </th>
 
+                        <!-- Akses Kantor -->
+                        <th class="py-3 px-4">Akses Kantor</th>
+
                         <!-- Status sortir -->
                         <th @click="sortTable('status')" class="py-3 px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition">
                             <div class="flex items-center gap-1">
@@ -142,9 +145,21 @@
                             <span class="capitalize inline-flex items-center rounded-lg px-2.5 py-1 text-[11px] font-semibold
                                 {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 border border-purple-200
                                 {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 border border-blue-200
+                                {% elif user.role == 'teknisi' %}bg-emerald-50 text-emerald-700 border border-emerald-200
                                 {% else %}bg-slate-100 text-slate-600 border border-slate-200{% endif %}">
                                 {{ user.role | title }}
                             </span>
+                        </td>
+
+                        <!-- Akses Kantor Badge -->
+                        <td class="py-3 px-4">
+                            <div class="flex flex-wrap items-center gap-1">
+                                {% for k in user.allowed_kantor %}
+                                    <span class="capitalize inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                        {{ k }}
+                                    </span>
+                                {% endfor %}
+                            </div>
                         </td>
 
                         <!-- Status Badge -->
@@ -166,7 +181,7 @@
                                 {% if current_user.get('role') == 'super admin' or user.role != 'super admin' %}
 
                                 <!-- Tombol Edit (Pensil) -->
-                                <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan or '' }}', '{{ user.role }}')"
+                                <button @click='openEditModal({{ user.id }}, {{ user.username | tojson }}, {{ (user.nama_karyawan or "") | tojson }}, {{ user.role | tojson }}, {{ user.allowed_kantor | tojson }})'
                                         title="Edit user {{ user.username }}"
                                         class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200 transition-all">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,27 +235,38 @@
                         </div>
                         <div class="text-xs text-slate-500 mt-0.5">{{ user.nama_karyawan or '-' }}</div>
                     </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <span class="capitalize inline-flex items-center rounded-lg px-2 py-0.5 text-[11px] font-semibold
-                            {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 border border-purple-200
-                            {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 border border-blue-200
-                            {% else %}bg-slate-100 text-slate-600 border border-slate-200{% endif %}">
-                            {{ user.role | title }}
-                        </span>
-                        {% if user.is_active %}
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                    <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                        <div class="flex items-center gap-1.5">
+                            <span class="capitalize inline-flex items-center rounded-lg px-2 py-0.5 text-[11px] font-semibold
+                                {% if user.role == 'super admin' %}bg-purple-50 text-purple-700 border border-purple-200
+                                {% elif user.role == 'admin' %}bg-blue-50 text-blue-700 border border-blue-200
+                                {% elif user.role == 'teknisi' %}bg-emerald-50 text-emerald-700 border border-emerald-200
+                                {% else %}bg-slate-100 text-slate-600 border border-slate-200{% endif %}">
+                                {{ user.role | title }}
                             </span>
-                        {% else %}
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>Nonaktif
-                            </span>
-                        {% endif %}
+                            {% if user.is_active %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>Nonaktif
+                                </span>
+                            {% endif %}
+                        </div>
+                        <!-- Badges Kantor Mobile -->
+                        <div class="flex flex-wrap items-center justify-end gap-1">
+                            {% for k in user.allowed_kantor %}
+                                <span class="capitalize px-1 py-0.2 rounded text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                    {{ k }}
+                                </span>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                     {% if current_user.get('role') == 'super admin' or user.role != 'super admin' %}
-                    <button @click="openEditModal({{ user.id }}, '{{ user.username }}', '{{ user.nama_karyawan or '' }}', '{{ user.role }}')"
+                    <button @click='openEditModal({{ user.id }}, {{ user.username | tojson }}, {{ (user.nama_karyawan or "") | tojson }}, {{ user.role | tojson }}, {{ user.allowed_kantor | tojson }})'
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold hover:bg-indigo-100 transition min-h-[36px]">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -314,14 +340,56 @@
                             <!-- Role -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-600 mb-1.5">Role</label>
-                                <select name="role" x-model="form.role"
-                                        class="block w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                                    <option value="karyawan">Karyawan</option>
+                                <select name="role" x-model="form.role" @change="onRoleChange()"
+                                        class="block w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-medium">
+                                    <option value="teknisi">Teknisi</option>
                                     <option value="admin">Admin</option>
-                                    {% if current_user.get('role') == 'super admin' %}
                                     <option value="super admin">Super Admin</option>
-                                    {% endif %}
                                 </select>
+                            </div>
+
+                            <!-- Izin Akses Kantor (Checklist) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">
+                                    Izin Akses Kantor
+                                    <span x-show="form.role === 'super admin'" class="text-[11px] font-normal text-indigo-600 ml-1">(Super Admin otomatis akses ke semua kantor)</span>
+                                </label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition"
+                                           :class="{'opacity-60 cursor-not-allowed': form.role === 'super admin'}">
+                                        <input type="checkbox" name="kantor" value="cabang" 
+                                               :checked="form.role === 'super admin' || form.kantor.includes('cabang')"
+                                               :disabled="form.role === 'super admin'"
+                                               @change="toggleKantor('cabang')"
+                                               class="rounded text-indigo-600 focus:ring-indigo-500">
+                                        <span class="text-xs font-semibold text-slate-700">Cabang</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition"
+                                           :class="{'opacity-60 cursor-not-allowed': form.role === 'super admin'}">
+                                        <input type="checkbox" name="kantor" value="pusat" 
+                                               :checked="form.role === 'super admin' || form.kantor.includes('pusat')"
+                                               :disabled="form.role === 'super admin'"
+                                               @change="toggleKantor('pusat')"
+                                               class="rounded text-indigo-600 focus:ring-indigo-500">
+                                        <span class="text-xs font-semibold text-slate-700">Pusat</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition"
+                                           :class="{'opacity-60 cursor-not-allowed': form.role === 'super admin'}">
+                                        <input type="checkbox" name="kantor" value="banyumas" 
+                                               :checked="form.role === 'super admin' || form.kantor.includes('banyumas')"
+                                               :disabled="form.role === 'super admin'"
+                                               @change="toggleKantor('banyumas')"
+                                               class="rounded text-indigo-600 focus:ring-indigo-500">
+                                        <span class="text-xs font-semibold text-slate-700">Banyumas</span>
+                                    </label>
+                                </div>
+                                <template x-if="form.role === 'super admin'">
+                                    <div>
+                                        <input type="hidden" name="kantor" value="cabang">
+                                        <input type="hidden" name="kantor" value="pusat">
+                                        <input type="hidden" name="kantor" value="banyumas">
+                                    </div>
+                                </template>
                             </div>
 
                             <!-- Password -->
@@ -398,6 +466,10 @@
                 <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
                     <span class="text-slate-500">Role Akses:</span>
                     <span class="font-bold uppercase text-indigo-600" x-text="form.role"></span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
+                    <span class="text-slate-500">Izin Kantor:</span>
+                    <span class="font-semibold text-slate-800 capitalize" x-text="form.role === 'super admin' ? '3 Kantor (Cabang, Pusat, Banyumas)' : (form.kantor.join(', ') || 'Belum dipilih')"></span>
                 </div>
                 <div class="flex justify-between items-center py-1">
                     <span class="text-slate-500">Kata Sandi:</span>
@@ -543,7 +615,8 @@ function userManagement() {
             id: null,
             username: '',
             nama_karyawan: '',
-            role: 'karyawan',
+            role: 'teknisi',
+            kantor: ['cabang'],
             password: ''
         },
         toggleTarget: {
@@ -588,21 +661,48 @@ function userManagement() {
             });
         },
 
+        onRoleChange() {
+            if (this.form.role === 'super admin') {
+                this.form.kantor = ['cabang', 'pusat', 'banyumas'];
+            } else if (!this.form.kantor || this.form.kantor.length === 0) {
+                this.form.kantor = ['cabang'];
+            }
+        },
+
+        toggleKantor(k) {
+            if (this.form.role === 'super admin') return;
+            const idx = this.form.kantor.indexOf(k);
+            if (idx > -1) {
+                if (this.form.kantor.length > 1) {
+                    this.form.kantor.splice(idx, 1);
+                }
+            } else {
+                this.form.kantor.push(k);
+            }
+        },
+
         openAddModal() {
             this.isEdit = false;
             this.showPassword = false;
             this.modalTitle = 'Tambah User Baru';
             this.formAction = '/users/add';
-            this.form = { id: null, username: '', nama_karyawan: '', role: 'karyawan', password: '' };
+            this.form = { id: null, username: '', nama_karyawan: '', role: 'teknisi', kantor: ['cabang'], password: '' };
             this.isModalOpen = true;
         },
 
-        openEditModal(id, username, nama_karyawan, role) {
+        openEditModal(id, username, nama_karyawan, role, allowed_kantor) {
             this.isEdit = true;
             this.showPassword = false;
             this.modalTitle = 'Edit User';
             this.formAction = '/users/edit/' + id;
-            this.form = { id, username, nama_karyawan, role, password: '' };
+            this.form = { 
+                id, 
+                username, 
+                nama_karyawan, 
+                role, 
+                kantor: (role === 'super admin') ? ['cabang', 'pusat', 'banyumas'] : (allowed_kantor && allowed_kantor.length ? [...allowed_kantor] : ['cabang']), 
+                password: '' 
+            };
             this.isModalOpen = true;
         },
 

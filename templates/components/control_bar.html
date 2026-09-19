@@ -91,7 +91,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span>Mulai Pemantauan</span>
+                        <span x-text="activeKantor && activeKantor !== 'all' ? 'Pindai ' + (activeKantor === 'banyumas' ? 'Banyumas' : (activeKantor === 'cabang' ? 'Cabang' : 'Pusat')) : 'Mulai Pemantauan (Semua)'">Mulai Pemantauan</span>
                     </button>
 
                     <!-- Tombol Toggle Scheduler: Jeda/Lanjut Jadwal Otomatis -->
@@ -173,7 +173,7 @@
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-600"></span>
                     </span>
                     <span class="font-bold text-indigo-950">
-                        Proses Pemindaian: <span class="text-indigo-600 font-extrabold font-mono text-sm" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span>
+                        Proses Pemindaian <template x-if="scanProgress && scanProgress.target_kantor && scanProgress.target_kantor !== 'all'"><span class="uppercase font-extrabold text-indigo-600" x-text="'[' + scanProgress.target_kantor + ']'"></span></template>: <span class="text-indigo-600 font-extrabold font-mono text-sm" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span>
                         <span class="text-indigo-700 font-semibold" x-text="' (' + (scanProgress.percent || 0) + '%)'">(0%)</span>
                     </span>
                 </div>
@@ -197,7 +197,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                 <div class="flex items-center gap-2 text-amber-900 font-bold">
                     <span class="h-2.5 w-2.5 rounded-full bg-amber-500 inline-block"></span>
-                    <span>Pemindaian Terjeda: <span class="font-mono text-amber-700 font-extrabold" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span> <span x-text="' (' + (scanProgress.percent || 0) + '%)'">(0%)</span></span>
+                    <span>Pemindaian Terjeda <template x-if="scanProgress && scanProgress.target_kantor && scanProgress.target_kantor !== 'all'"><span class="uppercase font-extrabold text-amber-700" x-text="'[' + scanProgress.target_kantor + ']'"></span></template>: <span class="font-mono text-amber-700 font-extrabold" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span> <span x-text="' (' + (scanProgress.percent || 0) + '%)'">(0%)</span></span>
                 </div>
                 <div class="text-[11px] text-amber-800">
                     Checkpoint tersimpan di JSON. Klik <strong>Lanjut</strong> untuk meneruskan atau <strong>Stop</strong> untuk membatalkan.

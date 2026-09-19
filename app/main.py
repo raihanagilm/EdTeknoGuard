@@ -64,9 +64,63 @@ async def custom_http_exception_handler(request: Request, exc: StarletteHTTPExce
 
 @app.middleware("http")
 async def inject_current_user_middleware(request: Request, call_next):
-    from app.core.security import get_current_user_optional
-    request.state.current_user = get_current_user_optional(request)
+    from app.core.security import (
+        get_current_user_optional,
+        get_active_kantor,
+        get_user_allowed_kantor,
+        create_session_token,
+        SESSION_COOKIE_NAME,
+        MAX_SESSION_AGE
+    )
+    current_user = get_current_user_optional(request)
+    request.state.current_user = current_user
+    if current_user:
+        request.state.allowed_kantor = get_user_allowed_kantor(current_user)
+        request.state.active_kantor = get_active_kantor(request, current_user)
+    else:
+        request.state.allowed_kantor = ["cabang"]
+        request.state.active_kantor = "cabang"
     response = await call_next(request)
+
+    # Aturan Sesi Inaktivitas 30 Hari:
+    # Selama pengguna aktif membuka/menggunakan aplikasi, masa aktif sesi diperpanjang ke 30 hari ke depan.
+    # Jika pengguna tidak mengakses aplikasi selama 30 hari, sesi kedaluwarsa dan otomatis logout sendiri.
+    if current_user and request.method == "GET" and not request.url.path.startswith("/static") and request.url.path != "/logout":
+        refreshed_token = create_session_token(
+            username=current_user.get("user", "admin"),
+            role=current_user.get("role", "teknisi"),
+            nama_karyawan=current_user.get("nama_karyawan", "User"),
+            allowed_kantor=current_user.get("allowed_kantor", ["cabang"])
+        )
+        response.set_cookie(
+            key=SESSION_COOKIE_NAME,
+            value=refreshed_token,
+            max_age=MAX_SESSION_AGE,
+            httponly=True,
+            samesite="lax"
+        )
+
+    return response
+
+@app.get("/switch-kantor")
+async def switch_kantor(request: Request, kantor: str = "cabang"):
+    from app.core.security import get_current_user_optional, get_user_allowed_kantor
+    user = get_current_user_optional(request)
+    referer = request.headers.get("referer", "/")
+    # Hindari redirect loop jika referer adalah /switch-kantor
+    if "/switch-kantor" in referer:
+        referer = "/"
+    response = RedirectResponse(url=referer, status_code=303)
+    
+    if not user:
+        return response
+        
+    kantor_clean = kantor.strip().lower()
+    allowed = get_user_allowed_kantor(user)
+    
+    if kantor_clean in allowed and kantor_clean != "all":
+        response.set_cookie("active_kantor", kantor_clean, max_age=86400 * 30, path="/")
+        
     return response
 
 # Mount folder static

@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -17,10 +18,11 @@ async def add_user(
     username: str = Form(...),
     password: str = Form(...),
     nama_karyawan: str = Form(""),
-    role: str = Form("operator"),
+    role: str = Form("teknisi"),
+    kantor: List[str] = Form(["cabang"]),
     db: Session = Depends(get_db)
 ):
-    return UsersController.handle_add_user(request, username, password, nama_karyawan, role, db)
+    return UsersController.handle_add_user(request, username, password, nama_karyawan, role, kantor, db)
 
 @router.post("/edit/{user_id}")
 async def edit_user(
@@ -29,10 +31,11 @@ async def edit_user(
     username: str = Form(...),
     password: str = Form(None),
     nama_karyawan: str = Form(""),
-    role: str = Form("operator"),
+    role: str = Form("teknisi"),
+    kantor: List[str] = Form(["cabang"]),
     db: Session = Depends(get_db)
 ):
-    return UsersController.handle_edit_user(request, user_id, username, password, nama_karyawan, role, db)
+    return UsersController.handle_edit_user(request, user_id, username, password, nama_karyawan, role, kantor, db)
 
 @router.post("/toggle/{user_id}")
 async def toggle_user(

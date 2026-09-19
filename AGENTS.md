@@ -121,8 +121,11 @@ EdTeknoGuard/
 
 ## 6. Standar Keamanan & Kode
 
-1. **Autentikasi Admin NOC**:
+1. **Autentikasi Admin NOC & Manajemen Sesi 30 Hari**:
    - Default login: Username `admin`, Password `agiltampan`.
+   - Fitur lihat password: Input password pada halaman login dilengkapi tombol toggle SVG (mata terbuka / mata tertutup) tanpa emoji.
+   - Masa aktif sesi (`MAX_SESSION_AGE`): Sesi pengguna bertahan selama **30 hari** (2.592.000 detik).
+   - Mekanisme *Sliding Expiration*: Selama pengguna aktif mengakses aplikasi, masa berlaku sesi otomatis diperpanjang 30 hari ke depan. Jika pengguna tidak mengakses aplikasi selama 30 hari berturut-turut, sesi otomatis kedaluwarsa dan pengguna dialihkan ke `/login`.
    - Sesi disimpan secara aman melalui session cookie terproteksi (`edteknoguard_session`).
 2. **Kerahasiaan Credential**:
    - Secret key, bot token Telegram, dan kredensial TiDB Cloud **WAJIB** berada di file `.env`.
@@ -140,6 +143,34 @@ EdTeknoGuard/
 7. **Filter Rentang Tanggal & Real-Time Auto-Refresh**:
    - Filter tanggal terpadu (`Semua Tanggal`, `Hari Ini`, `7 Hari Terakhir`, `30 Hari Terakhir`, `Kustom Tanggal` dengan picker rentang `s/d`) diterapkan pada `/logs` dan `/pelanggan`.
    - Polling latar belakang otomatis (8-10 detik) memutakhirkan DOM secara *silent* dengan proteksi pause saat modal/kalender sedang dibuka.
+8. **Sistem 3 Role & Multi-Kantor Cabang**:
+   - **Tiga Role Pengguna**:
+     - `super admin`: Akses penuh 3 kantor, satu-satunya role yang diizinkan mengakses menu Manajemen Pengguna (`/users`) dan Pengaturan Sistem (`/settings`).
+     - `admin`: Mengelola operasional teknis (CRUD pelanggan, monitoring, import) terbatas pada kantor cabang yang diizinkan (`allowed_kantor`). Tidak dapat mengakses menu User dan Pengaturan.
+     - `teknisi`: Menggantikan peran `karyawan` sebelumnya, fokus pada pemantauan real-time status redaman ONT & probe on-demand terbatas pada kantor yang diizinkan. Dibatasi dari aksi manipulasi/penghapusan data pelanggan.
+   - **Tiga Wilayah Kantor**: `cabang` (Kantor Cabang), `pusat` (Kantor Pusat), dan `banyumas` (Kantor Banyumas).
+   - **Office Switcher**: Dropdown interaktif di navbar atas untuk Super Admin dan user multi-kantor untuk berpindah kantor aktif (`cabang`, `pusat`, `banyumas`). Opsi "Semua Kantor" telah ditiadakan agar pemantauan, scanning, dan pelaporan selalu fokus dan terisolasi per kantor yang dipilih secara spesifik.
+   - **Notifikasi Telegram**: Setiap alert redaman drop, status kritis/LOS, dan batch alert wajib memuat identitas wilayah kantor pelanggan (misal: `🏢 <b>Kantor:</b> CABANG`).
+9. **Model Pemantauan Hybrid 3 Kantor (Background Scheduler vs Scan Manual)**:
+   - **Pemantauan Otomatis Latar Belakang (*Background Scheduler*)**:
+     - Berjalan otomatis secara periodik (tiap X menit) via APScheduler daemon untuk **memindai seluruh pelanggan aktif di seluruh kantor (`cabang`, `pusat`, `banyumas`)** sekaligus tanpa intervensi manual.
+   - **Pemindaian Manual (*Manual Scan / Scan All*)**:
+     - **Admin Cabang**: Pemicuan tombol "Mulai Pemantauan" otomatis diisolasi hanya untuk memindai pelanggan di wilayah kantor yang diizinkan (misal: hanya ONT Kantor Cabang).
+     - **Super Admin**: Memindai seluruh pelanggan pada kantor aktif yang sedang dipilih di Office Switcher (misal: memindai pelanggan Kantor Cabang saat switcher berada di Cabang).
+     - **Teknisi**: Dibatasi dari pemindaian serentak (*Scan All*) dengan proteksi HTTP 403 Forbidden; teknisi tetap dapat melakukan pengujian on-demand per pelanggan (*Single Probe*) terbatas pada kantor yang diizinkan.
+   - **Metrik KPI & Visualisasi Grafik Chart.js**:
+     - Endpoint `/api/monitoring/kpi` dan `/api/monitoring/chart-data` terisolasi secara dinamis sesuai kantor aktif pengguna yang sedang login.
+10. **Import Multi-Kantor & Auto-Recovery Server (Crash/Reboot Persistence)**:
+    - **Import Multi-Kantor & Resolusi Duplikasi Tanpa Penimpaan (No Overwrite)**:
+      - Template Excel/CSV mendukung kolom `Kantor` (Cabang, Pusat, Banyumas) untuk pemetaan per baris secara otomatis.
+      - **Alokasi Kantor Otomatis Sesuai Kantor Aktif**: Dropdown pemilihan kantor pada Langkah 1 ditiadakan. Data otomatis dialokasikan ke kantor aktif yang sedang dibuka di navbar (atau dipetakan otomatis per baris jika berkas memuat kolom *Kantor*).
+      - **Kebijakan SOP Jangan Ditimpa**: Data pelanggan yang sudah terdaftar di database dilarang keras ditimpa saat import. Seluruh opsi "Timpa" ditiadakan dari sistem.
+      - **Resolusi Duplikasi Inline**: Penanganan duplikasi (Auto-ID unik, abaikan/skip, hapus baris, atau edit manual ID/IP/Nama) dilakukan secara langsung dan interaktif pada tabel Pratinjau Langkah 3 tanpa menggunakan pop-up modal koreksi sekunder yang terpisah. Baris dengan status diabaikan (*skip*) otomatis dilewati dan tidak memblokir proses simpan ke database.
+    - **Auto-Recovery & Persistence Pemantauan**:
+      - Status scheduler (`RUNNING`/`STOPPED`) dan interval tersimpan permanen di tabel `system_settings` TiDB Cloud.
+      - Saat server reboot / restart / hidup kembali setelah mati listrik atau putus jaringan, sistem otomatis memulihkan status scheduler ke `RUNNING` tanpa intervensi manual.
+      - Jika waktu mati server telah melampaui interval pemantauan reguler, sistem otomatis menjadwalkan *Catch-Up Scan* (5 detik setelah startup) dan mencatat entri audit log `STARTUP_RECOVERY`.
+      - API `/api/monitoring/status` menyediakan parameter `next_run_time` untuk kepastian visibilitas jadwal pemindaian berikutnya di antarmuka web.
 
 ---
 

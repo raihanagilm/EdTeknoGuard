@@ -14,8 +14,10 @@ class CustomerController:
     @staticmethod
     def render_customers_page(request: Request, db: Session):
         """Render antarmuka manajemen pelanggan (templates/customers/index.html)"""
-        pops = CustomerService.get_pop_list(db)
-        stats = CustomerService.get_customer_stats(db)
+        active_kantor = getattr(request.state, "active_kantor", "cabang")
+        allowed_kantor = getattr(request.state, "allowed_kantor", ["cabang"])
+        pops = CustomerService.get_pop_list(db, kantor=active_kantor, allowed_kantor=allowed_kantor)
+        stats = CustomerService.get_customer_stats(db, kantor=active_kantor, allowed_kantor=allowed_kantor)
         min_date = CustomerService.get_min_date(db)
         return templates.TemplateResponse(
             request=request,
@@ -43,14 +45,17 @@ class CustomerController:
         sort_by: Optional[str] = "id",
         sort_dir: str = "asc",
         page: int = 1,
-        limit: int = 25
+        limit: int = 25,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         total, data = CustomerService.get_customers(
             db=db, q=q, pop=pop, status=status, monitoring=monitoring,
             range_type=range_type, start_date=start_date, end_date=end_date,
-            sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
+            sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit,
+            kantor=kantor, allowed_kantor=allowed_kantor
         )
-        stats = CustomerService.get_customer_stats(db)
+        stats = CustomerService.get_customer_stats(db, kantor=kantor, allowed_kantor=allowed_kantor)
         return {
             "total": total,
             "page": page,
@@ -61,8 +66,8 @@ class CustomerController:
 
     @staticmethod
     def toggle_customer_monitoring(db: Session, id_pelanggan: str, user: dict, request: Request) -> Dict[str, Any]:
-        if user and user.get("role") == "operator":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan mengubah status pemantauan")
+        if user and user.get("role") in ("operator", "teknisi", "karyawan"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan mengubah status pemantauan")
         
         from app.modules.activity_logs.service import ActivityLogService
         cust = CustomerService.toggle_monitoring(db=db, id_pelanggan=id_pelanggan)
@@ -136,8 +141,8 @@ class CustomerController:
 
     @staticmethod
     def create_customer(db: Session, data: CustomerCreate, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "operator":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan menambahkan pelanggan")
+        if user and user.get("role") in ("operator", "teknisi", "karyawan"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan menambahkan pelanggan")
             
         from app.modules.activity_logs.service import ActivityLogService
         try:
@@ -173,6 +178,9 @@ class CustomerController:
 
     @staticmethod
     def update_customer(db: Session, id_pelanggan: str, data: CustomerUpdate, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") in ("operator", "teknisi", "karyawan"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan mengubah profil pelanggan")
+
         from app.modules.activity_logs.service import ActivityLogService
         try:
             cust = CustomerService.update_customer(db=db, id_pelanggan=id_pelanggan, data=data)
@@ -211,8 +219,8 @@ class CustomerController:
 
     @staticmethod
     def delete_customer(db: Session, id_pelanggan: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "operator":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan menghapus data pelanggan")
+        if user and user.get("role") in ("operator", "teknisi", "karyawan"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan menghapus data pelanggan")
         
         from app.modules.activity_logs.service import ActivityLogService
         detail = CustomerService.get_customer_detail(db=db, id_pelanggan=id_pelanggan)
@@ -236,8 +244,8 @@ class CustomerController:
 
     @staticmethod
     def bulk_delete(db: Session, ids: List[str], request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "operator":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan menghapus data pelanggan")
+        if user and user.get("role") in ("operator", "teknisi", "karyawan"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan menghapus data pelanggan")
         
         from app.modules.activity_logs.service import ActivityLogService
         affected = CustomerService.bulk_delete_customers(db=db, id_list=ids)
@@ -306,8 +314,10 @@ class CustomerController:
         )
 
     @staticmethod
-    def export_excel(db: Session) -> Response:
-        excel_bytes = CustomerService.generate_excel_export(db=db)
+    def export_excel(db: Session, request: Optional[Request] = None) -> Response:
+        active_kantor = getattr(request.state, "active_kantor", "cabang") if request else "cabang"
+        allowed_kantor = getattr(request.state, "allowed_kantor", ["cabang"]) if request else None
+        excel_bytes = CustomerService.generate_excel_export(db=db, kantor=active_kantor, allowed_kantor=allowed_kantor)
         return Response(
             content=excel_bytes,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -347,25 +357,44 @@ class CustomerController:
             raise HTTPException(status_code=500, detail=f"Gagal memproses preview: {e}")
 
     @staticmethod
-    def execute_import(db: Session, data_list: list, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "operator":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan mengeksekusi import pelanggan")
+    def execute_import(db: Session, data_list: list, target_kantor: Optional[str] = None, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") in ("operator", "teknisi", "karyawan"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan mengeksekusi import pelanggan")
             
         from app.modules.activity_logs.service import ActivityLogService
         try:
-            res = CustomerService.execute_json_import(db=db, data_list=data_list)
+            # Tentukan default kantor berdasarkan hak akses user dan target_kantor
+            user_allowed = user.get("allowed_kantor", ["cabang"]) if user else ["cabang"]
+            is_super_admin = user and user.get("role") == "super admin"
+            
+            effective_kantor = "cabang"
+            if target_kantor and target_kantor.lower().strip() in ["cabang", "pusat", "banyumas"]:
+                if is_super_admin or target_kantor.lower().strip() in user_allowed:
+                    effective_kantor = target_kantor.lower().strip()
+                else:
+                    effective_kantor = user_allowed[0] if user_allowed else "cabang"
+            else:
+                active_kantor = getattr(request.state, "active_kantor", "cabang") if request else "cabang"
+                if active_kantor in ["cabang", "pusat", "banyumas"]:
+                    effective_kantor = active_kantor
+                elif user_allowed:
+                    effective_kantor = user_allowed[0]
+                else:
+                    effective_kantor = "cabang"
+
+            res = CustomerService.execute_json_import(db=db, data_list=data_list, default_kantor=effective_kantor)
             if request:
                 ActivityLogService.log_from_request(
                     db=db,
                     request=request,
                     action="IMPORT_PELANGGAN",
                     status="SUCCESS",
-                    keterangan=f"Import berhasil: {res['imported']} baru, {res['updated']} diperbarui, {res['failed']} gagal dari total {res['total_processed']} baris",
+                    keterangan=f"Import berhasil ({effective_kantor.upper()}): {res['imported']} baru, {res['skipped']} dilewati, {res['failed']} gagal dari total {res['total_processed']} baris",
                     user=user
                 )
             return {
                 "status": "success",
-                "message": f"Berhasil memproses {res['total_processed']} baris ({res['imported']} baru, {res['updated']} diperbarui, {res['failed']} gagal).",
+                "message": f"Berhasil memproses {res['total_processed']} baris ({res['imported']} baru, {res['skipped']} dilewati, {res['failed']} gagal).",
                 "result": res
             }
         except ValueError as e:

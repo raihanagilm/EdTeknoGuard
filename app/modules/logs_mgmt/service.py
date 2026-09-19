@@ -26,11 +26,18 @@ class LogsMgmtService:
         sort_by: Optional[str] = "waktu_cek",
         sort_dir: str = "desc",
         page: int = 1,
-        limit: int = 50
+        limit: int = 50,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[List[str]] = None
     ) -> Tuple[int, List[Dict[str, Any]], Dict[str, Any]]:
         query = db.query(LogPerformaONT, Pelanggan).join(
             Pelanggan, LogPerformaONT.id_pelanggan == Pelanggan.id_pelanggan
         )
+
+        if kantor and kantor != "all":
+            query = query.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            query = query.filter(Pelanggan.kantor.in_(allowed_kantor))
 
         now = get_now_wib()
         if range_type == "today":
@@ -122,6 +129,7 @@ class LogsMgmtService:
                 "uptime": log_entry.uptime,
                 "latency_ms": log_entry.latency_ms,
                 "status_koneksi": log_entry.status_koneksi,
+                "kantor": getattr(cust, "kantor", "cabang") or "cabang",
                 "keterangan": log_entry.keterangan
             })
 

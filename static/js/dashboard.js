@@ -38,6 +38,7 @@ document.addEventListener('alpine:init', () => {
         engineStatus: 'RUNNING',
         lastScanTime: '',
         intervalMinutes: Number(document.getElementById('dashboard-container')?.dataset?.pollingInterval) || 10,
+        activeKantor: document.getElementById('dashboard-container')?.dataset?.activeKantor || 'all',
         isScanning: false,
         isToggling: false,
         isNetworkError: false,
@@ -185,9 +186,18 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        formatKantorLabel(k) {
+            if (!k || k === 'all') return 'seluruh kantor';
+            if (k === 'banyumas') return 'Kantor Banyumas';
+            if (k === 'cabang') return 'Kantor Cabang';
+            if (k === 'pusat') return 'Kantor Pusat';
+            return `Kantor ${k.toUpperCase()}`;
+        },
+
         async actionStartScan() {
             if (this.isScanning) return;
-            this.showToast('Memulai pemindaian manual seluruh ONT...', 'info');
+            const target = this.formatKantorLabel(this.activeKantor);
+            this.showToast(`Memulai pemindaian manual ONT ${target}...`, 'info');
             await this.triggerScanAll();
         },
 
@@ -287,7 +297,8 @@ document.addEventListener('alpine:init', () => {
                     await this.fetchStatus();
                     await this.fetchKpi();
                     await this.loadChartData();
-                    this.showToast('Pemindaian seluruh ONT jaringan selesai!', 'success');
+                    const target = this.formatKantorLabel(data.target_kantor || this.activeKantor);
+                    this.showToast(`Pemindaian ONT ${target} selesai!`, 'success');
                 } else {
                     this.showToast(data.message || 'Pemindaian sedang berjalan di latar belakang', 'info');
                 }

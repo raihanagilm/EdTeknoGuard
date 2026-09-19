@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.security import require_admin
+from app.core.security import require_admin, require_super_admin
 from app.modules.telegram_mgmt.controller import TelegramMgmtController
 from app.modules.telegram_mgmt.schemas import TelegramSettingsSchema, TelegramTestAlertRequest
 
@@ -15,7 +15,7 @@ from fastapi.responses import RedirectResponse
 def render_telegram_page(
     request: Request,
     db: Session = Depends(get_db),
-    user: dict = Depends(require_admin)
+    user: dict = Depends(require_super_admin)
 ):
     """Halaman Bot Telegram dialihkan ke Tab Pengaturan Terpusat"""
     return RedirectResponse(url="/settings", status_code=302)
@@ -25,7 +25,7 @@ def render_telegram_page(
 @router.get("/api/telegram/settings")
 def get_telegram_settings(
     db: Session = Depends(get_db),
-    user: dict = Depends(require_admin)
+    user: dict = Depends(require_super_admin)
 ):
     """Ambil konfigurasi aktif bot telegram"""
     return TelegramMgmtController.get_settings(db=db)
@@ -35,7 +35,7 @@ def update_telegram_settings(
     request: Request,
     data: TelegramSettingsSchema,
     db: Session = Depends(get_db),
-    user: dict = Depends(require_admin)
+    user: dict = Depends(require_super_admin)
 ):
     """Simpan konfigurasi baru bot telegram & parameter alert"""
     return TelegramMgmtController.update_settings(db=db, data=data, request=request, user=user)
@@ -45,7 +45,7 @@ async def send_test_alert(
     request: Request,
     req: TelegramTestAlertRequest,
     db: Session = Depends(get_db),
-    user: dict = Depends(require_admin)
+    user: dict = Depends(require_super_admin)
 ):
     """Uji coba pengiriman pesan instan ke bot telegram"""
     return await TelegramMgmtController.send_test_alert(db=db, req=req, request=request, user=user)

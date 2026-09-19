@@ -83,5 +83,6 @@ python -m app.db.init_db
 ### 4. Menjalankan Server Web
 ```bash
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-atau uvicorn app.main:app --reload --port 8000
+atau 
+uvicorn app.main:app --reload --port 8000
 ```

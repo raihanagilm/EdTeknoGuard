@@ -133,12 +133,21 @@ class ImporterService:
                 pop = clean_string(get_val("pop")) or sname.replace("PELANGGAN ", "Server ")
                 redaman = clean_float(get_val("redaman"))
 
+                sname_upper = sname.upper()
+                if "PUSAT" in sname_upper:
+                    kantor = "pusat"
+                elif "BMS" in sname_upper or "BANYUMAS" in sname_upper:
+                    kantor = "banyumas"
+                else:
+                    kantor = "cabang"
+
                 existing = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
                 if existing:
                     existing.nama = nama
                     existing.alamat = clean_string(get_val("alamat"))
                     existing.no_hp = clean_string(get_val("no hp") or get_val("nomor wa"))
                     existing.pop = pop
+                    existing.kantor = kantor
                     existing.ip_router = ip
                     existing.paket = clean_string(get_val("paket"))
                     existing.jenis_modem = modem
@@ -155,6 +164,7 @@ class ImporterService:
                         alamat=clean_string(get_val("alamat")),
                         no_hp=clean_string(get_val("no hp") or get_val("nomor wa")),
                         pop=pop,
+                        kantor=kantor,
                         ip_router=ip,
                         paket=clean_string(get_val("paket")),
                         jenis_modem=modem,

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 from app.db.models import Pelanggan, SystemSetting, LogPerformaONT
 from app.core.config import settings
@@ -6,16 +6,30 @@ from app.core.config import settings
 class DashboardService:
 
     @staticmethod
-    def get_dashboard_data(db: Session) -> Dict[str, Any]:
-        total_customers = db.query(Pelanggan).filter(
+    def get_dashboard_data(
+        db: Session,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        q_cust = db.query(Pelanggan).filter(
             Pelanggan.is_active == True,
             Pelanggan.is_monitored == True
-        ).count()
+        )
+        if kantor and kantor != "all":
+            q_cust = q_cust.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            q_cust = q_cust.filter(Pelanggan.kantor.in_(allowed_kantor))
+        total_customers = q_cust.count()
         
-        pops_raw = db.query(Pelanggan.pop).filter(
+        q_pops = db.query(Pelanggan.pop).filter(
             Pelanggan.is_active == True,
             Pelanggan.is_monitored == True
-        ).distinct().all()
+        )
+        if kantor and kantor != "all":
+            q_pops = q_pops.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            q_pops = q_pops.filter(Pelanggan.kantor.in_(allowed_kantor))
+        pops_raw = q_pops.distinct().all()
         unique_pops = [p[0] for p in pops_raw if p[0]]
 
         setting_status = db.query(SystemSetting).filter(SystemSetting.key_name == "scheduler_status").first()

@@ -23,8 +23,10 @@ def render_customers_page(
 # ----------------- REST API ROUTES -----------------
 @router.get("/api/customers")
 def list_customers(
+    request: Request,
     q: Optional[str] = Query(None, description="Pencarian nama, IP, MAC, atau ID"),
     pop: Optional[str] = Query(None, description="Filter POP"),
+    kantor: Optional[str] = Query(None, description="Filter kantor"),
     status: Optional[str] = Query(None, description="Filter status NORMAL, WARNING, CRITICAL, LOS, NONAKTIF"),
     monitoring: Optional[str] = Query(None, description="Filter pemantauan: all, active, inactive"),
     range: Optional[str] = Query("all", description="Filter rentang waktu: all, today, 7d, 30d, custom"),
@@ -37,10 +39,15 @@ def list_customers(
     db: Session = Depends(get_db)
 ):
     """Route untuk mendapatkan daftar pelanggan dengan filter, sorting, dan pagination"""
+    active_kantor = getattr(request.state, "active_kantor", "cabang")
+    allowed_kantor = getattr(request.state, "allowed_kantor", ["cabang"])
+    target_kantor = kantor if (kantor and kantor != "all") else active_kantor
+
     return CustomerController.list_customers(
         db=db, q=q, pop=pop, status=status, monitoring=monitoring,
         range_type=range, start_date=start_date, end_date=end_date,
-        sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit
+        sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit,
+        kantor=target_kantor, allowed_kantor=allowed_kantor
     )
 
 @router.get("/api/customers/template-excel")
@@ -52,11 +59,12 @@ def download_customers_template_excel(
 
 @router.get("/api/customers/export-excel")
 def export_customers_excel(
+    request: Request,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
     """Ekspor seluruh data pelanggan ke format spreadsheet Excel (.xlsx)"""
-    return CustomerController.export_excel(db=db)
+    return CustomerController.export_excel(db=db, request=request)
 
 @router.get("/api/customers/{id_pelanggan}")
 def get_customer_detail(
@@ -183,5 +191,6 @@ async def execute_import(
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="Data import tidak valid")
         
-    return CustomerController.execute_import(db=db, data_list=data["data"], request=request, user=user)
+    target_kantor = data.get("target_kantor")
+    return CustomerController.execute_import(db=db, data_list=data["data"], target_kantor=target_kantor, request=request, user=user)
 

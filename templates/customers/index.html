@@ -62,7 +62,7 @@ EdTeknoGuard{% endblock %} {% block content %}
       </a>
 
       {% if request.state.current_user and
-      request.state.current_user.get('role') != 'karyawan' %}
+      request.state.current_user.get('role') in ('super admin', 'admin') %}
       <!-- Tombol Import CSV -->
       <button
         @click="openImportModal()"
@@ -260,8 +260,8 @@ EdTeknoGuard{% endblock %} {% block content %}
     </div>
   </div>
 
-  {% if request.state.current_user and request.state.current_user.get('role') !=
-  'karyawan' %}
+  {% if request.state.current_user and request.state.current_user.get('role') in
+  ('super admin', 'admin') %}
   <!-- Floating Bulk Actions Bar (Muncul saat ada checkbox terpilih) -->
   <div
     x-show="selectedIds.length > 0"
@@ -913,12 +913,23 @@ EdTeknoGuard{% endblock %} {% block content %}
                 ></div>
               </td>
 
-              <!-- 3. POP -->
+              <!-- 3. POP & Kantor -->
               <td class="py-3 px-2 sm:px-4">
-                <span
-                  class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100"
-                  x-text="c.pop"
-                ></span>
+                <div class="flex flex-col gap-1 items-start">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100"
+                    x-text="c.pop"
+                  ></span>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+                    :class="{
+                      'bg-purple-50 text-purple-700 border border-purple-200': c.kantor === 'pusat',
+                      'bg-blue-50 text-blue-700 border border-blue-200': c.kantor === 'cabang',
+                      'bg-emerald-50 text-emerald-700 border border-emerald-200': c.kantor === 'banyumas'
+                    }"
+                    x-text="c.kantor || 'cabang'"
+                  ></span>
+                </div>
               </td>
 
               <!-- 4. Paket Bandwidth -->
@@ -1073,7 +1084,7 @@ EdTeknoGuard{% endblock %} {% block content %}
               <td class="py-3 px-2 sm:px-4 text-center">
                 <div class="inline-flex flex-col items-center gap-1">
                   {% if request.state.current_user and
-                  request.state.current_user.get('role') != 'karyawan' %}
+                  request.state.current_user.get('role') in ('super admin', 'admin') %}
                   <button
                     type="button"
                     @click.stop="toggleMonitoring(c)"
@@ -1266,7 +1277,7 @@ EdTeknoGuard{% endblock %} {% block content %}
 
                   <!-- Hapus (Ikon Sampah) -->
                   {% if request.state.current_user and
-                  request.state.current_user.get('role') != 'karyawan' %}
+                  request.state.current_user.get('role') in ('super admin', 'admin') %}
                   <button
                     @click="confirmDeleteSingle(c)"
                     title="Hapus Pelanggan"
@@ -1465,6 +1476,21 @@ EdTeknoGuard{% endblock %} {% block content %}
             placeholder="Server Cabang"
             class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px]"
           />
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1"
+            >Kantor Wilayah / Cabang *</label
+          >
+          <select
+            x-model="formData.kantor"
+            required
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[42px] font-semibold text-slate-700"
+          >
+            <option value="cabang">Kantor Cabang</option>
+            <option value="pusat">Kantor Pusat</option>
+            <option value="banyumas">Kantor Banyumas</option>
+          </select>
         </div>
 
         <div>
@@ -2170,6 +2196,41 @@ EdTeknoGuard{% endblock %} {% block content %}
               >
             </div>
           </div>
+
+          <!-- Informasi Kantor Wilayah Tujuan Import (Otomatis Sesuai Kantor Aktif) -->
+          <div class="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <span>Kantor Wilayah Tujuan Import</span>
+              </label>
+              <span class="text-[10px] font-bold text-indigo-700 uppercase bg-indigo-100/80 px-2 py-0.5 rounded-md">
+                Otomatis Sesuai Kantor Aktif
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2.5 p-2.5 bg-white rounded-xl border border-indigo-200 shadow-xs">
+              <div class="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <span class="text-xs font-bold text-slate-800 uppercase block">
+                  Kantor {{ (request.state.active_kantor or 'cabang') | title }}
+                </span>
+                <span class="text-[11px] text-slate-500">
+                  Data dialokasikan ke kantor yang sedang aktif Anda buka di navbar
+                </span>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-500">
+              Data pelanggan baru akan otomatis dialokasikan ke kantor di atas. Jika pada berkas Anda memuat kolom <em>"Kantor"</em>, sistem akan memetakan otomatis per baris sesuai kolom tersebut.
+            </p>
+          </div>
         </div>
 
         <!-- LANGKAH 2: PEMETAAN KOLOM -->
@@ -2398,22 +2459,9 @@ EdTeknoGuard{% endblock %} {% block content %}
             <div class="flex items-center gap-2 flex-wrap shrink-0">
               <button
                 type="button"
-                @click="setAllDuplicatesAction('update')"
-                class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] transition"
-              >
-                Timpa Semua
-              </button>
-              <button
-                type="button"
-                @click="setAllDuplicatesAction('skip')"
-                class="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[11px] transition"
-              >
-                Abaikan Semua
-              </button>
-              <button
-                type="button"
-                @click="openDuplicateModal()"
-                class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition flex items-center gap-1.5 shadow-xs"
+                @click="autoGenerateAllDuplicates()"
+                class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition flex items-center gap-1.5 shadow-xs"
+                title="Otomatis ubah semua baris duplikat menjadi ID unik baru"
               >
                 <svg
                   class="w-3.5 h-3.5"
@@ -2425,16 +2473,31 @@ EdTeknoGuard{% endblock %} {% block content %}
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
                   />
+                </svg>
+                <span>Auto-ID Semua Duplikat</span>
+              </button>
+              <button
+                type="button"
+                @click="setAllDuplicatesAction('skip')"
+                class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[11px] transition flex items-center gap-1.5"
+                title="Abaikan (skip) seluruh data duplikat agar tidak diimpor"
+              >
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
                   />
                 </svg>
-                <span>Buka Fitur Koreksi</span>
+                <span>Abaikan Semua (Skip)</span>
               </button>
             </div>
           </div>
@@ -2504,27 +2567,6 @@ EdTeknoGuard{% endblock %} {% block content %}
                   />
                 </svg>
                 <span>Auto-ID Terpilih</span>
-              </button>
-              <button
-                type="button"
-                @click="setSelectedPreviewAction('update')"
-                class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs"
-                title="Set aksi ke Timpa Data"
-              >
-                <svg
-                  class="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                <span>Timpa</span>
               </button>
               <button
                 type="button"
@@ -2784,14 +2826,28 @@ EdTeknoGuard{% endblock %} {% block content %}
                           >Simpan Baru</span
                         >
                         <template x-if="row._status === 'duplicate'">
-                          <select
-                            x-model="row._action"
-                            class="px-2 py-1 text-[11px] font-bold rounded-lg border border-amber-300 bg-white"
-                            :class="row._action === 'update' ? 'text-amber-800' : 'text-slate-500'"
-                          >
-                            <option value="update">Timpa Data</option>
-                            <option value="skip">Abaikan (Skip)</option>
-                          </select>
+                          <div class="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              @click="makeRowUnique(row)"
+                              class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[10px] rounded-lg border border-indigo-200 transition flex items-center gap-1 shrink-0"
+                              title="Ubah otomatis ke format ID unik agar dapat disimpan"
+                            >
+                              <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                              <span>Auto-ID</span>
+                            </button>
+                            <button
+                              type="button"
+                              @click="row._action = (row._action === 'skip' ? 'insert' : 'skip'); updatePreviewStats();"
+                              class="px-2 py-1 text-[10px] font-bold rounded-lg border transition shrink-0"
+                              :class="row._action === 'skip' ? 'bg-slate-200 text-slate-700 border-slate-300' : 'bg-white text-slate-500 hover:bg-slate-100 border-slate-200'"
+                              :title="row._action === 'skip' ? 'Batalkan status abaikan (jadikan aktif)' : 'Abaikan baris ini (tidak disimpan)'"
+                            >
+                              <span x-text="row._action === 'skip' ? 'Dilewati' : 'Abaikan'"></span>
+                            </button>
+                          </div>
                         </template>
                         <span
                           x-show="row._status === 'error'"
@@ -3032,9 +3088,9 @@ EdTeknoGuard{% endblock %} {% block content %}
           <button
             x-show="importStep === 3"
             @click="executeImportData()"
-            :disabled="getActiveImportCount() === 0 || importPreviewDuplicates.length > 0 || isImporting"
+            :disabled="getActiveImportCount() === 0 || unhandledDuplicateCount > 0 || isImporting"
             class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-emerald-100 transition min-h-[40px] flex items-center gap-2"
-            :title="importPreviewDuplicates.length > 0 ? 'Harap benarkan atau selesaikan seluruh data duplikat terlebih dahulu sebelum menyimpan!' : 'Simpan data ke database'"
+            :title="unhandledDuplicateCount > 0 ? 'Harap ubah ke ID unik atau abaikan (skip) seluruh data duplikat sebelum menyimpan!' : 'Simpan data ke database'"
           >
             <svg
               x-show="isImporting"
@@ -3055,675 +3111,6 @@ EdTeknoGuard{% endblock %} {% block content %}
               Data)</span
             >
             <span x-show="isImporting">Menyimpan...</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 5B: Pop-up Khusus Duplikasi & Fitur Koreksi -->
-  <div
-    x-show="duplicateModalOpen"
-    style="display: none"
-    class="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4"
-  >
-    <div
-      class="bg-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-amber-200 flex flex-col max-h-[90vh] space-y-4"
-    >
-      <div
-        class="flex items-center justify-between border-b border-slate-100 pb-3"
-      >
-        <div class="flex items-center gap-2.5">
-          <div class="p-2 rounded-xl bg-amber-50 text-amber-600">
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-slate-900">
-              Pop-up Duplikasi & Fitur Koreksi ID
-            </h3>
-            <p class="text-xs text-slate-500">
-              Ubah ID pelanggan yang bentrok atau tentukan aksi Timpa / Skip
-              sebelum dieksekusi
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          @click.stop="cancelDuplicateModal()"
-          class="text-slate-400 hover:text-slate-600 p-1"
-          title="Tutup tanpa menyimpan perubahan"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Toolbar Aksi Cepat Global (Pure SVG Icons) -->
-      <div
-        class="p-3 bg-amber-50 rounded-2xl border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs"
-      >
-        <div class="text-amber-900">
-          <span>Ditemukan </span>
-          <strong x-text="duplicateTotalCount"></strong>
-          <span> baris data duplikat yang dapat dikoreksi.</span>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            @click="setAllDuplicatesAction('update')"
-            class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold transition text-xs shadow-xs flex items-center gap-1.5"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            <span>Timpa Semua Data</span>
-          </button>
-          <button
-            type="button"
-            @click="setAllDuplicatesAction('skip')"
-            class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition text-xs flex items-center gap-1.5"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 5l7 7-7 7M5 5l7 7-7 7"
-              />
-            </svg>
-            <span>Abaikan Semua (Skip)</span>
-          </button>
-          <button
-            type="button"
-            @click="autoGenerateUniqueDuplicateIds()"
-            class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition text-xs shadow-xs flex items-center gap-1.5"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-            <span>Auto-Generate ID Unik</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Bar Aksi Massal Checklist Duplikat (Modal 5B) -->
-      <div
-        x-show="duplicateSelectedUids.length > 0"
-        x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="opacity-0 -translate-y-1"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        class="p-2.5 bg-indigo-50/90 border border-indigo-200 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs shadow-xs"
-      >
-        <div class="flex items-center gap-2">
-          <span
-            class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-indigo-600 text-white font-bold text-[10px]"
-            x-text="duplicateSelectedUids.length"
-          ></span>
-          <span class="font-bold text-indigo-900">Baris Duplikat Terpilih</span>
-          <span class="text-slate-300 text-xs">|</span>
-          <button
-            type="button"
-            @click="duplicateSelectedUids = []"
-            class="text-indigo-600 hover:text-indigo-800 font-semibold underline text-[11px]"
-          >
-            Batal Pilih
-          </button>
-        </div>
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <button
-            type="button"
-            @click="deleteSelectedDuplicateRows()"
-            class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs"
-            title="Hapus baris duplikat yang dicentang"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-            <span>Hapus Terpilih</span>
-          </button>
-          <button
-            type="button"
-            @click="autoGenerateSelectedDuplicateIds()"
-            class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs"
-            title="Auto-Generate ID Unik untuk baris yang dicentang"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-            <span>Auto-ID Terpilih</span>
-          </button>
-          <button
-            type="button"
-            @click="setSelectedDuplicateAction('update')"
-            class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] transition flex items-center gap-1 shadow-xs"
-            title="Set tindakan ke Timpa Profil"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            <span>Timpa</span>
-          </button>
-          <button
-            type="button"
-            @click="setSelectedDuplicateAction('skip')"
-            class="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[11px] transition flex items-center gap-1"
-            title="Set tindakan ke Abaikan (Skip)"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-              />
-            </svg>
-            <span>Abaikan</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Tabel Baris Duplikat yang Dapat Diedit & Di-Sort -->
-      <div
-        class="border border-slate-200 rounded-2xl overflow-hidden flex-1 flex flex-col bg-white"
-      >
-        <div class="overflow-y-auto max-h-72">
-          <table class="w-full text-left text-xs whitespace-nowrap">
-            <thead
-              class="bg-slate-100 text-slate-700 sticky top-0 font-bold uppercase text-[10px] tracking-wider z-10 select-none"
-            >
-              <tr>
-                <!-- Checkbox Select All Duplikat -->
-                <th class="py-2.5 px-3 text-center w-10">
-                  <input
-                    type="checkbox"
-                    @change="toggleSelectAllDuplicate()"
-                    :checked="isAllDuplicateSelected"
-                    class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
-                    title="Pilih Semua di Halaman Ini"
-                  />
-                </th>
-                <th
-                  @click="sortDuplicateTable('no')"
-                  class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition"
-                >
-                  <div class="flex items-center gap-1">
-                    <span>No</span>
-                    <svg
-                      class="w-3 h-3 text-slate-400"
-                      :class="{'text-indigo-600': duplicateSortBy === 'no'}"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        :d="duplicateSortBy === 'no' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th
-                  @click="sortDuplicateTable('id_pelanggan')"
-                  class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition"
-                >
-                  <div class="flex items-center gap-1">
-                    <span>ID Pelanggan (Bisa Diubah)</span>
-                    <svg
-                      class="w-3 h-3 text-slate-400"
-                      :class="{'text-indigo-600': duplicateSortBy === 'id_pelanggan'}"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        :d="duplicateSortBy === 'id_pelanggan' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th
-                  @click="sortDuplicateTable('nama')"
-                  class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition"
-                >
-                  <div class="flex items-center gap-1">
-                    <span>Nama Pelanggan</span>
-                    <svg
-                      class="w-3 h-3 text-slate-400"
-                      :class="{'text-indigo-600': duplicateSortBy === 'nama'}"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        :d="duplicateSortBy === 'nama' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th
-                  @click="sortDuplicateTable('ip_router')"
-                  class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition"
-                >
-                  <div class="flex items-center gap-1">
-                    <span>IP Router</span>
-                    <svg
-                      class="w-3 h-3 text-slate-400"
-                      :class="{'text-indigo-600': duplicateSortBy === 'ip_router'}"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        :d="duplicateSortBy === 'ip_router' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th
-                  @click="sortDuplicateTable('action')"
-                  class="py-2.5 px-3 cursor-pointer hover:bg-slate-200 transition"
-                >
-                  <div class="flex items-center gap-1">
-                    <span>Pilihan Tindakan</span>
-                    <svg
-                      class="w-3 h-3 text-slate-400"
-                      :class="{'text-indigo-600': duplicateSortBy === 'action'}"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        :d="duplicateSortBy === 'action' && duplicateSortDir === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"
-                      />
-                    </svg>
-                  </div>
-                </th>
-                <th class="py-2.5 px-3 text-center">Aksi Cepat</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <template
-                x-for="(row, dIdx) in paginatedDuplicateRows"
-                :key="row._uid || dIdx"
-              >
-                <tr
-                  :class="{
-                                    'bg-indigo-50/70 ring-1 ring-inset ring-indigo-200': duplicateSelectedUids.includes(row._uid),
-                                    'bg-emerald-50/30': (row._autoGenerated || row._status === 'valid') && !duplicateSelectedUids.includes(row._uid),
-                                    'hover:bg-amber-50/40': !(row._autoGenerated || row._status === 'valid') && !duplicateSelectedUids.includes(row._uid)
-                                }"
-                >
-                  <!-- Checkbox Baris Duplikat -->
-                  <td class="py-2 px-3 text-center">
-                    <input
-                      type="checkbox"
-                      :value="row._uid"
-                      x-model="duplicateSelectedUids"
-                      class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
-                    />
-                  </td>
-
-                  <td
-                    class="py-2 px-3 text-slate-500 font-mono"
-                    x-text="(duplicatePage - 1) * duplicateLimit + dIdx + 1"
-                  ></td>
-
-                  <!-- ID Pelanggan Editable Langsung -->
-                  <td class="py-2 px-3 font-mono">
-                    <div class="flex items-center gap-1.5">
-                      <input
-                        x-model="row.data.id_pelanggan"
-                        @input="onRowIdChanged(row)"
-                        class="w-40 px-2.5 py-1.5 border rounded-lg text-xs font-bold text-slate-900 transition"
-                        :class="row._autoGenerated || row._status === 'valid' ? 'border-emerald-400 bg-emerald-50/60 focus:ring-2 focus:ring-emerald-500' : 'border-amber-300 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500'"
-                        placeholder="Masukkan ID Baru"
-                      />
-                      <span
-                        x-show="row._autoGenerated || row._status === 'valid'"
-                        class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200"
-                        >UNIK</span
-                      >
-                    </div>
-                  </td>
-
-                  <!-- Nama Pelanggan -->
-                  <td
-                    class="py-2 px-3 font-medium text-slate-800"
-                    x-text="row.data.nama"
-                  ></td>
-
-                  <!-- IP Router -->
-                  <td
-                    class="py-2 px-3 font-mono text-slate-600"
-                    x-text="row.data.ip_router"
-                  ></td>
-
-                  <!-- Tindakan Per Baris -->
-                  <td class="py-2 px-3">
-                    <template
-                      x-if="row._autoGenerated || row._status === 'valid'"
-                    >
-                      <span
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-bold"
-                      >
-                        <svg
-                          class="w-3.5 h-3.5 text-emerald-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        Simpan Baru (ID Unik)
-                      </span>
-                    </template>
-                    <template
-                      x-if="!row._autoGenerated && row._status === 'duplicate'"
-                    >
-                      <select
-                        x-model="row._action"
-                        class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-white"
-                        :class="row._action === 'update' ? 'text-amber-800' : 'text-slate-500'"
-                      >
-                        <option value="update">Timpa Profil Database</option>
-                        <option value="skip">Abaikan (Jangan Simpan)</option>
-                      </select>
-                    </template>
-                  </td>
-
-                  <!-- Tombol Auto-Unik / Status & Hapus Per Baris -->
-                  <td class="py-2 px-3 text-center">
-                    <div class="flex items-center justify-center gap-1.5">
-                      <template
-                        x-if="row._autoGenerated || row._status === 'valid'"
-                      >
-                        <span
-                          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200"
-                        >
-                          <svg
-                            class="w-3.5 h-3.5 text-emerald-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                          Terselesaikan
-                        </span>
-                      </template>
-                      <template
-                        x-if="!row._autoGenerated && row._status === 'duplicate'"
-                      >
-                        <button
-                          type="button"
-                          @click="makeRowUnique(row)"
-                          class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition flex items-center gap-1"
-                          title="Tambahkan kode unik agar menjadi ID baru"
-                        >
-                          <svg
-                            class="w-3 h-3 text-indigo-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M13 10V3L4 14h7v7l9-11h-7z"
-                            />
-                          </svg>
-                          <span>Jadikan ID Unik</span>
-                        </button>
-                      </template>
-                      <button
-                        type="button"
-                        @click="removeDuplicateRow(row)"
-                        class="text-slate-400 hover:text-rose-600 transition p-1"
-                        title="Hapus baris duplikat ini"
-                      >
-                        <svg
-                          class="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </template>
-              <tr x-show="paginatedDuplicateRows.length === 0">
-                <td colspan="7" class="py-8 text-center text-slate-400">
-                  Tidak ada data duplikasi yang ditemukan.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination Bar Pop-up Duplikasi -->
-        <div
-          class="p-3 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 rounded-b-2xl"
-        >
-          <div class="flex items-center gap-3">
-            <div>
-              Menampilkan
-              <span
-                class="font-bold text-slate-800"
-                x-text="paginatedDuplicateRows.length"
-              ></span>
-              dari
-              <span
-                class="font-bold text-slate-800"
-                x-text="duplicateTotalCount"
-              ></span>
-              Data Duplikat
-            </div>
-            <!-- Dropdown Limit -->
-            <div class="flex items-center gap-2">
-              <span class="text-slate-500">Per Halaman:</span>
-              <select
-                x-model.number="duplicateLimit"
-                @change="duplicatePage = 1"
-                class="px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="75">75</option>
-                <option value="100">100</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              @click="duplicatePage--"
-              :disabled="duplicatePage <= 1"
-              class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[32px]"
-            >
-              &larr; Sebelumnya
-            </button>
-
-            <div class="hidden sm:flex items-center gap-1">
-              <template x-for="p in getDuplicatePageNumbers()" :key="p">
-                <button
-                  type="button"
-                  @click="typeof p === 'number' ? duplicatePage = p : null"
-                  :disabled="typeof p !== 'number'"
-                  class="px-2.5 py-1 rounded-lg border transition font-semibold min-h-[32px]"
-                  :class="p === duplicatePage ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : (typeof p !== 'number' ? 'border-transparent text-slate-400 bg-transparent' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700')"
-                >
-                  <span x-text="p"></span>
-                </button>
-              </template>
-            </div>
-            <div class="sm:hidden font-bold text-slate-700">
-              <span x-text="duplicatePage"></span> /
-              <span x-text="duplicateTotalPages"></span>
-            </div>
-
-            <button
-              type="button"
-              @click="duplicatePage++"
-              :disabled="duplicatePage >= duplicateTotalPages"
-              class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[32px]"
-            >
-              Selanjutnya &rarr;
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer Pop-up Duplikasi -->
-      <div
-        class="flex items-center justify-between pt-3 border-t border-slate-100"
-      >
-        <span class="text-xs text-slate-500"
-          >Perubahan hanya akan diterapkan jika tombol simpan diklik.</span
-        >
-        <div class="flex items-center gap-2">
-          <button
-            type="button"
-            @click.stop="cancelDuplicateModal()"
-            class="px-4 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl text-xs font-bold transition"
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            @click.stop="saveDuplicateDecisions()"
-            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition flex items-center gap-2"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            <span>Simpan Keputusan & Kembali ke Pratinjau</span>
           </button>
         </div>
       </div>
@@ -4320,8 +3707,7 @@ EdTeknoGuard{% endblock %} {% block content %}
       confirmDeleteModalOpen: false,
       confirmBulkDeleteModalOpen: false,
       importModalOpen: false,
-      duplicateModalOpen: false,
-      // State Import Wizard (Multi-langkah)
+            // State Import Wizard (Multi-langkah)
       importStep: 1, // 1: Upload, 2: Mapping, 3: Preview
       importFile: null,
       importSheets: [],
@@ -4354,24 +3740,10 @@ EdTeknoGuard{% endblock %} {% block content %}
         );
       },
 
-      // State Sorting & Pagination Duplikasi (Modal 5B)
-      duplicateRows: [],
-      duplicateDraftRows: [],
-      initialDuplicateSnapshotUids: [],
-      duplicateSortBy: "id_pelanggan",
-      duplicateSortDir: "asc",
-      duplicatePage: 1,
-      duplicateLimit: 25,
-      duplicateSelectedUids: [],
-      get isAllDuplicateSelected() {
-        if (
-          !this.paginatedDuplicateRows ||
-          this.paginatedDuplicateRows.length === 0
-        )
-          return false;
-        return this.paginatedDuplicateRows.every((r) =>
-          this.duplicateSelectedUids.includes(r._uid),
-        );
+      get unhandledDuplicateCount() {
+        return this.importPreviewDuplicates.filter(
+          (r) => r._action !== "skip",
+        ).length;
       },
       dbImportFields: [
         {
@@ -4391,7 +3763,9 @@ EdTeknoGuard{% endblock %} {% block content %}
         { key: "mac_address", label: "MAC Address", required: false },
         { key: "alamat", label: "Alamat Pemasangan", required: false },
         { key: "no_hp", label: "No HP / WhatsApp", required: false },
+        { key: "kantor", label: "Kantor Wilayah (Cabang / Pusat / Banyumas)", required: false },
       ],
+      importTargetKantor: "{% if request.state.active_kantor and request.state.active_kantor != 'all' %}{{ request.state.active_kantor }}{% elif request.state.allowed_kantor %}{{ request.state.allowed_kantor[0] }}{% else %}cabang{% endif %}",
 
       get isExcelFile() {
         return !!(
@@ -4447,6 +3821,7 @@ EdTeknoGuard{% endblock %} {% block content %}
         nama: "",
         alamat: "",
         no_hp: "",
+        kantor: "cabang",
         pop: "Server Cabang",
         ip_router: "",
         paket: "",
@@ -4479,8 +3854,7 @@ EdTeknoGuard{% endblock %} {% block content %}
             this.confirmDeleteModalOpen ||
             this.confirmBulkDeleteModalOpen ||
             this.importModalOpen ||
-            this.duplicateModalOpen ||
-            this.detailModalOpen ||
+                        this.detailModalOpen ||
             this.isEditingWifi ||
             this.selectedIds.length > 0 ||
             this.probingId ||
@@ -4739,6 +4113,7 @@ EdTeknoGuard{% endblock %} {% block content %}
           nama: "",
           alamat: "",
           no_hp: "",
+          kantor: "cabang",
           pop: "Server Cabang",
           ip_router: "",
           paket: "20 Mbps Home",
@@ -4761,6 +4136,7 @@ EdTeknoGuard{% endblock %} {% block content %}
           nama: c.nama,
           alamat: c.alamat === "-" ? "" : c.alamat,
           no_hp: c.no_hp === "-" ? "" : c.no_hp,
+          kantor: c.kantor || "cabang",
           pop: c.pop,
           ip_router: c.ip_router,
           paket: c.paket === "-" ? "" : c.paket,
@@ -4885,7 +4261,6 @@ EdTeknoGuard{% endblock %} {% block content %}
         this.importPreviewDuplicates = [];
         this.importPreviewErrors = [];
         this.existingDbIds = [];
-        this.duplicateModalOpen = false;
         this.isImporting = false;
         this.previewStatusFilter = "all";
         this.previewSortBy = "id_pelanggan";
@@ -4893,12 +4268,7 @@ EdTeknoGuard{% endblock %} {% block content %}
         this.previewPage = 1;
         this.previewLimit = 25;
         this.previewSelectedUids = [];
-        this.duplicateRows = [];
-        this.duplicateSortBy = "id_pelanggan";
-        this.duplicateSortDir = "asc";
-        this.duplicatePage = 1;
-        this.duplicateLimit = 25;
-        this.duplicateSelectedUids = [];
+        this.importTargetKantor = "{% if request.state.active_kantor and request.state.active_kantor != 'all' %}{{ request.state.active_kantor }}{% elif request.state.allowed_kantor %}{{ request.state.allowed_kantor[0] }}{% else %}cabang{% endif %}";
         if (this.$refs.excelFileInput) {
           this.$refs.excelFileInput.value = "";
         }
@@ -5097,6 +4467,15 @@ EdTeknoGuard{% endblock %} {% block content %}
             "phone",
             "nomorhp",
           ],
+          kantor: [
+            "kantor",
+            "wilayah",
+            "cabang",
+            "office",
+            "kantorwilayah",
+            "site",
+            "lokasikantor",
+          ],
         };
 
         this.dbImportFields.forEach((field) => {
@@ -5170,8 +4549,6 @@ EdTeknoGuard{% endblock %} {% block content %}
             this.previewStatusFilter = "all";
             this.previewPage = 1;
             this.previewSelectedUids = [];
-            this.duplicateRows = [];
-            this.duplicateDraftRows = [];
             this.updatePreviewStats();
             this.importStep = 3;
             this.showToast(
@@ -5230,29 +4607,29 @@ EdTeknoGuard{% endblock %} {% block content %}
             this.importPreviewErrors.push(row);
           } else if (dbIps.includes(ip)) {
             row._status = "duplicate";
-            if (!row._action || row._action === "insert") {
-              row._action = "update";
+            if (!row._action || row._action === "insert" || row._action === "update") {
+              row._action = "skip";
             }
             row._message = `IP Router '${ip}' sudah terdaftar di database`;
             this.importPreviewDuplicates.push(row);
           } else if (seenBatchIps.has(ip)) {
             row._status = "duplicate";
-            if (!row._action || row._action === "insert") {
-              row._action = "update";
+            if (!row._action || row._action === "insert" || row._action === "update") {
+              row._action = "skip";
             }
             row._message = `IP Router '${ip}' duplikat di berkas ini (baris ${seenBatchIps.get(ip)})`;
             this.importPreviewDuplicates.push(row);
           } else if (dbIds.includes(id)) {
             row._status = "duplicate";
-            if (!row._action || row._action === "insert") {
-              row._action = "update";
+            if (!row._action || row._action === "insert" || row._action === "update") {
+              row._action = "skip";
             }
             row._message = `ID Pelanggan '${id}' sudah terdaftar di database`;
             this.importPreviewDuplicates.push(row);
           } else if (seenBatchIds.has(id)) {
             row._status = "duplicate";
-            if (!row._action || row._action === "insert") {
-              row._action = "update";
+            if (!row._action || row._action === "insert" || row._action === "update") {
+              row._action = "skip";
             }
             row._message = `ID Pelanggan '${id}' duplikat di berkas ini (baris ${seenBatchIds.get(id)})`;
             this.importPreviewDuplicates.push(row);
@@ -5260,8 +4637,7 @@ EdTeknoGuard{% endblock %} {% block content %}
             seenBatchIds.set(id, idx + 1);
             seenBatchIps.set(ip, idx + 1);
             row._status = "valid";
-            if (row._action === "update" && !row._wasDuplicate)
-              row._action = "insert";
+            row._action = "insert";
             if (row._autoGenerated) {
               row._action = "insert";
               row._message = `ID Unik: ${id}`;
@@ -5434,9 +4810,6 @@ EdTeknoGuard{% endblock %} {% block content %}
         this.importPreviewData = this.importPreviewData.filter(
           (r) => !selectedSet.has(r._uid),
         );
-        this.duplicateRows = this.duplicateRows.filter(
-          (r) => !selectedSet.has(r._uid),
-        );
         this.previewSelectedUids = [];
         this.updatePreviewStats();
         if (this.previewPage > this.previewTotalPages) {
@@ -5475,300 +4848,21 @@ EdTeknoGuard{% endblock %} {% block content %}
           }
         });
         this.showToast(
-          `${count} baris terpilih diatur ke: ${action === "update" ? "Timpa Data" : "Abaikan (Skip)"}`,
+          `${count} baris terpilih diatur ke: Abaikan (Skip)`,
         );
-      },
-
-      openDuplicateModal() {
-        // Snapshot mendalam (deep clone) baris duplikat sebagai draft kerja terisolasi
-        const targetRows = this.importPreviewData.filter(
-          (r) => r._status === "duplicate" || r._wasDuplicate,
-        );
-        this.initialDuplicateSnapshotUids = targetRows.map((r) => r._uid);
-        this.duplicateDraftRows = JSON.parse(JSON.stringify(targetRows));
-        this.duplicateRows = this.duplicateDraftRows;
-        this.duplicatePage = 1;
-        this.duplicateSelectedUids = [];
-        this.duplicateModalOpen = true;
-      },
-
-      cancelDuplicateModal() {
-        // Buang seluruh perubahan draft tanpa memutasi data pratinjau asli
-        this.duplicateDraftRows = [];
-        this.duplicateRows = [];
-        this.duplicateSelectedUids = [];
-        this.duplicateModalOpen = false;
-        this.showToast(
-          "Perubahan duplikasi dibatalkan. Data pratinjau tidak berubah.",
-        );
-      },
-
-      saveDuplicateDecisions() {
-        // Terapkan seluruh keputusan draft ke tabel pratinjau asli
-        const draftMap = new Map();
-        this.duplicateDraftRows.forEach((r) => {
-          draftMap.set(r._uid, r);
-        });
-
-        this.importPreviewData.forEach((r) => {
-          if (draftMap.has(r._uid)) {
-            const draft = draftMap.get(r._uid);
-            const rData = r.data || r;
-            const dData = draft.data || draft;
-            rData.id_pelanggan = dData.id_pelanggan;
-            r._status = draft._status;
-            r._action = draft._action;
-            r._autoGenerated = draft._autoGenerated;
-            r._wasDuplicate = draft._wasDuplicate;
-            r._message = draft._message;
-          }
-        });
-
-        // Hapus baris dari pratinjau jika baris tersebut dihapus pada modal duplikasi
-        const remainingDraftUids = new Set(
-          this.duplicateDraftRows.map((r) => r._uid),
-        );
-        const initialUids = new Set(this.initialDuplicateSnapshotUids || []);
-        this.importPreviewData = this.importPreviewData.filter((r) => {
-          if (initialUids.has(r._uid) && !remainingDraftUids.has(r._uid)) {
-            return false;
-          }
-          return true;
-        });
-
-        this.updatePreviewStats();
-        this.duplicateDraftRows = [];
-        this.duplicateRows = [];
-        this.duplicateSelectedUids = [];
-        this.duplicateModalOpen = false;
-        this.showToast(
-          "Keputusan duplikasi berhasil disimpan ke pratinjau!",
-          "success",
-        );
-      },
-
-      toggleSelectAllDuplicate() {
-        if (this.isAllDuplicateSelected) {
-          const currentUids = new Set(
-            this.paginatedDuplicateRows.map((r) => r._uid),
-          );
-          this.duplicateSelectedUids = this.duplicateSelectedUids.filter(
-            (id) => !currentUids.has(id),
-          );
-        } else {
-          const uidsToAdd = this.paginatedDuplicateRows.map((r) => r._uid);
-          this.duplicateSelectedUids = Array.from(
-            new Set([...this.duplicateSelectedUids, ...uidsToAdd]),
-          );
-        }
-      },
-
-      deleteSelectedDuplicateRows() {
-        if (this.duplicateSelectedUids.length === 0) return;
-        const count = this.duplicateSelectedUids.length;
-        const selectedSet = new Set(this.duplicateSelectedUids);
-        this.duplicateRows = this.duplicateRows.filter(
-          (r) => !selectedSet.has(r._uid),
-        );
-        this.duplicateDraftRows = this.duplicateRows;
-        this.duplicateSelectedUids = [];
-        if (this.duplicatePage > this.duplicateTotalPages) {
-          this.duplicatePage = Math.max(1, this.duplicateTotalPages);
-        }
-        this.showToast(
-          `${count} baris duplikat dihapus dari daftar draft`,
-          "success",
-        );
-      },
-
-      autoGenerateSelectedDuplicateIds() {
-        if (this.duplicateSelectedUids.length === 0) return;
-        const selectedSet = new Set(this.duplicateSelectedUids);
-        const allIds = new Set([
-          ...this.existingDbIds,
-          ...this.importPreviewData.map((r) => (r.data || r).id_pelanggan),
-          ...this.duplicateRows.map((r) => (r.data || r).id_pelanggan),
-        ]);
-        let count = 0;
-        const ipSeqMap = {};
-
-        this.duplicateRows.forEach((r) => {
-          if (selectedSet.has(r._uid)) {
-            const d = r.data || r;
-            const ip = d.ip_router || "";
-            const cleanIp = ip.replace(/[^0-9]/g, "") || "PLG";
-
-            let seq = ipSeqMap[cleanIp] || 1;
-            let candidate = this.generateCustomerIdFromIp(ip, seq);
-            while (allIds.has(candidate)) {
-              seq++;
-              candidate = this.generateCustomerIdFromIp(ip, seq);
-            }
-            ipSeqMap[cleanIp] = seq + 1;
-            allIds.add(candidate);
-
-            d.id_pelanggan = candidate;
-            r._status = "valid";
-            r._action = "insert";
-            r._autoGenerated = true;
-            r._wasDuplicate = true;
-            r._message = `ID diubah menjadi ${candidate} (Unik)`;
-            count++;
-          }
-        });
-        this.showToast(
-          `${count} baris duplikat terpilih berhasil diubah ke format ID unik P(idrouter)00001!`,
-          "success",
-        );
-      },
-
-      setSelectedDuplicateAction(action) {
-        if (this.duplicateSelectedUids.length === 0) return;
-        const selectedSet = new Set(this.duplicateSelectedUids);
-        let count = 0;
-        this.duplicateRows.forEach((r) => {
-          if (selectedSet.has(r._uid)) {
-            r._action = action;
-            count++;
-          }
-        });
-        this.showToast(
-          `${count} baris terpilih diatur ke: ${action === "update" ? "Timpa Data" : "Abaikan"}`,
-        );
-      },
-
-      removeDuplicateRow(row) {
-        const dIdx = this.duplicateRows.indexOf(row);
-        if (dIdx > -1) {
-          this.duplicateRows.splice(dIdx, 1);
-        }
-        this.duplicateDraftRows = this.duplicateRows;
-        this.duplicateSelectedUids = this.duplicateSelectedUids.filter(
-          (id) => id !== row._uid,
-        );
-        if (this.duplicatePage > this.duplicateTotalPages) {
-          this.duplicatePage = Math.max(1, this.duplicateTotalPages);
-        }
-        this.showToast("Baris duplikat dihapus dari daftar draft");
-      },
-
-      sortDuplicateTable(col) {
-        if (this.duplicateSortBy === col) {
-          this.duplicateSortDir =
-            this.duplicateSortDir === "asc" ? "desc" : "asc";
-        } else {
-          this.duplicateSortBy = col;
-          this.duplicateSortDir = "asc";
-        }
-        this.duplicatePage = 1;
-      },
-
-      get sortedDuplicateRows() {
-        const dir = this.duplicateSortDir === "asc" ? 1 : -1;
-        const col = this.duplicateSortBy;
-
-        return [...this.duplicateRows].sort((a, b) => {
-          const da = a.data || a;
-          const db = b.data || b;
-          let va = "";
-          let vb = "";
-
-          if (col === "no") {
-            return (
-              (this.duplicateRows.indexOf(a) - this.duplicateRows.indexOf(b)) *
-              dir
-            );
-          } else if (col === "id_pelanggan") {
-            va = (da.id_pelanggan || "").toString();
-            vb = (db.id_pelanggan || "").toString();
-            return (
-              va.localeCompare(vb, undefined, {
-                numeric: true,
-                sensitivity: "base",
-              }) * dir
-            );
-          } else if (col === "nama") {
-            va = (da.nama || "").toString().toLowerCase();
-            vb = (db.nama || "").toString().toLowerCase();
-          } else if (col === "ip_router") {
-            va = (da.ip_router || "").toString();
-            vb = (db.ip_router || "").toString();
-            return va.localeCompare(vb, undefined, { numeric: true }) * dir;
-          } else if (col === "action") {
-            va = (a._action || "").toString().toLowerCase();
-            vb = (b._action || "").toString().toLowerCase();
-          } else {
-            va = (da[col] || "").toString().toLowerCase();
-            vb = (db[col] || "").toString().toLowerCase();
-          }
-
-          if (va < vb) return -1 * dir;
-          if (va > vb) return 1 * dir;
-          return 0;
-        });
-      },
-
-      get duplicateTotalCount() {
-        return this.sortedDuplicateRows.length;
-      },
-
-      get duplicateTotalPages() {
-        return Math.max(
-          1,
-          Math.ceil(this.duplicateTotalCount / this.duplicateLimit),
-        );
-      },
-
-      get paginatedDuplicateRows() {
-        const start = (this.duplicatePage - 1) * this.duplicateLimit;
-        return this.sortedDuplicateRows.slice(
-          start,
-          start + this.duplicateLimit,
-        );
-      },
-
-      getDuplicatePageNumbers() {
-        const pages = [];
-        const total = this.duplicateTotalPages;
-        const maxVisible = 5;
-
-        if (total <= maxVisible + 2) {
-          for (let i = 1; i <= total; i++) pages.push(i);
-        } else {
-          pages.push(1);
-          let start = Math.max(2, this.duplicatePage - 1);
-          let end = Math.min(total - 1, this.duplicatePage + 1);
-
-          if (this.duplicatePage <= 3) {
-            end = 4;
-          } else if (this.duplicatePage >= total - 2) {
-            start = total - 3;
-          }
-
-          if (start > 2) pages.push("...");
-          for (let i = start; i <= end; i++) pages.push(i);
-          if (end < total - 1) pages.push("...");
-          if (total > 1) pages.push(total);
-        }
-        return pages;
       },
 
       setAllDuplicatesAction(action) {
-        this.duplicateRows.forEach((r) => {
+        let count = 0;
+        this.importPreviewData.forEach((r) => {
           if (r._status === "duplicate" && !r._autoGenerated) {
             r._action = action;
+            count++;
           }
         });
-        if (!this.duplicateModalOpen) {
-          this.importPreviewData.forEach((r) => {
-            if (r._status === "duplicate" && !r._autoGenerated) {
-              r._action = action;
-            }
-          });
-          this.updatePreviewStats();
-        }
+        this.updatePreviewStats();
         this.showToast(
-          `Aksi data duplikat diatur ke: ${action === "update" ? "Timpa Data" : "Abaikan (Skip)"}`,
+          `${count} data duplikat diatur ke: ${action === "skip" ? "Abaikan (Skip)" : "Aktif"}`,
         );
       },
 
@@ -5778,7 +4872,6 @@ EdTeknoGuard{% endblock %} {% block content %}
         const allIds = new Set([
           ...this.existingDbIds,
           ...this.importPreviewData.map((r) => (r.data || r).id_pelanggan),
-          ...this.duplicateRows.map((r) => (r.data || r).id_pelanggan),
         ]);
 
         let seq = 1;
@@ -5795,23 +4888,20 @@ EdTeknoGuard{% endblock %} {% block content %}
         row._autoGenerated = true;
         row._wasDuplicate = true;
         row._message = `ID diubah menjadi ${candidate} (Unik)`;
-        if (!this.duplicateModalOpen) {
-          this.updatePreviewStats();
-        }
-        this.showToast(`ID berhasil diubah menjadi ${candidate} (Unik)`);
+        this.updatePreviewStats();
+        this.showToast(`ID berhasil diubah menjadi ${candidate} (Unik)`, "success");
       },
 
-      autoGenerateUniqueDuplicateIds() {
+      autoGenerateAllDuplicates() {
         let changed = 0;
         const allIds = new Set([
           ...this.existingDbIds,
           ...this.importPreviewData.map((r) => (r.data || r).id_pelanggan),
-          ...this.duplicateRows.map((r) => (r.data || r).id_pelanggan),
         ]);
         const ipSeqMap = {};
 
-        this.duplicateRows.forEach((r) => {
-          if (r._status === "duplicate" || !r._autoGenerated) {
+        this.importPreviewData.forEach((r) => {
+          if (r._status === "duplicate" && !r._autoGenerated) {
             const d = r.data || r;
             const ip = d.ip_router || "";
             const cleanIp = ip.replace(/[^0-9]/g, "") || "PLG";
@@ -5835,8 +4925,9 @@ EdTeknoGuard{% endblock %} {% block content %}
           }
         });
 
+        this.updatePreviewStats();
         this.showToast(
-          `${changed} data duplikat berhasil diperbarui dengan format ID unik P(idrouter)00001!`,
+          `${changed} data duplikat berhasil diperbarui dengan format ID unik!`,
           "success",
         );
       },
@@ -5848,9 +4939,9 @@ EdTeknoGuard{% endblock %} {% block content %}
       },
 
       async executeImportData() {
-        if (this.importPreviewDuplicates.length > 0) {
+        if (this.unhandledDuplicateCount > 0) {
           this.showToast(
-            `Ditolak: Masih terdapat ${this.importPreviewDuplicates.length} data duplikat! Seluruh ID Pelanggan dan IP Router duplikat WAJIB diselesaikan terlebih dahulu.`,
+            `Ditolak: Masih terdapat ${this.unhandledDuplicateCount} data duplikat aktif! Harap jadikan ID unik atau abaikan (skip) terlebih dahulu.`,
             "error",
           );
           return;
@@ -5869,7 +4960,10 @@ EdTeknoGuard{% endblock %} {% block content %}
           const res = await fetch("/api/customers/import/execute", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ data: dataToImport }),
+            body: JSON.stringify({ 
+              data: dataToImport,
+              target_kantor: this.importTargetKantor
+            }),
           });
           const json = await res.json();
 
@@ -5879,8 +4973,7 @@ EdTeknoGuard{% endblock %} {% block content %}
               "success",
             );
             this.importModalOpen = false;
-            this.duplicateModalOpen = false;
-            this.fetchCustomers(1);
+                        this.fetchCustomers(1);
           } else {
             this.showToast(
               json.detail || "Gagal menyimpan data import",

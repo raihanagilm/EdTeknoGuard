@@ -364,7 +364,16 @@
 
                             <!-- POP & IP -->
                             <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200" x-text="l.pop"></span>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200" x-text="l.pop"></span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+                                          :class="{
+                                              'bg-purple-50 text-purple-700 border border-purple-200': l.kantor === 'pusat',
+                                              'bg-blue-50 text-blue-700 border border-blue-200': l.kantor === 'cabang',
+                                              'bg-emerald-50 text-emerald-700 border border-emerald-200': l.kantor === 'banyumas'
+                                          }"
+                                          x-text="l.kantor || 'cabang'"></span>
+                                </div>
                                 <div class="font-mono text-slate-800 font-bold text-xs mt-0.5" x-text="l.ip_router"></div>
                             </td>
 

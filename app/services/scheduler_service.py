@@ -31,6 +31,7 @@ class MonitoringScheduler:
     _scan_start_time: float = 0.0
     _last_scan_duration: float = 0.0
     _resume_index: int = 0
+    _scan_target_kantor: Optional[str] = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -45,6 +46,7 @@ class MonitoringScheduler:
             cls._instance._scan_start_time = 0.0
             cls._instance._last_scan_duration = 0.0
             cls._instance._resume_index = 0
+            cls._instance._scan_target_kantor = None
         return cls._instance
 
     @classmethod
@@ -55,7 +57,7 @@ class MonitoringScheduler:
         return os.path.join(data_dir, "scan_state.json")
 
     @classmethod
-    def save_scan_state(cls, current_index: int, total: int):
+    def save_scan_state(cls, current_index: int, total: int, kantor: Optional[str] = None):
         try:
             filepath = cls.get_state_file_path()
             with open(filepath, "w", encoding="utf-8") as f:
@@ -63,9 +65,10 @@ class MonitoringScheduler:
                     "status": "PAUSED",
                     "current_index": current_index,
                     "total": total,
+                    "kantor": kantor,
                     "timestamp": get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
                 }, f, indent=2)
-            logger.info(f"[STATE] State pemindaian disimpan ke JSON: {current_index}/{total}")
+            logger.info(f"[STATE] State pemindaian disimpan ke JSON: {current_index}/{total} (Kantor: {kantor or 'SEMUA'})")
         except Exception as e:
             logger.error(f"[STATE] Gagal menyimpan scan_state.json: {e}")
 
@@ -159,10 +162,12 @@ class MonitoringScheduler:
     def start(self):
         if self._scheduler and not self._scheduler.running:
             db = SessionLocal()
+            last_scan_time_str = "-"
             try:
                 interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
                 interval = int(interval_str)
                 current_status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
+                last_scan_time_str = self.get_setting_from_db(db, "last_scan_time", "-")
             except Exception as e:
                 logger.error(f"Gagal membaca pengaturan scheduler dari DB: {e}")
                 interval = settings.POLLING_INTERVAL_MINUTES
@@ -173,10 +178,38 @@ class MonitoringScheduler:
                 self.cleanup_old_logs(db, days=30)
             except Exception as e:
                 logger.error(f"Gagal membersihkan log lama: {e}")
+
+            # Catat aktivitas boot recovery sistem ke UserActivityLog
+            try:
+                from app.modules.activity_logs.service import ActivityLogService
+                ActivityLogService.log_activity(
+                    db=db,
+                    username="SYSTEM_DAEMON",
+                    action="STARTUP_RECOVERY",
+                    status="SUCCESS",
+                    keterangan=f"Aplikasi EdTeknoGuard aktif kembali. Status Scheduler: {current_status} (Interval: {interval} menit). Pemantauan otomatis dipulihkan."
+                )
+            except Exception as e:
+                logger.error(f"Gagal mencatat log startup recovery: {e}")
             finally:
                 db.close()
 
             settings.POLLING_INTERVAL_MINUTES = interval
+            
+            # Deteksi apakah jadwal scan sebelumnya terlewat saat server mati/reboot
+            need_immediate_scan = False
+            if current_status == "RUNNING":
+                if not last_scan_time_str or last_scan_time_str == "-":
+                    need_immediate_scan = True
+                else:
+                    try:
+                        last_dt = datetime.strptime(last_scan_time_str, "%Y-%m-%d %H:%M:%S")
+                        now_dt = get_now_wib()
+                        if (now_dt - last_dt).total_seconds() > (interval * 60):
+                            need_immediate_scan = True
+                    except Exception:
+                        need_immediate_scan = True
+
             self._scheduler.add_job(
                 self.scheduled_job_wrapper,
                 "interval",
@@ -203,10 +236,20 @@ class MonitoringScheduler:
                 replace_existing=True
             )
             self._scheduler.start()
+            
             if current_status == "STOPPED":
                 logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: STOPPED (Jeda Pemantauan) sesuai status terakhir.")
             else:
                 logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: RUNNING (Interval: {interval} menit) sesuai status terakhir.")
+                if need_immediate_scan:
+                    logger.info("Jadwal scan terlewat saat server mati/nonaktif. Menjadwalkan catch-up scan otomatis dalam 5 detik...")
+                    self._scheduler.add_job(
+                        self.scheduled_job_wrapper,
+                        "date",
+                        run_date=datetime.now() + timedelta(seconds=5),
+                        id="immediate_recovery_scan_job"
+                    )
+
             logger.info("[CLEANUP] Job cleanup alert_logs (setiap hari, >7 hari) & activity_logs (setiap hari, >60 hari) aktif.")
 
     def update_interval(self, minutes: int):
@@ -256,6 +299,7 @@ class MonitoringScheduler:
         """Menghentikan paksa pemindaian yang sedang berjalan atau membatalkan yang dijeda."""
         self._stop_requested = True
         self._is_paused = False
+        self._scan_target_kantor = None
         self.delete_scan_state()
         if not self._is_scanning:
             self._resume_index = 0
@@ -269,12 +313,14 @@ class MonitoringScheduler:
         if self._is_scanning:
             return {"status": "busy", "message": "Proses pemindaian sedang berjalan."}
         state = self.load_scan_state()
+        kantor = None
         if state and state.get("current_index") is not None:
             self._resume_index = state.get("current_index", 0)
+            kantor = state.get("kantor")
         self._is_paused = False
         self._stop_requested = False
-        logger.info(f"[SCAN] Melanjutkan pemindaian dari indeks ke-{self._resume_index}...")
-        return self.execute_scan_sync()
+        logger.info(f"[SCAN] Melanjutkan pemindaian dari indeks ke-{self._resume_index} (Kantor: {kantor or 'SEMUA'})...")
+        return self.execute_scan_sync(kantor=kantor)
 
     def get_status(self) -> Dict[str, Any]:
         db = SessionLocal()
@@ -309,9 +355,11 @@ class MonitoringScheduler:
             if self._scan_total == 0:
                 self._scan_total = state.get("total", total_customers)
 
+        target_kantor = self._scan_target_kantor or (state.get("kantor") if state else None) or "all"
         scan_progress = {
             "current": scan_current_val,
             "total": self._scan_total,
+            "target_kantor": target_kantor,
             "percent": int((scan_current_val / self._scan_total) * 100) if self._scan_total > 0 else 0,
             "is_scanning": self._is_scanning,
             "is_paused": is_paused,
@@ -322,10 +370,17 @@ class MonitoringScheduler:
             "last_scan_duration": last_duration
         }
 
+        next_run_time_str = "-"
+        if self._scheduler and self._scheduler.running:
+            job = self._scheduler.get_job("ont_monitoring_job")
+            if job and job.next_run_time:
+                next_run_time_str = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S")
+
         return {
             "status": status,
             "interval_minutes": interval,
             "last_scan_time": last_scan,
+            "next_run_time": next_run_time_str,
             "is_scanning": self._is_scanning,
             "is_paused": is_paused,
             "can_resume": is_paused and not self._is_scanning,
@@ -336,7 +391,7 @@ class MonitoringScheduler:
         }
 
     def scheduled_job_wrapper(self):
-        """Dijalankan tiap 5 menit oleh APScheduler background thread"""
+        """Dijalankan tiap 5 menit oleh APScheduler background thread (Semua Kantor)"""
         db = SessionLocal()
         try:
             current_status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
@@ -346,10 +401,10 @@ class MonitoringScheduler:
         finally:
             db.close()
 
-        # Eksekusi scanning
-        self.execute_scan_sync()
+        # Eksekusi scanning untuk seluruh kantor
+        self.execute_scan_sync(kantor=None)
 
-    def execute_scan_sync(self) -> Dict[str, Any]:
+    def execute_scan_sync(self, kantor: Optional[str] = None) -> Dict[str, Any]:
         if self._is_scanning:
             return {"status": "busy", "message": "Proses pemindaian sedang berjalan."}
 
@@ -357,18 +412,24 @@ class MonitoringScheduler:
         state = self.load_scan_state()
         if state and state.get("current_index") is not None and self._resume_index == 0:
             self._resume_index = state.get("current_index", 0)
+            if not kantor and state.get("kantor"):
+                kantor = state.get("kantor")
 
         self._is_scanning = True
         self._is_paused = False
         self._stop_requested = False
+        self._scan_target_kantor = kantor if (kantor and kantor != "all") else None
         self._scan_start_time = time.time()
         
         db = SessionLocal()
         try:
-            pelanggan_list = db.query(Pelanggan).filter(
+            query = db.query(Pelanggan).filter(
                 Pelanggan.is_active == True,
                 Pelanggan.is_monitored == True
-            ).all()
+            )
+            if self._scan_target_kantor:
+                query = query.filter(Pelanggan.kantor == self._scan_target_kantor)
+            pelanggan_list = query.all()
             self._scan_total = len(pelanggan_list)
             
             if self._resume_index >= self._scan_total:
@@ -414,15 +475,16 @@ class MonitoringScheduler:
 
                 # 0. Cek interupsi JEDA (Pause)
                 if self._is_paused:
-                    logger.info(f"[SCAN] Pemindaian dijeda pada pelanggan ke-{self._scan_current} dari {self._scan_total}.")
+                    logger.info(f"[SCAN] Pemindaian dijeda pada pelanggan ke-{self._scan_current} dari {self._scan_total} (Kantor: {self._scan_target_kantor or 'SEMUA'}).")
                     self._is_scanning = False
                     self._resume_index = self._scan_current
-                    self.save_scan_state(current_index=self._resume_index, total=self._scan_total)
+                    self.save_scan_state(current_index=self._resume_index, total=self._scan_total, kantor=self._scan_target_kantor)
                     return {
                         "status": "paused",
                         "message": f"Pemindaian dijeda pada pelanggan ke-{self._resume_index} dari {self._scan_total}.",
                         "current_index": self._resume_index,
-                        "total": self._scan_total
+                        "total": self._scan_total,
+                        "target_kantor": self._scan_target_kantor or "all"
                     }
 
                 self._scan_current += 1
@@ -568,6 +630,8 @@ class MonitoringScheduler:
             self.delete_scan_state()
             self._resume_index = 0
             self._is_paused = False
+            effective_kantor = self._scan_target_kantor or "all"
+            self._scan_target_kantor = None
 
             # Deteksi apakah server terputus dari jaringan lokal ISP / VLAN ONT
             if len(pelanggan_list) > 0 and unreachable_count == len(pelanggan_list):
@@ -583,6 +647,7 @@ class MonitoringScheduler:
                     "warning_count": warning_count,
                     "critical_count": critical_count,
                     "los_count": los_count,
+                    "target_kantor": effective_kantor,
                     "scan_time": now.strftime("%Y-%m-%d %H:%M:%S")
                 }
 
@@ -595,6 +660,7 @@ class MonitoringScheduler:
                 "warning_count": warning_count,
                 "critical_count": critical_count,
                 "los_count": los_count,
+                "target_kantor": effective_kantor,
                 "scan_time": now.strftime("%Y-%m-%d %H:%M:%S")
             }
         except Exception as e:

@@ -6,6 +6,7 @@ class CustomerBase(BaseModel):
     alamat: Optional[str] = Field(None, description="Alamat pemasangan")
     no_hp: Optional[str] = Field(None, max_length=50, description="Nomor telepon/WhatsApp")
     pop: str = Field("Server Cabang", max_length=100, description="Point of Presence")
+    kantor: str = Field("cabang", max_length=50, description="Kantor: cabang, pusat, banyumas")
     ip_router: str = Field(..., description="Alamat IP ONT/Modem pelanggan")
     paket: Optional[str] = Field(None, max_length=50, description="Paket bandwidth")
     jenis_modem: str = Field("GM220-S", max_length=50, description="Tipe ONT / Modem")
@@ -26,6 +27,7 @@ class CustomerUpdate(BaseModel):
     alamat: Optional[str] = None
     no_hp: Optional[str] = None
     pop: Optional[str] = None
+    kantor: Optional[str] = None
     ip_router: Optional[str] = None
     paket: Optional[str] = None
     jenis_modem: Optional[str] = None

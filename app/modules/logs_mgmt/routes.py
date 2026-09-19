@@ -22,7 +22,9 @@ def render_logs_page(
 # ----------------- REST API ROUTE -----------------
 @router.get("/api/logs")
 def list_logs(
+    request: Request,
     q: Optional[str] = Query(None, description="Pencarian nama, IP, atau ID pelanggan"),
+    kantor: Optional[str] = Query(None, description="Filter kantor"),
     status: Optional[str] = Query(None, description="Filter status NORMAL, WARNING, CRITICAL, LOS"),
     range: str = Query("today", description="Rentang waktu: today, 7d, 30d, custom"),
     start_date: Optional[str] = Query(None, description="Tanggal mulai (YYYY-MM-DD)"),
@@ -35,6 +37,10 @@ def list_logs(
     user: dict = Depends(require_admin)
 ):
     """API data time-series log performa ONT dengan filter, sorting, dan pagination"""
+    active_kantor = getattr(request.state, "active_kantor", "cabang")
+    allowed_kantor = getattr(request.state, "allowed_kantor", ["cabang"])
+    target_kantor = kantor if (kantor and kantor != "all") else active_kantor
+
     return LogsMgmtController.list_logs(
         db=db,
         q=q,
@@ -45,5 +51,7 @@ def list_logs(
         sort_by=sort_by,
         sort_dir=sort_dir,
         page=page,
-        limit=limit
+        limit=limit,
+        kantor=target_kantor,
+        allowed_kantor=allowed_kantor
     )

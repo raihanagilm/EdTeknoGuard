@@ -3,7 +3,7 @@
 {% block title %}Dashboard NOC — EdTeknoGuard{% endblock %}
 
 {% block content %}
-<div x-data="dashboardApp" id="dashboard-container" data-min-date="{{ min_date }}" data-polling-interval="{{ polling_interval }}">
+<div x-data="dashboardApp" id="dashboard-container" data-min-date="{{ min_date }}" data-polling-interval="{{ polling_interval }}" data-active-kantor="{{ active_kantor }}">
 
     <!-- Hero Title & Ringkasan NOC -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">

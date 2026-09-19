@@ -252,7 +252,7 @@ class CustomerService:
                     "original_row": index + 1,
                     "data": mapped_row,
                     "_status": _status,
-                    "_action": "update" if _status == "duplicate" else "insert",
+                    "_action": "skip" if _status == "duplicate" else "insert",
                     "_message": _message
                 })
 
@@ -273,39 +273,41 @@ class CustomerService:
             raise ValueError(f"Gagal memproses file untuk preview: {str(e)}")
 
     @staticmethod
-    def execute_json_import(db: Session, data_list: list) -> dict:
+    def execute_json_import(db: Session, data_list: list, default_kantor: Optional[str] = "cabang") -> dict:
         from app.db.models import Pelanggan
 
         # 1. Validasi Ketat: Tolak eksekusi jika terdapat duplikasi IP Router atau ID Pelanggan
         active_items = [item for item in data_list if item.get("_action") != "skip" and item.get("_status") != "error"]
         
-        batch_ids = []
-        batch_ips = []
+        batch_ids = {}
+        batch_ips = {}
         duplicate_reasons = []
 
         # Ambil IP yang sudah aktif di DB untuk verifikasi tabrakan IP
         db_ips = {row[0]: row[1] for row in db.query(Pelanggan.ip_router, Pelanggan.id_pelanggan).filter(Pelanggan.is_active == True).all() if row[0]}
 
-        for item in active_items:
+        for idx, item in enumerate(active_items, start=1):
             row_data = item.get("data", item)
             id_pel = str(row_data.get("id_pelanggan", "")).strip()
             ip_r = str(row_data.get("ip_router", "")).strip()
 
             if id_pel:
                 if id_pel in batch_ids:
-                    duplicate_reasons.append(f"ID Pelanggan ganda di dalam data: '{id_pel}'")
-                batch_ids.append(id_pel)
+                    duplicate_reasons.append(f"ID Pelanggan '{id_pel}' ganda di berkas (baris {batch_ids[id_pel]} dan {idx})")
+                else:
+                    batch_ids[id_pel] = idx
 
             if ip_r:
                 if ip_r in batch_ips:
-                    duplicate_reasons.append(f"IP Router ganda di dalam data: '{ip_r}'")
-                batch_ips.append(ip_r)
-                # Jika baris ini baru (insert) tapi IP-nya sudah dipakai ID lain di DB
+                    duplicate_reasons.append(f"IP Router '{ip_r}' ganda di berkas (baris {batch_ips[ip_r]} dan {idx})")
+                else:
+                    batch_ips[ip_r] = idx
+
                 if ip_r in db_ips and db_ips[ip_r] != id_pel:
-                    duplicate_reasons.append(f"IP Router '{ip_r}' sudah digunakan oleh pelanggan lain di database (ID: {db_ips[ip_r]})")
+                    duplicate_reasons.append(f"IP Router '{ip_r}' sudah digunakan pelanggan lain di DB (ID: {db_ips[ip_r]})")
 
         if duplicate_reasons:
-            reasons_summary = "; ".join(duplicate_reasons[:3])
+            reasons_summary = ", ".join(duplicate_reasons[:3])
             if len(duplicate_reasons) > 3:
                 reasons_summary += f" ... dan {len(duplicate_reasons) - 3} lainnya"
             raise ValueError(f"Eksekusi Ditolak: Ditemukan duplikasi ({reasons_summary}). Seluruh ID Pelanggan dan IP Router yang bertabrakan WAJIB dibenarkan terlebih dahulu sebelum import dapat dieksekusi!")
@@ -336,31 +338,27 @@ class CustomerService:
                     errors.append(f"Baris tidak lengkap: ID='{id_pel}', Nama='{nama}', IP='{ip_router}'")
                     continue
 
+                # Tentukan kantor untuk baris ini
+                raw_kantor = str(row_data.get("kantor", "")).strip().lower()
+                if raw_kantor in ["cabang", "pusat", "banyumas"]:
+                    row_kantor = raw_kantor
+                else:
+                    pop_val = str(row_data.get("pop", "")).upper()
+                    if "PUSAT" in pop_val:
+                        row_kantor = "pusat"
+                    elif "BMS" in pop_val or "BANYUMAS" in pop_val:
+                        row_kantor = "banyumas"
+                    elif default_kantor and default_kantor.lower().strip() in ["cabang", "pusat", "banyumas"]:
+                        row_kantor = default_kantor.lower().strip()
+                    else:
+                        row_kantor = "cabang"
+
                 existing = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
                 if existing:
-                    existing.nama = nama
-                    if row_data.get("alamat"): existing.alamat = str(row_data["alamat"]).strip()
-                    if row_data.get("no_hp"): existing.no_hp = str(row_data["no_hp"]).strip()
-                    if row_data.get("pop"): existing.pop = str(row_data["pop"]).strip()
-                    existing.ip_router = ip_router
-                    if row_data.get("paket"): existing.paket = str(row_data["paket"]).strip()
-                    if row_data.get("jenis_modem"): existing.jenis_modem = str(row_data["jenis_modem"]).strip()
-                    if row_data.get("mac_address"): existing.mac_address = str(row_data["mac_address"]).strip()
-                    
-                    if row_data.get("redaman_baseline"):
-                        try:
-                            existing.redaman_baseline = float(row_data["redaman_baseline"])
-                        except (ValueError, TypeError):
-                            pass
-                            
-                    if row_data.get("nama_wifi"): existing.nama_wifi = str(row_data["nama_wifi"]).strip()
-                    if row_data.get("password_wifi"): existing.password_wifi = str(row_data["password_wifi"]).strip()
-                    if row_data.get("user_admin"): existing.user_admin = str(row_data["user_admin"]).strip()
-                    if row_data.get("pass_admin"): existing.pass_admin = str(row_data["pass_admin"]).strip()
-                    existing.status_kredensial = "UNTESTED"
-                    existing.is_active = True
-                    
-                    updated_count += 1
+                    # SOP: Data pelanggan yang sudah ada di database dilarang ditimpa saat import
+                    skipped_count += 1
+                    errors.append(f"Pelanggan ID '{id_pel}' sudah ada di database (penimpaan ditolak)")
+                    continue
                 else:
                     redaman_baseline = None
                     if row_data.get("redaman_baseline"):
@@ -375,6 +373,7 @@ class CustomerService:
                         alamat=str(row_data.get("alamat", "")).strip() or None,
                         no_hp=str(row_data.get("no_hp", "")).strip() or None,
                         pop=str(row_data.get("pop", "Server Cabang")).strip() or "Server Cabang",
+                        kantor=row_kantor,
                         ip_router=ip_router,
                         paket=str(row_data.get("paket", "")).strip() or None,
                         jenis_modem=str(row_data.get("jenis_modem", "GM220-S")).strip() or "GM220-S",
@@ -417,7 +416,9 @@ class CustomerService:
         sort_by: Optional[str] = "id",
         sort_dir: str = "asc",
         page: int = 1,
-        limit: int = 25
+        limit: int = 25,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[List[str]] = None
     ) -> Tuple[int, List[Dict[str, Any]]]:
         # Subquery ID log terbaru per id_pelanggan
         subq = (
@@ -449,6 +450,11 @@ class CustomerService:
 
         if pop and pop != "Semua POP":
             query = query.filter(Pelanggan.pop == pop)
+
+        if kantor and kantor != "all":
+            query = query.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            query = query.filter(Pelanggan.kantor.in_(allowed_kantor))
 
         if status and status != "Semua Status":
             if status == "NORMAL":
@@ -541,7 +547,8 @@ class CustomerService:
                 "user_admin": c.user_admin or "-",
                 "pass_admin": c.pass_admin or "-",
                 "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED",
-                "is_monitored": bool(getattr(c, "is_monitored", True))
+                "is_monitored": bool(getattr(c, "is_monitored", True)),
+                "kantor": getattr(c, "kantor", "cabang") or "cabang"
             })
 
         return total_count, result
@@ -584,36 +591,52 @@ class CustomerService:
         return "2026-09-01"
 
     @staticmethod
-    def get_pop_list(db: Session) -> List[str]:
-        rows = db.query(Pelanggan.pop).filter(Pelanggan.is_active == True).distinct().all()
+    def get_pop_list(
+        db: Session, 
+        kantor: Optional[str] = None, 
+        allowed_kantor: Optional[List[str]] = None
+    ) -> List[str]:
+        q = db.query(Pelanggan.pop).filter(Pelanggan.is_active == True)
+        if kantor and kantor != "all":
+            q = q.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            q = q.filter(Pelanggan.kantor.in_(allowed_kantor))
+        rows = q.distinct().all()
         return [r[0] for r in rows if r[0]]
 
     @staticmethod
-    def get_customer_stats(db: Session) -> Dict[str, Any]:
-        # Hanya hitung pelanggan yang aktif dan dipantau (is_monitored == True) di card
-        monitored_active = db.query(Pelanggan).filter(
-            Pelanggan.is_active == True,
-            Pelanggan.is_monitored == True
-        ).count()
-        monitored_inactive = db.query(Pelanggan).filter(
-            Pelanggan.is_active == True,
-            Pelanggan.is_monitored == False
-        ).count()
-        total_all = db.query(Pelanggan).filter(Pelanggan.is_active == True).count()
+    def get_customer_stats(
+        db: Session,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """Menghitung agregasi KPI status pelanggan untuk kartu analitik dashboard"""
+        base_q = db.query(Pelanggan).filter(Pelanggan.is_active == True)
+        if kantor and kantor != "all":
+            base_q = base_q.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            base_q = base_q.filter(Pelanggan.kantor.in_(allowed_kantor))
+
+        monitored_active = base_q.filter(Pelanggan.is_monitored == True).count()
+        monitored_inactive = base_q.filter(Pelanggan.is_monitored == False).count()
+        total_all = base_q.count()
 
         total_pelanggan = monitored_active  # Nilai card dikurangi pelanggan yang OFF
 
-        pop_counts = (
+        pop_q = (
             db.query(Pelanggan.pop, func.count(Pelanggan.id))
             .filter(
                 Pelanggan.is_active == True,
                 Pelanggan.is_monitored == True
             )
-            .group_by(Pelanggan.pop)
-            .all()
         )
+        if kantor and kantor != "all":
+            pop_q = pop_q.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            pop_q = pop_q.filter(Pelanggan.kantor.in_(allowed_kantor))
+        pop_counts = pop_q.group_by(Pelanggan.pop).all()
 
-        subq = (
+        subq_builder = (
             db.query(
                 LogPerformaONT.id_pelanggan,
                 func.max(LogPerformaONT.id).label('max_log_id')
@@ -623,9 +646,12 @@ class CustomerService:
                 Pelanggan.is_active == True,
                 Pelanggan.is_monitored == True
             )
-            .group_by(LogPerformaONT.id_pelanggan)
-            .subquery()
         )
+        if kantor and kantor != "all":
+            subq_builder = subq_builder.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            subq_builder = subq_builder.filter(Pelanggan.kantor.in_(allowed_kantor))
+        subq = subq_builder.group_by(LogPerformaONT.id_pelanggan).subquery()
 
         status_counts = (
             db.query(
@@ -691,6 +717,7 @@ class CustomerService:
             alamat=data.alamat,
             no_hp=data.no_hp,
             pop=data.pop,
+            kantor=getattr(data, "kantor", "cabang") or "cabang",
             ip_router=data.ip_router,
             paket=data.paket,
             jenis_modem=data.jenis_modem,
@@ -890,6 +917,14 @@ class CustomerService:
                     redaman_baseline = None
 
             pop = get_val(idx_pop) or "Server Cabang"
+            pop_upper = pop.upper()
+            if "PUSAT" in pop_upper:
+                row_kantor = "pusat"
+            elif "BMS" in pop_upper or "BANYUMAS" in pop_upper:
+                row_kantor = "banyumas"
+            else:
+                row_kantor = "cabang"
+
             alamat = get_val(idx_alamat) or None
             no_hp = get_val(idx_hp) or None
             paket = get_val(idx_paket) or None
@@ -910,6 +945,7 @@ class CustomerService:
                 if alamat: existing.alamat = alamat
                 if no_hp: existing.no_hp = no_hp
                 if pop: existing.pop = pop
+                existing.kantor = row_kantor
                 existing.ip_router = ip_router
                 if paket: existing.paket = paket
                 if jenis_modem: existing.jenis_modem = jenis_modem
@@ -928,6 +964,7 @@ class CustomerService:
                     alamat=alamat,
                     no_hp=no_hp,
                     pop=pop,
+                    kantor=row_kantor,
                     ip_router=ip_router,
                     paket=paket,
                     jenis_modem=jenis_modem,
@@ -954,7 +991,11 @@ class CustomerService:
         }
 
     @staticmethod
-    def generate_excel_export(db: Session) -> bytes:
+    def generate_excel_export(
+        db: Session,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[List[str]] = None
+    ) -> bytes:
         """
         Menghasilkan file Excel (.xlsx) data seluruh pelanggan aktif
         lengkap dengan status performa dan redaman terakhir menggunakan styling profesional.
@@ -975,7 +1016,7 @@ class CustomerService:
         cell_border = Border(top=thin_side, left=thin_side, right=thin_side, bottom=thin_side)
 
         headers = [
-            "ID Pelanggan (Wajib)", "Nama Pelanggan (Wajib)", "Alamat", "No. HP",
+            "Kantor", "ID Pelanggan (Wajib)", "Nama Pelanggan (Wajib)", "Alamat", "No. HP",
             "POP / OLT", "IP Router / ONT (Wajib)", "Paket Bandwidth", "Tipe Modem",
             "MAC Address", "Redaman Baseline (dBm)", "Nama WiFi", "Password WiFi",
             "User Admin", "Pass Admin",
@@ -995,7 +1036,12 @@ class CustomerService:
         ws.row_dimensions[1].height = 28
 
         # Query Seluruh Data Pelanggan Aktif
-        customers = db.query(Pelanggan).filter(Pelanggan.is_active == True).order_by(Pelanggan.id.asc()).all()
+        q_cust = db.query(Pelanggan).filter(Pelanggan.is_active == True)
+        if kantor and kantor != "all":
+            q_cust = q_cust.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            q_cust = q_cust.filter(Pelanggan.kantor.in_(allowed_kantor))
+        customers = q_cust.order_by(Pelanggan.id.asc()).all()
 
         for idx, c in enumerate(customers, start=1):
             latest_log = (
@@ -1009,6 +1055,7 @@ class CustomerService:
             last_check = latest_log.waktu_cek.strftime("%d/%m/%Y %H:%M") if latest_log else "-"
 
             row_data = [
+                (c.kantor or "cabang").upper(),
                 c.id_pelanggan,
                 c.nama,
                 c.alamat or "-",
@@ -1077,7 +1124,7 @@ class CustomerService:
         cell_border = Border(top=thin_side, left=thin_side, right=thin_side, bottom=thin_side)
 
         headers = [
-            "ID Pelanggan (Wajib)", "Nama Pelanggan (Wajib)", "Alamat", "No. HP",
+            "ID Pelanggan (Wajib)", "Nama Pelanggan (Wajib)", "Kantor (Cabang/Pusat/Banyumas)", "Alamat", "No. HP",
             "POP / OLT", "IP Router / ONT (Wajib)", "Paket Bandwidth", "Tipe Modem",
             "MAC Address", "Redaman Baseline (dBm)", "Nama WiFi", "Password WiFi",
             "User Admin", "Pass Admin"
@@ -1095,7 +1142,7 @@ class CustomerService:
 
         # Tambahkan satu baris sampel sebagai contoh
         sample_row = [
-            "P-001", "Budi Santoso", "Jl. Merdeka No 1", "081234567890",
+            "P-001", "Budi Santoso", "Cabang", "Jl. Merdeka No 1", "081234567890",
             "Server Pusat", "192.168.1.100", "20Mbps", "GM220-S",
             "AA:BB:CC:DD:EE:FF", "-23.5", "Budi_WiFi", "password123",
             "admin", "admin123"
@@ -1112,17 +1159,17 @@ class CustomerService:
         output = io.StringIO()
         writer = csv.writer(output)
         writer.writerow([
-            "ID Pelanggan", "Nama", "Alamat", "No HP", "POP", "IP Router",
+            "ID Pelanggan", "Nama", "Kantor", "Alamat", "No HP", "POP", "IP Router",
             "Paket", "MAC Address", "Redaman", "Nama Wifi", "Password wifi",
             "Jenis Modem", "USER ADMIN", "PASS ADMIN"
         ])
         writer.writerow([
-            "CUST-001", "Contoh Pelanggan 1", "Jl. Merdeka No. 10", "08123456789",
+            "CUST-001", "Contoh Pelanggan 1", "Cabang", "Jl. Merdeka No. 10", "08123456789",
             "Server Cabang", "10.10.2.71", "10MB CAB", "44:22:95:6B:4B:C0",
             "-21.5", "WIFI-CUST01", "rahasia123", "GM220-S", "admin", "admin123"
         ])
         writer.writerow([
-            "CUST-002", "Contoh Pelanggan 2", "Klero Rt 02", "08571234567",
+            "CUST-002", "Contoh Pelanggan 2", "Pusat", "Klero Rt 02", "08571234567",
             "Mini Klero", "10.10.2.15", "30MB Residential", "FC:8E:5B:28:4D:21",
             "-22.0", "WIFI-CUST02", "sandiwifi", "GM220-S XPON", "admin", "admin123"
         ])

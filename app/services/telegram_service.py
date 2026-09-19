@@ -106,6 +106,7 @@ class TelegramService:
         is_critical = is_los or (rx is not None and rx <= critical_th)
 
         waktu_str = log_entry.waktu_cek.strftime("%d/%m/%Y %H:%M:%S")
+        kantor_str = (getattr(pelanggan, "kantor", None) or "cabang").upper()
 
         if is_critical:
             # Notifikasi Merah Kritis
@@ -113,6 +114,7 @@ class TelegramService:
             msg = (
                 f"🚨🔴 <b>[NOTIFIKASI MERAH - SEGERA DICEK!]</b>\n\n"
                 f"⚠️ <i>Terdeteksi redaman optik kritis &le; {critical_th:.1f} dBm yang berisiko tinggi pemutusan koneksi internet pelanggan!</i>\n\n"
+                f"🏢 <b>Kantor:</b> {kantor_str}\n"
                 f"👤 <b>Pelanggan:</b> {pelanggan.nama} (ID: <code>{pelanggan.id_pelanggan}</code>)\n"
                 f"📍 <b>POP:</b> {pelanggan.pop}\n"
                 f"🌐 <b>IP ONT:</b> <code>{pelanggan.ip_router}</code>\n"
@@ -129,6 +131,7 @@ class TelegramService:
             msg = (
                 f"⚠️ <b>[PERINGATAN RINGAN - PERINGATAN DINI]</b>\n\n"
                 f"ℹ️ <i>Sinyal optik mulai menurun menyentuh batas peringatan dini {warning_th:.1f} dBm.</i>\n\n"
+                f"🏢 <b>Kantor:</b> {kantor_str}\n"
                 f"👤 <b>Pelanggan:</b> {pelanggan.nama} (ID: <code>{pelanggan.id_pelanggan}</code>)\n"
                 f"📍 <b>POP:</b> {pelanggan.pop}\n"
                 f"🌐 <b>IP ONT:</b> <code>{pelanggan.ip_router}</code>\n"
@@ -322,7 +325,8 @@ class TelegramService:
         lines = []
         for idx, (cust, le) in enumerate(alerts, 1):
             rx_str = f"{le.rx_power:.2f} dBm" if le.rx_power is not None else "LOS"
-            lines.append(f"  {idx}. <b>{cust.nama}</b> — {cust.pop} | <code>{cust.ip_router}</code> | {rx_str}")
+            kantor_tag = (getattr(cust, "kantor", None) or "cabang").upper()
+            lines.append(f"  {idx}. <b>{cust.nama}</b> [{kantor_tag}] — {cust.pop} | <code>{cust.ip_router}</code> | {rx_str}")
 
         detail_block = "\n".join(lines)
 

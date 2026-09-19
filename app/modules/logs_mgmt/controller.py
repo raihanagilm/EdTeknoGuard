@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -12,7 +12,11 @@ class LogsMgmtController:
 
     @staticmethod
     def render_logs_page(request: Request, db: Session):
-        total, data, summary = LogsMgmtService.get_logs(db=db, page=1, limit=50)
+        active_kantor = getattr(request.state, "active_kantor", "cabang")
+        allowed_kantor = getattr(request.state, "allowed_kantor", ["cabang"])
+        total, data, summary = LogsMgmtService.get_logs(
+            db=db, page=1, limit=50, kantor=active_kantor, allowed_kantor=allowed_kantor
+        )
         min_date = LogsMgmtService.get_min_date(db)
         return templates.TemplateResponse(
             request=request,
@@ -36,7 +40,9 @@ class LogsMgmtController:
         sort_by: Optional[str] = "waktu_cek",
         sort_dir: str = "desc",
         page: int = 1,
-        limit: int = 50
+        limit: int = 50,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         total, data, summary = LogsMgmtService.get_logs(
             db=db,
@@ -48,7 +54,9 @@ class LogsMgmtController:
             sort_by=sort_by,
             sort_dir=sort_dir,
             page=page,
-            limit=limit
+            limit=limit,
+            kantor=kantor,
+            allowed_kantor=allowed_kantor
         )
         return {
             "total": total,

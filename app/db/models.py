@@ -16,6 +16,7 @@ class Pelanggan(Base):
     alamat = Column(Text, nullable=True)
     no_hp = Column(String(50), nullable=True)
     pop = Column(String(100), nullable=False, default="Server Cabang", index=True)
+    kantor = Column(String(50), nullable=False, default="cabang", index=True) # cabang, pusat, banyumas
     ip_router = Column(String(45), nullable=False, index=True)
     paket = Column(String(50), nullable=True)
     jenis_modem = Column(String(50), nullable=False, default="GM220-S", index=True)
@@ -101,7 +102,8 @@ class User(Base):
     username = Column(String(100), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
     nama_karyawan = Column(String(150), nullable=True)
-    role = Column(String(50), default="operator", nullable=False)
+    role = Column(String(50), default="teknisi", nullable=False) # super admin, admin, teknisi
+    allowed_kantor = Column(String(255), nullable=False, default='["cabang"]') # JSON array string: ["cabang"], ["pusat"], etc.
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)

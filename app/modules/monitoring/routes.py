@@ -39,14 +39,14 @@ def trigger_scan_stop(request: Request, db: Session = Depends(get_db), user: dic
     return MonitoringController.trigger_scan_stop(request=request, db=db, user=user)
 
 @router.post("/scan/{id_pelanggan}")
-def trigger_scan_single(id_pelanggan: str, user: dict = Depends(require_admin)):
+def trigger_scan_single(id_pelanggan: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
     """Route trigger pemindaian on-demand untuk satu ONT pelanggan"""
-    return MonitoringController.trigger_scan_single(id_pelanggan=id_pelanggan, user=user)
+    return MonitoringController.trigger_scan_single(id_pelanggan=id_pelanggan, user=user, db=db)
 
 @router.post("/check-single/{id_pelanggan}")
-def check_single_alias(id_pelanggan: str, user: dict = Depends(require_admin)):
+def check_single_alias(id_pelanggan: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
     """Alias route probe single ONT untuk kompatibilitas frontend"""
-    res = MonitoringController.trigger_scan_single(id_pelanggan=id_pelanggan, user=user)
+    res = MonitoringController.trigger_scan_single(id_pelanggan=id_pelanggan, user=user, db=db)
     return {
         "status": "success",
         "probe_result": {
@@ -65,12 +65,13 @@ def check_single_alias(id_pelanggan: str, user: dict = Depends(require_admin)):
     }
 
 @router.get("/kpi")
-def get_kpi_metrics(db: Session = Depends(get_db)):
-    """Route ringkasan metrik kesehatan jaringan ONT"""
-    return MonitoringController.get_kpi(db=db)
+def get_kpi_metrics(request: Request, db: Session = Depends(get_db)):
+    """Route ringkasan metrik kesehatan jaringan ONT (Office-aware)"""
+    return MonitoringController.get_kpi(request=request, db=db)
 
 @router.get("/chart-data")
 def get_chart_data(
+    request: Request,
     range_type: str = Query("today", alias="range"),
     date_filter: Optional[str] = Query(None, alias="date"),
     id_pelanggan: Optional[str] = None,
@@ -78,5 +79,5 @@ def get_chart_data(
 ):
     """Route data historis redaman optik untuk Chart.js dengan filter tanggal (date=YYYY-MM-DD) atau range (today, yesterday, week, month)"""
     return MonitoringController.get_chart_data(
-        db=db, range_type=range_type, date_filter=date_filter, id_pelanggan=id_pelanggan
+        request=request, db=db, range_type=range_type, date_filter=date_filter, id_pelanggan=id_pelanggan
     )

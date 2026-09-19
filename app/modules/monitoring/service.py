@@ -25,22 +25,31 @@ class MonitoringService:
             return "RUNNING"
 
     @staticmethod
-    def scan_all() -> Dict[str, Any]:
-        return scheduler.execute_scan_sync()
+    def scan_all(kantor: Optional[str] = None) -> Dict[str, Any]:
+        return scheduler.execute_scan_sync(kantor=kantor)
 
     @staticmethod
     def scan_single(id_pelanggan: str) -> Optional[Dict[str, Any]]:
         return scheduler.scan_single(id_pelanggan)
 
     @staticmethod
-    def get_kpi_metrics(db: Session) -> Dict[str, Any]:
+    def get_kpi_metrics(
+        db: Session,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[list] = None
+    ) -> Dict[str, Any]:
         # Hanya hitung pelanggan yang aktif dan berstatus dipantau (is_monitored == True)
-        total_customers = db.query(Pelanggan).filter(
+        q_cust = db.query(Pelanggan).filter(
             Pelanggan.is_active == True,
             Pelanggan.is_monitored == True
-        ).count()
+        )
+        if kantor and kantor != "all":
+            q_cust = q_cust.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            q_cust = q_cust.filter(Pelanggan.kantor.in_(allowed_kantor))
+        total_customers = q_cust.count()
 
-        subq = (
+        subq_query = (
             db.query(
                 LogPerformaONT.id_pelanggan,
                 func.max(LogPerformaONT.waktu_cek).label("max_waktu")
@@ -50,9 +59,12 @@ class MonitoringService:
                 Pelanggan.is_active == True,
                 Pelanggan.is_monitored == True
             )
-            .group_by(LogPerformaONT.id_pelanggan)
-            .subquery()
         )
+        if kantor and kantor != "all":
+            subq_query = subq_query.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            subq_query = subq_query.filter(Pelanggan.kantor.in_(allowed_kantor))
+        subq = subq_query.group_by(LogPerformaONT.id_pelanggan).subquery()
 
         latest_logs = (
             db.query(LogPerformaONT)
@@ -83,7 +95,12 @@ class MonitoringService:
         if total_customers > total_with_logs:
             normal_count += (total_customers - total_with_logs)
 
-        total_all = db.query(Pelanggan).filter(Pelanggan.is_active == True).count()
+        q_all = db.query(Pelanggan).filter(Pelanggan.is_active == True)
+        if kantor and kantor != "all":
+            q_all = q_all.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            q_all = q_all.filter(Pelanggan.kantor.in_(allowed_kantor))
+        total_all = q_all.count()
         monitored_inactive = total_all - total_customers
 
         return {
@@ -94,6 +111,7 @@ class MonitoringService:
             "warning": warning_count,
             "critical": critical_count,
             "los": los_count,
+            "target_kantor": kantor or "all",
             "warning_threshold": settings.WARNING_THRESHOLD_DBM,
             "critical_threshold": settings.CRITICAL_THRESHOLD_DBM
         }
@@ -115,7 +133,9 @@ class MonitoringService:
         db: Session,
         range_type: str = "today",
         date_filter: Optional[str] = None,
-        id_pelanggan: Optional[str] = None
+        id_pelanggan: Optional[str] = None,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[list] = None
     ) -> Dict[str, Any]:
         from sqlalchemy import case
         now = get_now_wib()
@@ -141,8 +161,13 @@ class MonitoringService:
                     func.min(LogPerformaONT.rx_power).label('min_rx'),
                     func.max(LogPerformaONT.rx_power).label('max_rx')
                 )
+                .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
                 .filter(LogPerformaONT.waktu_cek >= d_start, LogPerformaONT.waktu_cek <= d_end)
             )
+            if kantor and kantor != "all":
+                q = q.filter(Pelanggan.kantor == kantor)
+            elif allowed_kantor:
+                q = q.filter(Pelanggan.kantor.in_(allowed_kantor))
             if id_pelanggan:
                 q = q.filter(LogPerformaONT.id_pelanggan == id_pelanggan)
             rows = q.group_by(
@@ -370,8 +395,14 @@ class MonitoringService:
                     func.max(LogPerformaONT.rx_power).label('max_rx'),
                     func.min(LogPerformaONT.waktu_cek).label('min_waktu')
                 )
+                .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
                 .filter(LogPerformaONT.waktu_cek >= d_start, LogPerformaONT.waktu_cek <= d_end)
             )
+
+            if kantor and kantor != "all":
+                q = q.filter(Pelanggan.kantor == kantor)
+            elif allowed_kantor:
+                q = q.filter(Pelanggan.kantor.in_(allowed_kantor))
 
             if id_pelanggan:
                 q = q.filter(LogPerformaONT.id_pelanggan == id_pelanggan)
