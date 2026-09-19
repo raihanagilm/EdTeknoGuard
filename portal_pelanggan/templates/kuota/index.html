@@ -1,0 +1,62 @@
+{% extends "layouts/base.html" %}
+{% block title %}Penggunaan Kuota — EdTekno Pelanggan{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+
+    <!-- Header -->
+    <div>
+        <h2 class="text-base font-black text-slate-900 tracking-tight">Penggunaan Kuota Data</h2>
+        <p class="text-[11px] text-slate-500">Statistik pemakaian bandwidth layanan internet Anda</p>
+    </div>
+
+    <!-- Main Usage Card (Penggunaan Data Bulan Ini) -->
+    <div class="p-5 rounded-3xl bg-gradient-to-tr from-slate-900 to-indigo-950 text-white shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-indigo-300 uppercase tracking-wider">
+                Periode {{ data.now.strftime('%B %Y') }}
+            </span>
+            <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+                Unlimited
+            </span>
+        </div>
+
+        <div>
+            <span class="text-[11px] text-slate-400 block">Total Kuota Terpakai:</span>
+            <div class="flex items-baseline gap-1.5 mt-1">
+                <span class="text-4xl font-black text-white tracking-tight">
+                    {{ data.kuota.kuota_terpakai_gb }}
+                </span>
+                <span class="text-sm font-bold text-slate-300">Gigabyte (GB)</span>
+            </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
+            <span>Kecepatan Paket:</span>
+            <span class="font-bold text-white">{{ data.kuota.kecepatan_paket }}</span>
+        </div>
+    </div>
+
+    <!-- Daily Usage List (7 Hari Terakhir) -->
+    <div class="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs space-y-3">
+        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Riwayat 7 Hari Terakhir</h3>
+        <div class="divide-y divide-slate-100">
+            {% for u in data.usage_history %}
+            <div class="py-2.5 flex items-center justify-between text-xs">
+                <span class="text-slate-600 font-medium">{{ u.tanggal }}</span>
+                <span class="font-extrabold text-slate-900">{{ u.pemakaian_gb }} GB</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-900 text-xs space-y-1">
+        <span class="font-bold block">Koneksi Tanpa Batas Kuota</span>
+        <p class="text-[11px] text-indigo-700 leading-relaxed">
+            Paket Anda aktif 24 jam dengan kecepatan stabil. Tidak ada batasan kuota sisa, nikmati streaming dan internet sepuasnya.
+        </p>
+    </div>
+
+</div>
+{% endblock %}

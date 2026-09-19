@@ -107,3 +107,48 @@ class User(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
+
+
+class AkunPelanggan(Base):
+    __tablename__ = "akun_pelanggan"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_pelanggan = Column(String(64), nullable=False, unique=True, index=True)
+    username = Column(String(100), nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    no_hp = Column(String(50), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    last_login = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False)
+    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
+
+
+class TiketKendala(Base):
+    __tablename__ = "tiket_kendala"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_tiket = Column(String(32), unique=True, nullable=False, index=True)
+    id_pelanggan = Column(String(64), nullable=False, index=True)
+    kantor = Column(String(50), default="cabang", nullable=False)
+    kategori = Column(String(100), nullable=False)
+    deskripsi = Column(Text, nullable=False)
+    no_wa_pelapor = Column(String(50), nullable=False)
+    redaman_saat_lapor = Column(Numeric(5, 2), nullable=True)
+    status_ont_saat_lapor = Column(String(20), nullable=True)
+    status = Column(String(30), default="MENUNGGU", nullable=False, index=True) # MENUNGGU, DIPROSES, SELESAI, DIBATALKAN
+    catatan_teknisi = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False)
+    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
+
+
+class KuotaPelanggan(Base):
+    __tablename__ = "kuota_pelanggan"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_pelanggan = Column(String(64), nullable=False, index=True)
+    periode_bulan = Column(String(10), nullable=False) # format YYYY-MM
+    kuota_terpakai_gb = Column(Numeric(8, 2), default=0, nullable=False)
+    kecepatan_paket = Column(String(50), nullable=True)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False)
+    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
+

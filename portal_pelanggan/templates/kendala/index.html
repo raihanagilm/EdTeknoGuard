@@ -1,0 +1,75 @@
+{% extends "layouts/base.html" %}
+{% block title %}Riwayat Kendala — EdTekno Pelanggan{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+
+    <!-- Header & Action Button -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-base font-black text-slate-900 tracking-tight">Laporan Kendala</h2>
+            <p class="text-[11px] text-slate-500">Riwayat pengaduan gangguan internet Anda</p>
+        </div>
+        <a href="{{ base_url or '' }}/kendala/buat" 
+           class="px-3.5 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition min-h-[40px]">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>Buat Laporan</span>
+        </a>
+    </div>
+
+    {% if sukses %}
+    <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
+        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span>Laporan kendala berhasil dikirimkan ke tim teknisi piket!</span>
+    </div>
+    {% endif %}
+
+    <!-- Tickets List -->
+    {% if tickets %}
+    <div class="space-y-3">
+        {% for t in tickets %}
+        <div class="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+                <div>
+                    <span class="text-[11px] font-mono text-slate-400 block">{{ t.id_tiket }}</span>
+                    <h3 class="text-xs font-bold text-slate-900 mt-0.5">{{ t.kategori }}</h3>
+                </div>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase {% if t.status == 'SELESAI' %}bg-emerald-50 text-emerald-700 border border-emerald-200{% elif t.status == 'DIPROSES' %}bg-blue-50 text-blue-700 border border-blue-200{% else %}bg-amber-50 text-amber-700 border border-amber-200{% endif %}">
+                    {{ t.status }}
+                </span>
+            </div>
+
+            <p class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                {{ t.deskripsi }}
+            </p>
+
+            {% if t.catatan_teknisi %}
+            <div class="text-[11px] text-indigo-900 bg-indigo-50/70 p-2.5 rounded-xl border border-indigo-100">
+                <span class="font-bold block">Tanggapan Teknisi:</span>
+                <span>{{ t.catatan_teknisi }}</span>
+            </div>
+            {% endif %}
+
+            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                <span>{{ t.created_at.strftime('%d %b %Y, %H:%M') }} WIB</span>
+                {% if t.redaman_saat_lapor %}
+                <span>Redaman: {{ t.redaman_saat_lapor }} dBm</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="p-8 text-center bg-white rounded-3xl border border-slate-200/80 space-y-2">
+        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h3 class="text-sm font-bold text-slate-800">Koneksi Berjalan Baik</h3>
+        <p class="text-xs text-slate-500 max-w-xs mx-auto">
+            Tidak ada laporan gangguan aktif. Jika Anda mengalami kendala koneksi, silakan tekan tombol Buat Laporan di atas.
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

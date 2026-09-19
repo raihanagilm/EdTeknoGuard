@@ -1,0 +1,69 @@
+{% extends "layouts/base.html" %}
+{% block title %}Buat Laporan Kendala — EdTekno Pelanggan{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+
+    <!-- Header -->
+    <div>
+        <a href="{{ base_url or '' }}/kendala" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 mb-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            <span>Kembali ke Riwayat</span>
+        </a>
+        <h2 class="text-lg font-black text-slate-900 tracking-tight">Form Pengaduan Gangguan</h2>
+        <p class="text-xs text-slate-500">Laporan akan diteruskan otomatis ke teknisi kantor cabang</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs">
+        <form action="{{ base_url or '' }}/kendala/buat" method="POST" class="space-y-3.5">
+            
+            <!-- Kategori Kendala -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" for="kategori">
+                    Jenis Kendala <span class="text-rose-500">*</span>
+                </label>
+                <select id="kategori" name="kategori" required
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                    <option value="Internet Lambat / Lemot">Internet Lambat / Lemot</option>
+                    <option value="Lampu LOS Merah / Putus Total">Lampu LOS Merah / Putus Total</option>
+                    <option value="Sinyal Drop / Redaman Buruk">Sinyal Drop / Sering Putus</option>
+                    <option value="Modem ONT Mati Total">Modem ONT Mati Total</option>
+                    <option value="WiFi Tidak Terdeteksi / Sinyal Lemah">WiFi Tidak Terdeteksi / Sinyal Lemah</option>
+                    <option value="Kendala Lainnya">Kendala Lainnya</option>
+                </select>
+            </div>
+
+            <!-- Deskripsi Keluhan -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" for="deskripsi">
+                    Uraian Keluhan <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="deskripsi" name="deskripsi" required rows="3"
+                          placeholder="Jelaskan kendala yang dialami, sejak kapan, atau lampu indikator modem yang menyala"
+                          class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            </div>
+
+            <!-- Nomor Kontak WhatsApp -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" for="no_wa">
+                    Nomor WhatsApp / Kontak Pelapor <span class="text-rose-500">*</span>
+                </label>
+                <input type="tel" id="no_wa" name="no_wa" required
+                       value="{{ pelanggan.no_hp if pelanggan else '' }}"
+                       placeholder="08xxxxxxxxxx"
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                <p class="text-[11px] text-slate-400 mt-0.5">Teknisi lapangan akan menghubungi nomor ini jika diperlukan pengecekan fisik.</p>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full mt-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs tracking-wide transition shadow-md shadow-indigo-600/20 min-h-[44px] flex items-center justify-center gap-2">
+                <span>Kirim Laporan Gangguan</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

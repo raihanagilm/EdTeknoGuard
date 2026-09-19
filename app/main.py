@@ -85,7 +85,16 @@ async def inject_current_user_middleware(request: Request, call_next):
     # Aturan Sesi Inaktivitas 30 Hari:
     # Selama pengguna aktif membuka/menggunakan aplikasi, masa aktif sesi diperpanjang ke 30 hari ke depan.
     # Jika pengguna tidak mengakses aplikasi selama 30 hari, sesi kedaluwarsa dan otomatis logout sendiri.
-    if current_user and request.method == "GET" and not request.url.path.startswith("/static") and request.url.path != "/logout":
+    path_lower = request.url.path.lower().rstrip("/")
+    is_auth_or_static = (
+        path_lower.endswith("/logout")
+        or path_lower.endswith("/login")
+        or request.url.path.startswith("/static")
+        or "/static" in path_lower
+        or request.url.path.startswith("/portal")
+    )
+
+    if current_user and request.method == "GET" and not is_auth_or_static:
         refreshed_token = create_session_token(
             username=current_user.get("user", "admin"),
             role=current_user.get("role", "teknisi"),
@@ -97,7 +106,8 @@ async def inject_current_user_middleware(request: Request, call_next):
             value=refreshed_token,
             max_age=MAX_SESSION_AGE,
             httponly=True,
-            samesite="lax"
+            samesite="lax",
+            path="/"
         )
 
     return response
@@ -136,6 +146,10 @@ app.include_router(logs_router)
 app.include_router(settings_router)
 app.include_router(activity_logs_router)
 app.include_router(users_router)
+
+# Mount Portal Pelanggan
+from portal_pelanggan.main import app as portal_app
+app.mount("/portal", portal_app)
 
 if __name__ == "__main__":
     import uvicorn

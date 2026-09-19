@@ -68,6 +68,14 @@
             </div>
             {% endif %}
 
+            <!-- Success Alert Banner -->
+            {% if success %}
+            <div class="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2.5">
+                <svg class="w-4 h-4 shrink-0 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>{{ success }}</span>
+            </div>
+            {% endif %}
+
             <form action="/login" method="POST" class="space-y-4">
                 
                 <!-- Username Input -->

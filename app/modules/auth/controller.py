@@ -15,6 +15,29 @@ class AuthController:
 
     @staticmethod
     def render_login_page(request: Request, error: Optional[str] = None):
+        if request.query_params.get("logout") == "1":
+            response = templates.TemplateResponse(
+                request=request,
+                name="auth/login.html",
+                context={
+                    "app_name": settings.APP_NAME,
+                    "error": error,
+                    "success": "Anda telah berhasil keluar (logout) dari sistem."
+                }
+            )
+            response.delete_cookie(SESSION_COOKIE_NAME, path="/")
+            response.delete_cookie(SESSION_COOKIE_NAME)
+            response.set_cookie(
+                key=SESSION_COOKIE_NAME,
+                value="",
+                max_age=0,
+                expires=0,
+                path="/",
+                httponly=True,
+                samesite="lax"
+            )
+            return response
+
         # Jika sudah login, langsung lempar ke dashboard
         if get_current_user_optional(request):
             return RedirectResponse("/", status_code=303)
@@ -72,7 +95,8 @@ class AuthController:
             value=token,
             max_age=MAX_SESSION_AGE,
             httponly=True,
-            samesite="lax"
+            samesite="lax",
+            path="/"
         )
         return response
 
@@ -93,6 +117,16 @@ class AuthController:
             keterangan="Admin logout dari sistem"
         )
 
-        response = RedirectResponse("/login", status_code=303)
+        response = RedirectResponse("/login?logout=1", status_code=303)
+        response.delete_cookie(SESSION_COOKIE_NAME, path="/")
         response.delete_cookie(SESSION_COOKIE_NAME)
+        response.set_cookie(
+            key=SESSION_COOKIE_NAME,
+            value="",
+            max_age=0,
+            expires=0,
+            path="/",
+            httponly=True,
+            samesite="lax"
+        )
         return response

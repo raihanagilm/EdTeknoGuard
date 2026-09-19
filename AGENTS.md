@@ -172,6 +172,47 @@ EdTeknoGuard/
       - Jika waktu mati server telah melampaui interval pemantauan reguler, sistem otomatis menjadwalkan *Catch-Up Scan* (5 detik setelah startup) dan mencatat entri audit log `STARTUP_RECOVERY`.
       - API `/api/monitoring/status` menyediakan parameter `next_run_time` untuk kepastian visibilitas jadwal pemindaian berikutnya di antarmuka web.
 
+11. **Portal Pelanggan Mandiri (Self-Service Mobile Web App di `/portal`)**:
+    - **Arsitektur Satu Proyek & Satu Server**:
+      - Terintegrasi di dalam repositori pada folder `portal_pelanggan/` dan di-mount langsung pada aplikasi utama di endpoint `/portal` (dapat juga dijalankan mandiri di port terpisah jika diinginkan).
+      - Menggunakan database bersama (TiDB Cloud) dengan penambahan tabel `akun_pelanggan`, `tiket_kendala`, dan `kuota_pelanggan`.
+    - **Aktivasi / Registrasi Ramah Warga Desa (`/portal/daftar`)**:
+      - Didesain sangat sederhana dan mudah untuk warga desa tanpa istilah teknis yang membingungkan.
+      - **Prompt & Panduan Izin GPS Otomatis**: Saat formulir pendaftaran dibuka, sistem otomatis memicu dialog izin GPS lokasi (`navigator.geolocation`) dan menampilkan modal izin ramah desa yang memandu warga untuk **menghidupkan ikon Lokasi/GPS di HP mereka** (swipe bar atas layar HP).
+      - Input hanya: **Nama Terdaftar** (sesuai pasang WiFi), **Alamat / Dusun / Desa** (bukan istilah 'alamat pemasangan'), **Deteksi GPS Rumah Otomatis**, **No WhatsApp/HP**, dan **IP Router (Opsional, boleh dikosongkan)**.
+      - **Bebas Ribet Password**: Pelanggan tidak perlu membuat atau mengingat password baru saat daftar. Seluruh akun otomatis disetel ke password awal `123456` dan langsung otomatis login ke dashboard setelah pendaftaran.
+      - Algoritma pencocokan fleksibel berbasis token/substring nama dan alamat (mencakup pencarian seluruh baris pelanggan di database). Koordinat GPS otomatis disimpan ke data pelanggan untuk memudahkan teknisi menemukan lokasi fisik.
+    - **Autentikasi & Sesi Pelanggan (`/portal/login`)**:
+      - Seluruh akun pelanggan baru menggunakan kata sandi awal: `123456`.
+      - Antarmuka ramah warga menggunakan bahasa Indonesia bersih (*"Petunjuk Masuk: Kata sandi awal adalah: 123456"*), tanpa tombol preset "Isi 123456", dilengkapi toggle lihat kata sandi (ikon SVG mata terbuka/tertutup) dan tautan *"Lupa Kata Sandi?"*.
+      - **Fitur Auto-Provisioning**: Jika pelanggan belum pernah membuka menu daftar tetapi langsung masuk dengan nama terdaftar + password `123456`, sistem otomatis mengaktifkan akun dan mengizinkan login tanpa hambatan.
+      - Masa aktif sesi 30 hari via secure cookie `edtekno_pelanggan_session` dengan mekanisme perpanjangan otomatis (*sliding expiration*).
+    - **Fitur Lupa & Reset Kata Sandi Mandiri (`/portal/lupa-password`)**:
+      - **Opsi Verifikasi Mandiri**:
+        1. **Opsi Utama (IP Modem / Router)**: Sangat logis & mudah diakses warga karena dapat dicek langsung pada stiker fisik bagian belakang/bawah modem ONT atau di menu info sambungan WiFi HP (`10.10.x.x` / `192.168.x.x`). Jika pelanggan lupa nama terdaftar atau nomor HP yang dulu dipakai pasang WiFi, **cukup masukkan IP Modem saja** untuk langsung mereset kata sandi baru tanpa hambatan.
+        2. **Opsi Alternatif (Nama & Nomor HP Terdaftar)**: Jika pelanggan tidak tahu IP modem, sistem tetap menyediakan pencocokan berbasis Nama Terdaftar dan Nomor WhatsApp/HP.
+        3. **Kata Sandi Baru**: Pelanggan dapat mengatur kata sandi baru (minimal 6 karakter) atau menggunakan tombol cepat *"Setel ke 123456"*.
+      - **Bebas Ketergantungan WA**: Tombol kontak WhatsApp teknisi ditiadakan agar sistem benar-benar mandiri (*self-service*).
+      - **Pemberitahuan Audit**: Sistem otomatis mengirimkan alert notifikasi ke Bot Telegram grup teknisi saat pelanggan mereset kata sandi.
+    - **Lapor Kendala Terintegrasi Telegram**:
+      - Pelanggan dapat membuat tiket gangguan (Internet Lambat, LOS Lampu Merah, Sinyal Drop, ONT Mati, WiFi Lemah, dll.) di `/portal/kendala/buat`.
+      - Sistem otomatis melampirkan redaman optik terakhir (dBm) dan status ONT dari `log_performa_ont` serta nomor WA pelapor.
+      - Otomatis meneruskan notifikasi tiket baru ke bot Telegram grup teknisi.
+    - **Cek Penggunaan Kuota & Larangan Menampilkan Sisa Kuota**:
+      - Menampilkan pemakaian kuota bulan berjalan (GB), nama paket, kecepatan (Mbps), dan histori pemakaian 7 hari terakhir.
+      - **KEBIJAKAN MUTLAK SOP**: DILARANG KERAS menampilkan kata atau angka "Sisa Kuota" di seluruh antarmuka pelanggan (layanan bersifat unlimited).
+    - **Menu Kelola WiFi Rumah (`/portal/wifi`)**:
+      - Menu khusus bagi pelanggan untuk melihat nama WiFi sekarang, kata sandi sekarang, dan mengganti Nama WiFi (SSID) serta Kata Sandi WiFi baru (minimal 8 karakter).
+      - **Tutorial & Peringatan Wajib Nyambung ke WiFi Sendiri**:
+        - HP / perangkat pelanggan **WAJIB sedang tersambung ke jaringan WiFi rumah sendiri** saat melakukan pergantian (dilarang memakai paket data seluler).
+        - Tutorial langkah demi langkah mengedukasi warga desa bahwa setelah klik simpan, sambungan WiFi di HP akan terputus sesaat (normal), lalu pelanggan diarahkan membuka menu Pengaturan WiFi HP untuk menyambungkan ulang dengan nama dan kata sandi baru.
+    - **Menu Profil Pelanggan (`/portal/profil`)**:
+      - Terfokus murni pada identitas dan status langganan: Nama Lengkap, ID Pelanggan, Alamat/Dusun/Desa, No. WhatsApp/HP, Paket Layanan, Wilayah Kantor, dan IP Router.
+      - Dilengkapi formulir ganti password akun portal mandiri (password awal default `123456`).
+    - **Desain Mobile-First & Sticky Bottom Navigation 5 Tab**:
+      - Dilengkapi *sticky bottom navigation bar* 5 menu (`Beranda`, `Kendala`, `WiFi`, `Kuota`, `Profil`) dengan area sentuh ramah jempol (>= 44x44 px).
+      - Bebas emoji pada elemen UI dan tombol; seluruh ikon menggunakan SVG inline murni.
+
 ---
 
 ## 7. Standar Agen AI & Manajemen Dokumen
