@@ -209,8 +209,9 @@ EdTeknoGuard/
       - Mobile: Header ringkas dengan tombol burger (ikon SVG 3 garis) yang membuka slide-over drawer dari kiri dengan backdrop blur gelap.
     - **Modul Manajemen Pelanggan Admin NOC**:
       - **Verifikasi Pendaftar Baru (`/admin/verifikasi-pelanggan`)**: Admin mencocokkan pendaftar mandiri (status `PENDING`) dengan data pelanggan database kantor, melihat titik lokasi GPS di Google Maps, dan menghubungkannya dengan aman.
-      - **Tiket Keluhan Pelanggan (`/admin/tiket`)**: Daftar tiket keluhan yang dikirimkan warga desa melalui portal, dilengkapi filter status (*Semua, Menunggu, Diproses, Selesai*) dan modal update status + catatan teknisi.
-      - **Pemantauan Pemakaian Kuota (`/admin/kuota`)**: Monitoring akumulasi GB yang telah digunakan pelanggan pada bulan berjalan.
+      - **Tiket Keluhan Pelanggan (`/admin/tiket`)**: Daftar tiket keluhan warga desa dengan kapabilitas tabel audit log: filter status, filter jenis kendala, filter rentang tanggal (Hari Ini, 7 Hari, 30 Hari, Kustom s/d), live search dengan debounce, header kolom sortable (ID, Waktu, Pelanggan, Kendala, Redaman, Status), pagination bar (10, 25, 50, 100), dan modal kelola status tiket responsif.
+      - **Pemantauan Pemakaian Kuota (`/admin/kuota`)**: Monitoring akumulasi GB yang telah digunakan pelanggan pada bulan berjalan dengan kapabilitas tabel audit log: kartu KPI ringkas dinamis (Total Pelanggan, Total GB, Rata-rata GB/user), filter paket, filter level pemakaian (sangat tinggi >150GB, tinggi 100-150GB, sedang 50-100GB, ringan <50GB, nol 0GB), live search, header kolom sortable numerik, dan pagination bar lengkap.
+
 
 ---
 
