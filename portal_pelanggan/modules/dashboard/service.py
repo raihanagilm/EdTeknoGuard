@@ -1,4 +1,5 @@
 import random
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.db.models import Pelanggan, LogPerformaONT, KuotaPelanggan, TiketKendala
 from app.core.timezone import get_now_wib
@@ -6,10 +7,28 @@ from app.core.timezone import get_now_wib
 class DashboardService:
 
     @staticmethod
-    def get_dashboard_data(db: Session, id_pelanggan: str):
+    def get_dashboard_data(db: Session, id_pelanggan: Optional[str]):
+        now = get_now_wib()
+        if not id_pelanggan:
+            return {
+                "pelanggan": None,
+                "is_pending": True,
+                "last_log": None,
+                "kuota": None,
+                "active_tickets_count": 0,
+                "now": now
+            }
+
         cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
         if not cust:
-            return None
+            return {
+                "pelanggan": None,
+                "is_pending": True,
+                "last_log": None,
+                "kuota": None,
+                "active_tickets_count": 0,
+                "now": now
+            }
 
         # 1. Log performa ONT terakhir (Live Signal)
         last_log = db.query(LogPerformaONT).filter(

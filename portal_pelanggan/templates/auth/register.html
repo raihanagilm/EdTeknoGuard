@@ -18,119 +18,14 @@
 
     <!-- Alert Error jika ada -->
     {% if error %}
-    <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
+    <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
         <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         <span class="font-medium leading-relaxed">{{ error }}</span>
     </div>
     {% endif %}
 
-    <!-- Modal Permintaan Izin GPS (Friendly Permission Prompt) -->
-    <div x-show="showPermissionModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div class="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full border border-slate-200 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
-            <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mx-auto">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-            <div class="text-center space-y-1.5">
-                <h3 class="text-base font-black text-slate-900">Aktifkan GPS & Izin Lokasi</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">
-                    Sistem membutuhkan titik lokasi rumah Anda agar teknisi sigap membantu jika kabel putus atau sinyal modem drop.
-                </p>
-            </div>
+        <!-- Deteksi GPS Otomatis di Latar Belakang (Hidden/Silent untuk Kebutuhan Kantor & Teknisi) -->
 
-            <!-- Langkah Mudah -->
-            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-2 text-[11px] text-slate-700">
-                <div class="flex items-start gap-2">
-                    <span class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center shrink-0 text-[10px]">1</span>
-                    <span>Tarik bar atas layar HP Anda, pastikan ikon <strong>Lokasi / GPS</strong> sudah <strong>MENYALA</strong>.</span>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center shrink-0 text-[10px]">2</span>
-                    <span>Tekan tombol di bawah, lalu pilih <strong>"Izinkan / Allow"</strong> saat layar HP meminta izin.</span>
-                </div>
-            </div>
-
-            <!-- Tombol Aksi Modal -->
-            <div class="space-y-2 pt-1">
-                <button type="button"
-                        @click="ambilLokasi(true); showPermissionModal = false"
-                        class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-bold text-xs shadow-md shadow-indigo-600/25 flex items-center justify-center gap-2 min-h-[44px]">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    <span>Hidupkan GPS & Izinkan Sekarang</span>
-                </button>
-                <button type="button"
-                        @click="showPermissionModal = false"
-                        class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs min-h-[44px]">
-                    Nanti Saja (Tulis Manual)
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card Form Pendaftaran -->
-    <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4">
-        
-        <!-- Fitur Buka Akses Lokasi (GPS Otomatis) -->
-        <div class="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-50/70 to-blue-50/70 border border-indigo-100 space-y-2.5">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </span>
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-900">Deteksi Titik Rumah Otomatis (GPS)</h4>
-                        <p class="text-[11px] text-slate-500">Wajib hidupkan GPS HP untuk panduan teknisi</p>
-                    </div>
-                </div>
-                <template x-if="gpsBerhasil">
-                    <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">Terhubung</span>
-                </template>
-            </div>
-
-            <!-- Tombol Buka Akses Lokasi -->
-            <button type="button"
-                    @click="ambilLokasi(true)"
-                    :disabled="loadingGps"
-                    class="w-full py-2.5 px-3 rounded-xl bg-white border-2 border-indigo-200 hover:border-indigo-400 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2 shadow-2xs transition-all active:scale-98 min-h-[44px]">
-                <template x-if="!loadingGps && !gpsBerhasil">
-                    <span class="flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-indigo-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11a7.96 7.96 0 001.077 3.998"/></svg>
-                        <span>Deteksi Titik GPS Rumah (Klik di Sini)</span>
-                    </span>
-                </template>
-                <template x-if="loadingGps">
-                    <span class="flex items-center gap-2 text-indigo-600">
-                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-                        <span>Menghubungkan Satelit GPS HP...</span>
-                    </span>
-                </template>
-                <template x-if="gpsBerhasil">
-                    <span class="flex items-center gap-1.5 text-emerald-700">
-                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Titik GPS Terkunci (Klik untuk Perbarui)</span>
-                    </span>
-                </template>
-            </button>
-
-            <!-- Status Hasil GPS -->
-            <div x-show="gpsBerhasil" x-cloak class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] flex items-center justify-between">
-                <span class="flex items-center gap-1.5 font-medium truncate pr-2">
-                    <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span>Titik: <strong x-text="koordinatGps"></strong></span>
-                </span>
-                <span class="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-bold text-emerald-900 shrink-0">Akurat</span>
-            </div>
-
-            <!-- Pesan Error / Panduan Hidupkan GPS -->
-            <div x-show="gpsError" x-cloak class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] space-y-1.5">
-                <div class="flex items-start gap-2">
-                    <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <div class="space-y-1">
-                        <p class="font-bold text-amber-900">Perhatian GPS:</p>
-                        <p class="leading-relaxed" x-text="gpsError"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <form action="{{ base_url or '' }}/daftar" method="POST" class="space-y-4">
 
@@ -148,7 +43,7 @@
                        required
                        value="{{ data.nama or '' }}"
                        placeholder="Contoh: Budi Santoso / Pak Slamet"
-                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                       class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
                 <p class="text-[11px] text-slate-400 mt-1">Masukkan nama yang didaftarkan saat pertama kali pasang WiFi.</p>
             </div>
 
@@ -161,9 +56,8 @@
                           name="alamat"
                           required
                           rows="2"
-                          x-model="alamatValue"
                           placeholder="Contoh: Dusun Karangmangu RT 02 RW 01, Desa Sukamaju"
-                          class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">{{ data.alamat or '' }}</textarea>
+                          class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">{{ data.alamat or '' }}</textarea>
                 <p class="text-[11px] text-slate-400 mt-1">Cukup tulis nama dusun, RT/RW, atau desa tempat tinggal Anda.</p>
             </div>
 
@@ -180,29 +74,14 @@
                        name="no_hp"
                        value="{{ data.no_hp or '' }}"
                        placeholder="Contoh: 081234567890"
-                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                       class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
                 <p class="text-[11px] text-slate-400 mt-1">Digunakan teknisi untuk mengabari Anda jika ada perbaikan jaringan.</p>
             </div>
 
-            <!-- 4. IP Router / Modem (Opsional) -->
-            <div>
-                <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider" for="ip_router">
-                        IP Router / Modem
-                    </label>
-                    <span class="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-semibold">Boleh Dikosongkan</span>
-                </div>
-                <input type="text"
-                       id="ip_router"
-                       name="ip_router"
-                       value="{{ data.ip_router or '' }}"
-                       placeholder="Boleh dikosongkan jika tidak tahu"
-                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                <p class="text-[11px] text-slate-400 mt-1">Jika Anda tahu IP modem Anda (misal 10.10.x.x), ini membantu pencocokan instan.</p>
-            </div>
+
 
             <!-- Kartu Info Password Sementara Otomatis -->
-            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-2.5 text-slate-700">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-2.5 text-slate-700">
                 <svg class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                 <div class="text-[11px] space-y-0.5">
                     <p class="font-bold text-slate-900">Tidak Perlu Repot Membuat Password!</p>
@@ -214,7 +93,7 @@
 
             <!-- Tombol Kirim Pendaftaran -->
             <button type="submit"
-                    class="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-bold text-xs tracking-wide shadow-md shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 min-h-[48px]">
+                    class="w-full py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-bold text-xs tracking-wide shadow-md shadow-indigo-600/25 transition-all flex items-center justify-center gap-2 min-h-[48px]">
                 <span>Daftar & Masuk ke Aplikasi</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </button>
@@ -237,70 +116,22 @@
 <script>
 function locationForm() {
     return {
-        showPermissionModal: false,
-        loadingGps: false,
-        gpsBerhasil: false,
-        gpsError: '',
         koordinatGps: "{{ data.lokasi_gps or '' }}",
-        alamatValue: "{{ data.alamat or '' }}",
         init() {
-            if (this.koordinatGps && this.koordinatGps.trim()) {
-                this.gpsBerhasil = true;
-            } else {
-                // Tampilkan panduan izin GPS otomatis saat pertama kali buka form
-                setTimeout(() => {
-                    if (!this.koordinatGps) {
-                        this.showPermissionModal = true;
-                    }
-                }, 500);
+            // Deteksi GPS otomatis di latar belakang untuk kebutuhan data kantor & teknisi
+            if (!this.koordinatGps && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude.toFixed(6);
+                        const lng = pos.coords.longitude.toFixed(6);
+                        this.koordinatGps = `${lat}, ${lng}`;
+                    },
+                    (err) => {
+                        // Silent fail jika pengguna menolak atau GPS mati
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+                );
             }
-        },
-        ambilLokasi(isUserTriggered = false) {
-            if (!navigator.geolocation) {
-                this.gpsError = 'HP atau browser Anda belum mendukung deteksi lokasi otomatis. Silakan tulis alamat secara manual.';
-                return;
-            }
-            this.loadingGps = true;
-            this.gpsError = '';
-            
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const lat = pos.coords.latitude.toFixed(6);
-                    const lng = pos.coords.longitude.toFixed(6);
-                    this.koordinatGps = `${lat}, ${lng}`;
-                    this.gpsBerhasil = true;
-                    this.loadingGps = false;
-                    this.showPermissionModal = false;
-
-                    // Coba deteksi alamat otomatis via reverse geocoding jika alamat masih kosong
-                    if (!this.alamatValue.trim()) {
-                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                            .then(r => r.json())
-                            .then(d => {
-                                if (d && d.display_name && !this.alamatValue.trim()) {
-                                    this.alamatValue = d.display_name;
-                                }
-                            })
-                            .catch(() => {});
-                    }
-                },
-                (err) => {
-                    this.loadingGps = false;
-                    if (err.code === 1) {
-                        // PERMISSION_DENIED
-                        this.gpsError = 'Izin lokasi belum diberikan. Mohon klik ikon gembok di sebelah alamat web browser atau hidupkan izin lokasi di HP Anda, lalu coba lagi.';
-                    } else if (err.code === 2) {
-                        // POSITION_UNAVAILABLE
-                        this.gpsError = 'Fitur Lokasi / GPS di HP Anda dalam keadaan MATI. Silakan tarik bar atas layar HP Anda, hidupkan ikon Lokasi/GPS, lalu klik tombol deteksi lagi.';
-                    } else if (err.code === 3) {
-                        // TIMEOUT
-                        this.gpsError = 'Waktu pencarian sinyal GPS habis. Silakan coba klik tombol deteksi sekali lagi, atau ketik alamat rumah Anda secara manual di bawah.';
-                    } else {
-                        this.gpsError = 'Lokasi GPS belum dapat ditemukan. Silakan langsung ketik alamat atau nama dusun Anda di kolom bawah.';
-                    }
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-            );
         }
     }
 }

@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import timedelta
 from sqlalchemy.orm import Session
 from app.db.models import KuotaPelanggan, Pelanggan
@@ -6,11 +7,25 @@ from app.core.timezone import get_now_wib
 class KuotaService:
 
     @staticmethod
-    def get_kuota_details(db: Session, id_pelanggan: str):
-        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+    def get_kuota_details(db: Session, id_pelanggan: Optional[str]):
         now = get_now_wib()
         current_period = now.strftime("%Y-%m")
 
+        if not id_pelanggan:
+            mock_kuota = KuotaPelanggan(
+                id_pelanggan="-",
+                periode_bulan=current_period,
+                kuota_terpakai_gb=0.0,
+                kecepatan_paket="Menunggu Verifikasi"
+            )
+            return {
+                "pelanggan": None,
+                "kuota": mock_kuota,
+                "usage_history": [],
+                "now": now
+            }
+
+        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
         kuota = db.query(KuotaPelanggan).filter(
             KuotaPelanggan.id_pelanggan == id_pelanggan,
             KuotaPelanggan.periode_bulan == current_period

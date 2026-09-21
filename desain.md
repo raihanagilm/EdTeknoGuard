@@ -3,9 +3,11 @@
 Dokumen ini merupakan acuan resmi standar visual, palet warna, tipografi, dan komponen antarmuka aplikasi **EdTeknoGuard**. Seluruh template HTML, styling Tailwind CSS, dan komponen interaktif wajib mengacu pada standar di dokumen ini untuk menjaga konsistensi tampilan.
 
 > 🔗 **Tautan Dokumen Terkait:**
+> - 📐 [Design System Pro — Master Rulebook UI/UX (designsystempro.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) — **Sumber Kebenaran Tunggal (*Single Source of Truth*)** untuk seluruh komponen, spacing 8pt/4pt, tipografi, warna, dan pola interaksi UI/UX.
 > - 📖 [README Utama Proyek](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/README.md)
 > - 📋 [Alur Kerja Sistem & Logika Bisnis (prd.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/prd.md)
 > - 🏗️ [Struktur File/Folder & Database (arsitektur.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/arsitektur.md)
+> - 🤖 [Pedoman AI Agent (AGENTS.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/AGENTS.md)
 
 ---
 

@@ -1,0 +1,165 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Pemantauan Kuota Pelanggan — EdTeknoGuard{% endblock %}
+
+{% block content %}
+<div class="space-y-6" x-data="kuotaApp()">
+
+    <!-- Header Halaman -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    Manajemen Pelanggan
+                </span>
+                <span class="text-xs text-slate-400">&bull;</span>
+                <span class="text-xs text-slate-500 font-medium">Kantor {{ active_kantor | upper }}</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1 flex items-center gap-2">
+                <span>Pemantauan Pemakaian Kuota</span>
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Data akumulasi kuota data yang telah digunakan pelanggan pada periode bulan berjalan (Layanan Unlimited Tanpa Batas Sisa).
+            </p>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full sm:w-72">
+            <input type="text"
+                   x-model="searchQuery"
+                   placeholder="Cari nama atau ID..."
+                   class="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[44px]">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrik Ringkas -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500">Total Pelanggan Terdata</span>
+                <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
+            </div>
+            <div class="text-2xl font-black text-slate-900 mt-2">{{ quota_items|length }}</div>
+            <span class="text-[11px] text-slate-400">Wilayah Kantor {{ active_kantor | upper }}</span>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500">Total Trafik Bulan Ini</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                </div>
+            </div>
+            {% set total_gb = quota_items|sum(attribute='terpakai_gb') %}
+            <div class="text-2xl font-black text-emerald-600 mt-2">
+                {{ "%.2f"|format(total_gb) }} <span class="text-sm font-bold text-slate-500">GB</span>
+            </div>
+            <span class="text-[11px] text-slate-400">Akumulasi pemakaian seluruh user</span>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500">Rata-rata Pemakaian</span>
+                <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
+            </div>
+            {% set avg_gb = (total_gb / quota_items|length) if quota_items|length > 0 else 0 %}
+            <div class="text-2xl font-black text-blue-600 mt-2">
+                {{ "%.2f"|format(avg_gb) }} <span class="text-sm font-bold text-slate-500">GB/user</span>
+            </div>
+            <span class="text-[11px] text-slate-400">Konsumsi rata-rata pelanggan</span>
+        </div>
+    </div>
+
+    <!-- Tabel Rekap Kuota Pelanggan -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                <h3 class="text-sm font-bold text-slate-900">Rekap Pemakaian Kuota Pelanggan</h3>
+            </div>
+            <span class="text-xs text-slate-500 font-medium">Periode: <strong>{{ quota_items[0].periode if quota_items else '-' }}</strong></span>
+        </div>
+
+        {% if quota_items %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50/80 text-slate-600 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200">
+                    <tr>
+                        <th class="py-3 px-4">ID Pelanggan</th>
+                        <th class="py-3 px-4">Nama Pelanggan</th>
+                        <th class="py-3 px-4">Alamat / Dusun</th>
+                        <th class="py-3 px-4">Paket Layanan</th>
+                        <th class="py-3 px-4">Kuota Terpakai</th>
+                        <th class="py-3 px-4">Sifat Layanan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in quota_items %}
+                    {% set p = item.pelanggan %}
+                    <tr class="hover:bg-slate-50/70 transition"
+                        x-show="matchesSearch('{{ p.id_pelanggan }}', '{{ p.nama }}')">
+                        <td class="py-3 px-4 font-mono font-bold text-indigo-700">
+                            {{ p.id_pelanggan }}
+                        </td>
+                        <td class="py-3 px-4 font-extrabold text-slate-900 text-sm">
+                            {{ p.nama }}
+                        </td>
+                        <td class="py-3 px-4 text-slate-600 font-medium">
+                            {{ p.alamat or '-' }}
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-800 font-bold border border-slate-200 inline-block">
+                                {{ item.paket }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="font-mono font-black text-sm text-slate-900">
+                                {{ "%.2f"|format(item.terpakai_gb) }} <span class="text-xs font-semibold text-slate-500">GB</span>
+                            </div>
+                            <!-- Baris visual mini persentase relatif -->
+                            <div class="w-28 bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1.5">
+                                {% set pct = (item.terpakai_gb / 200.0 * 100)|round %}
+                                <div class="bg-indigo-600 h-full rounded-full" :style="'width: ' + Math.min({{ pct }}, 100) + '%'"></div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Unlimited (Bebas FUP)
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="py-12 px-4 text-center">
+            <p class="font-bold text-slate-700">Belum ada data pemakaian kuota pelanggan</p>
+            <p class="text-xs text-slate-500 mt-1">Data kuota akan tercatat secara periodik saat polling WAN/RADIUS berjalan.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+function kuotaApp() {
+    return {
+        searchQuery: '',
+        matchesSearch(id, nama) {
+            if (!this.searchQuery.trim()) return true;
+            const q = this.searchQuery.toLowerCase();
+            return (id && id.toLowerCase().includes(q)) || (nama && nama.toLowerCase().includes(q));
+        }
+    }
+}
+</script>
+{% endblock %}

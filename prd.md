@@ -3,9 +3,11 @@
 Dokumen ini mendefinisikan **alur kerja sistem, logika bisnis, dan kebutuhan fungsional** dari aplikasi **EdTeknoGuard** (Sistem Deteksi Dini & Monitoring Kualitas Jaringan ONT/Modem Berbasis Python FastAPI, TiDB Cloud, dan Telegram Alerting).
 
 > 🔗 **Tautan Dokumen Terkait:**
+> - 📐 [Design System Pro — Rulebook UI/UX (designsystempro.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) — **Sumber Kebenaran Tunggal (*Single Source of Truth*)** untuk seluruh komponen, spacing, tipografi, warna, dan pola interaksi UI/UX.
 > - 🎨 [Pedoman Desain & Tampilan (desain.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/desain.md) — Mengatur warna tampilan, komponen visual, dan mobile-first.
 > - 🏗️ [Struktur File/Folder & Database (arsitektur.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/arsitektur.md) — Mengatur struktur direktori proyek dan skema tabel TiDB.
 > - 📖 [README Utama Proyek](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/README.md) — Gambaran umum dan panduan menjalankan sistem.
+> - 🤖 [Pedoman AI Agent (AGENTS.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/AGENTS.md) — Aturan sistem dan instruksi AI Agent.
 
 ---
 
@@ -175,3 +177,25 @@ Untuk mempermudah analisa teknis, dashboard menyediakan visualisasi grafik (Char
    - Menampilkan tren jangka panjang degradasi redaman kabel optik.
 4. **Garis Ambang Batas (Threshold Line):**
    - Pada grafik selalu tergambar garis horizontal oranye putus-putus pada titik `-26.0 dBm` sebagai batas visual yang tegas.
+
+---
+
+## 7. Standar & Kepatuhan UI/UX (Design System Pro)
+
+Seluruh perancangan, pengembangan, penambahan fitur, dan perbaikan antarmuka (UI/UX) pada **EdTeknoGuard** (baik portal admin NOC maupun portal pelanggan mandiri) **WAJIB MENGIKUTI DAN MEMATUHI** aturan yang telah dibakukan dalam:
+
+👉 **[`designsystempro.md` — Rulebook UI/UX (Design System V2)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md)**
+
+### Ketentuan Utama yang Mengikat:
+1. **Prinsip Utama:** *"Terlihat rapi" ≠ "Terstruktur dengan benar."* Setiap komponen, jarak (spacing), warna, dan elevasi wajib memiliki alasan matematis dan fungsional dari rulebook.
+2. **Foundations:**
+   - **Grid & Spacing:** Wajib menggunakan sistem modular 8pt/4pt (4px, 8px, 12px, 16px, 24px, 32px, 48px, dst.). Dilarang menggunakan nilai arbitrer acak (seperti 13px, 17px, 23px).
+   - **Color Balance (60-30-10):** 60% warna dominan netral/background, 30% warna sekunder/surface kontainer, 10% warna aksen/brand (`#4F46E5` / status alert).
+   - **Accessibility & Contrast:** Kontras teks wajib memenuhi standar WCAG AA (minimal 4.5:1 untuk teks normal, 3:1 untuk teks besar).
+   - **Touch Target:** Area sentuh interaktif pada seluruh antarmuka mobile minimal berukuran **44 x 44 px** (`min-h-[44px]` dan `min-w-[44px]`).
+3. **Komponen & Pola Interaksi:**
+   - **Button Hierarchy:** Primary (aksi utama), Secondary (aksi alternatif), Ghost/Tertiary (aksi pelengkap), dan Destructive (aksi berbahaya/hapus dengan modal konfirmasi).
+   - **Form Fields:** Label jelas di atas input, placeholder sebagai contoh bukan pengganti label, error message deskriptif di bawah input.
+   - **Ikon Antarmuka:** Wajib SVG inline murni bersih; dilarang menggunakan emoji atau font-icon eksternal sebagai tombol aksi UI.
+   - **Mobile-First Navigation:** Navigasi mobile wajib ramah satu tangan (bottom navigation bar atau drawer burger menu off-canvas).
+

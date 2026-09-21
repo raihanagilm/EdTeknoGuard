@@ -1,0 +1,308 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Verifikasi Pendaftar Baru — EdTeknoGuard{% endblock %}
+
+{% block content %}
+<div class="space-y-6" x-data="verifikasiApp()">
+
+    <!-- Header Halaman -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    Manajemen Pelanggan
+                </span>
+                <span class="text-xs text-slate-400">&bull;</span>
+                <span class="text-xs text-slate-500 font-medium">Kantor {{ active_kantor | upper }}</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1 flex items-center gap-2">
+                <span>Verifikasi Pendaftar Baru</span>
+                {% if total_pending > 0 %}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                    {{ total_pending }} Menunggu
+                </span>
+                {% endif %}
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Cocokkan warga desa yang mendaftar mandiri dengan data pelanggan resmi kantor sebelum ID Pelanggan dan akses WiFi diberikan.
+            </p>
+        </div>
+    </div>
+
+    <!-- Info SOP Ramah Admin -->
+    <div class="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-100 text-xs text-indigo-950 flex items-start gap-3">
+        <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="space-y-1">
+            <p class="font-bold text-indigo-900">Panduan Verifikasi Aman (SOP Kantor):</p>
+            <p class="text-indigo-800 leading-relaxed">
+                Periksa nama pendaftar dan alamat dusun yang diketik warga. Klik tombol <strong>Titik GPS</strong> untuk melihat posisi rumah pendaftar di Google Maps. Pilih baris data pelanggan yang cocok di database, lalu klik <strong>Setujui &amp; Hubungkan</strong>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Tabel Daftar Pendaftar PENDING -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <h3 class="text-sm font-bold text-slate-900">Daftar Antrean Pendaftar Mandiri</h3>
+            </div>
+            <span class="text-xs text-slate-500 font-medium">Total: <strong>{{ pending_list|length }}</strong> antrean</span>
+        </div>
+
+        {% if pending_list %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50/80 text-slate-600 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200">
+                    <tr>
+                        <th class="py-3 px-4">Warga Pendaftar</th>
+                        <th class="py-3 px-4">Alamat / Dusun</th>
+                        <th class="py-3 px-4">No. WhatsApp</th>
+                        <th class="py-3 px-4">Titik Lokasi Rumah</th>
+                        <th class="py-3 px-4">Waktu Daftar</th>
+                        <th class="py-3 px-4 text-center">Tindakan Admin</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for p in pending_list %}
+                    <tr class="hover:bg-slate-50/70 transition">
+                        <td class="py-3 px-4">
+                            <div class="font-extrabold text-slate-900 text-sm">
+                                {{ p.nama_lengkap or p.username }}
+                            </div>
+                            <span class="text-[10px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-md font-bold inline-block mt-0.5">
+                                Belum Terhubung ID
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-slate-700 font-medium max-w-xs leading-relaxed">
+                            {{ p.alamat_pendaftar or '-' }}
+                        </td>
+                        <td class="py-3 px-4">
+                            {% if p.no_hp %}
+                            <a href="https://wa.me/{{ p.no_hp|replace(' ', '')|replace('-', '')|replace('+', '') }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold transition">
+                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                <span>{{ p.no_hp }}</span>
+                            </a>
+                            {% else %}
+                            <span class="text-slate-400 italic">Tidak ada nomor</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4">
+                            {% if p.lokasi_gps %}
+                            <a href="https://www.google.com/maps?q={{ p.lokasi_gps }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold transition">
+                                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span>Buka di Maps</span>
+                            </a>
+                            {% else %}
+                            <span class="text-slate-400 italic">GPS tidak aktif</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">
+                            {{ p.created_at.strftime("%d/%m/%Y %H:%M") if p.created_at else '-' }}
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button type="button"
+                                        @click="openMatchModal({{ p.id }}, '{{ p.nama_lengkap or p.username }}', '{{ p.alamat_pendaftar or '' }}')"
+                                        class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 min-h-[44px]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                    <span>Cocokkan Pelanggan</span>
+                                </button>
+                                <button type="button"
+                                        @click="rejectRegistration({{ p.id }}, '{{ p.nama_lengkap or p.username }}')"
+                                        class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 font-bold text-xs transition flex items-center gap-1 min-h-[44px]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <span>Tolak</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-12 text-center space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800">Semua Pendaftar Telah Terverifikasi</h3>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                Tidak ada antrean pendaftaran mandiri baru yang berstatus pending di kantor {{ active_kantor | upper }}.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal Pencocokan Data Pelanggan -->
+    <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="bg-white rounded-3xl p-6 max-w-lg w-full border border-slate-200 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-150">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Hubungkan ke Data Pelanggan</h3>
+                        <p class="text-[11px] text-slate-500">Pilih data resmi kantor untuk pendaftar ini</p>
+                    </div>
+                </div>
+                <button type="button" @click="modalOpen = false" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Detail Pendaftar -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Nama Pendaftar:</span>
+                    <strong class="text-slate-900" x-text="selectedPendaftarNama"></strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Alamat Dusun:</span>
+                    <span class="text-slate-800 font-medium" x-text="selectedPendaftarAlamat || '-'"></span>
+                </div>
+            </div>
+
+            <!-- Pilih Pelanggan Kantor -->
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider" for="select_customer">
+                    Pilih Pelanggan dari Database Kantor <span class="text-rose-500">*</span>
+                </label>
+                <div class="space-y-2">
+                    <input type="text"
+                           x-model="searchQuery"
+                           placeholder="Ketik nama pelanggan atau ID untuk mencari..."
+                           class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+
+                    <select id="select_customer"
+                            x-model="selectedCustomerId"
+                            size="5"
+                            class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-indigo-500 h-40 overflow-y-auto">
+                        <template x-for="c in filteredCustomers" :key="c.id_pelanggan">
+                            <option :value="c.id_pelanggan" class="py-1 px-2 hover:bg-indigo-50">
+                                <span x-text="c.nama"></span> - [<span x-text="c.id_pelanggan"></span>] (<span x-text="c.alamat"></span>)
+                            </option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tombol Simpan -->
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button"
+                        @click="modalOpen = false"
+                        class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs min-h-[44px]">
+                    Batal
+                </button>
+                <button type="button"
+                        :disabled="!selectedCustomerId || loadingApprove"
+                        @click="submitApprove()"
+                        class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition flex items-center gap-2 min-h-[44px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span x-text="loadingApprove ? 'Menghubungkan...' : 'Setujui & Hubungkan'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="application/json" id="customer-options-json">
+{{ customer_options | tojson }}
+</script>
+
+<script>
+function verifikasiApp() {
+    let rawOptions = [];
+    try {
+        const el = document.getElementById('customer-options-json');
+        if (el) rawOptions = JSON.parse(el.textContent);
+    } catch(e) {
+        rawOptions = [];
+    }
+    return {
+        modalOpen: false,
+        selectedAccountId: null,
+        selectedPendaftarNama: '',
+        selectedPendaftarAlamat: '',
+        selectedCustomerId: '',
+        searchQuery: '',
+        loadingApprove: false,
+        allCustomers: rawOptions,
+
+        get filteredCustomers() {
+            if (!this.searchQuery.trim()) return this.allCustomers;
+            const q = this.searchQuery.toLowerCase();
+            return this.allCustomers.filter(c => 
+                (c.nama && c.nama.toLowerCase().includes(q)) ||
+                (c.id_pelanggan && c.id_pelanggan.toLowerCase().includes(q)) ||
+                (c.alamat && c.alamat.toLowerCase().includes(q))
+            );
+        },
+
+        openMatchModal(accId, nama, alamat) {
+            this.selectedAccountId = accId;
+            this.selectedPendaftarNama = nama;
+            this.selectedPendaftarAlamat = alamat;
+            this.searchQuery = nama;
+            this.selectedCustomerId = '';
+            this.modalOpen = true;
+        },
+
+        async submitApprove() {
+            if (!this.selectedAccountId || !this.selectedCustomerId) return;
+            this.loadingApprove = true;
+
+            const fd = new FormData();
+            fd.append('account_id', this.selectedAccountId);
+            fd.append('id_pelanggan', this.selectedCustomerId);
+
+            try {
+                const res = await fetch('/admin/api/verifikasi-pelanggan/approve', {
+                    method: 'POST',
+                    body: fd
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert('Gagal: ' + data.message);
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan jaringan.');
+            } finally {
+                this.loadingApprove = false;
+            }
+        },
+
+        async rejectRegistration(accId, nama) {
+            if (!confirm(`Apakah Anda yakin ingin menolak pendaftaran akun '${nama}'?`)) return;
+            const fd = new FormData();
+            fd.append('account_id', accId);
+            fd.append('alasan', 'Data tidak sesuai');
+
+            try {
+                const res = await fetch('/admin/api/verifikasi-pelanggan/reject', {
+                    method: 'POST',
+                    body: fd
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert('Gagal: ' + data.message);
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan.');
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

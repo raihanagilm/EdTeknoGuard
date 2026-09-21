@@ -49,14 +49,14 @@
         <table class="w-full text-left border-collapse text-xs">
             <thead>
                 <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold">
-                    <th class="py-3.5 px-4">Pelanggan</th>
-                    <th class="py-3.5 px-4">POP &amp; IP Router</th>
-                    <th class="py-3.5 px-4">Perangkat Modem</th>
-                    <th class="py-3.5 px-4 text-center">Baseline</th>
-                    <th class="py-3.5 px-4 text-center">Redaman Terkini</th>
-                    <th class="py-3.5 px-4 text-center">Status</th>
-                    <th class="py-3.5 px-4 text-center">Cek Terakhir</th>
-                    <th class="py-3.5 px-4 text-center">Aksi</th>
+                    <th class="py-3 px-4">Pelanggan</th>
+                    <th class="py-3 px-4">POP &amp; IP Router</th>
+                    <th class="py-3 px-4">Perangkat Modem</th>
+                    <th class="py-3 px-4 text-center">Baseline</th>
+                    <th class="py-3 px-4 text-center">Redaman Terkini</th>
+                    <th class="py-3 px-4 text-center">Status</th>
+                    <th class="py-3 px-4 text-center">Cek Terakhir</th>
+                    <th class="py-3 px-4 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 text-slate-700">
@@ -64,7 +64,7 @@
                     <tr class="hover:bg-slate-50/60 transition group">
                         
                         <!-- Nama & ID -->
-                        <td class="py-3.5 px-4">
+                        <td class="py-3 px-4">
                             <div class="font-bold text-slate-900 text-sm" x-text="c.nama"></div>
                             <div class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
                                 <span class="font-mono" x-text="'ID: ' + c.id_pelanggan"></span>
@@ -73,24 +73,24 @@
                         </td>
 
                         <!-- POP & IP -->
-                        <td class="py-3.5 px-4">
+                        <td class="py-3 px-4">
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200" x-text="c.pop"></span>
                             <div class="font-mono text-slate-800 font-bold text-xs mt-1" x-text="c.ip_router"></div>
                         </td>
 
                         <!-- Modem & MAC -->
-                        <td class="py-3.5 px-4">
+                        <td class="py-3 px-4">
                             <div class="font-semibold text-slate-800" x-text="c.jenis_modem"></div>
                             <div class="font-mono text-[10px] text-slate-400" x-text="c.mac_address || '-'"></div>
                         </td>
 
                         <!-- Baseline -->
-                        <td class="py-3.5 px-4 text-center font-mono font-medium text-slate-600">
+                        <td class="py-3 px-4 text-center font-mono font-medium text-slate-600">
                             <span x-text="c.redaman_baseline ? (c.redaman_baseline + ' dBm') : '-'"></span>
                         </td>
 
                         <!-- Current Redaman (Highlight) -->
-                        <td class="py-3.5 px-4 text-center">
+                        <td class="py-3 px-4 text-center">
                             <span class="font-mono font-extrabold text-sm px-2.5 py-1 rounded-lg inline-block"
                                   :class="{
                                       'bg-emerald-50 text-emerald-700 border border-emerald-200': c.status === 'NORMAL',
@@ -103,7 +103,7 @@
                         </td>
 
                         <!-- Status Badge -->
-                        <td class="py-3.5 px-4 text-center">
+                        <td class="py-3 px-4 text-center">
                             <span class="px-2 py-1 rounded-full text-[10px] font-bold inline-flex items-center gap-1"
                                   :class="{
                                       'bg-emerald-50 text-emerald-700 border border-emerald-200': c.status === 'NORMAL',
@@ -123,14 +123,14 @@
                         </td>
 
                         <!-- Last Check -->
-                        <td class="py-3.5 px-4 text-center text-slate-500 font-mono text-[11px]" x-text="c.last_check"></td>
+                        <td class="py-3 px-4 text-center text-slate-500 font-mono text-[11px]" x-text="c.last_check"></td>
 
                         <!-- Action Cek Live -->
-                        <td class="py-3.5 px-4 text-center">
+                        <td class="py-3 px-4 text-center">
                             <button @click="triggerScanSingle(c.id_pelanggan)"
                                     :disabled="scanningSingleId === c.id_pelanggan"
                                     title="Tembak SNMP ONT sekarang"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition disabled:opacity-50 min-h-[36px]">
+                                    class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition disabled:opacity-50 min-h-[40px]">
                                 <svg x-show="scanningSingleId !== c.id_pelanggan" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <svg x-show="scanningSingleId === c.id_pelanggan" class="animate-spin w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 <span x-text="scanningSingleId === c.id_pelanggan ? 'Mengecek...' : 'Cek Live'">Cek Live</span>
@@ -207,13 +207,13 @@
         <div class="flex items-center gap-2">
             <button @click="prevPage()"
                     :disabled="currentPage <= 1"
-                    class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-semibold disabled:opacity-40 min-h-[38px]">
+                    class="px-4 py-2 rounded-xl border border-slate-200 bg-white font-semibold disabled:opacity-40 min-h-[40px]">
                 Sebelumnya
             </button>
-            <span class="font-mono font-bold text-slate-800" x-text="currentPage"></span>
+            <span class="font-mono font-bold text-slate-800 px-2" x-text="currentPage"></span>
             <button @click="nextPage()"
                     :disabled="customers.length < pageSize"
-                    class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-semibold disabled:opacity-40 min-h-[38px]">
+                    class="px-4 py-2 rounded-xl border border-slate-200 bg-white font-semibold disabled:opacity-40 min-h-[40px]">
                 Berikutnya
             </button>
         </div>

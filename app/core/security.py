@@ -120,3 +120,5 @@ def require_super_admin(request: Request) -> Dict[str, Any]:
         )
     return user
 
+require_login = require_admin
+

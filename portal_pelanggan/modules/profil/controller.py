@@ -16,8 +16,18 @@ class ProfilController:
     @staticmethod
     def render_profil_page(request: Request, db: Session, error: str = None, success: str = None):
         cust_session = require_customer_login(request)
-        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_session["id_pelanggan"]).first()
-        akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == cust_session["id_pelanggan"]).first()
+        id_pel = cust_session.get("id_pelanggan")
+        acc_id = cust_session.get("account_id")
+        
+        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first() if id_pel else None
+        
+        if acc_id:
+            akun = db.query(AkunPelanggan).filter(AkunPelanggan.id == acc_id).first()
+        elif id_pel:
+            akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == id_pel).first()
+        else:
+            akun = db.query(AkunPelanggan).filter(AkunPelanggan.username == cust_session["nama"]).first()
+
         base = get_base_url(request)
 
         return templates.TemplateResponse(
@@ -43,7 +53,15 @@ class ProfilController:
         konfirmasi_password: str = Form(...)
     ):
         cust_session = require_customer_login(request)
-        akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == cust_session["id_pelanggan"]).first()
+        id_pel = cust_session.get("id_pelanggan")
+        acc_id = cust_session.get("account_id")
+        
+        if acc_id:
+            akun = db.query(AkunPelanggan).filter(AkunPelanggan.id == acc_id).first()
+        elif id_pel:
+            akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == id_pel).first()
+        else:
+            akun = db.query(AkunPelanggan).filter(AkunPelanggan.username == cust_session["nama"]).first()
 
         if not akun or not verify_password(password_lama, akun.password_hash):
             return ProfilController.render_profil_page(

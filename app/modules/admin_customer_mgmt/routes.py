@@ -1,0 +1,62 @@
+from fastapi import APIRouter, Depends, Request, Form
+from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.modules.admin_customer_mgmt.controller import AdminCustomerMgmtController
+
+router = APIRouter(prefix="/admin", tags=["admin_customer_mgmt"])
+
+@router.get("/verifikasi-pelanggan")
+def render_verification_page(request: Request, db: Session = Depends(get_db)):
+    return AdminCustomerMgmtController.render_verification_page(request=request, db=db)
+
+@router.post("/api/verifikasi-pelanggan/approve")
+def approve_registration(
+    request: Request,
+    account_id: int = Form(...),
+    id_pelanggan: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    return AdminCustomerMgmtController.approve_registration(
+        request=request,
+        db=db,
+        account_id=account_id,
+        id_pelanggan=id_pelanggan
+    )
+
+@router.post("/api/verifikasi-pelanggan/reject")
+def reject_registration(
+    request: Request,
+    account_id: int = Form(...),
+    alasan: str = Form(""),
+    db: Session = Depends(get_db)
+):
+    return AdminCustomerMgmtController.reject_registration(
+        request=request,
+        db=db,
+        account_id=account_id,
+        alasan=alasan
+    )
+
+@router.get("/tiket")
+def render_tickets_page(request: Request, status: str = "SEMUA", db: Session = Depends(get_db)):
+    return AdminCustomerMgmtController.render_tickets_page(request=request, db=db, status_filter=status)
+
+@router.post("/api/tiket/update-status")
+def update_ticket_status(
+    request: Request,
+    ticket_id: str = Form(...),
+    new_status: str = Form(...),
+    catatan: str = Form(""),
+    db: Session = Depends(get_db)
+):
+    return AdminCustomerMgmtController.update_ticket_status(
+        request=request,
+        db=db,
+        ticket_id=ticket_id,
+        new_status=new_status,
+        catatan=catatan
+    )
+
+@router.get("/kuota")
+def render_quota_page(request: Request, db: Session = Depends(get_db)):
+    return AdminCustomerMgmtController.render_quota_page(request=request, db=db)

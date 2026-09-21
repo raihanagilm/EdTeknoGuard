@@ -28,7 +28,7 @@ Dokumen ini adalah acuan arsitektur dan pedoman sistem (*System Instruction / Ru
 | **Interaktivitas UI** | Alpine.js 3.x (Reaktif ringan tanpa build tools kompleks) |
 | **Visualisasi Grafik** | Chart.js |
 | **Ikon UI** | Standar SVG inline murni bersih (bebas ketergantungan library eksternal, DILARANG KERAS memakai emoji/font icons) |
-| **Integrasi Eksternal** | Telegram Bot API (`requests` / `httpx`) & HTTP Scraper Modem ONT |
+| **Integrasi Eksternal** | HTTP Scraper Modem ONT ZTE GM220-S & Notifikasi Native APK Android (Web Wrapper) |
 
 ---
 
@@ -40,14 +40,12 @@ Pengecekan redaman optik mengacu pada standar operasional berikut:
    - Kondisi koneksi prima, throughput lancar, tidak ada tindakan yang diperlukan.
 2. **Ambang Batas Peringatan Dini (`-26.0 dBm`) — Peringatan Ringan ⚠️**:
    - Dipicu jika redaman berada pada rentang **`-26.0 dBm` s/d `-27.0 dBm`**.
-   - Header notifikasi Telegram: `⚠️ [PERINGATAN RINGAN - PERINGATAN DINI]`.
    - Status koneksi: `WARNING`.
    - Menandakan koneksi pelanggan mulai mengalami penurunan kualitas (konektor kotor atau tekukan ringan), namun masih dalam batas operasional.
 3. **Ambang Batas Kritis (`<= -27.0 dBm` atau LOS) — Notifikasi Merah Segera Dicek 🚨🔴**:
    - Dipicu jika redaman menyentuh atau lebih buruk dari **`-27.0 dBm`** (misal `-27.1 dBm`, `-28 dBm`, s/d LOS).
-   - Header notifikasi Telegram: `🚨🔴 [NOTIFIKASI MERAH - SEGERA DICEK!]`.
    - Status koneksi: `CRITICAL` atau `LOS`.
-   - Berisiko tinggi pemutusan koneksi (*drop signal*). Pesan Telegram memuat instruksi darurat: *"Mohon teknisi piket lapangan untuk SEGERA melakukan pengecekan fisik kabel dropcore, sambungan fusion/fast connector, dan patchcord pelanggan!"*
+   - Berisiko tinggi pemutusan koneksi (*drop signal*). Sistem memicu instruksi darurat: *"Mohon teknisi piket lapangan untuk SEGERA melakukan pengecekan fisik kabel dropcore, sambungan fusion/fast connector, dan patchcord pelanggan!"*
 
 ---
 
@@ -69,10 +67,10 @@ Modem pelanggan di lapangan dapat memiliki kredensial yang bervariasi karena kon
    - **Langkah 2**: Jika gagal (`AUTH_FAILED`), scraper mencoba seluruh daftar kredensial default dari pengaturan satu per satu secara berurutan.
    - **Langkah 3**: Jika salah satu kredensial default berhasil login, kredensial pelanggan yang tadinya `INVALID` otomatis diperbarui menjadi `VALID` di database.
 3. **Halaman Pengaturan (`/pengaturan` atau `/settings`)**:
-   - Menggunakan layout **3 TAB**:
+   - Menggunakan layout **2 TAB**:
      - **Tab 1 (Parameter & Ambang Batas)**: Input manual menit interval, ambang batas -26.0 dBm (warning) dan -27.0 dBm (kritis). *Tanpa tombol preset opsi dan tanpa radio button status scheduler*.
      - **Tab 2 (Kredensial Modem ONT)**: Tabel repeater dinamis untuk menambah/menghapus pasangan username & password modem lebih dari 1 + opsi sinkronisasi massal ke pelanggan invalid.
-     - **Tab 3 (Integrasi Bot Telegram)**: Konfigurasi token @BotFather, recipient chat ID, dan tombol uji coba alert instan.
+     - *(Fitur Telegram telah dihapus bersih karena notifikasi darurat ditangani secara native melalui web wrapper APK Android Studio)*.
 
 ---
 
@@ -176,49 +174,54 @@ EdTeknoGuard/
     - **Arsitektur Satu Proyek & Satu Server**:
       - Terintegrasi di dalam repositori pada folder `portal_pelanggan/` dan di-mount langsung pada aplikasi utama di endpoint `/portal` (dapat juga dijalankan mandiri di port terpisah jika diinginkan).
       - Menggunakan database bersama (TiDB Cloud) dengan penambahan tabel `akun_pelanggan`, `tiket_kendala`, dan `kuota_pelanggan`.
-    - **Aktivasi / Registrasi Ramah Warga Desa (`/portal/daftar`)**:
+    - **Aktivasi / Registrasi Ramah Warga Desa 2-Tahap (`/portal/daftar`)**:
       - Didesain sangat sederhana dan mudah untuk warga desa tanpa istilah teknis yang membingungkan.
-      - **Prompt & Panduan Izin GPS Otomatis**: Saat formulir pendaftaran dibuka, sistem otomatis memicu dialog izin GPS lokasi (`navigator.geolocation`) dan menampilkan modal izin ramah desa yang memandu warga untuk **menghidupkan ikon Lokasi/GPS di HP mereka** (swipe bar atas layar HP).
-      - Input hanya: **Nama Terdaftar** (sesuai pasang WiFi), **Alamat / Dusun / Desa** (bukan istilah 'alamat pemasangan'), **Deteksi GPS Rumah Otomatis**, **No WhatsApp/HP**, dan **IP Router (Opsional, boleh dikosongkan)**.
-      - **Bebas Ribet Password**: Pelanggan tidak perlu membuat atau mengingat password baru saat daftar. Seluruh akun otomatis disetel ke password awal `123456` dan langsung otomatis login ke dashboard setelah pendaftaran.
-      - Algoritma pencocokan fleksibel berbasis token/substring nama dan alamat (mencakup pencarian seluruh baris pelanggan di database). Koordinat GPS otomatis disimpan ke data pelanggan untuk memudahkan teknisi menemukan lokasi fisik.
+      - Input hanya: **Nama Lengkap Pendaftar**, **Alamat / Dusun / Desa**, **Nomor WhatsApp**, dan **Deteksi Titik GPS Rumah Otomatis (Background)**. Input IP router ditiadakan dari formulir pendaftaran karena warga desa tidak mengetahui IP WAN jaringan ISP.
+      - **Status PENDING & Keamanan Data Kantor**: Pendaftaran awal otomatis berstatus `PENDING` dengan `id_pelanggan = None`. Warga belum diberikan akses ganti WiFi / ID Pelanggan sebelum dicocokkan dan diverifikasi oleh Admin kantor.
+      - **Bebas Ribet Password**: Seluruh akun otomatis disetel ke password awal `123456` dan langsung dapat masuk ke dashboard pratinjau.
     - **Autentikasi & Sesi Pelanggan (`/portal/login`)**:
       - Seluruh akun pelanggan baru menggunakan kata sandi awal: `123456`.
       - Antarmuka ramah warga menggunakan bahasa Indonesia bersih (*"Petunjuk Masuk: Kata sandi awal adalah: 123456"*), tanpa tombol preset "Isi 123456", dilengkapi toggle lihat kata sandi (ikon SVG mata terbuka/tertutup) dan tautan *"Lupa Kata Sandi?"*.
-      - **Fitur Auto-Provisioning**: Jika pelanggan belum pernah membuka menu daftar tetapi langsung masuk dengan nama terdaftar + password `123456`, sistem otomatis mengaktifkan akun dan mengizinkan login tanpa hambatan.
-      - Masa aktif sesi 30 hari via secure cookie `edtekno_pelanggan_session` dengan mekanisme perpanjangan otomatis (*sliding expiration*).
+      - Sesi 30 hari via secure cookie `edtekno_pelanggan_session`.
     - **Fitur Lupa & Reset Kata Sandi Mandiri (`/portal/lupa-password`)**:
       - **Opsi Verifikasi Mandiri**:
-        1. **Opsi Utama (IP Modem / Router)**: Sangat logis & mudah diakses warga karena dapat dicek langsung pada stiker fisik bagian belakang/bawah modem ONT atau di menu info sambungan WiFi HP (`10.10.x.x` / `192.168.x.x`). Jika pelanggan lupa nama terdaftar atau nomor HP yang dulu dipakai pasang WiFi, **cukup masukkan IP Modem saja** untuk langsung mereset kata sandi baru tanpa hambatan.
-        2. **Opsi Alternatif (Nama & Nomor HP Terdaftar)**: Jika pelanggan tidak tahu IP modem, sistem tetap menyediakan pencocokan berbasis Nama Terdaftar dan Nomor WhatsApp/HP.
-        3. **Kata Sandi Baru**: Pelanggan dapat mengatur kata sandi baru (minimal 6 karakter) atau menggunakan tombol cepat *"Setel ke 123456"*.
-      - **Bebas Ketergantungan WA**: Tombol kontak WhatsApp teknisi ditiadakan agar sistem benar-benar mandiri (*self-service*).
-      - **Pemberitahuan Audit**: Sistem otomatis mengirimkan alert notifikasi ke Bot Telegram grup teknisi saat pelanggan mereset kata sandi.
-    - **Lapor Kendala Terintegrasi Telegram**:
-      - Pelanggan dapat membuat tiket gangguan (Internet Lambat, LOS Lampu Merah, Sinyal Drop, ONT Mati, WiFi Lemah, dll.) di `/portal/kendala/buat`.
+        1. **Opsi Utama (IP Modem / Router)**: Cek stiker fisik modem ONT atau menu WiFi HP (`10.10.x.x` / `192.168.x.x`).
+        2. **Opsi Alternatif (Nama & Nomor HP Terdaftar)**: Pencocokan berbasis Nama Terdaftar dan Nomor WhatsApp.
+        3. **Kata Sandi Baru**: Pelanggan dapat mengatur kata sandi baru (minimal 6 karakter) atau tombol cepat *"Setel ke 123456"*.
+      - **Bebas Ketergantungan WA**: Mandiri (*self-service*).
+    - **Lapor Kendala Mandiri (`/portal/kendala/buat`)**:
+      - Pelanggan dapat membuat tiket gangguan (Internet Lambat, LOS Lampu Merah, Sinyal Drop, ONT Mati, WiFi Lemah, dll.).
       - Sistem otomatis melampirkan redaman optik terakhir (dBm) dan status ONT dari `log_performa_ont` serta nomor WA pelapor.
-      - Otomatis meneruskan notifikasi tiket baru ke bot Telegram grup teknisi.
     - **Cek Penggunaan Kuota & Larangan Menampilkan Sisa Kuota**:
       - Menampilkan pemakaian kuota bulan berjalan (GB), nama paket, kecepatan (Mbps), dan histori pemakaian 7 hari terakhir.
       - **KEBIJAKAN MUTLAK SOP**: DILARANG KERAS menampilkan kata atau angka "Sisa Kuota" di seluruh antarmuka pelanggan (layanan bersifat unlimited).
     - **Menu Kelola WiFi Rumah (`/portal/wifi`)**:
-      - Menu khusus bagi pelanggan untuk melihat nama WiFi sekarang, kata sandi sekarang, dan mengganti Nama WiFi (SSID) serta Kata Sandi WiFi baru (minimal 8 karakter).
-      - **Tutorial & Peringatan Wajib Nyambung ke WiFi Sendiri**:
-        - HP / perangkat pelanggan **WAJIB sedang tersambung ke jaringan WiFi rumah sendiri** saat melakukan pergantian (dilarang memakai paket data seluler).
-        - Tutorial langkah demi langkah mengedukasi warga desa bahwa setelah klik simpan, sambungan WiFi di HP akan terputus sesaat (normal), lalu pelanggan diarahkan membuka menu Pengaturan WiFi HP untuk menyambungkan ulang dengan nama dan kata sandi baru.
+      - Menu khusus bagi pelanggan terverifikasi untuk melihat nama WiFi sekarang, kata sandi sekarang, dan mengganti Nama WiFi (SSID) serta Kata Sandi WiFi baru (minimal 8 karakter).
+      - Dilengkapi tutorial edukasi warga desa bahwa perangkat wajib tersambung ke WiFi rumah sendiri.
     - **Menu Profil Pelanggan (`/portal/profil`)**:
-      - Terfokus murni pada identitas dan status langganan: Nama Lengkap, ID Pelanggan, Alamat/Dusun/Desa, No. WhatsApp/HP, Paket Layanan, Wilayah Kantor, dan IP Router.
-      - Dilengkapi formulir ganti password akun portal mandiri (password awal default `123456`).
+      - Terfokus murni pada identitas dan status langganan terverifikasi serta form ganti password mandiri.
     - **Desain Mobile-First & Sticky Bottom Navigation 5 Tab**:
       - Dilengkapi *sticky bottom navigation bar* 5 menu (`Beranda`, `Kendala`, `WiFi`, `Kuota`, `Profil`) dengan area sentuh ramah jempol (>= 44x44 px).
-      - Bebas emoji pada elemen UI dan tombol; seluruh ikon menggunakan SVG inline murni.
+
+12. **Navigasi Admin NOC & Modul Manajemen Pelanggan**:
+    - **Sidebar Tetap Kiri Desktop (`w-64`) & Off-Canvas Burger Drawer Mobile**:
+      - Desktop: Sidebar permanen di sisi kiri dengan pengelompokan seksi: *NOC & Jaringan*, *Manajemen Pelanggan*, dan *Sistem & Audit*.
+      - Mobile: Header ringkas dengan tombol burger (ikon SVG 3 garis) yang membuka slide-over drawer dari kiri dengan backdrop blur gelap.
+    - **Modul Manajemen Pelanggan Admin NOC**:
+      - **Verifikasi Pendaftar Baru (`/admin/verifikasi-pelanggan`)**: Admin mencocokkan pendaftar mandiri (status `PENDING`) dengan data pelanggan database kantor, melihat titik lokasi GPS di Google Maps, dan menghubungkannya dengan aman.
+      - **Tiket Keluhan Pelanggan (`/admin/tiket`)**: Daftar tiket keluhan yang dikirimkan warga desa melalui portal, dilengkapi filter status (*Semua, Menunggu, Diproses, Selesai*) dan modal update status + catatan teknisi.
+      - **Pemantauan Pemakaian Kuota (`/admin/kuota`)**: Monitoring akumulasi GB yang telah digunakan pelanggan pada bulan berjalan.
 
 ---
 
 ## 7. Standar Agen AI & Manajemen Dokumen
 
 1. **Sinkronisasi Dokumen Markdown**:
-   - Setiap AI Agent **WAJIB** membaca dan memahami file markdown (`.md`) seperti `AGENTS.md`, `README.md`, dan dokumen lainnya di proyek untuk menjaga konteks tetap konsisten antar sesi.
+   - Setiap AI Agent **WAJIB** membaca dan memahami file markdown (`.md`) seperti `AGENTS.md`, `README.md`, `designsystempro.md`, `prd.md`, dan dokumen lainnya di proyek untuk menjaga konteks tetap konsisten antar sesi.
    - Jika ada perubahan arsitektur, fitur, atau aturan baru, agen **WAJIB** memperbarui dokumen `.md` ini agar saling terhubung dan selalu *up-to-date*.
-2. **Implementasi Mobile-First**:
-   - Setiap kali pengguna menginstruksikan pendekatan **mobile first**, agen **WAJIB** menggunakan MCP atau skill dari `appllama-skills` (yang telah dipasang secara global) sebagai referensi dan alat bantu.
+2. **Kepatuhan Mutlak Design System Pro (`designsystempro.md`)**:
+   - File [`designsystempro.md`](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) adalah **Sumber Kebenaran Tunggal (*Single Source of Truth* / SSOT)** untuk seluruh antarmuka, tata letak, komponen, dan interaktivitas UI/UX di proyek EdTeknoGuard (baik aplikasi admin NOC maupun portal pelanggan).
+   - Setiap AI Agent **WAJIB SELALU MENGECEK DAN MEMATUHI** seluruh aturan di `designsystempro.md` sebelum dan saat merancang, membuat, memodifikasi, atau mereview UI/UX (termasuk spacing 8pt/4pt, color ratio 60-30-10, kontras WCAG 4.5:1, touch target minimal 44x44 px, button hierarchy, form patterns, modal/drawer, dan UX principles).
+   - Prinsip dasar yang wajib dipegang: *"Terlihat rapi" ≠ "Terstruktur dengan benar."* Setiap angka padding/margin, warna, elevasi, dan komponen harus memiliki landasan aturan dari rulebook tersebut.
+3. **Implementasi Mobile-First**:
+   - Setiap kali pengguna menginstruksikan pendekatan **mobile first**, agen **WAJIB** mengacu pada `designsystempro.md` serta menggunakan MCP atau skill dari `appllama-skills` sebagai referensi dan alat bantu.

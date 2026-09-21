@@ -113,9 +113,14 @@ class AkunPelanggan(Base):
     __tablename__ = "akun_pelanggan"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), nullable=False, unique=True, index=True)
+    id_pelanggan = Column(String(64), nullable=True, unique=True, index=True)
     username = Column(String(100), nullable=False)
     password_hash = Column(String(255), nullable=False)
+    nama_lengkap = Column(String(200), nullable=True)
+    alamat_pendaftar = Column(Text, nullable=True)
+    lokasi_gps = Column(String(100), nullable=True)
+    kantor = Column(String(50), default="cabang", nullable=False)
+    status_verifikasi = Column(String(30), default="PENDING", nullable=False, index=True) # PENDING, TERVERIFIKASI, DITOLAK
     no_hp = Column(String(50), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     last_login = Column(DateTime, nullable=True)

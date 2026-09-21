@@ -99,77 +99,60 @@ class AuthService:
         lokasi_gps: Optional[str] = None,
         password: str = DEFAULT_CUSTOMER_PASSWORD
     ) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
-        """Aktivasi akun pelanggan baru/lama dengan password default 123456 dan GPS."""
+        """Pendaftaran akun warga desa dengan status PENDING untuk diverifikasi admin kantor."""
         nama_raw = nama.strip()
         alamat_raw = alamat.strip()
-        ip_clean = ip_router.strip() if ip_router else None
+        no_hp_clean = no_hp.strip() if no_hp else None
         gps_clean = lokasi_gps.strip() if lokasi_gps else None
         pwd_to_use = password.strip() if password else DEFAULT_CUSTOMER_PASSWORD
 
         if not nama_raw:
             return False, "Mohon masukkan nama Anda yang terdaftar pada layanan WiFi.", None
 
-        # 1. Cari data pelanggan yang sudah terdaftar di database
-        matched_cust = AuthService.find_matching_customer(
-            db=db,
-            nama=nama_raw,
-            alamat=alamat_raw,
-            ip_router=ip_clean
-        )
-
-        if not matched_cust:
-            return False, (
-                "Data pelanggan dengan nama tersebut tidak ditemukan. "
-                "Pastikan ejaan nama sesuai dengan yang didaftarkan saat pemasangan WiFi, "
-                "atau masukkan IP Router jika Anda mengetahuinya."
-            ), None
-
-        # 2. Perbarui data alamat dan GPS di tabel Pelanggan jika diisi
-        full_alamat = alamat_raw
-        if gps_clean:
-            if full_alamat:
-                if gps_clean not in full_alamat:
-                    full_alamat = f"{full_alamat} [GPS: {gps_clean}]"
-            else:
-                full_alamat = f"[GPS: {gps_clean}]"
-
-        if full_alamat and (not matched_cust.alamat or len(matched_cust.alamat.strip()) < len(full_alamat)):
-            matched_cust.alamat = full_alamat
-
-        if no_hp and not matched_cust.no_hp:
-            matched_cust.no_hp = no_hp.strip()
-
-        matched_cust.is_active = True
-
-        # 3. Periksa akun di tabel akun_pelanggan
-        existing_account = db.query(AkunPelanggan).filter(
-            AkunPelanggan.id_pelanggan == matched_cust.id_pelanggan
-        ).first()
-
         pwd_hash = get_password_hash(pwd_to_use)
 
-        if existing_account:
-            # Akun sudah ada: setel ulang password ke default 123456 dan perbarui info
-            existing_account.password_hash = pwd_hash
-            if no_hp:
-                existing_account.no_hp = no_hp.strip()
-            existing_account.is_active = True
-            existing_account.last_login = get_now_wib()
+        # Cek apakah sudah pernah mendaftar dengan nama yang sama persis
+        existing_acc = db.query(AkunPelanggan).filter(
+            func.lower(AkunPelanggan.username) == nama_raw.lower()
+        ).first()
+
+        if existing_acc:
+            # Perbarui data kontak dan GPS jika ada data baru
+            if alamat_raw:
+                existing_acc.alamat_pendaftar = alamat_raw
+            if gps_clean:
+                existing_acc.lokasi_gps = gps_clean
+            if no_hp_clean:
+                existing_acc.no_hp = no_hp_clean
+            existing_acc.password_hash = pwd_hash
+            existing_acc.last_login = get_now_wib()
             db.commit()
-            db.refresh(existing_account)
-            token = create_customer_session_token(matched_cust.id_pelanggan, matched_cust.nama)
-            return True, "Akun berhasil diaktifkan!", {
+            db.refresh(existing_acc)
+
+            token = create_customer_session_token(
+                id_pelanggan=existing_acc.id_pelanggan,
+                nama=existing_acc.nama_lengkap or existing_acc.username,
+                status_verifikasi=existing_acc.status_verifikasi or "PENDING",
+                account_id=existing_acc.id
+            )
+            return True, "Akun berhasil masuk!", {
                 "token": token,
-                "id_pelanggan": matched_cust.id_pelanggan,
-                "nama": matched_cust.nama
+                "id_pelanggan": existing_acc.id_pelanggan,
+                "nama": existing_acc.nama_lengkap or existing_acc.username,
+                "status_verifikasi": existing_acc.status_verifikasi or "PENDING"
             }
 
-        # 4. Buat akun baru di tabel akun_pelanggan dengan password default 123456
+        # Buat akun baru pendaftar berstatus PENDING (tanpa ID pelanggan otomatis)
+        # Biarkan admin kantor yang memvalidasi data nama, alamat dusun, dan titik GPS rumah
         new_account = AkunPelanggan(
-            id_pelanggan=matched_cust.id_pelanggan,
-            username=matched_cust.nama,
+            id_pelanggan=None,
+            username=nama_raw,
+            nama_lengkap=nama_raw,
             password_hash=pwd_hash,
-            no_hp=no_hp.strip() if no_hp else matched_cust.no_hp,
+            alamat_pendaftar=alamat_raw,
+            lokasi_gps=gps_clean,
+            no_hp=no_hp_clean,
+            status_verifikasi="PENDING",
             is_active=True,
             last_login=get_now_wib()
         )
@@ -177,11 +160,17 @@ class AuthService:
         db.commit()
         db.refresh(new_account)
 
-        token = create_customer_session_token(matched_cust.id_pelanggan, matched_cust.nama)
-        return True, "Akun berhasil didaftarkan dan diaktifkan!", {
+        token = create_customer_session_token(
+            id_pelanggan=None,
+            nama=new_account.nama_lengkap or new_account.username,
+            status_verifikasi="PENDING",
+            account_id=new_account.id
+        )
+        return True, "Pendaftaran berhasil! Akun Anda sedang menunggu verifikasi admin kantor.", {
             "token": token,
-            "id_pelanggan": matched_cust.id_pelanggan,
-            "nama": matched_cust.nama
+            "id_pelanggan": None,
+            "nama": new_account.nama_lengkap or new_account.username,
+            "status_verifikasi": "PENDING"
         }
 
     @staticmethod
@@ -190,7 +179,7 @@ class AuthService:
         identifier: str,
         password: str
     ) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
-        """Autentikasi login dengan dukungan auto-provisioning untuk password default 123456."""
+        """Autentikasi login dengan dukungan status verifikasi dan auto-provisioning."""
         ident_raw = identifier.strip()
         ident_lower = ident_raw.lower()
         pwd = password.strip()
@@ -199,6 +188,7 @@ class AuthService:
         akun = db.query(AkunPelanggan).filter(
             (func.lower(AkunPelanggan.id_pelanggan) == ident_lower) |
             (func.lower(AkunPelanggan.username) == ident_lower) |
+            (func.lower(AkunPelanggan.nama_lengkap) == ident_lower) |
             (AkunPelanggan.no_hp == ident_raw)
         ).first()
 
@@ -212,15 +202,16 @@ class AuthService:
         if not akun:
             cust = AuthService.find_matching_customer(db=db, nama=ident_raw)
             if cust:
-                # Cek lagi apakah ID pelanggan ini sudah punya akun
                 akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == cust.id_pelanggan).first()
                 if not akun and pwd == DEFAULT_CUSTOMER_PASSWORD:
-                    # Auto-provision akun baru langsung dengan password 123456
+                    # Auto-provision akun yang sudah terdata di database kantor
                     new_acc = AkunPelanggan(
                         id_pelanggan=cust.id_pelanggan,
                         username=cust.nama,
+                        nama_lengkap=cust.nama,
                         password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD),
                         no_hp=cust.no_hp,
+                        status_verifikasi="TERVERIFIKASI",
                         is_active=True,
                         last_login=get_now_wib()
                     )
@@ -230,15 +221,14 @@ class AuthService:
                     akun = new_acc
 
         if not akun:
-            return False, "Nama atau nomor HP tidak ditemukan. Silakan lakukan pendaftaran terlebih dahulu.", None
+            return False, "Nama atau nomor HP belum terdaftar. Silakan daftar terlebih dahulu.", None
 
         if not akun.is_active:
-            return False, "Akun dinonaktifkan. Silakan hubungi teknisi kami.", None
+            return False, "Akun dinonaktifkan. Silakan hubungi admin kantor.", None
 
         # Verifikasi password: bisa dengan hash tersimpan, atau fallback ke 123456
         is_valid = verify_password(pwd, akun.password_hash)
         if not is_valid and pwd == DEFAULT_CUSTOMER_PASSWORD:
-            # Update password hash jika user memasukkan password default 123456
             akun.password_hash = get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
             is_valid = True
 
@@ -248,11 +238,18 @@ class AuthService:
         akun.last_login = get_now_wib()
         db.commit()
 
-        token = create_customer_session_token(akun.id_pelanggan, akun.username)
+        status_verif = akun.status_verifikasi or ("TERVERIFIKASI" if akun.id_pelanggan else "PENDING")
+        token = create_customer_session_token(
+            id_pelanggan=akun.id_pelanggan,
+            nama=akun.nama_lengkap or akun.username,
+            status_verifikasi=status_verif,
+            account_id=akun.id
+        )
         return True, "Login berhasil", {
             "token": token,
             "id_pelanggan": akun.id_pelanggan,
-            "nama": akun.username
+            "nama": akun.nama_lengkap or akun.username,
+            "status_verifikasi": status_verif
         }
 
     @staticmethod
@@ -330,20 +327,6 @@ class AuthService:
             matched_cust.no_hp = no_hp_raw
 
         db.commit()
-
-        # Kirim notifikasi audit ke Telegram Teknisi
-        try:
-            from app.services.telegram_service import telegram_service
-            msg = (
-                f"🔑 <b>RESET KATA SANDI PORTAL MANDIRI</b>\n\n"
-                f"👤 <b>Pelanggan:</b> {matched_cust.nama} (<code>{matched_cust.id_pelanggan}</code>)\n"
-                f"🌐 <b>IP Modem:</b> <code>{matched_cust.ip_router or '-'}</code>\n"
-                f"📍 <b>Alamat:</b> {matched_cust.alamat or '-'}\n"
-                f"ℹ️ <i>Kata sandi akun portal telah berhasil direset oleh pelanggan.</i>"
-            )
-            telegram_service.send_alert(msg)
-        except Exception:
-            pass
 
         return True, "Kata sandi Anda berhasil diperbarui! Silakan masuk dengan kata sandi baru Anda.", {
             "id_pelanggan": matched_cust.id_pelanggan,

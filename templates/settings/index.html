@@ -61,19 +61,6 @@
                       :class="activeTab === 'credentials' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
                       x-text="form.default_modem_credentials.length"></span>
             </button>
-
-            <!-- Tab 3: Integrasi Telegram -->
-            <button type="button"
-                    @click="activeTab = 'telegram'"
-                    :class="activeTab === 'telegram'
-                        ? 'border-indigo-600 text-indigo-600 font-bold bg-indigo-50/50'
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium'"
-                    class="group inline-flex items-center gap-2 py-3 px-4 border-b-2 text-xs sm:text-sm rounded-t-xl transition whitespace-nowrap min-h-[44px]">
-                <svg class="w-4 h-4 transition" :class="activeTab === 'telegram' ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-                <span>Integrasi Bot Telegram</span>
-            </button>
         </nav>
     </div>
 
@@ -112,8 +99,8 @@
                                 <input type="number" min="1" max="1440"
                                        x-model.number="form.polling_interval_minutes"
                                        required
-                                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                                <span class="absolute right-3.5 top-3 text-slate-400 font-semibold">Menit Sekali</span>
+                                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                                <span class="absolute right-4 top-3 text-slate-400 font-semibold">Menit Sekali</span>
                             </div>
                             <span class="text-[11px] text-slate-400 block mt-1">Rekomendasi standar ISP: <strong>5 menit</strong>.</span>
                         </div>
@@ -132,15 +119,15 @@
                                 </span>
                             </div>
                             <p class="text-xs text-slate-400">
-                                Modem dengan nilai redaman optik lebih buruk atau sama dengan batas ini akan memicu <strong>Peringatan Ringan</strong> di Telegram.
+                                Modem dengan nilai redaman optik lebih buruk atau sama dengan batas ini akan memicu <strong>Peringatan Ringan</strong>.
                             </p>
                             <div class="relative max-w-xs mt-2">
                                 <input type="number" step="0.1" max="-10.0" min="-40.0"
                                        x-model.number="form.warning_threshold_dbm"
                                        required
                                        placeholder="-26.0"
-                                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-amber-500 min-h-[44px]">
-                                <span class="absolute right-3.5 top-3 text-slate-400 font-bold">dBm</span>
+                                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-amber-500 min-h-[44px]">
+                                <span class="absolute right-4 top-3 text-slate-400 font-bold">dBm</span>
                             </div>
                             <p class="text-[11px] text-amber-700 mt-1 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -162,15 +149,15 @@
                                 </span>
                             </div>
                             <p class="text-xs text-slate-400">
-                                Jika redaman optik menyentuh atau melampaui nilai ini, bot akan mengirimkan <strong>NOTIFIKASI MERAH SEGERA DICEK</strong> ke teknisi lapangan.
+                                Jika redaman optik menyentuh atau melampaui nilai ini, sistem akan memicu <strong>NOTIFIKASI MERAH SEGERA DICEK</strong>.
                             </p>
                             <div class="relative max-w-xs mt-2">
                                 <input type="number" step="0.1" max="-15.0" min="-45.0"
                                        x-model.number="form.critical_threshold_dbm"
                                        required
                                        placeholder="-27.0"
-                                       class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-rose-500 min-h-[44px]">
-                                <span class="absolute right-3.5 top-3 text-slate-400 font-bold">dBm</span>
+                                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:ring-2 focus:ring-rose-500 min-h-[44px]">
+                                <span class="absolute right-4 top-3 text-slate-400 font-bold">dBm</span>
                             </div>
                             <p class="text-[11px] text-rose-700 mt-1 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -210,9 +197,9 @@
                         <!-- Tombol Tambah Baris -->
                         <button type="button"
                                 @click="addCredentialRow()"
-                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 transition min-h-[40px]">
+                                class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 transition min-h-[44px]">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            <span>+ Tambah Kredensial</span>
+                            <span>Tambah Kredensial</span>
                         </button>
                     </div>
 
@@ -232,7 +219,7 @@
                                      @dragleave="onDragLeave(index)"
                                      @drop="onDrop($event, index)"
                                      @dragend="onDragEnd()"
-                                     class="p-3.5 bg-slate-50 rounded-2xl border transition-all duration-150 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 select-none"
+                                     class="p-4 bg-slate-50 rounded-2xl border transition-all duration-150 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 select-none"
                                      :class="{
                                          'border-indigo-500 bg-indigo-50/70 shadow-lg scale-[0.99] border-dashed': draggedIdx === index,
                                          'border-indigo-400 ring-2 ring-indigo-300 bg-indigo-50/40': dragOverIdx === index && draggedIdx !== index,
@@ -341,100 +328,7 @@
                 </div>
             </div>
 
-            <!-- TAB 3: INTEGRASI TELEGRAM -->
-            <div x-show="activeTab === 'telegram'" class="space-y-6" style="display: none;">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                            </svg>
-                            <span>Pengaturan Notifikasi Bot Telegram &amp; Jadwal Kirim</span>
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-1">
-                            Notifikasi darurat otomatis dikirimkan ke tim teknisi saat redaman mencapai batas <strong>Peringatan Ringan</strong> (<span x-text="Number(form.warning_threshold_dbm).toFixed(1) + ' dBm'"></span>) atau <strong>Notifikasi Merah Kritis</strong> (&le; <span x-text="Number(form.critical_threshold_dbm).toFixed(1) + ' dBm'"></span>).
-                        </p>
-                    </div>
 
-                    <!-- Form Pengaturan Frekuensi Notifikasi & Mode Malam -->
-                    <form @submit.prevent="confirmSaveSettings()" class="space-y-5 text-xs">
-                        
-                        <!-- 1. Interval Pengulangan Kirim Notifikasi (Jam Sekali) -->
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                            <label class="block font-bold text-slate-800">
-                                Interval Kirim Ulang Notifikasi Peringatan (Jam Sekali)
-                            </label>
-                            <div class="relative max-w-xs">
-                                <input type="number"
-                                       step="0.5"
-                                       min="0.5"
-                                       max="24"
-                                       x-model.number="form.telegram_alert_interval_hours"
-                                       required
-                                       placeholder="1.0"
-                                       class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                                <span class="absolute right-3.5 top-3 text-slate-400 font-bold">Jam Sekali</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500">
-                                Menentukan jeda waktu pengiriman pesan alert berulang ke grup Telegram jika ONT pelanggan masih mengalami gangguan (misal: diisi <strong>1.0</strong> jam sekali, <strong>2.0</strong> jam sekali, dsb. untuk mencegah spam).
-                            </p>
-                        </div>
-
-                        <!-- 2. Mode Malam (Quiet Hours / Silent Notification) -->
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <label class="block font-bold text-slate-800">
-                                        Mode Malam (Quiet Hours / Notifikasi Senyap)
-                                    </label>
-                                    <p class="text-[11px] text-slate-500 mt-0.5">
-                                        Kirimkan alert Telegram secara senyap (tanpa suara getar/dering) pada jam istirahat malam.
-                                    </p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" x-model="form.telegram_night_mode_enabled" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                                </label>
-                            </div>
-
-                            <!-- Jam Rentang Mode Malam -->
-                            <div x-show="form.telegram_night_mode_enabled"
-                                 x-transition
-                                 class="pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
-                                        Jam Mulai Mode Malam (WIB):
-                                    </label>
-                                    <input type="time"
-                                           x-model="form.telegram_night_mode_start"
-                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 mb-1">
-                                        Jam Selesai Mode Malam (WIB):
-                                    </label>
-                                    <input type="time"
-                                           x-model="form.telegram_night_mode_end"
-                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
-                                </div>
-                                <div class="sm:col-span-2 text-[11px] text-indigo-700 bg-indigo-50 p-2.5 rounded-xl border border-indigo-100 flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-indigo-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    <span>Pesan alert Telegram antara pukul <strong x-text="form.telegram_night_mode_start || '22:00'"></strong> s/d <strong x-text="form.telegram_night_mode_end || '06:00'"></strong> akan dikirimkan dengan flag <em>Silent Notification</em> tanpa membunyikan nada dering teknisi.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Action Button -->
-                        <div class="flex items-center justify-end pt-2">
-                            <button type="submit"
-                                    class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span>Simpan Pengaturan Notifikasi Telegram</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
 
         </div>
 
@@ -460,7 +354,10 @@
 
                     <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 shadow-xs">
                         <div class="flex items-center justify-between font-bold text-amber-800">
-                            <span>⚠️ Peringatan Ringan</span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span>Peringatan Ringan</span>
+                            </span>
                             <span class="font-mono" x-text="'&le; ' + Number(form.warning_threshold_dbm).toFixed(1) + ' dBm'"></span>
                         </div>
                         <p class="text-amber-900 mt-1">
@@ -470,7 +367,10 @@
 
                     <div class="p-3 bg-rose-50 rounded-xl border border-rose-200 shadow-xs">
                         <div class="flex items-center justify-between font-bold text-rose-800">
-                            <span>🚨🔴 Notifikasi Merah (Segera Dicek)</span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Notifikasi Merah (Segera Dicek)</span>
+                            </span>
                             <span class="font-mono" x-text="'&le; ' + Number(form.critical_threshold_dbm).toFixed(1) + ' dBm'"></span>
                         </div>
                         <p class="text-rose-900 mt-1">
@@ -509,7 +409,7 @@
         <div @click.away="confirmModalOpen = false"
              class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             
-            <div class="flex items-center gap-3.5">
+            <div class="flex items-center gap-3">
                 <div class="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -521,7 +421,7 @@
                 </div>
             </div>
 
-            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs space-y-2">
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs space-y-2">
                 <div class="flex justify-between items-center py-1 border-b border-slate-200/60">
                     <span class="text-slate-500">Interval Pemindaian ONT:</span>
                     <strong class="font-mono text-indigo-700" x-text="form.polling_interval_minutes + ' Menit Sekali'"></strong>

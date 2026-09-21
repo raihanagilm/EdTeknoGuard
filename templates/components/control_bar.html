@@ -5,7 +5,7 @@
     <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         
         <!-- Sisi Kiri: 3 Indikator Warna Status Pemantau Otomatis -->
-        <div class="flex items-center gap-3.5">
+        <div class="flex items-center gap-4">
             <!-- Indikator Lingkaran Status (3 Warna: Hijau = Running, Kuning = Stopped, Merah = Error/Gagal) -->
             <div class="h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0"
                  :class="{
@@ -86,7 +86,7 @@
                     <!-- Tombol Biru: Mulai Pemantauan -->
                     <button @click="actionStartScan()"
                             :disabled="isToggling"
-                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 shadow-indigo-200">
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 shadow-indigo-200 min-h-[44px] active:scale-95">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -97,7 +97,7 @@
                     <!-- Tombol Toggle Scheduler: Jeda/Lanjut Jadwal Otomatis -->
                     <button @click="actionToggleEngine()"
                             :disabled="isToggling"
-                            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl font-bold text-xs transition-all duration-200 border"
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all duration-200 border min-h-[44px] active:scale-95"
                             :class="engineStatus === 'RUNNING' ? 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'"
                             :title="engineStatus === 'RUNNING' ? 'Klik untuk menjeda jadwal pemindaian otomatis tiap 20 menit' : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis'">
                         <svg x-show="engineStatus === 'RUNNING'" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +116,7 @@
                 <div class="flex items-center gap-2">
                     <!-- Tombol Kuning: Jeda (Aktif bisa diklik) -->
                     <button @click="actionPauseScan()"
-                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-amber-500 hover:bg-amber-600 border border-amber-500 shadow-amber-200">
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-amber-500 hover:bg-amber-600 border border-amber-500 shadow-amber-200 min-h-[44px] active:scale-95">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -125,7 +125,7 @@
 
                     <!-- Tombol Merah: Stop (Berhenti Paksa) -->
                     <button @click="actionStopScan()"
-                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-rose-600 hover:bg-rose-700 border border-rose-600 shadow-rose-200">
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-rose-600 hover:bg-rose-700 border border-rose-600 shadow-rose-200 min-h-[44px] active:scale-95">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <rect x="6" y="6" width="12" height="12" rx="2" stroke-width="2" stroke="currentColor" fill="currentColor"/>
                         </svg>
@@ -139,7 +139,7 @@
                 <div class="flex items-center gap-2">
                     <!-- Tombol Hijau: Lanjut (Melanjutkan dari JSON) -->
                     <button @click="actionResumeScan()"
-                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 shadow-emerald-200">
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 shadow-emerald-200 min-h-[44px] active:scale-95">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -149,7 +149,7 @@
 
                     <!-- Tombol Merah: Stop (Batalkan pemindaian dan buang JSON) -->
                     <button @click="actionStopScan()"
-                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-rose-600 hover:bg-rose-700 border border-rose-600 shadow-rose-200">
+                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md text-white bg-rose-600 hover:bg-rose-700 border border-rose-600 shadow-rose-200 min-h-[44px] active:scale-95">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <rect x="6" y="6" width="12" height="12" rx="2" stroke-width="2" stroke="currentColor" fill="currentColor"/>
                         </svg>
@@ -165,7 +165,7 @@
     <!-- Progress Bar Pemindaian Real-Time & Estimasi Waktu 1 Siklus Pemindaian -->
     <div class="pt-3 border-t border-slate-100">
         <!-- Kondisi 1: Sedang Memindai (Live Progress x/y ONT & Estimasi Waktu) -->
-        <div x-show="isScanning || (scanProgress && scanProgress.is_scanning)" class="space-y-2 bg-indigo-50/80 border border-indigo-200/80 p-3.5 rounded-xl shadow-inner">
+        <div x-show="isScanning || (scanProgress && scanProgress.is_scanning)" class="space-y-2 bg-indigo-50/80 border border-indigo-200/80 p-4 rounded-xl shadow-inner">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="relative flex h-2.5 w-2.5">
@@ -193,7 +193,7 @@
         </div>
 
         <!-- Kondisi 2: Pemindaian Sedang Dijeda (Paused) -->
-        <div x-show="!isScanning && scanProgress && scanProgress.is_paused" class="space-y-2 bg-amber-50 border border-amber-200 p-3.5 rounded-xl shadow-inner">
+        <div x-show="!isScanning && scanProgress && scanProgress.is_paused" class="space-y-2 bg-amber-50 border border-amber-200 p-4 rounded-xl shadow-inner">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                 <div class="flex items-center gap-2 text-amber-900 font-bold">
                     <span class="h-2.5 w-2.5 rounded-full bg-amber-500 inline-block"></span>
@@ -210,7 +210,7 @@
         </div>
 
         <!-- Kondisi 3: Sedang Standby (Menampilkan Informasi Durasi Siklus Pemindaian Terakhir) -->
-        <div x-show="!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused))" class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 bg-slate-50/60 px-3.5 py-2 rounded-xl border border-slate-100">
+        <div x-show="!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused))" class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 bg-slate-50/60 px-4 py-2 rounded-xl border border-slate-100">
             <div class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>

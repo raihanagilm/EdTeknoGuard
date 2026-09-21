@@ -15,7 +15,6 @@ from app.core.config import settings
 from app.db.models import Pelanggan, LogPerformaONT, SystemSetting, AlertLog, UserActivityLog
 from app.services.snmp_service import SNMPService
 from app.services.ont_scraper_service import ONTScraperService
-from app.services.telegram_service import TelegramService
 
 logger = logging.getLogger("scheduler_service")
 
@@ -564,18 +563,6 @@ class MonitoringScheduler:
                 else:
                     cust.los_count = 0
 
-                # Kirim telegram alert jika warning/critical LANGSUNG per perangkat
-                # LOS dikumpulkan dan dikirim setelah scan selesai (batch jika >= 5)
-                if not is_auth_failure:
-                    if st in ["WARNING", "CRITICAL"]:
-                        TelegramService.process_and_send_alert_sync(
-                            pelanggan=cust,
-                            log_entry=log_entry,
-                            db=db
-                        )
-                    elif st == "LOS" and cust.los_count >= 3:
-                        los_pending_alerts.append((cust, log_entry))
-
                 results.append({
                     "id_pelanggan": cust.id_pelanggan,
                     "nama": cust.nama,
@@ -591,34 +578,6 @@ class MonitoringScheduler:
                     db.rollback()
                     self._resume_index = self._scan_current - 1
                     raise inner_e
-
-            # Evaluasi Gangguan Massal (>= 3 ONT LOS di POP yang sama)
-            for pop_name, affected_names in los_by_pop.items():
-                if len(affected_names) >= 3:
-                    TelegramService.send_mass_outage_alert_sync(
-                        pop=pop_name,
-                        count=len(affected_names),
-                        customer_names=affected_names,
-                        db=db
-                    )
-
-            # == Kirim LOS alerts setelah scan selesai (batch jika >= 5) ==
-            if los_pending_alerts:
-                if len(los_pending_alerts) >= 5:
-                    # >= 5 ONT LOS: gabung semua jadi 1 notif batch (berlaku kelipatan)
-                    TelegramService.send_batch_los_alert_sync(
-                        alerts=los_pending_alerts,
-                        scan_time=now,
-                        db=db
-                    )
-                else:
-                    # < 5 -> kirim individual seperti biasa
-                    for c_obj, le_obj in los_pending_alerts:
-                        TelegramService.process_and_send_alert_sync(
-                            pelanggan=c_obj,
-                            log_entry=le_obj,
-                            db=db
-                        )
 
 
             self.set_setting_in_db(db, "last_scan_time", now.strftime("%Y-%m-%d %H:%M:%S"))

@@ -19,10 +19,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-def create_customer_session_token(id_pelanggan: str, nama: str) -> str:
+def create_customer_session_token(id_pelanggan: Optional[str], nama: str, status_verifikasi: str = "TERVERIFIKASI", account_id: Optional[int] = None) -> str:
     return _serializer.dumps({
         "id_pelanggan": id_pelanggan,
-        "nama": nama
+        "nama": nama,
+        "status_verifikasi": status_verifikasi,
+        "account_id": account_id
     })
 
 def verify_customer_session_token(token: str) -> Optional[Dict[str, Any]]:

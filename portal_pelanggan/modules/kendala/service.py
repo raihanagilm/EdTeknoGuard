@@ -2,7 +2,6 @@ import random
 from typing import List
 from sqlalchemy.orm import Session
 from app.db.models import TiketKendala, Pelanggan, LogPerformaONT
-from portal_pelanggan.services.telegram_service import PortalTelegramService
 from app.core.timezone import get_now_wib
 
 class KendalaService:
@@ -50,25 +49,5 @@ class KendalaService:
         db.add(new_ticket)
         db.commit()
         db.refresh(new_ticket)
-
-        nama = cust.nama if cust else "Pelanggan"
-        alamat = cust.alamat if cust else "-"
-        redaman_str = f"{redaman} dBm" if redaman is not None else "Belum ada data"
-
-        try:
-            PortalTelegramService.send_ticket_notification(
-                id_tiket=ticket_id,
-                nama_pelanggan=nama,
-                id_pelanggan=id_pelanggan,
-                kantor=kantor,
-                alamat=alamat,
-                kategori=kategori,
-                deskripsi=deskripsi,
-                no_wa=no_wa,
-                redaman=redaman_str,
-                status_koneksi=status_koneksi
-            )
-        except Exception:
-            pass
 
         return new_ticket

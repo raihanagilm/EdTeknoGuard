@@ -18,7 +18,7 @@
         </div>
 
         <!-- Filter Tanggal & Rentang Waktu -->
-        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+        <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
             <!-- Date Picker -->
             <div class="relative flex-1 sm:flex-none">
                 <input type="date"
@@ -27,24 +27,24 @@
                        :max="todayDate"
                        @change="onDateSelect()"
                        title="Pilih tanggal spesifik untuk melihat tren grafik (sebelum data pertama didisable)"
-                       class="px-3 py-1.5 text-xs bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[36px] font-medium transition cursor-pointer">
+                        class="px-4 py-2.5 text-xs bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px] font-medium transition cursor-pointer">
             </div>
 
             <!-- Preset Buttons -->
-            <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 flex-1 sm:flex-none">
+            <div class="inline-flex rounded-2xl bg-slate-100 p-1 border border-slate-200 flex-1 sm:flex-none">
                 <button @click="switchChartRange('today')"
-                        :class="chartRange === 'today' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                        class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none min-h-[32px]">
+                        :class="chartRange === 'today' ? 'bg-white text-indigo-600 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                        class="px-4 py-2 rounded-xl text-xs transition flex-1 sm:flex-none min-h-[40px] flex items-center justify-center">
                     Hari Ini
                 </button>
                 <button @click="switchChartRange('yesterday')"
-                        :class="chartRange === 'yesterday' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                        class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none min-h-[32px]">
+                        :class="chartRange === 'yesterday' ? 'bg-white text-indigo-600 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                        class="px-4 py-2 rounded-xl text-xs transition flex-1 sm:flex-none min-h-[40px] flex items-center justify-center">
                     Kemarin
                 </button>
                 <button @click="switchChartRange('week')"
-                        :class="chartRange === 'week' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
-                        class="px-3 py-1.5 rounded-lg text-xs transition flex-1 sm:flex-none min-h-[32px]">
+                        :class="chartRange === 'week' ? 'bg-white text-indigo-600 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                        class="px-4 py-2 rounded-xl text-xs transition flex-1 sm:flex-none min-h-[40px] flex items-center justify-center">
                     7 Hari
                 </button>
             </div>

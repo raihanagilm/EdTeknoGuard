@@ -11,8 +11,14 @@ class WifiController:
     @staticmethod
     def render_wifi_page(request: Request, db: Session, error: str = None, success: str = None):
         cust_session = require_customer_login(request)
-        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_session["id_pelanggan"]).first()
+        id_pel = cust_session.get("id_pelanggan")
+        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first() if id_pel else None
         base = get_base_url(request)
+
+        # Jika akun masih berstatus PENDING
+        if not id_pel or cust_session.get("status_verifikasi") == "PENDING":
+            if not error:
+                error = "Akun Anda saat ini masih dalam proses verifikasi oleh Admin Kantor. Fitur kelola WiFi akan aktif otomatis setelah sambungan WiFi rumah Anda diverifikasi."
 
         return templates.TemplateResponse(
             request=request,
