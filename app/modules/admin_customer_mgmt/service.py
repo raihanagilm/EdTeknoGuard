@@ -67,15 +67,13 @@ class AdminCustomerMgmtService:
         akun.kantor = pelanggan.kantor
         akun.updated_at = get_now_wib()
 
-        # Update data pelanggan jika pendaftar melampirkan no HP / GPS baru
-        if akun.no_hp and (not pelanggan.no_hp or len(pelanggan.no_hp) < 8):
+        # Update data pelanggan jika pendaftar melampirkan no HP baru
+        if akun.no_hp:
             pelanggan.no_hp = akun.no_hp
 
-        if akun.lokasi_gps and pelanggan.alamat:
-            if akun.lokasi_gps not in pelanggan.alamat:
-                pelanggan.alamat = f"{pelanggan.alamat} [GPS: {akun.lokasi_gps}]"
-        elif akun.lokasi_gps and not pelanggan.alamat:
-            pelanggan.alamat = f"{akun.alamat_pendaftar or ''} [GPS: {akun.lokasi_gps}]"
+        # Update alamat pelanggan dari data pendaftar jika pendaftar mengisi alamat
+        if akun.alamat_pendaftar:
+            pelanggan.alamat = akun.alamat_pendaftar
 
         db.commit()
         db.refresh(akun)

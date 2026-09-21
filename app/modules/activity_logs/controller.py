@@ -50,7 +50,7 @@ class ActivityLogController:
         sort_by: str = "created_at",
         sort_dir: str = "desc",
         page: int = 1,
-        limit: int = 25
+        limit: int = 15
     ) -> Dict[str, Any]:
         """Endpoint JSON untuk fetching log aktivitas dengan filter, sort, dan pagination"""
         total, data, min_date_str = ActivityLogService.get_activity_logs(

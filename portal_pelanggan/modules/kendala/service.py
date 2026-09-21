@@ -51,3 +51,28 @@ class KendalaService:
         db.refresh(new_ticket)
 
         return new_ticket
+
+    @staticmethod
+    def resolve_customer_ticket(db: Session, id_tiket: str, id_pelanggan: str) -> bool:
+        t = db.query(TiketKendala).filter(
+            TiketKendala.id_tiket == id_tiket,
+            TiketKendala.id_pelanggan == id_pelanggan
+        ).first()
+        if not t:
+            return False
+        t.status = "SELESAI"
+        t.updated_at = get_now_wib()
+        db.commit()
+        return True
+
+    @staticmethod
+    def delete_customer_ticket(db: Session, id_tiket: str, id_pelanggan: str) -> bool:
+        t = db.query(TiketKendala).filter(
+            TiketKendala.id_tiket == id_tiket,
+            TiketKendala.id_pelanggan == id_pelanggan
+        ).first()
+        if not t:
+            return False
+        db.delete(t)
+        db.commit()
+        return True

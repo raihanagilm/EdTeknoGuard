@@ -24,11 +24,25 @@
     </div>
     {% endif %}
 
+    {% if selesai %}
+    <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
+        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>Terima kasih! Kendala telah Anda tandai sebagai selesai dan koneksi telah normal.</span>
+    </div>
+    {% endif %}
+
+    {% if dihapus %}
+    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 text-xs flex items-center gap-2.5">
+        <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        <span>Laporan kendala telah berhasil dihapus.</span>
+    </div>
+    {% endif %}
+
     <!-- Tickets List -->
     {% if tickets %}
-    <div class="space-y-3">
+    <div class="space-y-3" x-data="{ confirmResolveId: null, confirmDeleteId: null }">
         {% for t in tickets %}
-        <div class="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2.5">
+        <div class="p-4 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-3">
             <div class="flex items-start justify-between gap-2">
                 <div>
                     <span class="text-[11px] font-mono text-slate-400 block">{{ t.id_tiket }}</span>
@@ -56,8 +70,84 @@
                 <span>Redaman: {{ t.redaman_saat_lapor }} dBm</span>
                 {% endif %}
             </div>
+
+            <!-- Action Buttons for Customer -->
+            <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-end gap-2">
+                {% if t.status != 'SELESAI' %}
+                <!-- Tombol Konfirmasi Selesai Mandiri -->
+                <button type="button"
+                        @click="confirmResolveId = '{{ t.id_tiket }}'"
+                        class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200 transition min-h-[40px] flex items-center gap-1.5 active:scale-95">
+                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Masalah Sudah Selesai</span>
+                </button>
+                {% endif %}
+
+                <!-- Tombol Hapus Tiket -->
+                <button type="button"
+                        @click="confirmDeleteId = '{{ t.id_tiket }}'"
+                        class="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-[11px] font-bold border border-slate-200 hover:border-rose-200 transition min-h-[40px] flex items-center gap-1.5 active:scale-95">
+                    <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <span>Hapus</span>
+                </button>
+            </div>
         </div>
         {% endfor %}
+
+        <!-- Modal Konfirmasi Selesai -->
+        <div x-show="confirmResolveId !== null" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen p-4 text-center">
+                <div @click="confirmResolveId = null" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+                <div class="relative bg-white rounded-3xl max-w-sm w-full p-5 text-left shadow-xl border border-slate-200 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">Konfirmasi Masalah Selesai</h4>
+                            <p class="text-[11px] text-slate-500">Apakah internet Anda sudah kembali normal?</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        Tiket <span class="font-mono font-bold text-indigo-700" x-text="confirmResolveId"></span> akan ditandai berstatus <strong class="text-emerald-700">SELESAI</strong>.
+                    </p>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button type="button" @click="confirmResolveId = null" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 min-h-[44px]">Batal</button>
+                        <form :action="'{{ base_url or '' }}/kendala/' + confirmResolveId + '/selesai'" method="POST">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold min-h-[44px] shadow-xs active:scale-95 transition">Ya, Selesai</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Konfirmasi Hapus Tiket -->
+        <div x-show="confirmDeleteId !== null" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen p-4 text-center">
+                <div @click="confirmDeleteId = null" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+                <div class="relative bg-white rounded-3xl max-w-sm w-full p-5 text-left shadow-xl border border-slate-200 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-900">Hapus Laporan Kendala</h4>
+                            <p class="text-[11px] text-slate-500">Tindakan ini tidak dapat dibatalkan.</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        Laporan tiket <span class="font-mono font-bold text-indigo-700" x-text="confirmDeleteId"></span> akan dihapus dari riwayat Anda.
+                    </p>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button type="button" @click="confirmDeleteId = null" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 min-h-[44px]">Batal</button>
+                        <form :action="'{{ base_url or '' }}/kendala/' + confirmDeleteId + '/hapus'" method="POST">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold min-h-[44px] shadow-xs active:scale-95 transition">Hapus Tiket</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
     {% else %}
     <div class="p-8 text-center bg-white rounded-3xl border border-slate-200/80 space-y-2">

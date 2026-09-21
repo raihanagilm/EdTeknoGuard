@@ -1,5 +1,5 @@
 <!-- Control Bar: Status Engine, 3 Indikator Warna & Tombol Kontrol Cerdas Tunggal -->
-<div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm mb-6 space-y-4">
+<div class="bg-white/80 backdrop-blur-xl rounded-2xl p-4 sm:p-5 border border-slate-200/60 shadow-2xs mb-6 space-y-4">
     
     <!-- Baris Utama: Status, Timer Interval & Tombol Kontrol -->
     <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
@@ -9,9 +9,9 @@
             <!-- Indikator Lingkaran Status (3 Warna: Hijau = Running, Kuning = Stopped, Merah = Error/Gagal) -->
             <div class="h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0"
                  :class="{
-                     'bg-emerald-500 shadow-sm shadow-emerald-200': engineStatus === 'RUNNING' && !isNetworkError,
-                     'bg-amber-400 shadow-sm shadow-amber-200': engineStatus === 'STOPPED',
-                     'bg-rose-500 shadow-sm shadow-rose-200': isNetworkError
+                     'bg-emerald-500 shadow-xs shadow-emerald-200': engineStatus === 'RUNNING' && !isNetworkError,
+                     'bg-amber-400 shadow-xs shadow-amber-200': engineStatus === 'STOPPED',
+                     'bg-rose-500 shadow-xs shadow-rose-200': isNetworkError
                  }">
                 <div class="h-2 w-2 rounded-full bg-white"
                      :class="engineStatus === 'RUNNING' && !isNetworkError ? 'animate-ping' : ''"></div>

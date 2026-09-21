@@ -32,7 +32,7 @@ def list_logs(
     sort_by: Optional[str] = Query("waktu_cek", description="Kolom urutan: waktu_cek, nama, ip_router, rx_power, suhu_ont, latency_ms, status_koneksi"),
     sort_dir: str = Query("desc", description="Arah urutan: asc atau desc"),
     page: int = Query(1, ge=1),
-    limit: int = Query(50, ge=10, le=200),
+    limit: int = Query(15, ge=1, le=200),
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):

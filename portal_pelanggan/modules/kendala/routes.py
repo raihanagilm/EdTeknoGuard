@@ -22,3 +22,11 @@ def submit_ticket(
     db: Session = Depends(get_db)
 ):
     return KendalaController.submit_ticket(request, db, kategori, deskripsi, no_wa)
+
+@router.post("/{id_tiket}/selesai")
+def resolve_ticket(id_tiket: str, request: Request, db: Session = Depends(get_db)):
+    return KendalaController.resolve_ticket(request, db, id_tiket)
+
+@router.post("/{id_tiket}/hapus")
+def delete_ticket(id_tiket: str, request: Request, db: Session = Depends(get_db)):
+    return KendalaController.delete_ticket(request, db, id_tiket)

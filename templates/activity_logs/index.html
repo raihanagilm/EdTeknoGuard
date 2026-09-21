@@ -40,84 +40,82 @@
         </div>
     </div>
 
-    <!-- Filter & Search Bar -->
-    <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <!-- Filter & Search Bar (Apple HIG Design) -->
+    <div class="p-3 sm:p-4 bg-white/80 backdrop-blur-xl rounded-2xl border border-slate-200/60 shadow-2xs space-y-2.5">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             
             <!-- Filter Karyawan / User -->
             <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Filter Karyawan / User</label>
+                <label class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">User / Karyawan</label>
                 <div class="relative">
                     <select x-model="filterUser"
                             @change="fetchLogs(1)"
-                            class="w-full px-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-8 min-h-[44px] font-medium text-slate-800">
-                        <option value="all">Semua Karyawan / User</option>
+                            class="w-full px-3 sm:px-3.5 py-2 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10 rounded-xl appearance-none pr-8 min-h-[40px] sm:min-h-[44px] font-medium text-slate-800 transition">
+                        <option value="all">Semua User</option>
                         {% for u in users %}
-                        <option value="{{ u.username }}">{{ u.nama_karyawan }} ({{ u.username }})</option>
+                        <option value="{{ u.username }}">{{ u.nama_karyawan }}</option>
                         {% endfor %}
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </div>
                 </div>
             </div>
 
-
-            <!-- Filter Rentang Waktu (sama seperti Riwayat Log) -->
+            <!-- Filter Rentang Waktu -->
             <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Filter Rentang Waktu</label>
+                <label class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Rentang Waktu</label>
                 <div class="relative">
                     <select x-model="filterRange"
                             @change="onRangeChange()"
-                            class="w-full px-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-8 min-h-[44px] font-medium text-slate-800">
+                            class="w-full px-3 sm:px-3.5 py-2 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10 rounded-xl appearance-none pr-8 min-h-[40px] sm:min-h-[44px] font-medium text-slate-800 transition">
                         <option value="all">Semua Waktu</option>
                         <option value="today">Hari Ini</option>
                         <option value="7d">7 Hari Terakhir</option>
                         <option value="30d">30 Hari Terakhir</option>
                         <option value="custom">Kustom Tanggal</option>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </div>
                 </div>
             </div>
 
             <!-- Filter Jenis Aksi -->
             <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Aktivitas</label>
+                <label class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Jenis Aktivitas</label>
                 <div class="relative">
                     <select x-model="filterAction"
                             @change="fetchLogs(1)"
-                            class="w-full px-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none pr-8 min-h-[44px] font-medium text-slate-800">
-                        <option value="all">Semua Jenis Aksi</option>
+                            class="w-full px-3 sm:px-3.5 py-2 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10 rounded-xl appearance-none pr-8 min-h-[40px] sm:min-h-[44px] font-medium text-slate-800 transition">
+                        <option value="all">Semua Aksi</option>
                         <option value="LOGIN">LOGIN</option>
                         <option value="LOGOUT">LOGOUT</option>
                         <option value="LOGIN_FAILED">LOGIN GAGAL</option>
-                        <option value="START_MONITORING">MULAI PEMANTAUAN</option>
-                        <option value="PAUSE_MONITORING">JEDA PEMANTAUAN</option>
-                        <option value="IMPORT_PELANGGAN">IMPORT PELANGGAN</option>
-                        <option value="TAMBAH_PELANGGAN">TAMBAH PELANGGAN</option>
-                        <option value="EDIT_PELANGGAN">EDIT PELANGGAN</option>
-                        <option value="HAPUS_PELANGGAN">HAPUS PELANGGAN</option>
-                        <option value="HAPUS_PELANGGAN_MASSAL">HAPUS MASSAL PELANGGAN</option>
-                        <option value="UPDATE_SETTINGS">UBAH PENGATURAN</option>
+                        <option value="START_MONITORING">MULAI SCAN</option>
+                        <option value="PAUSE_MONITORING">JEDA SCAN</option>
+                        <option value="IMPORT_PELANGGAN">IMPORT</option>
+                        <option value="TAMBAH_PELANGGAN">TAMBAH</option>
+                        <option value="EDIT_PELANGGAN">EDIT</option>
+                        <option value="HAPUS_PELANGGAN">HAPUS</option>
+                        <option value="UPDATE_SETTINGS">PENGATURAN</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </div>
                 </div>
             </div>
 
-            <!-- Search Box -->
+            <!-- Search Box (Apple iOS Search Bar) -->
             <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Pencarian Cepat</label>
+                <label class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Pencarian Cepat</label>
                 <div class="relative">
                     <input type="text"
                            x-model="searchQuery"
                            @input.debounce.400ms="fetchLogs(1)"
                            placeholder="Cari user, IP, aktivitas..."
-                           class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                           class="w-full pl-8 sm:pl-9 pr-3 py-2 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10 rounded-xl min-h-[40px] sm:min-h-[44px] text-slate-800 font-medium placeholder-slate-400 transition">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                 </div>
@@ -125,7 +123,7 @@
 
         </div>
 
-        <!-- Custom Date Range Row (Show only when custom selected) — persis seperti Riwayat Log -->
+        <!-- Custom Date Range Row -->
         <div x-show="filterRange === 'custom'"
              x-transition
              class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3 text-xs">
@@ -135,14 +133,14 @@
                        x-model="customStartDate"
                        :min="minDate"
                        :max="todayDate"
-                       class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500">
+                       class="px-3 py-2 bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500/10 transition">
                 <span class="text-slate-400">s/d</span>
                 <input type="date"
                        x-model="customEndDate"
                        :min="minDate"
                        :max="todayDate"
-                       class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500">
-                <button @click="fetchLogs(1)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs min-h-[40px]">
+                       class="px-3 py-2 bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500/10 transition">
+                <button @click="fetchLogs(1)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs min-h-[40px] shadow-2xs active:scale-[0.98] transition">
                     Terapkan
                 </button>
             </div>
@@ -150,11 +148,11 @@
         </div>
     </div>
 
-    <!-- Tabel Data Log Aktivitas -->
-    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+    <!-- Tabel Data Log Aktivitas (macOS Inset Table Style) -->
+    <div class="bg-white border border-slate-200/60 rounded-2xl overflow-hidden shadow-2xs flex flex-col">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs whitespace-nowrap">
-                <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider select-none border-b border-slate-200">
+                <thead class="bg-slate-50/70 text-slate-400 font-semibold uppercase text-[10px] tracking-wider select-none border-b border-slate-200/60">
                     <tr>
                         <!-- Kolom No -->
                         <th class="py-3 px-4 w-12 text-center">No</th>
@@ -337,52 +335,52 @@
             </table>
         </div>
 
-        <!-- Pagination Bar (25, 50, 75, 100 & Page 1, 2, 3... 10) -->
-        <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <!-- Pagination Bar (Apple HIG Segmented Control) -->
+        <div class="p-3.5 sm:p-4 border-t border-slate-200/60 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
             <div class="flex items-center gap-3">
                 <div>
                     Menampilkan <span class="font-bold text-slate-800" x-text="logs.length"></span> dari <span class="font-bold text-slate-800" x-text="totalRecords"></span> Total Log
                 </div>
 
-                <!-- Dropdown Pilihan Limit (25 - 100) -->
+                <!-- Dropdown Pilihan Limit -->
                 <div class="flex items-center gap-2">
-                    <span class="text-slate-500">Per Halaman:</span>
+                    <span class="text-slate-400 text-[11px]">Per Hal:</span>
                     <select x-model.number="limit"
                             @change="fetchLogs(1)"
-                            class="px-2.5 py-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold cursor-pointer">
-                        <option value="25">25</option>
+                            class="px-2.5 py-1 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 rounded-lg focus:outline-none font-medium cursor-pointer transition">
+                        <option value="15">15</option>
+                        <option value="30">30</option>
                         <option value="50">50</option>
-                        <option value="75">75</option>
                         <option value="100">100</option>
                     </select>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 p-1 bg-slate-200/50 rounded-xl">
                 <!-- Tombol Sebelumnya -->
                 <button type="button"
                         @click="fetchLogs(currentPage - 1)"
                         :disabled="currentPage <= 1 || isLoading"
-                        class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold min-h-[40px] flex items-center gap-1.5">
+                        class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 hover:bg-white/80 disabled:opacity-30 disabled:hover:bg-transparent transition active:scale-[0.98] min-h-[36px] flex items-center gap-1">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                    <span>Sebelumnya</span>
+                    <span class="hidden sm:inline">Sebelumnya</span>
                 </button>
 
-                <!-- Nomor Halaman (1, 2, 3... 10) -->
+                <!-- Nomor Halaman -->
                 <div class="hidden sm:flex items-center gap-1">
                     <template x-for="p in getPageNumbers()" :key="p">
                         <button type="button"
                                 @click="typeof p === 'number' ? fetchLogs(p) : null"
                                 :disabled="typeof p !== 'number' || isLoading"
-                                class="px-4 py-2 rounded-xl border transition font-semibold min-h-[40px]"
-                                :class="p === currentPage ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : (typeof p !== 'number' ? 'border-transparent text-slate-400 bg-transparent cursor-default' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700')">
+                                class="w-8 h-8 rounded-lg text-xs font-medium transition flex items-center justify-center"
+                                :class="p === currentPage ? 'bg-white text-indigo-600 font-bold shadow-2xs' : (typeof p !== 'number' ? 'text-slate-400 cursor-default' : 'text-slate-600 hover:bg-white/60')">
                             <span x-text="p"></span>
                         </button>
                     </template>
                 </div>
 
                 <!-- Info Halaman di Mobile -->
-                <div class="sm:hidden font-bold text-slate-700">
+                <div class="sm:hidden px-2 text-xs font-semibold text-slate-700">
                     <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
                 </div>
 
@@ -390,8 +388,8 @@
                 <button type="button"
                         @click="fetchLogs(currentPage + 1)"
                         :disabled="currentPage >= totalPages || isLoading"
-                        class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold min-h-[40px] flex items-center gap-1.5">
-                    <span>Selanjutnya</span>
+                        class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 hover:bg-white/80 disabled:opacity-30 disabled:hover:bg-transparent transition active:scale-[0.98] min-h-[36px] flex items-center gap-1">
+                    <span class="hidden sm:inline">Selanjutnya</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>
@@ -406,7 +404,7 @@ function activityLogsApp() {
         logs: [],
         totalRecords: 0,
         currentPage: 1,
-        limit: 25,
+        limit: 15,
         isLoading: false,
 
         // Filters

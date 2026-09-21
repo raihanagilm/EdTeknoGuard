@@ -40,7 +40,7 @@ class LogsMgmtController:
         sort_by: Optional[str] = "waktu_cek",
         sort_dir: str = "desc",
         page: int = 1,
-        limit: int = 50,
+        limit: int = 15,
         kantor: Optional[str] = None,
         allowed_kantor: Optional[List[str]] = None
     ) -> Dict[str, Any]:

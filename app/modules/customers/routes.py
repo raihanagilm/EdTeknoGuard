@@ -35,7 +35,7 @@ def list_customers(
     sort_by: Optional[str] = Query("id", description="Kolom urutan: id, nama, pop, ip_router, jenis_modem, redaman_baseline, status_kredensial, is_monitored, waktu_cek"),
     sort_dir: str = Query("asc", description="Arah urutan: asc atau desc"),
     page: int = Query(1, ge=1),
-    limit: int = Query(25, ge=5, le=200),
+    limit: int = Query(15, ge=5, le=200),
     db: Session = Depends(get_db)
 ):
     """Route untuk mendapatkan daftar pelanggan dengan filter, sorting, dan pagination"""

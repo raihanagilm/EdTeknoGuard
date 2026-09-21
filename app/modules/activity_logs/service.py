@@ -154,7 +154,7 @@ class ActivityLogService:
         sort_by: str = "created_at",
         sort_dir: str = "desc",
         page: int = 1,
-        limit: int = 25
+        limit: int = 15
     ) -> Tuple[int, List[Dict[str, Any]], Optional[str]]:
         """Mengambil data log aktivitas dengan filter rentang waktu/kustom tanggal, sorting dinamis, dan pagination"""
         query = db.query(UserActivityLog)

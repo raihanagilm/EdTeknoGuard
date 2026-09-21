@@ -6,4 +6,4 @@ class LogFilterParams(BaseModel):
     status: Optional[str] = None
     date_filter: Optional[str] = "today"
     page: int = 1
-    limit: int = 50
+    limit: int = 15

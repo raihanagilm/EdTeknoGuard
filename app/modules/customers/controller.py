@@ -7,6 +7,8 @@ from app.modules.customers.service import CustomerService
 from app.modules.customers.schemas import CustomerCreate, CustomerUpdate
 from app.core.config import settings
 
+from app.db.models import AkunPelanggan
+
 templates = Jinja2Templates(directory="templates")
 
 class CustomerController:
@@ -45,7 +47,7 @@ class CustomerController:
         sort_by: Optional[str] = "id",
         sort_dir: str = "asc",
         page: int = 1,
-        limit: int = 25,
+        limit: int = 15,
         kantor: Optional[str] = None,
         allowed_kantor: Optional[List[str]] = None
     ) -> Dict[str, Any]:
@@ -107,12 +109,18 @@ class CustomerController:
             raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
 
         cust, logs = result
+        akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == cust.id_pelanggan).first()
+        lokasi_gps = akun.lokasi_gps if akun else None
+        alamat_final = cust.alamat or (akun.alamat_pendaftar if akun else None) or "-"
+        no_hp_final = cust.no_hp or (akun.no_hp if akun else None) or "-"
+
         return {
             "customer": {
                 "id_pelanggan": cust.id_pelanggan,
                 "nama": cust.nama,
-                "alamat": cust.alamat,
-                "no_hp": cust.no_hp,
+                "alamat": alamat_final,
+                "no_hp": no_hp_final,
+                "lokasi_gps": lokasi_gps,
                 "pop": cust.pop,
                 "ip_router": cust.ip_router,
                 "paket": cust.paket,

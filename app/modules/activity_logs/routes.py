@@ -30,7 +30,7 @@ def get_user_logs_api(
     sort_by: str = Query("created_at"),
     sort_dir: str = Query("desc"),
     page: int = Query(1, ge=1),
-    limit: int = Query(25, ge=1, le=100),
+    limit: int = Query(15, ge=1, le=100),
     db: Session = Depends(get_db),
     admin: dict = Depends(require_admin)
 ):

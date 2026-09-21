@@ -23,6 +23,8 @@ class KendalaController:
                 "tickets": tickets,
                 "active_tab": "kendala",
                 "sukses": request.query_params.get("sukses"),
+                "selesai": request.query_params.get("selesai"),
+                "dihapus": request.query_params.get("dihapus"),
                 "base_url": base
             }
         )
@@ -61,3 +63,25 @@ class KendalaController:
             no_wa=no_wa
         )
         return RedirectResponse(f"{base}/kendala?sukses=1", status_code=303)
+
+    @staticmethod
+    def resolve_ticket(request: Request, db: Session, id_tiket: str):
+        base = get_base_url(request)
+        cust_session = require_customer_login(request)
+        KendalaService.resolve_customer_ticket(
+            db=db,
+            id_tiket=id_tiket,
+            id_pelanggan=cust_session["id_pelanggan"]
+        )
+        return RedirectResponse(f"{base}/kendala?selesai=1", status_code=303)
+
+    @staticmethod
+    def delete_ticket(request: Request, db: Session, id_tiket: str):
+        base = get_base_url(request)
+        cust_session = require_customer_login(request)
+        KendalaService.delete_customer_ticket(
+            db=db,
+            id_tiket=id_tiket,
+            id_pelanggan=cust_session["id_pelanggan"]
+        )
+        return RedirectResponse(f"{base}/kendala?dihapus=1", status_code=303)

@@ -126,6 +126,16 @@ class AuthService:
                 existing_acc.no_hp = no_hp_clean
             existing_acc.password_hash = pwd_hash
             existing_acc.last_login = get_now_wib()
+
+            # Jika akun sudah terhubung ke data pelanggan, perbarui alamat di data pelanggan
+            if existing_acc.id_pelanggan:
+                cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == existing_acc.id_pelanggan).first()
+                if cust:
+                    if alamat_raw:
+                        cust.alamat = alamat_raw
+                    if no_hp_clean:
+                        cust.no_hp = no_hp_clean
+
             db.commit()
             db.refresh(existing_acc)
 
@@ -142,36 +152,76 @@ class AuthService:
                 "status_verifikasi": existing_acc.status_verifikasi or "PENDING"
             }
 
-        # Buat akun baru pendaftar berstatus PENDING (tanpa ID pelanggan otomatis)
-        # Biarkan admin kantor yang memvalidasi data nama, alamat dusun, dan titik GPS rumah
-        new_account = AkunPelanggan(
-            id_pelanggan=None,
-            username=nama_raw,
-            nama_lengkap=nama_raw,
-            password_hash=pwd_hash,
-            alamat_pendaftar=alamat_raw,
-            lokasi_gps=gps_clean,
-            no_hp=no_hp_clean,
-            status_verifikasi="PENDING",
-            is_active=True,
-            last_login=get_now_wib()
-        )
-        db.add(new_account)
-        db.commit()
-        db.refresh(new_account)
+        # Cek apakah nama yang didaftarkan cocok dengan data pelanggan yang sudah ada di database
+        matched_cust = AuthService.find_matching_customer(db, nama=nama_raw, alamat=alamat_raw, ip_router=ip_router)
 
-        token = create_customer_session_token(
-            id_pelanggan=None,
-            nama=new_account.nama_lengkap or new_account.username,
-            status_verifikasi="PENDING",
-            account_id=new_account.id
-        )
-        return True, "Pendaftaran berhasil! Akun Anda sedang menunggu verifikasi admin kantor.", {
-            "token": token,
-            "id_pelanggan": None,
-            "nama": new_account.nama_lengkap or new_account.username,
-            "status_verifikasi": "PENDING"
-        }
+        # Buat akun baru pendaftar
+        if matched_cust:
+            # Nama cocok dengan data pelanggan ISP: langsung hubungkan dan verifikasi
+            new_account = AkunPelanggan(
+                id_pelanggan=matched_cust.id_pelanggan,
+                username=nama_raw,
+                nama_lengkap=nama_raw,
+                password_hash=pwd_hash,
+                alamat_pendaftar=alamat_raw,
+                lokasi_gps=gps_clean,
+                no_hp=no_hp_clean,
+                kantor=matched_cust.kantor or "cabang",
+                status_verifikasi="TERVERIFIKASI",
+                is_active=True,
+                last_login=get_now_wib()
+            )
+            if alamat_raw:
+                matched_cust.alamat = alamat_raw
+            if no_hp_clean:
+                matched_cust.no_hp = no_hp_clean
+
+            db.add(new_account)
+            db.commit()
+            db.refresh(new_account)
+
+            token = create_customer_session_token(
+                id_pelanggan=matched_cust.id_pelanggan,
+                nama=new_account.nama_lengkap or new_account.username,
+                status_verifikasi="TERVERIFIKASI",
+                account_id=new_account.id
+            )
+            return True, f"Pendaftaran berhasil! Akun Anda terverifikasi sebagai pelanggan {matched_cust.nama} ({matched_cust.id_pelanggan}).", {
+                "token": token,
+                "id_pelanggan": matched_cust.id_pelanggan,
+                "nama": new_account.nama_lengkap or new_account.username,
+                "status_verifikasi": "TERVERIFIKASI"
+            }
+        else:
+            # Akun baru pendaftar berstatus PENDING untuk diverifikasi admin kantor
+            new_account = AkunPelanggan(
+                id_pelanggan=None,
+                username=nama_raw,
+                nama_lengkap=nama_raw,
+                password_hash=pwd_hash,
+                alamat_pendaftar=alamat_raw,
+                lokasi_gps=gps_clean,
+                no_hp=no_hp_clean,
+                status_verifikasi="PENDING",
+                is_active=True,
+                last_login=get_now_wib()
+            )
+            db.add(new_account)
+            db.commit()
+            db.refresh(new_account)
+
+            token = create_customer_session_token(
+                id_pelanggan=None,
+                nama=new_account.nama_lengkap or new_account.username,
+                status_verifikasi="PENDING",
+                account_id=new_account.id
+            )
+            return True, "Pendaftaran berhasil! Akun Anda sedang menunggu verifikasi admin kantor.", {
+                "token": token,
+                "id_pelanggan": None,
+                "nama": new_account.nama_lengkap or new_account.username,
+                "status_verifikasi": "PENDING"
+            }
 
     @staticmethod
     def authenticate(

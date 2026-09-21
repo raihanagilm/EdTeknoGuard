@@ -416,7 +416,7 @@ class CustomerService:
         sort_by: Optional[str] = "id",
         sort_dir: str = "asc",
         page: int = 1,
-        limit: int = 25,
+        limit: int = 15,
         kantor: Optional[str] = None,
         allowed_kantor: Optional[List[str]] = None
     ) -> Tuple[int, List[Dict[str, Any]]]:

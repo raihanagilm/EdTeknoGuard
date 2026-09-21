@@ -2,14 +2,14 @@
 EdTeknoGuard{% endblock %} {% block content %}
 <div class="space-y-6" x-data="customerApp()" x-init="initData()">
   <!-- Page Header & Action Buttons -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
     <div>
       <h1
-        class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5"
+        class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2"
       >
-        <div class="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+        <div class="p-1.5 rounded-xl bg-indigo-50 text-indigo-600">
           <svg
-            class="w-6 h-6"
+            class="w-5 h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -24,70 +24,26 @@ EdTeknoGuard{% endblock %} {% block content %}
         </div>
         <span>Manajemen Pelanggan ONT</span>
         <span
-          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
+          class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
         >
           <span
-            class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+            class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
           ></span>
           <span>Live Real-Time</span>
         </span>
       </h1>
-      <p class="text-xs sm:text-sm text-slate-500 mt-1">
-        Kelola data pelanggan, parameter IP router, tipe ONT modem, serta batas
-        redaman baseline fiber optik.
+      <p class="text-xs text-slate-500 mt-0.5">
+        Kelola data pelanggan, parameter IP router, tipe ONT modem, serta batas redaman baseline fiber optik.
       </p>
     </div>
 
-    <div class="flex items-center gap-2.5 flex-wrap">
-      <!-- Tombol Export Excel -->
-      <a
-        href="/api/customers/export-excel"
-        download="data_pelanggan_edteknoguard.xlsx"
-        class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-100 transition flex items-center gap-2 min-h-[44px]"
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-        <span>Export Excel</span>
-      </a>
-
-      {% if request.state.current_user and
-      request.state.current_user.get('role') in ('super admin', 'admin') %}
-      <!-- Tombol Import CSV -->
-      <button
-        @click="openImportModal()"
-        class="px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold border border-slate-200 shadow-sm transition flex items-center gap-2 min-h-[44px]"
-      >
-        <svg
-          class="w-4 h-4 text-emerald-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-          />
-        </svg>
-        <span>Import CSV</span>
-      </button>
-
-      <!-- Tombol Tambah Pelanggan -->
+    <!-- Action Buttons (Mobile-first rapi: Tambah Pelanggan di atas full-width, Export & Import grid 2-kolom seimbang) -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
+      {% if request.state.current_user and request.state.current_user.get('role') in ('super admin', 'admin') %}
+      <!-- Tombol Tambah Pelanggan (Primary) -->
       <button
         @click="openCreateModal()"
-        class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]"
+        class="order-1 sm:order-3 w-full sm:w-auto px-4 py-2.5 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm shadow-indigo-100 transition flex items-center justify-center gap-2 min-h-[44px] sm:min-h-[40px] active:scale-[0.98]"
       >
         <svg
           class="w-4 h-4"
@@ -105,23 +61,71 @@ EdTeknoGuard{% endblock %} {% block content %}
         <span>Tambah Pelanggan</span>
       </button>
       {% endif %}
+
+      <!-- Grid 2-Kolom Simetris untuk Export & Import di Mobile -->
+      <div class="order-2 sm:order-1 grid grid-cols-2 sm:flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+        <!-- Tombol Export Excel -->
+        <a
+          href="/api/customers/export-excel"
+          download="data_pelanggan_edteknoguard.xlsx"
+          class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl sm:rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm shadow-emerald-100 transition flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[40px] active:scale-[0.98]"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          <span>Export Excel</span>
+        </a>
+
+        {% if request.state.current_user and request.state.current_user.get('role') in ('super admin', 'admin') %}
+        <!-- Tombol Import CSV -->
+        <button
+          @click="openImportModal()"
+          class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl sm:rounded-2xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-200 shadow-2xs transition flex items-center justify-center gap-1.5 min-h-[44px] sm:min-h-[40px] active:scale-[0.98]"
+        >
+          <svg
+            class="w-4 h-4 text-emerald-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+            />
+          </svg>
+          <span>Import CSV</span>
+        </button>
+        {% endif %}
+      </div>
     </div>
   </div>
 
-  <!-- Quick Stats Cards (Interaktif: Klik untuk Filter & Sortir Tabel) -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+  <!-- Quick Stats Cards (Apple HIG Widget Cards: 2x2 grid compact simetris, rounded-2xl, subtle border) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
     <!-- Card 1: Total Pelanggan -->
     <div
       @click="filterByCard('Semua Status')"
       title="Klik untuk melihat semua data pelanggan"
-      class="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center gap-4 cursor-pointer hover:shadow-md hover:border-indigo-300 transition-all select-none"
-      :class="{'ring-2 ring-indigo-500 border-transparent bg-indigo-50/20': filterStatus === 'Semua Status'}"
+      class="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200/60 shadow-2xs flex items-center gap-2.5 sm:gap-3.5 cursor-pointer hover:border-slate-300 hover:shadow-xs transition-all select-none min-h-[44px] active:scale-[0.99]"
+      :class="{'ring-2 ring-indigo-500/70 border-transparent bg-indigo-50/30': filterStatus === 'Semua Status'}"
     >
       <div
-        class="h-11 w-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0"
+        class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4 sm:w-5 sm:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -134,18 +138,18 @@ EdTeknoGuard{% endblock %} {% block content %}
           />
         </svg>
       </div>
-      <div>
-        <div class="text-[11px] font-bold uppercase text-slate-400">
+      <div class="min-w-0 flex-1">
+        <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
           Total Terpantau
         </div>
-        <div class="flex items-baseline gap-1.5">
+        <div class="flex items-baseline gap-1 mt-0.5">
           <span
-            class="text-xl font-extrabold text-slate-900"
+            class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight"
             x-text="stats.total"
           ></span>
           <span
             x-show="stats.monitored_inactive > 0"
-            class="text-[11px] font-semibold text-slate-400"
+            class="text-[10px] sm:text-[11px] font-medium text-slate-400 truncate"
             :title="stats.monitored_inactive + ' pelanggan dinonaktifkan (OFF)'"
           >
             (<span x-text="stats.monitored_inactive"></span> OFF)
@@ -158,14 +162,14 @@ EdTeknoGuard{% endblock %} {% block content %}
     <div
       @click="filterByCard('NORMAL')"
       title="Klik untuk memfilter pelanggan berstatus NORMAL"
-      class="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center gap-4 cursor-pointer hover:shadow-md hover:border-emerald-300 transition-all select-none"
-      :class="{'ring-2 ring-emerald-500 border-transparent bg-emerald-50/20': filterStatus === 'NORMAL'}"
+      class="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200/60 shadow-2xs flex items-center gap-2.5 sm:gap-3.5 cursor-pointer hover:border-slate-300 hover:shadow-xs transition-all select-none min-h-[44px] active:scale-[0.99]"
+      :class="{'ring-2 ring-emerald-500/70 border-transparent bg-emerald-50/30': filterStatus === 'NORMAL'}"
     >
       <div
-        class="h-11 w-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
+        class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4 sm:w-5 sm:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -178,12 +182,12 @@ EdTeknoGuard{% endblock %} {% block content %}
           />
         </svg>
       </div>
-      <div>
-        <div class="text-[11px] font-bold uppercase text-slate-400">
+      <div class="min-w-0 flex-1">
+        <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
           Status Normal
         </div>
         <div
-          class="text-xl font-extrabold text-emerald-600"
+          class="text-lg sm:text-xl font-extrabold text-emerald-600 tracking-tight mt-0.5"
           x-text="stats.normal"
         ></div>
       </div>
@@ -193,14 +197,14 @@ EdTeknoGuard{% endblock %} {% block content %}
     <div
       @click="filterByCard('WARNING')"
       title="Klik untuk memfilter pelanggan berstatus WARNING (<= -26 dBm)"
-      class="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center gap-4 cursor-pointer hover:shadow-md hover:border-amber-300 transition-all select-none"
-      :class="{'ring-2 ring-amber-500 border-transparent bg-amber-50/20': filterStatus === 'WARNING'}"
+      class="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200/60 shadow-2xs flex items-center gap-2.5 sm:gap-3.5 cursor-pointer hover:border-slate-300 hover:shadow-xs transition-all select-none min-h-[44px] active:scale-[0.99]"
+      :class="{'ring-2 ring-amber-500/70 border-transparent bg-amber-50/30': filterStatus === 'WARNING'}"
     >
       <div
-        class="h-11 w-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0"
+        class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4 sm:w-5 sm:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -213,12 +217,12 @@ EdTeknoGuard{% endblock %} {% block content %}
           />
         </svg>
       </div>
-      <div>
-        <div class="text-[11px] font-bold uppercase text-slate-400">
+      <div class="min-w-0 flex-1">
+        <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
           Warning (&le; -26 dBm)
         </div>
         <div
-          class="text-xl font-extrabold text-amber-600"
+          class="text-lg sm:text-xl font-extrabold text-amber-600 tracking-tight mt-0.5"
           x-text="stats.warning"
         ></div>
       </div>
@@ -228,14 +232,14 @@ EdTeknoGuard{% endblock %} {% block content %}
     <div
       @click="filterByCard('CRITICAL')"
       title="Klik untuk memfilter pelanggan berstatus Kritis & LOS"
-      class="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm flex items-center gap-4 cursor-pointer hover:shadow-md hover:border-rose-300 transition-all select-none"
-      :class="{'ring-2 ring-rose-500 border-transparent bg-rose-50/20': filterStatus === 'CRITICAL' || filterStatus === 'LOS'}"
+      class="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200/60 shadow-2xs flex items-center gap-2.5 sm:gap-3.5 cursor-pointer hover:border-slate-300 hover:shadow-xs transition-all select-none min-h-[44px] active:scale-[0.99]"
+      :class="{'ring-2 ring-rose-500/70 border-transparent bg-rose-50/30': filterStatus === 'CRITICAL' || filterStatus === 'LOS'}"
     >
       <div
-        class="h-11 w-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0"
+        class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0"
       >
         <svg
-          class="w-5 h-5"
+          class="w-4 h-4 sm:w-5 sm:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -248,12 +252,12 @@ EdTeknoGuard{% endblock %} {% block content %}
           />
         </svg>
       </div>
-      <div>
-        <div class="text-[11px] font-bold uppercase text-slate-400">
+      <div class="min-w-0 flex-1">
+        <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
           Kritis / LOS
         </div>
         <div
-          class="text-xl font-extrabold text-rose-600"
+          class="text-lg sm:text-xl font-extrabold text-rose-600 tracking-tight mt-0.5"
           x-text="stats.critical_los"
         ></div>
       </div>
@@ -272,16 +276,16 @@ EdTeknoGuard{% endblock %} {% block content %}
     x-transition:leave="transition ease-in duration-150"
     x-transition:leave-start="opacity-100 translate-y-0"
     x-transition:leave-end="opacity-0 -translate-y-2"
-    class="p-4 bg-indigo-900 text-white rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-3 border border-indigo-700"
+    class="p-4 bg-slate-900 text-white rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-3 border border-slate-800"
   >
     <div class="flex items-center gap-3">
       <div
-        class="h-8 w-8 rounded-lg bg-indigo-800 flex items-center justify-center font-bold text-sm text-indigo-200"
+        class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-sm text-white"
         x-text="selectedIds.length"
       ></div>
       <div>
         <h4 class="text-xs font-bold text-white">Pelanggan Terpilih</h4>
-        <p class="text-[11px] text-indigo-300">
+        <p class="text-[11px] text-slate-300">
           Siap untuk dilakukan tindakan massal
         </p>
       </div>
@@ -290,13 +294,13 @@ EdTeknoGuard{% endblock %} {% block content %}
     <div class="flex items-center gap-2">
       <button
         @click="selectedIds = []"
-        class="px-4 py-2 rounded-xl bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white text-xs font-semibold transition min-h-[40px]"
+        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition min-h-[40px] active:scale-[0.98]"
       >
         Batalkan Pilihan
       </button>
       <button
         @click="confirmBulkDelete()"
-        class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 min-h-[40px]"
+        class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 min-h-[40px] active:scale-[0.98]"
       >
         <svg
           class="w-4 h-4"
@@ -316,20 +320,19 @@ EdTeknoGuard{% endblock %} {% block content %}
     </div>
   </div>
   {% endif %}
-
-  <!-- Search & Filter Controls -->
+  <!-- Search & Filter Controls (Apple iOS Search & Picker Style) -->
   <div
-    class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3"
+    class="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200/60 shadow-2xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 sm:gap-3"
   >
-    <div class="w-full md:w-96 relative">
+    <div class="w-full lg:w-80 relative">
       <input
         type="text"
         x-model="searchQuery"
         @input.debounce.300ms="fetchCustomers(1)"
-        placeholder="Cari nama, IP, MAC, atau ID pelanggan..."
-        class="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
+        placeholder="Cari nama, IP, MAC, atau ID..."
+        class="w-full pl-9 pr-3 py-2 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl transition outline-none min-h-[40px] text-slate-800 placeholder-slate-400"
       />
-      <div class="absolute left-3 top-3 text-slate-400">
+      <div class="absolute left-3 top-2.5 text-slate-400 pointer-events-none">
         <svg
           class="w-4 h-4"
           fill="none"
@@ -346,11 +349,12 @@ EdTeknoGuard{% endblock %} {% block content %}
       </div>
     </div>
 
-    <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+    <!-- Dropdown Filters: Grid 2-Kolom Simetris di Mobile -->
+    <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
       <select
         x-model="filterPop"
         @change="fetchCustomers(1)"
-        class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
+        class="w-full sm:w-auto px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
       >
         <option value="Semua POP">Semua POP</option>
         {% for pop in pops %}
@@ -361,7 +365,7 @@ EdTeknoGuard{% endblock %} {% block content %}
       <select
         x-model="filterStatus"
         @change="fetchCustomers(1)"
-        class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
+        class="w-full sm:w-auto px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
       >
         <option value="Semua Status">Semua Status</option>
         <option value="NORMAL">Normal</option>
@@ -373,18 +377,18 @@ EdTeknoGuard{% endblock %} {% block content %}
       <select
         x-model="filterMonitoring"
         @change="fetchCustomers(1)"
-        class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
+        class="w-full sm:w-auto px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
       >
         <option value="all">Semua Pemantauan</option>
-        <option value="active">Pemantauan ON (Aktif)</option>
-        <option value="inactive">Pemantauan OFF (Nonaktif)</option>
+        <option value="active">Pemantauan ON</option>
+        <option value="inactive">Pemantauan OFF</option>
       </select>
 
       <!-- Filter Rentang Waktu Tanggal -->
       <select
         x-model="filterRange"
         @change="onRangeChange()"
-        class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
+        class="w-full sm:w-auto px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
       >
         <option value="all">Semua Tanggal</option>
         <option value="today">Hari Ini</option>
@@ -395,10 +399,11 @@ EdTeknoGuard{% endblock %} {% block content %}
 
       <button
         @click="fetchCustomers(currentPage)"
-        class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition min-h-[44px]"
+        class="col-span-2 sm:col-span-1 px-3 py-1.5 rounded-xl bg-slate-100/80 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition min-h-[40px] active:scale-[0.98]"
+        title="Refresh data tabel"
       >
         <svg
-          class="w-4 h-4"
+          class="w-4 h-4 text-slate-600"
           :class="{'animate-spin': loading}"
           fill="none"
           stroke="currentColor"
@@ -411,7 +416,7 @@ EdTeknoGuard{% endblock %} {% block content %}
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
           />
         </svg>
-        <span>Refresh</span>
+        <span class="sm:hidden">Muat Ulang Data</span>
       </button>
     </div>
   </div>
@@ -420,7 +425,7 @@ EdTeknoGuard{% endblock %} {% block content %}
   <div
     x-show="filterRange === 'custom'"
     x-transition
-    class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-3 text-xs"
+    class="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200/60 shadow-2xs flex flex-wrap items-center gap-2.5 text-xs"
   >
     <span class="font-semibold text-slate-600">Pilih Rentang Tanggal:</span>
     <div class="flex items-center gap-2">
@@ -429,7 +434,7 @@ EdTeknoGuard{% endblock %} {% block content %}
         x-model="customStartDate"
         :min="minDate"
         :max="todayDate"
-        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+        class="px-3 py-2 bg-slate-100/80 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl text-xs min-h-[40px] cursor-pointer"
       />
       <span class="text-slate-400">s/d</span>
       <input
@@ -437,11 +442,11 @@ EdTeknoGuard{% endblock %} {% block content %}
         x-model="customEndDate"
         :min="minDate"
         :max="todayDate"
-        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs min-h-[40px] focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+        class="px-3 py-2 bg-slate-100/80 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl text-xs min-h-[40px] cursor-pointer"
       />
       <button
         @click="fetchCustomers(1)"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs min-h-[40px] transition"
+        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs min-h-[40px] shadow-xs transition active:scale-[0.98]"
       >
         Terapkan
       </button>
@@ -451,15 +456,15 @@ EdTeknoGuard{% endblock %} {% block content %}
     >
   </div>
 
-  <!-- Customer Table Card -->
+  <!-- Customer Table Card (Apple HIG Inset Table View) -->
   <div
-    class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+    class="bg-white rounded-2xl border border-slate-200/60 shadow-2xs overflow-hidden"
   >
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
           <tr
-            class="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-bold uppercase tracking-wider text-[11px] select-none"
+            class="border-b border-slate-200/60 bg-slate-50/70 text-slate-400 font-semibold uppercase tracking-wider text-[10px] select-none"
           >
             <!-- Checkbox Select All -->
             <th class="py-3 px-2 sm:px-3 text-center w-10">
@@ -475,13 +480,13 @@ EdTeknoGuard{% endblock %} {% block content %}
             <!-- No. -->
             <th class="py-3 px-2 sm:px-3 text-center w-12">No.</th>
 
-            <!-- 1. Nama Pelanggan -->
+            <!-- 1. Pelanggan & Alamat (Konsolidasi Nama, ID, Telepon, dan Alamat Pemasangan) -->
             <th
               @click="sortTable('nama')"
-              class="py-3 px-2 sm:px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition"
+              class="py-3 px-3 sm:px-4 cursor-pointer hover:bg-slate-100/60 hover:text-indigo-600 transition"
             >
               <div class="flex items-center gap-1">
-                <span>Nama Pelanggan</span>
+                <span>Pelanggan &amp; Alamat</span>
                 <template x-if="sortBy === 'nama'">
                   <svg
                     class="w-3.5 h-3.5 text-indigo-600"
@@ -523,16 +528,13 @@ EdTeknoGuard{% endblock %} {% block content %}
               </div>
             </th>
 
-            <!-- 2. Alamat -->
-            <th class="py-3 px-2 sm:px-4">Alamat</th>
-
-            <!-- 3. POP -->
+            <!-- 2. POP & Kantor -->
             <th
               @click="sortTable('pop')"
-              class="py-3 px-2 sm:px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition"
+              class="py-3 px-2 sm:px-3 cursor-pointer hover:bg-slate-100/60 hover:text-indigo-600 transition"
             >
               <div class="flex items-center gap-1">
-                <span>POP</span>
+                <span>POP &amp; Kantor</span>
                 <template x-if="sortBy === 'pop'">
                   <svg
                     class="w-3.5 h-3.5 text-indigo-600"
@@ -574,61 +576,13 @@ EdTeknoGuard{% endblock %} {% block content %}
               </div>
             </th>
 
-            <!-- 4. Paket Bandwidth -->
-            <th
-              @click="sortTable('paket')"
-              class="py-3 px-2 sm:px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition"
-            >
-              <div class="flex items-center gap-1">
-                <span>Paket Bandwidth</span>
-                <template x-if="sortBy === 'paket'">
-                  <svg
-                    class="w-3.5 h-3.5 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      x-show="sortDir === 'asc'"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 15l7-7 7 7"
-                    />
-                    <path
-                      x-show="sortDir === 'desc'"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </template>
-                <template x-if="sortBy !== 'paket'">
-                  <svg
-                    class="w-3.5 h-3.5 text-slate-300 opacity-60"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-                    />
-                  </svg>
-                </template>
-              </div>
-            </th>
-
-            <!-- 5. Tipe Modem / IP -->
+            <!-- 3. Perangkat & IP (Konsolidasi Tipe Modem, IP Router, & MAC) -->
             <th
               @click="sortTable('jenis_modem')"
-              class="py-3 px-2 sm:px-4 cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition"
+              class="py-3 px-3 sm:px-4 cursor-pointer hover:bg-slate-100/60 hover:text-indigo-600 transition"
             >
               <div class="flex items-center gap-1">
-                <span>Tipe Modem &amp; IP</span>
+                <span>Perangkat &amp; IP</span>
                 <template x-if="sortBy === 'jenis_modem'">
                   <svg
                     class="w-3.5 h-3.5 text-indigo-600"
@@ -670,19 +624,14 @@ EdTeknoGuard{% endblock %} {% block content %}
               </div>
             </th>
 
-            <!-- 6. MAC Address -->
-            <th class="py-3 px-2 sm:px-4">
-              <span>MAC Address</span>
-            </th>
-
-            <!-- 7. Kredensial ONT (User & Pass) -->
+            <!-- 4. Paket Bandwidth -->
             <th
-              @click="sortTable('status_kredensial')"
-              class="py-3 px-2 sm:px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition"
+              @click="sortTable('paket')"
+              class="py-3 px-2 sm:px-3 cursor-pointer hover:bg-slate-100/60 hover:text-indigo-600 transition"
             >
-              <div class="flex items-center justify-center gap-1">
-                <span>Kredensial ONT</span>
-                <template x-if="sortBy === 'status_kredensial'">
+              <div class="flex items-center gap-1">
+                <span>Paket</span>
+                <template x-if="sortBy === 'paket'">
                   <svg
                     class="w-3.5 h-3.5 text-indigo-600"
                     fill="none"
@@ -705,7 +654,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                     />
                   </svg>
                 </template>
-                <template x-if="sortBy !== 'status_kredensial'">
+                <template x-if="sortBy !== 'paket'">
                   <svg
                     class="w-3.5 h-3.5 text-slate-300 opacity-60"
                     fill="none"
@@ -723,14 +672,17 @@ EdTeknoGuard{% endblock %} {% block content %}
               </div>
             </th>
 
-            <!-- 8. Rx Power Saat Ini -->
+            <!-- 5. Kredensial ONT -->
+            <th class="py-3 px-2 sm:px-3 text-center">Kredensial ONT</th>
+
+            <!-- 6. Status & Redaman Terakhir (Konsolidasi Status Badge, Angka dBm, & Waktu) -->
             <th
-              @click="sortTable('redaman_baseline')"
-              class="py-3 px-2 sm:px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition"
+              @click="sortTable('status_terakhir')"
+              class="py-3 px-3 sm:px-4 text-center cursor-pointer hover:bg-slate-100/60 hover:text-indigo-600 transition"
             >
               <div class="flex items-center justify-center gap-1">
-                <span>Rx Power</span>
-                <template x-if="sortBy === 'redaman_baseline'">
+                <span>Status &amp; Redaman</span>
+                <template x-if="sortBy === 'status_terakhir'">
                   <svg
                     class="w-3.5 h-3.5 text-indigo-600"
                     fill="none"
@@ -753,7 +705,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                     />
                   </svg>
                 </template>
-                <template x-if="sortBy !== 'redaman_baseline'">
+                <template x-if="sortBy !== 'status_terakhir'">
                   <svg
                     class="w-3.5 h-3.5 text-slate-300 opacity-60"
                     fill="none"
@@ -771,111 +723,18 @@ EdTeknoGuard{% endblock %} {% block content %}
               </div>
             </th>
 
-            <!-- 9. Status -->
-            <th
-              @click="sortTable('status')"
-              class="py-3 px-2 sm:px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition"
-            >
-              <div class="flex items-center justify-center gap-1">
-                <span>Status</span>
-                <template x-if="sortBy === 'status'">
-                  <svg
-                    class="w-3.5 h-3.5 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      x-show="sortDir === 'asc'"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 15l7-7 7 7"
-                    />
-                    <path
-                      x-show="sortDir === 'desc'"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </template>
-                <template x-if="sortBy !== 'status'">
-                  <svg
-                    class="w-3.5 h-3.5 text-slate-300 opacity-60"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-                    />
-                  </svg>
-                </template>
-              </div>
-            </th>
+            <!-- 7. Pantau (Toggle ON/OFF) -->
+            <th class="py-3 px-2 sm:px-3 text-center">Pantau</th>
 
-            <!-- 10. Pemantauan (ON/OFF Toggle) -->
-            <th
-              @click="sortTable('is_monitored')"
-              class="py-3 px-2 sm:px-4 text-center cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition select-none"
-            >
-              <div class="flex items-center justify-center gap-1">
-                <span>Pemantauan</span>
-                <template x-if="sortBy === 'is_monitored'">
-                  <svg
-                    class="w-3.5 h-3.5 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      x-show="sortDir === 'asc'"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 15l7-7 7 7"
-                    />
-                    <path
-                      x-show="sortDir === 'desc'"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </template>
-                <template x-if="sortBy !== 'is_monitored'">
-                  <svg
-                    class="w-3.5 h-3.5 text-slate-300 opacity-60"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-                    />
-                  </svg>
-                </template>
-              </div>
-            </th>
-
-            <!-- 11. Aksi -->
-            <th class="py-3 px-2 sm:px-4 text-right">Aksi</th>
+            <!-- 8. Aksi -->
+            <th class="py-3 px-3 sm:px-4 text-right">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           <template x-for="(c, index) in customers" :key="c.id_pelanggan">
             <tr
-              class="hover:bg-slate-50/80 transition"
-              :class="selectedIds.includes(c.id_pelanggan) ? 'bg-indigo-50/40' : ''"
+              class="hover:bg-slate-50/60 transition-colors"
+              :class="{'bg-indigo-50/20': selectedIds.includes(c.id_pelanggan), 'opacity-60 bg-slate-50/40': !c.is_monitored}"
             >
               <!-- Checkbox per Baris -->
               <td class="py-3 px-2 sm:px-3 text-center">
@@ -890,38 +749,29 @@ EdTeknoGuard{% endblock %} {% block content %}
               <!-- No. -->
               <td class="py-3 px-2 sm:px-3 text-center font-semibold text-slate-500" x-text="(currentPage - 1) * limit + index + 1"></td>
 
-              <!-- 1. Nama Pelanggan -->
-              <td class="py-3 px-2 sm:px-4">
-                <div class="font-bold text-slate-900" x-text="c.nama"></div>
-                <div
-                  class="text-[11px] text-slate-400 font-mono"
-                  x-text="c.id_pelanggan"
-                ></div>
-                <div
-                  class="text-[11px] text-slate-400"
-                  x-show="c.no_hp && c.no_hp !== '-'"
-                  x-text="c.no_hp"
-                ></div>
+              <!-- 1. Pelanggan & Alamat (Konsolidasi) -->
+              <td class="py-3 px-3 sm:px-4">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm tracking-tight" x-text="c.nama"></div>
+                <div class="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono mt-0.5">
+                  <span x-text="c.id_pelanggan"></span>
+                  <span x-show="c.no_hp && c.no_hp !== '-'" class="text-slate-300">•</span>
+                  <span x-show="c.no_hp && c.no_hp !== '-'" x-text="c.no_hp" class="font-sans text-slate-500"></span>
+                </div>
+                <div x-show="c.alamat && c.alamat !== '-'" class="text-[11px] text-slate-500 mt-1 line-clamp-1 flex items-center gap-1" :title="c.alamat">
+                  <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span x-text="c.alamat"></span>
+                </div>
               </td>
 
-              <!-- 2. Alamat -->
-              <td class="py-3 px-2 sm:px-4">
-                <div
-                  class="text-xs text-slate-700 max-w-[200px] line-clamp-2"
-                  :title="c.alamat"
-                  x-text="c.alamat || '-'"
-                ></div>
-              </td>
-
-              <!-- 3. POP & Kantor -->
-              <td class="py-3 px-2 sm:px-4">
+              <!-- 2. POP & Kantor -->
+              <td class="py-3 px-2 sm:px-3">
                 <div class="flex flex-col gap-1 items-start">
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100"
                     x-text="c.pop"
                   ></span>
                   <span
-                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
                     :class="{
                       'bg-purple-50 text-purple-700 border border-purple-200': c.kantor === 'pusat',
                       'bg-blue-50 text-blue-700 border border-blue-200': c.kantor === 'cabang',
@@ -932,63 +782,53 @@ EdTeknoGuard{% endblock %} {% block content %}
                 </div>
               </td>
 
-              <!-- 4. Paket Bandwidth -->
-              <td class="py-3 px-2 sm:px-4">
-                <span
-                  class="text-xs font-semibold text-slate-800"
-                  x-text="c.paket || '-'"
-                ></span>
-              </td>
-
-              <!-- 5. Tipe Modem & IP -->
-              <td class="py-3 px-2 sm:px-4">
+              <!-- 3. Perangkat & IP (Konsolidasi Tipe Modem, IP Router, & MAC) -->
+              <td class="py-3 px-3 sm:px-4">
                 <div
-                  class="text-slate-800 font-semibold text-xs"
+                  class="text-slate-800 font-bold text-xs"
                   x-text="c.jenis_modem"
                 ></div>
                 <div
                   class="text-[11px] font-mono text-indigo-600 font-bold"
                   x-text="c.ip_router"
                 ></div>
-              </td>
-
-              <!-- 6. MAC Address -->
-              <td class="py-3 px-2 sm:px-4">
                 <template x-if="c.mac_address && c.mac_address !== '-'">
-                  <span
-                    class="font-mono text-xs font-semibold text-slate-800 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200 inline-block shadow-xs"
-                    x-text="c.mac_address"
-                  ></span>
-                </template>
-                <template x-if="!c.mac_address || c.mac_address === '-'">
-                  <span class="text-xs text-slate-400 font-mono">-</span>
+                  <div class="text-[10px] font-mono text-slate-400 mt-0.5 tracking-tight" x-text="c.mac_address"></div>
                 </template>
               </td>
 
-              <!-- 7. Kredensial ONT (User & Password Modem) -->
-              <td class="py-3 px-2 sm:px-4 text-center">
+              <!-- 4. Paket Bandwidth -->
+              <td class="py-3 px-2 sm:px-3">
+                <span
+                  class="text-xs font-semibold text-slate-800"
+                  x-text="c.paket || '-'"
+                ></span>
+              </td>
+
+              <!-- 5. Kredensial ONT (User & Password Modem) -->
+              <td class="py-3 px-2 sm:px-3 text-center">
                 <div class="inline-flex flex-col items-center gap-1.5">
                   <span
                     class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 border"
                     :class="{
-                                              'bg-emerald-50 text-emerald-700 border-emerald-200': c.status_kredensial === 'VALID',
-                                              'bg-rose-50 text-rose-700 border-rose-200': c.status_kredensial === 'INVALID',
-                                              'bg-slate-100 text-slate-600 border-slate-200': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
-                                          }"
+                      'bg-emerald-50 text-emerald-700 border-emerald-200': c.status_kredensial === 'VALID',
+                      'bg-rose-50 text-rose-700 border-rose-200': c.status_kredensial === 'INVALID',
+                      'bg-slate-100 text-slate-600 border-slate-200': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
+                    }"
                     :title="c.status_kredensial === 'VALID' ? 'Kredensial login modem terverifikasi valid' : (c.status_kredensial === 'INVALID' ? 'Gagal login: Username/Password modem salah' : 'Belum pernah diverifikasi')"
                   >
                     <span
                       class="w-1.5 h-1.5 rounded-full"
                       :class="{
-                                                  'bg-emerald-500': c.status_kredensial === 'VALID',
-                                                  'bg-rose-500': c.status_kredensial === 'INVALID',
-                                                  'bg-slate-400': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
-                                              }"
+                        'bg-emerald-500': c.status_kredensial === 'VALID',
+                        'bg-rose-500': c.status_kredensial === 'INVALID',
+                        'bg-slate-400': c.status_kredensial === 'UNTESTED' || !c.status_kredensial
+                      }"
                     ></span>
                     <span x-text="c.status_kredensial || 'UNTESTED'"></span>
                   </span>
                   <div
-                    class="text-[10px] font-mono text-slate-700 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 space-y-0.5 text-left min-w-[115px]"
+                    class="text-[10px] font-mono text-slate-700 bg-slate-50 px-2 py-1 rounded-xl border border-slate-200/70 space-y-0.5 text-left min-w-[110px]"
                   >
                     <div class="flex items-center justify-between gap-1">
                       <span class="text-slate-400">User:</span>
@@ -1013,7 +853,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                         <button
                           type="button"
                           @click="showOntPass[c.id_pelanggan] = !showOntPass[c.id_pelanggan]"
-                          class="text-slate-400 hover:text-indigo-600 focus:outline-none"
+                          class="text-slate-400 hover:text-indigo-600 focus:outline-none p-0.5"
                           title="Lihat/Sembunyikan Password Modem"
                         >
                           <svg
@@ -1023,16 +863,18 @@ EdTeknoGuard{% endblock %} {% block content %}
                             viewBox="0 0 24 24"
                           >
                             <path
+                              x-show="!showOntPass[c.id_pelanggan]"
                               stroke-linecap="round"
                               stroke-linejoin="round"
                               stroke-width="2"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                             />
                             <path
+                              x-show="showOntPass[c.id_pelanggan]"
                               stroke-linecap="round"
                               stroke-linejoin="round"
                               stroke-width="2"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
                             />
                           </svg>
                         </button>
@@ -1042,46 +884,54 @@ EdTeknoGuard{% endblock %} {% block content %}
                 </div>
               </td>
 
-              <!-- 8. Rx Power Saat Ini -->
-              <td class="py-3 px-2 sm:px-4 text-center font-mono font-bold">
-                <span
-                  :class="{
-                                    'text-emerald-600': c.status === 'NORMAL',
-                                    'text-amber-600': c.status === 'WARNING',
-                                    'text-rose-600': c.status === 'CRITICAL' || c.status === 'LOS'
-                                }"
-                  x-text="c.redaman_current !== null ? c.redaman_current + ' dBm' : 'LOS'"
-                ></span>
-                <div
-                  class="text-[10px] text-slate-400 font-sans"
-                  x-text="c.last_check"
-                ></div>
-              </td>
-
-              <!-- 9. Status -->
-              <td class="py-3 px-2 sm:px-4 text-center">
-                <span
-                  class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase inline-flex items-center gap-1"
-                  :class="{
-                                          'bg-emerald-50 text-emerald-700 border border-emerald-200': c.status === 'NORMAL',
-                                          'bg-amber-50 text-amber-700 border border-amber-200': c.status === 'WARNING',
-                                          'bg-rose-50 text-rose-700 border border-rose-200': c.status === 'CRITICAL' || c.status === 'LOS'
-                                      }"
-                >
+              <!-- 6. Status & Redaman Terakhir (Konsolidasi Status Badge, Angka dBm, & Waktu) -->
+              <td class="py-3 px-3 sm:px-4 text-center">
+                <div class="flex flex-col items-center gap-1">
+                  <!-- Status Pill -->
                   <span
-                    class="w-1.5 h-1.5 rounded-full"
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1 border"
                     :class="{
-                                              'bg-emerald-500': c.status === 'NORMAL',
-                                              'bg-amber-500': c.status === 'WARNING',
-                                              'bg-rose-500': c.status === 'CRITICAL' || c.status === 'LOS'
-                                          }"
-                  ></span>
-                  <span x-text="c.status"></span>
-                </span>
+                      'bg-emerald-500/10 text-emerald-700 border-emerald-500/20': c.status_terakhir === 'NORMAL',
+                      'bg-amber-500/10 text-amber-700 border-amber-500/20': c.status_terakhir === 'WARNING',
+                      'bg-rose-500/10 text-rose-700 border-rose-500/20': c.status_terakhir === 'CRITICAL' || c.status_terakhir === 'LOS',
+                      'bg-slate-100 text-slate-600 border-slate-200': !c.status_terakhir || c.status_terakhir === 'UNKNOWN'
+                    }"
+                  >
+                    <span
+                      class="w-1.5 h-1.5 rounded-full"
+                      :class="{
+                        'bg-emerald-500': c.status_terakhir === 'NORMAL',
+                        'bg-amber-500': c.status_terakhir === 'WARNING',
+                        'bg-rose-500': c.status_terakhir === 'CRITICAL' || c.status_terakhir === 'LOS',
+                        'bg-slate-400': !c.status_terakhir || c.status_terakhir === 'UNKNOWN'
+                      }"
+                    ></span>
+                    <span x-text="c.status_terakhir || 'UNKNOWN'"></span>
+                  </span>
+
+                  <!-- Redaman Optik (dBm) -->
+                  <div class="font-mono text-xs font-bold tracking-tight">
+                    <span
+                      :class="{
+                        'text-emerald-600': c.status_terakhir === 'NORMAL',
+                        'text-amber-600': c.status_terakhir === 'WARNING',
+                        'text-rose-600': c.status_terakhir === 'CRITICAL' || c.status_terakhir === 'LOS',
+                        'text-slate-400': !c.status_terakhir || c.status_terakhir === 'UNKNOWN'
+                      }"
+                      x-text="c.redaman_terakhir ? c.redaman_terakhir + ' dBm' : '-'"
+                    ></span>
+                  </div>
+
+                  <!-- Waktu Cek Terakhir -->
+                  <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span x-text="formatDate(c.waktu_terakhir)"></span>
+                  </div>
+                </div>
               </td>
 
-              <!-- 10. Pemantauan (Toggle ON/OFF) -->
-              <td class="py-3 px-2 sm:px-4 text-center">
+              <!-- 7. Pemantauan (Toggle ON/OFF) -->
+              <td class="py-3 px-2 sm:px-3 text-center">
                 <div class="inline-flex flex-col items-center gap-1">
                   {% if request.state.current_user and
                   request.state.current_user.get('role') in ('super admin', 'admin') %}
@@ -1089,7 +939,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                     type="button"
                     @click.stop="toggleMonitoring(c)"
                     :disabled="togglingMonitoringId === c.id_pelanggan"
-                    :title="c.is_monitored ? 'Pemantauan AKTIF: Modem discan berkala & dikirimi alert Telegram. Klik untuk nonaktifkan.' : 'Pemantauan NONAKTIF: Modem dilewati saat scanning & tidak dikirim alert Telegram. Klik untuk aktifkan.'"
+                    :title="c.is_monitored ? 'Pemantauan AKTIF: Modem discan berkala & dikirimi alert. Klik untuk nonaktifkan.' : 'Pemantauan NONAKTIF: Modem dilewati saat scanning. Klik untuk aktifkan.'"
                     class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-50"
                     :class="c.is_monitored ? 'bg-emerald-500' : 'bg-slate-300'"
                   >
@@ -1150,11 +1000,11 @@ EdTeknoGuard{% endblock %} {% block content %}
                     </span>
                   </button>
                   {% else %}
-                  <!-- Read-only for karyawan -->
+                  <!-- Read-only for teknisi -->
                   <div
                     class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out opacity-80 cursor-not-allowed"
                     :class="c.is_monitored ? 'bg-emerald-500' : 'bg-slate-300'"
-                    title="Anda tidak memiliki akses untuk mengubah status pemantauan"
+                    title="Hanya dapat diubah oleh Admin"
                   >
                     <span
                       class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center"
@@ -1202,14 +1052,16 @@ EdTeknoGuard{% endblock %} {% block content %}
                   ></span>
                 </div>
               </td>
-              <td class="py-3 px-2 sm:px-4 text-right">
-                <div class="flex items-center justify-end gap-1.5">
+
+              <!-- 8. Aksi -->
+              <td class="py-3 px-3 sm:px-4 text-right">
+                <div class="flex items-center justify-end gap-1 sm:gap-1.5">
                   <!-- Cek Live -->
                   <button
                     @click="probeSingle(c)"
                     title="Cek Live Redaman ONT Sekarang"
                     :disabled="probingId === c.id_pelanggan"
-                    class="p-2 rounded-lg text-indigo-600 hover:bg-indigo-50 border border-indigo-100 transition disabled:opacity-50 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                    class="p-2 rounded-xl text-indigo-600 hover:bg-indigo-50 border border-indigo-100 transition disabled:opacity-50 min-h-[40px] min-w-[40px] flex items-center justify-center active:scale-[0.95]"
                   >
                     <svg
                       class="w-4 h-4"
@@ -1231,7 +1083,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                   <button
                     @click="openEditModal(c)"
                     title="Edit Data Pelanggan"
-                    class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-200 transition min-h-[40px] min-w-[40px] flex items-center justify-center"
+                    class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 border border-slate-200/70 transition min-h-[40px] min-w-[40px] flex items-center justify-center active:scale-[0.95]"
                   >
                     <svg
                       class="w-4 h-4"
@@ -1252,7 +1104,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                   <button
                     @click="openDetailModal(c.id_pelanggan)"
                     title="Lihat Detail Pelanggan, Kredensial WiFi & Riwayat Log"
-                    class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-200 transition min-h-[40px] min-w-[40px] flex items-center justify-center"
+                    class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 border border-slate-200/70 transition min-h-[40px] min-w-[40px] flex items-center justify-center active:scale-[0.95]"
                   >
                     <svg
                       class="w-4 h-4"
@@ -1281,7 +1133,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                   <button
                     @click="confirmDeleteSingle(c)"
                     title="Hapus Pelanggan"
-                    class="p-2 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-100 transition min-h-[40px] min-w-[40px] flex items-center justify-center"
+                    class="p-2 rounded-xl text-rose-600 hover:bg-rose-50 border border-rose-100 transition min-h-[40px] min-w-[40px] flex items-center justify-center active:scale-[0.95]"
                   >
                     <svg
                       class="w-4 h-4"
@@ -1304,12 +1156,12 @@ EdTeknoGuard{% endblock %} {% block content %}
           </template>
 
           <tr x-show="customers.length === 0 && !loading">
-            <td colspan="11" class="py-12 text-center text-slate-400">
+            <td colspan="10" class="py-12 text-center text-slate-400">
               Tidak ditemukan pelanggan yang cocok dengan pencarian / filter.
             </td>
           </tr>
           <tr x-show="loading">
-            <td colspan="11" class="py-12 text-center text-slate-400">
+            <td colspan="10" class="py-12 text-center text-slate-400">
               <div class="inline-flex items-center gap-2 font-medium">
                 <svg
                   class="w-5 h-5 animate-spin text-indigo-600"
@@ -1324,7 +1176,7 @@ EdTeknoGuard{% endblock %} {% block content %}
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                   />
                 </svg>
-                Memuat data pelanggan dari Database...
+                <span>Memuat data pelanggan dari Database...</span>
               </div>
             </td>
           </tr>
@@ -1332,9 +1184,9 @@ EdTeknoGuard{% endblock %} {% block content %}
       </table>
     </div>
 
-    <!-- Pagination Bar -->
+    <!-- Pagination Bar (Apple Segmented Pager Style) -->
     <div
-      class="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500"
+      class="p-4 border-t border-slate-100 bg-slate-50/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500"
     >
       <div class="flex items-center gap-3">
         <div>
@@ -1352,11 +1204,11 @@ EdTeknoGuard{% endblock %} {% block content %}
           <select
             x-model="limit"
             @change="fetchCustomers(1)"
-            class="px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="px-2.5 py-1 text-xs bg-white border border-slate-200/70 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold cursor-pointer"
           >
-            <option value="25">25</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
             <option value="50">50</option>
-            <option value="75">75</option>
             <option value="100">100</option>
           </select>
         </div>
@@ -1366,7 +1218,7 @@ EdTeknoGuard{% endblock %} {% block content %}
         <button
           @click="fetchCustomers(currentPage - 1)"
           :disabled="currentPage <= 1"
-          class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[40px]"
+          class="px-3.5 py-2 rounded-xl border border-slate-200/70 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[40px] active:scale-[0.98]"
         >
           &larr; Sebelumnya
         </button>
@@ -1376,8 +1228,8 @@ EdTeknoGuard{% endblock %} {% block content %}
             <button
               @click="typeof page === 'number' ? fetchCustomers(page) : null"
               :disabled="typeof page !== 'number'"
-              class="px-4 py-2 rounded-xl border transition font-semibold min-h-[40px]"
-              :class="page === currentPage ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : (typeof page !== 'number' ? 'border-transparent text-slate-400 bg-transparent' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700')"
+              class="px-3.5 py-2 rounded-xl border transition font-semibold min-h-[40px] active:scale-[0.98]"
+              :class="page === currentPage ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : (typeof page !== 'number' ? 'border-transparent text-slate-400 bg-transparent' : 'border-slate-200/70 bg-white hover:bg-slate-50 text-slate-700')"
             >
               <span x-text="page"></span>
             </button>
@@ -1390,7 +1242,7 @@ EdTeknoGuard{% endblock %} {% block content %}
         <button
           @click="fetchCustomers(currentPage + 1)"
           :disabled="currentPage >= totalPages"
-          class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[40px]"
+          class="px-3.5 py-2 rounded-xl border border-slate-200/70 bg-white hover:bg-slate-50 disabled:opacity-40 transition font-semibold min-h-[40px] active:scale-[0.98]"
         >
           Selanjutnya &rarr;
         </button>
@@ -3162,6 +3014,45 @@ EdTeknoGuard{% endblock %} {% block content %}
 
       <!-- Detail Cards: Kredensial WiFi & Parameter Perangkat ONT -->
       <div class="space-y-3">
+        <!-- Card 0: Informasi Pelanggan, Alamat & Titik Lokasi GPS -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+          <div class="flex items-center gap-2">
+            <div class="p-1.5 rounded-lg bg-emerald-600 text-white shadow-xs">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-900">Informasi Alamat &amp; Titik Lokasi Rumah (GPS)</h4>
+              <p class="text-[10px] text-slate-500">Data alamat rumah dan titik koordinat Google Maps pelanggan</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+            <!-- Alamat / Dusun -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Alamat / Dusun / Desa</span>
+              <div class="font-bold text-slate-900 text-xs leading-relaxed" x-text="selectedCustomer?.alamat || 'Belum Diatur'"></div>
+            </div>
+
+            <!-- Titik Lokasi GPS -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Titik Koordinat GPS</span>
+              <template x-if="selectedCustomer?.lokasi_gps">
+                <div class="flex items-center justify-between gap-2 mt-0.5">
+                  <span class="font-mono font-bold text-indigo-700 text-xs" x-text="selectedCustomer?.lokasi_gps"></span>
+                  <a :href="'https://www.google.com/maps?q=' + selectedCustomer?.lokasi_gps" target="_blank"
+                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-[11px] transition shrink-0 min-h-[36px]">
+                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <span>Buka Google Maps</span>
+                  </a>
+                </div>
+              </template>
+              <template x-if="!selectedCustomer?.lokasi_gps">
+                <span class="text-slate-400 italic text-xs">Belum terdata (otomatis tersimpan saat warga daftar di portal)</span>
+              </template>
+            </div>
+          </div>
+        </div>
+
         <!-- Card 1: Informasi Kredensial WiFi Pelanggan (Input Manual) -->
         <div
           class="p-4 rounded-2xl bg-gradient-to-r from-indigo-50/80 to-blue-50/60 border border-indigo-100 shadow-xs"
@@ -3611,7 +3502,7 @@ EdTeknoGuard{% endblock %} {% block content %}
       totalCustomers: 0,
       currentPage: 1,
       totalPages: 1,
-      limit: 25,
+      limit: 15,
       searchQuery: "",
       filterPop: "Semua POP",
       filterStatus: "Semua Status",
@@ -3727,7 +3618,7 @@ EdTeknoGuard{% endblock %} {% block content %}
       previewSortBy: "id_pelanggan",
       previewSortDir: "asc",
       previewPage: 1,
-      previewLimit: 25,
+      previewLimit: 15,
       previewSelectedUids: [],
       get isAllPreviewSelected() {
         if (
