@@ -58,7 +58,7 @@ class DashboardService:
         # 3. Tiket aktif pelanggan
         active_tickets = db.query(TiketKendala).filter(
             TiketKendala.id_pelanggan == id_pelanggan,
-            TiketKendala.status.in_(["MENUNGGU", "DIPROSES"])
+            TiketKendala.status.in_(["MENUNGGU", "DICEK_ADMIN", "DIPROSES"])
         ).count()
 
         return {

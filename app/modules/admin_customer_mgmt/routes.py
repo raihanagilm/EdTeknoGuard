@@ -57,6 +57,31 @@ def update_ticket_status(
         catatan=catatan
     )
 
+@router.post("/api/tiket/{ticket_id}/status")
+async def update_ticket_status_json(
+    request: Request,
+    ticket_id: str,
+    db: Session = Depends(get_db)
+):
+    try:
+        data = await request.json()
+        new_status = data.get("new_status")
+        catatan = data.get("catatan", "")
+    except Exception:
+        new_status = None
+        catatan = ""
+
+    if not new_status:
+        return {"status": "error", "message": "Status baru wajib dipilih."}
+
+    return AdminCustomerMgmtController.update_ticket_status(
+        request=request,
+        db=db,
+        ticket_id=ticket_id,
+        new_status=new_status,
+        catatan=catatan
+    )
+
 @router.get("/kuota")
 def render_quota_page(request: Request, db: Session = Depends(get_db)):
     return AdminCustomerMgmtController.render_quota_page(request=request, db=db)

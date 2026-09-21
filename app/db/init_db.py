@@ -4,7 +4,10 @@ import random
 from datetime import datetime, timedelta
 from app.core.timezone import get_now_wib
 from app.core.database import engine, Base, SessionLocal
-from app.db.models import Pelanggan, LogPerformaONT, AlertLog, SystemSetting
+from app.db.models import (
+    Pelanggan, LogPerformaONT, AlertLog, SystemSetting,
+    User, UserActivityLog, TiketKendala, KuotaPelanggan
+)
 from app.services.importer_service import ImporterService
 from app.core.config import settings
 

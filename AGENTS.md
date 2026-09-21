@@ -110,6 +110,7 @@ EdTeknoGuard/
 │   └── logs/
 ├── static/                    # Aset statis (CSS, JS, Gambar)
 ├── AGENTS.md                  # Pedoman arsitektur agen AI (dokumen ini)
+├── CHANGELOG.md               # Catatan riwayat perubahan & perlindungan fitur sistem
 ├── README.md
 ├── requirements.txt
 └── .env.example
@@ -127,10 +128,11 @@ EdTeknoGuard/
    - Sesi disimpan secara aman melalui session cookie terproteksi (`edteknoguard_session`).
 2. **Kerahasiaan Credential**:
    - Secret key, bot token Telegram, dan kredensial TiDB Cloud **WAJIB** berada di file `.env`.
-   - File `.env` **TIDAK BOLEH** di-commit ke Git.
-3. **Pop-up Konfirmasi**:
-   - Setiap aksi modifikasi penting (hapus data pelanggan, bulk delete, dan simpan pengaturan) **WAJIB** menampilkan modal pop-up konfirmasi sebelum eksekusi.
-4. **Anti-Spam Alert Debounce**:
+3. **Pop-up Konfirmasi & Penghapusan Berjenjang (CASCADE Deletion) & Normalisasi Data**:
+   - **Normalisasi Tunggal Master Pelanggan**: Entitas akun portal telah digabung langsung ke dalam tabel master `pelanggan` (`password_hash`, `lokasi_gps`, `status_verifikasi`, `last_login`), mengeliminasi tabel redundan `akun_pelanggan`.
+   - **Database CASCADE Wajib**: Seluruh 4 tabel anakan pelanggan (`log_performa_ont`, `alert_logs`, `tiket_kendala`, `kuota_pelanggan`) **WAJIB** memiliki constraint ForeignKey dengan `ON DELETE CASCADE` di database dan `cascade="all, delete-orphan", passive_deletes=True` pada model SQLAlchemy.
+   - **Peringatan Penghapusan Data Utama**: Modal pop-up konfirmasi hapus data pelanggan (baik tunggal maupun massal) **WAJIB** menampilkan kotak peringatan bahaya yang merinci secara eksplisit bahwa menghapus data utama pelanggan akan menghapus permanen seluruh data anakannya yang terkait dari database.
+   - **Pembersihan Bersih Tanpa Orphan**: Aksi hapus data utama pelanggan langsung mengeksekusi penghapusan berjenjang fisik (hard delete CASCADE) sehingga tidak ada data yatim (*orphaned records*) yang tersisa di sistem.
    - Sistem memiliki mekanisme debounce menit (default 30 menit) di `telegram_service.py` untuk mencegah pengiriman alert berulang ke teknisi jika modem masih dalam status gangguan yang sama.
 5. **Standar Ikon UI Wajib SVG Inline Bersih**:
    - Seluruh ikon antarmuka (tombol, badge, header modal, indikator sorting, dan aksi tabel) **WAJIB** menggunakan standar SVG inline bersih dengan atribut stroke/fill yang konsisten.
@@ -173,15 +175,14 @@ EdTeknoGuard/
 11. **Portal Pelanggan Mandiri (Self-Service Mobile Web App di `/portal`)**:
     - **Arsitektur Satu Proyek & Satu Server**:
       - Terintegrasi di dalam repositori pada folder `portal_pelanggan/` dan di-mount langsung pada aplikasi utama di endpoint `/portal` (dapat juga dijalankan mandiri di port terpisah jika diinginkan).
-      - Menggunakan database bersama (TiDB Cloud) dengan penambahan tabel `akun_pelanggan`, `tiket_kendala`, dan `kuota_pelanggan`.
-    - **Aktivasi / Registrasi Ramah Warga Desa 2-Tahap (`/portal/daftar`)**:
-      - Didesain sangat sederhana dan mudah untuk warga desa tanpa istilah teknis yang membingungkan.
-      - Input hanya: **Nama Lengkap Pendaftar**, **Alamat / Dusun / Desa**, **Nomor WhatsApp**, dan **Deteksi Titik GPS Rumah Otomatis (Background)**. Input IP router ditiadakan dari formulir pendaftaran karena warga desa tidak mengetahui IP WAN jaringan ISP.
-      - **Status PENDING & Keamanan Data Kantor**: Pendaftaran awal otomatis berstatus `PENDING` dengan `id_pelanggan = None`. Warga belum diberikan akses ganti WiFi / ID Pelanggan sebelum dicocokkan dan diverifikasi oleh Admin kantor.
-      - **Bebas Ribet Password**: Seluruh akun otomatis disetel ke password awal `123456` dan langsung dapat masuk ke dashboard pratinjau.
+      - Menggunakan basis data terpadu (TiDB Cloud) langsung pada tabel master `pelanggan` serta tabel anak `tiket_kendala` dan `kuota_pelanggan`.
+    - **Pemberian Akun & Kredensial Langsung oleh Petugas (Bebas Pendaftaran Mandiri)**:
+      - Alur pendaftaran mandiri warga desa ditiadakan demi kemudahan warga dan kepastian otentikasi data ISP.
+      - Akun pelanggan dibuat langsung oleh kantor ISP saat pemasangan modem dengan kata sandi awal `123456`.
+      - Rute `/portal/daftar` otomatis mengalihkan pengguna ke `/portal/login`.
     - **Autentikasi & Sesi Pelanggan (`/portal/login`)**:
-      - Seluruh akun pelanggan baru menggunakan kata sandi awal: `123456`.
-      - Antarmuka ramah warga menggunakan bahasa Indonesia bersih (*"Petunjuk Masuk: Kata sandi awal adalah: 123456"*), tanpa tombol preset "Isi 123456", dilengkapi toggle lihat kata sandi (ikon SVG mata terbuka/tertutup) dan tautan *"Lupa Kata Sandi?"*.
+      - Seluruh akun pelanggan dapat masuk menggunakan ID Pelanggan, Nomor WhatsApp, atau IP Router dengan kata sandi awal: `123456`.
+      - Antarmuka ramah warga menggunakan bahasa Indonesia bersih, dilengkapi toggle lihat kata sandi (ikon SVG mata terbuka/tertutup) dan tautan *"Lupa Kata Sandi?"*.
       - Sesi 30 hari via secure cookie `edtekno_pelanggan_session`.
     - **Fitur Lupa & Reset Kata Sandi Mandiri (`/portal/lupa-password`)**:
       - **Opsi Verifikasi Mandiri**:
@@ -208,9 +209,10 @@ EdTeknoGuard/
       - Desktop: Sidebar permanen di sisi kiri dengan pengelompokan seksi: *NOC & Jaringan*, *Manajemen Pelanggan*, dan *Sistem & Audit*.
       - Mobile: Header ringkas dengan tombol burger (ikon SVG 3 garis) yang membuka slide-over drawer dari kiri dengan backdrop blur gelap.
     - **Modul Manajemen Pelanggan Admin NOC**:
-      - **Verifikasi Pendaftar Baru (`/admin/verifikasi-pelanggan`)**: Admin mencocokkan pendaftar mandiri (status `PENDING`) dengan data pelanggan database kantor, melihat titik lokasi GPS di Google Maps, dan menghubungkannya dengan aman.
-      - **Tiket Keluhan Pelanggan (`/admin/tiket`)**: Daftar tiket keluhan warga desa dengan kapabilitas tabel audit log: filter status, filter jenis kendala, filter rentang tanggal (Hari Ini, 7 Hari, 30 Hari, Kustom s/d), live search dengan debounce, header kolom sortable (ID, Waktu, Pelanggan, Kendala, Redaman, Status), pagination bar (10, 25, 50, 100), dan modal kelola status tiket responsif.
+      - **Data Pelanggan & Kredensial Portal (`/pelanggan`)**: Pengelolaan data master pelanggan terpadu yang memuat profil jaringan (IP, POP, redaman) dan kredensial akses portal warga desa.
+      - **Tiket Keluhan Pelanggan (`/admin/tiket`)**: Daftar tiket keluhan warga desa dengan 4 status terpadu (`MENUNGGU`, `DICEK_ADMIN` / Diproses Cek Admin, `DIPROSES` / Teknisi Cek Lapangan, `SELESAI`), kapabilitas tabel audit log: filter status, filter jenis kendala, filter rentang tanggal (Hari Ini, 7 Hari, 30 Hari, Kustom s/d), live search dengan debounce, header kolom sortable (ID, Waktu, Pelanggan, Kendala, Redaman, Status), pagination bar (10, 25, 50, 100), dan modal kelola status tiket responsif.
       - **Pemantauan Pemakaian Kuota (`/admin/kuota`)**: Monitoring akumulasi GB yang telah digunakan pelanggan pada bulan berjalan dengan kapabilitas tabel audit log: kartu KPI ringkas dinamis (Total Pelanggan, Total GB, Rata-rata GB/user), filter paket, filter level pemakaian (sangat tinggi >150GB, tinggi 100-150GB, sedang 50-100GB, ringan <50GB, nol 0GB), live search, header kolom sortable numerik, dan pagination bar lengkap.
+      - **Penyelarasan Data Detail ke Tabel Pelanggan**: Titik koordinat GPS dengan link Google Maps, kredensial WiFi (SSID & Password dengan toggle lihat/sembunyikan), serta metrik pembacaan redaman terakhir, suhu ONT (°C), dan latency (ms) terintegrasi langsung pada tabel master `/pelanggan`.
 
 
 ---
@@ -218,7 +220,7 @@ EdTeknoGuard/
 ## 7. Standar Agen AI & Manajemen Dokumen
 
 1. **Sinkronisasi Dokumen Markdown**:
-   - Setiap AI Agent **WAJIB** membaca dan memahami file markdown (`.md`) seperti `AGENTS.md`, `README.md`, `designsystempro.md`, `prd.md`, dan dokumen lainnya di proyek untuk menjaga konteks tetap konsisten antar sesi.
+   - Setiap AI Agent **WAJIB** membaca dan memahami file markdown (`.md`) seperti `AGENTS.md`, `CHANGELOG.md`, `README.md`, `designsystempro.md`, `prd.md`, dan dokumen lainnya di proyek untuk menjaga konteks tetap konsisten antar sesi.
    - Jika ada perubahan arsitektur, fitur, atau aturan baru, agen **WAJIB** memperbarui dokumen `.md` ini agar saling terhubung dan selalu *up-to-date*.
 2. **Kepatuhan Mutlak Design System Pro (`designsystempro.md`)**:
    - File [`designsystempro.md`](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) adalah **Sumber Kebenaran Tunggal (*Single Source of Truth* / SSOT)** untuk seluruh antarmuka, tata letak, komponen, dan interaktivitas UI/UX di proyek EdTeknoGuard (baik aplikasi admin NOC maupun portal pelanggan).
@@ -226,3 +228,7 @@ EdTeknoGuard/
    - Prinsip dasar yang wajib dipegang: *"Terlihat rapi" ≠ "Terstruktur dengan benar."* Setiap angka padding/margin, warna, elevasi, dan komponen harus memiliki landasan aturan dari rulebook tersebut.
 3. **Implementasi Mobile-First**:
    - Setiap kali pengguna menginstruksikan pendekatan **mobile first**, agen **WAJIB** mengacu pada `designsystempro.md` serta menggunakan MCP atau skill dari `appllama-skills` sebagai referensi dan alat bantu.
+4. **Kewajiban Pencatatan & Perlindungan Fitur di CHANGELOG.md**:
+   - File [`CHANGELOG.md`](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/CHANGELOG.md) adalah acuan riwayat perubahan sistem yang berfungsi sebagai **benteng pencegahan regresi (*regression shield*)**.
+   - **Perlindungan Fitur Existing**: Sebelum menambahkan atau memodifikasi kode, AI Agent **WAJIB** meninjau `CHANGELOG.md` untuk memahami fitur apa saja yang sudah berjalan stabil. DILARANG KERAS merusak, menimpa (*overwrite*), atau menghilangkan fitur lama tanpa instruksi eksplisit dari pengguna.
+   - **Pencatatan Wajib**: Setiap kali selesai melakukan perbaikan bug, penambahan fitur, perubahan fungsi, atau pembaruan konfigurasi, AI Agent **WAJIB** mencatat perubahan tersebut di `CHANGELOG.md` pada seksi `[Unreleased]` atau versi terkait menggunakan kategori baku (`Added`, `Changed`, `Fixed`, `Removed`, `Security`).

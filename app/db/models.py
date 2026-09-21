@@ -34,8 +34,17 @@ class Pelanggan(Base):
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
-    # Relasi ke log performa
-    logs = relationship("LogPerformaONT", back_populates="pelanggan", cascade="all, delete-orphan")
+    # Kredensial & Status Akses Portal Warga Mandiri
+    password_hash = Column(String(255), nullable=True)
+    lokasi_gps = Column(String(100), nullable=True)
+    status_verifikasi = Column(String(30), default="TERVERIFIKASI", nullable=False, index=True) # TERVERIFIKASI, PENDING, DITOLAK
+    last_login = Column(DateTime, nullable=True)
+
+    # Relasi ke seluruh data anakan (Cascading Deletion)
+    logs = relationship("LogPerformaONT", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
+    alerts = relationship("AlertLog", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
+    tiket_list = relationship("TiketKendala", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
+    kuota_list = relationship("KuotaPelanggan", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class LogPerformaONT(Base):
@@ -62,13 +71,15 @@ class AlertLog(Base):
     __tablename__ = "alert_logs"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), nullable=False, index=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
     tipe_alert = Column(String(30), nullable=False)  # REDAMAN_DROP, ONT_LOS, OVERHEAT
     rx_power = Column(Numeric(5, 2), nullable=True)
     pesan = Column(Text, nullable=False)
     target_recipients = Column(Text, nullable=False)
     status_kirim = Column(String(20), nullable=False, default="SUCCESS")
     waktu_kirim = Column(DateTime, default=get_now_wib, nullable=False, index=True)
+
+    pelanggan = relationship("Pelanggan", back_populates="alerts")
 
 
 class SystemSetting(Base):
@@ -109,31 +120,12 @@ class User(Base):
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
 
-class AkunPelanggan(Base):
-    __tablename__ = "akun_pelanggan"
-
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), nullable=True, unique=True, index=True)
-    username = Column(String(100), nullable=False)
-    password_hash = Column(String(255), nullable=False)
-    nama_lengkap = Column(String(200), nullable=True)
-    alamat_pendaftar = Column(Text, nullable=True)
-    lokasi_gps = Column(String(100), nullable=True)
-    kantor = Column(String(50), default="cabang", nullable=False)
-    status_verifikasi = Column(String(30), default="PENDING", nullable=False, index=True) # PENDING, TERVERIFIKASI, DITOLAK
-    no_hp = Column(String(50), nullable=True)
-    is_active = Column(Boolean, default=True, nullable=False)
-    last_login = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=get_now_wib, nullable=False)
-    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
-
-
 class TiketKendala(Base):
     __tablename__ = "tiket_kendala"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     id_tiket = Column(String(32), unique=True, nullable=False, index=True)
-    id_pelanggan = Column(String(64), nullable=False, index=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
     kantor = Column(String(50), default="cabang", nullable=False)
     kategori = Column(String(100), nullable=False)
     deskripsi = Column(Text, nullable=False)
@@ -145,15 +137,19 @@ class TiketKendala(Base):
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
+    pelanggan = relationship("Pelanggan", back_populates="tiket_list")
+
 
 class KuotaPelanggan(Base):
     __tablename__ = "kuota_pelanggan"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), nullable=False, index=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
     periode_bulan = Column(String(10), nullable=False) # format YYYY-MM
     kuota_terpakai_gb = Column(Numeric(8, 2), default=0, nullable=False)
     kecepatan_paket = Column(String(50), nullable=True)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
+
+    pelanggan = relationship("Pelanggan", back_populates="kuota_list")
 

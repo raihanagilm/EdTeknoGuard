@@ -1,22 +1,22 @@
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from app.db.models import AkunPelanggan, Pelanggan, TiketKendala, KuotaPelanggan, LogPerformaONT
+from app.db.models import Pelanggan, TiketKendala, KuotaPelanggan, LogPerformaONT
 from app.core.timezone import get_now_wib
 
 class AdminCustomerMgmtService:
 
     @staticmethod
-    def get_pending_registrations(db: Session, kantor: Optional[str] = None) -> List[AkunPelanggan]:
-        query = db.query(AkunPelanggan).filter(AkunPelanggan.status_verifikasi == "PENDING")
+    def get_pending_registrations(db: Session, kantor: Optional[str] = None) -> List[Pelanggan]:
+        """Mengambil data pelanggan berstatus PENDING jika ada (alur registrasi mandiri telah dinonaktifkan)."""
+        query = db.query(Pelanggan).filter(Pelanggan.status_verifikasi == "PENDING")
         if kantor and kantor != "all":
-            # Jika ada filter kantor
-            query = query.filter(AkunPelanggan.kantor == kantor)
-        return query.order_by(AkunPelanggan.created_at.desc()).all()
+            query = query.filter(Pelanggan.kantor == kantor)
+        return query.order_by(Pelanggan.created_at.desc()).all()
 
     @staticmethod
     def get_unlinked_customers_options(db: Session, kantor: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Mengambil daftar pelanggan kantor yang belum terhubung ke akun portal aktif untuk opsi pencocokan."""
+        """Mengambil daftar pelanggan kantor."""
         query = db.query(Pelanggan)
         if kantor and kantor != "all":
             query = query.filter(Pelanggan.kantor == kantor)
@@ -37,66 +37,39 @@ class AdminCustomerMgmtService:
     @staticmethod
     def approve_registration(
         db: Session,
-        account_id: int,
+        account_id: Any,
         id_pelanggan: str,
         admin_user: Optional[str] = None
     ) -> Dict[str, Any]:
-        akun = db.query(AkunPelanggan).filter(AkunPelanggan.id == account_id).first()
-        if not akun:
-            return {"status": "error", "message": "Akun pendaftar tidak ditemukan."}
-
-        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+        target_id = id_pelanggan or str(account_id)
+        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == target_id).first()
         if not pelanggan:
             return {"status": "error", "message": "Data pelanggan kantor tidak ditemukan."}
 
-        # Cek apakah id_pelanggan ini sudah terhubung ke akun lain yang terverifikasi
-        existing_linked = db.query(AkunPelanggan).filter(
-            AkunPelanggan.id_pelanggan == id_pelanggan,
-            AkunPelanggan.id != account_id,
-            AkunPelanggan.status_verifikasi == "TERVERIFIKASI"
-        ).first()
-        if existing_linked:
-            return {
-                "status": "error",
-                "message": f"Data pelanggan '{pelanggan.nama}' sudah terhubung ke akun portal '{existing_linked.username}'."
-            }
-
-        # Hubungkan akun pendaftar ke data pelanggan
-        akun.id_pelanggan = pelanggan.id_pelanggan
-        akun.status_verifikasi = "TERVERIFIKASI"
-        akun.kantor = pelanggan.kantor
-        akun.updated_at = get_now_wib()
-
-        # Update data pelanggan jika pendaftar melampirkan no HP baru
-        if akun.no_hp:
-            pelanggan.no_hp = akun.no_hp
-
-        # Update alamat pelanggan dari data pendaftar jika pendaftar mengisi alamat
-        if akun.alamat_pendaftar:
-            pelanggan.alamat = akun.alamat_pendaftar
-
+        pelanggan.status_verifikasi = "TERVERIFIKASI"
+        pelanggan.updated_at = get_now_wib()
         db.commit()
-        db.refresh(akun)
+        db.refresh(pelanggan)
 
         return {
             "status": "success",
-            "message": f"Akun '{akun.username}' berhasil diverifikasi dan terhubung ke pelanggan '{pelanggan.nama}' ({pelanggan.id_pelanggan})."
+            "message": f"Akun pelanggan '{pelanggan.nama}' ({pelanggan.id_pelanggan}) berhasil diverifikasi."
         }
 
     @staticmethod
-    def reject_registration(db: Session, account_id: int, alasan: str = "") -> Dict[str, Any]:
-        akun = db.query(AkunPelanggan).filter(AkunPelanggan.id == account_id).first()
-        if not akun:
-            return {"status": "error", "message": "Akun tidak ditemukan."}
+    def reject_registration(db: Session, account_id: Any, alasan: str = "") -> Dict[str, Any]:
+        target_id = str(account_id)
+        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == target_id).first()
+        if not pelanggan:
+            return {"status": "error", "message": "Pelanggan tidak ditemukan."}
 
-        akun.status_verifikasi = "DITOLAK"
-        akun.is_active = False
-        akun.updated_at = get_now_wib()
+        pelanggan.status_verifikasi = "DITOLAK"
+        pelanggan.updated_at = get_now_wib()
         db.commit()
 
         return {
             "status": "success",
-            "message": f"Pendaftaran akun '{akun.username}' telah ditolak."
+            "message": f"Status akun pelanggan '{pelanggan.nama}' telah ditolak."
         }
 
     @staticmethod

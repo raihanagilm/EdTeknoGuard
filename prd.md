@@ -8,6 +8,7 @@ Dokumen ini mendefinisikan **alur kerja sistem, logika bisnis, dan kebutuhan fun
 > - 🏗️ [Struktur File/Folder & Database (arsitektur.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/arsitektur.md) — Mengatur struktur direktori proyek dan skema tabel TiDB.
 > - 📖 [README Utama Proyek](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/README.md) — Gambaran umum dan panduan menjalankan sistem.
 > - 🤖 [Pedoman AI Agent (AGENTS.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/AGENTS.md) — Aturan sistem dan instruksi AI Agent.
+> - 📜 [Riwayat Perubahan & Changelog (CHANGELOG.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/CHANGELOG.md) — Riwayat perubahan, rilis versi, dan perlindungan stabilitas fitur.
 
 ---
 

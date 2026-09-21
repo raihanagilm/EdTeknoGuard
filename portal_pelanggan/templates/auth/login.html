@@ -112,14 +112,16 @@
             </button>
         </form>
 
-        <!-- Registrasi / Aktivasi Link -->
+        <!-- Informasi Akses Akun dari Kantor -->
         <div class="pt-3 border-t border-slate-100 text-center">
-            <p class="text-xs text-slate-500 leading-relaxed">
-                Belum terdaftar sebagai akun baru?
-                <a href="{{ base_url or '' }}/daftar" class="font-bold text-indigo-600 hover:text-indigo-700 ml-1 underline">
-                    Daftar di Sini
-                </a>
-            </p>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-[11px] text-slate-600 leading-snug">
+                    Akses akun pelanggan diberikan langsung oleh kantor ISP saat pemasangan WiFi.
+                </span>
+            </div>
         </div>
     </div>
 

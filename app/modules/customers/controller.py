@@ -7,8 +7,6 @@ from app.modules.customers.service import CustomerService
 from app.modules.customers.schemas import CustomerCreate, CustomerUpdate
 from app.core.config import settings
 
-from app.db.models import AkunPelanggan
-
 templates = Jinja2Templates(directory="templates")
 
 class CustomerController:
@@ -109,10 +107,9 @@ class CustomerController:
             raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
 
         cust, logs = result
-        akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == cust.id_pelanggan).first()
-        lokasi_gps = akun.lokasi_gps if akun else None
-        alamat_final = cust.alamat or (akun.alamat_pendaftar if akun else None) or "-"
-        no_hp_final = cust.no_hp or (akun.no_hp if akun else None) or "-"
+        lokasi_gps = cust.lokasi_gps
+        alamat_final = cust.alamat or "-"
+        no_hp_final = cust.no_hp or "-"
 
         return {
             "customer": {
@@ -242,12 +239,12 @@ class CustomerController:
                 request=request,
                 action="HAPUS_PELANGGAN",
                 status="SUCCESS",
-                keterangan=f"Menghapus data pelanggan: {cust_name} (ID: {id_pelanggan})",
+                keterangan=f"Menghapus data pelanggan {cust_name} (ID: {id_pelanggan}) beserta seluruh data anakannya (CASCADE)",
                 user=user
             )
         return {
             "status": "success",
-            "message": f"Pelanggan dengan ID '{id_pelanggan}' berhasil dihapus."
+            "message": f"Pelanggan '{cust_name}' (ID: {id_pelanggan}) beserta seluruh data anakannya berhasil dihapus."
         }
 
     @staticmethod
@@ -266,12 +263,12 @@ class CustomerController:
                 request=request,
                 action="HAPUS_PELANGGAN_MASSAL",
                 status="SUCCESS",
-                keterangan=f"Menghapus massal {affected} data pelanggan (Daftar ID: {sample_ids})",
+                keterangan=f"Menghapus massal {affected} data pelanggan beserta seluruh anakannya (CASCADE) (Daftar ID: {sample_ids})",
                 user=user
             )
         return {
             "status": "success",
-            "message": f"{affected} pelanggan berhasil dihapus.",
+            "message": f"{affected} pelanggan beserta seluruh data anakannya berhasil dihapus.",
             "deleted_count": affected
         }
 

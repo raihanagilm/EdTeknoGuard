@@ -526,7 +526,8 @@ class CustomerService:
         for c, latest_log in rows:
             current_status = latest_log.status_koneksi if latest_log else "NORMAL"
             current_rx = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else (float(c.redaman_baseline) if c.redaman_baseline else None)
-            last_check = latest_log.waktu_cek.strftime("%d/%m %H:%M") if latest_log else "-"
+            last_check = latest_log.waktu_cek.strftime("%d/%m %H:%M") if (latest_log and latest_log.waktu_cek) else "-"
+            waktu_terakhir_iso = latest_log.waktu_cek.isoformat() if (latest_log and latest_log.waktu_cek) else None
 
             result.append({
                 "id_pelanggan": c.id_pelanggan,
@@ -540,8 +541,15 @@ class CustomerService:
                 "mac_address": c.mac_address or "-",
                 "redaman_baseline": float(c.redaman_baseline) if c.redaman_baseline else None,
                 "redaman_current": current_rx,
+                "redaman_terakhir": current_rx,
                 "status": current_status,
+                "status_terakhir": current_status,
                 "last_check": last_check,
+                "waktu_terakhir": waktu_terakhir_iso,
+                "waktu_cek": last_check,
+                "suhu_ont": float(latest_log.suhu_ont) if (latest_log and latest_log.suhu_ont is not None) else None,
+                "latency_ms": int(latest_log.latency_ms) if (latest_log and latest_log.latency_ms is not None) else None,
+                "lokasi_gps": c.lokasi_gps or None,
                 "nama_wifi": c.nama_wifi or "-",
                 "password_wifi": c.password_wifi or "-",
                 "user_admin": c.user_admin or "-",
@@ -765,26 +773,26 @@ class CustomerService:
 
     @staticmethod
     def delete_customer(db: Session, id_pelanggan: str) -> bool:
+        """Hapus permanen data utama pelanggan beserta seluruh data anakannya (CASCADE)."""
         cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
         if not cust:
             return False
 
-        # Soft delete
-        cust.is_active = False
+        # Hard delete memicu foreign key ON DELETE CASCADE dan SQLAlchemy cascade
+        db.delete(cust)
         db.commit()
         return True
 
     @staticmethod
     def bulk_delete_customers(db: Session, id_list: List[str]) -> int:
-        """Soft delete banyak pelanggan sekaligus berdasarkan list id_pelanggan"""
+        """Hapus permanen banyak pelanggan sekaligus beserta seluruh data anakannya (CASCADE)."""
         if not id_list:
             return 0
 
-        affected = (
-            db.query(Pelanggan)
-            .filter(Pelanggan.id_pelanggan.in_(id_list))
-            .update({Pelanggan.is_active: False}, synchronize_session=False)
-        )
+        customers = db.query(Pelanggan).filter(Pelanggan.id_pelanggan.in_(id_list)).all()
+        affected = len(customers)
+        for cust in customers:
+            db.delete(cust)
         db.commit()
         return affected
 

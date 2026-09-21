@@ -140,14 +140,6 @@
                     Manajemen Pelanggan
                 </div>
                 <div class="space-y-0.5 pt-1">
-                    <a href="/admin/verifikasi-pelanggan"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/admin/verifikasi-pelanggan') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/verifikasi-pelanggan') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                            <span>Verifikasi Pendaftar</span>
-                        </div>
-                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    </a>
                     <a href="/pelanggan"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/pelanggan') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
                         <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/pelanggan') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -304,14 +296,6 @@
                 <!-- PELANGGAN -->
                 <div class="space-y-1">
                     <div class="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Manajemen Pelanggan</div>
-                    <a href="/admin/verifikasi-pelanggan" @click="mobileDrawerOpen = false"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/admin/verifikasi-pelanggan') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                            <span>Verifikasi Pendaftar</span>
-                        </div>
-                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    </a>
                     <a href="/pelanggan" @click="mobileDrawerOpen = false"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/pelanggan') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
                         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>

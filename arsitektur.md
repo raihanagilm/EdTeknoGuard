@@ -6,6 +6,8 @@ Dokumen ini mendefinisikan secara spesifik **struktur file/folder direktori modu
 > - 📋 [Alur Kerja Sistem & Logika Bisnis (prd.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/prd.md) — Alur monitoring 5 menit, manual check, dan alerting.
 > - 🎨 [Pedoman Desain & Tampilan (desain.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/desain.md) — Acuan warna, komponen visual, dan mobile-first.
 > - 📖 [README Utama Proyek](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/README.md) — Gambaran umum dan panduan menjalankan sistem.
+> - 🤖 [Pedoman AI Agent (AGENTS.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/AGENTS.md) — Aturan sistem dan instruksi AI Agent.
+> - 📜 [Riwayat Perubahan & Changelog (CHANGELOG.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/CHANGELOG.md) — Riwayat perubahan, rilis versi, dan perlindungan stabilitas fitur.
 
 ---
 
@@ -192,7 +194,66 @@ CREATE TABLE IF NOT EXISTS alert_logs (
     status_kirim VARCHAR(20) NOT NULL DEFAULT 'SUCCESS', -- SUCCESS, FAILED
     waktu_kirim DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_alert_pelanggan (id_pelanggan),
-    INDEX idx_alert_waktu (waktu_kirim)
+    INDEX idx_alert_waktu (waktu_kirim),
+    FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### 3.4 Tabel `akun_pelanggan` (Portal Warga Self-Service)
+```sql
+CREATE TABLE IF NOT EXISTS akun_pelanggan (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_pelanggan VARCHAR(64) NULL UNIQUE,
+    username VARCHAR(100) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    nama_lengkap VARCHAR(200) NULL,
+    alamat_pendaftar TEXT NULL,
+    lokasi_gps VARCHAR(100) NULL,
+    kantor VARCHAR(50) NOT NULL DEFAULT 'cabang',
+    status_verifikasi VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    no_hp VARCHAR(50) NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    last_login DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_akun_pelanggan (id_pelanggan),
+    FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### 3.5 Tabel `tiket_kendala` (Laporan Gangguan Pelanggan)
+```sql
+CREATE TABLE IF NOT EXISTS tiket_kendala (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_tiket VARCHAR(32) NOT NULL UNIQUE,
+    id_pelanggan VARCHAR(64) NOT NULL,
+    kantor VARCHAR(50) NOT NULL DEFAULT 'cabang',
+    kategori VARCHAR(100) NOT NULL,
+    deskripsi TEXT NOT NULL,
+    no_wa_pelapor VARCHAR(50) NOT NULL,
+    redaman_saat_lapor NUMERIC(5,2) NULL,
+    status_ont_saat_lapor VARCHAR(20) NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'MENUNGGU',
+    catatan_teknisi TEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_tiket_pelanggan (id_pelanggan),
+    FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### 3.6 Tabel `kuota_pelanggan` (Histori Pemakaian Kuota)
+```sql
+CREATE TABLE IF NOT EXISTS kuota_pelanggan (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_pelanggan VARCHAR(64) NOT NULL,
+    periode_bulan VARCHAR(10) NOT NULL,
+    kuota_terpakai_gb NUMERIC(8,2) NOT NULL DEFAULT 0,
+    kecepatan_paket VARCHAR(50) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_kuota_pelanggan (id_pelanggan),
+    FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 

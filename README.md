@@ -9,6 +9,7 @@
 Seluruh dokumentasi proyek dirancang saling terhubung dan memiliki pembagian fokus yang jelas:
 - 📐 [Design System Pro — Rulebook UI/UX (designsystempro.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) — **Sumber Kebenaran Tunggal (*Single Source of Truth*)** untuk seluruh komponen, spacing, tipografi, warna, dan standar interaksi UI/UX.
 - 🤖 [Pedoman AI Agent (AGENTS.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/AGENTS.md) — Pedoman arsitektur sistem, aturan SOP, dan instruksi wajib AI Agent.
+- 📜 [Riwayat Perubahan & Changelog (CHANGELOG.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/CHANGELOG.md) — Catatan riwayat penambahan fitur, perbaikan bug, dan perlindungan stabilitas fitur.
 - 🎨 [Pedoman Tampilan & UI/UX (desain.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/desain.md) — Mengatur warna tampilan, palet status redaman (-26.0 dBm), tipografi, komponen visual, dan tata letak mobile-first.
 - 🏗️ [Struktur File/Folder & Database (arsitektur.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/arsitektur.md) — Mengatur struktur direktori proyek, skema tabel TiDB Cloud (MySQL Engine), konfigurasi, dan relasi entitas.
 - 📋 [Alur Kerja Sistem & Logika Bisnis (prd.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/prd.md) — Mengatur alur kerja pemantauan otomatis 5 menit, pemindaian manual on-demand, mekanisme alert Telegram multi-recipient, dan penanganan gangguan optik.

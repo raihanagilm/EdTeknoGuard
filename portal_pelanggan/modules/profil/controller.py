@@ -7,7 +7,7 @@ from portal_pelanggan.core.security import (
     get_password_hash,
     get_portal_base_url as get_base_url
 )
-from app.db.models import Pelanggan, AkunPelanggan
+from app.db.models import Pelanggan
 
 templates = Jinja2Templates(directory="portal_pelanggan/templates")
 
@@ -17,17 +17,8 @@ class ProfilController:
     def render_profil_page(request: Request, db: Session, error: str = None, success: str = None):
         cust_session = require_customer_login(request)
         id_pel = cust_session.get("id_pelanggan")
-        acc_id = cust_session.get("account_id")
         
         pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first() if id_pel else None
-        
-        if acc_id:
-            akun = db.query(AkunPelanggan).filter(AkunPelanggan.id == acc_id).first()
-        elif id_pel:
-            akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == id_pel).first()
-        else:
-            akun = db.query(AkunPelanggan).filter(AkunPelanggan.username == cust_session["nama"]).first()
-
         base = get_base_url(request)
 
         return templates.TemplateResponse(
@@ -36,7 +27,6 @@ class ProfilController:
             context={
                 "current_cust": cust_session,
                 "pelanggan": pelanggan,
-                "akun": akun,
                 "error": error,
                 "success": success,
                 "active_tab": "profil",
@@ -54,33 +44,32 @@ class ProfilController:
     ):
         cust_session = require_customer_login(request)
         id_pel = cust_session.get("id_pelanggan")
-        acc_id = cust_session.get("account_id")
         
-        if acc_id:
-            akun = db.query(AkunPelanggan).filter(AkunPelanggan.id == acc_id).first()
-        elif id_pel:
-            akun = db.query(AkunPelanggan).filter(AkunPelanggan.id_pelanggan == id_pel).first()
-        else:
-            akun = db.query(AkunPelanggan).filter(AkunPelanggan.username == cust_session["nama"]).first()
+        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first() if id_pel else None
 
-        if not akun or not verify_password(password_lama, akun.password_hash):
+        if not pelanggan:
             return ProfilController.render_profil_page(
-                request, db, error="Password lama yang Anda masukkan salah!"
+                request, db, error="Data pelanggan tidak ditemukan!"
+            )
+
+        if not pelanggan.password_hash or not verify_password(password_lama, pelanggan.password_hash):
+            return ProfilController.render_profil_page(
+                request, db, error="Kata sandi lama yang Anda masukkan salah!"
             )
 
         if len(password_baru) < 6:
             return ProfilController.render_profil_page(
-                request, db, error="Password baru minimal harus 6 karakter!"
+                request, db, error="Kata sandi baru minimal harus 6 karakter!"
             )
 
         if password_baru != konfirmasi_password:
             return ProfilController.render_profil_page(
-                request, db, error="Konfirmasi password baru tidak cocok!"
+                request, db, error="Konfirmasi kata sandi baru tidak cocok!"
             )
 
-        akun.password_hash = get_password_hash(password_baru)
+        pelanggan.password_hash = get_password_hash(password_baru)
         db.commit()
 
         return ProfilController.render_profil_page(
-            request, db, success="Password akun portal Anda berhasil diperbarui!"
+            request, db, success="Kata sandi akun portal Anda berhasil diperbarui!"
         )

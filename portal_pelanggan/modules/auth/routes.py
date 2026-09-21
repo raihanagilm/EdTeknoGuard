@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, Request, Form
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from portal_pelanggan.modules.auth.controller import AuthController
+from portal_pelanggan.core.security import get_portal_base_url as get_base_url
 
 router = APIRouter(tags=["Autentikasi Pelanggan"])
 
@@ -20,22 +22,9 @@ def login_submit(
 
 @router.get("/daftar")
 def register_page(request: Request):
-    return AuthController.render_register_page(request)
-
-@router.post("/daftar")
-def register_submit(
-    request: Request,
-    nama: str = Form(...),
-    alamat: str = Form(""),
-    no_hp: str = Form(""),
-    ip_router: str = Form(""),
-    lokasi_gps: str = Form(""),
-    password: str = Form("123456"),
-    db: Session = Depends(get_db)
-):
-    return AuthController.handle_register(
-        request, db, nama, alamat, no_hp, ip_router, lokasi_gps, password
-    )
+    # Akses akun diberikan langsung oleh kantor, alihkan ke login
+    base = get_base_url(request)
+    return RedirectResponse(f"{base}/login", status_code=303)
 
 @router.get("/lupa-password")
 def lupa_password_page(request: Request):

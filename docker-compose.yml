@@ -16,6 +16,11 @@ services:
       - "8000:8000"   # Local network access
     volumes:
       - ./data:/app/data   # persist scan_state.json & file runtime
+      - ./app:/app/app     # Live sync kode backend
+      - ./templates:/app/templates # Live sync template HTML admin
+      - ./static:/app/static       # Live sync aset static CSS/JS
+      - ./portal_pelanggan:/app/portal_pelanggan # Live sync portal pelanggan
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers", "--forwarded-allow-ips=*"]
 
   ngrok:
     image: ngrok/ngrok:latest
