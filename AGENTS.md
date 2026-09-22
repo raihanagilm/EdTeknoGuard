@@ -207,15 +207,34 @@ EdTeknoGuard/
 12. **Navigasi Admin NOC & Modul Manajemen Pelanggan**:
     - **Sidebar Tetap Kiri Desktop (`w-64`) & Off-Canvas Burger Drawer Mobile**:
       - Desktop: Sidebar permanen di sisi kiri dengan pengelompokan seksi: *NOC & Jaringan*, *Manajemen Pelanggan*, dan *Sistem & Audit*.
-      - Mobile: Header ringkas dengan tombol burger (ikon SVG 3 garis) yang membuka slide-over drawer dari kiri dengan backdrop blur gelap.
+      - Mobile: Tampilan mobile murni menggunakan Sticky Bottom Navigation 5-Tab tanpa drawer samping (off-canvas burger menu telah ditiadakan).
     - **Modul Manajemen Pelanggan Admin NOC**:
       - **Data Pelanggan & Kredensial Portal (`/pelanggan`)**: Pengelolaan data master pelanggan terpadu yang memuat profil jaringan (IP, POP, redaman) dan kredensial akses portal warga desa.
       - **Tiket Keluhan Pelanggan (`/admin/tiket`)**: Daftar tiket keluhan warga desa dengan 4 status terpadu (`MENUNGGU`, `DICEK_ADMIN` / Diproses Cek Admin, `DIPROSES` / Teknisi Cek Lapangan, `SELESAI`), kapabilitas tabel audit log: filter status, filter jenis kendala, filter rentang tanggal (Hari Ini, 7 Hari, 30 Hari, Kustom s/d), live search dengan debounce, header kolom sortable (ID, Waktu, Pelanggan, Kendala, Redaman, Status), pagination bar (10, 25, 50, 100), dan modal kelola status tiket responsif.
       - **Pemantauan Pemakaian Kuota (`/admin/kuota`)**: Monitoring akumulasi GB yang telah digunakan pelanggan pada bulan berjalan dengan kapabilitas tabel audit log: kartu KPI ringkas dinamis (Total Pelanggan, Total GB, Rata-rata GB/user), filter paket, filter level pemakaian (sangat tinggi >150GB, tinggi 100-150GB, sedang 50-100GB, ringan <50GB, nol 0GB), live search, header kolom sortable numerik, dan pagination bar lengkap.
       - **Penyelarasan Data Detail ke Tabel Pelanggan**: Titik koordinat GPS dengan link Google Maps, kredensial WiFi (SSID & Password dengan toggle lihat/sembunyikan), serta metrik pembacaan redaman terakhir, suhu ONT (°C), dan latency (ms) terintegrasi langsung pada tabel master `/pelanggan`.
 
-
----
+13. **Navigasi Mobile 5-Tab Ergonomis (Center Beranda & Pengaturan), Action Cards Paling Atas, Font Besar & Notifikasi Anti-Spam**:
+    - **Branding Resmi Proyek**:
+      - Web Karyawan & NOC: **TeknoGuard**.
+      - Web Pelanggan Warga: **TeknoCust**.
+    - **Sticky Bottom Navigation 5 Tab (Mobile Viewport `lg:hidden`)**:
+      - Menyajikan 5 tab utama di layar mobile dengan tipografi besar & tebal (`text-[13px] sm:text-sm font-extrabold tracking-tight`):
+        1. `Pelanggan` (`/pelanggan`)
+        2. `Redaman` (`/logs`)
+        3. `Beranda` (`/`) — **Posisi Tengah** dengan tombol menonjol (*elevated center button / ring glow active*)
+        4. `Tiket` (`/admin/tiket`) dengan badge counter unread realtime
+        5. `Pengaturan` (`/settings`)
+      - Tombol memiliki target sentuh minimal `>= 52px` dengan ikon `w-6 h-6 sm:w-7 sm:h-7`.
+    - **Layanan & Akses Cepat di Beranda (Action Cards Grid) Paling Atas**:
+      - Diposisikan di puncak halaman Dashboard Utama (`/`) di atas Control Bar.
+      - Skala kartu & box diperbesar (`h-14 w-14 sm:h-16 sm:w-16`, ikon `w-7 h-7`), tipografi judul diperbesar ke `text-sm sm:text-base font-extrabold text-slate-800`.
+    - **Notifikasi In-App Real-Time Tiket Baru Anti-Spam (Floating Overlay Layer)**:
+      - Polling berkala (6 detik) ke endpoint `/api/notifications/poll`.
+      - **Floating Fixed Overlay**: Banner notifikasi melayang di atas semua layer (`fixed top-4 right-4 z-[999]`) tanpa pernah menggeser atau mendorong konten UI halaman ke bawah.
+      - **Anti-Spam State**: Menyimpan riwayat tiket di `sessionStorage` (`tekno_last_alerted_ticket`) dan proteksi initial load agar tidak memutar suara/getaran spam saat halaman dibuka atau di-refresh. Nada audio (Web Audio API) dan getaran (`navigator.vibrate`) hanya aktif saat tiket baru benar-benar masuk.
+    - **Tipografi Sidebar Menu Desktop**:
+      - Seluruh menu di sidebar desktop menggunakan `text-sm sm:text-base font-extrabold` dengan ikon `w-5 h-5` dan padding `py-3 px-3.5` agar mudah dibaca.
 
 ## 7. Standar Agen AI & Manajemen Dokumen
 

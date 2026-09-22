@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>{% block title %}EdTeknoGuard — NOC ONT Early Warning System{% endblock %}</title>
+    <title>{% block title %}TeknoGuard — NOC ONT Early Warning System{% endblock %}</title>
 
     <!-- Apple HIG & System Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,15 +66,8 @@
 </head>
 
 <body class="min-h-full bg-slate-50 text-slate-800"
-      x-data="{
-          mobileDrawerOpen: false,
-          profileMenuOpen: false,
-          sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true',
-          toggleSidebar() {
-              this.sidebarCollapsed = !this.sidebarCollapsed;
-              localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
-          }
-      }">
+      x-data="teknoGuardApp()"
+      x-init="init()">
 
     <!-- ========================================================================= -->
     <!-- 1. SIDEBAR DESKTOP (COLLAPSIBLE - lg:flex w-64)                             -->
@@ -92,11 +85,11 @@
                 </div>
                 <div class="min-w-0">
                     <div class="text-sm font-extrabold tracking-tight text-slate-900 whitespace-nowrap">
-                        EdTekno<span class="text-indigo-600">Guard</span>
+                        Tekno<span class="text-indigo-600">Guard</span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="px-1 py-0.2 rounded text-[9px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200 leading-none">NOC</span>
-                        <p class="text-[10px] text-slate-400 font-medium truncate">Monitoring ONT</p>
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200 leading-none">NOC</span>
+                        <p class="text-xs text-slate-400 font-medium truncate">Monitoring ONT</p>
                     </div>
                 </div>
             </a>
@@ -117,68 +110,68 @@
 
             <!-- SEKSI 1: NOC & JARINGAN -->
             <div class="space-y-1">
-                <div class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div class="px-3 text-xs font-black uppercase tracking-wider text-slate-400">
                     NOC &amp; Jaringan
                 </div>
-                <div class="space-y-0.5 pt-1">
+                <div class="space-y-1 pt-1">
                     <a href="/"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path == '/' %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path == '/' %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        <span>Dashboard Utama</span>
+                       class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm sm:text-base font-extrabold transition min-h-[48px] {% if request.url.path == '/' %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <svg class="w-5 h-5 shrink-0 {% if request.url.path == '/' %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <span class="tracking-tight">Dashboard Utama</span>
                     </a>
                     <a href="/logs"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/logs') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/logs') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>Riwayat Log Redaman</span>
+                       class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm sm:text-base font-extrabold transition min-h-[48px] {% if request.url.path.startswith('/logs') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <svg class="w-5 h-5 shrink-0 {% if request.url.path.startswith('/logs') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span class="tracking-tight">Riwayat Log Redaman</span>
                     </a>
                 </div>
             </div>
 
             <!-- SEKSI 2: MANAJEMEN PELANGGAN -->
             <div class="space-y-1">
-                <div class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div class="px-3 text-xs font-black uppercase tracking-wider text-slate-400">
                     Manajemen Pelanggan
                 </div>
-                <div class="space-y-0.5 pt-1">
+                <div class="space-y-1 pt-1">
                     <a href="/pelanggan"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/pelanggan') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/pelanggan') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                        <span>Data Pelanggan</span>
+                       class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm sm:text-base font-extrabold transition min-h-[48px] {% if request.url.path.startswith('/pelanggan') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <svg class="w-5 h-5 shrink-0 {% if request.url.path.startswith('/pelanggan') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <span class="tracking-tight">Data Pelanggan</span>
                     </a>
                     <a href="/admin/tiket"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/admin/tiket') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/tiket') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
-                        <span>Tiket Keluhan</span>
+                       class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm sm:text-base font-extrabold transition min-h-[48px] {% if request.url.path.startswith('/admin/tiket') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <svg class="w-5 h-5 shrink-0 {% if request.url.path.startswith('/admin/tiket') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                        <span class="tracking-tight">Tiket Keluhan</span>
                     </a>
                     <a href="/admin/kuota"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/admin/kuota') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/kuota') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                        <span>Pemantauan Kuota</span>
+                       class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm sm:text-base font-extrabold transition min-h-[48px] {% if request.url.path.startswith('/admin/kuota') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <svg class="w-5 h-5 shrink-0 {% if request.url.path.startswith('/admin/kuota') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        <span class="tracking-tight">Pemantauan Kuota</span>
                     </a>
                 </div>
             </div>
 
             <!-- SEKSI 3: SISTEM & AUDIT -->
             <div class="space-y-1">
-                <div class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div class="px-3 text-xs font-black uppercase tracking-wider text-slate-400">
                     Sistem &amp; Audit
                 </div>
-                <div class="space-y-0.5 pt-1">
+                <div class="space-y-1 pt-1">
                     <a href="/user-logs"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/user-logs') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/user-logs') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                        <span>Log Aktivitas</span>
+                       class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm sm:text-base font-extrabold transition min-h-[48px] {% if request.url.path.startswith('/user-logs') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <svg class="w-5 h-5 shrink-0 {% if request.url.path.startswith('/user-logs') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        <span class="tracking-tight">Log Aktivitas</span>
                     </a>
                     {% if request.state.current_user and request.state.current_user.get('role') == 'super admin' %}
                     <a href="/users"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/users') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/users') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        <span>Manajemen User</span>
+                       class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm sm:text-base font-extrabold transition min-h-[48px] {% if request.url.path.startswith('/users') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <svg class="w-5 h-5 shrink-0 {% if request.url.path.startswith('/users') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        <span class="tracking-tight">Manajemen User</span>
                     </a>
                     <a href="/settings"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/settings') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/settings') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        <span>Pengaturan Sistem</span>
+                       class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm sm:text-base font-extrabold transition min-h-[48px] {% if request.url.path.startswith('/settings') %}bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <svg class="w-5 h-5 shrink-0 {% if request.url.path.startswith('/settings') %}text-indigo-600{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span class="tracking-tight">Pengaturan Sistem</span>
                     </a>
                     {% endif %}
                 </div>
@@ -186,16 +179,16 @@
 
             <!-- TAUTAN CEPAT KE PORTAL PELANGGAN -->
             <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70">
-                <div class="flex items-center gap-2 text-indigo-700 font-bold text-xs">
+                <div class="flex items-center gap-2 text-indigo-700 font-extrabold text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     <span>Portal Pelanggan</span>
                 </div>
-                <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">
-                    Lihat tampilan web warga desa / aplikasi mobile.
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Lihat tampilan web warga desa / aplikasi mobile TeknoCust.
                 </p>
                 <a href="/portal" target="_blank"
-                   class="inline-flex items-center justify-center gap-1.5 w-full mt-2.5 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 font-bold text-xs shadow-2xs transition min-h-[40px]">
-                    <span>Buka Portal</span>
+                   class="inline-flex items-center justify-center gap-1.5 w-full mt-2.5 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 font-extrabold text-xs shadow-2xs transition min-h-[44px]">
+                    <span>Buka Portal TeknoCust</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
             </div>
@@ -206,18 +199,18 @@
         <div class="p-4 border-t border-slate-100 bg-slate-50/50">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <div class="h-9 w-9 bg-indigo-600 text-white font-bold text-xs rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+                    <div class="h-10 w-10 bg-indigo-600 text-white font-black text-sm rounded-xl flex items-center justify-center shrink-0 shadow-xs">
                         {% if request.state.current_user and request.state.current_user.get('user') %}
                             {{ request.state.current_user.get('user')[:2].upper() }}
                         {% else %}U{% endif %}
                     </div>
                     <div class="truncate">
-                        <div class="text-xs font-bold text-slate-900 truncate">
+                        <div class="text-sm font-black text-slate-900 truncate">
                             {% if request.state.current_user %}
                                 {{ request.state.current_user.get('nama_karyawan') or request.state.current_user.get('user') or 'Petugas' }}
                             {% else %}Petugas{% endif %}
                         </div>
-                        <div class="text-[10px] text-slate-500 capitalize truncate">
+                        <div class="text-xs text-slate-500 font-semibold capitalize truncate">
                             {{ request.state.current_user.get('role', 'Teknisi') if request.state.current_user else 'User' }}
                         </div>
                     </div>
@@ -232,162 +225,23 @@
     </aside>
 
     <!-- ========================================================================= -->
-    <!-- 2. OFF-CANVAS BURGER DRAWER (MOBILE ONLY - lg:hidden)                      -->
-    <!-- ========================================================================= -->
-    <div x-show="mobileDrawerOpen"
-         x-cloak
-         class="fixed inset-0 z-50 lg:hidden"
-         role="dialog" aria-modal="true">
-
-        <!-- Backdrop gelap -->
-        <div x-show="mobileDrawerOpen"
-             x-transition:enter="transition-opacity ease-linear duration-200"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition-opacity ease-linear duration-150"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             @click="mobileDrawerOpen = false"
-             class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs"></div>
-
-        <!-- Panel Drawer -->
-        <div x-show="mobileDrawerOpen"
-             x-transition:enter="transition ease-in-out duration-250 transform"
-             x-transition:enter-start="-translate-x-full"
-             x-transition:enter-end="translate-x-0"
-             x-transition:leave="transition ease-in-out duration-200 transform"
-             x-transition:leave-start="translate-x-0"
-             x-transition:leave-end="-translate-x-full"
-             class="relative flex w-72 max-w-[85%] flex-col h-full bg-white shadow-2xl">
-
-            <!-- Header Drawer -->
-            <div class="flex items-center justify-between px-5 h-16 border-b border-slate-100 shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <div class="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-xs">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    </div>
-                    <span class="text-base font-extrabold text-slate-900 tracking-tight">EdTekno<span class="text-indigo-600">Guard</span></span>
-                </div>
-                <!-- Tombol Tutup Burger (Touch Target >= 44x44) -->
-                <button @click="mobileDrawerOpen = false"
-                        class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center"
-                        aria-label="Tutup Menu">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <!-- List Menu Mobile (Scrollable) -->
-            <div class="flex-1 overflow-y-auto px-4 py-4 space-y-5">
-                <!-- NOC -->
-                <div class="space-y-1">
-                    <div class="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">NOC &amp; Jaringan</div>
-                    <a href="/" @click="mobileDrawerOpen = false"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path == '/' %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        <span>Dashboard Utama</span>
-                    </a>
-                    <a href="/logs" @click="mobileDrawerOpen = false"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/logs') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>Riwayat Log Redaman</span>
-                    </a>
-                </div>
-
-                <!-- PELANGGAN -->
-                <div class="space-y-1">
-                    <div class="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Manajemen Pelanggan</div>
-                    <a href="/pelanggan" @click="mobileDrawerOpen = false"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/pelanggan') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                        <span>Data Pelanggan</span>
-                    </a>
-                    <a href="/admin/tiket" @click="mobileDrawerOpen = false"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/admin/tiket') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
-                        <span>Tiket Keluhan</span>
-                    </a>
-                    <a href="/admin/kuota" @click="mobileDrawerOpen = false"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/admin/kuota') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                        <span>Pemantauan Kuota</span>
-                    </a>
-                </div>
-
-                <!-- SISTEM -->
-                <div class="space-y-1">
-                    <div class="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Sistem &amp; Audit</div>
-                    <a href="/user-logs" @click="mobileDrawerOpen = false"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/user-logs') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                        <span>Log Aktivitas</span>
-                    </a>
-                    {% if request.state.current_user and request.state.current_user.get('role') == 'super admin' %}
-                    <a href="/users" @click="mobileDrawerOpen = false"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/users') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        <span>Manajemen User</span>
-                    </a>
-                    <a href="/settings" @click="mobileDrawerOpen = false"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-xs font-bold transition min-h-[44px] {% if request.url.path.startswith('/settings') %}bg-indigo-50 text-indigo-700 border border-indigo-100{% else %}text-slate-700 hover:bg-slate-50{% endif %}">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        <span>Pengaturan Sistem</span>
-                    </a>
-                    {% endif %}
-                </div>
-
-                <!-- Link Portal -->
-                <div class="pt-2">
-                    <a href="/portal" target="_blank"
-                       class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-2xl bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-200 min-h-[44px]">
-                        <span>Buka Portal Pelanggan</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Footer Drawer -->
-            <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-                <div class="truncate">
-                    <div class="text-xs font-bold text-slate-900 truncate">
-                        {{ request.state.current_user.get('nama_karyawan') or request.state.current_user.get('user') or 'User' if request.state.current_user else 'User' }}
-                    </div>
-                    <div class="text-[10px] text-slate-500 capitalize">
-                        {{ request.state.current_user.get('role', 'Teknisi') if request.state.current_user else 'User' }}
-                    </div>
-                </div>
-                <a href="/logout"
-                   class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200 min-h-[44px] flex items-center">
-                    Logout
-                </a>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ========================================================================= -->
     <!-- 3. KONTEN AREA UTAMA (lg:pl-64 / lg:pl-0 responsif terhadap sidebar)       -->
     <!-- ========================================================================= -->
     <div class="flex flex-col min-h-screen transition-all duration-300 ease-in-out"
          :class="sidebarCollapsed ? 'lg:pl-0' : 'lg:pl-64'">
 
         <!-- Top Header Bar (Apple HIG Translucent Frost Glass) -->
-        <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-2xs">
+        <header class="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-slate-200/70 shadow-2xs">
             <div class="px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between gap-4">
+                <div class="flex h-16 items-center justify-between gap-3">
 
-                    <!-- Mobile Burger Button + Brand (lg:hidden) -->
-                    <div class="flex items-center gap-3 lg:hidden">
-                        <button @click="mobileDrawerOpen = true"
-                                type="button"
-                                class="p-2.5 rounded-xl border border-slate-200/80 bg-white/90 text-slate-700 hover:bg-slate-100 active:scale-95 transition min-h-[44px] min-w-[44px] flex items-center justify-center shadow-2xs"
-                                aria-label="Buka Menu Navigasi">
-                            <!-- SVG Burger Menu 3 Garis -->
-                            <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
-                        </button>
+                    <!-- Mobile Brand Logo & Name (lg:hidden) - Burger Menu Dihapus -->
+                    <div class="flex items-center gap-2.5 lg:hidden">
                         <a href="/" class="flex items-center gap-2">
-                            <span class="text-base font-extrabold text-slate-900 tracking-tight">EdTekno<span class="text-indigo-600">Guard</span></span>
+                            <div class="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-xs">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            </div>
+                            <span class="text-lg font-black text-slate-900 tracking-tight">Tekno<span class="text-indigo-600">Guard</span></span>
                         </a>
                     </div>
 
@@ -419,8 +273,22 @@
                         </span>
                     </div>
 
-                    <!-- Right Controls: Kantor Switcher + Profile -->
-                    <div class="flex items-center gap-2.5 sm:gap-3">
+                    <!-- Right Controls: Notification Bell + Kantor Switcher + Profile -->
+                    <div class="flex items-center gap-2 sm:gap-2.5">
+
+                        <!-- Tombol Lonceng Notifikasi Realtime -->
+                        <a href="/admin/tiket"
+                           class="relative p-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 transition flex items-center justify-center min-h-[44px] min-w-[44px] shadow-2xs"
+                           title="Tiket Aduan Masuk">
+                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            <!-- Badge Counter Realtime -->
+                            <span x-show="unreadTicketsCount > 0"
+                                  x-text="unreadTicketsCount"
+                                  class="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] text-center text-[10px] font-black text-white bg-rose-600 rounded-full border-2 border-white shadow-xs animate-pulse">
+                            </span>
+                        </a>
 
                         <!-- Kantor Switcher -->
                         {% if request.state.current_user %}
@@ -429,11 +297,12 @@
                             {% if request.state.current_user.get('role') == 'super admin' or allowed|length > 1 %}
                                 <div class="relative" x-data="{ kantorOpen: false }" @click.away="kantorOpen = false">
                                     <button @click="kantorOpen = !kantorOpen"
-                                            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200/80 bg-white/90 hover:bg-slate-50 text-xs font-semibold text-slate-800 shadow-2xs transition active:scale-[0.98] min-h-[40px] sm:min-h-[44px]">
+                                            class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200/80 bg-white/90 hover:bg-slate-50 text-xs font-semibold text-slate-800 shadow-2xs transition active:scale-[0.98] min-h-[44px]">
                                         <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                         </svg>
-                                        <span class="capitalize">Kantor {{ active_k }}</span>
+                                        <span class="capitalize hidden sm:inline">Kantor {{ active_k }}</span>
+                                        <span class="capitalize sm:hidden">{{ active_k }}</span>
                                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
                                     <div x-show="kantorOpen"
@@ -457,9 +326,10 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <div class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100/80 border border-slate-200/60 text-xs font-semibold text-slate-700 capitalize min-h-[40px] sm:min-h-[44px]">
+                                <div class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100/80 border border-slate-200/60 text-xs font-semibold text-slate-700 capitalize min-h-[44px]">
                                     <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                    <span>Kantor {{ allowed[0] }}</span>
+                                    <span class="hidden sm:inline">Kantor {{ allowed[0] }}</span>
+                                    <span class="sm:hidden">{{ allowed[0] }}</span>
                                 </div>
                             {% endif %}
                         {% endif %}
@@ -467,7 +337,7 @@
                         <!-- Profile Button & Dropdown -->
                         <div class="relative" @click.away="profileMenuOpen = false">
                             <button @click="profileMenuOpen = !profileMenuOpen"
-                                    class="flex items-center gap-2 pl-2 hover:opacity-80 transition min-h-[44px]">
+                                    class="flex items-center gap-2 pl-1 hover:opacity-80 transition min-h-[44px]">
                                 <div class="h-9 w-9 bg-indigo-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center shrink-0 shadow-2xs">
                                     {% if request.state.current_user and request.state.current_user.get('user') %}
                                         {{ request.state.current_user.get('user')[:2].upper() }}
@@ -518,15 +388,56 @@
             </div>
         </header>
 
-        <!-- Main Content Slot -->
-        <main class="flex-1 w-full px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <!-- Realtime Ticket Heads-Up Notification Floating Modal/Banner (Floating di atas layer tanpa menggeser layout) -->
+        <div x-show="realtimeAlert.show"
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="-translate-y-8 opacity-0 scale-95"
+             x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="translate-y-0 opacity-100 scale-100"
+             x-transition:leave-end="-translate-y-8 opacity-0 scale-95"
+             x-cloak
+             class="fixed top-4 right-4 sm:right-6 max-w-sm sm:max-w-md w-[calc(100%-2rem)] sm:w-full z-[999] pointer-events-auto">
+            <div class="bg-rose-600/95 text-white p-4 sm:p-4.5 rounded-3xl shadow-2xl border border-rose-400/50 flex items-start justify-between gap-3.5 backdrop-blur-xl ring-4 ring-rose-600/20">
+                <div class="flex items-start gap-3 min-w-0">
+                    <div class="p-2.5 bg-white/20 rounded-2xl shrink-0 mt-0.5 shadow-xs">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-black uppercase tracking-wider bg-white text-rose-700 px-2.5 py-0.5 rounded-full shadow-xs">TIKET BARU MASUK!</span>
+                        </div>
+                        <h4 class="text-sm font-black mt-1.5 truncate tracking-tight text-white" x-text="realtimeAlert.title"></h4>
+                        <p class="text-xs text-rose-100 mt-1 leading-relaxed line-clamp-2" x-text="realtimeAlert.desc"></p>
+                        <div class="mt-3 flex items-center gap-2">
+                            <a :href="'/admin/tiket?search=' + (realtimeAlert.id_tiket || '')"
+                               class="px-3.5 py-2 bg-white text-rose-700 font-black text-xs rounded-xl shadow-xs hover:bg-rose-50 transition min-h-[38px] inline-flex items-center">
+                                Buka Tiket Aduan
+                            </a>
+                            <button @click="dismissAlert()"
+                                    class="px-3.5 py-2 text-rose-200 hover:text-white font-bold text-xs">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button @click="dismissAlert()" class="text-rose-200 hover:text-white p-1 rounded-lg transition" aria-label="Tutup Notifikasi">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Slot (pb-28 on mobile agar tidak tertutup sticky bottom nav) -->
+        <main class="flex-1 w-full px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:pb-8 max-w-7xl mx-auto">
             {% block content %}{% endblock %}
         </main>
 
         <!-- Footer -->
-        <footer class="mt-auto border-t border-slate-200/80 bg-white py-4 text-center text-xs text-slate-500">
+        <footer class="mt-auto border-t border-slate-200/80 bg-white py-4 text-center text-xs text-slate-500 hidden lg:block">
             <div class="px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto">
-                <span>&copy; 2026 <strong>EdTeknoGuard</strong> — Pemantauan ONT Cerdas ISP Lokal</span>
+                <span>&copy; 2026 <strong>TeknoGuard</strong> — Pemantauan ONT Cerdas ISP Lokal</span>
                 <div class="flex items-center gap-3 text-slate-400 text-[11px]">
                     <span>Ambang Batas: <strong class="text-amber-600">&le; -26.0 dBm</strong></span>
                     <span>&bull;</span>
@@ -538,6 +449,228 @@
         </footer>
 
     </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. STICKY MOBILE BOTTOM NAVIGATION BAR (BCA / Shopee Style - 5 Tab)        -->
+    <!-- Tab 1: Pelanggan | Tab 2: Redaman | Tab 3: Beranda (Center) | Tab 4: Tiket | Tab 5: Pengaturan -->
+    <!-- ========================================================================= -->
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-2 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
+        <div class="grid grid-cols-5 gap-1 max-w-lg mx-auto items-center">
+            
+            <!-- Tab 1: Pelanggan -->
+            <a href="/pelanggan"
+               class="flex flex-col items-center justify-center py-1.5 px-0.5 rounded-2xl transition-all min-h-[52px] group {% if request.url.path.startswith('/pelanggan') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+                <div class="relative">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/pelanggan') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    {% if request.url.path.startswith('/pelanggan') %}
+                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                    {% endif %}
+                </div>
+                <span class="text-[13px] sm:text-sm mt-0.5 tracking-tight">Pelanggan</span>
+            </a>
+
+            <!-- Tab 2: Redaman -->
+            <a href="/logs"
+               class="flex flex-col items-center justify-center py-1.5 px-0.5 rounded-2xl transition-all min-h-[52px] group {% if request.url.path.startswith('/logs') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+                <div class="relative">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/logs') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    {% if request.url.path.startswith('/logs') %}
+                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                    {% endif %}
+                </div>
+                <span class="text-[13px] sm:text-sm mt-0.5 tracking-tight">Redaman</span>
+            </a>
+
+            <!-- Tab 3: Beranda (CENTER TAB - Elevated & Prominent) -->
+            <a href="/"
+               class="flex flex-col items-center justify-center -mt-4 py-1 px-0.5 group focus:outline-none">
+                <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-95 border-2 {% if request.url.path == '/' %}bg-indigo-600 text-white border-white shadow-indigo-500/40 ring-2 ring-indigo-200{% else %}bg-slate-800 text-white border-slate-100 shadow-slate-600/30 group-hover:bg-indigo-600{% endif %}">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path == '/' %}stroke-[2.5]{% else %}stroke-2{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                </div>
+                <span class="text-[13px] sm:text-sm mt-1 tracking-tight {% if request.url.path == '/' %}font-black text-indigo-700{% else %}font-bold text-slate-700 group-hover:text-indigo-600{% endif %}">Beranda</span>
+            </a>
+
+            <!-- Tab 4: Tiket -->
+            <a href="/admin/tiket"
+               class="relative flex flex-col items-center justify-center py-1.5 px-0.5 rounded-2xl transition-all min-h-[52px] group {% if request.url.path.startswith('/admin/tiket') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+                <div class="relative">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/admin/tiket') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                    </svg>
+                    <!-- Live Badge Counter Tiket -->
+                    <span x-show="unreadTicketsCount > 0"
+                          x-text="unreadTicketsCount"
+                          class="absolute -top-1.5 -right-2.5 px-1.5 py-0.2 min-w-[20px] text-center text-[10px] font-black text-white bg-rose-600 rounded-full border-2 border-white shadow-xs animate-pulse">
+                    </span>
+                    {% if request.url.path.startswith('/admin/tiket') %}
+                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                    {% endif %}
+                </div>
+                <span class="text-[13px] sm:text-sm mt-0.5 tracking-tight">Tiket</span>
+            </a>
+
+            <!-- Tab 5: Pengaturan (Menggantikan menu lama) -->
+            <a href="/settings"
+               class="flex flex-col items-center justify-center py-1.5 px-0.5 rounded-2xl transition-all min-h-[52px] group {% if request.url.path.startswith('/settings') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+                <div class="relative">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/settings') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    {% if request.url.path.startswith('/settings') %}
+                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                    {% endif %}
+                </div>
+                <span class="text-[13px] sm:text-sm mt-0.5 tracking-tight truncate max-w-full">Pengaturan</span>
+            </a>
+
+        </div>
+    </nav>
+
+    <!-- Global App Controller & Realtime In-App Notification Script -->
+    <script>
+        function teknoGuardApp() {
+            return {
+                sidebarCollapsed: localStorage.getItem('tekno_sidebar_collapsed') === 'true',
+                profileMenuOpen: false,
+                unreadTicketsCount: 0,
+                isInitialized: false,
+                lastAlertedTicketId: parseInt(sessionStorage.getItem('tekno_last_alerted_ticket') || '0', 10),
+                pollTimer: null,
+                realtimeAlert: {
+                    show: false,
+                    id: null,
+                    id_tiket: '',
+                    title: '',
+                    desc: ''
+                },
+                
+                init() {
+                    // Polling notifikasi realtime setiap 6 detik
+                    this.pollNotifications();
+                    this.pollTimer = setInterval(() => {
+                        this.pollNotifications();
+                    }, 6000);
+                },
+
+                toggleSidebar() {
+                    this.sidebarCollapsed = !this.sidebarCollapsed;
+                    localStorage.setItem('tekno_sidebar_collapsed', this.sidebarCollapsed);
+                },
+
+                dismissAlert() {
+                    this.realtimeAlert.show = false;
+                    if (this.realtimeAlert.id) {
+                        this.lastAlertedTicketId = this.realtimeAlert.id;
+                        sessionStorage.setItem('tekno_last_alerted_ticket', this.realtimeAlert.id.toString());
+                    }
+                },
+
+                playNotificationSound() {
+                    try {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        if (!AudioContext) return;
+                        const ctx = new AudioContext();
+                        
+                        // Nada 1: 880Hz (A5)
+                        const osc1 = ctx.createOscillator();
+                        const gain1 = ctx.createGain();
+                        osc1.type = 'sine';
+                        osc1.frequency.setValueAtTime(880, ctx.currentTime);
+                        gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+                        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                        osc1.connect(gain1);
+                        gain1.connect(ctx.destination);
+                        osc1.start();
+                        osc1.stop(ctx.currentTime + 0.25);
+
+                        // Nada 2: 1320Hz (E6)
+                        const osc2 = ctx.createOscillator();
+                        const gain2 = ctx.createGain();
+                        osc2.type = 'sine';
+                        osc2.frequency.setValueAtTime(1320, ctx.currentTime + 0.15);
+                        gain2.gain.setValueAtTime(0.35, ctx.currentTime + 0.15);
+                        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+                        osc2.connect(gain2);
+                        gain2.connect(ctx.destination);
+                        osc2.start(ctx.currentTime + 0.15);
+                        osc2.stop(ctx.currentTime + 0.45);
+                    } catch (e) {
+                        console.warn('Audio play error:', e);
+                    }
+                },
+
+                triggerHaptic() {
+                    if (navigator.vibrate) {
+                        try {
+                            navigator.vibrate([250, 100, 250]);
+                        } catch(e) {}
+                    }
+                },
+
+                async pollNotifications() {
+                    try {
+                        const res = await fetch('/api/notifications/poll');
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        if (data.status === 'success' || data.status === 'ok') {
+                            const newCount = data.unread_tickets_count || 0;
+                            const latest = data.latest_ticket;
+
+                            if (latest) {
+                                const currentId = parseInt(latest.id || 0, 10);
+                                
+                                // HANYA picu alarm audio, getar, & popup jika:
+                                // 1. Sudah melewati load pertama (isInitialized == true)
+                                // 2. ID tiket baru lebih besar dari tiket yang sudah pernah dialert (anti-spam)
+                                if (this.isInitialized && currentId > this.lastAlertedTicketId) {
+                                    this.realtimeAlert = {
+                                        show: true,
+                                        id: currentId,
+                                        id_tiket: latest.id_tiket,
+                                        title: (latest.nama_pelanggan || 'Pelanggan') + ' — ' + (latest.kategori || latest.jenis_kendala || 'Keluhan'),
+                                        desc: latest.deskripsi || latest.deskripsi_kendala || 'Tiket keluhan baru telah dikirimkan oleh pelanggan.'
+                                    };
+                                    this.playNotificationSound();
+                                    this.triggerHaptic();
+
+                                    // Simpan ke memory & sessionStorage agar tidak spam
+                                    this.lastAlertedTicketId = currentId;
+                                    sessionStorage.setItem('tekno_last_alerted_ticket', currentId.toString());
+
+                                    // Auto hide banner setelah 10 detik
+                                    setTimeout(() => {
+                                        if (this.realtimeAlert.id === currentId) {
+                                            this.realtimeAlert.show = false;
+                                        }
+                                    }, 10000);
+                                } else if (!this.isInitialized) {
+                                    // First load: sinkronkan lastAlertedTicketId secara silent tanpa memutar suara/popup
+                                    if (currentId > this.lastAlertedTicketId) {
+                                        this.lastAlertedTicketId = currentId;
+                                        sessionStorage.setItem('tekno_last_alerted_ticket', currentId.toString());
+                                    }
+                                    this.isInitialized = true;
+                                }
+                            } else {
+                                this.isInitialized = true;
+                            }
+
+                            this.unreadTicketsCount = newCount;
+                        }
+                    } catch (e) {
+                        // Silent network error
+                    }
+                }
+            };
+        }
+    </script>
 
     {% block scripts %}{% endblock %}
 </body>

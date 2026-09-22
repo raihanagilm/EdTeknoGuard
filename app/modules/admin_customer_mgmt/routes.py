@@ -85,3 +85,11 @@ async def update_ticket_status_json(
 @router.get("/kuota")
 def render_quota_page(request: Request, db: Session = Depends(get_db)):
     return AdminCustomerMgmtController.render_quota_page(request=request, db=db)
+
+@router.get("/api/notifications/poll")
+def poll_realtime_notifications(request: Request, db: Session = Depends(get_db)):
+    from app.core.security import get_current_user_optional, get_active_kantor
+    from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
+    user = get_current_user_optional(request)
+    kantor = get_active_kantor(request, user) if user else "all"
+    return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor)

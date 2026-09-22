@@ -151,6 +151,19 @@ app.include_router(admin_customer_router)
 from portal_pelanggan.main import app as portal_app
 app.mount("/portal", portal_app)
 
+@app.get("/api/notifications/poll")
+def poll_notifications_alias(request: Request):
+    from app.core.database import SessionLocal
+    from app.core.security import get_current_user_optional, get_active_kantor
+    from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
+    db = SessionLocal()
+    try:
+        user = get_current_user_optional(request)
+        kantor = get_active_kantor(request, user) if user else "all"
+        return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor)
+    finally:
+        db.close()
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=settings.APP_PORT, reload=True)

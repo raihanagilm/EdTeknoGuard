@@ -3,7 +3,7 @@ from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    APP_NAME: str = "EdTeknoGuard"
+    APP_NAME: str = "TeknoGuard"
     APP_ENV: str = "development"
     APP_PORT: int = 8000
     APP_URL: str = "http://localhost:8000"

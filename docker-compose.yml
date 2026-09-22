@@ -1,26 +1,54 @@
-# EdTeknoGuard - Docker Compose (Produksi)
-# Data disimpan di TiDB Cloud (remote), jadi tidak perlu container DB.
-# Hanya folder /app/data (scan_state.json) yang dipersistenkan.
+# EdTeknoGuard - Docker Compose (Live Sync & Hot Reload)
+# Terhubung ke TiDB Cloud & Domain Ngrok: https://duty-astride-outright.ngrok-free.dev
 services:
   edteknoguard:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: edteknoguard:latest
     container_name: edteknoguard
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      - APP_URL=${APP_URL:-http://localhost:8000}
+      - APP_URL=${APP_URL:-https://duty-astride-outright.ngrok-free.dev}
       - TZ=Asia/Jakarta
+      - PYTHONUNBUFFERED=1
     ports:
-      - "8000:8000"   # Local network access
+      - "8000:8000"   # Akses jaringan lokal / host
     volumes:
-      - ./data:/app/data   # persist scan_state.json & file runtime
-      - ./app:/app/app     # Live sync kode backend
-      - ./templates:/app/templates # Live sync template HTML admin
-      - ./static:/app/static       # Live sync aset static CSS/JS
-      - ./portal_pelanggan:/app/portal_pelanggan # Live sync portal pelanggan
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers", "--forwarded-allow-ips=*"]
+      - ./data:/app/data                           # Persistensi scan_state.json & runtime data
+      - ./app:/app/app                             # Live sync otomatis kode backend
+      - ./templates:/app/templates                 # Live sync otomatis template HTML Jinja2
+      - ./static:/app/static                       # Live sync otomatis aset CSS & JS
+      - ./portal_pelanggan:/app/portal_pelanggan   # Live sync otomatis modul & template portal warga
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /app/app
+        - action: sync
+          path: ./templates
+          target: /app/templates
+        - action: sync
+          path: ./static
+          target: /app/static
+        - action: sync
+          path: ./portal_pelanggan
+          target: /app/portal_pelanggan
+        - action: rebuild
+          path: ./requirements.txt
+    command: [
+      "uvicorn", "app.main:app",
+      "--host", "0.0.0.0",
+      "--port", "8000",
+      "--reload",
+      "--reload-dir", "/app/app",
+      "--reload-dir", "/app/templates",
+      "--reload-dir", "/app/portal_pelanggan",
+      "--proxy-headers",
+      "--forwarded-allow-ips=*"
+    ]
 
   ngrok:
     image: ngrok/ngrok:latest
@@ -28,14 +56,12 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        if [ -n "$$NGROK_DOMAIN" ]; then
-          exec ngrok http edteknoguard:8000 --url "$$NGROK_DOMAIN" --log stdout
-        else
-          exec ngrok http edteknoguard:8000 --log stdout
-        fi
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command:
+      - "http"
+      - "edteknoguard:8000"
+      - "--url=duty-astride-outright.ngrok-free.dev"
+      - "--log=stdout"
     depends_on:
       - edteknoguard

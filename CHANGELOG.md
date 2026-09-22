@@ -29,7 +29,31 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
-- **Integrasi Informasi Detail ke Tabel Master Pelanggan (Gambar 4 ke Tabel)**:
+- **Navigasi Mobile 5-Tab Ergonomis & Premium (Gaya Aplikasi Mobile BCA / Shopee)**:
+  - Menerapkan *sticky bottom navigation bar* 5 tab utama di layar ponsel (mobile viewport):
+    - 👥 **Tab 1: Pelanggan** (`/pelanggan`)
+    - 📉 **Tab 2: Redaman** (`/logs`)
+    - 🏠 **Tab 3: Beranda (Posisi Tengah)** (`/`) dengan desain elevated dock button / pill menonjol aktif dan ring bayangan modern.
+    - 🎫 **Tab 4: Tiket** (`/admin/tiket`) dengan badge counter realtime tiket baru masuk.
+    - ⚙️ **Tab 5: Pengaturan** (`/settings`) menggantikan menu lama.
+  - **Peningkatan Skala Tipografi Menu Navigasi**: Seluruh teks label navigasi dibesarkan secara signifikan menjadi `text-[13px] sm:text-sm font-extrabold tracking-tight` dengan icon `w-6 h-6 sm:w-7 sm:h-7`.
+  - **Penghapusan Bersih Menu Burger di Mobile**: Drawer off-canvas dan tombol burger di header mobile telah dihapus total demi pengalaman native bottom navigation yang terpadu.
+- **Menu Layanan & Operasional Paling Atas (Quick Action Cards)**:
+  - Diposisikan di bagian paling atas Dashboard Utama (`/`) di atas Control Bar dan KPI Cards.
+  - Skala tipografi dan box diperbesar: Box icon `h-14 w-14 sm:h-16 sm:w-16` dengan ikon `w-7 h-7`, serta teks judul kartu menjadi `text-sm sm:text-base font-extrabold text-slate-800`.
+- **Notifikasi Real-Time Floating Overlay Anti-Spam**:
+  - Banner popup notifikasi tiket darurat diubah menjadi **floating fixed overlay** (`fixed top-4 right-4 z-[999]`) di atas seluruh layer viewport, sehingga sama sekali tidak menggeser atau mendorong layout UI halaman ke bawah.
+  - **Proteksi Anti-Spam**: Penyimpanan status tiket terakhir di `sessionStorage` (`tekno_last_alerted_ticket`) dan penanda `isInitialized` memastikan notifikasi tidak berulang atau spam saat halaman di-reload/navigasi; suara alarm dan getaran hanya dipicu tepat 1 kali ketika ada tiket baru yang benar-benar masuk.
+- **Peningkatan Font Sidebar Menu Desktop**:
+  - Menu sidebar desktop ditingkatkan menjadi `text-sm sm:text-base font-extrabold` dengan ikon `w-5 h-5` dan padding `py-3 px-3.5` agar nyaman dibaca dan tidak kekecilan.
+
+### Changed
+- **Rebranding Nama Aplikasi Web**:
+  - Web Karyawan & NOC ISP: **TeknoGuard** (sebelumnya EdTeknoGuard).
+  - Web Portal Pelanggan Warga: **TeknoCust** (sebelumnya EdTekno Pelanggan / EdTeknoCust).
+- **Peningkatan Skala Tipografi Khusus Mobile**:
+  - Membesarkan seluruh ukuran font kecil di perangkat mobile: teks badge, KPI, sub-label, dan menu navigasi dari `text-[10px]` / `text-[11px]` menjadi `text-xs` (12px) dan `text-sm` (14px) semibold/bold agar mudah dibaca di lapangan di bawah terik matahari.
+  - Penambahan ruang vertikal `<main>` dengan `pb-28 lg:pb-8` agar elemen konten tidak tertutup oleh bottom navigation bar.
   - Menampilkan informasi yang sebelumnya hanya ada di modal detail langsung di tabel pelanggan:
     - 📍 **Titik Koordinat GPS**: Menampilkan koordinat GPS dengan tombol cepat buka Google Maps langsung di kolom pelanggan & alamat.
     - 📶 **Kredensial WiFi**: Kolom kredensial ONT kini diperluas memuat kotak SSID dan Password WiFi pelanggan lengkap dengan tombol intip/sembunyikan kata sandi.

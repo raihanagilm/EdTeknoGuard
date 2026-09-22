@@ -142,3 +142,34 @@ class AdminCustomerMgmtService:
                 "paket": p.paket or (kuota.kecepatan_paket if kuota else "20 Mbps Unlimited")
             })
         return result
+
+    @staticmethod
+    def get_realtime_notifications(db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:
+        """Mengambil data notifikasi realtime (tiket baru & status redaman) untuk polling admin/teknisi."""
+        query = db.query(TiketKendala).filter(TiketKendala.status == "MENUNGGU")
+        if kantor and kantor != "all":
+            query = query.filter(TiketKendala.kantor == kantor)
+
+        unread_count = query.count()
+        latest_ticket = query.order_by(TiketKendala.created_at.desc()).first()
+
+        latest_data = None
+        if latest_ticket:
+            cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == latest_ticket.id_pelanggan).first()
+            cust_name = cust.nama if cust else latest_ticket.id_pelanggan
+            latest_data = {
+                "id": latest_ticket.id,
+                "id_tiket": latest_ticket.id_tiket,
+                "id_pelanggan": latest_ticket.id_pelanggan,
+                "nama_pelanggan": cust_name,
+                "kategori": latest_ticket.kategori,
+                "deskripsi_kendala": latest_ticket.deskripsi or "Laporan keluhan baru dari pelanggan.",
+                "kantor": latest_ticket.kantor,
+                "created_at": latest_ticket.created_at.strftime("%H:%M:%S") if latest_ticket.created_at else ""
+            }
+
+        return {
+            "status": "success",
+            "unread_tickets_count": unread_count,
+            "latest_ticket": latest_data
+        }
