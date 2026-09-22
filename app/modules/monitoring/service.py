@@ -38,16 +38,15 @@ class MonitoringService:
         kantor: Optional[str] = None,
         allowed_kantor: Optional[list] = None
     ) -> Dict[str, Any]:
-        # Hanya hitung pelanggan yang aktif dan berstatus dipantau (is_monitored == True)
-        q_cust = db.query(Pelanggan).filter(
-            Pelanggan.is_active == True,
-            Pelanggan.is_monitored == True
-        )
+        # Hitung seluruh pelanggan yang aktif di kantor terkait
+        q_all = db.query(Pelanggan).filter(Pelanggan.is_active == True)
         if kantor and kantor != "all":
-            q_cust = q_cust.filter(Pelanggan.kantor == kantor)
+            q_all = q_all.filter(Pelanggan.kantor == kantor)
         elif allowed_kantor:
-            q_cust = q_cust.filter(Pelanggan.kantor.in_(allowed_kantor))
-        total_customers = q_cust.count()
+            q_all = q_all.filter(Pelanggan.kantor.in_(allowed_kantor))
+        total_all = q_all.count()
+        monitored_active = q_all.filter(Pelanggan.is_monitored == True).count()
+        monitored_inactive = total_all - monitored_active
 
         subq_query = (
             db.query(
@@ -56,8 +55,7 @@ class MonitoringService:
             )
             .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
             .filter(
-                Pelanggan.is_active == True,
-                Pelanggan.is_monitored == True
+                Pelanggan.is_active == True
             )
         )
         if kantor and kantor != "all":
@@ -92,20 +90,13 @@ class MonitoringService:
                 los_count += 1
 
         total_with_logs = normal_count + warning_count + critical_count + los_count
-        if total_customers > total_with_logs:
-            normal_count += (total_customers - total_with_logs)
-
-        q_all = db.query(Pelanggan).filter(Pelanggan.is_active == True)
-        if kantor and kantor != "all":
-            q_all = q_all.filter(Pelanggan.kantor == kantor)
-        elif allowed_kantor:
-            q_all = q_all.filter(Pelanggan.kantor.in_(allowed_kantor))
-        total_all = q_all.count()
-        monitored_inactive = total_all - total_customers
+        if total_all > total_with_logs:
+            normal_count += (total_all - total_with_logs)
 
         return {
-            "total_monitored": total_customers,
+            "total_monitored": total_all,
             "total_all": total_all,
+            "monitored_active": monitored_active,
             "monitored_inactive": monitored_inactive,
             "normal": normal_count,
             "warning": warning_count,

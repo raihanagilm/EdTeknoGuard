@@ -251,3 +251,11 @@ EdTeknoGuard/
    - File [`CHANGELOG.md`](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/CHANGELOG.md) adalah acuan riwayat perubahan sistem yang berfungsi sebagai **benteng pencegahan regresi (*regression shield*)**.
    - **Perlindungan Fitur Existing**: Sebelum menambahkan atau memodifikasi kode, AI Agent **WAJIB** meninjau `CHANGELOG.md` untuk memahami fitur apa saja yang sudah berjalan stabil. DILARANG KERAS merusak, menimpa (*overwrite*), atau menghilangkan fitur lama tanpa instruksi eksplisit dari pengguna.
    - **Pencatatan Wajib**: Setiap kali selesai melakukan perbaikan bug, penambahan fitur, perubahan fungsi, atau pembaruan konfigurasi, AI Agent **WAJIB** mencatat perubahan tersebut di `CHANGELOG.md` pada seksi `[Unreleased]` atau versi terkait menggunakan kategori baku (`Added`, `Changed`, `Fixed`, `Removed`, `Security`).
+5. **Kewajiban Paritas Fitur & Adaptasi Desain UI Mobile vs Desktop (Prinsip Non-Negosiasi)**:
+   - Setiap kali menambahkan fitur baru, memodifikasi alur, atau menghapus fitur, AI Agent **WAJIB** mengevaluasi dan menerapkannya secara konsisten pada **KEDUA tampilan (Mobile dan Desktop)**.
+   - **Paritas Fungsional Penuh**: Seluruh kapabilitas fitur (seperti filter pencarian, pusat notifikasi/aduan, modal dialog, pagination, dan manipulasi data) **HARUS** tersedia dan dapat diakses dengan mudah baik di perangkat seluler/mobile maupun komputer desktop.
+   - **Adaptasi Ergonomi Sesuai Viewport (Bukan Menjiplak Mentah-Mentah)**:
+     - *Desktop*: Menggunakan popover dropdown anchored langsung di bawah tombol pemicu, tabel baris lebar, sidebar kiri permanen, dan inline grid filters.
+     - *Mobile*: Komponen harus diadaptasi secara ergonomis agar nyaman digunakan satu tangan (misal: slide-up bottom sheet drawer untuk filter, popover dengan posisi aman `fixed inset-x-3` agar tidak terpotong keluar layar / *no viewport clipping*, tabel dengan scroll horizontal halus `overflow-x-auto`, dan area sentuh minimal 44x44 px).
+   - **Dilarang Keras**: Mengubah atau menambahkan fitur hanya pada satu viewport (misalnya hanya merombak desktop lalu membiarkan mobile rusak, terpotong/clipping, atau tanpa filter yang setara).
+

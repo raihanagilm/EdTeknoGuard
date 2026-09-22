@@ -629,13 +629,12 @@ class CustomerService:
         monitored_inactive = base_q.filter(Pelanggan.is_monitored == False).count()
         total_all = base_q.count()
 
-        total_pelanggan = monitored_active  # Nilai card dikurangi pelanggan yang OFF
+        total_pelanggan = total_all  # Nilai total harus sesuai dengan jumlah data pelanggan aktual di database
 
         pop_q = (
             db.query(Pelanggan.pop, func.count(Pelanggan.id))
             .filter(
-                Pelanggan.is_active == True,
-                Pelanggan.is_monitored == True
+                Pelanggan.is_active == True
             )
         )
         if kantor and kantor != "all":
@@ -651,8 +650,7 @@ class CustomerService:
             )
             .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
             .filter(
-                Pelanggan.is_active == True,
-                Pelanggan.is_monitored == True
+                Pelanggan.is_active == True
             )
         )
         if kantor and kantor != "all":
@@ -669,8 +667,7 @@ class CustomerService:
             .join(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
             .join(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
             .filter(
-                Pelanggan.is_active == True,
-                Pelanggan.is_monitored == True
+                Pelanggan.is_active == True
             )
             .group_by(LogPerformaONT.status_koneksi)
             .all()

@@ -460,12 +460,100 @@ document.addEventListener('alpine:init', () => {
                                     return lines;
                                 }
                             }
+                        },
+                        zoom: {
+                            pan: { enabled: false },
+                            zoom: { wheel: { enabled: false }, pinch: { enabled: false } }
                         }
                     }
                 }
             });
 
+            // Touch Gestures (Pinch-to-zoom & Pan Drag seperti Foto di HP)
+            const chartContainer = document.getElementById('chart-canvas-container');
+            if (chartContainer) {
+                let initialDistance = 0;
+                let initialScale = 1.0;
+                let startTouchX = 0;
+                let startTouchY = 0;
+                let initialPanX = 0;
+                let initialPanY = 0;
+
+                chartContainer.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 2) {
+                        // Pinch gesture
+                        const dx = e.touches[0].clientX - e.touches[1].clientX;
+                        const dy = e.touches[0].clientY - e.touches[1].clientY;
+                        initialDistance = Math.hypot(dx, dy);
+                        initialScale = this.zoomScale;
+                    } else if (e.touches.length === 1 && this.zoomScale > 1.0) {
+                        // Pan gesture saat zoom > 1
+                        startTouchX = e.touches[0].clientX;
+                        startTouchY = e.touches[0].clientY;
+                        initialPanX = this.panX;
+                        initialPanY = this.panY;
+                    }
+                }, { passive: true });
+
+                chartContainer.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 2 && initialDistance > 0) {
+                        const dx = e.touches[0].clientX - e.touches[1].clientX;
+                        const dy = e.touches[0].clientY - e.touches[1].clientY;
+                        const currentDistance = Math.hypot(dx, dy);
+                        const factor = currentDistance / initialDistance;
+                        this.zoomScale = Math.min(3.5, Math.max(0.8, +(initialScale * factor).toFixed(2)));
+                        this.applyPhotoZoom();
+                    } else if (e.touches.length === 1 && this.zoomScale > 1.0) {
+                        const deltaX = (e.touches[0].clientX - startTouchX) / this.zoomScale;
+                        const deltaY = (e.touches[0].clientY - startTouchY) / this.zoomScale;
+                        this.panX = initialPanX + deltaX;
+                        this.panY = initialPanY + deltaY;
+                        this.applyPhotoZoom();
+                    }
+                }, { passive: true });
+            }
+
             this.loadChartData();
+        },
+
+        zoomScale: 1.0,
+        panX: 0,
+        panY: 0,
+
+        applyPhotoZoom() {
+            const canvas = document.getElementById('redamanChart');
+            if (canvas) {
+                canvas.style.transformOrigin = 'center center';
+                canvas.style.transform = `scale(${this.zoomScale}) translate(${this.panX}px, ${this.panY}px)`;
+            }
+        },
+
+        zoomInChart() {
+            if (this.zoomScale < 3.5) {
+                this.zoomScale = Math.min(3.5, +(this.zoomScale + 0.35).toFixed(2));
+                this.applyPhotoZoom();
+            }
+        },
+
+        zoomOutChart() {
+            if (this.zoomScale > 0.7) {
+                this.zoomScale = Math.max(0.7, +(this.zoomScale - 0.35).toFixed(2));
+                if (this.zoomScale <= 1.0) {
+                    this.panX = 0;
+                    this.panY = 0;
+                }
+                this.applyPhotoZoom();
+            }
+        },
+
+        resetZoomChart() {
+            this.zoomScale = 1.0;
+            this.panX = 0;
+            this.panY = 0;
+            this.applyPhotoZoom();
+            if (redamanChart && typeof redamanChart.resetZoom === 'function') {
+                redamanChart.resetZoom();
+            }
         },
 
         async switchChartRange(range) {

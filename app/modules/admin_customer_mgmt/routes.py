@@ -92,4 +92,15 @@ def poll_realtime_notifications(request: Request, db: Session = Depends(get_db))
     from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
     user = get_current_user_optional(request)
     kantor = get_active_kantor(request, user) if user else "all"
-    return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor)
+    return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor, user=user)
+
+@router.post("/api/monitoring/snooze-pause-reminder")
+def snooze_pause_reminder(request: Request, db: Session = Depends(get_db)):
+    from app.core.security import get_current_user_optional
+    from app.services.scheduler_service import ont_scheduler
+    from fastapi import HTTPException
+    user = get_current_user_optional(request)
+    if not user or user.get("role") != "super admin":
+        raise HTTPException(status_code=403, detail="Akses ditolak.")
+    ont_scheduler.snooze_paused_reminder(db)
+    return {"status": "success", "message": "Pengingat jeda ditunda 1 jam."}

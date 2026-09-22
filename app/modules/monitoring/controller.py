@@ -12,8 +12,8 @@ class MonitoringController:
 
     @staticmethod
     def toggle_scheduler(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "operator":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Operator tidak diizinkan mengubah status pemantauan")
+        if not user or user.get("role") != "super admin":
+            raise HTTPException(status_code=403, detail="Akses ditolak: Hanya Super Admin yang berhak menjeda atau mengaktifkan jadwal pemantauan")
         
         new_status = MonitoringService.toggle_scheduler()
         if request and db:

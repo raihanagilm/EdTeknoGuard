@@ -48,85 +48,164 @@
         </div>
     </div>
 
-    <!-- KPI Status Quick Pills (Apple HIG Metric Widgets: Mobile-First Compact, rounded-2xl, subtle border) -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+    <!-- ========================================================================= -->
+    <!-- 1. STAT STATUS TIKET (HORIZONTAL CHIPS DI MOBILE, GRID DI TABLET/DESKTOP)  -->
+    <!-- (Card 'Semua Tiket' dihapus karena total sudah tertera di header)          -->
+    <!-- ========================================================================= -->
+    
+    <!-- Mobile: Horizontal Scrollable Chips (Sangat ringkas, ramah jempol) -->
+    <div class="sm:hidden flex items-center gap-2 overflow-x-auto no-scrollbar py-1 pb-1.5 -mx-4 px-4">
+        <!-- Chip 1: Menunggu -->
         <button type="button"
-                @click="filterStatus = 'all'; currentPage = 1"
-                class="p-2.5 sm:p-3.5 rounded-2xl border text-left transition min-h-[54px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
-                :class="filterStatus === 'all' ? 'bg-indigo-50/40 border-indigo-400/80 ring-2 ring-indigo-500/20' : 'bg-white border-slate-200/60 hover:border-slate-300'">
-            <div>
-                <span class="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Semua Tiket</span>
-                <span class="text-base sm:text-lg font-black text-slate-900 tracking-tight" x-text="rawTickets.length"></span>
-            </div>
-            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-            </div>
+                @click="filterStatus = (filterStatus === 'MENUNGGU' ? 'all' : 'MENUNGGU'); currentPage = 1"
+                class="flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shrink-0 transition min-h-[44px] shadow-2xs active:scale-95"
+                :class="filterStatus === 'MENUNGGU' ? 'bg-amber-500 text-white border-amber-600 ring-2 ring-amber-400/40 shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+            <span class="w-2.5 h-2.5 rounded-full" :class="filterStatus === 'MENUNGGU' ? 'bg-white' : 'bg-amber-500'"></span>
+            <span>Menunggu</span>
+            <span class="px-2 py-0.5 rounded-xl text-[11px] font-black"
+                  :class="filterStatus === 'MENUNGGU' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'"
+                  x-text="countByStatus('MENUNGGU')">0</span>
         </button>
 
+        <!-- Chip 2: Dicek Admin -->
         <button type="button"
-                @click="filterStatus = 'MENUNGGU'; currentPage = 1"
-                class="p-2.5 sm:p-3.5 rounded-2xl border text-left transition min-h-[54px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
+                @click="filterStatus = (filterStatus === 'DICEK_ADMIN' ? 'all' : 'DICEK_ADMIN'); currentPage = 1"
+                class="flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shrink-0 transition min-h-[44px] shadow-2xs active:scale-95"
+                :class="filterStatus === 'DICEK_ADMIN' ? 'bg-purple-600 text-white border-purple-700 ring-2 ring-purple-400/40 shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+            <span class="w-2.5 h-2.5 rounded-full" :class="filterStatus === 'DICEK_ADMIN' ? 'bg-white' : 'bg-purple-500'"></span>
+            <span>Dicek Admin</span>
+            <span class="px-2 py-0.5 rounded-xl text-[11px] font-black"
+                  :class="filterStatus === 'DICEK_ADMIN' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-800'"
+                  x-text="countByStatus('DICEK_ADMIN')">0</span>
+        </button>
+
+        <!-- Chip 3: Diproses -->
+        <button type="button"
+                @click="filterStatus = (filterStatus === 'DIPROSES' ? 'all' : 'DIPROSES'); currentPage = 1"
+                class="flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shrink-0 transition min-h-[44px] shadow-2xs active:scale-95"
+                :class="filterStatus === 'DIPROSES' ? 'bg-blue-600 text-white border-blue-700 ring-2 ring-blue-400/40 shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+            <span class="w-2.5 h-2.5 rounded-full" :class="filterStatus === 'DIPROSES' ? 'bg-white' : 'bg-blue-500'"></span>
+            <span>Diproses</span>
+            <span class="px-2 py-0.5 rounded-xl text-[11px] font-black"
+                  :class="filterStatus === 'DIPROSES' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-800'"
+                  x-text="countByStatus('DIPROSES')">0</span>
+        </button>
+
+        <!-- Chip 4: Selesai -->
+        <button type="button"
+                @click="filterStatus = (filterStatus === 'SELESAI' ? 'all' : 'SELESAI'); currentPage = 1"
+                class="flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shrink-0 transition min-h-[44px] shadow-2xs active:scale-95"
+                :class="filterStatus === 'SELESAI' ? 'bg-emerald-600 text-white border-emerald-700 ring-2 ring-emerald-400/40 shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+            <span class="w-2.5 h-2.5 rounded-full" :class="filterStatus === 'SELESAI' ? 'bg-white' : 'bg-emerald-500'"></span>
+            <span>Selesai</span>
+            <span class="px-2 py-0.5 rounded-xl text-[11px] font-black"
+                  :class="filterStatus === 'SELESAI' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'"
+                  x-text="countByStatus('SELESAI')">0</span>
+        </button>
+    </div>
+
+    <!-- Desktop / Tablet: 4 Card Grid Proporsional -->
+    <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        <!-- Card 1: Menunggu -->
+        <button type="button"
+                @click="filterStatus = (filterStatus === 'MENUNGGU' ? 'all' : 'MENUNGGU'); currentPage = 1"
+                class="p-3 sm:p-3.5 rounded-2xl border text-left transition min-h-[60px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
                 :class="filterStatus === 'MENUNGGU' ? 'bg-amber-50/50 border-amber-400/80 ring-2 ring-amber-500/20' : 'bg-white border-slate-200/60 hover:border-slate-300'">
             <div>
                 <span class="text-[10px] sm:text-[11px] font-semibold text-amber-600 uppercase tracking-wider block">Menunggu</span>
                 <span class="text-base sm:text-lg font-black text-amber-600 tracking-tight" x-text="countByStatus('MENUNGGU')"></span>
             </div>
-            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
         </button>
 
+        <!-- Card 2: Dicek Admin -->
         <button type="button"
-                @click="filterStatus = 'DICEK_ADMIN'; currentPage = 1"
-                class="p-2.5 sm:p-3.5 rounded-2xl border text-left transition min-h-[54px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
+                @click="filterStatus = (filterStatus === 'DICEK_ADMIN' ? 'all' : 'DICEK_ADMIN'); currentPage = 1"
+                class="p-3 sm:p-3.5 rounded-2xl border text-left transition min-h-[60px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
                 :class="filterStatus === 'DICEK_ADMIN' ? 'bg-purple-50/50 border-purple-400/80 ring-2 ring-purple-500/20' : 'bg-white border-slate-200/60 hover:border-slate-300'">
             <div>
                 <span class="text-[10px] sm:text-[11px] font-semibold text-purple-600 uppercase tracking-wider block">Dicek Admin</span>
                 <span class="text-base sm:text-lg font-black text-purple-600 tracking-tight" x-text="countByStatus('DICEK_ADMIN')"></span>
             </div>
-            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </div>
         </button>
 
+        <!-- Card 3: Diproses -->
         <button type="button"
-                @click="filterStatus = 'DIPROSES'; currentPage = 1"
-                class="p-2.5 sm:p-3.5 rounded-2xl border text-left transition min-h-[54px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
+                @click="filterStatus = (filterStatus === 'DIPROSES' ? 'all' : 'DIPROSES'); currentPage = 1"
+                class="p-3 sm:p-3.5 rounded-2xl border text-left transition min-h-[60px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
                 :class="filterStatus === 'DIPROSES' ? 'bg-blue-50/50 border-blue-400/80 ring-2 ring-blue-500/20' : 'bg-white border-slate-200/60 hover:border-slate-300'">
             <div>
                 <span class="text-[10px] sm:text-[11px] font-semibold text-blue-600 uppercase tracking-wider block">Diproses</span>
                 <span class="text-base sm:text-lg font-black text-blue-600 tracking-tight" x-text="countByStatus('DIPROSES')"></span>
             </div>
-            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
         </button>
 
+        <!-- Card 4: Selesai -->
         <button type="button"
-                @click="filterStatus = 'SELESAI'; currentPage = 1"
-                class="p-2.5 sm:p-3.5 rounded-2xl border text-left transition min-h-[54px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
+                @click="filterStatus = (filterStatus === 'SELESAI' ? 'all' : 'SELESAI'); currentPage = 1"
+                class="p-3 sm:p-3.5 rounded-2xl border text-left transition min-h-[60px] sm:min-h-[64px] flex items-center justify-between shadow-2xs active:scale-[0.99]"
                 :class="filterStatus === 'SELESAI' ? 'bg-emerald-50/50 border-emerald-400/80 ring-2 ring-emerald-500/20' : 'bg-white border-slate-200/60 hover:border-slate-300'">
             <div>
                 <span class="text-[10px] sm:text-[11px] font-semibold text-emerald-600 uppercase tracking-wider block">Selesai</span>
                 <span class="text-base sm:text-lg font-black text-emerald-600 tracking-tight" x-text="countByStatus('SELESAI')"></span>
             </div>
-            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             </div>
         </button>
     </div>
 
-    <!-- Filter & Search Bar (Apple iOS Search & Picker Style: 2 kolom mobile, tidak memenuhi layar) -->
-    <div class="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200/60 shadow-2xs space-y-2.5">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+    <!-- ========================================================================= -->
+    <!-- 2. FILTER & SEARCH CONTROLS                                               -->
+    <!-- Mobile: Search input + Tombol Filter (Buka Bottom Sheet)                 -->
+    <!-- Desktop: Grid 4 Kolom Inline Seperti Semula                              -->
+    <!-- ========================================================================= -->
+    <div class="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200/60 shadow-2xs">
+        
+        <!-- Baris Mobile: Search + Tombol Filter (lg:hidden) -->
+        <div class="flex lg:hidden items-center gap-2">
+            <div class="relative flex-1">
+                <input type="text"
+                       x-model="searchQuery"
+                       @input.debounce.300ms="currentPage = 1"
+                       placeholder="Cari tiket, nama, kendala..."
+                       class="w-full pl-9 pr-3 py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl placeholder-slate-400 min-h-[44px] font-medium text-slate-800 outline-none transition">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+            </div>
 
+            <button type="button"
+                    @click="mobileFilterOpen = true"
+                    class="px-3.5 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition min-h-[44px] shrink-0 active:scale-95"
+                    :class="activeFiltersCount > 0 ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span>Filter</span>
+                <span x-show="activeFiltersCount > 0"
+                      x-text="activeFiltersCount"
+                      class="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-white text-indigo-700"></span>
+            </button>
+        </div>
+
+        <!-- Baris Desktop: Grid 4 Kolom Lengkap (hidden lg:grid) -->
+        <div class="hidden lg:grid grid-cols-4 gap-3">
             <!-- Filter Status -->
             <div>
                 <label class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Status Tiket</label>
                 <div class="relative">
                     <select x-model="filterStatus"
                             @change="currentPage = 1"
-                            class="w-full px-3 py-2 sm:py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl appearance-none pr-8 min-h-[40px] sm:min-h-[44px] font-semibold text-slate-700 outline-none cursor-pointer">
+                            class="w-full px-3 py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl appearance-none pr-8 min-h-[44px] font-semibold text-slate-700 outline-none cursor-pointer">
                         <option value="all">Semua Status</option>
                         <option value="MENUNGGU">MENUNGGU</option>
                         <option value="DICEK_ADMIN">DICEK ADMIN</option>
@@ -145,7 +224,7 @@
                 <div class="relative">
                     <select x-model="filterKategori"
                             @change="currentPage = 1"
-                            class="w-full px-3 py-2 sm:py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl appearance-none pr-8 min-h-[40px] sm:min-h-[44px] font-semibold text-slate-700 outline-none cursor-pointer">
+                            class="w-full px-3 py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl appearance-none pr-8 min-h-[44px] font-semibold text-slate-700 outline-none cursor-pointer">
                         <option value="all">Semua Jenis</option>
                         <template x-for="cat in kategoriOptions" :key="cat">
                             <option :value="cat" x-text="cat"></option>
@@ -163,7 +242,7 @@
                 <div class="relative">
                     <select x-model="filterRange"
                             @change="onRangeChange()"
-                            class="w-full px-3 py-2 sm:py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl appearance-none pr-8 min-h-[40px] sm:min-h-[44px] font-semibold text-slate-700 outline-none cursor-pointer">
+                            class="w-full px-3 py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl appearance-none pr-8 min-h-[44px] font-semibold text-slate-700 outline-none cursor-pointer">
                         <option value="all">Semua Waktu</option>
                         <option value="today">Hari Ini</option>
                         <option value="7d">7 Hari Terakhir</option>
@@ -176,7 +255,7 @@
                 </div>
             </div>
 
-            <!-- Pencarian Cepat (iOS Search Bar) -->
+            <!-- Pencarian Cepat Desktop -->
             <div>
                 <label class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Pencarian Cepat</label>
                 <div class="relative">
@@ -184,18 +263,18 @@
                            x-model="searchQuery"
                            @input.debounce.300ms="currentPage = 1"
                            placeholder="Cari ID, nama, kendala..."
-                           class="w-full pl-8 sm:pl-9 pr-3 py-2 sm:py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl placeholder-slate-400 min-h-[40px] sm:min-h-[44px] font-medium text-slate-800 outline-none transition">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
+                           class="w-full pl-9 pr-3 py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:bg-white focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl placeholder-slate-400 min-h-[44px] font-medium text-slate-800 outline-none transition">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Custom Date Range Row (Show only when custom selected) -->
+        <!-- Custom Date Range Row Desktop -->
         <div x-show="filterRange === 'custom'"
              x-transition
-             class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3 text-xs">
+             class="hidden lg:flex pt-3 border-t border-slate-100 flex-wrap items-center gap-3 text-xs">
             <span class="font-semibold text-slate-600">Pilih Rentang Tanggal Lapor:</span>
             <div class="flex items-center gap-2">
                 <input type="date"
@@ -213,7 +292,132 @@
                     Terapkan
                 </button>
             </div>
-            <span class="text-[11px] text-slate-400">Penyaringan berdasarkan tanggal pelaporan tiket.</span>
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 3. MOBILE FILTER BOTTOM SHEET (SLIDE UP DARI BAWAH)                      -->
+    <!-- ========================================================================= -->
+    <div x-show="mobileFilterOpen"
+         x-cloak
+         class="fixed inset-0 z-50 lg:hidden overflow-hidden"
+         role="dialog"
+         aria-modal="true">
+        <!-- Backdrop -->
+        <div x-show="mobileFilterOpen"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="mobileFilterOpen = false"
+             class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+
+        <!-- Sheet Container Slide Up -->
+        <div class="fixed inset-x-0 bottom-0 z-10 flex flex-col max-h-[85vh]">
+            <div x-show="mobileFilterOpen"
+                 x-transition:enter="transform transition ease-out duration-300"
+                 x-transition:enter-start="translate-y-full"
+                 x-transition:enter-end="translate-y-0"
+                 x-transition:leave="transform transition ease-in duration-200"
+                 x-transition:leave-start="translate-y-0"
+                 x-transition:leave-end="translate-y-full"
+                 class="bg-white rounded-t-3xl shadow-2xl p-5 sm:p-6 overflow-y-auto space-y-4 border-t border-slate-200/80">
+                
+                <!-- Drag Handle Bar -->
+                <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto -mt-1 mb-2"></div>
+
+                <!-- Header Bottom Sheet -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-black text-slate-900">Filter Tiket Keluhan</h3>
+                            <p class="text-xs text-slate-500">Sesuaikan kriteria data yang ingin ditampilkan</p>
+                        </div>
+                    </div>
+                    <button @click="mobileFilterOpen = false" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Form Filter di Bottom Sheet -->
+                <div class="space-y-3.5">
+                    <!-- Status Tiket -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Status Tiket</label>
+                        <select x-model="filterStatus"
+                                class="w-full px-3.5 py-2.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none min-h-[44px]">
+                            <option value="all">Semua Status</option>
+                            <option value="MENUNGGU">MENUNGGU</option>
+                            <option value="DICEK_ADMIN">DICEK ADMIN</option>
+                            <option value="DIPROSES">DIPROSES</option>
+                            <option value="SELESAI">SELESAI</option>
+                        </select>
+                    </div>
+
+                    <!-- Jenis Kendala -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Kendala</label>
+                        <select x-model="filterKategori"
+                                class="w-full px-3.5 py-2.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none min-h-[44px]">
+                            <option value="all">Semua Jenis Kendala</option>
+                            <template x-for="cat in kategoriOptions" :key="cat">
+                                <option :value="cat" x-text="cat"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Rentang Waktu -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Rentang Waktu</label>
+                        <select x-model="filterRange"
+                                class="w-full px-3.5 py-2.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none min-h-[44px]">
+                            <option value="all">Semua Waktu</option>
+                            <option value="today">Hari Ini</option>
+                            <option value="7d">7 Hari Terakhir</option>
+                            <option value="30d">30 Hari Terakhir</option>
+                            <option value="custom">Kustom Tanggal (Pilih Sendiri)</option>
+                        </select>
+                    </div>
+
+                    <!-- Kustom Tanggal (jika custom) -->
+                    <div x-show="filterRange === 'custom'" class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-600">Rentang Tanggal Lapor</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">Mulai:</span>
+                                <input type="date" x-model="customStartDate" :max="todayDate" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg min-h-[40px]">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">Sampai:</span>
+                                <input type="date" x-model="customEndDate" :max="todayDate" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg min-h-[40px]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi Bottom Sheet -->
+                <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
+                    <button type="button"
+                            @click="resetFilters(); mobileFilterOpen = false;"
+                            class="w-full py-3 rounded-2xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold min-h-[46px] active:scale-95 transition">
+                        Reset Filter
+                    </button>
+                    <button type="button"
+                            @click="currentPage = 1; mobileFilterOpen = false;"
+                            class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs min-h-[46px] active:scale-95 transition">
+                        Terapkan Filter
+                    </button>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -602,6 +806,15 @@ function tiketApp() {
         customEndDate: '',
         todayDate: '{{ today_date }}',
         searchQuery: '',
+        mobileFilterOpen: false,
+
+        get activeFiltersCount() {
+            let count = 0;
+            if (this.filterStatus && this.filterStatus !== 'all') count++;
+            if (this.filterKategori && this.filterKategori !== 'all') count++;
+            if (this.filterRange && this.filterRange !== 'all') count++;
+            return count;
+        },
 
         // Sorting
         sortBy: 'created_at_iso',

@@ -94,9 +94,32 @@
         </div>
     </div>
 
-    <!-- Chart Canvas Container -->
-    <div class="relative w-full h-[250px] sm:h-[290px]">
-        <canvas id="redamanChart"></canvas>
+    <!-- Chart Canvas Container with Interactive Zoom & Pan Controls -->
+    <div class="relative w-full h-[250px] sm:h-[290px] overflow-hidden" id="chart-canvas-container">
+        <!-- Interactive Zoom Controls (Khusus Mobile Saja: sm:hidden) -->
+        <div class="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-1 rounded-xl border border-slate-200/90 shadow-sm select-none">
+            <button @click="zoomInChart()"
+                    type="button"
+                    class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold flex items-center justify-center transition active:scale-90 shadow-2xs"
+                    title="Perbesar Grafik (Zoom In)">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            </button>
+            <button @click="zoomOutChart()"
+                    type="button"
+                    class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-bold flex items-center justify-center transition active:scale-90 shadow-2xs"
+                    title="Perkecil Grafik (Zoom Out)">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+            </button>
+            <button @click="resetZoomChart()"
+                    type="button"
+                    class="px-2 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold flex items-center justify-center gap-1 transition active:scale-90 shadow-2xs"
+                    title="Kembalikan Tampilan Awal (Reset Zoom)">
+                <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <span>Reset</span>
+            </button>
+        </div>
+
+        <canvas id="redamanChart" class="transition-transform duration-200 ease-out origin-center"></canvas>
     </div>
 
     <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">

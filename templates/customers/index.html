@@ -112,8 +112,71 @@ EdTeknoGuard{% endblock %} {% block content %}
     </div>
   </div>
 
-  <!-- Quick Stats Cards (Apple HIG Widget Cards: 2x2 grid compact simetris, rounded-2xl, subtle border) -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+  <!-- ========================================================================= -->
+  <!-- QUICK STATS (HORIZONTAL CHIPS DI MOBILE, GRID DI TABLET/DESKTOP)          -->
+  <!-- ========================================================================= -->
+  
+  <!-- Mobile: Horizontal Scrollable Chips (Sangat ringkas, ramah jempol) -->
+  <div class="sm:hidden flex items-center gap-2 overflow-x-auto no-scrollbar py-1 pb-1.5 -mx-4 px-4">
+    <!-- Chip 1: Total Terpantau -->
+    <button
+      type="button"
+      @click="filterByCard('Semua Status')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shrink-0 transition min-h-[44px] shadow-2xs active:scale-95"
+      :class="filterStatus === 'Semua Status' ? 'bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-400/40 shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'"
+    >
+      <span class="w-2.5 h-2.5 rounded-full" :class="filterStatus === 'Semua Status' ? 'bg-white' : 'bg-indigo-600'"></span>
+      <span>Total</span>
+      <span class="px-2 py-0.5 rounded-xl text-[11px] font-black"
+            :class="filterStatus === 'Semua Status' ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-800'"
+            x-text="stats.total">0</span>
+    </button>
+
+    <!-- Chip 2: Normal -->
+    <button
+      type="button"
+      @click="filterByCard('NORMAL')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shrink-0 transition min-h-[44px] shadow-2xs active:scale-95"
+      :class="filterStatus === 'NORMAL' ? 'bg-emerald-600 text-white border-emerald-700 ring-2 ring-emerald-400/40 shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'"
+    >
+      <span class="w-2.5 h-2.5 rounded-full" :class="filterStatus === 'NORMAL' ? 'bg-white' : 'bg-emerald-500'"></span>
+      <span>Normal</span>
+      <span class="px-2 py-0.5 rounded-xl text-[11px] font-black"
+            :class="filterStatus === 'NORMAL' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'"
+            x-text="stats.normal">0</span>
+    </button>
+
+    <!-- Chip 3: Warning -->
+    <button
+      type="button"
+      @click="filterByCard('WARNING')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shrink-0 transition min-h-[44px] shadow-2xs active:scale-95"
+      :class="filterStatus === 'WARNING' ? 'bg-amber-500 text-white border-amber-600 ring-2 ring-amber-400/40 shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'"
+    >
+      <span class="w-2.5 h-2.5 rounded-full" :class="filterStatus === 'WARNING' ? 'bg-white' : 'bg-amber-500'"></span>
+      <span>Warning</span>
+      <span class="px-2 py-0.5 rounded-xl text-[11px] font-black"
+            :class="filterStatus === 'WARNING' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'"
+            x-text="stats.warning">0</span>
+    </button>
+
+    <!-- Chip 4: Kritis / LOS -->
+    <button
+      type="button"
+      @click="filterByCard('CRITICAL')"
+      class="flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold shrink-0 transition min-h-[44px] shadow-2xs active:scale-95"
+      :class="filterStatus === 'CRITICAL' || filterStatus === 'LOS' ? 'bg-rose-600 text-white border-rose-700 ring-2 ring-rose-400/40 shadow-xs' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'"
+    >
+      <span class="w-2.5 h-2.5 rounded-full" :class="filterStatus === 'CRITICAL' || filterStatus === 'LOS' ? 'bg-white' : 'bg-rose-500'"></span>
+      <span>Kritis/LOS</span>
+      <span class="px-2 py-0.5 rounded-xl text-[11px] font-black"
+            :class="filterStatus === 'CRITICAL' || filterStatus === 'LOS' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-800'"
+            x-text="stats.critical_los">0</span>
+    </button>
+  </div>
+
+  <!-- Desktop / Tablet: 4 Card Grid Proporsional -->
+  <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
     <!-- Card 1: Total Pelanggan -->
     <div
       @click="filterByCard('Semua Status')"
@@ -320,104 +383,250 @@ EdTeknoGuard{% endblock %} {% block content %}
     </div>
   </div>
   {% endif %}
-  <!-- Search & Filter Controls (Apple iOS Search & Picker Style) -->
-  <div
-    class="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200/60 shadow-2xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 sm:gap-3"
-  >
-    <div class="w-full lg:w-80 relative">
-      <input
-        type="text"
-        x-model="searchQuery"
-        @input.debounce.300ms="fetchCustomers(1)"
-        placeholder="Cari nama, IP, MAC, atau ID..."
-        class="w-full pl-9 pr-3 py-2 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl transition outline-none min-h-[40px] text-slate-800 placeholder-slate-400"
-      />
-      <div class="absolute left-3 top-2.5 text-slate-400 pointer-events-none">
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+  <!-- ========================================================================= -->
+  <!-- SEARCH & FILTER CONTROLS                                                  -->
+  <!-- Mobile: Search input + Tombol Filter (Buka Bottom Sheet)                 -->
+  <!-- Desktop: Inline Bar Lengkap Seperti Semula                               -->
+  <!-- ========================================================================= -->
+  <div class="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200/60 shadow-2xs">
+    
+    <!-- Baris Mobile: Search + Tombol Filter (lg:hidden) -->
+    <div class="flex lg:hidden items-center gap-2">
+      <div class="relative flex-1">
+        <input
+          type="text"
+          x-model="searchQuery"
+          @input.debounce.300ms="fetchCustomers(1)"
+          placeholder="Cari nama, IP, MAC, ID..."
+          class="w-full pl-9 pr-3 py-2.5 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl transition outline-none min-h-[44px] text-slate-800 placeholder-slate-400 font-medium"
+        />
+        <div class="absolute left-3 top-3 text-slate-400 pointer-events-none">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
       </div>
-    </div>
-
-    <!-- Dropdown Filters: Grid 2-Kolom Simetris di Mobile -->
-    <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
-      <select
-        x-model="filterPop"
-        @change="fetchCustomers(1)"
-        class="w-full sm:w-auto px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
-      >
-        <option value="Semua POP">Semua POP</option>
-        {% for pop in pops %}
-        <option value="{{ pop }}">{{ pop }}</option>
-        {% endfor %}
-      </select>
-
-      <select
-        x-model="filterStatus"
-        @change="fetchCustomers(1)"
-        class="w-full sm:w-auto px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
-      >
-        <option value="Semua Status">Semua Status</option>
-        <option value="NORMAL">Normal</option>
-        <option value="WARNING">Warning (&le; -26 dBm)</option>
-        <option value="CRITICAL">Critical (&le; -27 dBm)</option>
-        <option value="LOS">LOS</option>
-      </select>
-
-      <select
-        x-model="filterMonitoring"
-        @change="fetchCustomers(1)"
-        class="w-full sm:w-auto px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
-      >
-        <option value="all">Semua Pemantauan</option>
-        <option value="active">Pemantauan ON</option>
-        <option value="inactive">Pemantauan OFF</option>
-      </select>
-
-      <!-- Filter Rentang Waktu Tanggal -->
-      <select
-        x-model="filterRange"
-        @change="onRangeChange()"
-        class="w-full sm:w-auto px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
-      >
-        <option value="all">Semua Tanggal</option>
-        <option value="today">Hari Ini</option>
-        <option value="7d">7 Hari Terakhir</option>
-        <option value="30d">30 Hari Terakhir</option>
-        <option value="custom">Kustom Tanggal</option>
-      </select>
 
       <button
-        @click="fetchCustomers(currentPage)"
-        class="col-span-2 sm:col-span-1 px-3 py-1.5 rounded-xl bg-slate-100/80 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition min-h-[40px] active:scale-[0.98]"
-        title="Refresh data tabel"
+        type="button"
+        @click="mobileFilterOpen = true"
+        class="px-3.5 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition min-h-[44px] shrink-0 active:scale-95"
+        :class="activeFiltersCount > 0 ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'"
       >
-        <svg
-          class="w-4 h-4 text-slate-600"
-          :class="{'animate-spin': loading}"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
         </svg>
-        <span class="sm:hidden">Muat Ulang Data</span>
+        <span>Filter</span>
+        <span x-show="activeFiltersCount > 0"
+              x-text="activeFiltersCount"
+              class="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-white text-indigo-700"></span>
       </button>
+    </div>
+
+    <!-- Baris Desktop: Inline Lengkap (hidden lg:flex) -->
+    <div class="hidden lg:flex items-center justify-between gap-3">
+      <div class="w-80 relative">
+        <input
+          type="text"
+          x-model="searchQuery"
+          @input.debounce.300ms="fetchCustomers(1)"
+          placeholder="Cari nama, IP, MAC, atau ID..."
+          class="w-full pl-9 pr-3 py-2 text-xs bg-slate-100/80 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl transition outline-none min-h-[40px] text-slate-800 placeholder-slate-400"
+        />
+        <div class="absolute left-3 top-2.5 text-slate-400 pointer-events-none">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select
+          x-model="filterPop"
+          @change="fetchCustomers(1)"
+          class="px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
+        >
+          <option value="Semua POP">Semua POP</option>
+          {% for pop in pops %}
+          <option value="{{ pop }}">{{ pop }}</option>
+          {% endfor %}
+        </select>
+
+        <select
+          x-model="filterStatus"
+          @change="fetchCustomers(1)"
+          class="px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
+        >
+          <option value="Semua Status">Semua Status</option>
+          <option value="NORMAL">Normal</option>
+          <option value="WARNING">Warning (&le; -26 dBm)</option>
+          <option value="CRITICAL">Critical (&le; -27 dBm)</option>
+          <option value="LOS">LOS</option>
+        </select>
+
+        <select
+          x-model="filterMonitoring"
+          @change="fetchCustomers(1)"
+          class="px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
+        >
+          <option value="all">Semua Pemantauan</option>
+          <option value="active">Pemantauan ON</option>
+          <option value="inactive">Pemantauan OFF</option>
+        </select>
+
+        <!-- Filter Rentang Waktu Tanggal -->
+        <select
+          x-model="filterRange"
+          @change="onRangeChange()"
+          class="px-2.5 py-1.5 text-xs bg-slate-100/80 hover:bg-slate-100 border border-transparent focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/20 rounded-xl focus:bg-white outline-none min-h-[40px] font-medium text-slate-700 cursor-pointer"
+        >
+          <option value="all">Semua Tanggal</option>
+          <option value="today">Hari Ini</option>
+          <option value="7d">7 Hari Terakhir</option>
+          <option value="30d">30 Hari Terakhir</option>
+          <option value="custom">Kustom Tanggal</option>
+        </select>
+
+        <button
+          @click="fetchCustomers(currentPage)"
+          class="px-3 py-1.5 rounded-xl bg-slate-100/80 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition min-h-[40px] active:scale-[0.98]"
+          title="Refresh data tabel"
+        >
+          <svg
+            class="w-4 h-4 text-slate-600"
+            :class="{'animate-spin': loading}"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Sheet Modal Pelanggan -->
+  <div x-show="mobileFilterOpen"
+       x-cloak
+       class="fixed inset-0 z-50 lg:hidden overflow-hidden"
+       role="dialog"
+       aria-modal="true">
+    <div x-show="mobileFilterOpen"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="mobileFilterOpen = false"
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+
+    <div class="fixed inset-x-0 bottom-0 z-10 flex flex-col max-h-[85vh]">
+      <div x-show="mobileFilterOpen"
+           x-transition:enter="transform transition ease-out duration-300"
+           x-transition:enter-start="translate-y-full"
+           x-transition:enter-end="translate-y-0"
+           x-transition:leave="transform transition ease-in duration-200"
+           x-transition:leave-start="translate-y-0"
+           x-transition:leave-end="translate-y-full"
+           class="bg-white rounded-t-3xl shadow-2xl p-5 sm:p-6 overflow-y-auto space-y-4 border-t border-slate-200/80">
+        
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto -mt-1 mb-2"></div>
+
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <div class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900">Filter Data Pelanggan</h3>
+              <p class="text-xs text-slate-500">Sesuaikan penyaringan daftar pelanggan ONT</p>
+            </div>
+          </div>
+          <button @click="mobileFilterOpen = false" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="space-y-3.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Pilih POP / Server</label>
+            <select x-model="filterPop" class="w-full px-3.5 py-2.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none min-h-[44px]">
+              <option value="Semua POP">Semua POP</option>
+              {% for pop in pops %}
+              <option value="{{ pop }}">{{ pop }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Status Redaman Optik</label>
+            <select x-model="filterStatus" class="w-full px-3.5 py-2.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none min-h-[44px]">
+              <option value="Semua Status">Semua Status</option>
+              <option value="NORMAL">Normal</option>
+              <option value="WARNING">Warning (&le; -26 dBm)</option>
+              <option value="CRITICAL">Critical (&le; -27 dBm)</option>
+              <option value="LOS">LOS</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Status Pemantauan Background</label>
+            <select x-model="filterMonitoring" class="w-full px-3.5 py-2.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none min-h-[44px]">
+              <option value="all">Semua Status</option>
+              <option value="active">Pemantauan ON</option>
+              <option value="inactive">Pemantauan OFF</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Rentang Waktu</label>
+            <select x-model="filterRange" class="w-full px-3.5 py-2.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none min-h-[44px]">
+              <option value="all">Semua Tanggal</option>
+              <option value="today">Hari Ini</option>
+              <option value="7d">7 Hari Terakhir</option>
+              <option value="30d">30 Hari Terakhir</option>
+              <option value="custom">Kustom Tanggal</option>
+            </select>
+          </div>
+
+          <div x-show="filterRange === 'custom'" class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <label class="block text-[11px] font-bold text-slate-600">Rentang Tanggal</label>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">Mulai:</span>
+                <input type="date" x-model="customStartDate" :min="minDate" :max="todayDate" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg min-h-[40px]">
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">Sampai:</span>
+                <input type="date" x-model="customEndDate" :min="minDate" :max="todayDate" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg min-h-[40px]">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
+          <button type="button"
+                  @click="filterPop = 'Semua POP'; filterStatus = 'Semua Status'; filterMonitoring = 'all'; filterRange = 'all'; customStartDate = ''; customEndDate = ''; fetchCustomers(1); mobileFilterOpen = false;"
+                  class="w-full py-3 rounded-2xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold min-h-[46px] active:scale-95 transition">
+            Reset Filter
+          </button>
+          <button type="button"
+                  @click="fetchCustomers(1); mobileFilterOpen = false;"
+                  class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs min-h-[46px] active:scale-95 transition">
+            Terapkan Filter
+          </button>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -1444,18 +1653,7 @@ EdTeknoGuard{% endblock %} {% block content %}
             />
           </div>
 
-          <div>
-            <label class="font-bold text-slate-700 block mb-1 text-xs">Kantor Wilayah / Cabang <span class="text-rose-500">*</span></label>
-            <select
-              x-model="formData.kantor"
-              required
-              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[38px] font-semibold text-slate-700 text-xs cursor-pointer"
-            >
-              <option value="cabang">Kantor Cabang</option>
-              <option value="pusat">Kantor Pusat</option>
-              <option value="banyumas">Kantor Banyumas</option>
-            </select>
-          </div>
+          <input type="hidden" x-model="formData.kantor" />
 
           <div>
             <label class="font-bold text-slate-700 block mb-1 text-xs">IP Router ONT <span class="text-rose-500">*</span></label>
@@ -1666,10 +1864,11 @@ EdTeknoGuard{% endblock %} {% block content %}
             <span>Kembali ke Profil</span>
           </button>
 
-          <!-- Tombol Simpan Utama (Selalu Terlihat) -->
+          <!-- Tombol Simpan Utama (Hanya Tampil di Tahap 2 Modem & WiFi) -->
           <button
             type="submit"
             form="customerModalForm"
+            x-show="customerFormTab === 'modem'"
             class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 min-h-[44px] transition inline-flex items-center gap-1.5 active:scale-[0.98]"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3213,326 +3412,19 @@ EdTeknoGuard{% endblock %} {% block content %}
 
       <!-- Modal Body (Scrollable with hidden scrollbar) -->
       <div class="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <!-- Card 0: Informasi Pelanggan, Alamat & Titik Lokasi GPS -->
-        <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-          <div class="flex items-center gap-2">
-            <div class="p-1.5 rounded-lg bg-emerald-600 text-white shadow-xs">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-            <div>
-              <h4 class="text-xs font-bold text-slate-900">Informasi Alamat &amp; Titik Lokasi Rumah (GPS)</h4>
-              <p class="text-[10px] text-slate-500">Data alamat rumah dan titik koordinat Google Maps pelanggan</p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs pt-0.5">
-            <!-- Alamat / Dusun -->
-            <div class="bg-white p-2.5 rounded-xl border border-slate-200">
-              <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Alamat / Dusun / Desa</span>
-              <div class="font-bold text-slate-900 text-xs leading-relaxed" x-text="selectedCustomer?.alamat || 'Belum Diatur'"></div>
-            </div>
-
-            <!-- Titik Lokasi GPS -->
-            <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex flex-col justify-between">
-              <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Titik Koordinat GPS</span>
-              <template x-if="selectedCustomer?.lokasi_gps">
-                <div class="flex items-center justify-between gap-2 mt-0.5">
-                  <span class="font-mono font-bold text-indigo-700 text-xs" x-text="selectedCustomer?.lokasi_gps"></span>
-                  <a :href="'https://www.google.com/maps?q=' + selectedCustomer?.lokasi_gps" target="_blank"
-                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-[11px] transition shrink-0 min-h-[36px]">
-                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    <span>Buka Google Maps</span>
-                  </a>
-                </div>
-              </template>
-              <template x-if="!selectedCustomer?.lokasi_gps">
-                <span class="text-slate-400 italic text-xs">Belum terdata (otomatis tersimpan saat warga daftar di portal)</span>
-              </template>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 1: Informasi Kredensial WiFi Pelanggan (Input Manual) -->
-        <div
-          class="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-indigo-50/80 to-blue-50/60 border border-indigo-100 shadow-xs"
-        >
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="flex items-center gap-2">
-              <div class="p-1.5 rounded-lg bg-indigo-600 text-white shadow-xs">
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h4 class="text-xs font-bold text-slate-900">
-                  Kredensial WiFi Pelanggan
-                </h4>
-                <p class="text-[10px] text-slate-500">
-                  Dikonfigurasi manual oleh teknisi
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <span
-                x-show="!isEditingWifi"
-                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200"
-              >
-                Manual
-              </span>
-              <button
-                type="button"
-                x-show="!isEditingWifi"
-                @click="startEditWifi()"
-                class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition flex items-center gap-1 min-h-[36px]"
-              >
-                <svg
-                  class="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
-                Edit
-              </button>
-              <div x-show="isEditingWifi" class="flex items-center gap-1">
-                <button
-                  type="button"
-                  @click="cancelEditWifi()"
-                  :disabled="isSavingWifi"
-                  class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300 transition min-h-[36px]"
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  @click="saveWifiCredentials()"
-                  :disabled="isSavingWifi"
-                  class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center gap-1 min-h-[36px]"
-                >
-                  <span x-show="!isSavingWifi">Simpan</span>
-                  <span x-show="isSavingWifi">Menyimpan...</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-            <!-- View Mode -->
-            <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100/60">
-              <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5"
-                >SSID WiFi</span
-              >
-              <div x-show="!isEditingWifi">
-                <div class="flex items-center justify-between">
-                  <span
-                    class="font-bold text-slate-800"
-                    x-text="selectedCustomer?.nama_wifi && selectedCustomer?.nama_wifi !== '-' ? selectedCustomer?.nama_wifi : 'Belum Diatur'"
-                  ></span>
-                  <template
-                    x-if="selectedCustomer?.nama_wifi && selectedCustomer?.nama_wifi !== '-'"
-                  >
-                    <button
-                      type="button"
-                      @click="copyToClipboard(selectedCustomer?.nama_wifi, 'SSID WiFi')"
-                      class="text-slate-400 hover:text-indigo-600 p-1"
-                      title="Salin SSID"
-                    >
-                      <svg
-                        class="w-3.5 h-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </button>
-                  </template>
-                </div>
-              </div>
-              <!-- Edit Mode -->
-              <div x-show="isEditingWifi" class="w-full">
-                <input
-                  type="text"
-                  x-model="editWifiData.nama_wifi"
-                  class="w-full px-2 py-1 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Masukkan SSID WiFi"
-                />
-              </div>
-            </div>
-
-            <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100/60">
-              <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5"
-                >Password WiFi</span
-              >
-              <div x-show="!isEditingWifi">
-                <div class="flex items-center justify-between">
-                  <template
-                    x-if="selectedCustomer?.password_wifi && selectedCustomer?.password_wifi !== '-'"
-                  >
-                    <div class="flex items-center gap-2">
-                      <span
-                        class="font-mono text-xs font-semibold text-slate-800"
-                        x-text="showWifiPass ? selectedCustomer?.password_wifi : '••••••••'"
-                      ></span>
-                      <button
-                        type="button"
-                        @click="showWifiPass = !showWifiPass"
-                        class="text-slate-400 hover:text-indigo-600 p-1"
-                        :title="showWifiPass ? 'Sembunyikan' : 'Lihat Password'"
-                      >
-                        <svg
-                          x-show="showWifiPass"
-                          class="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                          />
-                        </svg>
-                        <svg
-                          x-show="!showWifiPass"
-                          class="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </template>
-                  <template
-                    x-if="!selectedCustomer?.password_wifi || selectedCustomer?.password_wifi === '-'"
-                  >
-                    <span class="text-slate-400 italic text-xs"
-                      >Belum Diatur</span
-                    >
-                  </template>
-                </div>
-              </div>
-              <!-- Edit Mode -->
-              <div x-show="isEditingWifi" class="w-full">
-                <input
-                  type="text"
-                  x-model="editWifiData.password_wifi"
-                  class="w-full px-2 py-1 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Masukkan Password WiFi"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2: Informasi Parameter Modem & Jaringan ONT -->
-        <div
-          class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-50 p-3 rounded-2xl text-xs border border-slate-100"
-        >
-          <div>
-            <span class="text-slate-400 block text-[10px] font-bold uppercase"
-              >IP Router ONT</span
+        <!-- Recent Logs Table (Riwayat Log Pemeriksaan Terakhir) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h4
+              class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5"
             >
-            <span
-              class="font-mono font-bold text-slate-800 text-xs"
-              x-text="selectedCustomer?.ip_router"
-            ></span>
+              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Riwayat Log Pemeriksaan Terakhir (20 Sesi)</span>
+            </h4>
+            <span class="text-[10px] text-slate-400 font-medium" x-text="selectedLogs ? selectedLogs.length + ' sesi tercatat' : ''"></span>
           </div>
-          <div>
-            <span class="text-slate-400 block text-[10px] font-bold uppercase"
-              >MAC Address</span
-            >
-            <span
-              class="font-mono font-bold text-slate-800 text-[11px]"
-              x-text="selectedCustomer?.mac_address && selectedCustomer?.mac_address !== '-' ? selectedCustomer?.mac_address : 'Auto Deteksi'"
-            ></span>
-          </div>
-          <div>
-            <span class="text-slate-400 block text-[10px] font-bold uppercase"
-              >Tipe Modem</span
-            >
-            <span
-              class="font-bold text-slate-800"
-              x-text="selectedCustomer?.jenis_modem"
-            ></span>
-          </div>
-          <div>
-            <span class="text-slate-400 block text-[10px] font-bold uppercase"
-              >Login Admin Modem</span
-            >
-            <div class="font-mono text-[11px] text-slate-700">
-              <span x-text="selectedCustomer?.user_admin || 'admin'"></span> /
-              <span
-                class="text-indigo-600 font-bold"
-                x-text="selectedCustomer?.pass_admin && selectedCustomer?.pass_admin !== '-' ? selectedCustomer?.pass_admin : '-'"
-              ></span>
-            </div>
-          </div>
-          <div>
-            <span class="text-slate-400 block text-[10px] font-bold uppercase"
-              >Pemantauan &amp; Notif</span
-            >
-            <div class="mt-0.5">
-              <span
-                class="px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1 border"
-                :class="selectedCustomer?.is_monitored ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'"
-              >
-                <span
-                  class="w-1.5 h-1.5 rounded-full"
-                  :class="selectedCustomer?.is_monitored ? 'bg-emerald-500' : 'bg-slate-400'"
-                ></span>
-                <span
-                  x-text="selectedCustomer?.is_monitored ? 'AKTIF' : 'NONAKTIF'"
-                ></span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Logs Table -->
-        <div class="space-y-1.5">
-          <h4
-            class="text-xs font-bold text-slate-700 uppercase tracking-wider"
-          >
-            Riwayat Log Pemeriksaan Terakhir (20 Sesi)
-          </h4>
           <div
-            class="max-h-44 overflow-y-auto border border-slate-200 rounded-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            class="max-h-[60vh] overflow-y-auto border border-slate-200 rounded-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             <table class="w-full text-left text-xs">
               <thead
@@ -3708,7 +3600,15 @@ EdTeknoGuard{% endblock %} {% block content %}
       customStartDate: "",
       customEndDate: "",
       todayDate: new Date().toISOString().split("T")[0],
-      minDate: statsEl && statsEl.dataset.minDate ? statsEl.dataset.minDate : "2026-09-01",
+      mobileFilterOpen: false,
+      get activeFiltersCount() {
+        let count = 0;
+        if (this.filterPop && this.filterPop !== "Semua POP") count++;
+        if (this.filterStatus && this.filterStatus !== "Semua Status") count++;
+        if (this.filterMonitoring && this.filterMonitoring !== "all") count++;
+        if (this.filterRange && this.filterRange !== "all") count++;
+        return count;
+      },
       loading: false,
       probingId: null,
       togglingMonitoringId: null,

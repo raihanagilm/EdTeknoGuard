@@ -195,27 +195,47 @@ class MonitoringScheduler:
 
             settings.POLLING_INTERVAL_MINUTES = interval
             
-            # Deteksi apakah jadwal scan sebelumnya terlewat saat server mati/reboot
+            # Deteksi cerdas waktu server mati saat reboot / startup
             need_immediate_scan = False
+            first_run_time = None
             if current_status == "RUNNING":
                 if not last_scan_time_str or last_scan_time_str == "-":
                     need_immediate_scan = True
+                    first_run_time = datetime.now() + timedelta(seconds=5)
                 else:
                     try:
                         last_dt = datetime.strptime(last_scan_time_str, "%Y-%m-%d %H:%M:%S")
                         now_dt = get_now_wib()
-                        if (now_dt - last_dt).total_seconds() > (interval * 60):
+                        elapsed_seconds = (now_dt - last_dt).total_seconds()
+                        interval_seconds = interval * 60
+                        if elapsed_seconds >= interval_seconds:
+                            # Server mati lama (melebihi interval): langsung mulai dalam 5 detik
                             need_immediate_scan = True
-                    except Exception:
+                            first_run_time = datetime.now() + timedelta(seconds=5)
+                            logger.info(f"[SMART-RECOVERY] Server mati lama (terlewat {int(elapsed_seconds)}s >= {interval_seconds}s). Jadwal langsung dimulai dalam 5 detik.")
+                        else:
+                            # Server mati sebentar: lanjutkan sisa waktu jadwal otomatis
+                            remaining_seconds = max(5, int(interval_seconds - elapsed_seconds))
+                            first_run_time = datetime.now() + timedelta(seconds=remaining_seconds)
+                            logger.info(f"[SMART-RECOVERY] Server mati sebentar ({int(elapsed_seconds)}s). Jadwal dilanjutkan mengikuti sisa waktu ({remaining_seconds}s lagi).")
+                    except Exception as e:
+                        logger.warning(f"[SMART-RECOVERY] Gagal parsing last_scan_time '{last_scan_time_str}': {e}. Memulai dalam 5 detik.")
                         need_immediate_scan = True
+                        first_run_time = datetime.now() + timedelta(seconds=5)
 
-            self._scheduler.add_job(
-                self.scheduled_job_wrapper,
-                "interval",
-                minutes=interval,
-                id="ont_monitoring_job",
-                replace_existing=True
-            )
+            # Daftarkan job interval utama
+            job_kwargs = {
+                "func": self.scheduled_job_wrapper,
+                "trigger": "interval",
+                "minutes": interval,
+                "id": "ont_monitoring_job",
+                "replace_existing": True
+            }
+            if current_status == "RUNNING" and first_run_time:
+                job_kwargs["next_run_time"] = first_run_time
+
+            self._scheduler.add_job(**job_kwargs)
+
             # Job cleanup alert_logs: hapus otomatis tiap 7 hari (jalan setiap hari pukul 02:00)
             self._scheduler.add_job(
                 self.cleanup_alert_logs,
@@ -239,15 +259,7 @@ class MonitoringScheduler:
             if current_status == "STOPPED":
                 logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: STOPPED (Jeda Pemantauan) sesuai status terakhir.")
             else:
-                logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: RUNNING (Interval: {interval} menit) sesuai status terakhir.")
-                if need_immediate_scan:
-                    logger.info("Jadwal scan terlewat saat server mati/nonaktif. Menjadwalkan catch-up scan otomatis dalam 5 detik...")
-                    self._scheduler.add_job(
-                        self.scheduled_job_wrapper,
-                        "date",
-                        run_date=datetime.now() + timedelta(seconds=5),
-                        id="immediate_recovery_scan_job"
-                    )
+                logger.info(f"Aplikasi aktif. Status Scheduler dipulihkan ke: RUNNING (Interval: {interval} menit).")
 
             logger.info("[CLEANUP] Job cleanup alert_logs (setiap hari, >7 hari) & activity_logs (setiap hari, >60 hari) aktif.")
 
@@ -273,7 +285,10 @@ class MonitoringScheduler:
     def stop(self):
         db = SessionLocal()
         try:
+            now_str = get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
             self.set_setting_in_db(db, "scheduler_status", "STOPPED")
+            self.set_setting_in_db(db, "scheduler_paused_at", now_str)
+            self.set_setting_in_db(db, "last_paused_reminder_at", now_str)
         finally:
             db.close()
         logger.info("Pemantauan otomatis ONT dijeda (STOPPED) dan disimpan permanen.")
@@ -282,9 +297,53 @@ class MonitoringScheduler:
         db = SessionLocal()
         try:
             self.set_setting_in_db(db, "scheduler_status", "RUNNING")
+            self.set_setting_in_db(db, "scheduler_paused_at", "")
         finally:
             db.close()
         logger.info("Pemantauan otomatis ONT dilanjutkan (RUNNING) dan disimpan permanen.")
+
+    @classmethod
+    def check_paused_reminder(cls, db: Session) -> Optional[Dict[str, Any]]:
+        """Mengecek apakah scheduler sedang dijeda dan sudah waktunya memberi notifikasi pengingat 1 jam ke Super Admin."""
+        try:
+            status = cls.get_setting_from_db(db, "scheduler_status", "RUNNING")
+            if status != "STOPPED":
+                return None
+
+            paused_at_str = cls.get_setting_from_db(db, "scheduler_paused_at", "")
+            if not paused_at_str:
+                return None
+
+            last_reminder_str = cls.get_setting_from_db(db, "last_paused_reminder_at", paused_at_str)
+            now_dt = get_now_wib()
+            
+            try:
+                paused_dt = datetime.strptime(paused_at_str, "%Y-%m-%d %H:%M:%S")
+                last_reminder_dt = datetime.strptime(last_reminder_str, "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                return None
+
+            seconds_since_last_reminder = (now_dt - last_reminder_dt).total_seconds()
+            # Picu notifikasi tiap 1 jam (3600 detik)
+            if seconds_since_last_reminder >= 3600:
+                total_paused_hours = max(1, int(round((now_dt - paused_dt).total_seconds() / 3600)))
+                return {
+                    "show": True,
+                    "paused_hours": total_paused_hours,
+                    "paused_at": paused_at_str,
+                    "title": "PENGINGAT: Pemantauan Otomatis Sedang Dijeda!",
+                    "message": f"Pemantauan otomatis ONT telah dijeda selama {total_paused_hours} jam. Apakah ingin melanjutkan jeda atau mengaktifkan jadwal sekarang?"
+                }
+        except Exception as e:
+            logger.error(f"Error check_paused_reminder: {e}")
+        return None
+
+    @classmethod
+    def snooze_paused_reminder(cls, db: Session):
+        """Menunda notifikasi pengingat jeda selama 1 jam ke depan."""
+        now_str = get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
+        cls.set_setting_in_db(db, "last_paused_reminder_at", now_str)
+        logger.info("[REMINDER] Pengingat pemantauan terjeda ditunda (snooze) selama 1 jam.")
 
     def pause_scan(self) -> Dict[str, Any]:
         """Menjeda pemindaian manual/berkala yang sedang aktif berjalan."""

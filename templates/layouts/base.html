@@ -56,11 +56,42 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/custom.css">
 
-    <!-- Chart.js CDN -->
+    <!-- Chart.js & Zoom Plugin CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 
     <!-- Alpine.js CDN (defer) -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        /* Smooth Top Progress Loading Bar */
+        #global-page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3.5px;
+            width: 0%;
+            background: linear-gradient(90deg, #4f46e5, #06b6d4, #10b981);
+            z-index: 99999;
+            box-shadow: 0 0 12px rgba(79, 70, 229, 0.8), 0 0 4px rgba(6, 182, 212, 0.6);
+            transition: width 0.25s ease-out, opacity 0.3s ease;
+            pointer-events: none;
+            opacity: 0;
+        }
+        #global-page-loader.loading {
+            opacity: 1;
+            width: 80%;
+            transition: width 1.2s cubic-bezier(0.1, 0.5, 0.1, 1), opacity 0.2s ease;
+        }
+        #global-page-loader.finished {
+            width: 100% !important;
+            opacity: 0 !important;
+            transition: width 0.15s ease-out, opacity 0.4s ease 0.15s;
+        }
+    </style>
 
     {% block head %}{% endblock %}
 </head>
@@ -68,6 +99,9 @@
 <body class="min-h-full bg-slate-50 text-slate-800"
       x-data="teknoGuardApp()"
       x-init="init()">
+
+    <!-- Global Top Loading Progress Bar -->
+    <div id="global-page-loader"></div>
 
     <!-- ========================================================================= -->
     <!-- 1. SIDEBAR DESKTOP (COLLAPSIBLE - lg:flex w-64)                             -->
@@ -276,19 +310,144 @@
                     <!-- Right Controls: Notification Bell + Kantor Switcher + Profile -->
                     <div class="flex items-center gap-2 sm:gap-2.5">
 
-                        <!-- Tombol Lonceng Notifikasi Realtime -->
-                        <a href="/admin/tiket"
-                           class="relative p-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 transition flex items-center justify-center min-h-[44px] min-w-[44px] shadow-2xs"
-                           title="Tiket Aduan Masuk">
-                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                            </svg>
-                            <!-- Badge Counter Realtime -->
-                            <span x-show="unreadTicketsCount > 0"
-                                  x-text="unreadTicketsCount"
-                                  class="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] text-center text-[10px] font-black text-white bg-rose-600 rounded-full border-2 border-white shadow-xs animate-pulse">
-                            </span>
-                        </a>
+                        <!-- Dropdown Pusat Notifikasi & Aduan Realtime -->
+                        <div class="relative" x-data="{ notifDropdownOpen: false }" @click.away="notifDropdownOpen = false">
+                            <button type="button"
+                               @click="notifDropdownOpen = !notifDropdownOpen; if (notifDropdownOpen) pollNotifications();"
+                               class="relative p-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 transition flex items-center justify-center min-h-[44px] min-w-[44px] shadow-2xs active:scale-95"
+                               title="Pusat Notifikasi & Aduan">
+                                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                                <!-- Badge Counter Realtime -->
+                                <span x-show="unreadTicketsCount > 0"
+                                      x-text="unreadTicketsCount"
+                                      class="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] text-center text-[10px] font-black text-white bg-rose-600 rounded-full border-2 border-white shadow-xs animate-pulse">
+                                </span>
+                            </button>
+
+                            <!-- Dropdown Box Popover (Melayang di bawah lonceng, adaptif mobile & desktop) -->
+                            <div x-show="notifDropdownOpen"
+                                 x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-100"
+                                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+                                 style="display: none;"
+                                 class="fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 sm:w-96 rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-0 z-50 text-xs flex flex-col overflow-hidden max-h-[80vh]">
+                                
+                                <!-- Header Dropdown -->
+                                <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                            </svg>
+                                        </div>
+                                        <span class="font-extrabold text-slate-900 text-sm">Notifikasi &amp; Aduan</span>
+                                    </div>
+                                    <span x-show="unreadTicketsCount > 0"
+                                          x-text="unreadTicketsCount + ' Baru'"
+                                          class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                    </span>
+                                </div>
+
+                                <!-- Body Dropdown (Scrollable List) -->
+                                <div class="flex-1 overflow-y-auto p-3 space-y-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-h-[55vh]">
+                                    
+                                    <!-- Pengingat Jadwal Terjeda -->
+                                    <div x-show="pausedReminder.show" class="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+                                        <div class="flex items-start gap-2">
+                                            <div class="p-1.5 bg-amber-500 text-white rounded-lg shrink-0 mt-0.5 shadow-xs">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-[10px] font-black uppercase text-amber-800">Jadwal Terjeda</div>
+                                                <h4 class="text-xs font-bold text-amber-900 mt-0.5" x-text="pausedReminder.title"></h4>
+                                                <p class="text-[11px] text-amber-800 mt-0.5 leading-relaxed" x-text="pausedReminder.message"></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2 pt-1">
+                                            <button @click="activateSchedulerFromReminder(); notifDropdownOpen = false;"
+                                                    class="flex-1 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg shadow-xs transition min-h-[34px] inline-flex items-center justify-center gap-1 active:scale-95">
+                                                <span>Aktifkan Sekarang</span>
+                                            </button>
+                                            <button @click="snoozeSchedulerReminder()"
+                                                    class="px-2.5 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold text-xs rounded-lg transition min-h-[34px]">
+                                                Lanjut Jeda
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tiket Aduan Masuk -->
+                                    <template x-if="recentTickets && recentTickets.length > 0">
+                                        <div class="space-y-2">
+                                            <template x-for="t in recentTickets" :key="t.id">
+                                                <a :href="'/admin/tiket?search=' + t.id_tiket"
+                                                   @click="notifDropdownOpen = false"
+                                                   class="block p-3 rounded-xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/80 hover:border-indigo-200 transition space-y-1.5 group">
+                                                    <div class="flex items-center justify-between gap-1">
+                                                        <div class="flex items-center gap-1.5">
+                                                            <span class="font-mono font-black text-indigo-700 text-xs" x-text="'#' + t.id_tiket"></span>
+                                                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200">MENUNGGU</span>
+                                                        </div>
+                                                        <span class="text-[10px] text-slate-400 font-mono" x-text="t.created_at"></span>
+                                                    </div>
+                                                    <div>
+                                                        <div class="flex items-center gap-1.5">
+                                                            <span class="font-extrabold text-slate-900 text-xs group-hover:text-indigo-600 transition" x-text="t.nama_pelanggan"></span>
+                                                            <span class="text-[9px] font-semibold text-slate-500 uppercase px-1 py-0.2 rounded bg-slate-200/80" x-text="t.kantor"></span>
+                                                        </div>
+                                                        <div class="flex items-center gap-2 mt-0.5">
+                                                            <span class="text-[11px] font-bold text-rose-600" x-text="t.kategori"></span>
+                                                            <template x-if="t.redaman">
+                                                                <span class="text-[10px] font-mono px-1 py-0.2 rounded font-bold"
+                                                                      :class="t.redaman <= -26 ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'"
+                                                                      x-text="t.redaman + ' dBm'">
+                                                                </span>
+                                                            </template>
+                                                        </div>
+                                                        <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5 leading-snug" x-text="t.deskripsi_kendala"></p>
+                                                    </div>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Empty State -->
+                                    <div x-show="!pausedReminder.show && (!recentTickets || recentTickets.length === 0)" class="py-6 text-center space-y-2">
+                                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-800">Tidak Ada Notifikasi Baru</h4>
+                                            <p class="text-[10px] text-slate-400 mt-0.5">Semua tiket kendala telah ditangani.</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Footer Dropdown -->
+                                <div class="p-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
+                                    <a href="/admin/tiket"
+                                       @click="notifDropdownOpen = false"
+                                       class="text-xs font-bold text-indigo-600 hover:text-indigo-800 px-2 py-1 transition flex items-center gap-1">
+                                        <span>Buka Halaman Tiket</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </a>
+                                    <button type="button"
+                                            @click="notifDropdownOpen = false"
+                                            class="px-3 py-1 text-slate-500 hover:text-slate-800 font-semibold text-xs rounded-lg transition">
+                                        Tutup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Kantor Switcher -->
                         {% if request.state.current_user %}
@@ -397,6 +556,7 @@
              x-transition:leave-start="translate-y-0 opacity-100 scale-100"
              x-transition:leave-end="-translate-y-8 opacity-0 scale-95"
              x-cloak
+             style="display: none;"
              class="fixed top-4 right-4 sm:right-6 max-w-sm sm:max-w-md w-[calc(100%-2rem)] sm:w-full z-[999] pointer-events-auto">
             <div class="bg-rose-600/95 text-white p-4 sm:p-4.5 rounded-3xl shadow-2xl border border-rose-400/50 flex items-start justify-between gap-3.5 backdrop-blur-xl ring-4 ring-rose-600/20">
                 <div class="flex items-start gap-3 min-w-0">
@@ -429,6 +589,7 @@
             </div>
         </div>
 
+
         <!-- Main Content Slot (pb-28 on mobile agar tidak tertutup sticky bottom nav) -->
         <main class="flex-1 w-full px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:pb-8 max-w-7xl mx-auto">
             {% block content %}{% endblock %}
@@ -454,12 +615,16 @@
     <!-- 4. STICKY MOBILE BOTTOM NAVIGATION BAR (BCA / Shopee Style - 5 Tab)        -->
     <!-- Tab 1: Pelanggan | Tab 2: Redaman | Tab 3: Beranda (Center) | Tab 4: Tiket | Tab 5: Pengaturan -->
     <!-- ========================================================================= -->
-    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-2 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)]">
-        <div class="grid grid-cols-5 gap-1 max-w-lg mx-auto items-center">
+    <!-- ========================================================================= -->
+    <!-- 4. STICKY MOBILE BOTTOM NAVIGATION BAR (BCA / Shopee Style - 5 Tab)        -->
+    <!-- Tab 1: Pelanggan | Tab 2: Redaman | Tab 3: Beranda (Center) | Tab 4: Tiket | Tab 5: Pengaturan -->
+    <!-- ========================================================================= -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-2 pt-1 pb-[calc(env(safe-area-inset-bottom,0px)+0.25rem)] select-none">
+        <div class="grid grid-cols-5 gap-0.5 max-w-lg mx-auto items-end h-[58px]">
             
             <!-- Tab 1: Pelanggan -->
             <a href="/pelanggan"
-               class="flex flex-col items-center justify-center py-1.5 px-0.5 rounded-2xl transition-all min-h-[52px] group {% if request.url.path.startswith('/pelanggan') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all h-full group {% if request.url.path.startswith('/pelanggan') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
                 <div class="relative">
                     <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/pelanggan') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -468,12 +633,12 @@
                     <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
                     {% endif %}
                 </div>
-                <span class="text-[13px] sm:text-sm mt-0.5 tracking-tight">Pelanggan</span>
+                <span class="text-[12px] sm:text-xs mt-0.5 tracking-tight font-extrabold">Pelanggan</span>
             </a>
 
             <!-- Tab 2: Redaman -->
             <a href="/logs"
-               class="flex flex-col items-center justify-center py-1.5 px-0.5 rounded-2xl transition-all min-h-[52px] group {% if request.url.path.startswith('/logs') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all h-full group {% if request.url.path.startswith('/logs') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
                 <div class="relative">
                     <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/logs') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -482,23 +647,23 @@
                     <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
                     {% endif %}
                 </div>
-                <span class="text-[13px] sm:text-sm mt-0.5 tracking-tight">Redaman</span>
+                <span class="text-[12px] sm:text-xs mt-0.5 tracking-tight font-extrabold">Redaman</span>
             </a>
 
             <!-- Tab 3: Beranda (CENTER TAB - Elevated & Prominent) -->
             <a href="/"
-               class="flex flex-col items-center justify-center -mt-4 py-1 px-0.5 group focus:outline-none">
-                <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-95 border-2 {% if request.url.path == '/' %}bg-indigo-600 text-white border-white shadow-indigo-500/40 ring-2 ring-indigo-200{% else %}bg-slate-800 text-white border-slate-100 shadow-slate-600/30 group-hover:bg-indigo-600{% endif %}">
-                    <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path == '/' %}stroke-[2.5]{% else %}stroke-2{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="flex flex-col items-center justify-center -mt-3.5 py-0.5 px-0.5 group focus:outline-none">
+                <div class="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl flex items-center justify-center shadow-md transition-all active:scale-95 border-2 {% if request.url.path == '/' %}bg-indigo-600 text-white border-white shadow-indigo-500/40 ring-2 ring-indigo-200{% else %}bg-slate-800 text-white border-slate-100 shadow-slate-600/30 group-hover:bg-indigo-600{% endif %}">
+                    <svg class="w-6 h-6 sm:w-6 sm:h-6 {% if request.url.path == '/' %}stroke-[2.5]{% else %}stroke-2{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
                 </div>
-                <span class="text-[13px] sm:text-sm mt-1 tracking-tight {% if request.url.path == '/' %}font-black text-indigo-700{% else %}font-bold text-slate-700 group-hover:text-indigo-600{% endif %}">Beranda</span>
+                <span class="text-[12px] sm:text-xs mt-0.5 tracking-tight {% if request.url.path == '/' %}font-black text-indigo-700{% else %}font-bold text-slate-700 group-hover:text-indigo-600{% endif %}">Beranda</span>
             </a>
 
             <!-- Tab 4: Tiket -->
             <a href="/admin/tiket"
-               class="relative flex flex-col items-center justify-center py-1.5 px-0.5 rounded-2xl transition-all min-h-[52px] group {% if request.url.path.startswith('/admin/tiket') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+               class="relative flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all h-full group {% if request.url.path.startswith('/admin/tiket') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
                 <div class="relative">
                     <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/admin/tiket') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
@@ -512,12 +677,12 @@
                     <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
                     {% endif %}
                 </div>
-                <span class="text-[13px] sm:text-sm mt-0.5 tracking-tight">Tiket</span>
+                <span class="text-[12px] sm:text-xs mt-0.5 tracking-tight font-extrabold">Tiket</span>
             </a>
 
             <!-- Tab 5: Pengaturan (Menggantikan menu lama) -->
             <a href="/settings"
-               class="flex flex-col items-center justify-center py-1.5 px-0.5 rounded-2xl transition-all min-h-[52px] group {% if request.url.path.startswith('/settings') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all h-full group {% if request.url.path.startswith('/settings') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
                 <div class="relative">
                     <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/settings') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -527,11 +692,13 @@
                     <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
                     {% endif %}
                 </div>
-                <span class="text-[13px] sm:text-sm mt-0.5 tracking-tight truncate max-w-full">Pengaturan</span>
+                <span class="text-[12px] sm:text-xs mt-0.5 tracking-tight font-extrabold truncate max-w-full">Pengaturan</span>
             </a>
 
         </div>
     </nav>
+
+
 
     <!-- Global App Controller & Realtime In-App Notification Script -->
     <script>
@@ -539,6 +706,8 @@
             return {
                 sidebarCollapsed: localStorage.getItem('tekno_sidebar_collapsed') === 'true',
                 profileMenuOpen: false,
+                notificationModalOpen: false,
+                recentTickets: [],
                 unreadTicketsCount: 0,
                 isInitialized: false,
                 lastAlertedTicketId: parseInt(sessionStorage.getItem('tekno_last_alerted_ticket') || '0', 10),
@@ -550,13 +719,26 @@
                     title: '',
                     desc: ''
                 },
+                pausedReminder: {
+                    show: false,
+                    title: '',
+                    message: '',
+                    paused_hours: 1
+                },
                 
                 init() {
-                    // Polling notifikasi realtime setiap 6 detik
+                    // Polling notifikasi realtime setiap 15 detik (hanya saat tab aktif)
                     this.pollNotifications();
                     this.pollTimer = setInterval(() => {
                         this.pollNotifications();
-                    }, 6000);
+                    }, 15000);
+
+                    // Re-poll saat tab dibuka kembali oleh pengguna
+                    document.addEventListener('visibilitychange', () => {
+                        if (!document.hidden) {
+                            this.pollNotifications();
+                        }
+                    });
                 },
 
                 toggleSidebar() {
@@ -615,12 +797,16 @@
                 },
 
                 async pollNotifications() {
+                    // Jangan request jika tab di background (cegah spam terminal & hemat resource)
+                    if (document.hidden) return;
+
                     try {
                         const res = await fetch('/api/notifications/poll');
                         if (!res.ok) return;
                         const data = await res.json();
                         if (data.status === 'success' || data.status === 'ok') {
                             const newCount = data.unread_tickets_count || 0;
+                            this.recentTickets = data.recent_tickets || [];
                             const latest = data.latest_ticket;
 
                             if (latest) {
@@ -663,13 +849,115 @@
                             }
 
                             this.unreadTicketsCount = newCount;
+
+                            // Cek pengingat pemantauan terjeda (khusus Super Admin)
+                            if (data.paused_reminder && data.paused_reminder.show) {
+                                this.pausedReminder = {
+                                    show: true,
+                                    title: data.paused_reminder.title || 'Pemantauan Otomatis Dijeda',
+                                    message: data.paused_reminder.message || 'Pemantauan otomatis saat ini sedang dijeda.',
+                                    paused_hours: data.paused_reminder.paused_hours || 1
+                                };
+                            } else {
+                                this.pausedReminder.show = false;
+                            }
                         }
                     } catch (e) {
                         // Silent network error
                     }
+                },
+
+                async activateSchedulerFromReminder() {
+                    try {
+                        const res = await fetch('/api/monitoring/toggle-scheduler', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const data = await res.json();
+                        if (data.status === 'success' || data.scheduler_status === 'RUNNING') {
+                            this.pausedReminder.show = false;
+                            window.location.reload();
+                        }
+                    } catch(e) {
+                        console.error('Gagal mengaktifkan scheduler:', e);
+                    }
+                },
+
+                async snoozeSchedulerReminder() {
+                    try {
+                        await fetch('/api/monitoring/snooze-pause-reminder', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    } catch(e) {}
+                    this.pausedReminder.show = false;
                 }
             };
         }
+
+        // --- Global Page Transition Loading Handler ---
+        (function() {
+            const loader = document.getElementById('global-page-loader');
+            if (!loader) return;
+
+            function startLoader() {
+                loader.classList.remove('finished');
+                loader.classList.add('loading');
+            }
+
+            function stopLoader() {
+                loader.classList.add('finished');
+                setTimeout(() => {
+                    loader.classList.remove('loading', 'finished');
+                }, 500);
+            }
+
+            // Finish loader if already loaded or on back-forward cache restore
+            window.addEventListener('pageshow', stopLoader);
+            window.addEventListener('load', stopLoader);
+
+            // Intercept internal link clicks to trigger loading instantly
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (!link) return;
+
+                const href = link.getAttribute('href');
+                if (!href) return;
+
+                // Ignore anchors, javascript links, downloads, new tabs, and modal triggers
+                if (
+                    href.startsWith('#') ||
+                    href.startsWith('javascript:') ||
+                    link.hasAttribute('download') ||
+                    link.getAttribute('target') === '_blank' ||
+                    link.hasAttribute('@click') ||
+                    link.hasAttribute('x-on:click') ||
+                    link.getAttribute('role') === 'button'
+                ) {
+                    return;
+                }
+
+                // Check same-origin navigation
+                try {
+                    const url = new URL(link.href, window.location.origin);
+                    if (url.origin === window.location.origin && url.pathname !== window.location.pathname) {
+                        startLoader();
+                    } else if (url.origin === window.location.origin && (url.search !== window.location.search || url.pathname === window.location.pathname)) {
+                        // Query param change or same page reload link
+                        if (!url.hash || url.pathname !== window.location.pathname) {
+                            startLoader();
+                        }
+                    }
+                } catch (err) {
+                    // Ignore parse errors
+                }
+            });
+
+            // Stop loader if user cancels navigation or on beforeunload failsafe
+            window.addEventListener('beforeunload', function() {
+                startLoader();
+            });
+        })();
     </script>
 
     {% block scripts %}{% endblock %}

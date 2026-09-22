@@ -94,12 +94,13 @@
                         <span x-text="activeKantor && activeKantor !== 'all' ? 'Pindai ' + (activeKantor === 'banyumas' ? 'Banyumas' : (activeKantor === 'cabang' ? 'Cabang' : 'Pusat')) : 'Mulai Pemantauan (Semua)'">Mulai Pemantauan</span>
                     </button>
 
-                    <!-- Tombol Toggle Scheduler: Jeda/Lanjut Jadwal Otomatis -->
+                    <!-- Tombol Toggle Scheduler: Jeda/Lanjut Jadwal Otomatis (Khusus Super Admin) -->
+                    {% if current_user and current_user.get('role') == 'super admin' %}
                     <button @click="actionToggleEngine()"
                             :disabled="isToggling"
                             class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all duration-200 border min-h-[44px] active:scale-95"
                             :class="engineStatus === 'RUNNING' ? 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'"
-                            :title="engineStatus === 'RUNNING' ? 'Klik untuk menjeda jadwal pemindaian otomatis tiap 20 menit' : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis'">
+                            :title="engineStatus === 'RUNNING' ? 'Klik untuk menjeda jadwal pemindaian otomatis' : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis'">
                         <svg x-show="engineStatus === 'RUNNING'" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -108,6 +109,7 @@
                         </svg>
                         <span x-text="engineStatus === 'RUNNING' ? 'Jeda Jadwal' : 'Aktifkan Jadwal'"></span>
                     </button>
+                    {% endif %}
                 </div>
             </template>
 
@@ -224,8 +226,8 @@
         </div>
     </div>
 
-    <!-- Informasi Edukatif Jaringan Lokal (Syarat Utama Pengambilan Data ONT) -->
-    <div class="pt-3 border-t border-slate-100 flex items-start gap-2.5 text-xs text-slate-500 bg-slate-50/75 p-3 rounded-xl border border-slate-200/70">
+    <!-- Informasi Edukatif Jaringan Lokal (Syarat Utama Pengambilan Data ONT - Sembunyikan di Mobile) -->
+    <div class="hidden sm:flex pt-3 border-t border-slate-100 items-start gap-2.5 text-xs text-slate-500 bg-slate-50/75 p-3 rounded-xl border border-slate-200/70">
         <svg class="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>

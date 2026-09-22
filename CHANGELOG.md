@@ -29,6 +29,71 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Fitur Photo-Style Zoom & Pan Khusus Mobile pada Grafik Chart.js (Gambar 1)**:
+  - Tombol kontrol zoom (+, -, Reset) kini disembunyikan di desktop dan diisolasi khusus tampilan mobile (`sm:hidden`).
+  - Mengganti mekanisme step zoom data scale yang kaku dengan sistem pembesaran foto optikal (*optical photo-style zoom*): mendukung pinch-to-zoom dengan dua jari (`touchstart`/`touchmove`), satu jari untuk menggeser (*drag/pan*) saat diperbesar, tombol plus/minus dengan perbesaran halus (`1.0x` s/d `3.5x`), serta tombol Reset instan.
+- **Indikator Loading Transisi Antar Halaman & Menu Global (Anti-Lag & Responsif)**:
+  - Menghadirkan progress bar animasi gradien bercahaya di puncak halaman (`#global-page-loader`) yang langsung aktif seketika saat pengguna mengklik menu atau tautan navigasi.
+  - Memberikan umpan balik visual instan sehingga aplikasi terasa cepat, responsif, dan tidak terasa "hang", lambat, atau membeku (*freeze*) saat menunggu render halaman baru.
+
+### Fixed
+- **Stabilitas & Presisi Sticky Bottom Navigation Mobile (Gambar 2)**:
+  - Memperbaiki posisi bar navigasi bawah mobile menjadi `fixed bottom-0 left-0 right-0 z-50 w-full` dengan tinggi presisi `h-[58px]` dan perataan `items-end` dengan dukungan `safe-area-inset-bottom`.
+  - Merapikan proporsi tombol tengah "Beranda" (`-mt-3.5`, `h-11 w-11 sm:h-12 sm:w-12`) sehingga tidak lagi terpotong di tepi bawah, bergoyang, atau keluar dari batas layar ponsel saat scroll.
+- **Filter Khusus Mobile & Bottom Sheet Drawer di Log Aktivitas (`/user-logs`) (Gambar 1)**:
+  - Mengganti susunan filter 4-kolom desktop yang memenuhi layar mobile dengan baris pencarian terpadu dan tombol filter ber-badge jumlah filter aktif.
+  - Menghadirkan drawer slide-up lembaran bawah (*bottom sheet*) modern dengan seleksi User/Karyawan, Rentang Tanggal (termasuk kustom tanggal), Jenis Aktivitas, serta tombol Reset Filter.
+- **Tabel Responsif & Filter Mobile di Manajemen Pengguna (`/users`) (Gambar 2)**:
+  - Mengaktifkan tampilan tabel penuh dengan scroll horizontal halus di mobile (`overflow-x-auto`) dan menghapus kartu-kartu duplikat yang membingungkan.
+  - Menambahkan baris pencarian dan tombol filter ber-badge dengan drawer slide-up lembaran bawah (*bottom sheet*) untuk menyaring berdasarkan Role (Super Admin, Admin, Teknisi), Status Akun (Aktif/Nonaktif), dan Akses Kantor Wilayah, lengkap dengan penomoran baris dinamis.
+- **Pusat Notifikasi Popover Anchored Dropdown (Bukan Popup Modal Tengah) (Gambar 4)**:
+  - Mengubah tampilan notifikasi dari modal popup di tengah layar menjadi menu dropdown popover elegan yang menempel (*anchored*) tepat di bawah ikon lonceng header.
+  - Memuat daftar 5 tiket kendala darurat/terbaru secara mendetail (ID Tiket, Nama Pelanggan, Jenis Gangguan, dan Waktu Aduan) dengan link langsung ke halaman tiket.
+- **Proteksi Anti-Spam Polling & Eliminasi Flash Popup Saat Pindah Halaman**:
+  - Menambahkan deteksi tab aktif (`document.hidden` & event `visibilitychange`) sehingga polling notifikasi seketika dijeda saat tab browser diminimalkan atau berpindah tab, melonggarkan interval polling ke 15 detik untuk menghentikan spam log di terminal.
+  - Memasang aturan `[x-cloak]` dan style `display: none;` pada elemen floating alert agar banner notifikasi tidak lagi berkedip (*flash*) sesaat setiap kali pengguna berpindah halaman/menu.
+
+### Fixed
+- **Sinkronisasi Kartu KPI & Status Pelanggan (`/pelanggan` & Dashboard Utama) (Gambar 2)**:
+  - Memperbaiki kalkulasi agregasi KPI di `CustomerService.get_customer_stats` dan `MonitoringService.get_kpi_metrics` yang sebelumnya memfilter `is_monitored == True`, sehingga kartu tampak kosong/bernilai 0 jika pelanggan sedang di-OFF-kan pemantauannya.
+  - Kartu Total Terpantau, Sinyal Normal, Warning, dan Kritis/LOS kini 100% akurat merefleksikan seluruh data pelanggan aktif yang tersimpan di database (misal: Total: 1 (1 OFF), Sinyal Normal: 1).
+- **Adaptasi Popover Notifikasi Khusus Mobile Anti-Clipping (Gambar 1)**:
+  - Mengubah positioning dropdown notifikasi pada layar ponsel pintar menjadi `fixed inset-x-3 top-16` (sementara pada desktop tetap `sm:absolute sm:right-0`).
+  - Mengeliminasi bug popover yang terpotong di luar batas kiri layar (*viewport clipping*) pada perangkat mobile sehingga antarmuka tampak rapi, terpusat, dan nyaman dibaca.
+- **Penambahan Aturan Wajib Paritas UI Mobile vs Desktop di AGENTS.md**:
+  - Menetapkan aturan mutlak bagi seluruh AI Agent bahwa setiap penambahan, modifikasi, atau penghapusan fitur wajib dievaluasi dan diimplementasikan secara selaras pada tampilan mobile maupun desktop.
+
+### Added
+- **Filter Khusus Mobile & Bottom Sheet Drawer di Log Aktivitas (`/user-logs`) (Gambar 1)**:
+  - Memperbaiki tag penutup sintaks yang berlebih (`</span></div></div>`) yang merusak *scoping* reaktivitas Alpine.js dan sempat membuat tabel tiket tampak kosong/hilang. Data tiket kini kembali tampil normal dan reaktif.
+- **Penyembunyian Kartu Panduan Teknis di Mobile (`/settings`) (Gambar 5)**:
+  - Menyembunyikan kartu informasi "Ketentuan Ambang Batas Redaman" dan "Cara Kerja Multi-Kredensial" pada viewport mobile menggunakan utility `hidden lg:block` agar halaman pengaturan di layar ponsel tetap bersih dan fokus pada formulir input.
+- **Penyempurnaan Alur Tambah/Edit Pelanggan (Tahap 1 & 2) di Modal Pelanggan (`/pelanggan`)**:
+  - Tombol *"Simpan Data"* kini hanya dimunculkan pada Tahap 2 (Modem & WiFi) dengan `x-show="customerFormTab === 'modem'"`, mencegah pengguna menekan simpan terlalu dini di Tahap 1.
+  - Menghilangkan dropdown pilihan kantor pada modal tambah pelanggan, secara otomatis mengalokasikan data ke kantor aktif yang sedang dibuka di navbar (`activeOffice`).
+- **Penyederhanaan Modal Detail Pelanggan (Hanya Riwayat Log)**:
+  - Menghapus kartu Alamat/GPS, Parameter Modem, dan Kredensial WiFi yang redundan pada modal pratinjau detail (karena sudah tampil di tabel utama), memfokuskan modal 100% pada riwayat log performa 20 sesi terakhir dengan viewport tabel diperluas (`max-h-[60vh]`).
+
+### Added
+- **Isolasi Menu Layanan & Operasional Hanya untuk Mobile (`lg:hidden`)**:
+  - Menu akses cepat "Menu Layanan & Operasional" (8 kartu ikon grid) disetel khusus hanya muncul pada tampilan layar seluler/mobile (`lg:hidden`). Pada layar desktop, navigasi berfokus penuh pada sidebar permanen di sebelah kiri sehingga antarmuka desktop menjadi sangat bersih dan lega.
+- **Pengingat Berkala 1 Jam Pemantauan Terjeda untuk Super Admin**:
+  - Jika Super Admin menjeda jadwal pemantauan (`STOPPED`), sistem melacak waktu jeda dan memicu pengingat melayang (*floating alert*) setiap 1 jam via `/api/notifications/poll`.
+  - Banner dilengkapi tombol interaktif: *"Aktifkan Jadwal"* (langsung mengaktifkan scheduler) dan *"Lanjut Jeda"* (snooze pengingat untuk 1 jam ke depan via endpoint `/api/monitoring/snooze-pause-reminder`).
+- **Smart Scheduler Recovery Pasca Reboot / Server Mati**:
+  - Mengembangkan algoritma pemulihan scheduler cerdas di `scheduler_service.py` saat server menyala kembali:
+    - Menghitung waktu jeda server mati sejak pemindaian terakhir (`elapsed_seconds`).
+    - Jika server mati lebih lama dari interval pemantauan otomatis (`elapsed >= interval * 60`): Sistem langsung mengeksekusi *Catch-Up Scan* seketika dalam 5 detik.
+    - Jika server hanya mati sebentar (`elapsed < interval * 60`): Sistem secara presisi menjadwalkan pemindaian berikutnya sesuai sisa durasi interval asli (`next_run_time`) tanpa mereset hitungan interval dari awal.
+- **Standarisasi Universal Antarmuka Mobile di Seluruh Menu (`/admin/tiket`, `/pelanggan`, `/admin/kuota`, `/logs`)**:
+  - **Horizontal Chips untuk Kartu Metrik/Statistik**: Mengubah susunan grid/tumpukan kartu stat yang memakan tinggi layar di mobile (`sm:hidden`) menjadi baris *horizontal scrolling chips* yang ringkas, modern, dan ramah geser satu tangan (`no-scrollbar`).
+  - **Deduplikasi Kartu Stat**: Mengeliminasi kartu metrik redundan (seperti kartu "Semua Tiket" yang menduplikasi info header tiket).
+  - **Penyederhanaan Baris Filter Mobile (Search + Tombol Filter Ber-Badge)**: Menyembunyikan seluruh dropdown filter dan pemilih tanggal yang memenuhi layar mobile. Hanya menampilkan 1 baris bersih: `[ 🔍 Input Cari... ]` dan `[ ⚙️ Tombol Filter ]` yang menampilkan badge merah/indigo jumlah filter yang sedang aktif.
+  - **Slide-Up Bottom Sheet Drawer Filter**: Mengklik tombol filter memunculkan modal lembaran bawah (*bottom sheet*) bergaya native iOS/Android (`rounded-t-3xl` dengan backdrop blur, handle drag, tombol Reset Filter, dan Terapkan Filter).
+- **Pembatasan Hak Akses Tombol Jeda/Aktifkan Jadwal Khusus Super Admin**:
+  - Tombol aksi "Jeda Jadwal" dan "Aktifkan Jadwal" pada Control Bar hanya ditampilkan untuk role `super admin`.
+  - Endpoint backend `/api/monitoring/toggle-scheduler` kini secara ketat memverifikasi hak akses `super admin` dan mengembalikan respon `403 Forbidden` jika diakses oleh role non-superadmin.
+
 - **Navigasi Mobile 5-Tab Ergonomis & Premium (Gaya Aplikasi Mobile BCA / Shopee)**:
   - Menerapkan *sticky bottom navigation bar* 5 tab utama di layar ponsel (mobile viewport):
     - 👥 **Tab 1: Pelanggan** (`/pelanggan`)

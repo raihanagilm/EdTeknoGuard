@@ -144,8 +144,8 @@ class AdminCustomerMgmtService:
         return result
 
     @staticmethod
-    def get_realtime_notifications(db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:
-        """Mengambil data notifikasi realtime (tiket baru & status redaman) untuk polling admin/teknisi."""
+    def get_realtime_notifications(db: Session, kantor: Optional[str] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Mengambil data notifikasi realtime (tiket baru & pengingat jadwal pemantauan terjeda) untuk polling admin/teknisi."""
         query = db.query(TiketKendala).filter(TiketKendala.status == "MENUNGGU")
         if kantor and kantor != "all":
             query = query.filter(TiketKendala.kantor == kantor)
@@ -168,8 +168,34 @@ class AdminCustomerMgmtService:
                 "created_at": latest_ticket.created_at.strftime("%H:%M:%S") if latest_ticket.created_at else ""
             }
 
+        # Ambil daftar tiket terbaru yang berstatus MENUNGGU untuk detail notifikasi
+        recent_tickets_query = query.order_by(TiketKendala.created_at.desc()).limit(5).all()
+        recent_tickets_data = []
+        for t in recent_tickets_query:
+            c = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == t.id_pelanggan).first()
+            c_name = c.nama if c else t.id_pelanggan
+            recent_tickets_data.append({
+                "id": t.id,
+                "id_tiket": t.id_tiket,
+                "id_pelanggan": t.id_pelanggan,
+                "nama_pelanggan": c_name,
+                "kategori": t.kategori,
+                "deskripsi_kendala": t.deskripsi or "Keluhan masuk dari pelanggan.",
+                "kantor": t.kantor,
+                "redaman": t.redaman_saat_lapor,
+                "created_at": t.created_at.strftime("%d/%m %H:%M") if t.created_at else ""
+            })
+
+        # Cek pengingat pemantauan terjeda khusus Super Admin
+        paused_reminder = None
+        if user and user.get("role") == "super admin":
+            from app.services.scheduler_service import ont_scheduler
+            paused_reminder = ont_scheduler.check_paused_reminder(db)
+
         return {
             "status": "success",
             "unread_tickets_count": unread_count,
-            "latest_ticket": latest_data
+            "latest_ticket": latest_data,
+            "recent_tickets": recent_tickets_data,
+            "paused_reminder": paused_reminder
         }
