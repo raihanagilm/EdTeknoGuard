@@ -275,7 +275,7 @@
 
     <!-- Mobile Bottom Sheet Drawer Filter Log Performa -->
     <div x-show="mobileFilterOpen"
-         class="fixed inset-0 z-50 md:hidden"
+         class="fixed inset-0 z-[70] md:hidden"
          style="display: none;"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -287,7 +287,7 @@
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" @click="mobileFilterOpen = false"></div>
 
         <!-- Sheet Modal Content -->
-        <div class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl p-5 border-t border-slate-200 max-h-[85vh] overflow-y-auto"
+        <div class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl p-5 pb-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] border-t border-slate-200 max-h-[90vh] overflow-y-auto"
              x-transition:enter="transition ease-out duration-300 transform"
              x-transition:enter-start="translate-y-full"
              x-transition:enter-end="translate-y-0"

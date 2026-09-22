@@ -192,10 +192,23 @@ class AdminCustomerMgmtService:
             from app.services.scheduler_service import ont_scheduler
             paused_reminder = ont_scheduler.check_paused_reminder(db)
 
+        # Ambil konfigurasi notifikasi Android (Getaran, Interval Pengulangan Tiket Menunggu, Mode Malam)
+        from app.modules.settings.service import SystemSettingsService
+        current_cfg = SystemSettingsService.get_settings(db)
+        notif_config = {
+            "vibration_enabled": current_cfg.get("app_vibration_enabled", True),
+            "alert_waiting_interval_minutes": current_cfg.get("alert_waiting_interval_minutes", 5),
+            "night_mode_enabled": current_cfg.get("telegram_night_mode_enabled", False),
+            "night_mode_start": current_cfg.get("telegram_night_mode_start", "22:00"),
+            "night_mode_end": current_cfg.get("telegram_night_mode_end", "06:00")
+        }
+
         return {
             "status": "success",
             "unread_tickets_count": unread_count,
             "latest_ticket": latest_data,
             "recent_tickets": recent_tickets_data,
-            "paused_reminder": paused_reminder
+            "paused_reminder": paused_reminder,
+            "notification_config": notif_config
         }
+

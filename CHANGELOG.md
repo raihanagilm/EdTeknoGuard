@@ -35,8 +35,20 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 - **Indikator Loading Transisi Antar Halaman & Menu Global (Anti-Lag & Responsif)**:
   - Menghadirkan progress bar animasi gradien bercahaya di puncak halaman (`#global-page-loader`) yang langsung aktif seketika saat pengguna mengklik menu atau tautan navigasi.
   - Memberikan umpan balik visual instan sehingga aplikasi terasa cepat, responsif, dan tidak terasa "hang", lambat, atau membeku (*freeze*) saat menunggu render halaman baru.
+- **Filter Hak Akses Role pada Menu Navigasi & Action Cards Mobile**:
+  - Menyembunyikan menu "Pengaturan" dan "Karyawan" dari kartu aksi cepat Dashboard (`templates/dashboard/index.html`) untuk pengguna selain `super admin`.
+  - Mengalihkan Tab 5 pada Sticky Bottom Navigation (`templates/layouts/base.html`) secara dinamis: menampilkan "Pengaturan" bagi `super admin`, dan menampilkan "Log Audit" bagi role `admin` & `teknisi` untuk mencegah akses 403 atau menu terlarang.
+- **Pengaturan Notifikasi Aplikasi, Getaran & Jam Malam (Android & Web)**:
+  - Tab 3 baru di `/settings`: "Notifikasi & Jam Malam" yang mencakup toggle getaran haptic (`app_vibration_enabled`), pengaturan pengulangan alert aduan pelanggan berstatus MENUNGGU (`alert_waiting_interval_minutes`, default 5 menit), serta pengaturan mode senyap jam malam (`telegram_night_mode_enabled`, `telegram_night_mode_start`, `telegram_night_mode_end`).
+  - Payload konfigurasi notifikasi terintegrasi pada endpoint polling `/api/notifications/poll` (`notification_config`), siap dikonsumsi langsung oleh client web browser dan service background native Android.
+- **Dokumentasi Arsitektur Android Studio Dual Flavors di PRD (`prd.md`)**:
+  - Menyimpan spesifikasi teknis lengkap project Android Studio (Kotlin) dengan Gradle Product Flavors (`guard` untuk karyawan NOC dan `cust` untuk pelanggan warga), persistent background service + WakeLock, auto-restart BootReceiver, serta trigger notifikasi darurat.
 
 ### Fixed
+- **Penyelesaian Masalah Tombol Filter Tertutup Bottom Navigation Mobile**:
+  - Memperbaiki seluruh modal lembaran bawah (*bottom sheet drawer*) filter di seluruh modul (`/admin/tiket`, `/pelanggan`, `/logs`, `/admin/kuota`, `/user-logs`, `/users`).
+  - Menaikkan `z-index` drawer filter menjadi `z-[70]` sehingga berada di atas layer sticky bottom navigation (`z-50`).
+  - Menambahkan padding bawah responsif `pb-[calc(env(safe-area-inset-bottom,0px)+5.5rem)]` dan batas tinggi `max-h-[90vh]` pada wadah tombol aksi (Reset Filter & Terapkan Filter), sehingga tombol aksi tidak pernah tertutup oleh bilah navigasi bawah dan leluasa diklik oleh pengguna.
 - **Stabilitas & Presisi Sticky Bottom Navigation Mobile (Gambar 2)**:
   - Memperbaiki posisi bar navigasi bawah mobile menjadi `fixed bottom-0 left-0 right-0 z-50 w-full` dengan tinggi presisi `h-[58px]` dan perataan `items-end` dengan dukungan `safe-area-inset-bottom`.
   - Merapikan proporsi tombol tengah "Beranda" (`-mt-3.5`, `h-11 w-11 sm:h-12 sm:w-12`) sehingga tidak lagi terpotong di tepi bawah, bergoyang, atau keluar dari batas layar ponsel saat scroll.

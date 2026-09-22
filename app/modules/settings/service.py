@@ -24,7 +24,9 @@ class SystemSettingsService:
             "telegram_alert_interval_hours",
             "telegram_night_mode_enabled",
             "telegram_night_mode_start",
-            "telegram_night_mode_end"
+            "telegram_night_mode_end",
+            "app_vibration_enabled",
+            "alert_waiting_interval_minutes"
         ]
         db_settings = {}
         rows = db.query(SystemSetting).filter(SystemSetting.key_name.in_(keys)).all()
@@ -54,6 +56,12 @@ class SystemSettingsService:
         tg_night_enabled = db_settings.get("telegram_night_mode_enabled", "false").lower() in ["true", "1", "yes"]
         tg_night_start = db_settings.get("telegram_night_mode_start", "22:00")
         tg_night_end = db_settings.get("telegram_night_mode_end", "06:00")
+
+        app_vibration = db_settings.get("app_vibration_enabled", "true").lower() in ["true", "1", "yes"]
+        try:
+            alert_waiting_minutes = int(db_settings.get("alert_waiting_interval_minutes", "5"))
+        except (ValueError, TypeError):
+            alert_waiting_minutes = 5
 
         scheduler_status = db_settings.get("scheduler_status", "RUNNING")
         default_user = db_settings.get("default_modem_user", "admin")
@@ -98,6 +106,8 @@ class SystemSettingsService:
             "telegram_night_mode_enabled": tg_night_enabled,
             "telegram_night_mode_start": tg_night_start,
             "telegram_night_mode_end": tg_night_end,
+            "app_vibration_enabled": app_vibration,
+            "alert_waiting_interval_minutes": alert_waiting_minutes,
             "telegram_token_configured": bool(settings.TELEGRAM_BOT_TOKEN),
             "telegram_token_masked": masked_token,
             "telegram_chat_ids_configured": settings.TELEGRAM_CHAT_IDS or "-"
@@ -140,7 +150,9 @@ class SystemSettingsService:
             "alert_debounce_minutes": str(debounce_minutes),
             "telegram_night_mode_enabled": "true" if data.telegram_night_mode_enabled else "false",
             "telegram_night_mode_start": (data.telegram_night_mode_start or "22:00").strip(),
-            "telegram_night_mode_end": (data.telegram_night_mode_end or "06:00").strip()
+            "telegram_night_mode_end": (data.telegram_night_mode_end or "06:00").strip(),
+            "app_vibration_enabled": "true" if data.app_vibration_enabled else "false",
+            "alert_waiting_interval_minutes": str(data.alert_waiting_interval_minutes or 5)
         }
 
         for k, v in pairs.items():

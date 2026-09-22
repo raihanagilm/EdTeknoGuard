@@ -680,7 +680,8 @@
                 <span class="text-[12px] sm:text-xs mt-0.5 tracking-tight font-extrabold">Tiket</span>
             </a>
 
-            <!-- Tab 5: Pengaturan (Menggantikan menu lama) -->
+            <!-- Tab 5: Pengaturan (Khusus Super Admin) atau Log Audit (Admin/Teknisi) -->
+            {% if request.state.current_user and request.state.current_user.get('role') == 'super admin' %}
             <a href="/settings"
                class="flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all h-full group {% if request.url.path.startswith('/settings') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
                 <div class="relative">
@@ -694,6 +695,20 @@
                 </div>
                 <span class="text-[12px] sm:text-xs mt-0.5 tracking-tight font-extrabold truncate max-w-full">Pengaturan</span>
             </a>
+            {% else %}
+            <a href="/user-logs"
+               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all h-full group {% if request.url.path.startswith('/user-logs') %}bg-indigo-50/90 text-indigo-700 font-black shadow-2xs{% else %}text-slate-600 hover:text-slate-900 font-bold{% endif %}">
+                <div class="relative">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 {% if request.url.path.startswith('/user-logs') %}stroke-[2.5] text-indigo-600{% else %}stroke-2 text-slate-500 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    {% if request.url.path.startswith('/user-logs') %}
+                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                    {% endif %}
+                </div>
+                <span class="text-[12px] sm:text-xs mt-0.5 tracking-tight font-extrabold truncate max-w-full">Log Audit</span>
+            </a>
+            {% endif %}
 
         </div>
     </nav>
@@ -811,24 +826,64 @@
 
                             if (latest) {
                                 const currentId = parseInt(latest.id || 0, 10);
-                                
+                                const config = data.notification_config || {};
+                                const vibrationEnabled = config.vibration_enabled !== false;
+                                const waitingIntervalMin = config.alert_waiting_interval_minutes || 5;
+
+                                // Hitung apakah saat ini dalam jam malam (Quiet Hours)
+                                let isNightQuiet = false;
+                                if (config.night_mode_enabled && config.night_mode_start && config.night_mode_end) {
+                                    try {
+                                        const now = new Date();
+                                        const currentHM = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+                                        const startHM = config.night_mode_start;
+                                        const endHM = config.night_mode_end;
+                                        if (startHM <= endHM) {
+                                            isNightQuiet = currentHM >= startHM && currentHM < endHM;
+                                        } else {
+                                            // Lintas tengah malam (misal 22:00 s/d 06:00)
+                                            isNightQuiet = currentHM >= startHM || currentHM < endHM;
+                                        }
+                                    } catch(e) {}
+                                }
+
+                                const nowTs = Date.now();
+                                const lastRemindTs = parseInt(sessionStorage.getItem('tekno_last_waiting_remind') || '0', 10);
+                                const isRepeatDue = (nowTs - lastRemindTs) >= (waitingIntervalMin * 60 * 1000);
+
                                 // HANYA picu alarm audio, getar, & popup jika:
-                                // 1. Sudah melewati load pertama (isInitialized == true)
-                                // 2. ID tiket baru lebih besar dari tiket yang sudah pernah dialert (anti-spam)
-                                if (this.isInitialized && currentId > this.lastAlertedTicketId) {
+                                // 1. Sudah lewat initial load
+                                // 2. ID tiket baru > lastAlertedTicketId ATAU tiket MENUNGGU belum diproses dan sudah lewat interval X menit
+                                const isNewTicket = this.isInitialized && (currentId > this.lastAlertedTicketId);
+                                const shouldRepeatWaitingAlert = this.isInitialized && !isNewTicket && (newCount > 0) && isRepeatDue;
+
+                                if (isNewTicket || shouldRepeatWaitingAlert) {
                                     this.realtimeAlert = {
                                         show: true,
                                         id: currentId,
                                         id_tiket: latest.id_tiket,
-                                        title: (latest.nama_pelanggan || 'Pelanggan') + ' — ' + (latest.kategori || latest.jenis_kendala || 'Keluhan'),
-                                        desc: latest.deskripsi || latest.deskripsi_kendala || 'Tiket keluhan baru telah dikirimkan oleh pelanggan.'
+                                        title: (shouldRepeatWaitingAlert ? '[REMINDER ' + waitingIntervalMin + 'm] ' : '') + (latest.nama_pelanggan || 'Pelanggan') + ' — ' + (latest.kategori || latest.jenis_kendala || 'Keluhan'),
+                                        desc: (shouldRepeatWaitingAlert ? 'Aduan warga masih MENUNGGU penanganan teknisi. ' : '') + (latest.deskripsi || latest.deskripsi_kendala || 'Tiket keluhan baru telah dikirimkan oleh pelanggan.')
                                     };
-                                    this.playNotificationSound();
-                                    this.triggerHaptic();
 
-                                    // Simpan ke memory & sessionStorage agar tidak spam
-                                    this.lastAlertedTicketId = currentId;
-                                    sessionStorage.setItem('tekno_last_alerted_ticket', currentId.toString());
+                                    // Bunyikan audio hanya jika bukan mode senyap jam malam
+                                    if (!isNightQuiet) {
+                                        this.playNotificationSound();
+                                    }
+
+                                    // Getar hanya jika getaran diaktifkan di pengaturan
+                                    if (vibrationEnabled) {
+                                        this.triggerHaptic();
+                                    }
+
+                                    // Simpan marker
+                                    if (currentId > this.lastAlertedTicketId) {
+                                        this.lastAlertedTicketId = currentId;
+                                        sessionStorage.setItem('tekno_last_alerted_ticket', currentId.toString());
+                                    }
+                                    if (shouldRepeatWaitingAlert || isNewTicket) {
+                                        sessionStorage.setItem('tekno_last_waiting_remind', nowTs.toString());
+                                    }
 
                                     // Auto hide banner setelah 10 detik
                                     setTimeout(() => {
@@ -842,6 +897,7 @@
                                         this.lastAlertedTicketId = currentId;
                                         sessionStorage.setItem('tekno_last_alerted_ticket', currentId.toString());
                                     }
+                                    sessionStorage.setItem('tekno_last_waiting_remind', nowTs.toString());
                                     this.isInitialized = true;
                                 }
                             } else {

@@ -200,3 +200,57 @@ Seluruh perancangan, pengembangan, penambahan fitur, dan perbaikan antarmuka (UI
    - **Ikon Antarmuka:** Wajib SVG inline murni bersih; dilarang menggunakan emoji atau font-icon eksternal sebagai tombol aksi UI.
    - **Mobile-First Navigation:** Navigasi mobile wajib ramah satu tangan (bottom navigation bar atau drawer burger menu off-canvas).
 
+---
+
+## 8. Spesifikasi Native Android Studio (Kotlin - Dual Product Flavors)
+
+Untuk memastikan pengawasan darurat berjalan tanpa henti dan andal di perangkat ponsel teknisi NOC dan warga desa, sistem didukung aplikasi native wrapper Android Studio berbasis Gradle Product Flavors yang menghasilkan 2 aplikasi mandiri dari 1 basis kode:
+
+```text
+Domain Server Ngrok: https://duty-astride-outright.ngrok-free.dev
+Min SDK: 26 (Android 8.0 Oreo), Target SDK: 34 (Android 14)
+```
+
+### 8.1 Konfigurasi Product Flavors (`app/build.gradle.kts`)
+- **Flavor 1: `guard` (Khusus Karyawan, Teknisi & Admin NOC)**
+  - Application ID: `com.edtekno.guard`
+  - App Name: `EdTeknoGuard`
+  - Base URL: `https://duty-astride-outright.ngrok-free.dev/login`
+  - Role Type: `KARYAWAN`
+  - Output APK: `EdTeknoGuard.apk`
+- **Flavor 2: `cust` (Khusus Pelanggan Warga Desa)**
+  - Application ID: `com.edtekno.cust`
+  - App Name: `EdTeknoCust`
+  - Base URL: `https://duty-astride-outright.ngrok-free.dev/portal/login`
+  - Role Type: `PELANGGAN`
+  - Output APK: `EdTeknoCust.apk`
+
+### 8.2 Arsitektur Native WebView (`MainActivity.kt`)
+1. **Fullscreen WebView Modern**:
+   - `JavaScriptEnabled = true`, `DomStorageEnabled = true`, `DatabaseEnabled = true`, `CacheMode = LOAD_DEFAULT`.
+   - `CookieManager` persisten untuk menyimpan sesi login 30 hari (`MAX_SESSION_AGE`).
+   - `SwipeRefreshLayout` untuk tarik-ke-bawah guna memuat ulang halaman.
+2. **WebChromeClient Lengkap**:
+   - File Chooser (`ValueCallback<Array<Uri>>`): Mendukung upload foto kendala modem/tiang langsung dari kamera atau galeri HP.
+   - `GeolocationPermissions`: Otomatis meminta & menyetujui izin GPS untuk membaca koordinat rumah warga.
+3. **Smart Back Navigation**:
+   - Jika `webView.canGoBack()`, tombol back HP mundur di riwayat web.
+   - Jika di halaman utama, ketuk dua kali (*double tap*) dalam 2 detik untuk keluar aplikasi.
+4. **Error Handling**: Tampilan offline ramah jika internet putus dengan tombol "Coba Lagi".
+5. **Battery Optimization Exemption**: Meminta `Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` saat aplikasi pertama kali dibuka agar background worker tidak dimatikan Doze Mode Android.
+
+### 8.3 Persistent Background Service & Engine Notifikasi Darurat (`EdTeknoBackgroundService.kt`)
+1. **Foreground Service & WakeLock**:
+   - Berjalan dengan `START_STICKY` dan partial `WakeLock` agar CPU tetap siaga melakukan pengecekan berkala tanpa tertidur.
+   - Auto-Restart via `BootReceiver.kt` saat HP reboot (`ACTION_BOOT_COMPLETED` & `ACTION_MY_PACKAGE_REPLACED`).
+2. **Logika Background Polling Engine (Tiap 30-60 detik & Notifikasi Tiap 5 Menit)**:
+   - **Flavor `guard` (Karyawan & Teknisi NOC)**:
+     - Melakukan polling berkala ke `/api/notifications/poll` dan `/api/monitoring/status`.
+     - **Pemicu Tiket Menunggu**: Jika ada tiket keluhan pelanggan berstatus `MENUNGGU` yang belum ditindaklanjuti admin/teknisi:
+       * Sistem memunculkan Heads-Up Notification melayang (prioritas `IMPORTANCE_HIGH` / `MAX`) dan mengulang peringatan secara berkala tiap **5 menit**.
+       * Memutar efek nada alarm darurat (`RingtoneManager.TYPE_ALARM`) dan getaran pola kuat SOS `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)` (sesuai konfigurasi sakelar getaran di pengaturan pengguna).
+       * Mendukung filter jam malam (*Night Mode*) yang dapat diatur pengguna agar tidak mengganggu istirahat di luar jam siaga.
+     - **Pemicu Redaman Optik Drop**: Jika terdeteksi status `WARNING` ($\le -26.0$ dBm) atau `CRITICAL` / `LOS` ($\le -27.0$ dBm), sirine darurat dan lampu LED merah diaktifkan.
+   - **Flavor `cust` (Pelanggan Warga Desa)**:
+     - Memeriksa pembaruan status tiket aduan milik pelanggan.
+     - Begitu status tiket berubah (`DICEK ADMIN`, `DIPROSES TEKNISI`, atau `SELESAI`), kirimkan notifikasi ramah: *"Tiket Kendala: [Status Baru]. Teknisi kami sedang menindaklanjuti."* dengan nada `TYPE_NOTIFICATION` dan getaran lembut `longArrayOf(0, 300, 200, 300)`.

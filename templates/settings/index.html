@@ -61,6 +61,19 @@
                       :class="activeTab === 'credentials' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
                       x-text="form.default_modem_credentials.length"></span>
             </button>
+
+            <!-- Tab 3: Pengaturan Notifikasi & Jam Malam -->
+            <button type="button"
+                    @click="activeTab = 'notifications'"
+                    :class="activeTab === 'notifications'
+                        ? 'border-indigo-600 text-indigo-600 font-bold bg-indigo-50/50'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium'"
+                    class="group inline-flex items-center gap-2 py-3 px-4 border-b-2 text-xs sm:text-sm rounded-t-xl transition whitespace-nowrap min-h-[44px]">
+                <svg class="w-4 h-4 transition" :class="activeTab === 'notifications' ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <span>Notifikasi &amp; Jam Malam</span>
+            </button>
         </nav>
     </div>
 
@@ -328,7 +341,124 @@
                 </div>
             </div>
 
+            <!-- TAB 3: PENGATURAN NOTIFIKASI & JAM MALAM -->
+            <div x-show="activeTab === 'notifications'" class="space-y-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-6">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            <span>Notifikasi Aplikasi, Getaran &amp; Jam Malam</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Atur perilaku getar notifikasi pada smartphone Android/Web, pengulangan alert aduan pelanggan, serta waktu hening malam hari.
+                        </p>
+                    </div>
 
+                    <form @submit.prevent="confirmSaveSettings()" class="space-y-6">
+
+                        <!-- Pengaturan Getaran (Vibration) -->
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-4">
+                            <div class="space-y-0.5">
+                                <label for="switch_vibration" class="text-sm font-bold text-slate-900 cursor-pointer flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span>Getaran Notifikasi Darurat (Android &amp; Browser)</span>
+                                </label>
+                                <p class="text-xs text-slate-500">
+                                    Aktifkan pola getar haptic saat ada tiket aduan warga baru atau redaman pelanggan jatuh ke kondisi kritis.
+                                </p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                <input type="checkbox"
+                                       id="switch_vibration"
+                                       x-model="form.app_vibration_enabled"
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- Interval Notifikasi Tiket MENUNGGU (Default 5 Menit) -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>Pengulangan Notifikasi Aduan Warga (Status MENUNGGU)</span>
+                                </label>
+                                <span class="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100"
+                                      x-text="form.alert_waiting_interval_minutes + ' Menit Sekali'"></span>
+                            </div>
+                            <p class="text-xs text-slate-500">
+                                Jika ada tiket aduan pelanggan yang masih berstatus <strong>MENUNGGU</strong> (belum direspon admin/teknisi), notifikasi dan getaran darurat akan diulang tiap X menit ke seluruh personil.
+                            </p>
+                            <div class="relative mt-2">
+                                <input type="number"
+                                       min="1"
+                                       max="60"
+                                       step="1"
+                                       x-model.number="form.alert_waiting_interval_minutes"
+                                       class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[44px]">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">Menit</span>
+                            </div>
+                        </div>
+
+                        <!-- Pengaturan Jam Malam (Quiet Hours) -->
+                        <div class="p-5 bg-slate-50/75 rounded-2xl border border-slate-200/80 space-y-4">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="space-y-0.5">
+                                    <label for="switch_night_mode" class="text-sm font-bold text-slate-900 cursor-pointer flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                                        </svg>
+                                        <span>Mode Senyap Jam Malam (Quiet Hours)</span>
+                                    </label>
+                                    <p class="text-xs text-slate-500">
+                                        Heningkan suara alarm sirine di jam istirahat malam. Notifikasi tetap tercatat di sistem tanpa mengganggu waktu tidur teknisi.
+                                    </p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                    <input type="checkbox"
+                                           id="switch_night_mode"
+                                           x-model="form.telegram_night_mode_enabled"
+                                           class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+
+                            <div x-show="form.telegram_night_mode_enabled" x-transition class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-200">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Jam Mulai Senyap</label>
+                                    <input type="time"
+                                           x-model="form.telegram_night_mode_start"
+                                           class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[44px]">
+                                    <span class="block text-[11px] text-slate-400 mt-1">Default: 22:00 WIB</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Jam Berakhir Senyap</label>
+                                    <input type="time"
+                                           x-model="form.telegram_night_mode_end"
+                                           class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-h-[44px]">
+                                    <span class="block text-[11px] text-slate-400 mt-1">Default: 06:00 WIB</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="flex items-center justify-end pt-3 border-t border-slate-100">
+                            <button type="submit"
+                                    class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 transition flex items-center gap-2 min-h-[44px]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Simpan Pengaturan Notifikasi</span>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
 
         </div>
 
@@ -478,6 +608,8 @@
          data-warning="{{ config.warning_threshold_dbm }}"
          data-critical="{{ config.critical_threshold_dbm }}"
          data-creds='{{ config.default_modem_credentials | tojson | safe }}'
+         data-vibration="{{ 'true' if config.app_vibration_enabled else 'false' }}"
+         data-waiting-interval="{{ config.alert_waiting_interval_minutes }}"
          data-tg-interval="{{ config.telegram_alert_interval_hours }}"
          data-tg-night-enabled="{{ 'true' if config.telegram_night_mode_enabled else 'false' }}"
          data-tg-night-start="{{ config.telegram_night_mode_start }}"
@@ -523,6 +655,8 @@ function settingsApp() {
     const initInterval = el ? (Number(el.dataset.interval) || 5) : 5;
     const initWarning = el ? (Number(el.dataset.warning) || -26.0) : -26.0;
     const initCritical = el ? (Number(el.dataset.critical) || -27.0) : -27.0;
+    const initVibration = el ? (el.dataset.vibration === 'true') : true;
+    const initWaitingInterval = el ? (Number(el.dataset.waitingInterval) || 5) : 5;
     const initTgInterval = el ? (Number(el.dataset.tgInterval) || 1.0) : 1.0;
     const initTgNightEnabled = el ? (el.dataset.tgNightEnabled === 'true') : true;
     const initTgNightStart = el ? (el.dataset.tgNightStart || '22:00') : '22:00';
@@ -548,13 +682,15 @@ function settingsApp() {
     }
 
     return {
-        activeTab: 'thresholds', // 'thresholds' | 'credentials' | 'telegram'
+        activeTab: 'thresholds', // 'thresholds' | 'credentials' | 'notifications'
         form: {
             polling_interval_minutes: initInterval,
             warning_threshold_dbm: initWarning,
             critical_threshold_dbm: initCritical,
             default_modem_credentials: initCreds,
             apply_to_invalid_customers: false,
+            app_vibration_enabled: initVibration,
+            alert_waiting_interval_minutes: initWaitingInterval,
             telegram_alert_interval_hours: initTgInterval,
             telegram_night_mode_enabled: initTgNightEnabled,
             telegram_night_mode_start: initTgNightStart,
@@ -601,10 +737,9 @@ function settingsApp() {
             }
             const item = this.form.default_modem_credentials.splice(this.draggedIdx, 1)[0];
             this.form.default_modem_credentials.splice(targetIdx, 0, item);
-            const name = item.username ? `"${item.username}"` : `Kredensial`;
-            this.showToast(`${name} berhasil dipindahkan ke Prioritas #${targetIdx + 1}`);
             this.draggedIdx = null;
             this.dragOverIdx = null;
+            this.showToast(`Urutan kredensial berhasil dipindahkan ke Posisi #${targetIdx + 1}`);
         },
 
         onDragEnd() {
@@ -652,7 +787,7 @@ function settingsApp() {
         },
 
         confirmSaveSettings() {
-            // Validasi kredensial tidak boleh kosong
+            // Validasi kredensial tidak boleh kosong jika sedang di tab kredensial
             for (let i = 0; i < this.form.default_modem_credentials.length; i++) {
                 const item = this.form.default_modem_credentials[i];
                 if (!item.username.trim() || !item.password.trim()) {
@@ -677,6 +812,8 @@ function settingsApp() {
                         critical_threshold_dbm: Number(this.form.critical_threshold_dbm),
                         default_modem_credentials: this.form.default_modem_credentials,
                         apply_to_invalid_customers: Boolean(this.form.apply_to_invalid_customers),
+                        app_vibration_enabled: Boolean(this.form.app_vibration_enabled),
+                        alert_waiting_interval_minutes: Number(this.form.alert_waiting_interval_minutes),
                         telegram_alert_interval_hours: Number(this.form.telegram_alert_interval_hours),
                         telegram_night_mode_enabled: Boolean(this.form.telegram_night_mode_enabled),
                         telegram_night_mode_start: this.form.telegram_night_mode_start,
@@ -692,6 +829,12 @@ function settingsApp() {
                         this.form.critical_threshold_dbm = json.data.critical_threshold_dbm;
                         if (json.data.default_modem_credentials && json.data.default_modem_credentials.length > 0) {
                             this.form.default_modem_credentials = json.data.default_modem_credentials;
+                        }
+                        if (json.data.app_vibration_enabled !== undefined) {
+                            this.form.app_vibration_enabled = json.data.app_vibration_enabled;
+                        }
+                        if (json.data.alert_waiting_interval_minutes !== undefined) {
+                            this.form.alert_waiting_interval_minutes = json.data.alert_waiting_interval_minutes;
                         }
                         if (json.data.telegram_alert_interval_hours !== undefined) {
                             this.form.telegram_alert_interval_hours = json.data.telegram_alert_interval_hours;

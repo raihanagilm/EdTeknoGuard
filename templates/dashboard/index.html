@@ -96,7 +96,8 @@
                 <span class="text-sm sm:text-base font-extrabold text-slate-800 mt-2 group-hover:text-emerald-600 transition truncate w-full tracking-tight">Log Audit</span>
             </a>
 
-            <!-- 6. Pengaturan Sistem -->
+            <!-- 6. Pengaturan Sistem (Khusus Super Admin) -->
+            {% if current_user and current_user.get('role') == 'super admin' %}
             <a href="/settings" class="flex flex-col items-center text-center group active:scale-95 transition">
                 <div class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center shadow-2xs group-hover:bg-slate-800 group-hover:text-white group-hover:shadow-md transition duration-200">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +108,7 @@
                 <span class="text-sm sm:text-base font-extrabold text-slate-800 mt-2 group-hover:text-slate-900 transition truncate w-full tracking-tight">Pengaturan</span>
             </a>
 
-            <!-- 7. Manajemen User (Karyawan) -->
+            <!-- 7. Manajemen User (Karyawan - Khusus Super Admin) -->
             <a href="/users" class="flex flex-col items-center text-center group active:scale-95 transition">
                 <div class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100/80 flex items-center justify-center shadow-2xs group-hover:bg-purple-600 group-hover:text-white group-hover:shadow-md transition duration-200">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,6 +117,7 @@
                 </div>
                 <span class="text-sm sm:text-base font-extrabold text-slate-800 mt-2 group-hover:text-purple-600 transition truncate w-full tracking-tight">Karyawan</span>
             </a>
+            {% endif %}
 
             <!-- 8. Web Pelanggan (TeknoCust) -->
             <a href="/portal" target="_blank" class="flex flex-col items-center text-center group active:scale-95 transition">
