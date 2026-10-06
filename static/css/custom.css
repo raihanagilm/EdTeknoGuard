@@ -3,9 +3,39 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
+}
+
+/* 320px small mobile adjustments */
+@media (max-width: 360px) {
+  .mobile-nav-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .mobile-nav-label {
+    font-size: 10px !important;
+  }
+  .mobile-action-box {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  .mobile-action-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .mobile-brand-logo {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .mobile-brand-text {
+    font-size: 14px !important;
+  }
 }
 
 /* Custom Scrollbar for NOC Table */
