@@ -29,7 +29,22 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
-- **Implementasi Penuh Tabler UI & Authentic Tabler Icons (preview.tabler.io)**:
+- **Pemisahan Total Seluruh CSS & JS ke Outline Berkas Terpisah (Clean Separation of Concerns)**:
+  - **Single Consolidated Master CSS (`static/css/components.css`)**:
+    - Seluruh style, utility, dan komponen desain Tabler disatukan ke dalam 1 file master CSS terpusat (`static/css/components.css`), bebas dari inline `<style>` di seluruh template HTML.
+    - Dilengkapi penamaan class semantik dan ID terstruktur untuk tiap komponen (Cards, Buttons, Badges, Modals, Tables, KPI Metrik, Action Grid, Toasts, Login Portal, dan Tabler Status Ribbons).
+  - **Pemisahan Logika JavaScript ke Berkas Outline Khusus (`static/js/`)**:
+    - `static/js/app.js`: Master layout application handler (navbar, notifications polling, sound context, haptic feedback, snooze modal, global page loader).
+    - `static/js/customers.js`: Logika reaktif modul manajemen pelanggan (live search, filter POP, status chip, sorting, modal detail, modal CRUD, dan wizard import Excel/CSV multi-langkah).
+    - `static/js/tiket.js`: Logika reaktif tiket keluhan pelanggan (filter status, kategori, rentang tanggal hari ini/7d/30d/kustom, live search, sorting, dan modal update status).
+    - `static/js/kuota.js`: Logika reaktif pemantauan pemakaian kuota pelanggan (kalkulasi total GB, rata-rata trafik, filter paket, filter level konsumsi, live search, sorting).
+    - `static/js/logs.js`: Logika audit time-series redaman ONT (filter status, rentang tanggal real-time, live search, single probe ONT, sorting).
+    - `static/js/activity_logs.js`: Logika audit log aktivitas login/logout/operasional karyawan NOC.
+    - `static/js/settings.js`: Logika 2-tab pengaturan sistem (ambang batas -26/-27 dBm, interval scan, drag-and-drop kredensial modem repeater, notifikasi aplikasi & jam malam).
+    - `static/js/users.js`: Logika modul manajemen hak akses pengguna multi-kantor.
+    - `static/js/dashboard.js` & `static/js/login.js`: Dashboard charts telemetri dan form login admin NOC.
+- **Implementasi Penuh Tabler UI & Authentic Tabler Icons (preview.tabler.io & D:\UI_Panduan)**:
+  - **Aset Resmi Lokal**: Mengintegrasikan `tabler.min.css` dan `tabler.min.js` dari `D:\UI_Panduan\tabler-dist` serta seluruh pustaka ikon SVG murni dari `D:\UI_Panduan\tabler-icons`.
   - **Navigasi Base & Shell Aplikasi ([templates/layouts/base.html](file:///d:/databaru/Magang/EdTeknoGuard/templates/layouts/base.html))**:
     - **Header & Top Bar Tabler**: Mengadopsi header putih bersih dengan border 1px `#e6e8eb`, status LED real-time beranimasi pulse, breadcrumb portal yang rapi, dropdown Kantor Switcher, dan popover notifikasi aduan/tiket masuk.
     - **Sidebar Desktop**: Desain modular Tabler dengan pengelompokan seksi (`NOC & JARINGAN`, `MANAJEMEN PELANGGAN`, `SISTEM & AUDIT`), highlight aktif warna Azure Blue `#206bc4` dengan left border strip, badge counter tiket, dan profil pengguna bawah yang terintegrasi.
