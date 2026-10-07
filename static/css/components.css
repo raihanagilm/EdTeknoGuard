@@ -1,0 +1,499 @@
+/**
+ * TeknoGuard - Apple Human Interface Guidelines (HIG) Design System
+ * File: /static/css/components.css
+ * Follows Apple HIG Foundations (Color, Typography, Materials, Segmented Controls, SF System Rhythm)
+ *
+ * Sections:
+ * 1. Apple HIG Design Tokens & System Colors
+ * 2. Apple Materials & Translucency (.apple-glass, .apple-card, .apple-card-elevated)
+ * 3. Apple Segmented Controls (.apple-segmented-control)
+ * 4. Apple System Buttons (.apple-btn, variants: filled, tinted, gray, plain)
+ * 5. Apple Status Badges & Pills (.apple-badge)
+ * 6. Apple Springboard Action Grid (.apple-springboard-grid, .apple-app-icon)
+ * 7. Apple Health Metric Cards (.apple-metric-card, .apple-ring)
+ * 8. Apple Floating Banner Toasts (.apple-toast)
+ */
+
+/* ==========================================================================
+   1. APPLE HIG SYSTEM TOKENS (iOS / macOS Semantic Tokens)
+   ========================================================================== */
+:root {
+  /* Apple HIG + 60-30-10 Ocean Blue Palette (60% Biru Laut Dominan) */
+  --ocean-60-bg: #f0f7ff;           /* 60% Dominan: Latar Belakang Biru Laut Lembut */
+  --ocean-60-surface: #f8fbff;      /* Card Surface Biru Laut Es */
+  --ocean-deep: #0369a1;            /* Deep Ocean Blue 700 */
+  --ocean-primary: #0284c7;         /* Ocean Cyan/Sky 600 - Biru Laut Utama */
+  --ocean-light: rgba(2, 132, 199, 0.12);
+  --ocean-border: #bae6fd;          /* Sky 200 - Outline Border Biru Laut Nyata */
+  --ocean-border-focus: #38bdf8;    /* Sky 400 - Outline Active/Focus */
+
+  --apple-blue: var(--ocean-primary);
+  --apple-blue-hover: var(--ocean-deep);
+  --apple-blue-light: var(--ocean-light);
+  --apple-blue-ring: rgba(2, 132, 199, 0.28);
+
+  /* 10% Aksen Peringatan & Status (Strict Isolation) */
+  --apple-green: #10b981;
+  --apple-green-text: #047857;
+  --apple-yellow: #f59e0b;
+  --apple-orange: #f97316;
+  --apple-orange-text: #c2410c;
+  --apple-red: #ef4444;
+  --apple-red-text: #b91c1c;
+
+  /* Outline Borders & Radius Tokens */
+  --apple-radius-xs: 6px;
+  --apple-radius-sm: 10px;
+  --apple-radius-md: 14px;
+  --apple-radius-lg: 18px;
+  --apple-radius-xl: 22px;
+  --apple-radius-2xl: 28px;
+  --apple-radius-full: 9999px;
+
+  /* Aliases */
+  --tekno-primary: var(--ocean-primary);
+  --tekno-border: var(--ocean-border);
+  --tekno-border-subtle: rgba(186, 230, 253, 0.5);
+}
+
+/* ==========================================================================
+   2. APPLE MATERIALS & OUTLINE CARDS (.apple-card, .apple-glass, .tekno-card)
+   60% Ocean Atmosphere + 30% Pure White Surface + Sky Outline Border
+   ========================================================================== */
+.apple-card, .tekno-card {
+  background-color: #ffffff;
+  border: 1.5px solid var(--ocean-border);
+  border-radius: var(--apple-radius-xl);
+  padding: 1.125rem;
+  box-shadow: 0 4px 16px -2px rgba(2, 132, 199, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: 1px solid transparent;
+}
+
+@media (min-width: 640px) {
+  .apple-card, .tekno-card {
+    border-radius: var(--apple-radius-2xl);
+    padding: 1.375rem 1.5rem;
+  }
+}
+
+.apple-card--interactive, .tekno-card--interactive {
+  cursor: pointer;
+}
+
+.apple-card--interactive:hover, .tekno-card--interactive:hover {
+  background-color: #ffffff;
+  border-color: var(--ocean-border-focus);
+  outline: 2px solid rgba(14, 165, 233, 0.2);
+  box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.14), 0 2px 6px -1px rgba(2, 132, 199, 0.06);
+  transform: translateY(-1.5px);
+}
+
+.apple-card--interactive:active, .tekno-card--interactive:active {
+  transform: scale(0.985);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
+}
+
+.tekno-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.tekno-card-title {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #1c1c1e;
+}
+
+@media (min-width: 640px) {
+  .tekno-card-title {
+    font-size: 1.0625rem;
+  }
+}
+
+.tekno-card-subtitle {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--apple-gray);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   3. APPLE SEGMENTED CONTROL (.apple-segmented-control)
+   iOS Style Segment Switcher with Ocean Outline
+   ========================================================================== */
+.apple-segmented-control {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(2, 132, 199, 0.08);
+  border: 1px solid var(--ocean-border);
+  padding: 3px;
+  border-radius: var(--apple-radius-sm);
+  user-select: none;
+}
+
+.apple-segmented-btn {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding: 0.375rem 0.875rem;
+  min-height: 28px;
+  border-radius: calc(var(--apple-radius-sm) - 2px);
+  border: none;
+  background: transparent;
+  color: #0369a1;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-segmented-btn.active, .apple-segmented-btn--active {
+  background-color: #ffffff;
+  color: #0369a1;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15), 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-weight: 800;
+  border: 1px solid var(--ocean-border);
+}
+
+.apple-segmented-btn:not(.active):hover {
+  color: #0284c7;
+}
+
+.apple-segmented-btn:active {
+  transform: scale(0.96);
+}
+
+/* ==========================================================================
+   4. APPLE SYSTEM BUTTONS (.apple-btn, .tekno-btn)
+   Filled, Tinted, Gray, and Plain hierarchy with Ocean Outline
+   ========================================================================== */
+.apple-btn, .tekno-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  min-height: 44px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  border-radius: var(--apple-radius-md);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-btn:active, .tekno-btn:active {
+  transform: scale(0.97);
+  opacity: 0.88;
+}
+
+.apple-btn:disabled, .tekno-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Apple Filled Primary (Ocean Blue) */
+.apple-btn--filled, .tekno-btn--primary {
+  background-color: var(--ocean-primary);
+  border-color: var(--ocean-deep);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+.apple-btn--filled:hover, .tekno-btn--primary:hover {
+  background-color: var(--ocean-deep);
+  border-color: #075985;
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+}
+
+/* Apple Tinted Secondary */
+.apple-btn--tinted, .tekno-btn--secondary {
+  background-color: rgba(2, 132, 199, 0.1);
+  border-color: var(--ocean-border);
+  color: var(--ocean-primary);
+}
+
+.apple-btn--tinted:hover, .tekno-btn--secondary:hover {
+  background-color: rgba(2, 132, 199, 0.18);
+  border-color: var(--ocean-border-focus);
+}
+
+/* Apple Gray / Subtle with Outline */
+.apple-btn--gray {
+  background-color: #ffffff;
+  border-color: var(--ocean-border);
+  color: #334155;
+}
+
+.apple-btn--gray:hover {
+  background-color: var(--ocean-60-bg);
+  border-color: var(--ocean-border-focus);
+  color: #0369a1;
+}
+
+/* Apple Destructive / Danger */
+.apple-btn--destructive, .tekno-btn--danger {
+  background-color: var(--apple-red);
+  border-color: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+}
+
+/* ==========================================================================
+   5. APPLE STATUS BADGES & CAPSULES (.apple-badge, .tekno-badge)
+   ========================================================================== */
+.apple-badge, .tekno-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  border-radius: var(--apple-radius-full);
+  border: 1px solid transparent;
+}
+
+.apple-badge--gray, .tekno-badge--gray {
+  background-color: #ffffff;
+  border-color: var(--ocean-border);
+  color: #334155;
+}
+
+.apple-badge--ocean, .tekno-badge--ocean {
+  background-color: rgba(2, 132, 199, 0.12);
+  border-color: var(--ocean-border);
+  color: #0369a1;
+}
+
+.apple-badge--green, .tekno-badge--emerald {
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--apple-green-text);
+}
+
+.apple-badge--orange, .tekno-badge--amber {
+  background-color: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: var(--apple-orange-text);
+}
+
+.apple-badge--red, .tekno-badge--rose {
+  background-color: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--apple-red-text);
+}
+
+/* ==========================================================================
+   6. APPLE ACTION GRID SQUIRCLE (.action-grid-card)
+   ========================================================================== */
+.action-grid-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.action-grid-card:active {
+  transform: scale(0.92);
+}
+
+.action-grid-icon-box {
+  height: 52px;
+  width: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1.5px solid var(--ocean-border);
+  color: #0369a1;
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 640px) {
+  .action-grid-icon-box {
+    height: 58px;
+    width: 58px;
+    border-radius: 16px;
+  }
+}
+
+.action-grid-icon-box svg {
+  width: 24px;
+  height: 24px;
+}
+
+@media (min-width: 640px) {
+  .action-grid-icon-box svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.action-grid-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #334155;
+  margin-top: 0.375rem;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+@media (min-width: 640px) {
+  .action-grid-label {
+    font-size: 0.8125rem;
+    margin-top: 0.5rem;
+  }
+}
+
+/* ==========================================================================
+   7. APPLE METRIC CARDS WITH OUTLINE BORDER (.kpi-metric-card)
+   ========================================================================== */
+.kpi-metric-card, .apple-metric-card {
+  background-color: #ffffff;
+  border: 1.5px solid var(--ocean-border);
+  border-radius: var(--apple-radius-xl);
+  padding: 1.125rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px -2px rgba(2, 132, 199, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: 1px solid transparent;
+}
+
+@media (min-width: 640px) {
+  .kpi-metric-card, .apple-metric-card {
+    padding: 1.25rem 1.375rem;
+    border-radius: var(--apple-radius-2xl);
+  }
+}
+
+.kpi-metric-card:hover, .apple-metric-card:hover {
+  border-color: var(--ocean-border-focus);
+  outline: 2px solid rgba(14, 165, 233, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.16);
+}
+
+.kpi-metric-card:active, .apple-metric-card:active {
+  transform: scale(0.985);
+}
+
+.kpi-metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-metric-title {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.kpi-metric-icon {
+  height: 34px;
+  width: 34px;
+  border-radius: var(--apple-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ocean-60-bg);
+  border: 1px solid var(--ocean-border);
+  color: var(--ocean-primary);
+}
+
+.kpi-metric-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+.kpi-metric-number {
+  font-size: 1.625rem;
+  line-height: 1.1;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  color: #0f172a;
+}
+
+@media (min-width: 640px) {
+  .kpi-metric-number {
+    font-size: 2rem;
+  }
+}
+
+.kpi-metric-unit {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #64748b;
+}
+
+.kpi-metric-caption {
+  font-size: 0.6875rem;
+  line-height: 1.25;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 0.375rem;
+}
+
+/* ==========================================================================
+   8. APPLE FLOATING TOASTS (.apple-toast, .tekno-toast)
+   ========================================================================== */
+.apple-toast, .tekno-toast {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1.25rem;
+  z-index: 9999;
+  max-width: 360px;
+  border-radius: var(--apple-radius-lg);
+  padding: 0.875rem 1rem;
+  background-color: rgba(28, 28, 30, 0.95);
+  color: #ffffff;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 768px) {
+  .apple-toast, .tekno-toast {
+    bottom: 1.5rem;
+  }
+}

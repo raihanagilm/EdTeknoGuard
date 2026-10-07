@@ -5,132 +5,132 @@
 {% block content %}
 <div x-data="dashboardApp" id="dashboard-container" data-min-date="{{ min_date }}" data-polling-interval="{{ polling_interval }}" data-active-kantor="{{ active_kantor }}">
 
-    <!-- Hero Title & Ringkasan NOC -->
-    <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <!-- Hero Title & Ringkasan NOC (Apple Monochrome Header) -->
+    <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5" id="dashboardHeroSection">
         <div>
             <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Monitoring &amp; Deteksi Dini ONT
             </h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-                Pengawasan berkala setiap <strong class="text-indigo-600 font-bold"><span x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</span> menit</strong> ke seluruh perangkat ONT jaringan ISP lokal
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
+                Pengawasan berkala setiap <strong class="text-slate-800 font-bold"><span x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</span> menit</strong> ke seluruh perangkat ONT ISP lokal
             </p>
         </div>
         <div class="flex items-center gap-2">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>
+            <span class="apple-badge apple-badge--gray">
+                <span class="h-1.5 w-1.5 rounded-full bg-slate-500 mr-1.5" aria-hidden="true"></span>
                 <span>Live Real-Time</span>
             </span>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                <span class="h-2 w-2 rounded-full bg-indigo-600 mr-2"></span>
-                <span>Database Connected</span>
+            <span class="apple-badge apple-badge--gray">
+                <span class="h-1.5 w-1.5 rounded-full bg-slate-400 mr-1.5" aria-hidden="true"></span>
+                <span>TiDB Connected</span>
             </span>
         </div>
     </div>
 
     <!-- ========================================================================= -->
-    <!-- 1. MENU LAYANAN & OPERASIONAL (KHUSUS MOBILE - BCA / Shopee Grid)          -->
+    <!-- 1. MENU LAYANAN & OPERASIONAL (KHUSUS MOBILE - Clean Monochrome Grid)     -->
     <!-- ========================================================================= -->
-    <div class="lg:hidden bg-white rounded-3xl p-4 sm:p-6 border border-slate-200/80 shadow-xs mb-6">
-        <div class="flex items-center justify-between mb-4">
+    <section class="lg:hidden tekno-card mb-6" id="dashboardServiceGridSection">
+        <header class="tekno-card-header mb-4" id="dashboardServiceGridHeader">
             <div class="flex items-center gap-2.5">
-                <div class="h-6 w-2 bg-indigo-600 rounded-full"></div>
-                <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">Menu Layanan &amp; Operasional</h2>
+                <div class="h-5 w-1.5 bg-slate-800 rounded-full" aria-hidden="true"></div>
+                <h2 class="tekno-card-title text-base sm:text-lg">Menu Layanan &amp; Operasional</h2>
             </div>
-            <span class="text-xs text-slate-400 font-bold hidden sm:inline">Akses cepat seluruh modul sistem TeknoGuard</span>
-        </div>
+            <span class="tekno-card-subtitle hidden sm:inline">Akses cepat seluruh modul sistem TeknoGuard</span>
+        </header>
 
-        <div class="grid grid-cols-4 gap-1.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-8 md:gap-4">
+        <div class="grid grid-cols-4 gap-1.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-8 md:gap-4" id="dashboardServiceGridContainer">
             
             <!-- 1. Data Pelanggan -->
-            <a href="/pelanggan" class="flex flex-col items-center text-center group active:scale-95 transition">
-                <div class="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100/80 flex items-center justify-center shadow-2xs group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-md transition duration-200">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="/pelanggan" class="action-grid-card group" id="serviceCardPelanggan">
+                <div class="action-grid-icon-box bg-slate-100 text-slate-700 border-slate-200/80 group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-md">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </div>
-                <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-slate-800 mt-1 sm:mt-2 group-hover:text-indigo-600 transition truncate w-full tracking-tight">Pelanggan</span>
+                <span class="action-grid-label group-hover:text-slate-900">Pelanggan</span>
             </a>
 
-            <!-- 2. Tiket Keluhan (dengan realtime badge counter) -->
-            <a href="/admin/tiket" class="relative flex flex-col items-center text-center group active:scale-95 transition">
-                <div class="relative h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100/80 flex items-center justify-center shadow-2xs group-hover:bg-rose-600 group-hover:text-white group-hover:shadow-md transition duration-200">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- 2. Tiket Keluhan (dengan realtime badge counter - warna peringatan merah) -->
+            <a href="/admin/tiket" class="action-grid-card relative group" id="serviceCardTiket">
+                <div class="relative action-grid-icon-box bg-slate-100 text-slate-700 border-slate-200/80 group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-md">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                     </svg>
-                    <!-- Badge Realtime -->
+                    <!-- Badge Realtime Peringatan -->
                     <span x-show="unreadTicketsCount > 0"
                           x-text="unreadTicketsCount"
                           class="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 min-w-[20px] text-center text-[10px] font-black text-white bg-rose-600 rounded-full border-2 border-white shadow-xs animate-pulse">
                     </span>
                 </div>
-                <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-slate-800 mt-1 sm:mt-2 group-hover:text-rose-600 transition truncate w-full tracking-tight">Tiket Warga</span>
+                <span class="action-grid-label group-hover:text-slate-900">Tiket Warga</span>
             </a>
 
             <!-- 3. Pemantauan Kuota -->
-            <a href="/admin/kuota" class="flex flex-col items-center text-center group active:scale-95 transition">
-                <div class="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100/80 flex items-center justify-center shadow-2xs group-hover:bg-sky-600 group-hover:text-white group-hover:shadow-md transition duration-200">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="/admin/kuota" class="action-grid-card group" id="serviceCardKuota">
+                <div class="action-grid-icon-box bg-slate-100 text-slate-700 border-slate-200/80 group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-md">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                     </svg>
                 </div>
-                <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-slate-800 mt-1 sm:mt-2 group-hover:text-sky-600 transition truncate w-full tracking-tight">Kuota GB</span>
+                <span class="action-grid-label group-hover:text-slate-900">Kuota GB</span>
             </a>
 
             <!-- 4. Riwayat Redaman -->
-            <a href="/logs" class="flex flex-col items-center text-center group active:scale-95 transition">
-                <div class="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100/80 flex items-center justify-center shadow-2xs group-hover:bg-amber-600 group-hover:text-white group-hover:shadow-md transition duration-200">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="/logs" class="action-grid-card group" id="serviceCardRedaman">
+                <div class="action-grid-icon-box bg-slate-100 text-slate-700 border-slate-200/80 group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-md">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
-                <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-slate-800 mt-1 sm:mt-2 group-hover:text-amber-600 transition truncate w-full tracking-tight">Log Redaman</span>
+                <span class="action-grid-label group-hover:text-slate-900">Log Redaman</span>
             </a>
 
             <!-- 5. Log Aktivitas -->
-            <a href="/user-logs" class="flex flex-col items-center text-center group active:scale-95 transition">
-                <div class="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100/80 flex items-center justify-center shadow-2xs group-hover:bg-emerald-600 group-hover:text-white group-hover:shadow-md transition duration-200">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="/user-logs" class="action-grid-card group" id="serviceCardUserLogs">
+                <div class="action-grid-icon-box bg-slate-100 text-slate-700 border-slate-200/80 group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-md">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                     </svg>
                 </div>
-                <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-slate-800 mt-1 sm:mt-2 group-hover:text-emerald-600 transition truncate w-full tracking-tight">Log Audit</span>
+                <span class="action-grid-label group-hover:text-slate-900">Log Audit</span>
             </a>
 
             <!-- 6. Pengaturan Sistem (Khusus Super Admin) -->
             {% if current_user and current_user.get('role') == 'super admin' %}
-            <a href="/settings" class="flex flex-col items-center text-center group active:scale-95 transition">
-                <div class="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center shadow-2xs group-hover:bg-slate-800 group-hover:text-white group-hover:shadow-md transition duration-200">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="/settings" class="action-grid-card group" id="serviceCardSettings">
+                <div class="action-grid-icon-box bg-slate-100 text-slate-700 border-slate-200 group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-md">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-slate-800 mt-1 sm:mt-2 group-hover:text-slate-900 transition truncate w-full tracking-tight">Pengaturan</span>
+                <span class="action-grid-label group-hover:text-slate-900">Pengaturan</span>
             </a>
 
             <!-- 7. Manajemen User (Karyawan - Khusus Super Admin) -->
-            <a href="/users" class="flex flex-col items-center text-center group active:scale-95 transition">
-                <div class="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100/80 flex items-center justify-center shadow-2xs group-hover:bg-purple-600 group-hover:text-white group-hover:shadow-md transition duration-200">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="/users" class="action-grid-card group" id="serviceCardUsers">
+                <div class="action-grid-icon-box bg-slate-100 text-slate-700 border-slate-200/80 group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-md">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
-                <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-slate-800 mt-1 sm:mt-2 group-hover:text-purple-600 transition truncate w-full tracking-tight">Karyawan</span>
+                <span class="action-grid-label group-hover:text-slate-900">Karyawan</span>
             </a>
             {% endif %}
 
             <!-- 8. Web Pelanggan (TeknoCust) -->
-            <a href="/portal" target="_blank" class="flex flex-col items-center text-center group active:scale-95 transition">
-                <div class="h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-2xl bg-teal-50 text-teal-600 border border-teal-100/80 flex items-center justify-center shadow-2xs group-hover:bg-teal-600 group-hover:text-white group-hover:shadow-md transition duration-200">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="/portal" target="_blank" class="action-grid-card group" id="serviceCardTeknoCust">
+                <div class="action-grid-icon-box bg-slate-100 text-slate-700 border-slate-200/80 group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-md">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                     </svg>
                 </div>
-                <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-slate-800 mt-1 sm:mt-2 group-hover:text-teal-600 transition truncate w-full tracking-tight">TeknoCust</span>
+                <span class="action-grid-label group-hover:text-slate-900">TeknoCust</span>
             </a>
 
         </div>
-    </div>
+    </section>
 
     <!-- 2. Control Bar (Status Engine & Action Buttons) -->
     {% include "components/control_bar.html" %}
@@ -141,36 +141,36 @@
     <!-- 3. Visualisasi Grafik Riwayat Redaman -->
     {% include "components/charts.html" %}
 
-    <!-- 4. Quick Shortcut Navigation (Apple Inset Card Group) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-2">
-        <a href="/pelanggan" class="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/60 shadow-2xs hover:shadow-xs hover:border-slate-300 transition flex items-center justify-between group active:scale-[0.99]">
+    <!-- 4. Quick Shortcut Navigation (Apple Inset Card Group - Neutral Monochromatic) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-2" id="dashboardQuickShortcuts">
+        <a href="/pelanggan" class="tekno-card tekno-card--interactive flex items-center justify-between group" id="shortcutKelolaPelanggan">
             <div class="flex items-center gap-3.5">
-                <div class="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition">
+                <div class="h-11 w-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
                 <div>
-                    <h3 class="font-bold text-slate-900 text-sm sm:text-base group-hover:text-indigo-600 transition">Kelola Master Pelanggan</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Tabel seluruh modem ONT, filter POP/Kantor, dan live probe</p>
+                    <h3 class="tekno-card-title group-hover:text-slate-900 transition">Kelola Master Pelanggan</h3>
+                    <p class="tekno-card-subtitle">Tabel seluruh modem ONT, filter POP/Kantor, dan live probe</p>
                 </div>
             </div>
-            <svg class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
 
-        <a href="/admin/tiket" class="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/60 shadow-2xs hover:shadow-xs hover:border-slate-300 transition flex items-center justify-between group active:scale-[0.99]">
+        <a href="/admin/tiket" class="tekno-card tekno-card--interactive flex items-center justify-between group" id="shortcutTiketKeluhan">
             <div class="flex items-center gap-3.5">
-                <div class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-105 transition">
+                <div class="h-11 w-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                     </svg>
                 </div>
                 <div>
-                    <h3 class="font-bold text-slate-900 text-sm sm:text-base group-hover:text-rose-600 transition">Tiket Keluhan Pelanggan</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Pantau laporan aduan warga desa dan update status perbaikan</p>
+                    <h3 class="tekno-card-title group-hover:text-slate-900 transition">Tiket Keluhan Pelanggan</h3>
+                    <p class="tekno-card-subtitle">Pantau laporan aduan warga desa dan update status perbaikan</p>
                 </div>
             </div>
-            <svg class="w-5 h-5 text-slate-400 group-hover:text-rose-600 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
     </div>
 

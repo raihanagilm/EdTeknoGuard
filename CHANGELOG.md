@@ -29,6 +29,20 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Penerapan Tema Warna 60% Biru Laut Dominan (Ocean Blue) & Outline CSS**:
+  - Mengimplementasikan aturan rasio warna **60-30-10** secara ketat:
+    - **60% Dominan (Biru Laut / Ocean Atmosphere)**: Latar belakang seluruh halaman aplikasi menggunakan `#f0f7ff` (soft ocean mist), seluruh kartu dan panel menggunakan outline border biru laut presisi `1.5px solid #bae6fd` (*Sky 200*) dengan ring focus `rgba(14, 165, 233, 0.2)`.
+    - **30% Permukaan (Pure White & Clean Typography)**: Kartu putih bersih `#ffffff`, tipografi Slate tegas `#0f172a` & `#334155` untuk keterbacaan tinggi.
+    - **10% Aksen Khusus Status & Peringatan**: Amber/Kuning khusus peringatan redaman drop (`-26 dBm`), Merah/Rose khusus status kritis/LOS (`-27 dBm`), dan Hijau khusus sinyal normal.
+  - Mengadopsi **Outline CSS System** pada seluruh tombol (`.apple-btn`), kontrol tersegmentasi (`.apple-segmented-control`), input tanggal, dan kartu metrik KPI (`.kpi-metric-card`).
+- **Penerapan Apple Human Interface Guidelines (HIG) Design System pada Dashboard**:
+  - Mengadopsi bahasa desain resmi Apple HIG pada seluruh elemen Dashboard NOC: material translucent frosted glass (`.apple-card` dengan `backdrop-filter: blur(20px)` dan hairline border `rgba(60, 60, 67, 0.12)`), Apple Health Metric Widgets (`.kpi-metric-card`), Apple Segmented Controls (`.apple-segmented-control`), Apple System Buttons (`.apple-btn`), serta Squircle Action Grid Cards (`.action-grid-card`).
+  - **Penyederhanaan Palet Warna (Neutral Monochromatic with Alert-Only Highlights)**: Mengeliminasi warna-warni berlebih pada kartu, grid ikon, badge informasi umum, dan summary chips ke warna abu-abu netral Apple (*Apple System Gray* `#f2f2f7` & `#1c1c1e`). Warna aksen (hijau, kuning/amber, merah/rose) diisolasi khusus untuk indikator status sistem, peringatan redaman kritis/warning, dan notifikasi tiket darurat.
+  - Memisahkan CSS secara modular berbasis OOP di [`static/css/components.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/components.css) dan JS di [`static/js/dashboard.js`](file:///d:/databaru/Magang/EdTeknoGuard/static/js/dashboard.js).
+  - Memberikan penamaan ID dan class semantik per elemen (`#dashboardServiceGridSection`, `#kpiCardTotal`, `#dashboardControlBar`, `#dashboardQuickShortcuts`, `#dashboardChartCard`, dll.) sehingga mudah dipelihara dan dapat langsung digunakan kembali (*reusable*) pada halaman lain.
+- **Sistem Desain Komponen Modular OOP & Pemisahan CSS/JS Dashboard (`components.css`)**:
+  - Membuat stylesheet sistem desain terpusat di [`static/css/components.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/components.css) yang mengelompokkan komponen secara OOP: Card Container (`.tekno-card`), Button System (`.tekno-btn` dengan varian primary, success, warning, danger, secondary), Status Badges (`.tekno-badge`), Action Grid Cards (`.action-grid-card`), KPI Cards (`.kpi-metric-card`), dan Toast Notifications (`.tekno-toast`).
+  - Memperbarui halaman Dashboard ([`templates/dashboard/index.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/dashboard/index.html)), Control Bar, KPI Cards, dan Charts dengan penamaan elemen semantik (`#dashboardServiceGridSection`, `#kpiCardTotal`, `#dashboardControlBar`, `#dashboardQuickShortcuts`) sehingga dapat langsung digunakan kembali (*reusable*) pada modul halaman lain dengan konsistensi penuh.
 - **Pembaruan Halaman Login Admin (Clean White Theme & Ingat Saya)**:
   - Mengubah desain halaman login menjadi tema putih bersih (*clean white theme* `#ffffff` / `#f8fafc`) dengan rasio kontras WCAG 4.5:1.
   - Memisahkan CSS murni ke [`static/css/login.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/login.css) dan JavaScript modular ke [`static/js/login.js`](file:///d:/databaru/Magang/EdTeknoGuard/static/js/login.js) dengan penamaan class/id elemen yang semantik dan terstruktur untuk mempermudah pemeliharaan jangka panjang.

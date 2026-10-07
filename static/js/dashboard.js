@@ -336,14 +336,14 @@ document.addEventListener('alpine:init', () => {
                         {
                             label: 'Nilai Redaman Rata-rata',
                             data: [],
-                            borderColor: '#4F46E5',
-                            backgroundColor: 'rgba(79, 70, 229, 0.12)',
+                            borderColor: '#0284c7',
+                            backgroundColor: 'rgba(2, 132, 199, 0.12)',
                             borderWidth: 3,
                             fill: true,
                             tension: 0.12,
                             pointRadius: 6,
                             pointHoverRadius: 9,
-                            pointBackgroundColor: '#4F46E5',
+                            pointBackgroundColor: '#0284c7',
                             pointBorderColor: '#FFFFFF',
                             pointBorderWidth: 2.5,
                             showLine: true
