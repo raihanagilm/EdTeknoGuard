@@ -29,6 +29,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Standarisasi Penuh Tipografi & Ikon Tabler UI (`D:\UI_Panduan\UI1`) pada TeknoGuard**:
+  - **Sistem Font Tabler (`Plus Jakarta Sans`)**: Mengadopsi skala ukuran font Tabler (`0.875rem` body base, line-height `1.4285714286`, `h1: 1.5rem`, `h2: 1.25rem`, `h3: 1rem`, `h4: 0.875rem`, `h5: 0.75rem`, `h6: 0.625rem`) dengan tracking tebal (`font-black`, `font-extrabold`).
+  - **Standar Ukuran & Ketebalan Ikon Tabler (`stroke-width="2"` / `1.5`)**:
+    - `.icon`: `1.25rem` (20px) stroke width 2 untuk navigasi utama dan header.
+    - `.icon-xs` / `.icon-sm`: `0.75rem` - `1rem` (12px - 16px) untuk badge, dropdown item, dan tabel audit.
+    - `.icon-md` / `.icon-lg` / `.icon-xl`: `1.5rem` - `2.5rem` (24px - 40px) untuk kartu KPI metrik dan action box.
+  - **Mobile Sticky Bottom Navigation Dock (5-Tab)**:
+    - Target sentuh ergonomis $\ge 48\times 48\text{ px}$ (`h-15 / 60px` dock), ukuran ikon presisi `20px` (`w-5 h-5` / `.tabler-dock-icon`), label tipografi `10px` (`text-[10px]` / `0.625rem` Tabler scale), dan indikator dot aktif dengan background `#e9f1fa` & tekstur glow pada tombol tengah Beranda.
 - **Pemisahan Total Seluruh CSS & JS ke Outline Berkas Terpisah (Clean Separation of Concerns)**:
   - **Single Consolidated Master CSS (`static/css/components.css`)**:
     - Seluruh style, utility, dan komponen desain Tabler disatukan ke dalam 1 file master CSS terpusat (`static/css/components.css`), bebas dari inline `<style>` di seluruh template HTML.

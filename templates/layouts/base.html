@@ -733,63 +733,65 @@
     <!-- 3. STICKY MOBILE BOTTOM NAVIGATION (TABLER 5-TAB COMMAND DOCK)             -->
     <!-- Tab 1: Pelanggan | Tab 2: Redaman | Tab 3: Beranda (Center) | Tab 4: Tiket | Tab 5: Pengaturan -->
     <!-- ========================================================================= -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 w-full bg-white/98 backdrop-blur-md border-t border-[#e6e8eb] shadow-[0_-2px_12px_rgba(0,0,0,0.05)] select-none h-15 flex items-center">
-        <div class="grid grid-cols-5 gap-0.5 max-w-lg mx-auto w-full items-center h-full px-1">
+    <nav class="tabler-bottom-dock lg:hidden" aria-label="Navigasi Bawah Tabler">
+        <div class="tabler-dock-grid">
             
             <!-- Tab 1: Pelanggan -->
             <a href="/pelanggan"
-               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg transition-all duration-150 h-full group min-h-[44px] text-decoration-none {% if request.url.path.startswith('/pelanggan') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                <div class="relative mb-0.5">
+               class="tabler-dock-item {% if request.url.path.startswith('/pelanggan') %}active{% endif %}">
+                <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Users -->
-                    <svg class="w-5 h-5 {% if request.url.path.startswith('/pelanggan') %}text-[#206bc4]{% else %}text-slate-400 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon {% if request.url.path.startswith('/pelanggan') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
                         <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                         <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
                     </svg>
                     {% if request.url.path.startswith('/pelanggan') %}
-                    <div class="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-[#206bc4]"></div>
+                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#206bc4]"></div>
                     {% endif %}
                 </div>
-                <span class="text-[10px] font-extrabold leading-tight {% if request.url.path.startswith('/pelanggan') %}text-[#206bc4]{% else %}text-slate-600 group-hover:text-slate-900{% endif %}">Pelanggan</span>
+                <span>Pelanggan</span>
             </a>
             
             <!-- Tab 2: Redaman -->
             <a href="/logs"
-               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg transition-all duration-150 h-full group min-h-[44px] text-decoration-none {% if request.url.path.startswith('/logs') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                <div class="relative mb-0.5">
+               class="tabler-dock-item {% if request.url.path.startswith('/logs') %}active{% endif %}">
+                <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Activity -->
-                    <svg class="w-5 h-5 {% if request.url.path.startswith('/logs') %}text-[#206bc4]{% else %}text-slate-400 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon {% if request.url.path.startswith('/logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M3 12h4l3 8l4 -16l3 8h4"/>
                     </svg>
                     {% if request.url.path.startswith('/logs') %}
-                    <div class="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-[#206bc4]"></div>
+                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#206bc4]"></div>
                     {% endif %}
                 </div>
-                <span class="text-[10px] font-extrabold leading-tight {% if request.url.path.startswith('/logs') %}text-[#206bc4]{% else %}text-slate-600 group-hover:text-slate-900{% endif %}">Redaman</span>
+                <span>Redaman</span>
             </a>
             
             <!-- Tab 3: Beranda (Center Elevated Button) -->
             <a href="/"
-               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg transition-all duration-150 h-full group min-h-[44px] text-decoration-none bg-[#206bc4] text-white font-extrabold shadow-sm hover:bg-[#17549c] {% if request.url.path == '/' %}bg-[#17549c] shadow-md ring-2 ring-[#206bc4]/30{% endif %}">
-                <div class="relative mb-0.5">
+               class="tabler-dock-item tabler-dock-item-center {% if request.url.path == '/' %}active{% endif %}">
+                <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Home -->
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M5 12l-2 0l9 -9l9 9l-2 0"/>
                         <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/>
                         <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>
                     </svg>
-                    <div class="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-white"></div>
+                    {% if request.url.path == '/' %}
+                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white"></div>
+                    {% endif %}
                 </div>
-                <span class="text-[10px] font-extrabold leading-tight text-white">Beranda</span>
+                <span>Beranda</span>
             </a>
             
             <!-- Tab 4: Tiket -->
             <a href="/admin/tiket"
-               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg transition-all duration-150 h-full group min-h-[44px] text-decoration-none {% if request.url.path.startswith('/admin/tiket') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                <div class="relative mb-0.5">
+               class="tabler-dock-item {% if request.url.path.startswith('/admin/tiket') %}active{% endif %}">
+                <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Ticket -->
-                    <svg class="w-5 h-5 {% if request.url.path.startswith('/admin/tiket') %}text-[#206bc4]{% else %}text-slate-400 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon {% if request.url.path.startswith('/admin/tiket') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M15 5l0 2"/>
                         <path d="M15 11l0 2"/>
                         <path d="M15 17l0 2"/>
@@ -797,29 +799,29 @@
                     </svg>
                     <span x-show="unreadTicketsCount > 0"
                           x-text="unreadTicketsCount"
-                          class="absolute -top-1 -right-2 px-1 py-0.2 min-w-[15px] text-center text-[8px] font-black text-white bg-rose-600 rounded-full">
+                          class="absolute -top-1 -right-2 px-1 py-0.2 min-w-[15px] text-center text-[8px] font-black text-white bg-rose-600 rounded-full border border-white">
                     </span>
                     {% if request.url.path.startswith('/admin/tiket') %}
-                    <div class="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-[#206bc4]"></div>
+                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#206bc4]"></div>
                     {% endif %}
                 </div>
-                <span class="text-[10px] font-extrabold leading-tight {% if request.url.path.startswith('/admin/tiket') %}text-[#206bc4]{% else %}text-slate-600 group-hover:text-slate-900{% endif %}">Tiket</span>
+                <span>Tiket</span>
             </a>
             
             <!-- Tab 5: Pengaturan -->
             <a href="/settings"
-               class="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg transition-all duration-150 h-full group min-h-[44px] text-decoration-none {% if request.url.path.startswith('/settings') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                <div class="relative mb-0.5">
+               class="tabler-dock-item {% if request.url.path.startswith('/settings') %}active{% endif %}">
+                <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Settings -->
-                    <svg class="w-5 h-5 {% if request.url.path.startswith('/settings') %}text-[#206bc4]{% else %}text-slate-400 group-hover:text-slate-800{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon {% if request.url.path.startswith('/settings') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c.996 .608 2.296 .07 2.572 -1.065z"/>
                         <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
                     </svg>
                     {% if request.url.path.startswith('/settings') %}
-                    <div class="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-[#206bc4]"></div>
+                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#206bc4]"></div>
                     {% endif %}
                 </div>
-                <span class="text-[10px] font-extrabold leading-tight {% if request.url.path.startswith('/settings') %}text-[#206bc4]{% else %}text-slate-600 group-hover:text-slate-900{% endif %}">Pengaturan</span>
+                <span>Pengaturan</span>
             </a>
         </div>
     </nav>

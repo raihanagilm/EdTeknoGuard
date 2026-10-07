@@ -95,9 +95,92 @@
 
 html, body {
   font-family: var(--tblr-font-sans);
+  font-size: 0.875rem;
+  line-height: 1.4285714286;
   background-color: var(--tblr-body-bg);
   color: var(--tblr-text-primary);
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ==========================================================================
+   TABLER ICON SPECIFICATIONS & UTILITIES (Tabler Icons standard)
+   ========================================================================== */
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 1.25rem;
+  stroke-width: 2;
+  vertical-align: bottom;
+  stroke: currentColor;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.icon-xs {
+  width: 0.75rem;
+  height: 0.75rem;
+  font-size: 0.75rem;
+  stroke-width: 2;
+}
+
+.icon-sm {
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+  stroke-width: 2;
+}
+
+.icon-md {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.5rem;
+  stroke-width: 2;
+}
+
+.icon-lg {
+  width: 2rem;
+  height: 2rem;
+  font-size: 2rem;
+  stroke-width: 2;
+}
+
+.icon-xl {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 2.5rem;
+  stroke-width: 2;
+}
+
+.icon-inline {
+  display: inline-flex;
+  align-self: center;
+  top: -0.125em;
+  position: relative;
+}
+
+.btn .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-right: 0.375rem;
+  margin-left: -0.125rem;
+}
+
+.btn-sm .icon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.25rem;
+  margin-left: 0;
+}
+
+.btn-icon .icon {
+  margin: 0;
+}
+
+.dropdown-item-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-right: 0.5rem;
+  color: var(--tblr-text-secondary);
 }
 
 /* ==========================================================================
@@ -699,6 +782,93 @@ html, body {
   color: var(--tblr-text-primary);
   letter-spacing: -0.01em;
   line-height: 1.2;
+}
+
+/* Tabler Mobile Bottom Navigation Dock (5-Tab Sticky Command Bar) */
+.tabler-bottom-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3.75rem; /* 60px standard */
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--tblr-border-color);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
+  z-index: 1040;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  padding: 0 0.25rem;
+}
+
+.tabler-dock-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.125rem;
+  width: 100%;
+  max-width: 32rem; /* 512px */
+  height: 100%;
+  align-items: center;
+}
+
+.tabler-dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 48px;
+  padding: 0.25rem 0.125rem;
+  border-radius: var(--tblr-radius-md);
+  text-decoration: none;
+  color: var(--tblr-text-secondary);
+  font-weight: 700;
+  font-size: 0.625rem; /* 10px Tabler h6 scale */
+  letter-spacing: -0.01em;
+  transition: all 0.15s ease-in-out;
+  position: relative;
+}
+
+.tabler-dock-item:hover {
+  color: var(--tblr-text-primary);
+  background-color: #f8fafc;
+}
+
+.tabler-dock-item.active {
+  color: var(--tblr-primary);
+  background-color: var(--tblr-primary-light);
+  font-weight: 900;
+}
+
+.tabler-dock-icon {
+  width: 1.25rem; /* 20px Tabler standard */
+  height: 1.25rem;
+  stroke-width: 2;
+  margin-bottom: 0.125rem;
+  transition: transform 0.15s ease;
+}
+
+.tabler-dock-item:active .tabler-dock-icon {
+  transform: scale(0.9);
+}
+
+.tabler-dock-item-center {
+  background-color: var(--tblr-primary);
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(32, 107, 196, 0.35);
+}
+
+.tabler-dock-item-center:hover {
+  background-color: var(--tblr-primary-hover);
+  color: #ffffff !important;
+}
+
+.tabler-dock-item-center.active {
+  background-color: var(--tblr-primary-active);
+  box-shadow: 0 0 0 3px rgba(32, 107, 196, 0.25);
 }
 
 /* ==========================================================================
