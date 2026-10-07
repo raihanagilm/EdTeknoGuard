@@ -1,13 +1,13 @@
 {% extends "layouts/base.html" %}
-{% block title %}Profil Saya — EdTekno Pelanggan{% endblock %}
+{% block title %}Profil Saya — TeknoCust{% endblock %}
 
 {% block content %}
 <div class="space-y-4">
 
     <!-- Header Box -->
     <div class="space-y-1">
-        <h2 class="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        <h2 class="text-base font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/></svg>
             <span>Profil Pelanggan</span>
         </h2>
         <p class="text-xs text-slate-500">Informasi identitas pelanggan & langganan internet Anda</p>
@@ -15,52 +15,54 @@
 
     <!-- Alert Sukses -->
     {% if success %}
-    <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
-        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-        <span>{{ success }}</span>
+    <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs flex items-center gap-2.5">
+        <svg class="w-4 h-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
+        <span class="font-semibold">{{ success }}</span>
     </div>
     {% endif %}
 
     <!-- Alert Error -->
     {% if error %}
-    <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2.5">
-        <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span>{{ error }}</span>
+    <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs flex items-center gap-2.5">
+        <svg class="w-4 h-4 text-rose-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M12 3a9 9 0 1 0 9 9a9 9 0 0 0 -9 -9"/></svg>
+        <span class="font-semibold">{{ error }}</span>
     </div>
     {% endif %}
 
-    <!-- Card 1: Data Identitas & Langganan -->
-    <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-3">
+    <!-- Card 1: Data Identitas & Langganan (Tabler Card) -->
+    <div class="card-tabler p-5 space-y-3 relative overflow-hidden">
+        <div class="card-status-top card-status-azure"></div>
         <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                Informasi Pelanggan
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z"/><path d="M9 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M15 8l2 0"/><path d="M15 12l2 0"/><path d="M7 16l10 0"/></svg>
+                <span>Informasi Pelanggan</span>
             </h3>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200/60">
-                Akun Aktif
+            <span class="badge-tabler badge-teal">
+                <span class="status-dot status-teal mr-1"></span> Akun Aktif
             </span>
         </div>
 
-        <div class="space-y-2.5 text-xs">
-            <div class="flex justify-between items-start py-1 border-b border-slate-50">
-                <span class="text-slate-400">Nama Lengkap:</span>
-                <span class="font-bold text-slate-800 text-right">{{ pelanggan.nama if pelanggan else (current_cust.nama or 'Pelanggan') }}</span>
+        <div class="space-y-2 text-xs divide-y divide-slate-100">
+            <div class="flex justify-between items-start pt-1.5">
+                <span class="text-slate-400 font-medium">Nama Lengkap:</span>
+                <span class="font-extrabold text-slate-800 text-right">{{ pelanggan.nama if pelanggan else (current_cust.nama or 'Pelanggan') }}</span>
             </div>
-            <div class="flex justify-between items-center py-1 border-b border-slate-50">
-                <span class="text-slate-400">ID Pelanggan:</span>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-slate-400 font-medium">ID Pelanggan:</span>
                 <span class="font-mono font-bold text-indigo-600">{{ pelanggan.id_pelanggan if pelanggan else (current_cust.id_pelanggan or '-') }}</span>
             </div>
-            <div class="flex justify-between items-start py-1 border-b border-slate-50">
-                <span class="text-slate-400 shrink-0 mr-2">Alamat / Dusun:</span>
-                <span class="font-semibold text-slate-800 text-right max-w-[65%]">{{ (pelanggan.alamat if pelanggan and pelanggan.alamat else '-') }}</span>
+            <div class="flex justify-between items-start pt-2">
+                <span class="text-slate-400 font-medium shrink-0 mr-2">Alamat / Dusun:</span>
+                <span class="font-semibold text-slate-700 text-right max-w-[65%]">{{ (pelanggan.alamat if pelanggan and pelanggan.alamat else '-') }}</span>
             </div>
-            <div class="flex justify-between items-center py-1 border-b border-slate-50">
-                <span class="text-slate-400 shrink-0 mr-2">Titik Lokasi GPS:</span>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-slate-400 font-medium shrink-0 mr-2">Titik Lokasi GPS:</span>
                 {% if pelanggan and pelanggan.lokasi_gps %}
                 <div class="flex items-center gap-1.5 text-right">
                     <span class="font-mono text-[11px] text-slate-700 font-bold">{{ pelanggan.lokasi_gps }}</span>
                     <a href="https://www.google.com/maps?q={{ pelanggan.lokasi_gps }}" target="_blank"
-                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-[10px] transition border border-indigo-100">
-                        <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-[10px] transition border border-indigo-200">
+                        <svg class="w-3 h-3 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/></svg>
                         <span>Peta</span>
                     </a>
                 </div>
@@ -68,77 +70,78 @@
                 <span class="text-slate-400 italic text-[11px]">Belum tersimpan</span>
                 {% endif %}
             </div>
-            <div class="flex justify-between items-center py-1 border-b border-slate-50">
-                <span class="text-slate-400">No. WhatsApp / HP:</span>
-                <span class="font-semibold text-slate-800">{{ (pelanggan.no_hp if pelanggan and pelanggan.no_hp else '-') }}</span>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-slate-400 font-medium">No. WhatsApp / HP:</span>
+                <span class="font-semibold text-slate-800 font-mono">{{ (pelanggan.no_hp if pelanggan and pelanggan.no_hp else '-') }}</span>
             </div>
-            <div class="flex justify-between items-center py-1 border-b border-slate-50">
-                <span class="text-slate-400">Paket Layanan:</span>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-slate-400 font-medium">Paket Layanan:</span>
                 <span class="font-bold text-indigo-700">{{ (pelanggan.paket if pelanggan and pelanggan.paket else 'Paket Unlimited') }}</span>
             </div>
-            <div class="flex justify-between items-center py-1 border-b border-slate-50">
-                <span class="text-slate-400">Kantor Wilayah:</span>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-slate-400 font-medium">Kantor Wilayah:</span>
                 <span class="font-bold text-slate-800 uppercase text-[11px]">{{ (pelanggan.kantor if pelanggan and pelanggan.kantor else 'cabang') }}</span>
             </div>
-            <div class="flex justify-between items-center py-1">
-                <span class="text-slate-400">IP Router / Modem:</span>
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-slate-400 font-medium">IP Router / Modem:</span>
                 <span class="font-mono font-semibold text-slate-700">{{ (pelanggan.ip_router if pelanggan and pelanggan.ip_router else '-') }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Shortcut Box ke Menu Kelola WiFi -->
+    <!-- Shortcut Box ke Menu Kelola WiFi (Tabler Card Action) -->
     <a href="{{ base_url or '' }}/wifi" 
-       class="block p-4 rounded-3xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 hover:border-indigo-300 transition-all shadow-2xs group">
+       class="card-tabler block p-4 hover:border-indigo-300 transition-all group">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18l.01 0"/><path d="M9.172 15.172a4 4 0 0 1 5.656 0"/><path d="M6.343 12.343a8 8 0 0 1 11.314 0"/><path d="M3.515 9.515c4.686 -4.687 12.284 -4.687 17 0"/></svg>
                 </div>
                 <div>
-                    <h4 class="text-xs font-bold text-slate-900">Ingin Mengganti Nama / Sandi WiFi?</h4>
+                    <h4 class="text-xs font-bold text-slate-800">Ingin Mengganti Nama / Sandi WiFi?</h4>
                     <p class="text-[11px] text-slate-500">Klik di sini untuk membuka menu Pengaturan WiFi</p>
                 </div>
             </div>
-            <svg class="w-5 h-5 text-indigo-500 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6l-6 6"/></svg>
         </div>
     </a>
 
-    <!-- Card 2: Form Ganti Password Akun Portal -->
-    <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-3" x-data="{ openPwdForm: false }">
+    <!-- Card 2: Form Ganti Password Akun Portal (Tabler Card) -->
+    <div class="card-tabler p-4 space-y-3" x-data="{ openPwdForm: false }">
         <button type="button" 
                 @click="openPwdForm = !openPwdForm" 
-                class="w-full flex items-center justify-between text-xs font-bold text-slate-900 py-1">
+                class="w-full flex items-center justify-between text-xs font-bold text-slate-800 py-1 cursor-pointer">
             <span class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <svg class="w-4 h-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"/><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M8 11v-4a4 4 0 1 1 8 0v4"/></svg>
                 <span>Ganti Password Masuk Aplikasi Portal</span>
             </span>
-            <svg class="w-4 h-4 text-slate-400 transition-transform" :class="openPwdForm ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="openPwdForm ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6l6 -6"/></svg>
         </button>
 
         <div x-show="openPwdForm" x-transition class="space-y-3 pt-2 border-t border-slate-100">
             <p class="text-[11px] text-slate-500">
-                Password awal Anda adalah <span class="font-bold text-slate-800">123456</span>. Anda dapat menggantinya di bawah:
+                Password awal Anda adalah <span class="font-mono font-bold text-slate-800">123456</span>. Anda dapat menggantinya secara berkala demi keamanan:
             </p>
 
             <form action="{{ base_url or '' }}/profil/ganti-password" method="POST" class="space-y-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Password Saat Ini</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Password Saat Ini</label>
                     <input type="password" name="password_lama" required placeholder="123456"
-                           class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                           class="form-input-tabler">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Password Baru</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Password Baru</label>
                     <input type="password" name="password_baru" required minlength="6" placeholder="Minimal 6 karakter"
-                           class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                           class="form-input-tabler">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Ulangi Password Baru</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Ulangi Password Baru</label>
                     <input type="password" name="konfirmasi_password" required minlength="6" placeholder="Ketik ulang password baru"
-                           class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]">
+                           class="form-input-tabler">
                 </div>
-                <button type="submit" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs min-h-[44px]">
-                    Simpan Password Baru
+                <button type="submit" class="btn-tabler btn-tabler-primary w-full justify-center">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M14 4l0 4l-6 0l0 -4"/></svg>
+                    <span>Simpan Password Baru</span>
                 </button>
             </form>
         </div>
@@ -147,8 +150,8 @@
     <!-- Tombol Logout -->
     <div class="pt-2">
         <a href="{{ base_url or '' }}/logout" 
-           class="w-full py-3 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-xs flex items-center justify-center gap-2 transition min-h-[44px]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+           class="btn-tabler w-full justify-center border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs">
+            <svg class="w-4 h-4 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/><path d="M9 12h12l-3 -3"/><path d="M18 15l3 -3"/></svg>
             <span>Keluar dari Akun (Logout)</span>
         </a>
     </div>

@@ -1,0 +1,135 @@
+/* ==========================================================================
+   TeknoCust - Tabler Design System Master CSS (Single Consolidated CSS)
+   Aset Desain & Utility Berbasis D:\UI_Panduan\UI1 (Tabler UI)
+   ========================================================================== */
+
+:root {
+    --tblr-primary: #206bc4;
+    --tblr-primary-rgb: 32, 107, 196;
+    --tblr-primary-fg: #ffffff;
+    --tblr-primary-dark: #17549c;
+    --tblr-primary-lt: #e9f1fa;
+    --tblr-success: #2fb344;
+    --tblr-success-lt: #eaf7ec;
+    --tblr-warning: #f59f00;
+    --tblr-warning-lt: #fef5e6;
+    --tblr-danger: #d63939;
+    --tblr-danger-lt: #fbebeb;
+    --tblr-body-bg: #f4f6fa;
+    --tblr-card-bg: #ffffff;
+    --tblr-border-color: #e6e8eb;
+    --tblr-border-radius: 14px;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--tblr-body-bg);
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+/* Card Component */
+.card-tabler {
+    background-color: var(--tblr-card-bg);
+    border: 1px solid var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    position: relative;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Status Ribbons */
+.card-status-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3.5px;
+    border-top-left-radius: var(--tblr-border-radius);
+    border-top-right-radius: var(--tblr-border-radius);
+}
+.card-status-azure { background-color: #206bc4; }
+.card-status-green { background-color: #2fb344; }
+.card-status-amber { background-color: #f59f00; }
+.card-status-red { background-color: #d63939; }
+
+/* Status Dot Indicator */
+.status-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+.status-dot-green { background-color: #2fb344; }
+.status-dot-amber { background-color: #f59f00; }
+.status-dot-red { background-color: #d63939; }
+.status-dot-animated {
+    animation: status-pulse 1.5s infinite;
+}
+@keyframes status-pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(47, 179, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(47, 179, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(47, 179, 68, 0); }
+}
+
+/* Buttons */
+.btn-tabler {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    padding: 0.625rem 1rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+    min-height: 42px;
+}
+.btn-tabler-primary {
+    background-color: var(--tblr-primary);
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(32, 107, 196, 0.25);
+}
+.btn-tabler-primary:hover {
+    background-color: var(--tblr-primary-dark);
+}
+.btn-tabler-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-tabler-outline {
+    background-color: #ffffff;
+    border-color: var(--tblr-border-color);
+    color: #334155;
+}
+.btn-tabler-outline:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+    color: var(--tblr-primary);
+}
+
+/* Form Controls */
+.form-input-tabler {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    background-color: #ffffff;
+    border: 1px solid var(--tblr-border-color);
+    border-radius: 10px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    min-height: 42px;
+}
+.form-input-tabler:focus {
+    border-color: var(--tblr-primary);
+    box-shadow: 0 0 0 3px rgba(32, 107, 196, 0.15);
+}

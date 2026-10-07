@@ -43,6 +43,19 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - `static/js/settings.js`: Logika 2-tab pengaturan sistem (ambang batas -26/-27 dBm, interval scan, drag-and-drop kredensial modem repeater, notifikasi aplikasi & jam malam).
     - `static/js/users.js`: Logika modul manajemen hak akses pengguna multi-kantor.
     - `static/js/dashboard.js` & `static/js/login.js`: Dashboard charts telemetri dan form login admin NOC.
+- **Implementasi Sistem Desain Tabler UI pada Portal Pelanggan Mandiri (TeknoCust `/portal`)**:
+  - **Single Master CSS Khusus Pelanggan (`portal_pelanggan/static/css/portal.css`)**:
+    - Menyatukan seluruh class komponen desain Tabler UI untuk portal pelanggan (`.card-tabler`, `.card-status-top`, `.card-status-azure`, `.card-status-teal`, `.btn-tabler`, `.badge-tabler`, `.form-input-tabler`, `.status-dot`, `.dock-nav-tabler`).
+  - **Standar Ikon Tabler SVG Inline Bersih**:
+    - Seluruh halaman TeknoCust bebas emoji dan menggunakan ikon standar SVG Tabler murni (`stroke-width="2"`).
+  - **Refactor Seluruh Halaman TeknoCust**:
+    - `layouts/base.html`: Modern header bar, Plus Jakarta Sans, dan sticky 5-tab bottom navigation dock dengan touch target $\ge 48\times 48\text{ px}$.
+    - `dashboard/index.html`: Banner sapaan pelanggan dengan avatar Tabler, kartu telemetri ONT dengan status dots, kartu ringkasan kuota tanpa batas, dan action cards grid 2 kolom.
+    - `auth/login.html` & `auth/lupa_password.html`: Form login & reset kata sandi mandiri berbasis Tabler card.
+    - `kendala/index.html` & `kendala/create.html`: Riwayat tiket kendala dengan status ribbon dan form pelaporan gangguan.
+    - `wifi/index.html`: Banner edukasi warga, info WiFi saat ini, dan form ganti SSID/password WiFi.
+    - `kuota/index.html`: Kartu telemetri pemakaian kuota bulan berjalan, riwayat trafik 7 hari, dan kepatuhan SOP tanpa istilah sisa kuota.
+    - `profil/index.html`: Kartu rincian identitas langganan, tombol peta GPS, collapsible ganti password akun portal, dan tombol logout.
 - **Implementasi Penuh Tabler UI & Authentic Tabler Icons (preview.tabler.io & D:\UI_Panduan)**:
   - **Aset Resmi Lokal**: Mengintegrasikan `tabler.min.css` dan `tabler.min.js` dari `D:\UI_Panduan\tabler-dist` serta seluruh pustaka ikon SVG murni dari `D:\UI_Panduan\tabler-icons`.
   - **Navigasi Base & Shell Aplikasi ([templates/layouts/base.html](file:///d:/databaru/Magang/EdTeknoGuard/templates/layouts/base.html))**:
