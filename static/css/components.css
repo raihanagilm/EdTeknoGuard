@@ -1,499 +1,564 @@
 /**
- * TeknoGuard - Apple Human Interface Guidelines (HIG) Design System
+ * TeknoGuard - Tabler UI Official Enterprise Design System
  * File: /static/css/components.css
- * Follows Apple HIG Foundations (Color, Typography, Materials, Segmented Controls, SF System Rhythm)
+ * Follows official Tabler UI patterns (https://preview.tabler.io)
  *
  * Sections:
- * 1. Apple HIG Design Tokens & System Colors
- * 2. Apple Materials & Translucency (.apple-glass, .apple-card, .apple-card-elevated)
- * 3. Apple Segmented Controls (.apple-segmented-control)
- * 4. Apple System Buttons (.apple-btn, variants: filled, tinted, gray, plain)
- * 5. Apple Status Badges & Pills (.apple-badge)
- * 6. Apple Springboard Action Grid (.apple-springboard-grid, .apple-app-icon)
- * 7. Apple Health Metric Cards (.apple-metric-card, .apple-ring)
- * 8. Apple Floating Banner Toasts (.apple-toast)
+ * 1. Tabler System Tokens & Palette (Tabler Blue #206bc4, Canvas #f4f6fa, Border #e6e8eb)
+ * 2. Tabler Cards & Status Top Ribbons (.card, .tabler-card, .tekno-card, .card-status-top)
+ * 3. Tabler Buttons & Button Groups (.btn, .tabler-btn, .apple-btn, .tekno-btn)
+ * 4. Tabler Badges & Status Indicators (.badge, .badge-pill, .status-dot)
+ * 5. Tabler Metric Stat Cards (.kpi-metric-card, .tabler-kpi-card)
+ * 6. Tabler Action Grid & Service Cards (.action-grid-card)
+ * 7. Tabler Telemetry & Data Summary Chips (.tabler-chip)
+ * 8. Tabler Tables & Lists
+ * 9. Tabler Toasts & Notification Popovers
  */
 
 /* ==========================================================================
-   1. APPLE HIG SYSTEM TOKENS (iOS / macOS Semantic Tokens)
+   1. TABLER DESIGN TOKENS & SYSTEM PALETTE
    ========================================================================== */
 :root {
-  /* Apple HIG + 60-30-10 Ocean Blue Palette (60% Biru Laut Dominan) */
-  --ocean-60-bg: #f0f7ff;           /* 60% Dominan: Latar Belakang Biru Laut Lembut */
-  --ocean-60-surface: #f8fbff;      /* Card Surface Biru Laut Es */
-  --ocean-deep: #0369a1;            /* Deep Ocean Blue 700 */
-  --ocean-primary: #0284c7;         /* Ocean Cyan/Sky 600 - Biru Laut Utama */
-  --ocean-light: rgba(2, 132, 199, 0.12);
-  --ocean-border: #bae6fd;          /* Sky 200 - Outline Border Biru Laut Nyata */
-  --ocean-border-focus: #38bdf8;    /* Sky 400 - Outline Active/Focus */
+  /* Canvas & Surfaces */
+  --tblr-body-bg: #f4f6fa;
+  --tblr-card-bg: #ffffff;
+  --tblr-border-color: #e6e8eb;
+  --tblr-border-color-translucent: rgba(4, 32, 69, 0.1);
+  --tblr-border-active: #206bc4;
 
-  --apple-blue: var(--ocean-primary);
-  --apple-blue-hover: var(--ocean-deep);
-  --apple-blue-light: var(--ocean-light);
-  --apple-blue-ring: rgba(2, 132, 199, 0.28);
+  /* Primary Brand (Tabler Azure Blue) */
+  --tblr-primary: #206bc4;
+  --tblr-primary-hover: #17549c;
+  --tblr-primary-light: #e9f1fa;
+  --tblr-primary-border: #cde0f5;
+  --tblr-primary-ring: rgba(32, 107, 196, 0.25);
 
-  /* 10% Aksen Peringatan & Status (Strict Isolation) */
-  --apple-green: #10b981;
-  --apple-green-text: #047857;
-  --apple-yellow: #f59e0b;
-  --apple-orange: #f97316;
-  --apple-orange-text: #c2410c;
-  --apple-red: #ef4444;
-  --apple-red-text: #b91c1c;
+  /* Status Colors */
+  --tblr-green: #2fb344;
+  --tblr-green-light: #eaf7ec;
+  --tblr-green-text: #1e7e34;
+  --tblr-green-border: #c3e6cb;
 
-  /* Outline Borders & Radius Tokens */
-  --apple-radius-xs: 6px;
-  --apple-radius-sm: 10px;
-  --apple-radius-md: 14px;
-  --apple-radius-lg: 18px;
-  --apple-radius-xl: 22px;
-  --apple-radius-2xl: 28px;
-  --apple-radius-full: 9999px;
+  --tblr-yellow: #f59f00;
+  --tblr-yellow-light: #fef5e6;
+  --tblr-yellow-text: #b27200;
+  --tblr-yellow-border: #ffe8b3;
 
-  /* Aliases */
-  --tekno-primary: var(--ocean-primary);
-  --tekno-border: var(--ocean-border);
-  --tekno-border-subtle: rgba(186, 230, 253, 0.5);
+  --tblr-red: #d63939;
+  --tblr-red-light: #fbebeb;
+  --tblr-red-text: #a82222;
+  --tblr-red-border: #f5c6cb;
+
+  --tblr-azure: #4299e1;
+  --tblr-cyan: #17a2b8;
+  --tblr-indigo: #4263eb;
+  --tblr-purple: #ae3ec9;
+  --tblr-slate: #626976;
+
+  /* Typography */
+  --tblr-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --tblr-text-primary: #1e293b;
+  --tblr-text-secondary: #64748b;
+  --tblr-text-muted: #94a3b8;
+
+  /* Border Radius */
+  --tblr-radius-sm: 4px;
+  --tblr-radius-md: 8px;
+  --tblr-radius-lg: 12px;
+  --tblr-radius-xl: 16px;
+  --tblr-radius-full: 9999px;
+
+  /* Legacy aliases for backwards compatibility */
+  --ocean-primary: var(--tblr-primary);
+  --ocean-deep: var(--tblr-primary-hover);
+  --ocean-light: var(--tblr-primary-light);
+  --ocean-border: var(--tblr-border-color);
+  --ocean-border-focus: var(--tblr-border-active);
+  --apple-blue: var(--tblr-primary);
+  --apple-green: var(--tblr-green);
+  --apple-yellow: var(--tblr-yellow);
+  --apple-red: var(--tblr-red);
 }
 
 /* ==========================================================================
-   2. APPLE MATERIALS & OUTLINE CARDS (.apple-card, .apple-glass, .tekno-card)
-   60% Ocean Atmosphere + 30% Pure White Surface + Sky Outline Border
+   2. TABLER CARDS & STATUS TOP RIBBONS (.tekno-card, .tabler-card, .card)
    ========================================================================== */
-.apple-card, .tekno-card {
-  background-color: #ffffff;
-  border: 1.5px solid var(--ocean-border);
-  border-radius: var(--apple-radius-xl);
+.card, .tabler-card, .tekno-card, .apple-card {
+  position: relative;
+  background-color: var(--tblr-card-bg);
+  border: 1px solid var(--tblr-border-color);
+  border-radius: var(--tblr-radius-lg);
   padding: 1.125rem;
-  box-shadow: 0 4px 16px -2px rgba(2, 132, 199, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  outline: 1px solid transparent;
 }
 
 @media (min-width: 640px) {
-  .apple-card, .tekno-card {
-    border-radius: var(--apple-radius-2xl);
-    padding: 1.375rem 1.5rem;
+  .card, .tabler-card, .tekno-card, .apple-card {
+    border-radius: var(--tblr-radius-lg);
+    padding: 1.25rem 1.375rem;
   }
 }
 
-.apple-card--interactive, .tekno-card--interactive {
+.card--interactive, .tekno-card--interactive, .tabler-card--interactive {
   cursor: pointer;
+  text-decoration: none;
 }
 
-.apple-card--interactive:hover, .tekno-card--interactive:hover {
+.card--interactive:hover, .tekno-card--interactive:hover, .tabler-card--interactive:hover {
   background-color: #ffffff;
-  border-color: var(--ocean-border-focus);
-  outline: 2px solid rgba(14, 165, 233, 0.2);
-  box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.14), 0 2px 6px -1px rgba(2, 132, 199, 0.06);
-  transform: translateY(-1.5px);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
 }
 
-.apple-card--interactive:active, .tekno-card--interactive:active {
-  transform: scale(0.985);
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
+.card--interactive:active, .tekno-card--interactive:active, .tabler-card--interactive:active {
+  transform: scale(0.99);
 }
 
-.tekno-card-header {
+/* Tabler Card Status Ribbons */
+.card-status-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-top-left-radius: var(--tblr-radius-lg);
+  border-top-right-radius: var(--tblr-radius-lg);
+}
+
+.card-status-primary, .card-status-azure { background-color: var(--tblr-primary); }
+.card-status-green, .card-status-success { background-color: var(--tblr-green); }
+.card-status-amber, .card-status-warning { background-color: var(--tblr-yellow); }
+.card-status-red, .card-status-danger { background-color: var(--tblr-red); }
+
+.tekno-card-header, .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.875rem;
 }
 
-.tekno-card-title {
+.tekno-card-title, .card-title {
   font-size: 0.9375rem;
   line-height: 1.35;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.015em;
-  color: #1c1c1e;
+  color: var(--tblr-text-primary);
+  margin: 0;
 }
 
 @media (min-width: 640px) {
-  .tekno-card-title {
+  .tekno-card-title, .card-title {
     font-size: 1.0625rem;
   }
 }
 
-.tekno-card-subtitle {
+.tekno-card-subtitle, .card-subtitle {
   font-size: 0.75rem;
   line-height: 1rem;
-  color: var(--apple-gray);
+  color: var(--tblr-text-secondary);
   font-weight: 500;
 }
 
 /* ==========================================================================
-   3. APPLE SEGMENTED CONTROL (.apple-segmented-control)
-   iOS Style Segment Switcher with Ocean Outline
+   3. TABLER BUTTONS (.btn, .tabler-btn, .apple-btn, .tekno-btn)
    ========================================================================== */
-.apple-segmented-control {
-  display: inline-flex;
-  align-items: center;
-  background-color: rgba(2, 132, 199, 0.08);
-  border: 1px solid var(--ocean-border);
-  padding: 3px;
-  border-radius: var(--apple-radius-sm);
-  user-select: none;
-}
-
-.apple-segmented-btn {
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  padding: 0.375rem 0.875rem;
-  min-height: 28px;
-  border-radius: calc(var(--apple-radius-sm) - 2px);
-  border: none;
-  background: transparent;
-  color: #0369a1;
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.apple-segmented-btn.active, .apple-segmented-btn--active {
-  background-color: #ffffff;
-  color: #0369a1;
-  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15), 0 1px 2px rgba(0, 0, 0, 0.04);
-  font-weight: 800;
-  border: 1px solid var(--ocean-border);
-}
-
-.apple-segmented-btn:not(.active):hover {
-  color: #0284c7;
-}
-
-.apple-segmented-btn:active {
-  transform: scale(0.96);
-}
-
-/* ==========================================================================
-   4. APPLE SYSTEM BUTTONS (.apple-btn, .tekno-btn)
-   Filled, Tinted, Gray, and Plain hierarchy with Ocean Outline
-   ========================================================================== */
-.apple-btn, .tekno-btn {
+.btn, .tabler-btn, .apple-btn, .tekno-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.625rem 1.125rem;
-  min-height: 44px;
+  padding: 0.5625rem 1rem;
+  min-height: 40px;
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: -0.015em;
-  border-radius: var(--apple-radius-md);
-  border: 1.5px solid transparent;
+  letter-spacing: -0.01em;
+  border-radius: var(--tblr-radius-md);
+  border: 1px solid transparent;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  line-height: 1.25;
 }
 
-.apple-btn:active, .tekno-btn:active {
-  transform: scale(0.97);
-  opacity: 0.88;
+.btn:active, .tabler-btn:active, .apple-btn:active, .tekno-btn:active {
+  transform: scale(0.98);
 }
 
-.apple-btn:disabled, .tekno-btn:disabled {
-  opacity: 0.4;
+.btn:disabled, .tabler-btn:disabled, .apple-btn:disabled, .tekno-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* Apple Filled Primary (Ocean Blue) */
-.apple-btn--filled, .tekno-btn--primary {
-  background-color: var(--ocean-primary);
-  border-color: var(--ocean-deep);
+/* Primary Button (Tabler Azure) */
+.btn-primary, .tabler-btn-primary, .apple-btn--filled, .tekno-btn--primary {
+  background-color: var(--tblr-primary);
+  border-color: var(--tblr-primary-hover);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 1px 2px 0 rgba(32, 107, 196, 0.25);
 }
 
-.apple-btn--filled:hover, .tekno-btn--primary:hover {
-  background-color: var(--ocean-deep);
-  border-color: #075985;
-  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+.btn-primary:hover, .tabler-btn-primary:hover, .apple-btn--filled:hover, .tekno-btn--primary:hover {
+  background-color: var(--tblr-primary-hover);
+  border-color: #11427b;
+  box-shadow: 0 4px 12px rgba(32, 107, 196, 0.35);
+  color: #ffffff;
 }
 
-/* Apple Tinted Secondary */
-.apple-btn--tinted, .tekno-btn--secondary {
-  background-color: rgba(2, 132, 199, 0.1);
-  border-color: var(--ocean-border);
-  color: var(--ocean-primary);
-}
-
-.apple-btn--tinted:hover, .tekno-btn--secondary:hover {
-  background-color: rgba(2, 132, 199, 0.18);
-  border-color: var(--ocean-border-focus);
-}
-
-/* Apple Gray / Subtle with Outline */
-.apple-btn--gray {
+/* Default / Outline Button */
+.btn-default, .btn-outline-secondary, .tabler-btn-default, .apple-btn--gray {
   background-color: #ffffff;
-  border-color: var(--ocean-border);
-  color: #334155;
+  border-color: var(--tblr-border-color);
+  color: var(--tblr-text-primary);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
 }
 
-.apple-btn--gray:hover {
-  background-color: var(--ocean-60-bg);
-  border-color: var(--ocean-border-focus);
-  color: #0369a1;
+.btn-default:hover, .btn-outline-secondary:hover, .tabler-btn-default:hover, .apple-btn--gray:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: var(--tblr-primary);
 }
 
-/* Apple Destructive / Danger */
-.apple-btn--destructive, .tekno-btn--danger {
-  background-color: var(--apple-red);
-  border-color: #dc2626;
+/* Secondary / Light Tint */
+.btn-secondary, .tabler-btn-secondary, .apple-btn--tinted, .tekno-btn--secondary {
+  background-color: var(--tblr-primary-light);
+  border-color: var(--tblr-primary-border);
+  color: var(--tblr-primary);
+}
+
+.btn-secondary:hover, .tabler-btn-secondary:hover, .apple-btn--tinted:hover, .tekno-btn--secondary:hover {
+  background-color: #dbeaf9;
+  border-color: #b9d3ef;
+  color: var(--tblr-primary-hover);
+}
+
+/* Success Button */
+.btn-success, .tabler-btn-success {
+  background-color: var(--tblr-green);
+  border-color: #249036;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+}
+
+.btn-success:hover, .tabler-btn-success:hover {
+  background-color: #249036;
+  box-shadow: 0 4px 12px rgba(47, 179, 68, 0.35);
+}
+
+/* Warning Button */
+.btn-warning, .tabler-btn-warning {
+  background-color: var(--tblr-yellow);
+  border-color: #d98200;
+  color: #ffffff;
+}
+
+.btn-warning:hover, .tabler-btn-warning:hover {
+  background-color: #d98200;
+  box-shadow: 0 4px 12px rgba(245, 159, 0, 0.35);
+}
+
+/* Danger Button */
+.btn-danger, .tabler-btn-danger, .apple-btn--destructive, .tekno-btn--danger {
+  background-color: var(--tblr-red);
+  border-color: #b82b2b;
+  color: #ffffff;
+}
+
+.btn-danger:hover, .tabler-btn-danger:hover, .apple-btn--destructive:hover, .tekno-btn--danger:hover {
+  background-color: #b82b2b;
+  box-shadow: 0 4px 12px rgba(214, 57, 57, 0.35);
+}
+
+/* Tabler Segmented Switcher */
+.apple-segmented-control, .tabler-segmented {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f1f5f9;
+  border: 1px solid var(--tblr-border-color);
+  padding: 3px;
+  border-radius: var(--tblr-radius-md);
+  user-select: none;
+}
+
+.apple-segmented-btn, .tabler-segmented-btn {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 0.375rem 0.875rem;
+  min-height: 28px;
+  border-radius: calc(var(--tblr-radius-md) - 2px);
+  border: none;
+  background: transparent;
+  color: var(--tblr-text-secondary);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-segmented-btn.active, .tabler-segmented-btn.active {
+  background-color: #ffffff;
+  color: var(--tblr-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-weight: 800;
+  border: 1px solid var(--tblr-border-color);
 }
 
 /* ==========================================================================
-   5. APPLE STATUS BADGES & CAPSULES (.apple-badge, .tekno-badge)
+   4. TABLER BADGES & STATUS INDICATORS (.badge, .status-dot)
    ========================================================================== */
-.apple-badge, .tekno-badge {
+.badge, .tabler-badge, .apple-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   padding: 0.25rem 0.625rem;
   font-size: 0.6875rem;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  border-radius: var(--apple-radius-full);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: var(--tblr-radius-sm);
   border: 1px solid transparent;
+  line-height: 1;
 }
 
-.apple-badge--gray, .tekno-badge--gray {
-  background-color: #ffffff;
-  border-color: var(--ocean-border);
-  color: #334155;
+.badge-primary, .tabler-badge-primary, .apple-badge--blue {
+  background-color: var(--tblr-primary-light);
+  color: var(--tblr-primary);
+  border-color: var(--tblr-primary-border);
 }
 
-.apple-badge--ocean, .tekno-badge--ocean {
-  background-color: rgba(2, 132, 199, 0.12);
-  border-color: var(--ocean-border);
-  color: #0369a1;
+.badge-success, .tabler-badge-green, .apple-badge--green {
+  background-color: var(--tblr-green-light);
+  color: var(--tblr-green-text);
+  border-color: var(--tblr-green-border);
 }
 
-.apple-badge--green, .tekno-badge--emerald {
-  background-color: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: var(--apple-green-text);
+.badge-warning, .tabler-badge-yellow, .apple-badge--yellow {
+  background-color: var(--tblr-yellow-light);
+  color: var(--tblr-yellow-text);
+  border-color: var(--tblr-yellow-border);
 }
 
-.apple-badge--orange, .tekno-badge--amber {
-  background-color: rgba(245, 158, 11, 0.14);
-  border-color: rgba(245, 158, 11, 0.35);
-  color: var(--apple-orange-text);
+.badge-danger, .tabler-badge-red, .apple-badge--red {
+  background-color: var(--tblr-red-light);
+  color: var(--tblr-red-text);
+  border-color: var(--tblr-red-border);
 }
 
-.apple-badge--red, .tekno-badge--rose {
-  background-color: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.35);
-  color: var(--apple-red-text);
+.badge-secondary, .tabler-badge-gray, .apple-badge--gray {
+  background-color: #f1f5f9;
+  color: var(--tblr-text-secondary);
+  border-color: #e2e8f0;
 }
 
-/* ==========================================================================
-   6. APPLE ACTION GRID SQUIRCLE (.action-grid-card)
-   ========================================================================== */
-.action-grid-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+/* Tabler Pulsing Status Dot */
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.action-grid-card:active {
-  transform: scale(0.92);
+.status-dot-animated {
+  animation: tabler-pulse 2s infinite ease-in-out;
 }
 
-.action-grid-icon-box {
-  height: 52px;
-  width: 52px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  border: 1.5px solid var(--ocean-border);
-  color: #0369a1;
-  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.08);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+@keyframes tabler-pulse {
+  0% { transform: scale(0.95); opacity: 0.85; }
+  50% { transform: scale(1.35); opacity: 0.35; }
+  100% { transform: scale(0.95); opacity: 0.85; }
 }
 
-@media (min-width: 640px) {
-  .action-grid-icon-box {
-    height: 58px;
-    width: 58px;
-    border-radius: 16px;
-  }
-}
-
-.action-grid-icon-box svg {
-  width: 24px;
-  height: 24px;
-}
-
-@media (min-width: 640px) {
-  .action-grid-icon-box svg {
-    width: 28px;
-    height: 28px;
-  }
-}
-
-.action-grid-label {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  color: #334155;
-  margin-top: 0.375rem;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: color 0.15s ease;
-}
-
-@media (min-width: 640px) {
-  .action-grid-label {
-    font-size: 0.8125rem;
-    margin-top: 0.5rem;
-  }
-}
+.status-dot-green { background-color: var(--tblr-green); }
+.status-dot-yellow { background-color: var(--tblr-yellow); }
+.status-dot-red { background-color: var(--tblr-red); }
+.status-dot-azure { background-color: var(--tblr-primary); }
 
 /* ==========================================================================
-   7. APPLE METRIC CARDS WITH OUTLINE BORDER (.kpi-metric-card)
+   5. TABLER KPI METRIC STAT CARDS (.kpi-metric-card, .tabler-kpi-card)
    ========================================================================== */
-.kpi-metric-card, .apple-metric-card {
-  background-color: #ffffff;
-  border: 1.5px solid var(--ocean-border);
-  border-radius: var(--apple-radius-xl);
-  padding: 1.125rem;
+.kpi-metric-card, .tabler-kpi-card {
   position: relative;
-  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid var(--tblr-border-color);
+  border-radius: var(--tblr-radius-lg);
+  padding: 1.125rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 4px 16px -2px rgba(2, 132, 199, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  outline: 1px solid transparent;
 }
 
 @media (min-width: 640px) {
-  .kpi-metric-card, .apple-metric-card {
-    padding: 1.25rem 1.375rem;
-    border-radius: var(--apple-radius-2xl);
+  .kpi-metric-card, .tabler-kpi-card {
+    padding: 1.25rem;
   }
 }
 
-.kpi-metric-card:hover, .apple-metric-card:hover {
-  border-color: var(--ocean-border-focus);
-  outline: 2px solid rgba(14, 165, 233, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.16);
-}
-
-.kpi-metric-card:active, .apple-metric-card:active {
-  transform: scale(0.985);
+.kpi-metric-card:hover, .tabler-kpi-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1.5px);
 }
 
 .kpi-metric-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
 }
 
 .kpi-metric-title {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #64748b;
+  color: var(--tblr-text-secondary);
 }
 
 .kpi-metric-icon {
-  height: 34px;
-  width: 34px;
-  border-radius: var(--apple-radius-sm);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--tblr-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--ocean-60-bg);
-  border: 1px solid var(--ocean-border);
-  color: var(--ocean-primary);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .kpi-metric-value-row {
   display: flex;
   align-items: baseline;
   gap: 0.375rem;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
 }
 
 .kpi-metric-number {
   font-size: 1.625rem;
-  line-height: 1.1;
   font-weight: 900;
-  letter-spacing: -0.035em;
-  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-family: inherit;
 }
 
 @media (min-width: 640px) {
   .kpi-metric-number {
-    font-size: 2rem;
+    font-size: 1.875rem;
   }
 }
 
 .kpi-metric-unit {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #64748b;
+  color: var(--tblr-text-secondary);
 }
 
 .kpi-metric-caption {
-  font-size: 0.6875rem;
-  line-height: 1.25;
-  color: #64748b;
-  font-weight: 600;
-  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--tblr-text-muted);
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 /* ==========================================================================
-   8. APPLE FLOATING TOASTS (.apple-toast, .tekno-toast)
+   6. TABLER ACTION GRID & SERVICE TILES (.action-grid-card)
    ========================================================================== */
-.apple-toast, .tekno-toast {
-  position: fixed;
-  bottom: 5.5rem;
-  right: 1.25rem;
-  z-index: 9999;
-  max-width: 360px;
-  border-radius: var(--apple-radius-lg);
-  padding: 0.875rem 1rem;
-  background-color: rgba(28, 28, 30, 0.95);
-  color: #ffffff;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
-  font-size: 0.8125rem;
-  font-weight: 600;
+.action-grid-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  justify-content: center;
+  padding: 0.875rem 0.5rem;
+  background-color: #ffffff;
+  border: 1px solid var(--tblr-border-color);
+  border-radius: var(--tblr-radius-lg);
+  text-align: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 90px;
+  cursor: pointer;
+  text-decoration: none;
 }
 
-@media (min-width: 768px) {
-  .apple-toast, .tekno-toast {
-    bottom: 1.5rem;
-  }
+.action-grid-card:hover {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 18px -3px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.action-grid-card:active {
+  transform: scale(0.97);
+}
+
+.action-grid-icon-box {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--tblr-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  background-color: #f1f5f9;
+  color: var(--tblr-text-primary);
+  border: 1px solid var(--tblr-border-color);
+  transition: all 0.2s ease;
+}
+
+.action-grid-card:hover .action-grid-icon-box {
+  background-color: var(--tblr-primary);
+  color: #ffffff;
+  border-color: var(--tblr-primary-hover);
+  box-shadow: 0 4px 12px rgba(32, 107, 196, 0.28);
+}
+
+.action-grid-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--tblr-text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   7. TABLER DATA SUMMARY CHIPS & TELEMETRY
+   ========================================================================== */
+.tabler-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  background-color: #f8fafc;
+  border: 1px solid var(--tblr-border-color);
+  border-radius: var(--tblr-radius-md);
+  transition: all 0.2s ease;
+}
+
+.tabler-chip:hover {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.tabler-chip-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--tblr-radius-sm);
+  background-color: #e2e8f0;
+  color: var(--tblr-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }

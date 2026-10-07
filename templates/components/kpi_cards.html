@@ -1,16 +1,25 @@
-<!-- 4 Kartu KPI Ringkasan Kesehatan Jaringan ONT (Neutral Apple HIG with Alert Highlights) -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6" id="dashboardKpiGrid">
+<!-- 4 Kartu KPI Ringkasan Kesehatan Jaringan ONT (Tabler Modular Command Center) -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5" id="dashboardKpiGrid">
     
-    <!-- 1. Total ONT (Neutral Monochromatic) -->
+    <!-- 1. Total ONT (Tabler Azure Primary) -->
     <div class="kpi-metric-card" id="kpiCardTotal">
+        <div class="card-status-top card-status-azure"></div>
         <div class="kpi-metric-header">
             <span class="kpi-metric-title">Total Terpantau</span>
-            <div class="kpi-metric-icon bg-slate-100 text-slate-700 shadow-2xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+            <div class="kpi-metric-icon bg-[#e9f1fa] text-[#206bc4]">
+                <!-- Tabler Icon: Router / Device Modem -->
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M3 13m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/>
+                    <path d="M17 17l0 .01"/>
+                    <path d="M13 17l0 .01"/>
+                    <path d="M15 13l0 -2"/>
+                    <path d="M11.75 8.75a4 4 0 0 1 6.5 0"/>
+                    <path d="M8.5 6.5a8 8 0 0 1 13 0"/>
+                </svg>
             </div>
         </div>
         <div class="kpi-metric-value-row">
-            <span class="kpi-metric-number text-slate-900" x-text="kpi.total_monitored">111</span>
+            <span class="kpi-metric-number text-slate-900" x-text="kpi.total_monitored">0</span>
             <span class="kpi-metric-unit">Modem</span>
             <span x-show="kpi.monitored_inactive > 0" class="text-xs font-bold text-slate-500" :title="kpi.monitored_inactive + ' pelanggan dinonaktifkan (OFF)'">
                 (<span x-text="kpi.monitored_inactive"></span> OFF)
@@ -21,46 +30,65 @@
         </div>
     </div>
 
-    <!-- 2. Sinyal Normal (Clean Slate Neutral) -->
+    <!-- 2. Sinyal Normal (Tabler Green) -->
     <div class="kpi-metric-card" id="kpiCardNormal">
+        <div class="card-status-top card-status-green"></div>
         <div class="kpi-metric-header">
             <span class="kpi-metric-title">Sinyal Normal</span>
-            <div class="kpi-metric-icon bg-slate-100 text-slate-700 shadow-2xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="kpi-metric-icon bg-[#eaf7ec] text-[#2fb344]">
+                <!-- Tabler Icon: Circle Check -->
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+                    <path d="M9 12l2 2l4 -4"/>
+                </svg>
             </div>
         </div>
         <div class="kpi-metric-value-row">
-            <span class="kpi-metric-number text-slate-900" x-text="kpi.normal">0</span>
-            <span class="kpi-metric-unit text-slate-500 font-semibold">&gt; -26 dBm</span>
+            <span class="kpi-metric-number text-emerald-700" x-text="kpi.normal">0</span>
+            <span class="kpi-metric-unit text-slate-500 font-semibold">&gt; -26.0 dBm</span>
         </div>
         <div class="kpi-metric-caption">
             Kualitas optik prima
         </div>
     </div>
 
-    <!-- 3. Warning Peringatan Awal (<= -26 dBm) -->
-    <div class="kpi-metric-card bg-amber-50/40 border-amber-200/70" id="kpiCardWarning">
+    <!-- 3. Warning Redaman (Tabler Yellow/Amber) -->
+    <div class="kpi-metric-card" id="kpiCardWarning">
+        <div class="card-status-top card-status-amber"></div>
         <div class="kpi-metric-header">
             <span class="kpi-metric-title text-amber-900">Warning Redaman</span>
-            <div class="kpi-metric-icon bg-amber-100 text-amber-700 shadow-xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <div class="kpi-metric-icon bg-[#fef5e6] text-[#f59f00]">
+                <!-- Tabler Icon: Alert Triangle -->
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M12 9v4"/>
+                    <path d="M12 17h.01"/>
+                    <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"/>
+                </svg>
             </div>
         </div>
         <div class="kpi-metric-value-row">
             <span class="kpi-metric-number text-amber-600" x-text="kpi.warning">0</span>
             <span class="kpi-metric-unit text-amber-800 font-bold">&le; -26.0 dBm</span>
         </div>
-        <div class="kpi-metric-caption text-amber-800">
+        <div class="kpi-metric-caption text-amber-700">
             Indikasi drop / tekukan
         </div>
     </div>
 
-    <!-- 4. LOS / Modem Mati -->
-    <div class="kpi-metric-card bg-rose-50/40 border-rose-200/70" id="kpiCardLos">
+    <!-- 4. LOS / Modem Mati (Tabler Red) -->
+    <div class="kpi-metric-card" id="kpiCardLos">
+        <div class="card-status-top card-status-red"></div>
         <div class="kpi-metric-header">
             <span class="kpi-metric-title text-rose-900">LOS / Mati</span>
-            <div class="kpi-metric-icon bg-rose-100 text-rose-700 shadow-xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 4.243a9 9 0 01-2.828-5.657m0 0l2.828 2.828M3 3l18 18"/></svg>
+            <div class="kpi-metric-icon bg-[#fbebeb] text-[#d63939]">
+                <!-- Tabler Icon: Wifi Off / Signal Loss -->
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M12 18l.01 0"/>
+                    <path d="M9.172 15.172a4 4 0 0 1 5.656 0"/>
+                    <path d="M6.343 12.343a8 8 0 0 1 11.314 0"/>
+                    <path d="M3.515 9.515c4.686 -4.687 12.284 -4.687 17 0"/>
+                    <path d="M3 3l18 18"/>
+                </svg>
             </div>
         </div>
         <div class="kpi-metric-value-row">

@@ -9,12 +9,12 @@ class Settings(BaseSettings):
     APP_URL: str = "http://localhost:8000"
     SECRET_KEY: str = "edteknoguard-secret-key"
 
-    # Database TiDB Cloud (MySQL Engine)
-    DB_HOST: str = "gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
-    DB_PORT: int = 4000
+    # Database (MySQL Local)
+    DB_HOST: str = "127.0.0.1"
+    DB_PORT: int = 3306
     DB_USER: str = "root"
     DB_PASSWORD: str = ""
-    DB_NAME: str = "EdTeknoGuard"
+    DB_NAME: str = "edteknoguard"
 
     # Telegram Bot Alerting
     TELEGRAM_BOT_TOKEN: str = ""
