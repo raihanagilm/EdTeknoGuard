@@ -29,6 +29,10 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Pembaruan Halaman Login Admin (Clean White Theme & Ingat Saya)**:
+  - Mengubah desain halaman login menjadi tema putih bersih (*clean white theme* `#ffffff` / `#f8fafc`) dengan rasio kontras WCAG 4.5:1.
+  - Memisahkan CSS murni ke [`static/css/login.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/login.css) dan JavaScript modular ke [`static/js/login.js`](file:///d:/databaru/Magang/EdTeknoGuard/static/js/login.js) dengan penamaan class/id elemen yang semantik dan terstruktur untuk mempermudah pemeliharaan jangka panjang.
+  - Menambahkan komponen checkbox **"Ingat saya"** (`#remember_me`) yang menyimpan username ke local storage peramban pengguna secara otomatis.
 - **Fitur Photo-Style Zoom & Pan Khusus Mobile pada Grafik Chart.js (Gambar 1)**:
   - Tombol kontrol zoom (+, -, Reset) kini disembunyikan di desktop dan diisolasi khusus tampilan mobile (`sm:hidden`).
   - Mengganti mekanisme step zoom data scale yang kaku dengan sistem pembesaran foto optikal (*optical photo-style zoom*): mendukung pinch-to-zoom dengan dua jari (`touchstart`/`touchmove`), satu jari untuk menggeser (*drag/pan*) saat diperbesar, tombol plus/minus dengan perbesaran halus (`1.0x` s/d `3.5x`), serta tombol Reset instan.

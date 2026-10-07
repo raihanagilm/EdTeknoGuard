@@ -1,0 +1,432 @@
+/**
+ * TeknoGuard - Dedicated Login Page Stylesheet
+ * File: /static/css/login.css
+ * Standard: Anti-Slop UI/UX & Mobile-First Responsive Guidelines (UX-10, UX-11, UX-12)
+ * Breakpoints covered: 320px, 375px, 480px, 768px, 1024px, 1280px+ (Portrait & Landscape)
+ */
+
+/* ==========================================================================
+   1. CSS RESET & GLOBAL BASE
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-text-size-adjust: 100%;
+}
+
+body.login-page-body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  padding: 1rem 0.75rem;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   2. ROOT DESIGN TOKENS (Color palette ramp & sizing tokens)
+   ========================================================================== */
+:root {
+  --login-primary: #4f46e5;
+  --login-primary-hover: #4338ca;
+  --login-primary-active: #3730a3;
+  --login-primary-ring: rgba(79, 70, 229, 0.2);
+  --login-text-dark: #0f172a;
+  --login-text-body: #334155;
+  --login-text-muted: #64748b;
+  --login-border: #e2e8f0;
+  --login-border-input: #cbd5e1;
+}
+
+/* ==========================================================================
+   3. CONTAINER WRAPPER (Mobile First Fluid Sizing)
+   ========================================================================== */
+.login-wrapper-container {
+  width: 100%;
+  max-width: 416px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ==========================================================================
+   4. BRANDING HEADER
+   ========================================================================== */
+.login-header-section {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.login-brand-icon-box {
+  margin-left: auto;
+  margin-right: auto;
+  height: 52px;
+  width: 52px;
+  border-radius: 14px;
+  background-color: var(--login-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 10px 18px -4px rgba(79, 70, 229, 0.3);
+  margin-bottom: 0.875rem;
+}
+
+.login-brand-icon-svg {
+  width: 26px;
+  height: 26px;
+  stroke: #ffffff;
+}
+
+.login-brand-title {
+  font-size: 1.375rem;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--login-text-dark);
+}
+
+.login-brand-title-accent {
+  color: var(--login-primary);
+}
+
+.login-brand-subtitle {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--login-text-muted);
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* ==========================================================================
+   5. LOGIN CARD CONTAINER (Responsive padding & radius)
+   ========================================================================== */
+.login-card-container {
+  background-color: #ffffff;
+  border: 1px solid var(--login-border);
+  border-radius: 20px;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 16px 24px -4px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 480px) {
+  .login-card-container {
+    border-radius: 24px;
+    padding: 1.75rem 1.5rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .login-card-container {
+    padding: 2.25rem 2rem;
+  }
+}
+
+/* ==========================================================================
+   6. ALERTS (Success / Error)
+   ========================================================================== */
+.login-alert-banner {
+  margin-bottom: 1.125rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.login-alert-banner--error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.login-alert-banner--success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+.login-alert-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   7. FORM GROUPS & INPUTS (Touch targets >= 44px)
+   ========================================================================== */
+.login-form-group {
+  margin-bottom: 1.125rem;
+  width: 100%;
+}
+
+.login-field-label {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--login-text-body);
+  margin-bottom: 0.45rem;
+}
+
+.login-field-required {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.login-input-relative-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-leading-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: #94a3b8;
+  z-index: 2;
+}
+
+.login-input-leading-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.login-input-field {
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  padding-left: 40px;
+  padding-right: 12px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1.5px solid var(--login-border-input);
+  color: var(--login-text-dark);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.login-input-field:focus {
+  outline: none;
+  border-color: var(--login-primary);
+  box-shadow: 0 0 0 3px var(--login-primary-ring);
+}
+
+.login-input-field::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.login-input-field--password {
+  padding-right: 46px;
+}
+
+/* Password Visibility Toggle Button (Minimum Touch Target 44x44px) */
+.login-password-toggle-button {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.login-password-toggle-button:hover {
+  color: var(--login-text-dark);
+  background-color: #f1f5f9;
+}
+
+.login-password-toggle-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ==========================================================================
+   8. REMEMBER ME COMPONENT (Ingat Saya - Thumb Friendly Target)
+   ========================================================================== */
+.login-remember-wrapper {
+  display: flex;
+  align-items: center;
+  margin-top: 0.125rem;
+  margin-bottom: 1.25rem;
+}
+
+.login-remember-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.8125rem;
+  color: var(--login-text-body);
+  font-weight: 600;
+  min-height: 40px;
+  padding: 0.25rem 0;
+}
+
+.login-remember-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--login-border-input);
+  accent-color: var(--login-primary);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* ==========================================================================
+   9. SUBMIT BUTTON (Ergonomic & Touch Friendly)
+   ========================================================================== */
+.login-submit-button {
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 1rem;
+  border-radius: 12px;
+  background-color: var(--login-primary);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.22);
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.login-submit-button:hover {
+  background-color: var(--login-primary-hover);
+  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.32);
+}
+
+.login-submit-button:active {
+  transform: scale(0.99);
+  background-color: var(--login-primary-active);
+}
+
+.login-submit-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.5;
+}
+
+/* ==========================================================================
+   10. CARD FOOTER NOTE
+   ========================================================================== */
+.login-card-footer {
+  margin-top: 1.25rem;
+  padding-top: 1.125rem;
+  border-top: 1px solid var(--login-border);
+  text-align: center;
+}
+
+.login-card-footer-text {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  color: var(--login-text-muted);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   11. RESPONSIVENESS & EXTREME BREAKPOINT ADAPTATION (320px - Landscape)
+   ========================================================================== */
+/* Small Screen Adaptation (<= 360px) */
+@media (max-width: 360px) {
+  body.login-page-body {
+    padding: 0.75rem 0.5rem;
+  }
+  .login-card-container {
+    padding: 1rem 0.875rem;
+  }
+  .login-brand-title {
+    font-size: 1.25rem;
+  }
+  .login-brand-icon-box {
+    height: 46px;
+    width: 46px;
+    border-radius: 12px;
+  }
+  .login-brand-icon-svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Landscape Mode Adaptation (Smartphones in Landscape) */
+@media (max-height: 540px) and (orientation: landscape) {
+  body.login-page-body {
+    padding: 1rem;
+    align-items: flex-start;
+  }
+  .login-header-section {
+    margin-bottom: 0.75rem;
+  }
+  .login-brand-icon-box {
+    height: 40px;
+    width: 40px;
+    margin-bottom: 0.5rem;
+  }
+  .login-brand-icon-svg {
+    width: 20px;
+    height: 20px;
+  }
+  .login-brand-title {
+    font-size: 1.25rem;
+  }
+  .login-brand-subtitle {
+    display: none;
+  }
+  .login-form-group {
+    margin-bottom: 0.75rem;
+  }
+  .login-remember-wrapper {
+    margin-bottom: 0.75rem;
+  }
+  .login-card-container {
+    padding: 1.25rem 1.25rem;
+  }
+}
