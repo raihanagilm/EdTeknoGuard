@@ -80,3 +80,15 @@ body {
   animation: pulse-ring 2s infinite ease-in-out;
   z-index: 0;
 }
+
+/* Fix Sticky Bottom Navigation for Android & iOS Mobile Browser (Zero-Jitter Fixed Positioning) */
+nav.fixed.bottom-0 {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  contain: layout style;
+}
+

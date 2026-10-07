@@ -11,6 +11,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS (CDN) -->
+    <script>
+        // Mute Tailwind Play CDN production warning in browser console
+        (function() {
+            const origWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
+                origWarn.apply(console, args);
+            };
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -618,9 +628,8 @@
     <!-- ========================================================================= -->
     <!-- 4. STICKY MOBILE BOTTOM NAVIGATION BAR (BCA / Shopee Style - 5 Tab)        -->
     <!-- Tab 1: Pelanggan | Tab 2: Redaman | Tab 3: Beranda (Center) | Tab 4: Tiket | Tab 5: Pengaturan -->
-    <!-- ========================================================================= -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-2 pt-1 pb-[calc(env(safe-area-inset-bottom,0px)+0.25rem)] select-none">
-        <div class="grid grid-cols-5 gap-0.5 max-w-lg mx-auto items-end h-[58px]">
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 select-none h-16 flex items-center">
+        <div class="grid grid-cols-5 gap-0.5 max-w-lg mx-auto w-full items-center h-full">
             
             <!-- Tab 1: Pelanggan -->
             <a href="/pelanggan"
