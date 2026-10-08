@@ -163,9 +163,9 @@
                 </div>
                 <div class="space-y-0.5 pt-1">
                     <a href="/"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition min-h-[42px] {% if request.url.path == '/' %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path == '/' %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
                         <!-- Tabler Icon: Dashboard / Home -->
-                        <svg class="w-4.5 h-4.5 shrink-0 {% if request.url.path == '/' %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path == '/' %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M5 12l-2 0l9 -9l9 9l-2 0"/>
                             <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/>
                             <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>
@@ -173,9 +173,9 @@
                         <span class="tracking-tight">Dashboard Utama</span>
                     </a>
                     <a href="/logs"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition min-h-[42px] {% if request.url.path.startswith('/logs') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/logs') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
                         <!-- Tabler Icon: Activity / Pulse Log -->
-                        <svg class="w-4.5 h-4.5 shrink-0 {% if request.url.path.startswith('/logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M3 12h4l3 8l4 -16l3 8h4"/>
                         </svg>
                         <span class="tracking-tight">Riwayat Redaman</span>
@@ -190,9 +190,9 @@
                 </div>
                 <div class="space-y-0.5 pt-1">
                     <a href="/pelanggan"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition min-h-[42px] {% if request.url.path.startswith('/pelanggan') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/pelanggan') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
                         <!-- Tabler Icon: Users -->
-                        <svg class="w-4.5 h-4.5 shrink-0 {% if request.url.path.startswith('/pelanggan') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/pelanggan') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
                             <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -201,10 +201,10 @@
                         <span class="tracking-tight">Data Pelanggan</span>
                     </a>
                     <a href="/admin/tiket"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition min-h-[42px] {% if request.url.path.startswith('/admin/tiket') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
-                        <div class="flex items-center gap-3">
+                       class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/admin/tiket') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                        <div class="flex items-center gap-2.5">
                             <!-- Tabler Icon: Ticket -->
-                            <svg class="w-4.5 h-4.5 shrink-0 {% if request.url.path.startswith('/admin/tiket') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/tiket') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M15 5l0 2"/>
                                 <path d="M15 11l0 2"/>
                                 <path d="M15 17l0 2"/>
@@ -218,9 +218,9 @@
                         </span>
                     </a>
                     <a href="/admin/kuota"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition min-h-[42px] {% if request.url.path.startswith('/admin/kuota') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/admin/kuota') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
                         <!-- Tabler Icon: Database -->
-                        <svg class="w-4.5 h-4.5 shrink-0 {% if request.url.path.startswith('/admin/kuota') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/kuota') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M12 6m-8 0a8 3 0 1 0 16 0a8 3 0 1 0 -16 0"/>
                             <path d="M4 6v6a8 3 0 0 0 16 0v-6"/>
                             <path d="M4 12v6a8 3 0 0 0 16 0v-6"/>
@@ -237,9 +237,9 @@
                 </div>
                 <div class="space-y-0.5 pt-1">
                     <a href="/user-logs"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition min-h-[42px] {% if request.url.path.startswith('/user-logs') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/user-logs') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
                         <!-- Tabler Icon: File Text / Audit Logs -->
-                        <svg class="w-4.5 h-4.5 shrink-0 {% if request.url.path.startswith('/user-logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/user-logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
                             <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
                             <path d="M9 9l1 0"/>
@@ -250,9 +250,9 @@
                     </a>
                     {% if request.state.current_user and request.state.current_user.get('role') == 'super admin' %}
                     <a href="/users"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition min-h-[42px] {% if request.url.path.startswith('/users') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/users') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
                         <!-- Tabler Icon: User Check / Admin Team -->
-                        <svg class="w-4.5 h-4.5 shrink-0 {% if request.url.path.startswith('/users') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/users') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
                             <path d="M6 21v-2a4 4 0 0 1 4 -4h4"/>
                             <path d="M15 19l2 2l4 -4"/>
@@ -260,9 +260,9 @@
                         <span class="tracking-tight">Manajemen User</span>
                     </a>
                     <a href="/settings"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition min-h-[42px] {% if request.url.path.startswith('/settings') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/settings') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
                         <!-- Tabler Icon: Settings / Adjustments -->
-                        <svg class="w-4.5 h-4.5 shrink-0 {% if request.url.path.startswith('/settings') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/settings') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c.996 .608 2.296 .07 2.572 -1.065z"/>
                             <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
                         </svg>
@@ -747,9 +747,6 @@
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                         <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
                     </svg>
-                    {% if request.url.path.startswith('/pelanggan') %}
-                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#206bc4]"></div>
-                    {% endif %}
                 </div>
                 <span>Pelanggan</span>
             </a>
@@ -762,9 +759,6 @@
                     <svg class="tabler-dock-icon {% if request.url.path.startswith('/logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M3 12h4l3 8l4 -16l3 8h4"/>
                     </svg>
-                    {% if request.url.path.startswith('/logs') %}
-                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#206bc4]"></div>
-                    {% endif %}
                 </div>
                 <span>Redaman</span>
             </a>
@@ -779,9 +773,6 @@
                         <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/>
                         <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>
                     </svg>
-                    {% if request.url.path == '/' %}
-                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white"></div>
-                    {% endif %}
                 </div>
                 <span>Beranda</span>
             </a>
@@ -801,9 +792,6 @@
                           x-text="unreadTicketsCount"
                           class="absolute -top-1 -right-2 px-1 py-0.2 min-w-[15px] text-center text-[8px] font-black text-white bg-rose-600 rounded-full border border-white">
                     </span>
-                    {% if request.url.path.startswith('/admin/tiket') %}
-                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#206bc4]"></div>
-                    {% endif %}
                 </div>
                 <span>Tiket</span>
             </a>
@@ -817,9 +805,6 @@
                         <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c.996 .608 2.296 .07 2.572 -1.065z"/>
                         <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
                     </svg>
-                    {% if request.url.path.startswith('/settings') %}
-                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#206bc4]"></div>
-                    {% endif %}
                 </div>
                 <span>Pengaturan</span>
             </a>
