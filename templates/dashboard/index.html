@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Dashboard NOC — TeknoGuard{% endblock %}
+{% block title %}Dashboard NOC: TeknoGuard{% endblock %}
 
 {% block content %}
 <div x-data="dashboardApp" id="dashboard-container" data-min-date="{{ min_date }}" data-polling-interval="{{ polling_interval }}" data-active-kantor="{{ active_kantor }}">
@@ -9,13 +9,13 @@
     <div class="mb-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3" id="dashboardHeroSection">
         <div>
             <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                Pusat Komando Jaringan ISP
+                Pusat Operasional Jaringan ISP
             </div>
             <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
-                Monitoring &amp; Deteksi Dini ONT
+                Monitoring dan Deteksi Dini ONT
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
-                Pemeriksaan berkala tiap <strong class="text-slate-800 font-bold"><span x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</span> menit</strong> ke seluruh unit modem ONT pelanggan
+                Pemeriksaan otomatis setiap <strong class="text-slate-800 font-bold"><span x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</span> menit</strong> ke seluruh modem ONT pelanggan
             </p>
         </div>
         
@@ -56,7 +56,7 @@
                         <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
                     </svg>
                 </div>
-                <span class="action-grid-label">Pelanggan</span>
+                <span class="action-grid-label">Data Pelanggan</span>
             </a>
 
             <!-- 2. Tiket Keluhan (dengan realtime badge counter) -->
@@ -75,7 +75,7 @@
                           class="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[18px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
                     </span>
                 </div>
-                <span class="action-grid-label">Tiket Warga</span>
+                <span class="action-grid-label">Tiket Keluhan</span>
             </a>
 
             <!-- 3. Pemantauan Kuota -->
@@ -88,7 +88,7 @@
                         <path d="M4 12v6a8 3 0 0 0 16 0v-6"/>
                     </svg>
                 </div>
-                <span class="action-grid-label">Kuota GB</span>
+                <span class="action-grid-label">Pemantauan Kuota</span>
             </a>
 
             <!-- 4. Riwayat Redaman -->
@@ -99,7 +99,7 @@
                         <path d="M3 12h4l3 8l4 -16l3 8h4"/>
                     </svg>
                 </div>
-                <span class="action-grid-label">Log Redaman</span>
+                <span class="action-grid-label">Riwayat Redaman</span>
             </a>
 
             <!-- 5. Log Aktivitas -->
@@ -114,7 +114,7 @@
                         <path d="M9 17l6 0"/>
                     </svg>
                 </div>
-                <span class="action-grid-label">Log Audit</span>
+                <span class="action-grid-label">Log Aktivitas</span>
             </a>
 
             <!-- 6. Pengaturan Sistem (Khusus Super Admin) -->
@@ -127,10 +127,10 @@
                         <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
                     </svg>
                 </div>
-                <span class="action-grid-label">Pengaturan</span>
+                <span class="action-grid-label">Pengaturan Sistem</span>
             </a>
 
-            <!-- 7. Manajemen User (Khusus Super Admin) -->
+            <!-- 7. Manajemen Pengguna (Khusus Super Admin) -->
             <a href="/users" class="action-grid-card group" id="serviceCardUsers">
                 <div class="action-grid-icon-box">
                     <!-- Tabler Icon: User Check -->
@@ -140,7 +140,7 @@
                         <path d="M15 19l2 2l4 -4"/>
                     </svg>
                 </div>
-                <span class="action-grid-label">Karyawan</span>
+                <span class="action-grid-label">Manajemen Pengguna</span>
             </a>
             {% endif %}
 

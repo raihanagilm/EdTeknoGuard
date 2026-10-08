@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{% block title %}Profil Saya — TeknoCust{% endblock %}
+{% block title %}Profil Saya: TeknoCust{% endblock %}
 
 {% block content %}
 <div class="space-y-4">
@@ -106,42 +106,42 @@
         </div>
     </a>
 
-    <!-- Card 2: Form Ganti Password Akun Portal (Tabler Card) -->
+    <!-- Card 2: Form Ganti Kata Sandi Akun Portal (Tabler Card) -->
     <div class="card-tabler p-4 space-y-3" x-data="{ openPwdForm: false }">
         <button type="button" 
                 @click="openPwdForm = !openPwdForm" 
                 class="w-full flex items-center justify-between text-xs font-bold text-slate-800 py-1 cursor-pointer">
             <span class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"/><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M8 11v-4a4 4 0 1 1 8 0v4"/></svg>
-                <span>Ganti Password Masuk Aplikasi Portal</span>
+                <span>Ganti Kata Sandi Masuk Portal</span>
             </span>
             <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="openPwdForm ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6l6 -6"/></svg>
         </button>
 
         <div x-show="openPwdForm" x-transition class="space-y-3 pt-2 border-t border-slate-100">
             <p class="text-[11px] text-slate-500">
-                Password awal Anda adalah <span class="font-mono font-bold text-slate-800">123456</span>. Anda dapat menggantinya secara berkala demi keamanan:
+                Kata sandi awal Anda adalah <span class="font-mono font-bold text-slate-800">123456</span>. Anda dapat menggantinya secara berkala demi keamanan:
             </p>
 
             <form action="{{ base_url or '' }}/profil/ganti-password" method="POST" class="space-y-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Password Saat Ini</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Kata Sandi Saat Ini</label>
                     <input type="password" name="password_lama" required placeholder="123456"
                            class="form-input-tabler">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Password Baru</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Kata Sandi Baru</label>
                     <input type="password" name="password_baru" required minlength="6" placeholder="Minimal 6 karakter"
                            class="form-input-tabler">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Ulangi Password Baru</label>
-                    <input type="password" name="konfirmasi_password" required minlength="6" placeholder="Ketik ulang password baru"
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Ulangi Kata Sandi Baru</label>
+                    <input type="password" name="konfirmasi_password" required minlength="6" placeholder="Ketik ulang kata sandi baru"
                            class="form-input-tabler">
                 </div>
                 <button type="submit" class="btn-tabler btn-tabler-primary w-full justify-center">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M14 4l0 4l-6 0l0 -4"/></svg>
-                    <span>Simpan Password Baru</span>
+                    <span>Simpan Kata Sandi Baru</span>
                 </button>
             </form>
         </div>

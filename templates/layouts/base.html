@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>{% block title %}TeknoGuard — NOC ONT Early Warning System{% endblock %}</title>
+    <title>{% block title %}TeknoGuard: NOC ONT Early Warning System{% endblock %}</title>
 
     <!-- Tabler Typography (Plus Jakarta Sans / Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -257,7 +257,7 @@
                             <path d="M6 21v-2a4 4 0 0 1 4 -4h4"/>
                             <path d="M15 19l2 2l4 -4"/>
                         </svg>
-                        <span class="tracking-tight">Manajemen User</span>
+                        <span class="tracking-tight">Manajemen Pengguna</span>
                     </a>
                     <a href="/settings"
                        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/settings') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
@@ -304,7 +304,7 @@
         <div class="p-3.5 border-t border-[#e6e8eb] bg-[#fafbfc]">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <div class="h-9 w-9 bg-[#206bc4] text-white font-black text-xs rounded-lg flex items-center justify-center shrink-0 shadow-2xs">
+                    <div class="h-9 w-9 bg-[#206bc4] text-white font-black text-xs rounded-none flex items-center justify-center shrink-0 shadow-2xs">
                         {% if request.state.current_user and request.state.current_user.get('user') %}
                             {{ request.state.current_user.get('user')[:2].upper() }}
                         {% else %}U{% endif %}
@@ -402,7 +402,7 @@
                                class="relative p-2 rounded-lg border border-[#e6e8eb] bg-white hover:bg-slate-50 text-slate-700 transition flex items-center justify-center min-h-[40px] min-w-[40px] shadow-2xs active:scale-95"
                                title="Pusat Notifikasi & Aduan">
                                 <!-- Tabler Icon: Bell -->
-                                <svg class="w-4.5 h-4.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                     <path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
                                     <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
                                 </svg>
@@ -602,8 +602,8 @@
                         <!-- Profile Button & Dropdown -->
                         <div class="relative" @click.away="profileMenuOpen = false">
                             <button @click="profileMenuOpen = !profileMenuOpen"
-                                    class="flex items-center gap-2 pl-1 hover:opacity-90 transition min-h-[40px]">
-                                <div class="h-8.5 w-8.5 bg-[#206bc4] text-white font-bold text-xs rounded-lg flex items-center justify-center shrink-0 shadow-2xs">
+                                    class="flex items-center gap-2.5 pl-1 hover:opacity-90 transition min-h-[40px]">
+                                <div class="h-9.5 w-9.5 bg-[#206bc4] text-white font-extrabold text-sm rounded-none flex items-center justify-center shrink-0 shadow-xs">
                                     {% if request.state.current_user and request.state.current_user.get('user') %}
                                         {{ request.state.current_user.get('user')[:2].upper() }}
                                     {% else %}U{% endif %}

@@ -28,6 +28,33 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Fixed
+- **Perbaikan Error 500 pada Manajemen Pengguna (`/users` & `/users/`)**:
+  - Memperbaiki kesalahan sintaksis Jinja2 berupa tag penutup `{% endblock %}` untuk blok `content` yang hilang sebelum `{% block scripts %}` pada berkas `templates/users/index.html`.
+  - Menambahkan rute alias `@router.get("")` dan `@router.get("/")` agar permintaan ke `/users` dan `/users/` langsung merespons dengan **HTTP 200 OK** tanpa redirect 307.
+
+- **Pembaruan Aksi Tabel dengan Menu Titik Tiga (3-Dot Action Dropdown)**:
+  - Mengubah seluruh baris aksi tabel yang padat dengan tombol inline menjadi tombol ikon titik tiga vertikal (`...` / Tabler `dots-vertical`) yang bersih dan ergonomis pada:
+    - **Tabel Data Pelanggan (`templates/customers/index.html`)**: Memadukan aksi *Cek Live Sinyal*, *Detail Pelanggan*, *Edit Data*, dan *Hapus Pelanggan* ke dalam satu popover menu dropdown terproteksi.
+    - **Tabel Manajemen Pengguna (`templates/users/index.html`)**: Memadukan aksi *Edit Akun*, *Aktifkan/Nonaktifkan Akun*, dan *Hapus Pengguna* ke dalam menu dropdown titik tiga dengan penanganan hak akses role.
+- **Penerapan Penuh Standar Copywriting & Human Clarity (`antislop-copywriting` & `antislop-human`)**:
+  - **Eliminasi Karakter Em Dash (`—`)**: Mengganti seluruh tanda `—` pada tag `<title>` dan judul halaman menjadi titik dua (`:`) atau koma (`,`) di seluruh template **TeknoGuard** (NOC) dan **TeknoCust** (Portal Warga).
+  - **Standardisasi Terminologi Lintas Halaman**:
+    - Menyeragamkan seluruh label pintasan menu mobile (`dashboardServiceGridContainer`) agar **100% identik** dengan nama menu sidebar desktop:
+      - `Pelanggan` &rarr; **`Data Pelanggan`**
+      - `Tiket Warga` &rarr; **`Tiket Keluhan`**
+      - `Kuota GB` &rarr; **`Pemantauan Kuota`**
+      - `Log Redaman` &rarr; **`Riwayat Redaman`**
+      - `Log Audit` &rarr; **`Log Aktivitas`**
+      - `Pengaturan` &rarr; **`Pengaturan Sistem`**
+      - `Pengguna` / `Manajemen User` &rarr; **`Manajemen Pengguna`**
+      - `TeknoCust` &rarr; **`TeknoCust`**
+    - Menyeragamkan sebutan kredensial menjadi **`Kata Sandi`** secara konsisten di seluruh form login, reset mandiri, ubah kata sandi profil, dan WiFi (menghapus campur aduk istilah `password`).
+    - Menyeragamkan menu akun menjadi **`Manajemen Pengguna`** (menggantikan inkonsistensi `Manajemen User` dan `Karyawan`).
+    - Menyeragamkan modul pelaporan warga menjadi **`Laporan Kendala`** dan **`Tiket Kendala`**.
+  - **Peningkatan Keterbacaan Kalimat Operasional**:
+    - Menyederhanakan kalimat instruksi jaringan, panduan VLAN IP gateway, dan subjudul kartu KPI agar aktif, lugas, dan mudah dipahami manusia tanpa kalimat berbelit.
+
 ### Added
 - **Standarisasi Penuh Tipografi & Ikon Tabler UI (`D:\UI_Panduan\UI1`) pada TeknoGuard**:
   - **Sistem Font Tabler (`Plus Jakarta Sans`)**: Mengadopsi skala ukuran font Tabler (`0.875rem` body base, line-height `1.4285714286`, `h1: 1.5rem`, `h2: 1.25rem`, `h3: 1rem`, `h4: 0.875rem`, `h5: 0.75rem`, `h6: 0.625rem`) dengan tracking tebal (`font-black`, `font-extrabold`).

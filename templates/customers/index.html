@@ -1,5 +1,4 @@
-{% extends "layouts/base.html" %} {% block title %}Manajemen Pelanggan —
-EdTeknoGuard{% endblock %} {% block content %}
+{% extends "layouts/base.html" %} {% block title %}Manajemen Pelanggan: EdTeknoGuard{% endblock %} {% block content %}
 <div class="space-y-6" x-data="customerApp()" x-init="initData()">
   <!-- Page Header & Action Buttons -->
   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
@@ -25,7 +24,7 @@ EdTeknoGuard{% endblock %} {% block content %}
         <span>Manajemen Pelanggan ONT</span>
       </h1>
       <p class="text-xs text-slate-500 mt-0.5">
-        Kelola data pelanggan, parameter IP router, tipe ONT modem, serta batas redaman baseline fiber optik.
+        Kelola data pelanggan, IP router, tipe modem ONT, dan batas redaman acuan fiber optik.
       </p>
     </div>
 
@@ -1337,103 +1336,104 @@ EdTeknoGuard{% endblock %} {% block content %}
                 </div>
               </td>
 
-              <!-- 8. Aksi -->
-              <td class="py-3 px-3 sm:px-4 text-right">
-                <div class="flex items-center justify-end gap-1 sm:gap-1.5">
-                  <!-- Cek Live -->
+              <!-- 8. Aksi (Dropdown Titik Tiga) -->
+              <td class="py-3 px-3 sm:px-4 text-right" x-data="{ openActionMenu: false }">
+                <div class="relative inline-block text-left" @click.outside="openActionMenu = false">
+                  <!-- Tombol Titik Tiga -->
                   <button
-                    @click="probeSingle(c)"
-                    title="Cek Live Redaman ONT Sekarang"
-                    :disabled="probingId === c.id_pelanggan"
-                    class="p-2 rounded-xl text-indigo-600 hover:bg-indigo-50 border border-indigo-100 transition disabled:opacity-50 min-h-[40px] min-w-[40px] flex items-center justify-center active:scale-[0.95]"
+                    type="button"
+                    @click="openActionMenu = !openActionMenu"
+                    class="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/70 transition min-h-[38px] min-w-[38px] inline-flex items-center justify-center active:scale-95 focus:outline-none"
+                    :class="{'bg-slate-100 text-slate-900 ring-2 ring-indigo-500/20': openActionMenu}"
+                    title="Pilih Aksi Pelanggan"
                   >
-                    <svg
-                      class="w-4 h-4"
-                      :class="{'animate-spin': probingId === c.id_pelanggan}"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
+                    <svg class="w-4.5 h-4.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                      <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                      <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                      <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
                     </svg>
                   </button>
 
-                  <!-- Edit -->
-                  <button
-                    @click="openEditModal(c)"
-                    title="Edit Data Pelanggan"
-                    class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 border border-slate-200/70 transition min-h-[40px] min-w-[40px] flex items-center justify-center active:scale-[0.95]"
+                  <!-- Popover Menu Aksi -->
+                  <div
+                    x-show="openActionMenu"
+                    x-transition:enter="transition ease-out duration-100"
+                    x-transition:enter-start="transform opacity-0 scale-95"
+                    x-transition:enter-end="transform opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="transform opacity-100 scale-100"
+                    x-transition:leave-end="transform opacity-0 scale-95"
+                    style="display: none;"
+                    class="absolute right-0 mt-1.5 w-48 rounded-2xl bg-white border border-slate-200 shadow-xl py-1.5 z-50 text-left divide-y divide-slate-100 focus:outline-none"
                   >
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
-                  </button>
+                    <div class="py-1">
+                      <!-- Cek Live -->
+                      <button
+                        type="button"
+                        @click="openActionMenu = false; probeSingle(c)"
+                        :disabled="probingId === c.id_pelanggan"
+                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/70 transition disabled:opacity-50 text-left"
+                      >
+                        <svg
+                          class="w-4 h-4 text-indigo-600 shrink-0"
+                          :class="{'animate-spin': probingId === c.id_pelanggan}"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                          />
+                        </svg>
+                        <span x-text="probingId === c.id_pelanggan ? 'Mengecek...' : 'Cek Live Sinyal'"></span>
+                      </button>
 
-                  <!-- Detail (Lihat Info WiFi & Log) -->
-                  <button
-                    @click="openDetailModal(c.id_pelanggan)"
-                    title="Lihat Detail Pelanggan, Kredensial WiFi & Riwayat Log"
-                    class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 border border-slate-200/70 transition min-h-[40px] min-w-[40px] flex items-center justify-center active:scale-[0.95]"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  </button>
+                      <!-- Detail -->
+                      <button
+                        type="button"
+                        @click="openActionMenu = false; openDetailModal(c.id_pelanggan)"
+                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/70 transition text-left"
+                      >
+                        <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>Detail Pelanggan</span>
+                      </button>
 
-                  <!-- Hapus (Ikon Sampah) -->
-                  {% if request.state.current_user and
-                  request.state.current_user.get('role') in ('super admin', 'admin') %}
-                  <button
-                    @click="confirmDeleteSingle(c)"
-                    title="Hapus Pelanggan"
-                    class="p-2 rounded-xl text-rose-600 hover:bg-rose-50 border border-rose-100 transition min-h-[40px] min-w-[40px] flex items-center justify-center active:scale-[0.95]"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                  {% endif %}
+                      <!-- Edit -->
+                      <button
+                        type="button"
+                        @click="openActionMenu = false; openEditModal(c)"
+                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/70 transition text-left"
+                      >
+                        <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span>Edit Data</span>
+                      </button>
+                    </div>
+
+                    <!-- Hapus (Ikon Sampah) -->
+                    {% if request.state.current_user and
+                    request.state.current_user.get('role') in ('super admin', 'admin') %}
+                    <div class="py-1">
+                      <button
+                        type="button"
+                        @click="openActionMenu = false; confirmDeleteSingle(c)"
+                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50/80 transition text-left"
+                      >
+                        <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Hapus Pelanggan</span>
+                      </button>
+                    </div>
+                    {% endif %}
+                  </div>
                 </div>
               </td>
             </tr>

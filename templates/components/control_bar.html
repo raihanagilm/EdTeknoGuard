@@ -27,13 +27,13 @@
                     <!-- Judul Status -->
                     <span class="text-sm font-bold text-slate-900">
                         <template x-if="isNetworkError">
-                            <span class="text-rose-700">Pemantauan: GAGAL TERHUBUNG KE JARINGAN ONT</span>
+                            <span class="text-rose-700">Status: Gagal Terhubung ke Jaringan Modem ONT</span>
                         </template>
                         <template x-if="!isNetworkError && engineStatus === 'RUNNING'">
-                            <span>Pemantauan Otomatis: AKTIF (Tiap <strong class="text-[#206bc4] font-black" x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</strong> Menit)</span>
+                            <span>Pemantauan Otomatis: Aktif (Setiap <strong class="text-[#206bc4] font-black" x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</strong> Menit)</span>
                         </template>
                         <template x-if="!isNetworkError && engineStatus === 'STOPPED'">
-                            <span class="text-amber-800">Pemantauan Otomatis: BERHENTI / DIJEDA</span>
+                            <span class="text-amber-800">Pemantauan Otomatis: Dijeda</span>
                         </template>
                     </span>
 
@@ -44,13 +44,13 @@
                               'bg-amber-50 text-amber-700 border-amber-200': engineStatus === 'STOPPED',
                               'bg-rose-50 text-rose-700 border-rose-200': isNetworkError
                           }"
-                          x-text="isNetworkError ? 'GAGAL JARINGAN' : (engineStatus === 'RUNNING' ? 'DIMULAI (AKTIF)' : 'BERHENTI (JEDA)')">
-                        DIMULAI (AKTIF)
+                          x-text="isNetworkError ? 'GAGAL JARINGAN' : (engineStatus === 'RUNNING' ? 'BERJALAN' : 'DIJEDA')">
+                        BERJALAN
                     </span>
                 </div>
 
                 <div class="text-xs text-slate-500 flex flex-wrap items-center gap-1.5 mt-0.5">
-                    <span>Pengecekan Terakhir:</span>
+                    <span>Pemeriksaan Terakhir:</span>
                     <strong class="text-slate-700 font-mono font-bold" x-text="lastScanTime || '{{ last_scan_time }}'">{{ last_scan_time }}</strong>
                     <span class="text-slate-300">|</span>
                     <span class="text-[11px]"
@@ -60,13 +60,13 @@
                               'text-rose-700 font-bold': isNetworkError
                           }">
                         <template x-if="isNetworkError">
-                            <span>Koneksi gateway modem ONT terputus (Cek IP LAN)</span>
+                            <span>Gateway modem ONT tidak merespons (Periksa koneksi LAN/VLAN)</span>
                         </template>
                         <template x-if="!isNetworkError && engineStatus === 'RUNNING'">
-                            <span x-text="'Sedang Dimulai: Worker memindai berkala tiap ' + (intervalMinutes || '{{ polling_interval }}') + ' menit'"></span>
+                            <span x-text="'Sedang Berjalan: Memindai otomatis setiap ' + (intervalMinutes || '{{ polling_interval }}') + ' menit'"></span>
                         </template>
                         <template x-if="!isNetworkError && engineStatus === 'STOPPED'">
-                            <span>Sedang Berhenti: Pemindaian otomatis dijeda oleh Admin</span>
+                            <span>Sedang Dijeda: Jadwal pemantauan dihentikan sementara</span>
                         </template>
                     </span>
                 </div>
@@ -227,11 +227,11 @@
                     <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
                     <path d="M12 7l0 5l3 3"/>
                 </svg>
-                <span>Durasi Siklus Pemindaian Terakhir:</span>
-                <strong class="text-slate-800 font-bold font-mono" x-text="scanProgress.last_scan_duration > 0 ? (formatTime(scanProgress.last_scan_duration) + ' / 1 kali pemindaian') : 'Belum ada riwayat pemindaian'">Belum ada riwayat pemindaian</strong>
+                <span>Durasi Pemindaian Terakhir:</span>
+                <strong class="text-slate-800 font-bold font-mono" x-text="scanProgress.last_scan_duration > 0 ? (formatTime(scanProgress.last_scan_duration) + ' / siklus') : 'Belum ada riwayat pemindaian'">Belum ada riwayat pemindaian</strong>
             </div>
             <div class="text-[11px] text-slate-400">
-                <span x-text="'Kapasitas: ' + (scanProgress.total || kpi.total_monitored || 0) + ' Modem ONT Terdaftar'"></span>
+                <span x-text="'Total Target: ' + (scanProgress.total || kpi.total_monitored || 0) + ' Modem ONT'"></span>
             </div>
         </div>
     </div>
@@ -245,8 +245,8 @@
             <path d="M11 12h1v4h1"/>
         </svg>
         <div class="leading-relaxed">
-            <strong class="text-slate-800">Ketentuan Koneksi Jaringan:</strong>
-            Sistem pemantauan ini <span class="text-[#206bc4] font-semibold">wajib terhubung pada segmen jaringan / VLAN ISP lokal yang sama</span> dengan modem ONT pelanggan (misal: IP gateway <code class="font-mono bg-white px-1.5 py-0.5 rounded border border-[#e6e8eb] text-slate-800">10.10.x.x</code>). Jika server tidak berada di segmen yang sama, status akan <strong>Gagal/LOS</strong>.
+            <strong class="text-slate-800">Panduan Jaringan:</strong>
+            Server pemantau <span class="text-[#206bc4] font-semibold">harus berada dalam satu segmen jaringan atau VLAN ISP yang sama</span> dengan modem ONT pelanggan (contoh: IP gateway <code class="font-mono bg-white px-1.5 py-0.5 rounded border border-[#e6e8eb] text-slate-800">10.10.x.x</code>) agar status perangkat terbaca normal.
         </div>
     </div>
 

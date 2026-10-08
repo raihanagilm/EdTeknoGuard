@@ -258,4 +258,14 @@ EdTeknoGuard/
      - *Desktop*: Menggunakan popover dropdown anchored langsung di bawah tombol pemicu, tabel baris lebar, sidebar kiri permanen, dan inline grid filters.
      - *Mobile*: Komponen harus diadaptasi secara ergonomis agar nyaman digunakan satu tangan (misal: slide-up bottom sheet drawer untuk filter, popover dengan posisi aman `fixed inset-x-3` agar tidak terpotong keluar layar / *no viewport clipping*, tabel dengan scroll horizontal halus `overflow-x-auto`, dan area sentuh minimal 44x44 px).
    - **Dilarang Keras**: Mengubah atau menambahkan fitur hanya pada satu viewport (misalnya hanya merombak desktop lalu membiarkan mobile rusak, terpotong/clipping, atau tanpa filter yang setara).
+6. **Standar Penulisan, Copywriting & Konsistensi Terminologi (Anti-Slop & Human Clarity)**:
+   - **Keseragaman Terminologi Baku**:
+     - Kredensial Keamanan Akun/WiFi **WAJIB** memakai istilah **`Kata Sandi`** (`Kata Sandi Baru`, `Kata Sandi WiFi`, `Ulangi Kata Sandi`). Dilarang mencampuradukkan dengan kata `Password`.
+     - Manajemen Akun Admin/Teknisi **WAJIB** memakai istilah **`Manajemen Pengguna`** (label pintasan mobile: **`Pengguna`**). Dilarang memakai `Manajemen User` atau `Karyawan`.
+     - Modul Pelaporan Warga **WAJIB** memakai istilah **`Laporan Kendala`** dan **`Tiket Kendala`**.
+     - Layanan Internet Warga **WAJIB** memakai istilah **`Akses Bebas Kuota (Unlimited)`**. **DILARANG KERAS** menampilkan kata atau angka *"Sisa Kuota"*.
+   - **Larangan Tanda Em Dash (`—`)**: Seluruh tag `<title>` dan header halaman dilarang menggunakan karakter em dash (`—`). Gunakan tanda titik dua (`:`) atau koma (`,`) dengan format: `Nama Halaman: Nama Aplikasi`.
+   - **Keterbacaan Manusia & Kalimat Aktif**: Kalimat petunjuk operasional, panduan jaringan, dan deskripsi sistem wajib disusun ringkas, aktif, dan langsung pada poin tanpa istilah berbelit.
+
+
 

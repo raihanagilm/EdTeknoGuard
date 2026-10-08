@@ -8,6 +8,7 @@ from app.modules.users.controller import UsersController
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+@router.get("", response_class=Response)
 @router.get("/", response_class=Response)
 async def users_page(request: Request, db: Session = Depends(get_db)):
     return UsersController.render_users_page(request, db)

@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{% block title %}Kelola WiFi — TeknoCust{% endblock %}
+{% block title %}Kelola WiFi: TeknoCust{% endblock %}
 
 {% block content %}
 <div class="space-y-4">
@@ -119,13 +119,13 @@
         </div>
     </div>
 
-    <!-- FORM GANTI NAMA & PASSWORD WIFI -->
+    <!-- FORM GANTI NAMA & KATA SANDI WIFI -->
     <div class="card-tabler p-5 space-y-4">
         <div class="border-b border-[#e6e8eb] pb-2">
             <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                Ganti Nama & Kata Sandi Baru
+                Ganti Nama &amp; Kata Sandi Baru
             </h3>
-            <p class="text-[11px] text-slate-500">Masukkan nama dan password WiFi baru yang mudah Anda ingat</p>
+            <p class="text-[11px] text-slate-500">Masukkan nama dan kata sandi WiFi baru yang mudah Anda ingat</p>
         </div>
 
         <form action="{{ base_url or '' }}/wifi/ganti" method="POST" class="space-y-4" x-data="{ showNewPwd: false, showKonfPwd: false }">
