@@ -104,6 +104,23 @@ def require_admin(request: Request) -> Dict[str, Any]:
         )
     return user
 
+def require_admin_role(request: Request) -> Dict[str, Any]:
+    """Proteksi endpoint untuk role admin dan super admin. Teknisi dilarang akses."""
+    user = require_admin(request)
+    if user.get("role") not in ["admin", "super admin"]:
+        accept_header = request.headers.get("accept", "")
+        if "text/html" in accept_header or (request.method == "GET" and not request.url.path.startswith("/api/")):
+            raise HTTPException(
+                status_code=status.HTTP_303_SEE_OTHER,
+                detail="Akses khusus Admin & Super Admin",
+                headers={"Location": "/"}
+            )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Akses ditolak. Fitur ini hanya untuk Admin dan Super Admin."
+        )
+    return user
+
 def require_super_admin(request: Request) -> Dict[str, Any]:
     user = require_admin(request)
     if user.get("role") != "super admin":

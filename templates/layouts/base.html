@@ -394,6 +394,8 @@
                         </svg>
                         <span class="tracking-tight">Manajemen Pengguna</span>
                     </a>
+                    {% endif %}
+                    {% if request.state.current_user and request.state.current_user.get('role') in ['admin', 'super admin'] %}
                     <a href="/settings"
                        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/settings') %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <!-- Tabler Icon: Settings / Adjustments -->
@@ -951,7 +953,7 @@
     </nav>
 
     <!-- Master App Script (Separated JS) -->
-    <script src="/static/js/app.js?v=3.1"></script>
+    <script src="/static/js/app.js?v=3.2"></script>
 
     {% block scripts %}{% endblock %}
 </body>

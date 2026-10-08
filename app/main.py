@@ -164,6 +164,35 @@ def poll_notifications_alias(request: Request):
     finally:
         db.close()
 
+@app.get("/api/portal/ticket-status")
+def portal_ticket_status_alias(request: Request):
+    from app.core.database import SessionLocal
+    from portal_pelanggan.core.security import get_current_customer_optional
+    from portal_pelanggan.modules.kendala.service import KendalaService
+    db = SessionLocal()
+    try:
+        cust = get_current_customer_optional(request)
+        if not cust:
+            return JSONResponse(status_code=401, content={"status": "unauthorized", "message": "Belum login"})
+        tickets = KendalaService.get_customer_tickets(db, cust["id_pelanggan"])
+        return {
+            "status": "success",
+            "id_pelanggan": cust["id_pelanggan"],
+            "total": len(tickets),
+            "tickets": [
+                {
+                    "id_tiket": t.id_tiket,
+                    "kategori": t.kategori,
+                    "status": t.status,
+                    "deskripsi": t.deskripsi,
+                    "created_at": str(t.created_at) if t.created_at else None
+                }
+                for t in tickets
+            ]
+        }
+    finally:
+        db.close()
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=settings.APP_PORT, reload=True)

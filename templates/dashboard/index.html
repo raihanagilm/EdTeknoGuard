@@ -118,8 +118,8 @@
                 <span class="action-grid-label">Log Aktivitas</span>
             </a>
 
-            <!-- 6. Pengaturan Sistem (Khusus Super Admin) -->
-            {% if current_user and current_user.get('role') == 'super admin' %}
+            <!-- 6. Pengaturan Sistem (Admin & Super Admin) -->
+            {% if current_user and current_user.get('role') in ['admin', 'super admin'] %}
             <a href="/settings" class="action-grid-card group" id="serviceCardSettings">
                 <div class="action-grid-icon-box">
                     <!-- Tabler Icon: Settings -->
@@ -130,8 +130,10 @@
                 </div>
                 <span class="action-grid-label">Pengaturan Sistem</span>
             </a>
+            {% endif %}
 
             <!-- 7. Manajemen Pengguna (Khusus Super Admin) -->
+            {% if current_user and current_user.get('role') == 'super admin' %}
             <a href="/users" class="action-grid-card group" id="serviceCardUsers">
                 <div class="action-grid-icon-box">
                     <!-- Tabler Icon: User Check -->

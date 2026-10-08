@@ -28,15 +28,19 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
-### Added
-- **Varlet-Style Material Design Page Transition Overlay**:
-  - Mengganti progress bar loading atas menjadi **Varlet-Inspired Material Loading Overlay** dengan circular spinner berputar modern (`#0909f6`), latar belakang *translucent blur* (`backdrop-blur-md`), kartu popup putih elevasi tinggi, dan teks status **"MEMUAT HALAMAN..."** saat berpindah rute/halaman atau mengeklik navigasi.
-  - Mengintegrasikan deteksi event `pageshow`, `load`, `beforeunload`, dan *instant link click interceptor* untuk transisi halaman yang responsif dan mulus.
-
 ### Changed
+- **Hak Akses & Otorisasi Pengaturan Sistem (`/settings` & `/pengaturan`)**:
+  - Membuka akses menu dan endpoint **Pengaturan Sistem** (`/settings`, `/pengaturan`, `GET /api/settings`, `POST /api/settings`) untuk role **`admin`** di samping **`super admin`**, memungkinkan Admin Cabang/Pusat/Banyumas mengatur parameter monitoring, ambang batas redaman, dan kredensial modem ONT.
+  - Mempertahankan menu **Manajemen Pengguna (`/users`)** eksklusif hanya untuk role **`super admin`**.
+  - Mengimplementasikan helper dependency `require_admin_role` di [`app/core/security.py`](file:///d:/databaru/Magang/EdTeknoGuard/app/core/security.py) yang membatasi role `teknisi` dari akses pengaturan dengan proteksi HTTP 303/403.
+  - Memperbarui visibilitas menu sidebar di [`templates/layouts/base.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/layouts/base.html) dan tombol cepat di Dashboard [`templates/dashboard/index.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/dashboard/index.html) agar muncul untuk role `admin` dan `super admin`.
+- **Penyelarasan & Perapian Tata Letak Kontrol Pemindaian (`Control Bar`)**:
+  - Merapikan posisi dan ukuran tombol kontrol pemindaian (**Jeda Pemindaian** & **Hentikan Stop**) pada tampilan mobile agar berjajar simetris secara 2-kolom seimbang dengan target sentuh ergonomis (`min-h-[36px]`).
+  - Merapikan susunan teks status pemindaian, badge counter ONT, indikator durasi berjalan, estimasi waktu total, dan progress bar visual agar terstruktur rapi, proporsional, dan tidak bertumpuk.
 - **Mobile Global Layout (Edge-to-Edge Full-Bleed Cards)**:
   - Menerapkan tata letak *edge-to-edge full-bleed* (tanpa margin samping/horizontal) secara global pada seluruh kartu aplikasi di tampilan ponsel (*mobile viewport* `< 640px`) meliputi halaman **Dashboard**, **Manajemen Pelanggan (`/pelanggan`)**, **Tiket Keluhan (`/admin/tiket`)**, **Pemantauan Kuota (`/admin/kuota`)**, **Riwayat Redaman (`/logs`)**, **Log Aktivitas (`/user-logs`)**, **Pengaturan Sistem (`/settings`)**, dan **Manajemen Pengguna (`/users`)**.
   - Mengecualikan kartu **Menu Layanan & Operasional** di Dashboard agar tetap mempertahankan margin samping dan lekukan sudut melengkung (*rounded card*) yang proporsional.
+
 - **Mobile Bottom Navigation Styling**:
   - Mengubah tab aktif pada bottom navigation (Pelanggan, Redaman, Tiket, Pengaturan) menjadi **latar putih dengan ikon dan teks berwarna hitam tegas (`#0f172a`)** untuk kontras dan visibilitas yang tajam.
   - Mempertahankan tombol tengah **Beranda** (`.tabler-dock-item-center`) dengan **warna biru aksen elektrik (`#0909f6`)** dan ikon/teks putih solid yang menonjol (*elevated center button*).
@@ -49,6 +53,10 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 
 ### Fixed
+- **Resolusi 500 Internal Server Error saat Simpan Pengaturan Sistem (`POST /api/settings`)**:
+  - Menambahkan atribut field `telegram_alert_interval_hours` pada [`SystemSettingsSchema`](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/schemas.py) untuk mencegah kegagalan `AttributeError` di `SystemSettingsService.update_settings` saat membaca parameter debounce notifikasi.
+- **Resolusi 404 Not Found pada Polling Status Tiket Pelanggan (`GET /api/portal/ticket-status`)**:
+  - Menyediakan endpoint API `/api/portal/ticket-status` pada router utama [`app/main.py`](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) dan [`portal_pelanggan/modules/kendala/routes.py`](file:///d:/databaru/Magang/EdTeknoGuard/portal_pelanggan/modules/kendala/routes.py) untuk menyajikan status tiket keluhan aktif pelanggan secara aman.
 - **Perbaikan Efek Hover pada Navigasi Mobile (Bottom Dock)**:
   - Memperbaiki efek *hover* pada menu navigasi bawah agar teks dan ikon tidak pudar/hilang ketika kursor diarahkan atau disentuh. Mengganti variabel warna hover menjadi warna putih tegas (`#ffffff`) dengan *background highlight* transparan halus (`rgba(255,255,255,0.12)`).
   - Memastikan tab yang sedang aktif tetap mempertahankan warna teks dan ikon hitam (`#0f172a`) di atas latar putih meskipun sedang di-hover.

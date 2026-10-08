@@ -223,58 +223,74 @@ function teknoGuardApp() {
 
 // --- Global Page Transition Loading Handler ---
 (function() {
-    const loader = document.getElementById('global-page-loader');
-    if (!loader) return;
+    function initLoader() {
+        const loader = document.getElementById('global-page-loader');
+        if (!loader) return;
 
-    function startLoader() {
-        loader.classList.remove('finished');
-        loader.classList.add('loading');
-    }
+        let safetyTimer = null;
 
-    function stopLoader() {
-        loader.classList.add('finished');
-        setTimeout(() => {
-            loader.classList.remove('loading', 'finished');
-        }, 500);
-    }
-
-    window.addEventListener('pageshow', stopLoader);
-    window.addEventListener('load', stopLoader);
-
-    document.addEventListener('click', function(e) {
-        const link = e.target.closest('a');
-        if (!link) return;
-
-        const href = link.getAttribute('href');
-        if (!href) return;
-
-        if (
-            href.startsWith('#') ||
-            href.startsWith('javascript:') ||
-            link.hasAttribute('download') ||
-            link.getAttribute('target') === '_blank' ||
-            link.hasAttribute('@click') ||
-            link.hasAttribute('x-on:click') ||
-            link.getAttribute('role') === 'button'
-        ) {
-            return;
+        function startLoader() {
+            if (safetyTimer) clearTimeout(safetyTimer);
+            loader.classList.remove('finished');
+            loader.classList.add('loading');
+            
+            // Safety timeout: jika halaman tidak berpindah dalam 3 detik, otomatis sembunyikan loader
+            safetyTimer = setTimeout(stopLoader, 3000);
         }
 
-        try {
-            const url = new URL(link.href, window.location.origin);
-            if (url.origin === window.location.origin && url.pathname !== window.location.pathname) {
-                startLoader();
-            } else if (url.origin === window.location.origin && (url.search !== window.location.search || url.pathname === window.location.pathname)) {
-                if (!url.hash || url.pathname !== window.location.pathname) {
+        function stopLoader() {
+            if (safetyTimer) clearTimeout(safetyTimer);
+            loader.classList.remove('loading');
+            loader.classList.add('finished');
+            setTimeout(() => {
+                loader.classList.remove('finished');
+            }, 300);
+        }
+
+        // Pastikan loader selalu hilang saat halaman siap
+        stopLoader();
+        window.addEventListener('DOMContentLoaded', stopLoader);
+        window.addEventListener('pageshow', stopLoader);
+        window.addEventListener('load', stopLoader);
+
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            if (!href) return;
+
+            if (
+                href.startsWith('#') ||
+                href.startsWith('javascript:') ||
+                link.hasAttribute('download') ||
+                link.getAttribute('target') === '_blank' ||
+                link.hasAttribute('@click') ||
+                link.hasAttribute('x-on:click') ||
+                link.getAttribute('role') === 'button'
+            ) {
+                return;
+            }
+
+            try {
+                const targetUrl = new URL(link.href, window.location.origin);
+                // Hanya picu jika navigasi ke halaman baru dalam domain yang sama
+                if (targetUrl.origin === window.location.origin && targetUrl.pathname !== window.location.pathname) {
                     startLoader();
                 }
+            } catch (err) {
+                // Ignore parse errors
             }
-        } catch (err) {
-            // Ignore parse errors
-        }
-    });
+        });
 
-    window.addEventListener('beforeunload', function() {
-        startLoader();
-    });
+        window.addEventListener('beforeunload', function() {
+            startLoader();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLoader);
+    } else {
+        initLoader();
+    }
 })();

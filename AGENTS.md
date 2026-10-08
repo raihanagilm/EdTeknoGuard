@@ -145,9 +145,9 @@ EdTeknoGuard/
    - Polling latar belakang otomatis (8-10 detik) memutakhirkan DOM secara *silent* dengan proteksi pause saat modal/kalender sedang dibuka.
 8. **Sistem 3 Role & Multi-Kantor Cabang**:
    - **Tiga Role Pengguna**:
-     - `super admin`: Akses penuh 3 kantor, satu-satunya role yang diizinkan mengakses menu Manajemen Pengguna (`/users`) dan Pengaturan Sistem (`/settings`).
-     - `admin`: Mengelola operasional teknis (CRUD pelanggan, monitoring, import) terbatas pada kantor cabang yang diizinkan (`allowed_kantor`). Tidak dapat mengakses menu User dan Pengaturan.
-     - `teknisi`: Menggantikan peran `karyawan` sebelumnya, fokus pada pemantauan real-time status redaman ONT & probe on-demand terbatas pada kantor yang diizinkan. Dibatasi dari aksi manipulasi/penghapusan data pelanggan.
+     - `super admin`: Akses penuh 3 kantor, satu-satunya role yang diizinkan mengakses menu Manajemen Pengguna (`/users`), serta memiliki akses penuh ke Pengaturan Sistem (`/settings`).
+     - `admin`: Mengelola operasional teknis (CRUD pelanggan, monitoring, import) terbatas pada kantor cabang yang diizinkan (`allowed_kantor`), serta dapat mengakses dan mengubah Pengaturan Sistem (`/settings` - Parameter & Ambang Batas dan Kredensial Modem ONT). Tidak dapat mengakses menu Manajemen Pengguna (`/users`).
+     - `teknisi`: Menggantikan peran `karyawan` sebelumnya, fokus pada pemantauan real-time status redaman ONT & probe on-demand terbatas pada kantor yang diizinkan. Dibatasi dari aksi manipulasi/penghapusan data pelanggan serta dibatasi dari menu Pengaturan Sistem dan Manajemen Pengguna.
    - **Tiga Wilayah Kantor**: `cabang` (Kantor Cabang), `pusat` (Kantor Pusat), dan `banyumas` (Kantor Banyumas).
    - **Office Switcher**: Dropdown interaktif di navbar atas untuk Super Admin dan user multi-kantor untuk berpindah kantor aktif (`cabang`, `pusat`, `banyumas`). Opsi "Semua Kantor" telah ditiadakan agar pemantauan, scanning, dan pelaporan selalu fokus dan terisolasi per kantor yang dipilih secara spesifik.
    - **Notifikasi Telegram**: Setiap alert redaman drop, status kritis/LOS, dan batch alert wajib memuat identitas wilayah kantor pelanggan (misal: `🏢 <b>Kantor:</b> CABANG`).

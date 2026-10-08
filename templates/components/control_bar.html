@@ -75,23 +75,23 @@
 
         <!-- Sisi Kanan: Tombol Kontrol Cerdas Tabler -->
         {% if current_user.get('role') in ['admin', 'super admin'] %}
-        <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
-            <!-- Indikator Animasi Memuat -->
-            <div x-show="isScanning || isToggling" class="flex items-center gap-1.5 mr-1 text-slate-500 text-xs font-semibold">
+        <div class="flex items-center justify-between sm:justify-end gap-2.5 flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+            <!-- Indikator Animasi Memuat (Hanya saat request jaringan) -->
+            <div x-show="isToggling" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 text-[#0808dd] text-xs font-bold shrink-0">
                 <svg class="animate-spin h-3.5 w-3.5 text-[#0808dd]" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span x-text="isScanning ? 'Memindai...' : 'Menyimpan...'"></span>
+                <span>Menyimpan...</span>
             </div>
 
             <!-- KONDISI 1: STANDBY / IDLE -->
             <template x-if="!isScanning && (!scanProgress || !scanProgress.is_paused)">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
                     <!-- Tombol Primary Realtime Colors: Mulai Pemantauan -->
                     <button @click="actionStartScan()"
                             :disabled="isToggling"
-                            class="btn btn-primary"
+                            class="btn btn-primary flex-1 sm:flex-none"
                             id="btnActionStartScan">
                         <!-- Tabler Icon: Player Play -->
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -104,7 +104,7 @@
                     {% if current_user and current_user.get('role') == 'super admin' %}
                     <button @click="actionToggleEngine()"
                             :disabled="isToggling"
-                            class="btn btn-default text-xs"
+                            class="btn btn-default text-xs flex-1 sm:flex-none"
                             id="btnActionToggleScheduler"
                             :title="engineStatus === 'RUNNING' ? 'Klik untuk menjeda jadwal pemindaian otomatis' : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis'">
                         <!-- Tabler Icon: Player Pause -->
@@ -124,49 +124,49 @@
 
             <!-- KONDISI 2: SEDANG MEMINDAI -->
             <template x-if="isScanning">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
                     <button @click="actionPauseScan()"
-                            class="btn btn-warning"
+                            class="btn btn-warning flex-1 sm:flex-none px-4 py-2 min-h-[36px] text-xs font-bold shadow-xs"
                             id="btnActionPauseScan">
                         <!-- Tabler Icon: Player Pause -->
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"/>
                             <path d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"/>
                         </svg>
-                        <span>Jeda</span>
+                        <span>Jeda Pemindaian</span>
                     </button>
 
                     <button @click="actionStopScan()"
-                            class="btn btn-danger"
+                            class="btn btn-danger flex-1 sm:flex-none px-4 py-2 min-h-[36px] text-xs font-bold shadow-xs"
                             id="btnActionStopScan">
                         <!-- Tabler Icon: Player Stop -->
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M5 5m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"/>
                         </svg>
-                        <span>Stop</span>
+                        <span>Hentikan (Stop)</span>
                     </button>
                 </div>
             </template>
 
             <!-- KONDISI 3: PEMINDAIAN DIJEDA -->
             <template x-if="!isScanning && scanProgress && scanProgress.is_paused">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
                     <button @click="actionResumeScan()"
-                            class="btn btn-success">
+                            class="btn btn-success flex-1 sm:flex-none px-4 py-2 min-h-[36px] text-xs font-bold shadow-xs">
                         <!-- Tabler Icon: Player Play -->
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M7 4v16l13 -8z"/>
                         </svg>
-                        <span>Lanjut</span>
+                        <span>Lanjutkan</span>
                     </button>
 
                     <button @click="actionStopScan()"
-                            class="btn btn-danger">
+                            class="btn btn-danger flex-1 sm:flex-none px-4 py-2 min-h-[36px] text-xs font-bold shadow-xs">
                         <!-- Tabler Icon: Player Stop -->
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M5 5m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"/>
                         </svg>
-                        <span>Stop</span>
+                        <span>Batalkan (Stop)</span>
                     </button>
                 </div>
             </template>
@@ -178,43 +178,44 @@
     <!-- Progress Bar Pemindaian Real-Time -->
     <div class="pt-3 border-t border-slate-100">
         <!-- Kondisi 1: Sedang Memindai -->
-        <div x-show="isScanning || (scanProgress && scanProgress.is_scanning)" class="space-y-2 bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-slate-800">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
+        <div x-show="isScanning || (scanProgress && scanProgress.is_scanning)" class="space-y-2.5 bg-slate-50 border border-slate-200/80 p-3.5 sm:p-4 rounded-xl text-slate-800 shadow-2xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                 <div class="flex items-center gap-2">
-                    <span class="status-dot status-dot-azure status-dot-animated"></span>
-                    <span class="font-bold text-slate-900">
+                    <span class="status-dot status-dot-azure status-dot-animated shrink-0"></span>
+                    <span class="font-extrabold text-slate-900 tracking-tight">
                         Proses Pemindaian <template x-if="scanProgress && scanProgress.target_kantor && scanProgress.target_kantor !== 'all'"><span class="uppercase font-extrabold text-[#0808dd]" x-text="'[' + scanProgress.target_kantor + ']'"></span></template>: <span class="text-[#0808dd] font-black font-mono text-sm" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span>
                         <span class="text-slate-500 font-semibold" x-text="' (' + (scanProgress.percent || 0) + '%)'">(0%)</span>
                     </span>
                 </div>
-                <div class="flex items-center gap-2.5 text-slate-500 text-[11px]">
-                    <span>Waktu Berjalan: <strong class="text-slate-900 font-mono" x-text="formatTime(scanProgress.elapsed_seconds)">0 dtk</strong></span>
-                    <span class="text-slate-300">•</span>
-                    <span class="bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700 font-medium">
+                <div class="flex items-center gap-2 text-slate-500 text-[11px] flex-wrap">
+                    <span class="bg-white px-2 py-0.5 rounded border border-slate-200">
+                        Waktu: <strong class="text-slate-900 font-mono font-bold" x-text="formatTime(scanProgress.elapsed_seconds)">0 dtk</strong>
+                    </span>
+                    <span class="bg-white px-2 py-0.5 rounded border border-slate-200">
                         Estimasi Total: <strong class="text-slate-900 font-mono font-bold" x-text="'~' + formatTime(scanProgress.estimated_total_seconds)">~0 dtk</strong>
                     </span>
                 </div>
             </div>
             <!-- Visual Progress Bar -->
-            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                <div class="bg-[#0808dd] h-2 rounded-full transition-all duration-300 ease-out"
+            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-[#0808dd] h-2.5 rounded-full transition-all duration-300 ease-out shadow-xs"
                      :style="'width: ' + Math.max(scanProgress.percent || 3, 3) + '%'"></div>
             </div>
         </div>
 
         <!-- Kondisi 2: Pemindaian Sedang Dijeda -->
-        <div x-show="!isScanning && scanProgress && scanProgress.is_paused" class="space-y-2 bg-amber-50 border border-amber-200 p-3.5 rounded-xl">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
-                <div class="flex items-center gap-2 text-amber-900 font-bold">
-                    <span class="status-dot status-dot-yellow"></span>
+        <div x-show="!isScanning && scanProgress && scanProgress.is_paused" class="space-y-2.5 bg-amber-50 border border-amber-200 p-3.5 sm:p-4 rounded-xl shadow-2xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2 text-amber-900 font-extrabold">
+                    <span class="status-dot status-dot-yellow shrink-0"></span>
                     <span>Pemindaian Terjeda <template x-if="scanProgress && scanProgress.target_kantor && scanProgress.target_kantor !== 'all'"><span class="uppercase font-extrabold text-amber-700" x-text="'[' + scanProgress.target_kantor + ']'"></span></template>: <span class="font-mono text-amber-700 font-extrabold" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span> <span x-text="' (' + (scanProgress.percent || 0) + '%)'">(0%)</span></span>
                 </div>
                 <div class="text-[11px] text-amber-800">
-                    Checkpoint tersimpan di JSON. Klik <strong>Lanjut</strong> untuk meneruskan atau <strong>Stop</strong> untuk membatalkan.
+                    Klik <strong>Lanjutkan</strong> untuk meneruskan atau <strong>Batalkan</strong> untuk stop.
                 </div>
             </div>
-            <div class="w-full bg-amber-200 rounded-full h-2 overflow-hidden">
-                <div class="bg-amber-500 h-2 rounded-full transition-all duration-300 ease-out"
+            <div class="w-full bg-amber-200 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-amber-500 h-2.5 rounded-full transition-all duration-300 ease-out"
                      :style="'width: ' + Math.max(scanProgress.percent || 3, 3) + '%'"></div>
             </div>
         </div>
