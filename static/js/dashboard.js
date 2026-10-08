@@ -336,16 +336,16 @@ document.addEventListener('alpine:init', () => {
                         {
                             label: 'Nilai Redaman Rata-rata',
                             data: [],
-                            borderColor: '#0284c7',
-                            backgroundColor: 'rgba(2, 132, 199, 0.12)',
-                            borderWidth: 3,
+                            borderColor: '#0909f6',
+                            backgroundColor: 'rgba(9, 9, 246, 0.10)',
+                            borderWidth: 2.5,
                             fill: true,
                             tension: 0.12,
-                            pointRadius: 6,
-                            pointHoverRadius: 9,
-                            pointBackgroundColor: '#0284c7',
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: '#0909f6',
                             pointBorderColor: '#FFFFFF',
-                            pointBorderWidth: 2.5,
+                            pointBorderWidth: 2,
                             showLine: true
                         },
                         {
@@ -398,7 +398,7 @@ document.addEventListener('alpine:init', () => {
                                     return `-${Math.round(dbm)} dBm`;
                                 },
                                 color: '#64748B',
-                                font: { size: 10.5, family: 'Plus Jakarta Sans', weight: '600' }
+                                font: { size: 10.5, family: 'Inter', weight: '600' }
                             },
                             grid: {
                                 color: (ctx) => {
@@ -413,7 +413,7 @@ document.addEventListener('alpine:init', () => {
                         x: {
                             ticks: {
                                 color: '#64748B',
-                                font: { size: 11, family: 'Plus Jakarta Sans' },
+                                font: { size: 11, family: 'Inter' },
                                 maxRotation: 0,
                                 autoSkip: true,
                                 maxTicksLimit: 12
@@ -427,8 +427,8 @@ document.addEventListener('alpine:init', () => {
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(15, 23, 42, 0.94)',
-                            titleFont: { family: 'Plus Jakarta Sans', size: 11, weight: 'bold' },
-                            bodyFont: { family: 'Plus Jakarta Sans', size: 10, weight: '500' },
+                            titleFont: { family: 'Inter', size: 11, weight: 'bold' },
+                            bodyFont: { family: 'Inter', size: 10, weight: '500' },
                             padding: { top: 8, bottom: 8, left: 10, right: 10 },
                             cornerRadius: 8,
                             displayColors: false,

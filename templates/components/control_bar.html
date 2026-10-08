@@ -14,9 +14,9 @@
             <!-- Indikator Lingkaran Status LED Tabler -->
             <div class="h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0"
                  :class="{
-                     'bg-[#2fb344] shadow-xs shadow-emerald-200': engineStatus === 'RUNNING' && !isNetworkError,
-                     'bg-[#f59f00] shadow-xs shadow-amber-200': engineStatus === 'STOPPED',
-                     'bg-[#d63939] shadow-xs shadow-rose-200': isNetworkError
+                     'bg-[#10b981] shadow-xs shadow-emerald-200': engineStatus === 'RUNNING' && !isNetworkError,
+                     'bg-[#f59e0b] shadow-xs shadow-amber-200': engineStatus === 'STOPPED',
+                     'bg-[#ef4444] shadow-xs shadow-rose-200': isNetworkError
                  }">
                 <div class="h-2 w-2 rounded-full bg-white"
                      :class="engineStatus === 'RUNNING' && !isNetworkError ? 'animate-ping' : ''"></div>
@@ -25,15 +25,15 @@
             <div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <!-- Judul Status -->
-                    <span class="text-sm font-bold text-slate-900">
+                    <span class="text-sm font-extrabold text-slate-900">
                         <template x-if="isNetworkError">
-                            <span class="text-rose-700">Status: Gagal Terhubung ke Jaringan Modem ONT</span>
+                            <span class="text-rose-600">Status: Gagal Terhubung ke Jaringan Modem ONT</span>
                         </template>
                         <template x-if="!isNetworkError && engineStatus === 'RUNNING'">
-                            <span>Pemantauan Otomatis: Aktif (Setiap <strong class="text-[#206bc4] font-black" x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</strong> Menit)</span>
+                            <span>Pemantauan Otomatis: Aktif (Setiap <strong class="text-[#0808dd] font-black underline decoration-indigo-200" x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</strong> Menit)</span>
                         </template>
                         <template x-if="!isNetworkError && engineStatus === 'STOPPED'">
-                            <span class="text-amber-800">Pemantauan Otomatis: Dijeda</span>
+                            <span class="text-amber-700">Pemantauan Otomatis: Dijeda</span>
                         </template>
                     </span>
 
@@ -51,13 +51,13 @@
 
                 <div class="text-xs text-slate-500 flex flex-wrap items-center gap-1.5 mt-0.5">
                     <span>Pemeriksaan Terakhir:</span>
-                    <strong class="text-slate-700 font-mono font-bold" x-text="lastScanTime || '{{ last_scan_time }}'">{{ last_scan_time }}</strong>
+                    <strong class="text-slate-800 font-mono font-bold" x-text="lastScanTime || '{{ last_scan_time }}'">{{ last_scan_time }}</strong>
                     <span class="text-slate-300">|</span>
                     <span class="text-[11px]"
                           :class="{
                               'text-emerald-700 font-medium': engineStatus === 'RUNNING' && !isNetworkError,
                               'text-amber-700 font-medium': engineStatus === 'STOPPED',
-                              'text-rose-700 font-bold': isNetworkError
+                              'text-rose-600 font-bold': isNetworkError
                           }">
                         <template x-if="isNetworkError">
                             <span>Gateway modem ONT tidak merespons (Periksa koneksi LAN/VLAN)</span>
@@ -78,7 +78,7 @@
         <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
             <!-- Indikator Animasi Memuat -->
             <div x-show="isScanning || isToggling" class="flex items-center gap-1.5 mr-1 text-slate-500 text-xs font-semibold">
-                <svg class="animate-spin h-3.5 w-3.5 text-[#206bc4]" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin h-3.5 w-3.5 text-[#0808dd]" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -88,7 +88,7 @@
             <!-- KONDISI 1: STANDBY / IDLE -->
             <template x-if="!isScanning && (!scanProgress || !scanProgress.is_paused)">
                 <div class="flex items-center gap-2">
-                    <!-- Tombol Primary Azure: Mulai Pemantauan -->
+                    <!-- Tombol Primary Realtime Colors: Mulai Pemantauan -->
                     <button @click="actionStartScan()"
                             :disabled="isToggling"
                             class="btn btn-primary"
@@ -176,34 +176,34 @@
     </div>
 
     <!-- Progress Bar Pemindaian Real-Time -->
-    <div class="pt-3 border-t border-[#e6e8eb]">
+    <div class="pt-3 border-t border-slate-100">
         <!-- Kondisi 1: Sedang Memindai -->
-        <div x-show="isScanning || (scanProgress && scanProgress.is_scanning)" class="space-y-2 bg-[#e9f1fa] border border-[#cde0f5] p-3.5 rounded-lg">
+        <div x-show="isScanning || (scanProgress && scanProgress.is_scanning)" class="space-y-2 bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-slate-800">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="status-dot status-dot-azure status-dot-animated"></span>
                     <span class="font-bold text-slate-900">
-                        Proses Pemindaian <template x-if="scanProgress && scanProgress.target_kantor && scanProgress.target_kantor !== 'all'"><span class="uppercase font-extrabold text-[#206bc4]" x-text="'[' + scanProgress.target_kantor + ']'"></span></template>: <span class="text-[#206bc4] font-black font-mono text-sm" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span>
-                        <span class="text-slate-600 font-semibold" x-text="' (' + (scanProgress.percent || 0) + '%)'">(0%)</span>
+                        Proses Pemindaian <template x-if="scanProgress && scanProgress.target_kantor && scanProgress.target_kantor !== 'all'"><span class="uppercase font-extrabold text-[#0808dd]" x-text="'[' + scanProgress.target_kantor + ']'"></span></template>: <span class="text-[#0808dd] font-black font-mono text-sm" x-text="(scanProgress.current || 0) + ' / ' + (scanProgress.total || 0) + ' ONT'">0 / 0 ONT</span>
+                        <span class="text-slate-500 font-semibold" x-text="' (' + (scanProgress.percent || 0) + '%)'">(0%)</span>
                     </span>
                 </div>
-                <div class="flex items-center gap-2.5 text-slate-600 text-[11px]">
+                <div class="flex items-center gap-2.5 text-slate-500 text-[11px]">
                     <span>Waktu Berjalan: <strong class="text-slate-900 font-mono" x-text="formatTime(scanProgress.elapsed_seconds)">0 dtk</strong></span>
                     <span class="text-slate-300">•</span>
-                    <span class="bg-white px-2 py-0.5 rounded border border-[#cde0f5] text-[#206bc4]">
-                        Estimasi Total: <strong class="text-[#17549c] font-mono font-bold" x-text="'~' + formatTime(scanProgress.estimated_total_seconds)">~0 dtk</strong>
+                    <span class="bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700 font-medium">
+                        Estimasi Total: <strong class="text-slate-900 font-mono font-bold" x-text="'~' + formatTime(scanProgress.estimated_total_seconds)">~0 dtk</strong>
                     </span>
                 </div>
             </div>
             <!-- Visual Progress Bar -->
-            <div class="w-full bg-[#cde0f5] rounded-full h-2 overflow-hidden">
-                <div class="bg-[#206bc4] h-2 rounded-full transition-all duration-300 ease-out"
+            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                <div class="bg-[#0808dd] h-2 rounded-full transition-all duration-300 ease-out"
                      :style="'width: ' + Math.max(scanProgress.percent || 3, 3) + '%'"></div>
             </div>
         </div>
 
         <!-- Kondisi 2: Pemindaian Sedang Dijeda -->
-        <div x-show="!isScanning && scanProgress && scanProgress.is_paused" class="space-y-2 bg-amber-50 border border-amber-200 p-3.5 rounded-lg">
+        <div x-show="!isScanning && scanProgress && scanProgress.is_paused" class="space-y-2 bg-amber-50 border border-amber-200 p-3.5 rounded-xl">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
                 <div class="flex items-center gap-2 text-amber-900 font-bold">
                     <span class="status-dot status-dot-yellow"></span>
@@ -220,33 +220,33 @@
         </div>
 
         <!-- Kondisi 3: Standby -->
-        <div x-show="!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused))" class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 bg-[#fafbfc] px-3.5 py-2 rounded-lg border border-[#e6e8eb]">
+        <div x-show="!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused))" class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700 bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-100">
             <div class="flex items-center gap-2">
                 <!-- Tabler Icon: Clock -->
-                <svg class="w-4 h-4 text-[#206bc4]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
                     <path d="M12 7l0 5l3 3"/>
                 </svg>
-                <span>Durasi Pemindaian Terakhir:</span>
+                <span class="text-slate-500 font-medium">Durasi Pemindaian Terakhir:</span>
                 <strong class="text-slate-800 font-bold font-mono" x-text="scanProgress.last_scan_duration > 0 ? (formatTime(scanProgress.last_scan_duration) + ' / siklus') : 'Belum ada riwayat pemindaian'">Belum ada riwayat pemindaian</strong>
             </div>
-            <div class="text-[11px] text-slate-400">
+            <div class="text-[11px] text-slate-500 font-medium">
                 <span x-text="'Total Target: ' + (scanProgress.total || kpi.total_monitored || 0) + ' Modem ONT'"></span>
             </div>
         </div>
     </div>
 
     <!-- Informasi Edukatif Jaringan Lokal -->
-    <div class="hidden sm:flex pt-3 border-t border-[#e6e8eb] items-start gap-2.5 text-xs text-slate-500 bg-[#fafbfc] p-3 rounded-lg border border-[#e6e8eb]">
+    <div class="hidden sm:flex pt-3 border-t border-slate-100 items-start gap-2.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
         <!-- Tabler Icon: Info Circle -->
-        <svg class="w-4 h-4 text-[#206bc4] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-[#0808dd] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
             <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
             <path d="M12 9h.01"/>
             <path d="M11 12h1v4h1"/>
         </svg>
         <div class="leading-relaxed">
-            <strong class="text-slate-800">Panduan Jaringan:</strong>
-            Server pemantau <span class="text-[#206bc4] font-semibold">harus berada dalam satu segmen jaringan atau VLAN ISP yang sama</span> dengan modem ONT pelanggan (contoh: IP gateway <code class="font-mono bg-white px-1.5 py-0.5 rounded border border-[#e6e8eb] text-slate-800">10.10.x.x</code>) agar status perangkat terbaca normal.
+            <strong class="text-slate-900">Panduan Jaringan:</strong>
+            Server pemantau <span class="text-slate-900 font-semibold underline decoration-slate-300">harus berada dalam satu segmen jaringan atau VLAN ISP yang sama</span> dengan modem ONT pelanggan (contoh: IP gateway <code class="font-mono bg-slate-200 px-1.5 py-0.5 rounded border border-slate-300 text-slate-900 font-bold">10.10.x.x</code>) agar status perangkat terbaca normal.
         </div>
     </div>
 

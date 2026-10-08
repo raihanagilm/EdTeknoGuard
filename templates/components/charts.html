@@ -7,17 +7,17 @@
             <div class="flex flex-wrap items-center gap-2">
                 <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                     <!-- Tabler Icon: Chart Line -->
-                    <svg class="w-4 h-4 text-[#206bc4]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-[#0808dd]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M4 19l16 0"/>
                         <path d="M4 15l4 -6l4 2l4 -5l4 4"/>
                     </svg>
                     Tren Riwayat Kualitas Redaman (dBm)
                 </h3>
-                <span class="inline-flex items-center px-2 py-0.2 rounded text-[10px] font-bold bg-[#fef5e6] text-[#b27200] border border-[#ffe8b3]">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                     Batas Peringatan: -26.0 dBm
                 </span>
             </div>
-            <p class="text-xs text-slate-400 mt-0.5">Pemantauan kurva fluktuasi sinyal optik rata-rata jaringan ISP dari tabel database</p>
+            <p class="text-xs text-slate-500 mt-0.5">Pemantauan kurva fluktuasi sinyal optik rata-rata jaringan ISP dari tabel database</p>
         </div>
 
         <!-- Filter Tanggal & Rentang Waktu (Tabler Segmented Control) -->
@@ -30,24 +30,24 @@
                        :max="todayDate"
                        @change="onDateSelect()"
                        title="Pilih tanggal spesifik untuk melihat tren grafik"
-                       class="px-2.5 py-1.5 text-xs bg-slate-50 hover:bg-slate-100 focus:bg-white text-slate-800 border border-[#e6e8eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#206bc4]/20 min-h-[34px] font-semibold transition cursor-pointer">
+                       class="px-2.5 py-1.5 text-xs bg-slate-50 hover:bg-slate-100 focus:bg-white text-slate-800 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0808dd]/20 min-h-[34px] font-semibold transition cursor-pointer">
             </div>
 
             <!-- Segmented Control -->
-            <div class="apple-segmented-control flex-1 sm:flex-none">
+            <div class="apple-segmented-control flex-1 sm:flex-none bg-slate-100 border-slate-200">
                 <button @click="switchChartRange('today')"
-                        :class="chartRange === 'today' ? 'active' : ''"
-                        class="apple-segmented-btn flex-1 sm:flex-none">
+                        :class="chartRange === 'today' ? 'active !bg-white !text-[#0808dd] shadow-xs' : 'text-slate-600'"
+                        class="apple-segmented-btn flex-1 sm:flex-none font-bold">
                     Hari Ini
                 </button>
                 <button @click="switchChartRange('yesterday')"
-                        :class="chartRange === 'yesterday' ? 'active' : ''"
-                        class="apple-segmented-btn flex-1 sm:flex-none">
+                        :class="chartRange === 'yesterday' ? 'active !bg-white !text-[#0808dd] shadow-xs' : 'text-slate-600'"
+                        class="apple-segmented-btn flex-1 sm:flex-none font-bold">
                     Kemarin
                 </button>
                 <button @click="switchChartRange('week')"
-                        :class="chartRange === 'week' ? 'active' : ''"
-                        class="apple-segmented-btn flex-1 sm:flex-none">
+                        :class="chartRange === 'week' ? 'active !bg-white !text-[#0808dd] shadow-xs' : 'text-slate-600'"
+                        class="apple-segmented-btn flex-1 sm:flex-none font-bold">
                     7 Hari
                 </button>
             </div>
@@ -55,9 +55,9 @@
     </div>
 
     <!-- Data Summary Chips (Tabler Modular Chips) -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3.5 p-2.5 bg-[#fafbfc] rounded-lg border border-[#e6e8eb] text-xs">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-700">
         <div class="flex items-center gap-2">
-            <div class="p-1.5 rounded-md bg-[#e9f1fa] text-[#206bc4] shrink-0">
+            <div class="p-1.5 rounded-lg bg-indigo-50 text-[#0808dd] shrink-0">
                 <!-- Tabler Icon: Trending Up -->
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M3 17l6 -6l4 4l8 -8"/>
@@ -71,7 +71,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <div class="p-1.5 rounded-md bg-[#eaf7ec] text-[#2fb344] shrink-0">
+            <div class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
                 <!-- Tabler Icon: Circle Arrow Up (Terbaik) -->
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
@@ -82,12 +82,12 @@
             </div>
             <div>
                 <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Terbaik:</span>
-                <span class="font-extrabold text-slate-800" x-text="chartStats.min_dbm !== null ? chartStats.min_dbm + ' dBm' : '-'"></span>
+                <span class="font-extrabold text-emerald-600" x-text="chartStats.min_dbm !== null ? chartStats.min_dbm + ' dBm' : '-'"></span>
             </div>
         </div>
 
         <div class="flex items-center gap-2">
-            <div class="p-1.5 rounded-md bg-[#fef5e6] text-[#f59f00] shrink-0">
+            <div class="p-1.5 rounded-lg bg-rose-50 text-rose-600 shrink-0">
                 <!-- Tabler Icon: Circle Arrow Down (Terendah) -->
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
@@ -98,12 +98,12 @@
             </div>
             <div>
                 <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Terendah:</span>
-                <span class="font-extrabold text-slate-800" x-text="chartStats.max_dbm !== null ? chartStats.max_dbm + ' dBm' : '-'"></span>
+                <span class="font-extrabold text-rose-600" x-text="chartStats.max_dbm !== null ? chartStats.max_dbm + ' dBm' : '-'"></span>
             </div>
         </div>
 
         <div class="flex items-center gap-2">
-            <div class="p-1.5 rounded-md bg-slate-200 text-slate-700 shrink-0">
+            <div class="p-1.5 rounded-lg bg-slate-100 text-slate-600 shrink-0">
                 <!-- Tabler Icon: Chart Bar / Sample Points -->
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                     <path d="M3 12m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>
@@ -122,10 +122,10 @@
     <!-- Chart Canvas Container -->
     <div class="relative w-full h-[250px] sm:h-[290px] overflow-hidden" id="chart-canvas-container">
         <!-- Interactive Zoom Controls (Khusus Mobile: sm:hidden) -->
-        <div class="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-1 rounded-md border border-[#e6e8eb] shadow-xs select-none">
+        <div class="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-1 rounded-md border border-slate-200 shadow-xs select-none">
             <button @click="zoomInChart()"
                     type="button"
-                    class="w-6 h-6 rounded bg-slate-100 hover:bg-[#e9f1fa] hover:text-[#206bc4] text-slate-700 font-bold flex items-center justify-center transition active:scale-90"
+                    class="w-6 h-6 rounded bg-slate-100 hover:bg-indigo-50 hover:text-[#0808dd] text-slate-700 font-bold flex items-center justify-center transition active:scale-90"
                     title="Perbesar Grafik">
                 <!-- Tabler Icon: Zoom In -->
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@
             </button>
             <button @click="zoomOutChart()"
                     type="button"
-                    class="w-6 h-6 rounded bg-slate-100 hover:bg-[#e9f1fa] hover:text-[#206bc4] text-slate-700 font-bold flex items-center justify-center transition active:scale-90"
+                    class="w-6 h-6 rounded bg-slate-100 hover:bg-indigo-50 hover:text-[#0808dd] text-slate-700 font-bold flex items-center justify-center transition active:scale-90"
                     title="Perkecil Grafik">
                 <!-- Tabler Icon: Zoom Out -->
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -161,7 +161,7 @@
         <canvas id="redamanChart" class="transition-transform duration-200 ease-out origin-center"></canvas>
     </div>
 
-    <div class="mt-3 pt-3 border-t border-[#e6e8eb] flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+    <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
         <div class="flex flex-wrap items-center gap-3">
             <template x-for="(ds, idx) in activeDatasets.filter(d => !d.isThreshold)" :key="idx">
                 <div class="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition select-none"
@@ -173,11 +173,11 @@
             </template>
 
             <div class="flex items-center gap-1.5 ml-1 pl-2 border-l border-slate-200">
-                <span class="h-0.5 w-3 bg-amber-500 inline-block"></span>
+                <span class="h-0.5 w-3 bg-amber-400 inline-block"></span>
                 <span class="text-amber-700 font-bold">Garis Warning (-26.0 dBm)</span>
             </div>
             <div class="flex items-center gap-1.5">
-                <span class="h-0.5 w-3 bg-rose-500 inline-block"></span>
+                <span class="h-0.5 w-3 bg-rose-400 inline-block"></span>
                 <span class="text-rose-700 font-bold">Garis Kritis (-27.0 dBm)</span>
             </div>
         </div>

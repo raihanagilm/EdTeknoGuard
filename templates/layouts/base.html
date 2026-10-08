@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-[#f4f6fa] text-slate-800 antialiased">
+<html lang="id" class="h-full bg-[#f8fafc] text-slate-900 antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>{% block title %}TeknoGuard: NOC ONT Early Warning System{% endblock %}</title>
 
-    <!-- Tabler Typography (Plus Jakarta Sans / Inter) -->
+    <!-- Google Fonts: Inter (Realtime Colors Standard) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS (CDN) -->
     <script>
@@ -28,31 +28,93 @@
                 extend: {
                     colors: {
                         tblr: {
-                            blue: '#206bc4',
-                            'blue-hover': '#17549c',
-                            'blue-lt': '#e9f1fa',
-                            green: '#2fb344',
-                            'green-lt': '#eaf7ec',
-                            yellow: '#f59f00',
-                            'yellow-lt': '#fef5e6',
-                            red: '#d63939',
-                            'red-lt': '#fbebeb',
-                            slate: '#626976',
-                            canvas: '#f4f6fa',
-                            border: '#e6e8eb'
+                            blue: '#0909f6',
+                            'blue-hover': '#0707c5',
+                            'blue-lt': '#e6e6fe',
+                            secondary: '#0647f9',
+                            accent: '#0909f6',
+                            sky: '#7480f1',
+                            green: '#10b981',
+                            'green-lt': '#d1fae5',
+                            yellow: '#f59e0b',
+                            'yellow-lt': '#fef3c7',
+                            red: '#ef4444',
+                            'red-lt': '#fee2e2',
+                            slate: '#333333',
+                            navy: '#0e1a8b',
+                            muted: '#666666',
+                            canvas: '#e8eafd',
+                            'canvas-subtle': '#d1d5fa',
+                            border: '#a2abf6'
+                        },
+                        text: {
+                            50: '#f2f2f2',
+                            100: '#e6e6e6',
+                            200: '#cccccc',
+                            300: '#b3b3b3',
+                            400: '#999999',
+                            500: '#808080',
+                            600: '#666666',
+                            700: '#4d4d4d',
+                            800: '#333333',
+                            900: '#1a1a1a',
+                            950: '#0d0d0d',
+                        },
+                        background: {
+                            50: '#e8eafd',
+                            100: '#d1d5fa',
+                            200: '#a2abf6',
+                            300: '#7480f1',
+                            400: '#4556ed',
+                            500: '#172ce8',
+                            600: '#1223ba',
+                            700: '#0e1a8b',
+                            800: '#09125d',
+                            900: '#05092e',
+                            950: '#020417',
                         },
                         primary: {
-                            50: '#eef6ff',
-                            100: '#e0f0fe',
-                            500: '#206bc4',
-                            600: '#1d5eb0',
-                            700: '#17549c',
-                            800: '#14437a',
-                            900: '#0f335c',
+                            50: '#f2f2f2',
+                            100: '#e6e6e6',
+                            200: '#cccccc',
+                            300: '#b3b3b3',
+                            400: '#999999',
+                            500: '#808080',
+                            600: '#666666',
+                            700: '#4d4d4d',
+                            800: '#333333',
+                            900: '#1a1a1a',
+                            950: '#0d0d0d',
+                        },
+                        secondary: {
+                            50: '#e6edfe',
+                            100: '#cddafe',
+                            200: '#9cb5fc',
+                            300: '#6a91fb',
+                            400: '#386cfa',
+                            500: '#0647f9',
+                            600: '#0539c7',
+                            700: '#042b95',
+                            800: '#031c63',
+                            900: '#010e32',
+                            950: '#010719',
+                        },
+                        accent: {
+                            50: '#e6e6fe',
+                            100: '#cecefd',
+                            200: '#9d9dfb',
+                            300: '#6b6bfa',
+                            400: '#3a3af8',
+                            500: '#0909f6',
+                            600: '#0707c5',
+                            700: '#050594',
+                            800: '#040462',
+                            900: '#020231',
+                            950: '#010119',
                         }
                     },
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                        sans: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
                         mono: ['"SF Mono"', 'Menlo', 'Monaco', 'Consolas', 'monospace']
                     }
                 }
@@ -61,10 +123,10 @@
     </script>
 
     <!-- Tabler Reusable Component Design System (Cards, Buttons, Badges, Modals, Forms) -->
-    <link rel="stylesheet" href="/static/css/components.css?v=3.1">
+    <link rel="stylesheet" href="/static/css/components.css?v=4.1">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/custom.css?v=3.1">
+    <link rel="stylesheet" href="/static/css/custom.css?v=4.1">
 
     <!-- Chart.js & Zoom Plugin CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -84,9 +146,9 @@
             left: 0;
             height: 3px;
             width: 0%;
-            background: linear-gradient(90deg, #206bc4, #4299e1, #2fb344);
+            background: linear-gradient(90deg, #0909f6, #7480f1, #0647f9);
             z-index: 99999;
-            box-shadow: 0 0 10px rgba(32, 107, 196, 0.7);
+            box-shadow: 0 0 10px rgba(9, 9, 246, 0.7);
             transition: width 0.25s ease-out, opacity 0.3s ease;
             pointer-events: none;
             opacity: 0;
@@ -106,7 +168,7 @@
     {% block head %}{% endblock %}
 </head>
 
-<body class="min-h-full bg-[#f4f6fa] text-slate-800 antialiased"
+<body class="min-h-full bg-[#f8fafc] text-slate-900 antialiased font-sans"
       x-data="teknoGuardApp()"
       x-init="init()">
 
@@ -117,25 +179,25 @@
     <!-- 1. SIDEBAR DESKTOP (TABLER ENTERPRISE SIDEBAR - lg:flex w-64)             -->
     <!-- ========================================================================= -->
     <aside :class="sidebarCollapsed ? '-translate-x-full lg:w-0 opacity-0 pointer-events-none' : 'translate-x-0 lg:w-64 opacity-100'"
-           class="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col bg-white border-r border-[#e6e8eb] shadow-xs transition-all duration-300 ease-in-out">
+           class="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col bg-[#031f6d] border-r border-[#386cfa]/30 shadow-md transition-all duration-300 ease-in-out text-white">
         
         <!-- Brand Logo Header & Collapse Button (Tabler Style) -->
-        <div class="flex items-center justify-between px-4 h-16 border-b border-[#e6e8eb] shrink-0 gap-2 bg-white">
+        <div class="flex items-center justify-between px-4 h-16 border-b border-[#386cfa]/30 shrink-0 gap-2 bg-[#031f6d]">
             <a href="/" class="flex items-center gap-2.5 group min-w-0 flex-1 text-decoration-none">
-                <div class="h-9 w-9 rounded-lg bg-[#206bc4] flex items-center justify-center text-white shadow-xs group-hover:bg-[#17549c] transition shrink-0">
+                <div class="h-9 w-9 rounded-lg bg-white flex items-center justify-center text-[#031f6d] shadow-sm group-hover:bg-[#f1f3f9] transition shrink-0">
                     <!-- Tabler Icon: Shield Check -->
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-[#031f6d]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"/>
                         <path d="M9 12l2 2l4 -4"/>
                     </svg>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-sm font-black tracking-tight text-slate-900 whitespace-nowrap">
-                        Tekno<span class="text-[#206bc4]">Guard</span>
+                    <div class="text-sm font-black tracking-tight text-white whitespace-nowrap">
+                        Tekno<span class="text-[#7480f1]">Guard</span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="px-1.5 py-0.2 rounded text-[10px] font-black bg-[#e9f1fa] text-[#206bc4] border border-[#cde0f5] leading-none">NOC</span>
-                        <p class="text-[11px] text-slate-400 font-medium truncate">Early Warning System</p>
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-black bg-white/20 text-white border border-white/30 leading-none">NOC</span>
+                        <p class="text-[11px] text-[#cddafe] font-medium truncate">Early Warning System</p>
                     </div>
                 </div>
             </a>
@@ -143,7 +205,7 @@
             <!-- Tombol Sembunyikan Sidebar Desktop -->
             <button @click="toggleSidebar()"
                     type="button"
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition min-h-[32px] min-w-[32px] flex items-center justify-center shrink-0"
+                    class="p-1.5 rounded-lg text-[#cddafe] hover:text-white hover:bg-white/10 transition min-h-[32px] min-w-[32px] flex items-center justify-center shrink-0"
                     title="Sembunyikan Sidebar">
                 <!-- Tabler Icon: Chevrons Left -->
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -158,14 +220,14 @@
 
             <!-- SEKSI 1: NOC & JARINGAN -->
             <div class="space-y-1">
-                <div class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-[#9cb5fc]">
                     NOC &amp; Jaringan
                 </div>
                 <div class="space-y-0.5 pt-1">
                     <a href="/"
-                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path == '/' %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path == '/' %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <!-- Tabler Icon: Dashboard / Home -->
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path == '/' %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path == '/' %}text-white{% else %}text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M5 12l-2 0l9 -9l9 9l-2 0"/>
                             <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/>
                             <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>
@@ -173,9 +235,9 @@
                         <span class="tracking-tight">Dashboard Utama</span>
                     </a>
                     <a href="/logs"
-                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/logs') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/logs') %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <!-- Tabler Icon: Activity / Pulse Log -->
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/logs') %}text-white{% else %}text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M3 12h4l3 8l4 -16l3 8h4"/>
                         </svg>
                         <span class="tracking-tight">Riwayat Redaman</span>
@@ -185,14 +247,14 @@
 
             <!-- SEKSI 2: MANAJEMEN PELANGGAN -->
             <div class="space-y-1">
-                <div class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-[#9cb5fc]">
                     Manajemen Pelanggan
                 </div>
                 <div class="space-y-0.5 pt-1">
                     <a href="/pelanggan"
-                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/pelanggan') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/pelanggan') %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <!-- Tabler Icon: Users -->
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/pelanggan') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/pelanggan') %}text-white{% else %}text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
                             <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -201,10 +263,10 @@
                         <span class="tracking-tight">Data Pelanggan</span>
                     </a>
                     <a href="/admin/tiket"
-                       class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/admin/tiket') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/admin/tiket') %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <div class="flex items-center gap-2.5">
                             <!-- Tabler Icon: Ticket -->
-                            <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/tiket') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/tiket') %}text-white{% else %}text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M15 5l0 2"/>
                                 <path d="M15 11l0 2"/>
                                 <path d="M15 17l0 2"/>
@@ -218,9 +280,9 @@
                         </span>
                     </a>
                     <a href="/admin/kuota"
-                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/admin/kuota') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/admin/kuota') %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <!-- Tabler Icon: Database -->
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/kuota') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/admin/kuota') %}text-white{% else %}text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M12 6m-8 0a8 3 0 1 0 16 0a8 3 0 1 0 -16 0"/>
                             <path d="M4 6v6a8 3 0 0 0 16 0v-6"/>
                             <path d="M4 12v6a8 3 0 0 0 16 0v-6"/>
@@ -232,14 +294,14 @@
 
             <!-- SEKSI 3: SISTEM & AUDIT -->
             <div class="space-y-1">
-                <div class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                <div class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-[#9cb5fc]">
                     Sistem &amp; Audit
                 </div>
                 <div class="space-y-0.5 pt-1">
                     <a href="/user-logs"
-                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/user-logs') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/user-logs') %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <!-- Tabler Icon: File Text / Audit Logs -->
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/user-logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/user-logs') %}text-white{% else %}text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
                             <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
                             <path d="M9 9l1 0"/>
@@ -250,9 +312,9 @@
                     </a>
                     {% if request.state.current_user and request.state.current_user.get('role') == 'super admin' %}
                     <a href="/users"
-                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/users') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/users') %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <!-- Tabler Icon: User Check / Admin Team -->
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/users') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/users') %}text-white{% else %}text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
                             <path d="M6 21v-2a4 4 0 0 1 4 -4h4"/>
                             <path d="M15 19l2 2l4 -4"/>
@@ -260,9 +322,9 @@
                         <span class="tracking-tight">Manajemen Pengguna</span>
                     </a>
                     <a href="/settings"
-                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/settings') %}bg-[#e9f1fa] text-[#206bc4] font-extrabold border-l-4 border-[#206bc4]{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition min-h-[38px] {% if request.url.path.startswith('/settings') %}bg-white/20 text-white font-extrabold border-l-4 border-white shadow-sm{% else %}text-[#cddafe] hover:text-white hover:bg-white/10{% endif %}">
                         <!-- Tabler Icon: Settings / Adjustments -->
-                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/settings') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 shrink-0 {% if request.url.path.startswith('/settings') %}text-white{% else %}text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c.996 .608 2.296 .07 2.572 -1.065z"/>
                             <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
                         </svg>
@@ -273,24 +335,24 @@
             </div>
 
             <!-- TAUTAN KE PORTAL TEKNOCUST -->
-            <div class="p-3.5 rounded-lg bg-slate-50 border border-[#e6e8eb]">
-                <div class="flex items-center gap-2 text-[#206bc4] font-extrabold text-xs uppercase tracking-wide">
+            <div class="p-3.5 rounded-lg bg-white/10 border border-white/20">
+                <div class="flex items-center gap-2 text-white font-extrabold text-xs uppercase tracking-wide">
                     <!-- Tabler Icon: Device Mobile -->
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-[#7480f1]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M6 5a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-14z"/>
                         <path d="M11 4h2"/>
                         <path d="M12 17v.01"/>
                     </svg>
                     <span>Portal Pelanggan</span>
                 </div>
-                <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                <p class="text-[11px] text-[#cddafe] mt-1 leading-relaxed">
                     Akses portal mandiri warga desa TeknoCust.
                 </p>
                 <a href="/portal" target="_blank"
-                   class="inline-flex items-center justify-center gap-1.5 w-full mt-2 px-3 py-2 rounded-lg bg-white border border-[#e6e8eb] text-slate-700 hover:text-[#206bc4] hover:border-[#cde0f5] font-bold text-xs shadow-2xs transition min-h-[38px] text-decoration-none">
+                   class="inline-flex items-center justify-center gap-1.5 w-full mt-2 px-3 py-2 rounded-lg bg-white text-[#031f6d] hover:bg-[#f1f3f9] font-bold text-xs shadow-sm transition min-h-[38px] text-decoration-none">
                     <span>Buka TeknoCust</span>
                     <!-- Tabler Icon: Arrow Right -->
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 text-[#031f6d]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M5 12l14 0"/>
                         <path d="M13 18l6 -6"/>
                         <path d="M13 6l6 6"/>
@@ -301,28 +363,28 @@
         </div>
 
         <!-- User Profile Footer di Sidebar Desktop (Tabler Card Style) -->
-        <div class="p-3.5 border-t border-[#e6e8eb] bg-[#fafbfc]">
+        <div class="p-3.5 border-t border-[#386cfa]/30 bg-[#031f6d]">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <div class="h-9 w-9 bg-[#206bc4] text-white font-black text-xs rounded-none flex items-center justify-center shrink-0 shadow-2xs">
+                    <div class="h-9 w-9 bg-white text-[#031f6d] font-black text-xs rounded-lg flex items-center justify-center shrink-0 shadow-sm">
                         {% if request.state.current_user and request.state.current_user.get('user') %}
                             {{ request.state.current_user.get('user')[:2].upper() }}
                         {% else %}U{% endif %}
                     </div>
                     <div class="truncate">
-                        <div class="text-xs font-bold text-slate-900 truncate">
+                        <div class="text-xs font-bold text-white truncate">
                             {% if request.state.current_user %}
                                 {{ request.state.current_user.get('nama_karyawan') or request.state.current_user.get('user') or 'Petugas' }}
                             {% else %}Petugas{% endif %}
                         </div>
-                        <div class="text-[10px] text-slate-400 font-semibold capitalize truncate flex items-center gap-1">
+                        <div class="text-[10px] text-[#cddafe] font-semibold capitalize truncate flex items-center gap-1">
                             <span class="status-dot status-dot-green"></span>
                             <span>{{ request.state.current_user.get('role', 'Teknisi') if request.state.current_user else 'User' }}</span>
                         </div>
                     </div>
                 </div>
                 <a href="/logout" title="Logout"
-                   class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition min-h-[36px] min-w-[36px] flex items-center justify-center">
+                   class="p-2 rounded-lg text-[#cddafe] hover:text-rose-300 hover:bg-white/10 transition min-h-[36px] min-w-[36px] flex items-center justify-center">
                     <!-- Tabler Icon: Logout -->
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/>
@@ -341,31 +403,31 @@
     <div class="flex flex-col min-h-screen transition-all duration-300 ease-in-out"
          :class="sidebarCollapsed ? 'lg:pl-0' : 'lg:pl-64'">
 
-        <!-- Top Header Bar (Tabler Clean White Header with Border) -->
-        <header class="sticky top-0 z-30 bg-white border-b border-[#e6e8eb] shadow-2xs">
+        <!-- Top Header Bar (Tabler Clean Semi-Transparent / Dark Navy Header) -->
+        <header class="sticky top-0 z-30 bg-[#031f6d]/90 backdrop-blur-md border-b border-white/10 shadow-sm text-white">
             <div class="px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between gap-3">
 
                     <!-- Mobile Brand Logo & Name (lg:hidden) -->
                     <div class="flex items-center gap-2 lg:hidden">
                         <a href="/" class="flex items-center gap-2 text-decoration-none">
-                            <div class="h-8 w-8 rounded-lg bg-[#206bc4] flex items-center justify-center text-white font-bold shadow-xs">
+                            <div class="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-[#031f6d] font-bold shadow-xs">
                                 <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                     <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"/>
                                     <path d="M9 12l2 2l4 -4"/>
                                 </svg>
                             </div>
-                            <span class="text-base font-extrabold text-slate-900 tracking-tight">Tekno<span class="text-[#206bc4]">Guard</span></span>
+                            <span class="text-base font-extrabold text-white tracking-tight">Tekno<span class="text-[#7480f1]">Guard</span></span>
                         </a>
                     </div>
 
                     <!-- Desktop Left Breadcrumb & Sidebar Toggle (lg:flex) -->
-                    <div class="hidden lg:flex items-center gap-3 text-xs text-slate-500 font-medium">
+                    <div class="hidden lg:flex items-center gap-3 text-xs text-[#cddafe] font-medium">
                         <button type="button"
                                 @click="toggleSidebar()"
                                 x-show="sidebarCollapsed"
                                 x-transition
-                                class="p-1.5 rounded-lg border border-[#e6e8eb] bg-white text-slate-600 hover:text-[#206bc4] hover:bg-slate-50 transition flex items-center justify-center shadow-2xs active:scale-95"
+                                class="p-1.5 rounded-lg border border-white/20 bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center shadow-xs active:scale-95"
                                 title="Tampilkan Sidebar">
                             <!-- Tabler Icon: Menu 2 -->
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -374,12 +436,12 @@
                                 <path d="M4 18l16 0"/>
                             </svg>
                         </button>
-                        <span class="font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
+                        <span class="font-bold text-white tracking-tight flex items-center gap-1.5">
                             <span class="status-dot status-dot-green status-dot-animated"></span>
                             <span>NOC Portal</span>
                         </span>
-                        <span class="text-slate-300">/</span>
-                        <span class="capitalize font-bold text-[#206bc4]">
+                        <span class="text-white/40">/</span>
+                        <span class="capitalize font-bold text-white">
                             {% if request.url.path == '/' %}Dashboard Utama
                             {% elif request.url.path.startswith('/pelanggan') %}Data Pelanggan
                             {% elif request.url.path.startswith('/admin/tiket') %}Tiket Keluhan
@@ -387,7 +449,7 @@
                             {% elif request.url.path.startswith('/logs') %}Riwayat Redaman
                             {% elif request.url.path.startswith('/user-logs') %}Log Aktivitas
                             {% elif request.url.path.startswith('/settings') %}Pengaturan Sistem
-                            {% elif request.url.path.startswith('/users') %}Manajemen User
+                            {% elif request.url.path.startswith('/users') %}Manajemen Pengguna
                             {% else %}Monitoring{% endif %}
                         </span>
                     </div>
@@ -399,17 +461,17 @@
                         <div class="relative" x-data="{ notifDropdownOpen: false }" @click.away="notifDropdownOpen = false">
                             <button type="button"
                                @click="notifDropdownOpen = !notifDropdownOpen; if (notifDropdownOpen) pollNotifications();"
-                               class="relative p-2 rounded-lg border border-[#e6e8eb] bg-white hover:bg-slate-50 text-slate-700 transition flex items-center justify-center min-h-[40px] min-w-[40px] shadow-2xs active:scale-95"
+                               class="relative p-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white transition flex items-center justify-center min-h-[40px] min-w-[40px] shadow-xs active:scale-95"
                                title="Pusat Notifikasi & Aduan">
                                 <!-- Tabler Icon: Bell -->
-                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                     <path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
                                     <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
                                 </svg>
                                 <!-- Badge Counter Realtime -->
                                 <span x-show="unreadTicketsCount > 0"
                                       x-text="unreadTicketsCount"
-                                      class="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] text-center text-[10px] font-black text-white bg-rose-600 rounded-full border-2 border-white shadow-xs animate-pulse">
+                                      class="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] text-center text-[10px] font-black text-white bg-rose-600 rounded-full border-2 border-[#031f6d] shadow-xs animate-pulse">
                                 </span>
                             </button>
 
@@ -422,12 +484,12 @@
                                  x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                                  x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
                                  style="display: none;"
-                                 class="fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 sm:w-96 rounded-xl bg-white border border-[#e6e8eb] shadow-xl p-0 z-50 text-xs flex flex-col overflow-hidden max-h-[80vh]">
+                                 class="fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 sm:w-96 rounded-xl bg-white border border-[#d5e4ec] shadow-xl p-0 z-50 text-xs flex flex-col overflow-hidden max-h-[80vh] text-slate-800">
                                 
                                 <!-- Header Dropdown -->
-                                <div class="px-4 py-3 bg-[#fafbfc] border-b border-[#e6e8eb] flex items-center justify-between shrink-0">
+                                <div class="px-4 py-3 bg-[#f4f8fa] border-b border-[#d5e4ec] flex items-center justify-between shrink-0">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-lg bg-[#e9f1fa] text-[#206bc4] flex items-center justify-center border border-[#cde0f5]">
+                                        <div class="w-6 h-6 rounded-lg bg-[#0808dd]/10 text-[#0808dd] flex items-center justify-center border border-[#0808dd]/20">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                                 <path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/>
                                                 <path d="M9 17v1a3 3 0 0 0 6 0v-1"/>
@@ -479,14 +541,14 @@
                                                    class="block p-2.5 rounded-lg bg-slate-50 hover:bg-[#e9f1fa] border border-[#e6e8eb] hover:border-[#cde0f5] transition space-y-1 group text-decoration-none">
                                                     <div class="flex items-center justify-between gap-1">
                                                         <div class="flex items-center gap-1.5">
-                                                            <span class="font-mono font-black text-[#206bc4] text-xs" x-text="'#' + t.id_tiket"></span>
+                                                            <span class="font-mono font-black text-[#0808dd] text-xs" x-text="'#' + t.id_tiket"></span>
                                                             <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200">MENUNGGU</span>
                                                         </div>
                                                         <span class="text-[10px] text-slate-400 font-mono" x-text="t.created_at"></span>
                                                     </div>
                                                     <div>
                                                         <div class="flex items-center gap-1.5">
-                                                            <span class="font-extrabold text-slate-900 text-xs group-hover:text-[#206bc4] transition" x-text="t.nama_pelanggan"></span>
+                                                            <span class="font-extrabold text-slate-900 text-xs group-hover:text-[#0808dd] transition" x-text="t.nama_pelanggan"></span>
                                                             <span class="text-[9px] font-semibold text-slate-500 uppercase px-1 py-0.2 rounded bg-slate-200" x-text="t.kantor"></span>
                                                         </div>
                                                         <div class="flex items-center gap-2 mt-0.5">
@@ -524,7 +586,7 @@
                                 <div class="p-2.5 bg-[#fafbfc] border-t border-[#e6e8eb] flex items-center justify-between shrink-0">
                                     <a href="/admin/tiket"
                                        @click="notifDropdownOpen = false"
-                                       class="text-xs font-bold text-[#206bc4] hover:text-[#17549c] px-2 py-1 transition flex items-center gap-1 text-decoration-none">
+                                       class="text-xs font-bold text-[#0808dd] hover:text-[#0707c5] px-2 py-1 transition flex items-center gap-1 text-decoration-none">
                                         <span>Buka Halaman Tiket</span>
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                             <path d="M9 5l7 7-7 7"/>
@@ -546,9 +608,9 @@
                             {% if request.state.current_user.get('role') == 'super admin' or allowed|length > 1 %}
                                 <div class="relative" x-data="{ kantorOpen: false }" @click.away="kantorOpen = false">
                                     <button @click="kantorOpen = !kantorOpen"
-                                            class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#e6e8eb] bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 shadow-2xs transition active:scale-[0.98] min-h-[40px]">
+                                            class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-xs font-bold text-white shadow-xs transition active:scale-[0.98] min-h-[40px]">
                                         <!-- Tabler Icon: Building -->
-                                        <svg class="w-4 h-4 text-[#206bc4] shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 text-[#7480f1] shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                             <path d="M3 21l18 0"/>
                                             <path d="M9 8l1 0"/>
                                             <path d="M9 12l1 0"/>
@@ -561,7 +623,7 @@
                                         <span class="capitalize hidden sm:inline">Kantor {{ active_k }}</span>
                                         <span class="capitalize sm:hidden">{{ active_k }}</span>
                                         <!-- Tabler Icon: Chevron Down -->
-                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <svg class="w-3.5 h-3.5 text-[#cddafe]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                             <path d="M6 9l6 6l6 -6"/>
                                         </svg>
                                     </button>
@@ -573,13 +635,13 @@
                                          x-transition:leave-start="opacity-100 scale-100"
                                          x-transition:leave-end="opacity-0 scale-95"
                                          style="display: none;"
-                                         class="absolute right-0 mt-2 w-48 rounded-xl bg-white border border-[#e6e8eb] shadow-xl p-1 z-50 text-xs font-semibold">
+                                         class="absolute right-0 mt-2 w-48 rounded-xl bg-white border border-[#e6e8eb] shadow-xl p-1 z-50 text-xs font-semibold text-slate-800">
                                         {% for k in allowed %}
                                         <a href="/switch-kantor?kantor={{ k }}"
-                                           class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-100 transition min-h-[36px] {% if active_k == k %}text-[#206bc4] font-bold bg-[#e9f1fa]{% else %}text-slate-700{% endif %} text-decoration-none">
+                                           class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-100 transition min-h-[36px] {% if active_k == k %}text-[#0808dd] font-bold bg-[#e9f1fa]{% else %}text-slate-700{% endif %} text-decoration-none">
                                             <span class="capitalize">Kantor {{ k }}</span>
                                             {% if active_k == k %}
-                                            <svg class="w-4 h-4 text-[#206bc4]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                            <svg class="w-4 h-4 text-[#0808dd]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                                 <path d="M5 12l5 5l10 -10"/>
                                             </svg>
                                             {% endif %}
@@ -588,8 +650,8 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <div class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 border border-[#e6e8eb] text-xs font-bold text-slate-700 capitalize min-h-[40px]">
-                                    <svg class="w-4 h-4 text-[#206bc4]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <div class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-xs font-bold text-white capitalize min-h-[40px]">
+                                    <svg class="w-4 h-4 text-[#7480f1]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                         <path d="M3 21l18 0"/>
                                         <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16"/>
                                     </svg>
@@ -603,23 +665,23 @@
                         <div class="relative" @click.away="profileMenuOpen = false">
                             <button @click="profileMenuOpen = !profileMenuOpen"
                                     class="flex items-center gap-2.5 pl-1 hover:opacity-90 transition min-h-[40px]">
-                                <div class="h-9.5 w-9.5 bg-[#206bc4] text-white font-extrabold text-sm rounded-none flex items-center justify-center shrink-0 shadow-xs">
+                                <div class="h-9.5 w-9.5 bg-white text-[#031f6d] font-extrabold text-sm rounded-lg flex items-center justify-center shrink-0 shadow-xs">
                                     {% if request.state.current_user and request.state.current_user.get('user') %}
                                         {{ request.state.current_user.get('user')[:2].upper() }}
                                     {% else %}U{% endif %}
                                 </div>
                                 <div class="hidden sm:block text-left leading-tight">
-                                    <div class="text-xs font-bold text-slate-900">
+                                    <div class="text-xs font-bold text-white">
                                         {% if request.state.current_user %}
                                             {{ request.state.current_user.get('nama_karyawan') or request.state.current_user.get('user') or 'User' }}
                                         {% else %}User{% endif %}
                                     </div>
-                                    <div class="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                                    <div class="text-[10px] text-emerald-300 font-bold flex items-center gap-1">
                                         <span class="status-dot status-dot-green"></span>
                                         <span>Online</span>
                                     </div>
                                 </div>
-                                <svg class="w-3.5 h-3.5 text-slate-400 hidden sm:block" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <svg class="w-3.5 h-3.5 text-[#cddafe] hidden sm:block" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                     <path d="M6 9l6 6l6 -6"/>
                                 </svg>
                             </button>
@@ -713,16 +775,16 @@
             {% block content %}{% endblock %}
         </main>
 
-        <!-- Footer (Tabler Style Full Width) -->
-        <footer class="mt-auto border-t border-[#e6e8eb] bg-white py-3.5 text-center text-xs text-slate-500 hidden lg:block">
+        <!-- Footer (Tabler Style Full Width Deep Navy Glass) -->
+        <footer class="mt-auto border-t border-white/10 bg-[#031f6d]/80 backdrop-blur-md py-3.5 text-center text-xs text-[#cddafe] hidden lg:block">
             <div class="w-full px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-                <span>&copy; 2026 <strong>TeknoGuard</strong>: Sistem Monitoring Berkala ONT ISP</span>
-                <div class="flex items-center gap-3 text-slate-400 text-[11px]">
-                    <span>Ambang Batas: <strong class="text-amber-600">&le; -26.0 dBm</strong></span>
+                <span>&copy; 2026 <strong class="text-white">TeknoGuard</strong>: Sistem Monitoring Berkala ONT ISP</span>
+                <div class="flex items-center gap-3 text-[#9cb5fc] text-[11px]">
+                    <span>Ambang Batas: <strong class="text-amber-300">&le; -26.0 dBm</strong></span>
                     <span>&bull;</span>
-                    <span>TiDB Cloud Connected</span>
+                    <span class="text-white">TiDB Cloud Connected</span>
                     <span>&bull;</span>
-                    <span>FastAPI + Alpine.js</span>
+                    <span class="text-white">FastAPI + Alpine.js</span>
                 </div>
             </div>
         </footer>
@@ -733,15 +795,19 @@
     <!-- 3. STICKY MOBILE BOTTOM NAVIGATION (TABLER 5-TAB COMMAND DOCK)             -->
     <!-- Tab 1: Pelanggan | Tab 2: Redaman | Tab 3: Beranda (Center) | Tab 4: Tiket | Tab 5: Pengaturan -->
     <!-- ========================================================================= -->
-    <nav class="tabler-bottom-dock lg:hidden" aria-label="Navigasi Bawah Tabler">
+    <!-- ========================================================================= -->
+    <!-- 3. STICKY MOBILE BOTTOM NAVIGATION (TABLER 5-TAB COMMAND DOCK)             -->
+    <!-- Tab 1: Pelanggan | Tab 2: Redaman | Tab 3: Beranda (Center) | Tab 4: Tiket | Tab 5: Pengaturan -->
+    <!-- ========================================================================= -->
+    <nav class="tabler-bottom-dock lg:hidden !bg-[#031f6d]/95 !backdrop-blur-md !border-white/10 !text-white" aria-label="Navigasi Bawah Tabler">
         <div class="tabler-dock-grid">
             
             <!-- Tab 1: Pelanggan -->
             <a href="/pelanggan"
-               class="tabler-dock-item {% if request.url.path.startswith('/pelanggan') %}active{% endif %}">
+               class="tabler-dock-item {% if request.url.path.startswith('/pelanggan') %}active{% else %}!text-[#cddafe]{% endif %}">
                 <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Users -->
-                    <svg class="tabler-dock-icon {% if request.url.path.startswith('/pelanggan') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon {% if not request.url.path.startswith('/pelanggan') %}!text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
                         <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -753,10 +819,10 @@
             
             <!-- Tab 2: Redaman -->
             <a href="/logs"
-               class="tabler-dock-item {% if request.url.path.startswith('/logs') %}active{% endif %}">
+               class="tabler-dock-item {% if request.url.path.startswith('/logs') %}active{% else %}!text-[#cddafe]{% endif %}">
                 <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Activity -->
-                    <svg class="tabler-dock-icon {% if request.url.path.startswith('/logs') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon {% if not request.url.path.startswith('/logs') %}!text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M3 12h4l3 8l4 -16l3 8h4"/>
                     </svg>
                 </div>
@@ -765,10 +831,10 @@
             
             <!-- Tab 3: Beranda (Center Elevated Button) -->
             <a href="/"
-               class="tabler-dock-item tabler-dock-item-center {% if request.url.path == '/' %}active{% endif %}">
+               class="tabler-dock-item tabler-dock-item-center {% if request.url == '/' or request.url.path == '/' %}active{% endif %}">
                 <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Home -->
-                    <svg class="tabler-dock-icon text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M5 12l-2 0l9 -9l9 9l-2 0"/>
                         <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/>
                         <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>
@@ -779,10 +845,10 @@
             
             <!-- Tab 4: Tiket -->
             <a href="/admin/tiket"
-               class="tabler-dock-item {% if request.url.path.startswith('/admin/tiket') %}active{% endif %}">
+               class="tabler-dock-item {% if request.url.path.startswith('/admin/tiket') %}active{% else %}!text-[#cddafe]{% endif %}">
                 <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Ticket -->
-                    <svg class="tabler-dock-icon {% if request.url.path.startswith('/admin/tiket') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon {% if not request.url.path.startswith('/admin/tiket') %}!text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M15 5l0 2"/>
                         <path d="M15 11l0 2"/>
                         <path d="M15 17l0 2"/>
@@ -798,10 +864,10 @@
             
             <!-- Tab 5: Pengaturan -->
             <a href="/settings"
-               class="tabler-dock-item {% if request.url.path.startswith('/settings') %}active{% endif %}">
+               class="tabler-dock-item {% if request.url.path.startswith('/settings') %}active{% else %}!text-[#cddafe]{% endif %}">
                 <div class="relative mb-0.5 flex items-center justify-center">
                     <!-- Tabler Icon: Settings -->
-                    <svg class="tabler-dock-icon {% if request.url.path.startswith('/settings') %}text-[#206bc4]{% else %}text-slate-400{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="tabler-dock-icon {% if not request.url.path.startswith('/settings') %}!text-[#9cb5fc]{% endif %}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c.996 .608 2.296 .07 2.572 -1.065z"/>
                         <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
                     </svg>

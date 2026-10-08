@@ -8,14 +8,14 @@
     <!-- Tabler Page Header (Pretitle, Title & Actions) -->
     <div class="mb-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3" id="dashboardHeroSection">
         <div>
-            <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+            <div class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">
                 Pusat Operasional Jaringan ISP
             </div>
             <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
                 Monitoring dan Deteksi Dini ONT
             </h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
-                Pemeriksaan otomatis setiap <strong class="text-slate-800 font-bold"><span x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</span> menit</strong> ke seluruh modem ONT pelanggan
+            <p class="text-xs sm:text-sm text-slate-600 mt-0.5 font-medium">
+                Pemeriksaan otomatis setiap <strong class="text-slate-900 font-bold"><span x-text="intervalMinutes || '{{ polling_interval }}'">{{ polling_interval }}</span> menit</strong> ke seluruh modem ONT pelanggan
             </p>
         </div>
         
@@ -32,12 +32,13 @@
     </div>
 
     <!-- ========================================================================= -->
+    <!-- ========================================================================= -->
     <!-- 1. MENU LAYANAN & OPERASIONAL (TABLER MODULAR ACTION TILES - KHUSUS MOBILE)-->
     <!-- ========================================================================= -->
     <section class="lg:hidden card mb-5" id="dashboardServiceGridSection">
         <header class="card-header mb-3">
             <div class="flex items-center gap-2">
-                <div class="h-4 w-1 bg-[#206bc4] rounded-full" aria-hidden="true"></div>
+                <div class="h-4 w-1 bg-[#0808dd] rounded-full" aria-hidden="true"></div>
                 <h2 class="card-title text-sm sm:text-base">Menu Layanan &amp; Operasional</h2>
             </div>
             <span class="card-subtitle hidden sm:inline">Akses cepat modul TeknoGuard</span>
@@ -69,10 +70,10 @@
                         <path d="M15 17l0 2"/>
                         <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4v-3a2 2 0 0 1 2 -2"/>
                     </svg>
-                    <!-- Badge Realtime -->
+                    <!-- Badge Realtime (Danger Red #ef4444) -->
                     <span x-show="unreadTicketsCount > 0"
                           x-text="unreadTicketsCount"
-                          class="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[18px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
+                          class="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[18px] text-center text-[9px] font-black text-white bg-[#ef4444] rounded-full border border-white shadow-xs animate-pulse">
                     </span>
                 </div>
                 <span class="action-grid-label">Tiket Keluhan</span>
@@ -173,7 +174,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-2" id="dashboardQuickShortcuts">
         <a href="/pelanggan" class="card card--interactive flex items-center justify-between group" id="shortcutKelolaPelanggan">
             <div class="flex items-center gap-3.5">
-                <div class="h-10 w-10 rounded-lg bg-[#e9f1fa] text-[#206bc4] flex items-center justify-center group-hover:bg-[#206bc4] group-hover:text-white transition shrink-0">
+                <div class="h-10 w-10 rounded-xl bg-indigo-50 text-[#0808dd] flex items-center justify-center group-hover:bg-[#0808dd] group-hover:text-white transition shrink-0">
                     <!-- Tabler Icon: Users -->
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
@@ -183,19 +184,19 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="card-title group-hover:text-[#206bc4] transition">Kelola Master Pelanggan</h3>
-                    <p class="card-subtitle">Tabel seluruh modem ONT, filter POP/Kantor, dan live probe</p>
+                    <h3 class="card-title text-slate-900 group-hover:text-[#0808dd] transition">Kelola Master Pelanggan</h3>
+                    <p class="card-subtitle text-slate-500">Tabel seluruh modem ONT, filter POP/Kantor, dan live probe</p>
                 </div>
             </div>
             <!-- Tabler Icon: Chevron Right -->
-            <svg class="w-5 h-5 text-slate-400 group-hover:text-[#206bc4] group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-[#0808dd] group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                 <path d="M9 6l6 6l-6 6"/>
             </svg>
         </a>
 
         <a href="/admin/tiket" class="card card--interactive flex items-center justify-between group" id="shortcutTiketKeluhan">
             <div class="flex items-center gap-3.5">
-                <div class="h-10 w-10 rounded-lg bg-[#e9f1fa] text-[#206bc4] flex items-center justify-center group-hover:bg-[#206bc4] group-hover:text-white transition shrink-0">
+                <div class="h-10 w-10 rounded-xl bg-indigo-50 text-[#0808dd] flex items-center justify-center group-hover:bg-[#0808dd] group-hover:text-white transition shrink-0">
                     <!-- Tabler Icon: Ticket -->
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M15 5l0 2"/>
@@ -205,12 +206,12 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="card-title group-hover:text-[#206bc4] transition">Tiket Keluhan Pelanggan</h3>
-                    <p class="card-subtitle">Pantau laporan aduan warga desa dan update status penanganan</p>
+                    <h3 class="card-title text-slate-900 group-hover:text-[#0808dd] transition">Tiket Keluhan Pelanggan</h3>
+                    <p class="card-subtitle text-slate-500">Pantau laporan aduan warga desa dan update status penanganan</p>
                 </div>
             </div>
             <!-- Tabler Icon: Chevron Right -->
-            <svg class="w-5 h-5 text-slate-400 group-hover:text-[#206bc4] group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-[#0808dd] group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                 <path d="M9 6l6 6l-6 6"/>
             </svg>
         </a>
@@ -226,7 +227,7 @@
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 translate-y-4"
          class="fixed bottom-20 md:bottom-6 right-6 z-50 max-w-sm rounded-lg p-3.5 shadow-xl border text-xs font-bold flex items-center gap-3"
-         :class="toast.type === 'success' ? 'bg-[#1e7e34] text-white border-emerald-600' : (toast.type === 'info' ? 'bg-[#206bc4] text-white border-blue-600' : 'bg-[#a82222] text-white border-rose-600')">
+         :class="toast.type === 'success' ? 'bg-[#10b981] text-white border-emerald-600' : (toast.type === 'info' ? 'bg-[#0808dd] text-white border-[#031f6d]' : 'bg-[#ef4444] text-white border-rose-600')">
         
         <div class="flex-shrink-0">
             <template x-if="toast.type === 'success'">

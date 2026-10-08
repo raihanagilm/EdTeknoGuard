@@ -28,11 +28,36 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Changed
+- **Mobile Bottom Navigation Styling**:
+  - Mengubah tab aktif pada bottom navigation (Pelanggan, Redaman, Tiket, Pengaturan) menjadi **latar putih dengan ikon dan teks berwarna hitam tegas (`#0f172a`)** untuk kontras dan visibilitas yang tajam.
+  - Mempertahankan tombol tengah **Beranda** (`.tabler-dock-item-center`) dengan **warna biru aksen elektrik (`#0909f6`)** dan ikon/teks putih solid yang menonjol (*elevated center button*).
+- **Visual Design & Canvas Optimization (Clean White/Slate-50 Canvas Background & Dark Text)**:
+  - Mengubah latar belakang dasar aplikasi (`--tblr-body-bg`, `html`, `body`) menjadi **latar terang / putih bersih (`#f8fafc`)** dengan kontras teks gelap (`#0f172a` / `#334155`).
+  - Menyelaraskan teks judul header hero dashboard (`#dashboardHeroSection`) agar menggunakan warna teks gelap tegas dengan aksen indigo (`text-indigo-600` / `text-slate-900` / `text-slate-600`).
+  - Mempertahankan kartu komponen putih solid (`#ffffff`) dengan bayangan halus (*soft subtle shadow*), topbar & sidebar navy elegan (`#031f6d`), serta badge indikator status redaman (Normal Hijau, Warning Kuning, Kritis/LOS Merah).
+
+### Fixed
+- **Perbaikan Efek Hover pada Navigasi Mobile (Bottom Dock)**:
+  - Memperbaiki efek *hover* pada menu navigasi bawah agar teks dan ikon tidak pudar/hilang ketika kursor diarahkan atau disentuh. Mengganti variabel warna hover menjadi warna putih tegas (`#ffffff`) dengan *background highlight* transparan halus (`rgba(255,255,255,0.12)`).
+  - Memastikan tab yang sedang aktif tetap mempertahankan warna teks dan ikon hitam (`#0f172a`) di atas latar putih meskipun sedang di-hover.
+
+
+
+
 ### Fixed
 - **Perbaikan Error 500 pada Manajemen Pengguna (`/users` & `/users/`)**:
   - Memperbaiki kesalahan sintaksis Jinja2 berupa tag penutup `{% endblock %}` untuk blok `content` yang hilang sebelum `{% block scripts %}` pada berkas `templates/users/index.html`.
   - Menambahkan rute alias `@router.get("")` dan `@router.get("/")` agar permintaan ke `/users` dan `/users/` langsung merespons dengan **HTTP 200 OK** tanpa redirect 307.
 
+  - Memverifikasi secara visual hasil render menggunakan **Chrome DevTools MCP** dengan tangkapan layar beresolusi tinggi ([`static/dashboard_polished.png`](file:///d:/databaru/Magang/EdTeknoGuard/static/dashboard_polished.png)).
+  - Memperbarui file token terpusat [`static/css/components.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/components.css), layout master [`templates/layouts/base.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/layouts/base.html), serta komponen [`templates/components/control_bar.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/control_bar.html), [`templates/components/kpi_cards.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/kpi_cards.html), [`templates/components/charts.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/charts.html), dan [`templates/dashboard/index.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/dashboard/index.html).
+
+- **Audit Konsolidasi Palet 1 Warna Utama pada Dashboard**:
+  - Menyeragamkan seluruh elemen antarmuka halaman Dashboard (`/`) ke **1 warna tema utama** (Tabler Azure Primary `#206bc4`):
+    - Seluruh tombol interaktif, header, navigasi shortcut, icon card, dan garis kurva telemetri Chart.js menggunakan `#206bc4`.
+    - Chip data statistik grafik diubah menjadi warna netral profesional (`slate-100` / `slate-700`).
+    - Warna khusus (Hijau/Emerald, Kuning/Amber, Merah/Rose) diisolasi **HANYA** untuk status sinyal optik, status engine berjalan/dijeda, error jaringan, dan notifikasi/alert darurat.
 - **Pembaruan Aksi Tabel dengan Menu Titik Tiga (3-Dot Action Dropdown)**:
   - Mengubah seluruh baris aksi tabel yang padat dengan tombol inline menjadi tombol ikon titik tiga vertikal (`...` / Tabler `dots-vertical`) yang bersih dan ergonomis pada:
     - **Tabel Data Pelanggan (`templates/customers/index.html`)**: Memadukan aksi *Cek Live Sinyal*, *Detail Pelanggan*, *Edit Data*, dan *Hapus Pelanggan* ke dalam satu popover menu dropdown terproteksi.

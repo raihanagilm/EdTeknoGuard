@@ -1,30 +1,49 @@
 /* ==========================================================================
-   TeknoCust - Tabler Design System Master CSS (Single Consolidated CSS)
-   Aset Desain & Utility Berbasis D:\UI_Panduan\UI1 (Tabler UI)
+   TeknoCust - Tabler Design System Master CSS (Realtime Colors Standard)
+   Aset Desain & Utility Berbasis Realtime Colors (000000-339ad1-3d1fff-cfe8ef-0016b1, Inter)
    ========================================================================== */
 
 :root {
-    --tblr-primary: #206bc4;
-    --tblr-primary-rgb: 32, 107, 196;
-    --tblr-primary-fg: #ffffff;
-    --tblr-primary-dark: #17549c;
-    --tblr-primary-lt: #e9f1fa;
-    --tblr-success: #2fb344;
-    --tblr-success-lt: #eaf7ec;
-    --tblr-warning: #f59f00;
-    --tblr-warning-lt: #fef5e6;
-    --tblr-danger: #d63939;
-    --tblr-danger-lt: #fbebeb;
-    --tblr-body-bg: #f4f6fa;
-    --tblr-card-bg: #ffffff;
-    --tblr-border-color: #e6e8eb;
+    --tblr-primary: #ffffff;
+    --tblr-primary-rgb: 255, 255, 255;
+    --tblr-primary-fg: #031f6d;
+    --tblr-primary-dark: #f1f3f9;
+    --tblr-primary-secondary: #031f6d;
+    --tblr-primary-accent: #0808dd;
+    --tblr-primary-lt: rgba(255, 255, 255, 0.15);
+    --tblr-success: #10b981;
+    --tblr-success-lt: rgba(16, 185, 129, 0.18);
+    --tblr-warning: #f59e0b;
+    --tblr-warning-lt: rgba(245, 158, 11, 0.18);
+    --tblr-danger: #ef4444;
+    --tblr-danger-lt: rgba(239, 68, 68, 0.18);
+    --tblr-body-bg: #4253ec;
+    --tblr-card-bg: rgba(255, 255, 255, 0.10);
+    --tblr-border-color: rgba(255, 255, 255, 0.22);
     --tblr-border-radius: 14px;
 }
 
+@media (prefers-color-scheme: light) {
+    :root {
+        --tblr-body-bg: #4253ec;
+        --tblr-card-bg: rgba(255, 255, 255, 0.10);
+        --tblr-border-color: rgba(255, 255, 255, 0.22);
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root, .dark {
+        --tblr-body-bg: #020417;
+        --tblr-card-bg: #05092e;
+        --tblr-border-color: #0e1a8b;
+        --tblr-primary-lt: #050594;
+    }
+}
+
 body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--tblr-body-bg);
-    color: #1e293b;
+    color: #ffffff;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -52,10 +71,10 @@ body {
     border-top-left-radius: var(--tblr-border-radius);
     border-top-right-radius: var(--tblr-border-radius);
 }
-.card-status-azure { background-color: #206bc4; }
-.card-status-green { background-color: #2fb344; }
-.card-status-amber { background-color: #f59f00; }
-.card-status-red { background-color: #d63939; }
+.card-status-azure { background-color: #3d1fff; }
+.card-status-green { background-color: #10b981; }
+.card-status-amber { background-color: #f59e0b; }
+.card-status-red { background-color: #ef4444; }
 
 /* Status Dot Indicator */
 .status-dot {
