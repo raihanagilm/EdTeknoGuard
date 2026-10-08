@@ -402,6 +402,29 @@ html, body {
   color: #0f172a;
 }
 
+@media (max-width: 639px) {
+  /* Global edge-to-edge cards on mobile (Kecuali Menu Layanan #dashboardServiceGridSection) */
+  .card:not(#dashboardServiceGridSection),
+  .tabler-card,
+  .tekno-card,
+  .apple-card,
+  .mobile-full-bleed-card,
+  div[class*="bg-white rounded-2xl"]:not(.action-grid-card):not(#dashboardServiceGridSection *) {
+    margin-left: -1rem !important;
+    margin-right: -1rem !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+    width: calc(100% + 2rem) !important;
+    max-width: none !important;
+  }
+  
+  .card:not(#dashboardServiceGridSection) .card-status-top,
+  .mobile-full-bleed-card .card-status-top {
+    border-radius: 0 !important;
+  }
+}
+
 @media (min-width: 640px) {
   .card, .tabler-card, .tekno-card, .apple-card {
     padding: 1.25rem 1.375rem;
@@ -779,6 +802,15 @@ html, body {
   overflow: hidden;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   color: #0f172a;
+}
+
+@media (max-width: 639px) {
+  #dashboardKpiGrid .kpi-metric-card {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.875rem 1rem !important;
+  }
 }
 
 @media (min-width: 640px) {

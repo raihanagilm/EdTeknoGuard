@@ -28,7 +28,15 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Added
+- **Varlet-Style Material Design Page Transition Overlay**:
+  - Mengganti progress bar loading atas menjadi **Varlet-Inspired Material Loading Overlay** dengan circular spinner berputar modern (`#0909f6`), latar belakang *translucent blur* (`backdrop-blur-md`), kartu popup putih elevasi tinggi, dan teks status **"MEMUAT HALAMAN..."** saat berpindah rute/halaman atau mengeklik navigasi.
+  - Mengintegrasikan deteksi event `pageshow`, `load`, `beforeunload`, dan *instant link click interceptor* untuk transisi halaman yang responsif dan mulus.
+
 ### Changed
+- **Mobile Global Layout (Edge-to-Edge Full-Bleed Cards)**:
+  - Menerapkan tata letak *edge-to-edge full-bleed* (tanpa margin samping/horizontal) secara global pada seluruh kartu aplikasi di tampilan ponsel (*mobile viewport* `< 640px`) meliputi halaman **Dashboard**, **Manajemen Pelanggan (`/pelanggan`)**, **Tiket Keluhan (`/admin/tiket`)**, **Pemantauan Kuota (`/admin/kuota`)**, **Riwayat Redaman (`/logs`)**, **Log Aktivitas (`/user-logs`)**, **Pengaturan Sistem (`/settings`)**, dan **Manajemen Pengguna (`/users`)**.
+  - Mengecualikan kartu **Menu Layanan & Operasional** di Dashboard agar tetap mempertahankan margin samping dan lekukan sudut melengkung (*rounded card*) yang proporsional.
 - **Mobile Bottom Navigation Styling**:
   - Mengubah tab aktif pada bottom navigation (Pelanggan, Redaman, Tiket, Pengaturan) menjadi **latar putih dengan ikon dan teks berwarna hitam tegas (`#0f172a`)** untuk kontras dan visibilitas yang tajam.
   - Mempertahankan tombol tengah **Beranda** (`.tabler-dock-item-center`) dengan **warna biru aksen elektrik (`#0909f6`)** dan ikon/teks putih solid yang menonjol (*elevated center button*).
@@ -36,6 +44,9 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - Mengubah latar belakang dasar aplikasi (`--tblr-body-bg`, `html`, `body`) menjadi **latar terang / putih bersih (`#f8fafc`)** dengan kontras teks gelap (`#0f172a` / `#334155`).
   - Menyelaraskan teks judul header hero dashboard (`#dashboardHeroSection`) agar menggunakan warna teks gelap tegas dengan aksen indigo (`text-indigo-600` / `text-slate-900` / `text-slate-600`).
   - Mempertahankan kartu komponen putih solid (`#ffffff`) dengan bayangan halus (*soft subtle shadow*), topbar & sidebar navy elegan (`#031f6d`), serta badge indikator status redaman (Normal Hijau, Warning Kuning, Kritis/LOS Merah).
+
+
+
 
 ### Fixed
 - **Perbaikan Efek Hover pada Navigasi Mobile (Bottom Dock)**:
