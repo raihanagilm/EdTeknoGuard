@@ -23,6 +23,7 @@ import { ModulLogAktivitas } from './components/ModulLogAktivitas'
 import { ModulManajemenPengguna } from './components/ModulManajemenPengguna'
 import { ErrorView } from './components/ErrorView'
 import { ConfirmSaveModal, OntDetailModal } from './components/Modals'
+import { PortalPelangganApp } from './portal/PortalPelangganApp'
 
 export default function App() {
   // Authentication State
@@ -519,6 +520,7 @@ export default function App() {
   // URL Path to Module Tab Mapping Helper
   const getTabFromPath = (path) => {
     const clean = path.replace(/^\/+|\/+$/g, '').toLowerCase()
+    if (clean.startsWith('portal')) return 'portal'
     if (!clean || clean === 'dashboard' || clean === 'beranda') return 'beranda'
     if (clean === 'login') return 'login'
     if (clean === 'logs' || clean === 'riwayat') return 'riwayat'
@@ -557,9 +559,19 @@ export default function App() {
 
   // Check backend session & sync browser URL on initial load and popstate
   useEffect(() => {
+    const isPortalRoute = window.location.pathname.startsWith('/portal')
+
     const syncFromLocation = () => {
       const initialTab = getTabFromPath(window.location.pathname)
       setActiveTab(initialTab)
+    }
+
+    // Jika sedang di rute /portal, jangan redirect ke /login admin NOC
+    if (isPortalRoute) {
+      syncFromLocation()
+      const handlePopState = () => syncFromLocation()
+      window.addEventListener('popstate', handlePopState)
+      return () => window.removeEventListener('popstate', handlePopState)
     }
 
     const checkAuthStatus = async () => {
@@ -574,7 +586,7 @@ export default function App() {
         } else {
           setIsAuthenticated(false)
           localStorage.removeItem('edtekno_auth_status')
-          if (window.location.pathname !== '/login') {
+          if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/portal')) {
             window.history.pushState({}, '', '/login')
           }
         }
@@ -594,7 +606,14 @@ export default function App() {
   }, [])
 
   // =========================================================================
-  // VIEW A: HALAMAN LOGIN NOC
+  // VIEW A: PORTAL PELANGGAN MANDIRI (TeknoCust)
+  // =========================================================================
+  if (activeTab === 'portal' || window.location.pathname.startsWith('/portal')) {
+    return <PortalPelangganApp />
+  }
+
+  // =========================================================================
+  // VIEW B: HALAMAN LOGIN NOC
   // =========================================================================
   if (!isAuthenticated) {
     return (

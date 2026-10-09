@@ -69,6 +69,8 @@ if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="portal_static")
 
 # Registrasi Router
+from portal_pelanggan.api_router import api_router as portal_api_router
+app.include_router(portal_api_router)
 app.include_router(auth_router)
 app.include_router(dashboard_router)
 app.include_router(kendala_router)

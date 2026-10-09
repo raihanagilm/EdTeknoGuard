@@ -46,10 +46,10 @@ export function ModulPelanggan({
 
   // Quick stats
   const [stats, setStats] = useState({
-    total: 142,
-    normal: 124,
-    warning: 15,
-    critical_los: 3,
+    total: 0,
+    normal: 0,
+    warning: 0,
+    critical_los: 0,
     monitored_inactive: 0
   })
 

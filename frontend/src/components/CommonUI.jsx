@@ -58,33 +58,33 @@ export function MetricCard({
   const schemes = {
     cyan: {
       bgActive: 'bg-cyan-50/90 border-cyan-400 ring-2 ring-cyan-200',
-      iconBg: 'bg-cyan-100 text-cyan-700',
+      iconBg: 'bg-cyan-100 text-cyan-800',
       textNum: 'text-slate-900',
-      labelColor: 'text-slate-400',
+      labelColor: 'text-slate-600',
     },
     emerald: {
       bgActive: 'bg-emerald-50/90 border-emerald-400 ring-2 ring-emerald-200',
-      iconBg: 'bg-emerald-100 text-emerald-700',
-      textNum: 'text-emerald-700',
-      labelColor: 'text-emerald-700',
+      iconBg: 'bg-emerald-100 text-emerald-800',
+      textNum: 'text-emerald-800',
+      labelColor: 'text-emerald-800',
     },
     amber: {
       bgActive: 'bg-amber-50/90 border-amber-400 ring-2 ring-amber-200',
-      iconBg: 'bg-amber-100 text-amber-700',
-      textNum: 'text-amber-700',
-      labelColor: 'text-amber-700',
+      iconBg: 'bg-amber-100 text-amber-800',
+      textNum: 'text-amber-800',
+      labelColor: 'text-amber-800',
     },
     rose: {
       bgActive: 'bg-rose-50/90 border-rose-400 ring-2 ring-rose-200',
-      iconBg: 'bg-rose-100 text-rose-700',
-      textNum: 'text-rose-700',
-      labelColor: 'text-rose-700',
+      iconBg: 'bg-rose-100 text-rose-800',
+      textNum: 'text-rose-800',
+      labelColor: 'text-rose-800',
     },
     purple: {
       bgActive: 'bg-purple-50/90 border-purple-400 ring-2 ring-purple-200',
-      iconBg: 'bg-purple-100 text-purple-700',
-      textNum: 'text-purple-700',
-      labelColor: 'text-purple-700',
+      iconBg: 'bg-purple-100 text-purple-800',
+      textNum: 'text-purple-800',
+      labelColor: 'text-purple-800',
     },
   };
 
@@ -96,14 +96,14 @@ export function MetricCard({
         {Icon && <Icon className="w-4 h-4" />}
       </div>
       <div className="overflow-hidden text-left">
-        <div className={`text-[10px] font-mono font-bold uppercase truncate ${scheme.labelColor}`}>
+        <div className={`text-[11px] font-mono font-bold uppercase truncate ${scheme.labelColor}`}>
           {label}
         </div>
         <div className={`text-sm sm:text-base font-black font-mono tracking-tight ${scheme.textNum}`}>
-          {value} {unit && <span className="text-xs font-normal text-slate-500">{unit}</span>}
+          {value} {unit && <span className="text-xs font-normal text-slate-600">{unit}</span>}
         </div>
         {subLabel && (
-          <div className="text-[10px] text-slate-400 font-mono truncate">{subLabel}</div>
+          <div className="text-[11px] text-slate-600 font-mono truncate">{subLabel}</div>
         )}
       </div>
     </>
