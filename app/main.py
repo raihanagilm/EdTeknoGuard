@@ -164,31 +164,213 @@ def poll_notifications_alias(request: Request):
     finally:
         db.close()
 
-@app.get("/api/portal/ticket-status")
-def portal_ticket_status_alias(request: Request):
+@app.get("/api/tiket")
+def get_tickets_alias(request: Request, status: str = "SEMUA"):
     from app.core.database import SessionLocal
-    from portal_pelanggan.core.security import get_current_customer_optional
-    from portal_pelanggan.modules.kendala.service import KendalaService
+    from app.modules.admin_customer_mgmt.routes import get_tickets_json
     db = SessionLocal()
     try:
-        cust = get_current_customer_optional(request)
-        if not cust:
-            return JSONResponse(status_code=401, content={"status": "unauthorized", "message": "Belum login"})
-        tickets = KendalaService.get_customer_tickets(db, cust["id_pelanggan"])
-        return {
-            "status": "success",
-            "id_pelanggan": cust["id_pelanggan"],
-            "total": len(tickets),
-            "tickets": [
-                {
-                    "id_tiket": t.id_tiket,
-                    "kategori": t.kategori,
-                    "status": t.status,
-                    "deskripsi": t.deskripsi,
-                    "created_at": str(t.created_at) if t.created_at else None
+        return get_tickets_json(request=request, status=status, db=db)
+    finally:
+        db.close()
+
+@app.get("/api/kuota")
+def get_quota_alias(request: Request):
+    from app.core.database import SessionLocal
+    from app.modules.admin_customer_mgmt.routes import get_quota_json
+    db = SessionLocal()
+    try:
+        return get_quota_json(request=request, db=db)
+    finally:
+        db.close()
+
+@app.get("/api/users/list")
+async def get_users_alias(request: Request):
+    from app.core.database import SessionLocal
+    from app.modules.users.routes import get_users_json
+    db = SessionLocal()
+    try:
+        return await get_users_json(request=request, db=db)
+    finally:
+        db.close()
+
+@app.get("/api/auth/me")
+def get_current_user_profile(request: Request):
+    from app.core.database import SessionLocal
+    from app.core.security import get_current_user_optional, get_user_allowed_kantor
+    from app.db.models import User
+    from fastapi.responses import JSONResponse
+    
+    user_sess = get_current_user_optional(request)
+    if not user_sess:
+        return JSONResponse(status_code=401, content={"ok": False, "authenticated": False, "message": "Belum terautentikasi"})
+        
+    db = SessionLocal()
+    try:
+        username = user_sess.get("user")
+        db_user = db.query(User).filter(User.username == username).first()
+        if db_user:
+            return {
+                "ok": True,
+                "authenticated": True,
+                "user": {
+                    "id": db_user.id,
+                    "username": db_user.username,
+                    "nama_lengkap": db_user.nama_karyawan or "Administrator NOC",
+                    "role": db_user.role,
+                    "allowed_kantor": db_user.allowed_kantor
                 }
-                for t in tickets
-            ]
+            }
+        
+        return {
+            "ok": True,
+            "authenticated": True,
+            "user": {
+                "id": 1,
+                "username": username,
+                "nama_lengkap": "Administrator NOC",
+                "role": user_sess.get("role", "super admin"),
+                "allowed_kantor": user_sess.get("allowed_kantor", ["cabang", "pusat", "banyumas"])
+            }
+        }
+    finally:
+        db.close()
+
+@app.post("/api/auth/login")
+async def api_auth_login(request: Request):
+    from app.core.database import SessionLocal
+    from app.modules.auth.service import AuthService
+    from app.modules.activity_logs.service import ActivityLogService
+    from app.core.security import SESSION_COOKIE_NAME, MAX_SESSION_AGE
+    from fastapi.responses import JSONResponse
+    
+    body = await request.json()
+    username = body.get("username", "").strip()
+    password = body.get("password", "")
+    
+    db = SessionLocal()
+    try:
+        auth_result = AuthService.authenticate(db, username, password)
+        ip = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("user-agent")
+        
+        if not auth_result:
+            ActivityLogService.log_activity(
+                db=db,
+                username=username,
+                action="LOGIN_FAILED",
+                ip_address=ip,
+                user_agent=user_agent,
+                status="FAILED",
+                keterangan="Percobaan login API gagal: Kredensial tidak valid"
+            )
+            return JSONResponse(
+                status_code=401,
+                content={"ok": False, "message": "Nama pengguna atau kata sandi tidak sesuai!"}
+            )
+            
+        token, user = auth_result
+        ActivityLogService.log_activity(
+            db=db,
+            username=username,
+            nama_karyawan=user.nama_karyawan or username,
+            role=user.role or "operator",
+            action="LOGIN",
+            ip_address=ip,
+            user_agent=user_agent,
+            status="SUCCESS",
+            keterangan="Login berhasil melalui antarmuka web TeknoGuard"
+        )
+        
+        response = JSONResponse(
+            content={
+                "ok": True,
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "nama_lengkap": user.nama_karyawan or "Administrator NOC",
+                    "role": user.role,
+                    "allowed_kantor": user.allowed_kantor
+                }
+            }
+        )
+        response.set_cookie(
+            key=SESSION_COOKIE_NAME,
+            value=token,
+            max_age=MAX_SESSION_AGE,
+            httponly=True,
+            samesite="lax",
+            path="/"
+        )
+        return response
+    finally:
+        db.close()
+
+@app.post("/api/auth/logout")
+@app.get("/api/auth/logout")
+def api_auth_logout(request: Request):
+    from app.core.database import SessionLocal
+    from app.core.security import SESSION_COOKIE_NAME, get_current_user_optional
+    from app.modules.activity_logs.service import ActivityLogService
+    from fastapi.responses import JSONResponse
+    
+    db = SessionLocal()
+    try:
+        user = get_current_user_optional(request)
+        username = user.get("user") if user else "admin"
+        ip = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("user-agent")
+        
+        ActivityLogService.log_activity(
+            db=db,
+            username=username,
+            action="LOGOUT",
+            ip_address=ip,
+            user_agent=user_agent,
+            status="SUCCESS",
+            keterangan="Admin berhasil logout dari sesi TeknoGuard"
+        )
+        
+        response = JSONResponse(content={"ok": True, "message": "Sesi berhasil ditutup."})
+        response.delete_cookie(SESSION_COOKIE_NAME, path="/")
+        response.set_cookie(
+            key=SESSION_COOKIE_NAME,
+            value="",
+            max_age=0,
+            expires=0,
+            path="/",
+            httponly=True,
+            samesite="lax"
+        )
+        return response
+    finally:
+        db.close()
+
+@app.get("/api/auth/check")
+def api_auth_check(request: Request):
+    from app.core.database import SessionLocal
+    from app.core.security import SESSION_COOKIE_NAME, verify_session_token
+    from app.db.models import User
+    
+    token = request.cookies.get(SESSION_COOKIE_NAME)
+    verified = verify_session_token(token) if token else None
+    
+    if not verified:
+        return {"authenticated": False}
+        
+    db = SessionLocal()
+    try:
+        username = verified.get("user", "admin")
+        db_user = db.query(User).filter(User.username == username).first()
+        return {
+            "authenticated": True,
+            "user": {
+                "id": db_user.id if db_user else 1,
+                "username": username,
+                "nama_lengkap": (db_user.nama_karyawan if db_user else None) or "Administrator NOC",
+                "role": verified.get("role", "super admin"),
+                "allowed_kantor": verified.get("allowed_kantor", ["cabang", "pusat", "banyumas"])
+            }
         }
     finally:
         db.close()

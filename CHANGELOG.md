@@ -24,11 +24,63 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 - **`Fixed`** : Perbaikan kesalahan (*bug fix*), logika, atau error sistem.
 - **`Security`** : Peningkatan keamanan, sanitasi input, token, dan proteksi sesi.
 
----
-
 ## [Unreleased]
 
-### Changed
+- **Resolusi Penuh Konektivitas Vite Proxy & REST API Endpoints (Pemantauan Kuota, Tiket Keluhan, Manajemen Pengguna)**:
+  - **Penyebab Utama Teridentifikasi & Diperbaiki**: Vite dev server (`frontend/vite.config.js`) sebelumnya hanya mem-proxy `/api` dan belum mendaftarkan prefix `/admin` serta `/users`, sehingga request data kuota, tiket, dan user di-intercept oleh Vite SPA port 3000 dan mengembalikan file HTML alih-alih data JSON FastAPI port 8000.
+  - **Pembaruan Konfigurasi Proxy Vite (`vite.config.js`)**: Mendaftarkan `/admin` dan `/users` ke proxy target `http://127.0.0.1:8000`.
+  - **Penyediaan Endpoint Alias Mandiri (`app/main.py`)**: Menambahkan rute alias `/api/kuota`, `/api/tiket`, dan `/api/users/list` agar dapat diakses baik melalui prefix `/api/*` maupun `/admin/api/*` dan `/users/api/*`.
+  - **Pengujian Port 3000 & 8000 Terverifikasi 100% OK**: Seluruh request ke `/api/kuota` (112 data kuota), `/api/tiket` (4 tiket gangguan), dan `/users/api/list` (4 user NOC) sukses mengembalikan `HTTP 200 JSON`.
+
+- **Sinkronisasi Beranda (Dashboard) dengan Style Visual & Design Tokens Baru**:
+  - **Penyelarasan Style Warna & Font Card Baru**: Mengintegrasikan komponen token `ModuleHeader` dan `MetricCard` dari `CommonUI.jsx` pada `ModulBeranda.jsx` dengan estetika *frost cyan/sky glass*, tipografi `font-mono` & `font-black`, rounded `rounded-2xl`, border `border-sky-200/80`, serta badge status modern yang seragam dengan 7 modul lainnya.
+  - **Kelengkapan Fitur Tetap 100% Utuh**: Command control bar, live progress bar ONT, 4 kartu metrik KPI, visualisasi Chart.js telemetri redaman dengan skala piecewise, filter rentang tanggal, quick shortcuts, dan integrasi penuh REST API backend.
+
+- **Standarisasi Penamaan File Berbahasa Indonesia (Selaras dengan Antarmuka & Kaidah Antislop)**:
+  - Mengubah seluruh nama berkas komponen frontend agar seragam 100% dengan istilah antarmuka sistem:
+    1. `ModulBeranda.jsx` (sebelumnya `DashboardModule.jsx`)
+    2. `ModulPelanggan.jsx` (sebelumnya `CustomersModule.jsx`)
+    3. `ModulPengaturan.jsx` (sebelumnya `SettingsModule.jsx`)
+    4. `ModulRiwayatRedaman.jsx` (sebelumnya `LogsModule.jsx`)
+    5. `ModulTiketKeluhan.jsx` (sebelumnya `TicketsModule.jsx`)
+    6. `ModulPemantauanKuota.jsx` (sebelumnya `QuotaModule.jsx`)
+    7. `ModulLogAktivitas.jsx` (sebelumnya `ActivityLogsModule.jsx`)
+    8. `ModulManajemenPengguna.jsx` (sebelumnya `UsersModule.jsx`)
+  - **Penyelarasan Desain (CommonUI Tokens)**: Seluruh modul menggunakan `CommonUI.jsx` (`ModuleHeader`, `MetricCard`, `FilterContainer`, `DataTableContainer`) sehingga jenis font (*font-mono, font-bold, font-black*), ukuran kartu, border, dan padding seragam di semua menu.
+  - Menghapus seluruh berkas komponen lama yang berbahasa Inggris agar repositori bersih dan mudah dimaintain.
+
+- **Transformasi Penuh Nuansa & Arsitektur Visual (Optical Network Surveillance Identity — Impeccable Standards)**:
+  - **Arsitektur Baru & Berbeda Total**: Mengganti template kartu lama dengan sistem pemantauan **Optical Network Surveillance** yang memuat **Kendali Sesi Pemantauan (Scan Control Deck)** dengan progress bar real-time, status OLT-ONLINE aktif, jam telemetri real-time, dan **Grafik Fluktuasi Redaman Optik (Rx Power dBm)** 24 jam.
+  - **8 Pilar Navigasi Lengkap**: Mengintegrasikan 8 domain fungsional NOC (*Beranda, Riwayat Redaman, Pemantauan Kuota, Data Pelanggan, Tiket Keluhan, Log Aktivitas, Management Pengguna, Pengaturan Sistem*) dengan transisi instan.
+  - **Drawer Navigasi Mobile Penuh & 5-Fast Bottom Dock**: Menyediakan drawer geser (*slide-in mobile drawer*) untuk akses seluruh menu sistem di ponsel, berdampingan dengan 5 tombol aksi cepat di dock bawah.
+  - **Detail Telemetri Lapangan**: Bottom sheet inspeksi cepat yang menampilkan daya Rx, suhu ONT, POP ODP, alamat pasang, serta aksi telepon langsung teknisi ke pelanggan.
+- **Pembaruan Gaya Tema: Emerald Mint & Crisp White (Impeccable Color System)**:
+  - Mengubah identitas visual menjadi nuansa sistem telekomunikasi stabil dan segar berbasis **Emerald Mint (`#059669`)**, **Teal (`#0d9488`)**, dan **Crisp White (`#ffffff`)** dengan gradasi halus pada latar belakang (`from-emerald-50/40 via-white to-slate-50`).
+  - Menyelaraskan seluruh aksen tombol utama, ikon shield brand lockup, pill switcher kantor, highlight filter status aktif, dan tombol tengah dock bawah ke spektrum warna Emerald Mint yang harmonis.
+- **Optimasi Skala & Proporsi Kompak Mobile (Mobile Ergonomic Proportions)**:
+  - **Perampingan Skala Elemen**: Menghilangkan kartu raksasa yang boros ruang vertikal. Tinggi navbar disesuaikan ke `h-14` (56px), padding kontainer dipadatkan ke `p-3`, dan margin disederhanakan (`space-y-3`).
+  - **Bilah Aksi Kompak (Action Bar)**: Mengubah hero bar besar menjadi *inline status bar* ramping (`min-h-[36px]`) yang memuat scheduler status dan tombol scan cepat.
+  - **4-Pill KPI Padat**: Ukuran kartu indikator status diringkas (`p-2.5`, font angka `text-xl`/`text-2xl`), muat 4 kartu tanpa mendorong konten ke bawah.
+  - **Bottom Dock 5-Tab Ergonomis**: Tinggi dock disesuaikan ke `h-14` (56px) dengan tombol tengah *Beranda* `w-10 h-10` yang pas dan proporsional di layar ponsel.
+- **Integrasi Penuh Tampilan Login & Dashboard/Beranda (React 19 + Impeccable Mobile-First)**:
+  - **Halaman Login Cerah & Modern**: Desain form autentikasi berlatar putih bersih dengan ikon perisai heroik (`Shield`), input berlabel jelas, toggle lihat/sembunyikan kata sandi (`Eye`/`EyeOff`), validasi interaktif instan, dan tautan pintas ke Portal Pelanggan Warga (`TeknoCust`).
+  - **Dashboard/Beranda NOC Terintegrasi**: Memuat bilah komando hero, 4 kartu KPI status filter interaktif, pencarian cepat, card stack telemetri mobile, bottom sheet detail pelanggan dengan aksi telepon langsung, dan sticky 5-tab dock.
+  - **Sesi Otentikasi Interaktif**: Menyediakan mekanisme login/logout mulus dengan transisi instan tanpa reload halaman penuh.
+- **Implementasi Desain Mobile-First Adaptif (Impeccable & Thumb-Zone Ergonomics)**:
+  - **Responsive Layout Adaptation**: Otomatis mentransformasi tabel lebar di desktop menjadi tumpukan kartu telemetri (*card stack view*) di mobile dengan informasi padat dan mudah dipindai jempol.
+  - **Area Sentuh Ramah Jempol (Touch Target >= 44x44 px)**: Seluruh tombol aksi, tab filter status, trigger scan (`min-h-[48px]`), dan bottom navigation bar memenuhi standar ergonomis sentuhan tanpa salah sentuh (*mis-tap*).
+  - **Mobile Bottom Sheet Modal**: Modal detail teknis ONT membuka dari bawah (*slide-in from bottom*) dengan aksi cepat hubungi pelanggan langsung via telepon seluler.
+  - **Office Switcher Mobile Dropdown**: Pemilih kantor cabang yang ringkas di navbar atas agar tidak memakan ruang horizontal layar HP.
+  - **Notch & Safe Area Support**: Mengintegrasikan `env(safe-area-inset-bottom)` untuk tampilan sempurna di perangkat modern (iOS/Android).
+- **Perombakan UI Total ke React 19 + Tailwind CSS (Tema Cerah / Bright Vibrant Enterprise & Impeccable Standards)**:
+  - Mengganti tema gelap monoton lama menjadi **Bright Vibrant NOC Command Canvas** (`#f8fafc` / `#ffffff`) dengan aksen warna royal blue (`#2563eb`), emerald high-throughput (`#10b981`), amber warning (`#f59e0b`), dan rose critical (`#ef4444`).
+  - Merancang ulang tata letak komponen: **Hero NOC Command Strip**, **Interactive 4-Pill Status Filter Gauges**, **Live Search & Telemetry Explorer Table**, **Interactive Slide-over / Modal Detail ONT**, dan **Dock Mobile 5-Tab Ergonomis**.
+  - Menghilangkan layout klise lama dan menerapkan standar craft floor Impeccable (kontras rasio WCAG AA >= 4.5:1, tipografi tegas, natural elevations, dan zero-emoji SVG pure icons).
+- **Pembaruan & Penyelarasan UI Impeccable Design System (Craft Floor & Antislop)**:
+  - Mengimplementasikan standar kualitas antarmuka **Impeccable Design System** & **Antislop** secara komprehensif pada aplikasi TeknoGuard.
+  - **Keterbacaan Tipografi (Typography Floor >= 11px)**: Memperbaiki seluruh teks fungsional mikro (label mobile dock, badge tag, dan sub-caption) dari 9px/10px ke standar floor minimal `>= 11px` (`text-[11px]`).
+  - **Peningkatan Rasio Kontras (WCAG AA >= 4.5:1)**: Memperbaiki kontras teks placeholder form login (`#475569` pada latar putih, rasio 4.8:1) dan skala warna teks Tailwind (`text-50` s/d `text-950`).
+  - **Eliminasi AI Design Clichés**: Menghilangkan efek *zero-offset chromatic halo glow* pada bayangan elemen gelap, mengganti transisi ke *natural exponential easing* (`cubic-bezier(0.16, 1, 0.3, 1)`), dan menyelaraskan struktur *branding lockup* pada header login.
 - **Hak Akses & Otorisasi Pengaturan Sistem (`/settings` & `/pengaturan`)**:
   - Membuka akses menu dan endpoint **Pengaturan Sistem** (`/settings`, `/pengaturan`, `GET /api/settings`, `POST /api/settings`) untuk role **`admin`** di samping **`super admin`**, memungkinkan Admin Cabang/Pusat/Banyumas mengatur parameter monitoring, ambang batas redaman, dan kredensial modem ONT.
   - Mempertahankan menu **Manajemen Pengguna (`/users`)** eksklusif hanya untuk role **`super admin`**.

@@ -85,6 +85,14 @@ def get_active_kantor(request: Request, user: Optional[Dict[str, Any]]) -> str:
 
 def get_current_user_optional(request: Request) -> Optional[Dict[str, Any]]:
     token = request.cookies.get(SESSION_COOKIE_NAME)
+    if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1]
+
+    if not token:
+        return None
+
     return verify_session_token(token)
 
 def require_admin(request: Request) -> Dict[str, Any]:
