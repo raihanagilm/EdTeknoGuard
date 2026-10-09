@@ -16,15 +16,53 @@ import {
   PortalAuthService,
   PortalDashboardService
 } from './services/portalApi';
+import { PortalErrorView } from './components/PortalErrorView';
 import { RefreshCw } from 'lucide-react';
 
 export function PortalPelangganApp() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [viewState, setViewState] = useState('login'); // 'login' | 'reset' | 'app'
-  const [activeTab, setActiveTab] = useState('beranda'); // 'beranda' | 'kendala' | 'wifi' | 'kuota' | 'profil'
+  const [viewState, setViewState] = useState('login'); // 'login' | 'reset' | 'app' | 'error'
+  const getPortalTabFromPath = (path) => {
+    const clean = path.replace(/^\/+|\/+$/g, '').toLowerCase();
+    const parts = clean.split('/');
+    if (parts.length === 1 && (parts[0] === 'teknocust' || parts[0] === 'portal')) return 'beranda';
+    if (parts.length >= 2 && (parts[0] === 'teknocust' || parts[0] === 'portal')) {
+      const sub = parts[1];
+      if (['beranda', 'kendala', 'wifi', 'kuota', 'profil'].includes(sub)) {
+        return sub;
+      }
+      if (['login', 'masuk', 'auth', 'daftar'].includes(sub)) {
+        return 'beranda';
+      }
+      return '404_not_found';
+    }
+    return '404_not_found';
+  };
+
+  const [activeTab, setActiveTab] = useState(() => getPortalTabFromPath(window.location.pathname)); // 'beranda' | 'kendala' | 'wifi' | 'kuota' | 'profil' | '404_not_found'
   const [customer, setCustomer] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const switchTab = (tab, updateUrl = true) => {
+    setActiveTab(tab);
+    if (updateUrl && tab !== '404_not_found') {
+      const prefix = window.location.pathname.startsWith('/portal') ? '/portal' : '/teknocust';
+      const newUrl = tab === 'beranda' ? prefix : `${prefix}/${tab}`;
+      if (window.location.pathname !== newUrl) {
+        window.history.pushState({}, '', newUrl);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const tab = getPortalTabFromPath(window.location.pathname);
+      setActiveTab(tab);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const fetchSession = async () => {
     setLoading(true);
@@ -105,9 +143,29 @@ export function PortalPelangganApp() {
     );
   }
 
+  const validPortalTabs = ['beranda', 'kendala', 'wifi', 'kuota', 'profil'];
+  if (!validPortalTabs.includes(activeTab)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 text-slate-900 font-sans antialiased">
+        <div className="flex-1 flex items-center justify-center">
+          <PortalErrorView
+            errorCode={404}
+            title="Halaman TeknoCust Tidak Ditemukan"
+            description={`Menu atau rute "${window.location.pathname}" tidak tersedia pada portal mandiri pelanggan.`}
+            primaryActionLabel="Beranda"
+            onBackToHome={() => switchTab('beranda')}
+          />
+        </div>
+        <div className="py-4 text-center text-[11px] text-slate-500 font-mono">
+          &copy; 2026 TeknoCust &bull; Layanan Mandiri Pelanggan Internet
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] text-slate-900 font-sans antialiased">
-      {/* Top Header */}
+      {/* Top Header Navbar */}
       <PortalNavbar customer={customer} onLogout={handleLogout} />
 
       {/* Main Container Phone Shell (Max-w-md Mobile First) */}
@@ -115,7 +173,7 @@ export function PortalPelangganApp() {
         {activeTab === 'beranda' && (
           <TabBerandaPelanggan
             data={dashboardData}
-            onNavigate={(tab) => setActiveTab(tab)}
+            onNavigate={(tab) => switchTab(tab)}
           />
         )}
         {activeTab === 'kendala' && <TabKendalaPelanggan customer={customer} />}
@@ -127,7 +185,7 @@ export function PortalPelangganApp() {
       </main>
 
       {/* Sticky Bottom 5-Tab Navigation Bar */}
-      <PortalBottomNav activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab)} />
+      <PortalBottomNav activeTab={activeTab} onTabChange={(tab) => switchTab(tab)} />
     </div>
   );
 }

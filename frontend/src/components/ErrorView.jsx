@@ -13,15 +13,13 @@ export function ErrorView({
   errorCode = 404,
   title = "Halaman Tidak Ditemukan",
   description = "Maaf, rute atau halaman yang Anda tuju tidak tersedia atau telah dipindahkan oleh sistem NOC.",
+  primaryActionLabel = "Beranda",
   onRetry,
   onBackToHome
 }) {
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center p-4 sm:p-6 text-center">
-      <div className="max-w-md w-full bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-sky-200 shadow-xl relative overflow-hidden">
-        {/* Glow ambient background */}
-        <div className="absolute -top-16 -right-16 w-36 h-36 bg-cyan-400/20 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-36 h-36 bg-sky-400/20 rounded-full blur-2xl pointer-events-none" />
+    <div className="w-full flex flex-col items-center justify-center p-4 sm:p-6 text-center">
+      <div className="max-w-lg w-full relative">
 
         {/* Karakter Animasi Robot NOC / Jaringan (SVG Animated Vector) */}
         <div className="relative mx-auto w-40 h-40 sm:w-48 sm:h-48 mb-4 flex items-center justify-center">
@@ -99,12 +97,30 @@ export function ErrorView({
           {description}
         </p>
 
-        {/* Action Buttons */}
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+        {/* Action Buttons (1 Baris Horizontal di Mobile & Desktop) */}
+        <div className="mt-6 flex flex-row items-center justify-center gap-2 sm:gap-3 max-w-sm mx-auto">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) {
+                window.history.back();
+              } else if (onBackToHome) {
+                onBackToHome();
+              } else {
+                window.location.href = '/';
+              }
+            }}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 hover:text-slate-900 font-bold text-xs shadow-2xs transition active:scale-[0.98] min-h-[42px]"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-600" />
+            <span>Kembali</span>
+          </button>
+
           {onRetry && (
             <button
+              type="button"
               onClick={onRetry}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 border border-cyan-300 text-cyan-900 font-bold text-xs shadow-2xs transition active:scale-[0.98] min-h-[42px]"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 border border-cyan-300 text-cyan-900 font-bold text-xs shadow-2xs transition active:scale-[0.98] min-h-[42px]"
             >
               <RefreshCw className="w-3.5 h-3.5 text-cyan-700" />
               <span>Coba Lagi</span>
@@ -112,11 +128,12 @@ export function ErrorView({
           )}
 
           <button
+            type="button"
             onClick={onBackToHome || (() => { window.location.href = '/' })}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 transition active:scale-[0.98] min-h-[42px]"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 transition active:scale-[0.98] min-h-[42px]"
           >
             <Home className="w-3.5 h-3.5" />
-            <span>Kembali ke Beranda</span>
+            <span>{primaryActionLabel}</span>
           </button>
         </div>
       </div>

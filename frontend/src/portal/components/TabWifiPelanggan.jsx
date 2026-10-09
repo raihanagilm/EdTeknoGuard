@@ -53,12 +53,6 @@ export function TabWifiPelanggan({ customer }) {
 
   return (
     <div className="space-y-4 pb-20 animate-fadeIn">
-      {/* Header */}
-      <div>
-        <h2 className="text-base font-black text-slate-900">Kelola WiFi Rumah</h2>
-        <p className="text-[11px] text-slate-500">Ubah nama WiFi (SSID) dan kata sandi tanpa perlu memanggil teknisi</p>
-      </div>
-
       {message.text && (
         <div
           className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 ${
@@ -76,8 +70,14 @@ export function TabWifiPelanggan({ customer }) {
         </div>
       )}
 
-      {/* Form Ganti WiFi */}
+      {/* Form Ganti WiFi Card */}
       <div className="p-5 bg-white rounded-3xl border border-sky-100 shadow-xs space-y-4">
+        {/* Card Header Info */}
+        <div className="pb-3 border-b border-slate-100">
+          <h2 className="text-base font-black text-slate-900">Kelola WiFi Rumah</h2>
+          <p className="text-[11px] text-slate-500">Ubah nama WiFi (SSID) dan kata sandi tanpa perlu memanggil teknisi</p>
+        </div>
+
         <form onSubmit={handleChangeWifi} className="space-y-3.5 text-xs font-semibold">
           <div className="space-y-1">
             <label className="text-slate-700">Nama WiFi (SSID) Baru</label>

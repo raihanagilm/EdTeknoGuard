@@ -8,7 +8,11 @@ import {
   RefreshCw,
   ChevronRight,
   Radio,
-  Building2
+  Building2,
+  Bell,
+  MoreVertical,
+  LogOut,
+  Settings
 } from 'lucide-react'
 
 // Import Komponen Modular Berbahasa Indonesia (OOP & MVC Standard)
@@ -47,6 +51,18 @@ export default function App() {
     allowed_kantor: 'all'
   })
   const [unreadTickets, setUnreadTickets] = useState(0)
+  const [headerMenuOpen, setHeaderMenuOpen] = useState(false)
+  const headerMenuRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (headerMenuRef.current && !headerMenuRef.current.contains(event.target)) {
+        setHeaderMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleSwitchOffice = (officeKey) => {
     setActiveOffice(officeKey)
@@ -106,7 +122,7 @@ export default function App() {
   const [draggedCredIdx, setDraggedCredIdx] = useState(null)
   const [dragOverCredIdx, setDragOverCredIdx] = useState(null)
 
-  // Fetch Settings From Backend FastAPI
+  // Fetch Settings From Backend FastAPI (Thresholds & Credentials)
   const fetchBackendSettings = async () => {
     setSettingsLoading(true)
     try {
@@ -164,7 +180,8 @@ export default function App() {
         setLiveKpi(kpiRes)
       }
 
-      if (meRes && meRes.ok && meRes.user) {
+      if (meRes && meRes.authenticated && meRes.user) {
+        setIsAuthenticated(true)
         setCurrentUser(meRes.user)
       }
 
@@ -177,11 +194,16 @@ export default function App() {
   }
 
   useEffect(() => {
-    fetchBackendSettings()
     fetchLiveDashboardData()
     const interval = setInterval(fetchLiveDashboardData, 8000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (currentUser && currentUser.role !== 'teknisi') {
+      fetchBackendSettings()
+    }
+  }, [currentUser?.role])
 
   // Save Settings To Backend FastAPI
   const handleSaveSettings = async (e) => {
@@ -201,21 +223,25 @@ export default function App() {
     setSettingsSaveSuccess(false)
     setSettingsSaveError('')
 
+    const validCredentials = (modemCredentials || [])
+      .filter(c => c && c.username && c.password)
+      .map(c => ({ username: String(c.username).trim(), password: String(c.password).trim() }))
+
     const payload = {
-      polling_interval_minutes: parseInt(pollingInterval, 10),
-      warning_threshold_dbm: parseFloat(warnThreshold),
-      critical_threshold_dbm: parseFloat(critThreshold),
+      polling_interval_minutes: isNaN(parseInt(pollingInterval, 10)) ? 5 : parseInt(pollingInterval, 10),
+      warning_threshold_dbm: isNaN(parseFloat(warnThreshold)) ? -26.0 : parseFloat(warnThreshold),
+      critical_threshold_dbm: isNaN(parseFloat(critThreshold)) ? -27.0 : parseFloat(critThreshold),
       scheduler_status: isScanningActive ? 'RUNNING' : 'STOPPED',
-      default_modem_user: modemCredentials[0]?.username || 'admin',
-      default_modem_pass: modemCredentials[0]?.password || 'tekno2024',
-      default_modem_credentials: modemCredentials,
-      apply_to_invalid_customers: applyToInvalid,
+      default_modem_user: validCredentials[0]?.username || 'admin',
+      default_modem_pass: validCredentials[0]?.password || 'tekno2024',
+      default_modem_credentials: validCredentials.length > 0 ? validCredentials : [{ username: 'admin', password: 'tekno2024' }],
+      apply_to_invalid_customers: Boolean(applyToInvalid),
       telegram_alert_interval_hours: 1.0,
-      telegram_night_mode_enabled: nightModeEnabled,
-      telegram_night_mode_start: nightModeStart,
-      telegram_night_mode_end: nightModeEnd,
-      app_vibration_enabled: appVibration,
-      alert_waiting_interval_minutes: parseInt(alertWaitingInterval, 10)
+      telegram_night_mode_enabled: Boolean(nightModeEnabled),
+      telegram_night_mode_start: nightModeStart || '22:00',
+      telegram_night_mode_end: nightModeEnd || '06:00',
+      app_vibration_enabled: Boolean(appVibration),
+      alert_waiting_interval_minutes: isNaN(parseInt(alertWaitingInterval, 10)) ? 5 : parseInt(alertWaitingInterval, 10)
     }
 
     try {
@@ -230,7 +256,17 @@ export default function App() {
         setTimeout(() => setSettingsSaveSuccess(false), 4000)
       } else {
         const errJson = await res.json().catch(() => ({}))
-        setSettingsSaveError(errJson.detail || 'Gagal menyimpan konfigurasi ke database server.')
+        let errMsg = 'Gagal menyimpan konfigurasi ke database server.'
+        if (typeof errJson?.detail === 'string') {
+          errMsg = errJson.detail
+        } else if (Array.isArray(errJson?.detail)) {
+          errMsg = errJson.detail
+            .map(item => (item?.msg ? `${item?.loc?.slice(1).join('.') || ''}: ${item.msg}` : JSON.stringify(item)))
+            .join(', ')
+        } else if (typeof errJson?.message === 'string') {
+          errMsg = errJson.message
+        }
+        setSettingsSaveError(errMsg)
       }
     } catch (err) {
       // Fallback simulated success
@@ -520,8 +556,15 @@ export default function App() {
   // URL Path to Module Tab Mapping Helper
   const getTabFromPath = (path) => {
     const clean = path.replace(/^\/+|\/+$/g, '').toLowerCase()
-    if (clean.startsWith('portal')) return 'portal'
-    if (!clean || clean === 'dashboard' || clean === 'beranda') return 'beranda'
+    if (
+      clean === 'portal' ||
+      clean.startsWith('portal/') ||
+      clean === 'teknocust' ||
+      clean.startsWith('teknocust/')
+    ) {
+      return 'portal'
+    }
+    if (!clean || clean === 'teknoguard' || clean === 'dashboard' || clean === 'beranda') return 'beranda'
     if (clean === 'login') return 'login'
     if (clean === 'logs' || clean === 'riwayat') return 'riwayat'
     if (clean === 'kuota' || clean === 'admin/kuota') return 'kuota'
@@ -537,6 +580,7 @@ export default function App() {
   const getPathFromTab = (tab) => {
     switch (tab) {
       case 'beranda': return '/'
+      case 'portal': return '/portal'
       case 'riwayat': return '/logs'
       case 'kuota': return '/admin/kuota'
       case 'pelanggan': return '/pelanggan'
@@ -559,14 +603,16 @@ export default function App() {
 
   // Check backend session & sync browser URL on initial load and popstate
   useEffect(() => {
-    const isPortalRoute = window.location.pathname.startsWith('/portal')
+    const isPortalRoute =
+      window.location.pathname.startsWith('/portal') ||
+      window.location.pathname.startsWith('/teknocust')
 
     const syncFromLocation = () => {
       const initialTab = getTabFromPath(window.location.pathname)
       setActiveTab(initialTab)
     }
 
-    // Jika sedang di rute /portal, jangan redirect ke /login admin NOC
+    // Jika sedang di rute /portal atau /teknocust, jangan redirect ke /login admin NOC
     if (isPortalRoute) {
       syncFromLocation()
       const handlePopState = () => syncFromLocation()
@@ -586,7 +632,11 @@ export default function App() {
         } else {
           setIsAuthenticated(false)
           localStorage.removeItem('edtekno_auth_status')
-          if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/portal')) {
+          if (
+            window.location.pathname !== '/login' &&
+            !window.location.pathname.startsWith('/portal') &&
+            !window.location.pathname.startsWith('/teknocust')
+          ) {
             window.history.pushState({}, '', '/login')
           }
         }
@@ -608,7 +658,11 @@ export default function App() {
   // =========================================================================
   // VIEW A: PORTAL PELANGGAN MANDIRI (TeknoCust)
   // =========================================================================
-  if (activeTab === 'portal' || window.location.pathname.startsWith('/portal')) {
+  if (
+    activeTab === 'portal' ||
+    window.location.pathname.startsWith('/portal') ||
+    window.location.pathname.startsWith('/teknocust')
+  ) {
     return <PortalPelangganApp />
   }
 
@@ -711,7 +765,36 @@ export default function App() {
   }
 
   // =========================================================================
-  // VIEW B: PANEL UTAMA NOC (FROST CYAN & SPLIT VIEW KOMPAK)
+  // VIEW C: HALAMAN 404 / MODUL TIDAK DITEMUKAN (FULL PAGE BERSIH TANPA SIDEBAR/HEADER)
+  // =========================================================================
+  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'pengguna', 'pengaturan']
+  if (!validModules.includes(activeTab)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 sm:p-6 text-slate-900 font-sans">
+        <div className="flex-1 flex items-center justify-center">
+          <ErrorView
+            errorCode={404}
+            title="Halaman Modul Tidak Ditemukan"
+            description={`Rute URL "${window.location.pathname}" tidak terdaftar di sistem TeknoGuard NOC. Silakan periksa kembali tautan yang Anda masukkan.`}
+            primaryActionLabel={isAuthenticated ? "Beranda" : "Halaman Login"}
+            onBackToHome={() => {
+              if (isAuthenticated) {
+                handleTabChange('beranda')
+              } else {
+                window.location.href = '/login'
+              }
+            }}
+          />
+        </div>
+        <div className="py-4 text-center text-[11px] text-slate-500 font-mono">
+          &copy; 2026 TeknoGuard NOC &bull; Sistem Monitoring Redaman Jaringan Fiber Optik
+        </div>
+      </div>
+    )
+  }
+
+  // =========================================================================
+  // VIEW D: PANEL UTAMA NOC (FROST CYAN & SPLIT VIEW KOMPAK)
   // =========================================================================
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] text-[#0f172a] antialiased selection:bg-cyan-200 selection:text-cyan-900 pb-20 lg:pb-0 flex flex-col font-sans">
@@ -729,20 +812,21 @@ export default function App() {
       <div className="lg:pl-60 flex-1 flex flex-col">
         
         {/* Top Header Bar */}
-        <header className="h-14 bg-white/90 backdrop-blur-md border-b border-sky-200/80 sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between shadow-2xs">
+        <header className="h-14 bg-white/90 backdrop-blur-md border-b border-sky-200/80 sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-2 sm:gap-3">
             <span className="text-xs font-mono font-bold text-cyan-800 uppercase tracking-wide">
               {activeTab === 'beranda' ? 'Dashboard NOC' : `Modul ${activeTab}`}
             </span>
             <span className="hidden sm:inline-block text-slate-300">&bull;</span>
-            <span className="hidden sm:inline-block text-[11px] text-slate-500 font-mono font-medium">
-              TiDB Cloud Aktif
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-slate-500 font-mono font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>Sistem Aktif</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Office Switcher Dropdown (Pilih Kantor Sesuai SOP) */}
-            <div className="flex items-center gap-1.5 bg-cyan-50/90 hover:bg-cyan-100/80 p-1 pl-2.5 rounded-xl border border-sky-200 text-xs font-mono transition shadow-2xs">
+            <div className="flex items-center gap-1.5 bg-cyan-50/90 hover:bg-cyan-100/80 p-1 pl-2 sm:pl-2.5 rounded-xl border border-sky-200 text-xs font-mono transition shadow-2xs">
               <Building2 className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
               <span className="text-[10px] font-bold text-slate-400 uppercase hidden md:inline">Kantor:</span>
               <select
@@ -760,6 +844,65 @@ export default function App() {
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-50 border border-sky-200 text-xs font-mono text-cyan-900 font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
               <span className="uppercase text-[11px]">{activeOffice}</span>
+            </div>
+
+            {/* Ikon Lonceng Notifikasi Tiket */}
+            <button
+              type="button"
+              onClick={() => handleTabChange('tiket')}
+              className="relative p-2 rounded-xl bg-cyan-50/80 hover:bg-cyan-100 text-cyan-700 border border-sky-200/80 transition cursor-pointer flex items-center justify-center"
+              title="Tiket Keluhan Pelanggan"
+              aria-label="Tiket Keluhan Pelanggan"
+            >
+              <Bell className="w-4 h-4" />
+              {unreadTickets > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border-2 border-white animate-pulse">
+                  {unreadTickets}
+                </span>
+              )}
+            </button>
+
+            {/* Tombol Titik Tiga (More Menu & Logout Dropdown) */}
+            <div className="relative" ref={headerMenuRef}>
+              <button
+                type="button"
+                onClick={() => setHeaderMenuOpen(!headerMenuOpen)}
+                className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer flex items-center justify-center"
+                title="Menu Akun &amp; Sesi"
+                aria-label="Menu Akun dan Sesi"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+
+              {headerMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-sky-200/90 shadow-xl p-2 space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  {/* Header Ringkas Info Akun */}
+                  <div className="p-2.5 bg-cyan-50/60 rounded-xl border border-cyan-100/80 mb-1">
+                    <span className="block text-xs font-bold text-slate-900 truncate">
+                      {currentUser?.nama_lengkap || 'Administrator'}
+                    </span>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <span className="text-[10px] text-slate-500 font-mono">@{currentUser?.username || 'user'}</span>
+                      <span className="text-[9px] uppercase font-bold text-cyan-800 bg-cyan-100 px-1.5 py-0.2 rounded-md">
+                        {currentUser?.role || 'user'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tombol Keluar Sesi (Logout) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHeaderMenuOpen(false)
+                      handleLogout()
+                    }}
+                    className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold text-rose-700 bg-rose-50/60 hover:bg-rose-100 hover:text-rose-800 flex items-center gap-2 transition cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4 text-rose-600" />
+                    <span>Keluar Akun (Logout)</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -820,16 +963,9 @@ export default function App() {
               handleCredDragEnd={handleCredDragEnd}
               fetchBackendSettings={fetchBackendSettings}
               onOpenConfirmModal={() => setConfirmModalOpen(true)}
-            />
-          )}
-
-          {/* 404 / Unknown Module Fallback */}
-          {!['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'pengguna', 'pengaturan'].includes(activeTab) && (
-            <ErrorView
-              errorCode={404}
-              title="Halaman Modul Tidak Ditemukan"
-              description={`Rute URL "${window.location.pathname}" tidak terdaftar di sistem TeknoGuard NOC. Silakan periksa kembali tautan yang Anda masukkan.`}
-              onBackToHome={() => handleTabChange('beranda')}
+              currentUser={currentUser}
+              setCurrentUser={setCurrentUser}
+              onLogout={handleLogout}
             />
           )}
         </main>

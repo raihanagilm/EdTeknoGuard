@@ -6,7 +6,7 @@ from app.core.config import settings
 import bcrypt
 
 CUSTOMER_SESSION_COOKIE = "edtekno_pelanggan_session"
-MAX_SESSION_AGE = 86400 * 30  # 30 Hari Inaktivitas
+MAX_SESSION_AGE = 86400 * 60  # 60 Hari (2 Bulan) Inaktivitas Sesi Pelanggan
 
 _serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
 

@@ -281,6 +281,7 @@ export function ModulBeranda({
           isThreshold: true
         })
 
+        // Garis Kritis
         datasets.push({
           label: `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`,
           data: count > 0 ? new Array(count).fill(critVal) : [],
@@ -293,6 +294,9 @@ export function ModulBeranda({
           tension: 0,
           isThreshold: true
         })
+
+        // Pastikan instance Chart.js masih ada dan valid sebelum manipulasi data
+        if (!chartInstanceRef.current || !chartInstanceRef.current.data) return
 
         chartInstanceRef.current.data.labels = rawLabels
         chartInstanceRef.current.data.datasets = datasets
@@ -318,7 +322,7 @@ export function ModulBeranda({
         chartInstanceRef.current.update('none')
       }
     } catch (err) {
-      console.error('Gagal memuat data grafik:', err)
+      console.warn('Gagal memuat data grafik:', err)
     }
   }, [chartRange, selectedDate])
 
@@ -704,7 +708,7 @@ export function ModulBeranda({
 
           {/* 8. Web Pelanggan (TeknoCust) */}
           <a
-            href="/portal"
+            href="/teknocust"
             target="_blank"
             rel="noreferrer"
             className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"

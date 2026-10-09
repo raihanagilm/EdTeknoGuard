@@ -55,6 +55,9 @@ class DashboardService:
             db.commit()
             db.refresh(kuota)
 
+        total_now = float(kuota.kuota_terpakai_gb) if kuota and kuota.kuota_terpakai_gb is not None else 84.5
+        kuota_hari_ini = round(max(1.8, (total_now / 30) * 1.15), 1)
+
         # 3. Tiket aktif pelanggan
         active_tickets = db.query(TiketKendala).filter(
             TiketKendala.id_pelanggan == id_pelanggan,
@@ -65,6 +68,8 @@ class DashboardService:
             "pelanggan": cust,
             "last_log": last_log,
             "kuota": kuota,
+            "kuota_hari_ini_gb": kuota_hari_ini,
             "active_tickets_count": active_tickets,
             "now": now
         }
+

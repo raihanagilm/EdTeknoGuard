@@ -22,7 +22,7 @@ api_router = APIRouter(prefix="/api", tags=["Portal Pelanggan REST API"])
 def portal_auth_me(request: Request, db: Session = Depends(get_db)):
     cust = get_current_customer_optional(request)
     if not cust:
-        return JSONResponse(status_code=401, content={"authenticated": False, "message": "Belum login"})
+        return {"authenticated": False, "message": "Belum login"}
     
     id_pel = cust.get("id_pelanggan")
     pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first() if id_pel else None
@@ -37,7 +37,9 @@ def portal_auth_me(request: Request, db: Session = Depends(get_db)):
             "paket": pelanggan.paket if pelanggan else "",
             "alamat": pelanggan.alamat if pelanggan else "",
             "no_hp": pelanggan.no_hp if pelanggan else "",
-            "nama_wifi": pelanggan.nama_wifi if pelanggan else ""
+            "nama_wifi": pelanggan.nama_wifi if pelanggan else "",
+            "kantor": pelanggan.kantor if pelanggan else "cabang",
+            "pop": pelanggan.pop if pelanggan else "Server Cabang"
         }
     }
 
@@ -46,6 +48,8 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_db)):
     body = await request.json()
     identifier = body.get("identifier", "").strip()
     password = body.get("password", "").strip()
+    
+    remember_me = body.get("remember_me", True)
     
     success, msg, data = AuthService.authenticate(db, identifier, password)
     if not success or not data:
@@ -67,10 +71,12 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_db)):
             "customer": payload
         }
     )
+    # Jika Ingat Saya dicentang, sesi aktif 60 hari (2 bulan = 5.184.000 detik). Jika tidak, sesi berakhir saat browser ditutup / 1 hari.
+    cookie_max_age = MAX_SESSION_AGE if remember_me else 86400
     response.set_cookie(
         key=CUSTOMER_SESSION_COOKIE,
         value=token,
-        max_age=MAX_SESSION_AGE,
+        max_age=cookie_max_age,
         httponly=True,
         samesite="lax",
         path="/"
@@ -138,6 +144,8 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
             "paket": pel.paket if pel else "20 Mbps Unlimited",
             "ip_router": pel.ip_router if pel else "-",
             "nama_wifi": pel.nama_wifi if pel else "-",
+            "kantor": pel.kantor if pel else "cabang",
+            "pop": pel.pop if pel else "Server Cabang",
             "status_verifikasi": pel.status_verifikasi if pel else "TERVERIFIKASI"
         },
         "signal": {
@@ -149,6 +157,7 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
         },
         "kuota": {
             "kuota_terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota else 84.5,
+            "kuota_hari_ini_gb": float(data.get("kuota_hari_ini_gb", 3.2)),
             "periode_bulan": kuota.periode_bulan if kuota else "2026-10",
             "kecepatan_paket": kuota.kecepatan_paket if kuota else "20 Mbps Unlimited"
         },
@@ -223,6 +232,25 @@ async def portal_kendala_create(request: Request, db: Session = Depends(get_db))
         "id_tiket": ticket.id_tiket
     }
 
+@api_router.delete("/kendala/{ticket_id}")
+async def portal_kendala_delete(ticket_id: str, request: Request, db: Session = Depends(get_db)):
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"authenticated": False})
+        
+    success = KendalaService.delete_customer_ticket(
+        db=db,
+        id_tiket=ticket_id,
+        id_pelanggan=cust.get("id_pelanggan")
+    )
+    if not success:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Tiket tidak ditemukan atau sudah dihapus!"})
+        
+    return {
+        "ok": True,
+        "message": f"Tiket keluhan '{ticket_id}' berhasil dihapus."
+    }
+
 @api_router.post("/wifi/ganti")
 async def portal_wifi_change(request: Request, db: Session = Depends(get_db)):
     cust = get_current_customer_optional(request)
@@ -263,16 +291,12 @@ async def portal_profil_change_password(request: Request, db: Session = Depends(
         return JSONResponse(status_code=401, content={"authenticated": False})
         
     body = await request.json()
-    password_lama = body.get("password_lama", "").strip()
     password_baru = body.get("password_baru", "").strip()
     konfirmasi = body.get("konfirmasi_password", "").strip()
     
     pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust.get("id_pelanggan")).first()
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
-        
-    if not pelanggan.password_hash or not verify_password(password_lama, pelanggan.password_hash):
-        return JSONResponse(status_code=400, content={"ok": False, "message": "Kata sandi lama salah!"})
         
     if len(password_baru) < 6:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Kata sandi baru minimal 6 karakter!"})
@@ -287,3 +311,42 @@ async def portal_profil_change_password(request: Request, db: Session = Depends(
         "ok": True,
         "message": "Kata sandi akun portal Anda berhasil diubah!"
     }
+
+@api_router.post("/profil/update")
+async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"authenticated": False})
+        
+    body = await request.json()
+    no_hp = body.get("no_hp", "").strip()
+    alamat = body.get("alamat", "").strip()
+    
+    pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust.get("id_pelanggan")).first()
+    if not pelanggan:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
+        
+    if no_hp:
+        pelanggan.no_hp = no_hp
+    if alamat:
+        pelanggan.alamat = alamat
+        
+    db.commit()
+    db.refresh(pelanggan)
+    
+    return {
+        "ok": True,
+        "message": "Data diri (Alamat & No. Kontak) berhasil diperbarui!",
+        "customer": {
+            "id_pelanggan": pelanggan.id_pelanggan,
+            "nama": pelanggan.nama,
+            "no_hp": pelanggan.no_hp or "",
+            "alamat": pelanggan.alamat or "",
+            "paket": pelanggan.paket or "",
+            "ip_router": pelanggan.ip_router or "",
+            "kantor": pelanggan.kantor or "cabang",
+            "status_verifikasi": pelanggan.status_verifikasi or "TERVERIFIKASI"
+        }
+    }
+
+

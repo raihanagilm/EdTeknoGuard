@@ -203,7 +203,7 @@ def get_current_user_profile(request: Request):
     
     user_sess = get_current_user_optional(request)
     if not user_sess:
-        return JSONResponse(status_code=401, content={"ok": False, "authenticated": False, "message": "Belum terautentikasi"})
+        return {"ok": True, "authenticated": False, "user": None, "message": "Belum terautentikasi"}
         
     db = SessionLocal()
     try:
@@ -370,6 +370,69 @@ def api_auth_check(request: Request):
                 "nama_lengkap": (db_user.nama_karyawan if db_user else None) or "Administrator NOC",
                 "role": verified.get("role", "super admin"),
                 "allowed_kantor": verified.get("allowed_kantor", ["cabang", "pusat", "banyumas"])
+            }
+        }
+    finally:
+        db.close()
+
+@app.post("/api/auth/update-profile")
+async def api_auth_update_profile(request: Request):
+    from app.core.database import SessionLocal
+    from app.core.security import get_current_user_optional, get_password_hash
+    from app.db.models import User
+    from app.modules.activity_logs.service import ActivityLogService
+    from fastapi.responses import JSONResponse
+
+    user_sess = get_current_user_optional(request)
+    if not user_sess:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Sesi tidak valid atau telah berakhir."})
+
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    nama_lengkap = body.get("nama_lengkap", "").strip()
+    password_baru = body.get("password_baru", "").strip()
+
+    db = SessionLocal()
+    try:
+        username = user_sess.get("user")
+        db_user = db.query(User).filter(User.username == username).first()
+        if not db_user:
+            return JSONResponse(status_code=404, content={"ok": False, "message": "Pengguna tidak ditemukan."})
+
+        if nama_lengkap:
+            db_user.nama_karyawan = nama_lengkap
+
+        if password_baru:
+            if len(password_baru) < 6:
+                return JSONResponse(status_code=400, content={"ok": False, "message": "Kata sandi baru minimal 6 karakter."})
+            db_user.hashed_password = get_password_hash(password_baru)
+
+        db.commit()
+        db.refresh(db_user)
+
+        ActivityLogService.log_activity(
+            db=db,
+            username=username,
+            nama_karyawan=db_user.nama_karyawan or username,
+            role=db_user.role,
+            action="UPDATE_PROFILE",
+            ip_address=request.client.host if request.client else "unknown",
+            status="SUCCESS",
+            keterangan=f"Pengguna '{username}' ({db_user.role}) berhasil memperbarui profil & kata sandi"
+        )
+
+        return {
+            "ok": True,
+            "message": "Profil dan kata sandi berhasil diperbarui.",
+            "user": {
+                "id": db_user.id,
+                "username": db_user.username,
+                "nama_lengkap": db_user.nama_karyawan or "Administrator NOC",
+                "role": db_user.role,
+                "allowed_kantor": db_user.allowed_kantor
             }
         }
     finally:

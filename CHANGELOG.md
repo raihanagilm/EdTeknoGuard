@@ -26,6 +26,23 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Pembaruan Top Header Bar (Ikon Lonceng Notifikasi & Menu Titik Tiga dengan Logout)**:
+  - **Ikon Lonceng Notifikasi Cepat**: Menambahkan tombol lonceng di header atas dengan counter badge real-time untuk jumlah tiket keluhan yang belum dibaca (`unreadTickets`).
+  - **Menu Dropdown Titik Tiga (`MoreVertical`)**: Menambahkan tombol menu titik tiga di pojok kanan header yang menyajikan ringkasan identitas akun (nama, username, role) dan tombol **Keluar Akun (Logout)** secara eksklusif dan terfokus.
+  - **Pembaruan Status Sistem**: Menghapus teks "TiDB Cloud Aktif" dan menggantinya dengan indikator status dot hijau "Sistem Aktif" yang bersih dan netral.
+  
+- **Transformasi Antarmuka Pengaturan (Tree Menu Desktop & Action Cards Grid ala App DANA)**:
+  - **Penyederhanaan Header & Eliminasi Banner Statis**: Menghapus blok header atas (judul repetitif dan tombol sinkron server) pada [`ModulPengaturan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) sehingga antarmuka menjadi jauh lebih bersih, ramping, dan langsung berfokus pada navigasi menu.
+  - **Action Cards Grid 3 Kolom ala DANA di Mobile**: Pada tampilan smartphone/mobile, tab *Pengaturan NOC* menyajikan 3 Action Cards Grid interaktif yang identik dengan gaya aplikasi DANA (ikon lingkaran gradien biru, judul tebal, dan subjudul info status) untuk memilih sub-menu *Parameter* (`thresholds`), *Kredensial ONT* (`credentials`), dan *Notifikasi* (`notifications`).
+  - **Mobile Segmented Switcher (`Personal` vs `Pengaturan NOC`)**: Switcher pill atas memisahkan area *Personal* (semua role) dan *Pengaturan NOC* (khusus Admin & Super Admin; otomatis disembunyikan jika role adalah Teknisi).
+  - **Desktop Tree Menu Bersarang (Sidebar Kolom Kiri)**: Pada layar desktop (`lg:block`), menu pengaturan tersaji dalam struktur pohon (*Tree Menu*) modular yang elegan dengan hierarki cabang *Personal* (`account`) dan *Pengaturan NOC* (`thresholds`, `credentials`, `notifications`) lengkap dengan badge jumlah kredensial dan indikator aktif.
+  - **Integrasi Panduan Kontekstual & Logout Footer**: Card ketentuan ambang batas redaman dan cara kerja multi-kredensial fallback disematkan rapi di dalam masing-masing form tab, sementara tombol *"Keluar dari Sesi TeknoGuard"* diposisikan secara konsisten di bagian paling bawah halaman untuk semua pengguna.
+
+- **Fitur Pembaruan Data Diri Mandiri Pelanggan (TeknoCust Portal)**:
+  - **Edit Nomor WhatsApp / Telepon & Alamat Domisili**: Pelanggan kini dapat langsung mengubah nomor WhatsApp aktif dan alamat lengkap secara mandiri melalui tab Profil pada portal TeknoCust ([`TabProfilPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx)).
+  - **Penyimpanan Langsung ke Database Master**: Endpoint backend `POST /portal/api/profil/update` di [`api_router.py`](file:///d:/databaru/Magang/EdTeknoGuard/portal_pelanggan/api_router.py) memvalidasi dan memperbarui data master pelanggan di database TiDB / MySQL dengan respon status sukses dan auto-update state lokal frontend tanpa perlu refresh.
+  - **Penyederhanaan Form Profil & Password**: Menghilangkan field ID Pelanggan redundan, menampilkan identitas kantor ISP terdaftar, mengintegrasikan toggle show/hide mata pada kedua inputan kata sandi baru, dan accordion collapsible "Klik untuk Ganti Kata Sandi".
+
 - **Resolusi Penuh Konektivitas Vite Proxy & REST API Endpoints (Pemantauan Kuota, Tiket Keluhan, Manajemen Pengguna)**:
   - **Penyebab Utama Teridentifikasi & Diperbaiki**: Vite dev server (`frontend/vite.config.js`) sebelumnya hanya mem-proxy `/api` dan belum mendaftarkan prefix `/admin` serta `/users`, sehingga request data kuota, tiket, dan user di-intercept oleh Vite SPA port 3000 dan mengembalikan file HTML alih-alih data JSON FastAPI port 8000.
   - **Pembaruan Konfigurasi Proxy Vite (`vite.config.js`)**: Mendaftarkan `/admin` dan `/users` ke proxy target `http://127.0.0.1:8000`.

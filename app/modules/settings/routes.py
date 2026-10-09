@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.security import require_admin_role
+from app.core.security import require_admin_role, require_admin
 from app.modules.settings.controller import SystemSettingsController
 from app.modules.settings.schemas import SystemSettingsSchema
 
@@ -24,9 +24,9 @@ def render_settings_page(
 @router.get("/api/settings")
 def get_system_settings(
     db: Session = Depends(get_db),
-    user: dict = Depends(require_admin_role)
+    user: dict = Depends(require_admin)
 ):
-    """Ambil parameter aktif interval monitoring dan threshold"""
+    """Ambil parameter aktif interval monitoring dan threshold (Read-only untuk seluruh user NOC terotentikasi)"""
     return SystemSettingsController.get_settings(db=db)
 
 @router.post("/api/settings")

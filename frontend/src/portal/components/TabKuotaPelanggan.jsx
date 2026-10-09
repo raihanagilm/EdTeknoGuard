@@ -37,12 +37,6 @@ export function TabKuotaPelanggan({ customer }) {
 
   return (
     <div className="space-y-4 pb-20 animate-fadeIn">
-      {/* Header */}
-      <div>
-        <h2 className="text-base font-black text-slate-900">Pemakaian Kuota</h2>
-        <p className="text-[11px] text-slate-500">Statistik akumulasi pemakaian data internet bulan berjalan</p>
-      </div>
-
       {/* Main Gauge Card (MUTLAK: TANPA SISA KUOTA SESUAI SOP) */}
       <div className="bg-gradient-to-br from-cyan-600 via-sky-600 to-blue-700 rounded-3xl p-6 text-white shadow-lg shadow-cyan-600/20 text-center relative overflow-hidden">
         <div className="text-xs text-cyan-100 font-medium uppercase tracking-wider">

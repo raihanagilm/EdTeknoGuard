@@ -70,8 +70,8 @@ export class PortalAuthService {
     return new PortalApiService().get('/auth/me');
   }
 
-  static async login(identifier, password) {
-    return new PortalApiService().post('/auth/login', { identifier, password });
+  static async login(identifier, password, rememberMe = true) {
+    return new PortalApiService().post('/auth/login', { identifier, password, remember_me: rememberMe });
   }
 
   static async logout() {
@@ -103,6 +103,10 @@ export class PortalKendalaService {
   static async create(payload) {
     return new PortalApiService().post('/kendala/buat', payload);
   }
+
+  static async delete(ticketId) {
+    return new PortalApiService().request(`/kendala/${encodeURIComponent(ticketId)}`, { method: 'DELETE' });
+  }
 }
 
 export class PortalWifiService {
@@ -114,6 +118,10 @@ export class PortalWifiService {
 export class PortalProfilService {
   static async changePassword(payload) {
     return new PortalApiService().post('/profil/ganti-password', payload);
+  }
+
+  static async updateProfile(payload) {
+    return new PortalApiService().post('/profil/update', payload);
   }
 }
 
