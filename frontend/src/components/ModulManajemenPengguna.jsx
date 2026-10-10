@@ -208,59 +208,55 @@ export function ModulManajemenPengguna() {
         </div>
       )}
 
-      {/* 1. Header Banner */}
-      <ModuleHeader
-        badge="HAK AKSES"
-        icon={ShieldCheck}
-        title="Manajemen Pengguna &amp; Role"
-        subtitle="Pengelolaan akun pengguna NOC, penetapan hak akses role, dan alokasi kantor operasional."
-      >
-        <button
-          onClick={openAddModal}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[38px] shadow-xs"
-        >
-          <UserPlus className="w-3.5 h-3.5" />
-          <span>Tambah Pengguna</span>
-        </button>
-      </ModuleHeader>
-
-      {/* 2. Filter Bar */}
+      {/* 1. Filter Bar & Aksi */}
       <FilterContainer>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-          <div className="relative">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari username atau nama..."
-              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-            />
-            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 flex-1">
+            <div className="relative">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Cari username atau nama..."
+                className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+              />
+              <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+            </div>
+
+            <div>
+              <select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+              >
+                <option value="all">Semua Role Pengguna</option>
+                <option value="super admin">Super Admin</option>
+                <option value="admin">Admin Cabang</option>
+                <option value="teknisi">Teknisi</option>
+              </select>
+            </div>
+
+            <div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+              >
+                <option value="all">Semua Status Akun</option>
+                <option value="active">Status Aktif</option>
+                <option value="inactive">Status Nonaktif</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <select
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+          <div className="flex items-center justify-end shrink-0">
+            <button
+              onClick={openAddModal}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[38px] shadow-xs"
             >
-              <option value="all">Semua Role Pengguna</option>
-              <option value="super admin">Super Admin</option>
-              <option value="admin">Admin Cabang</option>
-              <option value="teknisi">Teknisi</option>
-            </select>
-          </div>
-
-          <div>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
-            >
-              <option value="all">Semua Status Akun</option>
-              <option value="active">Status Aktif</option>
-              <option value="inactive">Status Nonaktif</option>
-            </select>
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Tambah Pengguna</span>
+            </button>
           </div>
         </div>
       </FilterContainer>

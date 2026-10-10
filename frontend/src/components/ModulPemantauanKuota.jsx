@@ -73,28 +73,7 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang' }) {
 
   return (
     <div className="space-y-4">
-      {/* 1. Header Banner */}
-      <ModuleHeader
-        badge="MONITORING TRAFIK"
-        icon={Wifi}
-        title="Pemantauan Pemakaian Kuota"
-        subtitle={`Akumulasi pemakaian kuota data pelanggan pada bulan berjalan (${currentPeriod || 'Bulan Ini'}).`}
-      >
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-lg bg-cyan-100/80 border border-cyan-300 text-cyan-900 font-mono text-[11px] font-bold">
-            Wilayah: {activeKantor.toUpperCase() || 'CABANG'}
-          </span>
-          <button
-            onClick={fetchQuota}
-            className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition"
-            title="Muat Ulang"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </ModuleHeader>
-
-      {/* 2. 3 Kartu Metrik Grid */}
+      {/* 1. 3 Kartu Metrik Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <MetricCard
           label="Total Pelanggan Terdata"
@@ -122,46 +101,62 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang' }) {
         />
       </div>
 
-      {/* 3. Filter Bar */}
+      {/* 2. Filter Bar & Aksi */}
       <FilterContainer>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-          <div className="relative">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari ID, Nama, atau IP..."
-              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-            />
-            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 flex-1">
+            <div className="relative">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Cari ID, Nama, atau IP..."
+                className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+              />
+              <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+            </div>
+
+            <div>
+              <select
+                value={filterPaket}
+                onChange={(e) => setFilterPaket(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+              >
+                <option value="all">Semua Paket Layanan</option>
+                {paketOptions.map((pkt) => (
+                  <option key={pkt} value={pkt}>{pkt}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <select
+                value={filterLevel}
+                onChange={(e) => setFilterLevel(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+              >
+                <option value="all">Semua Level Pemakaian</option>
+                <option value="sangat_tinggi">Sangat Tinggi (&gt; 150 GB)</option>
+                <option value="tinggi">Tinggi (100 - 150 GB)</option>
+                <option value="sedang">Sedang (50 - 100 GB)</option>
+                <option value="ringan">Ringan (&lt; 50 GB)</option>
+                <option value="nol">Nol (0 GB)</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <select
-              value={filterPaket}
-              onChange={(e) => setFilterPaket(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+          <div className="flex items-center gap-2 justify-end">
+            <span className="px-2.5 py-1.5 rounded-xl bg-cyan-100/80 border border-cyan-300 text-cyan-900 font-mono text-[11px] font-bold shrink-0">
+              Wilayah: {activeKantor.toUpperCase() || 'CABANG'}
+            </span>
+            <button
+              onClick={fetchQuota}
+              disabled={loading}
+              className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[36px] flex items-center justify-center shrink-0"
+              title="Muat Ulang"
             >
-              <option value="all">Semua Paket Layanan</option>
-              {paketOptions.map((pkt) => (
-                <option key={pkt} value={pkt}>{pkt}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <select
-              value={filterLevel}
-              onChange={(e) => setFilterLevel(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
-            >
-              <option value="all">Semua Level Pemakaian</option>
-              <option value="sangat_tinggi">Sangat Tinggi (&gt; 150 GB)</option>
-              <option value="tinggi">Tinggi (100 - 150 GB)</option>
-              <option value="sedang">Sedang (50 - 100 GB)</option>
-              <option value="ringan">Ringan (&lt; 50 GB)</option>
-              <option value="nol">Nol (0 GB)</option>
-            </select>
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
       </FilterContainer>

@@ -207,7 +207,52 @@ export function ModulBeranda({
       const res = await MonitoringService.getChartData(params)
       if (res.ok && res.data) {
         const json = res.data
-        const rawLabels = json.labels || []
+        let rawLabels = json.labels || []
+        let rawDatasets = json.datasets || []
+        let singleValues = json.values || []
+        let singleDetails = json.details || []
+
+        // Auto-trimming: Temukan indeks data pertama dan terakhir yang memiliki nilai riil (bukan null)
+        if (rawLabels.length > 0) {
+          let firstValidIdx = -1
+          let lastValidIdx = -1
+
+          if (rawDatasets && rawDatasets.length > 0) {
+            for (let i = 0; i < rawLabels.length; i++) {
+              const hasDataAtI = rawDatasets.some(
+                (ds) => ds.values && ds.values[i] !== null && ds.values[i] !== undefined && !isNaN(ds.values[i])
+              )
+              if (hasDataAtI) {
+                if (firstValidIdx === -1) firstValidIdx = i
+                lastValidIdx = i
+              }
+            }
+          } else if (singleValues && singleValues.length > 0) {
+            for (let i = 0; i < rawLabels.length; i++) {
+              if (singleValues[i] !== null && singleValues[i] !== undefined && !isNaN(singleValues[i])) {
+                if (firstValidIdx === -1) firstValidIdx = i
+                lastValidIdx = i
+              }
+            }
+          }
+
+          // Jika ditemukan rentang valid, potong label dan array data
+          if (firstValidIdx !== -1 && lastValidIdx !== -1 && (firstValidIdx > 0 || lastValidIdx < rawLabels.length - 1)) {
+            rawLabels = rawLabels.slice(firstValidIdx, lastValidIdx + 1)
+            if (rawDatasets && rawDatasets.length > 0) {
+              rawDatasets = rawDatasets.map((ds) => ({
+                ...ds,
+                values: (ds.values || []).slice(firstValidIdx, lastValidIdx + 1),
+                details: (ds.details || []).slice(firstValidIdx, lastValidIdx + 1)
+              }))
+            }
+            if (singleValues && singleValues.length > 0) {
+              singleValues = singleValues.slice(firstValidIdx, lastValidIdx + 1)
+              singleDetails = singleDetails.slice(firstValidIdx, lastValidIdx + 1)
+            }
+          }
+        }
+
         const count = rawLabels.length
         const warnThreshold = json.threshold !== undefined ? json.threshold : -26.0
         const critThreshold = json.critical_threshold !== undefined ? json.critical_threshold : -27.0
@@ -216,9 +261,9 @@ export function ModulBeranda({
 
         let datasets = []
 
-        if (json.datasets && json.datasets.length > 0) {
-          const isMulti = json.datasets.length > 1
-          datasets = json.datasets.map((ds) => {
+        if (rawDatasets && rawDatasets.length > 0) {
+          const isMulti = rawDatasets.length > 1
+          datasets = rawDatasets.map((ds) => {
             const transformed = (ds.values || []).map((v) =>
               v !== null && !isNaN(v) && typeof v === 'number' ? transformDbm(v) : null
             )
@@ -229,11 +274,11 @@ export function ModulBeranda({
               details: ds.details || [],
               borderColor: ds.color || '#0891b2',
               backgroundColor: !isMulti ? 'rgba(8, 145, 178, 0.12)' : 'transparent',
-              borderWidth: json.datasets.length > 2 ? 2 : 2.5,
+              borderWidth: rawDatasets.length > 2 ? 2 : 2.5,
               fill: !isMulti,
               tension: 0.12,
-              pointRadius: json.datasets.length > 2 ? 3.5 : 5,
-              pointHoverRadius: json.datasets.length > 2 ? 6 : 8,
+              pointRadius: rawDatasets.length > 2 ? 3.5 : 5,
+              pointHoverRadius: rawDatasets.length > 2 ? 6 : 8,
               pointBackgroundColor: ds.color || '#0891b2',
               pointBorderColor: '#FFFFFF',
               pointBorderWidth: 2,
@@ -243,7 +288,7 @@ export function ModulBeranda({
             }
           })
         } else {
-          const transformedValues = (json.values || []).map((v) =>
+          const transformedValues = (singleValues || []).map((v) =>
             v !== null && !isNaN(v) && typeof v === 'number' ? transformDbm(v) : null
           )
           datasets.push({
@@ -591,151 +636,11 @@ export function ModulBeranda({
 
   return (
     <div className="space-y-4 font-sans">
-      {/* 1. HEADER UTAMA (MODERN CYAN GLASS MVC TOKEN) */}
-      <ModuleHeader
-        badge="PUSAT OPERASIONAL NOC"
-        icon={Activity}
-        title="Monitoring dan Deteksi Dini ONT"
-        subtitle={`Pemeriksaan otomatis setiap ${intervalMinutes} menit ke seluruh modem ONT pelanggan`}
-      >
-        <button
-          onClick={() => onNavigate('pelanggan')}
-          className="px-3.5 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100/80 text-cyan-900 border border-sky-200 font-mono text-xs font-bold transition flex items-center gap-1.5 shadow-2xs min-h-[38px]"
-        >
-          <Users className="w-3.5 h-3.5 text-cyan-700" />
-          <span>Kelola Pelanggan</span>
-        </button>
-      </ModuleHeader>
 
-      {/* 2. MENU LAYANAN & OPERASIONAL (TABLER MODULAR ACTION TILES - KHUSUS MOBILE / AKSES CEPAT) */}
-      <section className="lg:hidden bg-white/90 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-sky-200/80 shadow-xs">
-        <header className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-1 bg-cyan-600 rounded-full" />
-            <h2 className="text-xs sm:text-sm font-black text-slate-900 font-mono uppercase tracking-wide">
-              Menu Layanan &amp; Operasional
-            </h2>
-          </div>
-          <span className="text-[10px] text-slate-400 font-mono font-bold">Akses Cepat</span>
-        </header>
-
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-4 sm:gap-2.5">
-          {/* 1. Data Pelanggan */}
-          <button
-            onClick={() => onNavigate('pelanggan')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
-          >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Users className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Pelanggan</span>
-          </button>
-
-          {/* 2. Tiket Keluhan */}
-          <button
-            onClick={() => onNavigate('tiket')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative"
-          >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
-              <Ticket className="w-5 h-5" />
-              {unreadTicketsCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[18px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
-                  {unreadTicketsCount}
-                </span>
-              )}
-            </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Tiket</span>
-          </button>
-
-          {/* 3. Pemantauan Kuota */}
-          <button
-            onClick={() => onNavigate('kuota')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
-          >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Database className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Kuota</span>
-          </button>
-
-          {/* 4. Riwayat Redaman */}
-          <button
-            onClick={() => onNavigate('riwayat')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
-          >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Activity className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Redaman</span>
-          </button>
-
-          {/* 5. Log Aktivitas */}
-          <button
-            onClick={() => onNavigate('log')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
-          >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <FileText className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Aktivitas</span>
-          </button>
-
-          {/* 6. Pengaturan Sistem */}
-          {isAdminOrSuper && (
-            <button
-              onClick={() => onNavigate('pengaturan')}
-              className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
-            >
-              <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-                <Settings className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Pengaturan</span>
-            </button>
-          )}
-
-          {/* 7. Manajemen Pengguna */}
-          {isSuperAdmin && (
-            <button
-              onClick={() => onNavigate('pengguna')}
-              className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
-            >
-              <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-                <UserCheck className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Pengguna</span>
-            </button>
-          )}
-
-          {/* 8. Web Pelanggan (TeknoCust) */}
-          <a
-            href="/teknocust"
-            target="_blank"
-            rel="noreferrer"
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
-          >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Smartphone className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">TeknoCust</span>
-          </a>
-        </div>
-      </section>
-
-      {/* 3. TABLER COMMAND CONTROL BAR: STATUS ENGINE & ACTION BUTTONS */}
+      {/* 1. TABLER COMMAND CONTROL BAR: STATUS ENGINE & ACTION BUTTONS (Ditaruh di Paling Atas) */}
       <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-sky-200/80 shadow-xs space-y-3.5 relative overflow-hidden">
-        {/* Status Bar Top Line */}
-        <div
-          className={`absolute top-0 left-0 right-0 h-1 ${
-            isNetworkError
-              ? 'bg-rose-500'
-              : engineStatus === 'RUNNING'
-              ? 'bg-emerald-500'
-              : 'bg-amber-500'
-          }`}
-        />
-
         {/* Baris Utama: Status, Timer Interval & Tombol Kontrol */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5 pt-1">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
           {/* Sisi Kiri: Status Pemantau Otomatis */}
           <div className="flex items-center gap-3">
             <div
@@ -1026,6 +931,120 @@ export function ModulBeranda({
           </div>
         </div>
       </div>
+
+      {/* 2. MENU LAYANAN & OPERASIONAL (TABLER MODULAR ACTION TILES - KHUSUS MOBILE / AKSES CEPAT) */}
+      <section className="lg:hidden bg-white/90 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-sky-200/80 shadow-xs">
+        <header className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-1 bg-cyan-600 rounded-full" />
+            <h2 className="text-xs sm:text-sm font-black text-slate-900 font-mono uppercase tracking-wide">
+              Menu Layanan &amp; Operasional
+            </h2>
+          </div>
+          <span className="text-[10px] text-slate-400 font-mono font-bold">Akses Cepat</span>
+        </header>
+
+        <div className="grid grid-cols-4 gap-2 sm:grid-cols-4 sm:gap-2.5">
+          {/* 1. Data Pelanggan */}
+          <button
+            onClick={() => onNavigate('pelanggan')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+          >
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <Users className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Data Pelanggan</span>
+          </button>
+
+          {/* 2. Tiket Keluhan */}
+          <button
+            onClick={() => onNavigate('tiket')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative"
+          >
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
+              <Ticket className="w-5 h-5" />
+              {unreadTicketsCount > 0 && (
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[18px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
+                  {unreadTicketsCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Tiket Keluhan</span>
+          </button>
+
+          {/* 3. Pemantauan Kuota */}
+          <button
+            onClick={() => onNavigate('kuota')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+          >
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <Database className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Pemantauan Kuota</span>
+          </button>
+
+          {/* 4. Riwayat Redaman */}
+          <button
+            onClick={() => onNavigate('riwayat')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+          >
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <Activity className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Riwayat Redaman</span>
+          </button>
+
+          {/* 5. Log Aktivitas */}
+          <button
+            onClick={() => onNavigate('log')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+          >
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <FileText className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Log Aktivitas</span>
+          </button>
+
+          {/* 6. Pengaturan Sistem */}
+          {isAdminOrSuper && (
+            <button
+              onClick={() => onNavigate('pengaturan')}
+              className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            >
+              <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+                <Settings className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Pengaturan Sistem</span>
+            </button>
+          )}
+
+          {/* 7. Manajemen Pengguna */}
+          {isSuperAdmin && (
+            <button
+              onClick={() => onNavigate('pengguna')}
+              className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            >
+              <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+                <UserCheck className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Manajemen Pengguna</span>
+            </button>
+          )}
+
+          {/* 8. Web Pelanggan (TeknoCust) */}
+          <a
+            href="/teknocust"
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+          >
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Portal TeknoCust</span>
+          </a>
+        </div>
+      </section>
 
       {/* 4. TABLER MODULAR KPI STAT CARDS (4 KARTU KESEHATAN JARINGAN KONSISTEN COMMONUI) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

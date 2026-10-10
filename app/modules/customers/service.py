@@ -58,17 +58,25 @@ class CustomerService:
         return df
 
     @staticmethod
+    def generate_structured_customer_id(existing_ids: Optional[set] = None) -> str:
+        """
+        Menghasilkan ID pelanggan terstruktur sesuai standar aturan DB-05 (antislop-vibecoding):
+        Format: <prefix><YYYYMMDD><4 digit acak>
+        Contoh: cust202610104821
+        """
+        import random
+        now_str = datetime.now().strftime("%Y%m%d")
+        for _ in range(100):
+            rand_digits = f"{random.randint(1000, 9999)}"
+            cand = f"cust{now_str}{rand_digits}"
+            if not existing_ids or cand not in existing_ids:
+                return cand
+        return f"cust{now_str}{random.randint(10000, 99999)}"
+
+    @staticmethod
     def generate_customer_id_from_ip(ip: str, sequence: int = 1) -> str:
-        """
-        Menghasilkan ID pelanggan dengan format P(idrouter)00001
-        Contoh: IP 10.10.7.62 -> P101076200001
-        Jika IP kosong -> PLG00001
-        """
-        clean_ip = re.sub(r'[^0-9]', '', str(ip or ''))
-        seq_str = f"{sequence:05d}"
-        if clean_ip:
-            return f"P{clean_ip}{seq_str}"
-        return f"PLG{seq_str}"
+        """Fallback generator ID pelanggan berbasis format DB-05"""
+        return CustomerService.generate_structured_customer_id()
 
     @staticmethod
     def analyze_import_file(file_content: bytes, filename: str) -> dict:
@@ -144,7 +152,7 @@ class CustomerService:
     @staticmethod
     def preview_import_file(file_content: bytes, filename: str, sheet_name: str, mapping: dict, db: Session) -> dict:
         import math
-        from app.db.models import Pelanggan
+        from app.db.models import Pelanggan, PerangkatONT
 
         filename_lower = filename.lower()
         try:
@@ -171,8 +179,13 @@ class CustomerService:
             df.columns = [str(c).strip() for c in df.columns]
             df = df.fillna("")
 
-            # Query data existing di database untuk deteksi ID dan IP unik
-            existing_customers = db.query(Pelanggan.id_pelanggan, Pelanggan.ip_router, Pelanggan.nama).filter(Pelanggan.is_active == True).all()
+            # Query data existing di database untuk deteksi ID dan IP unik (join PerangkatONT)
+            existing_customers = (
+                db.query(Pelanggan.id_pelanggan, PerangkatONT.ip_router, Pelanggan.nama)
+                .outerjoin(PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)
+                .filter(Pelanggan.is_active == True)
+                .all()
+            )
             existing_ids = {row[0] for row in existing_customers if row[0]}
             existing_ips = {row[1]: (row[0], row[2]) for row in existing_customers if row[1]}
 
@@ -193,7 +206,7 @@ class CustomerService:
                         if isinstance(val, float) and math.isnan(val):
                             val = ""
                         val = str(val).strip()
-                        if val.endswith('.0') and db_field in ['id_pelanggan', 'no_hp', 'ip_router']:
+                        if val.endswith('.0') and db_field in ['id_pelanggan', 'no_hp', 'no_wa', 'ip_router']:
                             val = val[:-2]
                         mapped_row[db_field] = val
                         if val:
@@ -208,13 +221,11 @@ class CustomerService:
                 nama = mapped_row.get('nama', '').strip()
                 ip_router = mapped_row.get('ip_router', '').strip()
 
-                # Cek ID pelanggan: Jika kosong, buat format P(idrouter)00001
+                # Cek ID pelanggan: Jika kosong, buat format terstruktur DB-05 (<prefix><YYYYMMDD><4 digit acak>)
                 id_pel = mapped_row.get('id_pelanggan', '').strip()
                 if not id_pel:
-                    clean_ip = re.sub(r'[^0-9]', '', ip_router)
-                    ip_key = clean_ip if clean_ip else "PLG"
-                    ip_sequence_counter[ip_key] = ip_sequence_counter.get(ip_key, 0) + 1
-                    id_pel = CustomerService.generate_customer_id_from_ip(ip_router, ip_sequence_counter[ip_key])
+                    all_known_ids = existing_ids.union(set(seen_ids_in_batch.keys()))
+                    id_pel = CustomerService.generate_structured_customer_id(all_known_ids)
                     mapped_row['id_pelanggan'] = id_pel
 
                 _status = "valid"
@@ -274,7 +285,7 @@ class CustomerService:
 
     @staticmethod
     def execute_json_import(db: Session, data_list: list, default_kantor: Optional[str] = "cabang") -> dict:
-        from app.db.models import Pelanggan
+        from app.db.models import Pelanggan, PerangkatONT, Pop, Paket
 
         # 1. Validasi Ketat: Tolak eksekusi jika terdapat duplikasi IP Router atau ID Pelanggan
         active_items = [item for item in data_list if item.get("_action") != "skip" and item.get("_status") != "error"]
@@ -284,7 +295,15 @@ class CustomerService:
         duplicate_reasons = []
 
         # Ambil IP yang sudah aktif di DB untuk verifikasi tabrakan IP
-        db_ips = {row[0]: row[1] for row in db.query(Pelanggan.ip_router, Pelanggan.id_pelanggan).filter(Pelanggan.is_active == True).all() if row[0]}
+        db_ips = {
+            row[0]: row[1] 
+            for row in db.query(PerangkatONT.ip_router, PerangkatONT.id_pelanggan).all() 
+            if row[0]
+        }
+
+        # Cache master referensi untuk validasi FK
+        valid_pops = {p.nama for p in db.query(Pop).all()}
+        valid_pakets = {pk.nama for pk in db.query(Paket).all()}
 
         for idx, item in enumerate(active_items, start=1):
             row_data = item.get("data", item)
@@ -366,27 +385,58 @@ class CustomerService:
                             redaman_baseline = float(row_data["redaman_baseline"])
                         except (ValueError, TypeError):
                             pass
+
+                    # Pastikan master referensi Pop ada
+                    raw_pop = str(row_data.get("pop", "")).strip() or "Server Cabang"
+                    if raw_pop and raw_pop not in valid_pops:
+                        try:
+                            new_pop = Pop(nama=raw_pop, kantor_kode=row_kantor)
+                            db.add(new_pop)
+                            db.flush()
+                            valid_pops.add(raw_pop)
+                        except Exception:
+                            db.rollback()
+                            raw_pop = "Server Cabang" if "Server Cabang" in valid_pops else None
+
+                    # Pastikan master referensi Paket ada
+                    raw_paket = str(row_data.get("paket", "")).strip() or None
+                    if raw_paket and raw_paket not in valid_pakets:
+                        try:
+                            new_pkt = Paket(nama=raw_paket)
+                            db.add(new_pkt)
+                            db.flush()
+                            valid_pakets.add(raw_paket)
+                        except Exception:
+                            db.rollback()
+                            raw_paket = None
                             
                     new_pelanggan = Pelanggan(
                         id_pelanggan=id_pel,
                         nama=nama,
                         alamat=str(row_data.get("alamat", "")).strip() or None,
-                        no_hp=str(row_data.get("no_hp", "")).strip() or None,
-                        pop=str(row_data.get("pop", "Server Cabang")).strip() or "Server Cabang",
+                        no_hp=str(row_data.get("no_hp", "") or row_data.get("no_wa", "")).strip() or None,
+                        pop=raw_pop,
                         kantor=row_kantor,
+                        paket=raw_paket,
+                        is_monitored=True,
+                        is_active=True
+                    )
+                    db.add(new_pelanggan)
+                    db.flush()
+
+                    new_ont = PerangkatONT(
+                        id_pelanggan=id_pel,
                         ip_router=ip_router,
-                        paket=str(row_data.get("paket", "")).strip() or None,
                         jenis_modem=str(row_data.get("jenis_modem", "GM220-S")).strip() or "GM220-S",
                         mac_address=str(row_data.get("mac_address", "")).strip() or None,
                         redaman_baseline=redaman_baseline,
                         nama_wifi=str(row_data.get("nama_wifi", "")).strip() or None,
                         password_wifi=str(row_data.get("password_wifi", "")).strip() or None,
                         user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
-                        pass_admin=str(row_data.get("pass_admin", "")).strip() or None,
-                        status_kredensial="UNTESTED",
-                        is_active=True
+                        pass_admin=str(row_data.get("pass_admin", "tekno2024")).strip() or "tekno2024",
+                        status_kredensial="UNTESTED"
                     )
-                    db.add(new_pelanggan)
+                    db.add(new_ont)
                     imported_count += 1
             except Exception as e:
                 failed_count += 1
@@ -697,6 +747,8 @@ class CustomerService:
 
     @staticmethod
     def create_customer(db: Session, data: CustomerCreate) -> Pelanggan:
+        from app.db.models import PerangkatONT
+
         if not data.id_pelanggan or not str(data.id_pelanggan).strip():
             # Cari urutan sequence untuk IP router terkait jika sudah ada di DB
             clean_ip = "".join(filter(str.isdigit, str(data.ip_router or "0")))
@@ -708,13 +760,20 @@ class CustomerService:
         if existing_id:
             raise ValueError(f"ID Pelanggan '{data.id_pelanggan}' sudah terdaftar")
 
-        # Validasi duplikasi IP Router aktif
-        existing_ip = db.query(Pelanggan).filter(
-            Pelanggan.ip_router == data.ip_router,
-            Pelanggan.is_active == True
-        ).first()
+        # Validasi duplikasi IP Router aktif (join PerangkatONT)
+        existing_ip = (
+            db.query(PerangkatONT)
+            .join(Pelanggan, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)
+            .filter(
+                PerangkatONT.ip_router == data.ip_router,
+                Pelanggan.is_active == True
+            )
+            .first()
+        )
         if existing_ip:
-            raise ValueError(f"IP Router '{data.ip_router}' sudah digunakan oleh pelanggan '{existing_ip.nama}'")
+            pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == existing_ip.id_pelanggan).first()
+            pel_name = pel.nama if pel else existing_ip.id_pelanggan
+            raise ValueError(f"IP Router '{data.ip_router}' sudah digunakan oleh pelanggan '{pel_name}'")
 
         new_cust = Pelanggan(
             id_pelanggan=data.id_pelanggan,
@@ -723,26 +782,35 @@ class CustomerService:
             no_hp=data.no_hp,
             pop=data.pop,
             kantor=getattr(data, "kantor", "cabang") or "cabang",
-            ip_router=data.ip_router,
             paket=data.paket,
-            jenis_modem=data.jenis_modem,
-            mac_address=data.mac_address,
-            redaman_baseline=data.redaman_baseline,
-            nama_wifi=data.nama_wifi,
-            password_wifi=data.password_wifi,
-            user_admin=data.user_admin,
-            pass_admin=data.pass_admin,
-            snmp_community=data.snmp_community,
             is_monitored=getattr(data, "is_monitored", True) if getattr(data, "is_monitored", None) is not None else True,
             is_active=True
         )
         db.add(new_cust)
+        db.flush()
+
+        new_ont = PerangkatONT(
+            id_pelanggan=data.id_pelanggan,
+            ip_router=data.ip_router,
+            jenis_modem=data.jenis_modem or "GM220-S",
+            mac_address=data.mac_address,
+            redaman_baseline=data.redaman_baseline,
+            nama_wifi=data.nama_wifi,
+            password_wifi=data.password_wifi,
+            user_admin=data.user_admin or "admin",
+            pass_admin=data.pass_admin or "tekno2024",
+            snmp_community=data.snmp_community or "public",
+            status_kredensial="UNTESTED"
+        )
+        db.add(new_ont)
         db.commit()
         db.refresh(new_cust)
         return new_cust
 
     @staticmethod
     def update_customer(db: Session, id_pelanggan: str, data: CustomerUpdate) -> Optional[Pelanggan]:
+        from app.db.models import PerangkatONT
+
         cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
         if not cust:
             return None
@@ -752,13 +820,20 @@ class CustomerService:
         if "ip_router" in update_dict and update_dict["ip_router"]:
             new_ip = str(update_dict["ip_router"]).strip()
             # Periksa apakah IP sudah digunakan oleh pelanggan aktif lain
-            existing_ip = db.query(Pelanggan).filter(
-                Pelanggan.ip_router == new_ip,
-                Pelanggan.is_active == True,
-                Pelanggan.id_pelanggan != id_pelanggan
-            ).first()
+            existing_ip = (
+                db.query(PerangkatONT)
+                .join(Pelanggan, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)
+                .filter(
+                    PerangkatONT.ip_router == new_ip,
+                    Pelanggan.is_active == True,
+                    Pelanggan.id_pelanggan != id_pelanggan
+                )
+                .first()
+            )
             if existing_ip:
-                raise ValueError(f"IP Router '{new_ip}' sudah digunakan oleh pelanggan '{existing_ip.nama}' (ID: {existing_ip.id_pelanggan})")
+                pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == existing_ip.id_pelanggan).first()
+                pel_name = pel.nama if pel else existing_ip.id_pelanggan
+                raise ValueError(f"IP Router '{new_ip}' sudah digunakan oleh pelanggan '{pel_name}' (ID: {existing_ip.id_pelanggan})")
 
         for field, val in update_dict.items():
             if hasattr(cust, field) and val is not None:

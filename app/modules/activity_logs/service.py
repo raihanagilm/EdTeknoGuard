@@ -13,6 +13,7 @@ class ActivityLogService:
         db: Session,
         username: str,
         action: str,
+        user_id: Optional[int] = None,
         nama_karyawan: Optional[str] = None,
         role: str = "admin",
         ip_address: Optional[str] = None,
@@ -23,6 +24,7 @@ class ActivityLogService:
         """Mencatat entri aktivitas pengguna ke dalam database"""
         try:
             log_entry = UserActivityLog(
+                user_id=user_id,
                 username=username.strip() if username else "unknown",
                 nama_karyawan=nama_karyawan.strip() if nama_karyawan else (username.title() if username else None),
                 role=role or "admin",

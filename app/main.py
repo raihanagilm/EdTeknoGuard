@@ -55,12 +55,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Custom Exception Handler untuk Redirect Auth (HTTP 303)
+# Custom Exception Handler untuk Redirect Auth (HTTP 303) & Error Terstruktur
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code == 303 and exc.headers and "Location" in exc.headers:
         return RedirectResponse(url=exc.headers["Location"], status_code=303)
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    return JSONResponse(
+        status_code=exc.status_code, 
+        content={"ok": False, "status_code": exc.status_code, "detail": exc.detail, "message": str(exc.detail)}
+    )
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    import traceback
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={
+            "ok": False,
+            "status_code": 500,
+            "detail": "Internal Server Error",
+            "message": "Terjadi kendala pada server backend. Silakan coba beberapa saat lagi."
+        }
+    )
 
 @app.middleware("http")
 async def inject_current_user_middleware(request: Request, call_next):
@@ -368,6 +385,7 @@ def api_auth_check(request: Request):
                 "id": db_user.id if db_user else 1,
                 "username": username,
                 "nama_lengkap": (db_user.nama_karyawan if db_user else None) or "Administrator NOC",
+                "no_wa": (db_user.no_wa if db_user else "") or "",
                 "role": verified.get("role", "super admin"),
                 "allowed_kantor": verified.get("allowed_kantor", ["cabang", "pusat", "banyumas"])
             }
@@ -393,6 +411,7 @@ async def api_auth_update_profile(request: Request):
         body = {}
 
     nama_lengkap = body.get("nama_lengkap", "").strip()
+    no_wa = body.get("no_wa", "").strip()
     password_baru = body.get("password_baru", "").strip()
 
     db = SessionLocal()
@@ -405,6 +424,9 @@ async def api_auth_update_profile(request: Request):
         if nama_lengkap:
             db_user.nama_karyawan = nama_lengkap
 
+        if "no_wa" in body:
+            db_user.no_wa = no_wa
+
         if password_baru:
             if len(password_baru) < 6:
                 return JSONResponse(status_code=400, content={"ok": False, "message": "Kata sandi baru minimal 6 karakter."})
@@ -415,6 +437,7 @@ async def api_auth_update_profile(request: Request):
 
         ActivityLogService.log_activity(
             db=db,
+            user_id=db_user.id,
             username=username,
             nama_karyawan=db_user.nama_karyawan or username,
             role=db_user.role,
@@ -431,6 +454,7 @@ async def api_auth_update_profile(request: Request):
                 "id": db_user.id,
                 "username": db_user.username,
                 "nama_lengkap": db_user.nama_karyawan or "Administrator NOC",
+                "no_wa": db_user.no_wa or "",
                 "role": db_user.role,
                 "allowed_kantor": db_user.allowed_kantor
             }

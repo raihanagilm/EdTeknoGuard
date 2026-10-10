@@ -70,25 +70,9 @@ export function ModulLogAktivitas() {
 
   return (
     <div className="space-y-4">
-      {/* 1. Header Banner */}
-      <ModuleHeader
-        badge="AUDIT LOG"
-        icon={FileText}
-        title="Audit Log Aktivitas Karyawan"
-        subtitle="Catatan rekam jejak autentikasi, akses login, tindakan operasional, dan perubahan data sistem."
-      >
-        <button
-          onClick={() => { setPage(1); fetchActivityLogs(); }}
-          className="px-3.5 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[38px]"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Muat Ulang</span>
-        </button>
-      </ModuleHeader>
-
-      {/* 2. Filter Bar */}
+      {/* 1. Filter Bar */}
       <FilterContainer>
-        <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+        <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-2.5">
           <div className="relative">
             <input
               type="text"
@@ -121,6 +105,17 @@ export function ModulLogAktivitas() {
             >
               <Filter className="w-3.5 h-3.5" />
               <span>Terapkan Filter</span>
+            </button>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={() => { setPage(1); fetchActivityLogs(); }}
+              className="w-full py-2 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 rounded-xl text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 min-h-[38px]"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span>Muat Ulang</span>
             </button>
           </div>
         </form>

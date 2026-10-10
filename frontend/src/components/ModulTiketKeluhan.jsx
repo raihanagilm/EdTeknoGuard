@@ -109,28 +109,7 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang' }) {
         </div>
       )}
 
-      {/* 1. Header Banner */}
-      <ModuleHeader
-        badge="PORTAL WARGA"
-        icon={HelpCircle}
-        title="Tiket Keluhan Pelanggan"
-        subtitle="Daftar laporan kendala teknis dan keluhan koneksi jaringan yang dikirim melalui portal mandiri warga."
-      >
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-lg bg-cyan-100/80 border border-cyan-300 text-cyan-900 font-mono text-[11px] font-bold">
-            Total: {tickets.length} Tiket
-          </span>
-          <button
-            onClick={fetchTickets}
-            className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition"
-            title="Muat Ulang"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </ModuleHeader>
-
-      {/* 2. 4 Kartu KPI Interaktif */}
+      {/* 1. 4 Kartu KPI Interaktif */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <MetricCard
           label="Menunggu"
@@ -170,17 +149,33 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang' }) {
         />
       </div>
 
-      {/* 3. Search Bar */}
+      {/* 2. Search Bar & Aksi */}
       <FilterContainer>
-        <div className="relative">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari nomor tiket, nama warga, ID pelanggan, atau kategori kendala..."
-            className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-          />
-          <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari nomor tiket, nama warga, ID pelanggan, atau kategori kendala..."
+              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+            />
+            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1.5 rounded-xl bg-cyan-100/80 border border-cyan-300 text-cyan-900 font-mono text-[11px] font-bold">
+              Total: {tickets.length} Tiket
+            </span>
+            <button
+              onClick={fetchTickets}
+              disabled={loading}
+              className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[36px] flex items-center justify-center"
+              title="Muat Ulang Data"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
       </FilterContainer>
 

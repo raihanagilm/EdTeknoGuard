@@ -26,6 +26,18 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Modularisasi & Peningkatan Wizard Import Data Pelanggan (`WizardImportPelanggan.jsx`)**:
+  - **Pemisahan Komponen Mandiri**: Mengekstraksi wizard import data pelanggan dari `ModulPelanggan.jsx` menjadi file komponen mandiri [`WizardImportPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/WizardImportPelanggan.jsx).
+  - **Penghapusan Opsi Kantor Wilayah Manual**: Menghapus field pemetaan kantor pada Langkah 2 karena kantor otomatis mengikuti kantor aktif yang sedang dibuka pengguna di navbar atas sesuai standar SOP multi-cabang.
+  - **4 Kartu Metrik Filter Interaktif pada Langkah 3**: Menjadikan kartu metrik *Total Baris*, *Siap Diimpor (Valid)*, *Duplikat Terdeteksi*, dan *Tidak Lengkap (Error)* dapat diklik untuk menyaring tampilan baris pada tabel pratinjau secara instan.
+  - **Logika Cerdas Toolbar Aksi Baris Terpilih**:
+    - Toolbar hanya muncul ketika ada minimal 1 baris yang dicentang.
+    - Jika ada baris duplikat yang tercentang: Tombol *"Generate ID Unik Otomatis"* dan *"Abaikan Baris Terpilih"* aktif untuk menyelesaikan konflik duplikasi. Tombol simpan baris dicegah/disembunyikan karena baris duplikat belum aman diproses.
+    - Jika seluruh baris yang tercentang valid/aman: Hanya menampilkan tombol *"Simpan Baris Terpilih"*.
+  - **Penyelarasan Kolom Tabel Pratinjau**: Menghilangkan kolom dropdown aksi redundant di tabel dan menambahkan kolom **No WA** di sebelah Nama Pelanggan untuk kejelasan informasi kontak.
+  - **Step Indicator Header**: Penanda langkah di header modal diselaraskan menggunakan 3 kartu progres horizontal yang dinamis.
+
+
 - **Normalisasi Database 3NF, Dekomposisi Entitas Perangkat ONT & Relasi Terpadu**:
   - **Dekomposisi Tabel Modem (`perangkat_ont`)**: Memecah atribut fisik modem (IP router, jenis modem, MAC address, redaman baseline, kredensial Web GUI ONT, dan password WiFi) dari tabel master `pelanggan` ke entitas baru `perangkat_ont` dengan relasi 1-to-1 dan `ON DELETE CASCADE`.
   - **Master Data Referensi**: Membuat tabel `kantors`, `pops`, dan `pakets` untuk normalisasi master wilayah operasional, POP jaringan, dan paket bandwidth layanan.
@@ -39,10 +51,12 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Menu Dropdown Titik Tiga (`MoreVertical`)**: Menambahkan tombol menu titik tiga di pojok kanan header yang menyajikan ringkasan identitas akun (nama, username, role) dan tombol **Keluar Akun (Logout)** secara eksklusif dan terfokus.
   - **Pembaruan Status Sistem**: Menghapus teks "TiDB Cloud Aktif" dan menggantinya dengan indikator status dot hijau "Sistem Aktif" yang bersih dan netral.
   
-- **Transformasi Antarmuka Pengaturan (Tree Menu Desktop & Action Cards Grid ala App DANA)**:
-  - **Penyederhanaan Header & Eliminasi Banner Statis**: Menghapus blok header atas (judul repetitif dan tombol sinkron server) pada [`ModulPengaturan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) sehingga antarmuka menjadi jauh lebih bersih, ramping, dan langsung berfokus pada navigasi menu.
-  - **Action Cards Grid 3 Kolom ala DANA di Mobile**: Pada tampilan smartphone/mobile, tab *Pengaturan NOC* menyajikan 3 Action Cards Grid interaktif yang identik dengan gaya aplikasi DANA (ikon lingkaran gradien biru, judul tebal, dan subjudul info status) untuk memilih sub-menu *Parameter* (`thresholds`), *Kredensial ONT* (`credentials`), dan *Notifikasi* (`notifications`).
-  - **Mobile Segmented Switcher (`Personal` vs `Pengaturan NOC`)**: Switcher pill atas memisahkan area *Personal* (semua role) dan *Pengaturan NOC* (khusus Admin & Super Admin; otomatis disembunyikan jika role adalah Teknisi).
+- **Transformasi Halaman Personal / Akun Petugas (Desain Identik TeknoCust)**:
+  - **Card Identitas Profil Modern**: Menyelaraskan tab *Personal* pada [`ModulPengaturan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) agar menggunakan layout card rounded-3xl bergradien identik dengan antarmuka TeknoCust (Avatar huruf inisial gradien cyan-blue, badge hijau *"Akun Terverifikasi"*, dan tombol *"Edit Data"*).
+  - **Daftar Ringkasan Rapi (Key-Value List)**: Menampilkan ID Pengguna, Username Login, Badge Wilayah Kantor Layanan (`bg-cyan-50 text-cyan-800`), Nomor WhatsApp petugas, dan Hak Akses / Peran.
+  - **Inline Mode Edit Data Diri**: Tombol *"Edit Data"* membuka form inline untuk mengubah Nama Lengkap dan Nomor WhatsApp petugas secara cepat dengan feedback visual responsif.
+  - **Expandable Card Ganti Kata Sandi**: Kartu accordion mandiri dengan header *"Ganti Kata Sandi Akun"* dan toggle *"Ubah Sandi / Tutup"* (animasi rotasi chevron) yang dapat dibuka/tutup tanpa membebani halaman.
+  - **Tombol Logout Bersih Full-Width**: Tombol *"Keluar dari Akun TeknoGuard"* diposisikan di kartu bawah dengan aksen rose lembut (`bg-rose-50 border-rose-200 text-rose-700`).
   - **Desktop Tree Menu Bersarang (Sidebar Kolom Kiri)**: Pada layar desktop (`lg:block`), menu pengaturan tersaji dalam struktur pohon (*Tree Menu*) modular yang elegan dengan hierarki cabang *Personal* (`account`) dan *Pengaturan NOC* (`thresholds`, `credentials`, `notifications`) lengkap dengan badge jumlah kredensial dan indikator aktif.
   - **Integrasi Panduan Kontekstual & Logout Footer**: Card ketentuan ambang batas redaman dan cara kerja multi-kredensial fallback disematkan rapi di dalam masing-masing form tab, sementara tombol *"Keluar dari Sesi TeknoGuard"* diposisikan secara konsisten di bagian paling bawah halaman untuk semua pengguna.
 

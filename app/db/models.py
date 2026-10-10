@@ -173,6 +173,30 @@ class Pelanggan(Base):
     def password_wifi(self, val):
         self._get_or_create_perangkat().password_wifi = val
 
+    @property
+    def mac_address(self):
+        return self.perangkat.mac_address if self.perangkat else None
+
+    @mac_address.setter
+    def mac_address(self, val):
+        self._get_or_create_perangkat().mac_address = val
+
+    @property
+    def snmp_community(self):
+        return self.perangkat.snmp_community if self.perangkat else "public"
+
+    @snmp_community.setter
+    def snmp_community(self, val):
+        self._get_or_create_perangkat().snmp_community = val
+
+    @property
+    def los_count(self):
+        return self.perangkat.los_count if self.perangkat else 0
+
+    @los_count.setter
+    def los_count(self, val):
+        self._get_or_create_perangkat().los_count = val
+
 
 class LogPerformaONT(Base):
     __tablename__ = "log_performa_ont"

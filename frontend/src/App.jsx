@@ -95,7 +95,7 @@ export default function App() {
   // =========================================================================
   // STATE PENGATURAN SISTEM (3 TAB RESMI LENGKAP)
   // =========================================================================
-  const [settingsActiveSubTab, setSettingsActiveSubTab] = useState('threshold') // 'threshold' | 'credentials' | 'notifications'
+  const [settingsActiveSubTab, setSettingsActiveSubTab] = useState('thresholds') // 'thresholds' | 'credentials' | 'notifications' | 'account'
   const [settingsLoading, setSettingsLoading] = useState(false)
   const [settingsSaveSuccess, setSettingsSaveSuccess] = useState(false)
   const [settingsSaveError, setSettingsSaveError] = useState('')
@@ -815,16 +815,39 @@ export default function App() {
         <header className="h-14 bg-white/90 backdrop-blur-md border-b border-sky-200/80 sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-2 sm:gap-3">
             <span className="text-xs font-mono font-bold text-cyan-800 uppercase tracking-wide">
-              {activeTab === 'beranda' ? 'Dashboard NOC' : `Modul ${activeTab}`}
-            </span>
-            <span className="hidden sm:inline-block text-slate-300">&bull;</span>
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-slate-500 font-mono font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span>Sistem Aktif</span>
+              {(() => {
+                const tabTitles = {
+                  beranda: 'Beranda Pemantauan',
+                  riwayat: 'Riwayat Redaman',
+                  kuota: 'Pemantauan Kuota',
+                  pelanggan: 'Data Pelanggan',
+                  tiket: 'Tiket Keluhan',
+                  log: 'Log Aktivitas',
+                  pengguna: 'Manajemen Pengguna',
+                  pengaturan: 'Pengaturan Sistem'
+                }
+                return tabTitles[activeTab] || `Modul ${activeTab}`
+              })()}
             </span>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Ikon Lonceng Notifikasi Tiket (Dipindah ke Sebelah Kiri Kantor) */}
+            <button
+              type="button"
+              onClick={() => handleTabChange('tiket')}
+              className="relative p-2 rounded-xl bg-cyan-50/80 hover:bg-cyan-100 text-cyan-700 border border-sky-200/80 transition cursor-pointer flex items-center justify-center"
+              title="Tiket Keluhan Pelanggan"
+              aria-label="Tiket Keluhan Pelanggan"
+            >
+              <Bell className="w-4 h-4" />
+              {unreadTickets > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border-2 border-white animate-pulse">
+                  {unreadTickets}
+                </span>
+              )}
+            </button>
+
             {/* Office Switcher Dropdown (Pilih Kantor Sesuai SOP) */}
             <div className="flex items-center gap-1.5 bg-cyan-50/90 hover:bg-cyan-100/80 p-1 pl-2 sm:pl-2.5 rounded-xl border border-sky-200 text-xs font-mono transition shadow-2xs">
               <Building2 className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
@@ -840,27 +863,6 @@ export default function App() {
                 <option value="banyumas">Kantor Banyumas</option>
               </select>
             </div>
-
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-50 border border-sky-200 text-xs font-mono text-cyan-900 font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-              <span className="uppercase text-[11px]">{activeOffice}</span>
-            </div>
-
-            {/* Ikon Lonceng Notifikasi Tiket */}
-            <button
-              type="button"
-              onClick={() => handleTabChange('tiket')}
-              className="relative p-2 rounded-xl bg-cyan-50/80 hover:bg-cyan-100 text-cyan-700 border border-sky-200/80 transition cursor-pointer flex items-center justify-center"
-              title="Tiket Keluhan Pelanggan"
-              aria-label="Tiket Keluhan Pelanggan"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadTickets > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border-2 border-white animate-pulse">
-                  {unreadTickets}
-                </span>
-              )}
-            </button>
 
             {/* Tombol Titik Tiga (More Menu & Logout Dropdown) */}
             <div className="relative" ref={headerMenuRef}>

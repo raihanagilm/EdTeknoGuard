@@ -200,11 +200,11 @@ class MonitoringService:
             data_today = range_data.get(day_target.strftime("%Y-%m-%d"), {})
             data_yesterday = range_data.get(yesterday.strftime("%Y-%m-%d"), {})
 
-            # Cari jam paling awal dan jam paling akhir yang memiliki data riil
+            # Cari jam paling awal dan jam paling akhir yang memiliki data riil rx_power
             active_hours = set()
             for d_map in [data_today, data_yesterday]:
                 for h_str, h_val in d_map.items():
-                    if h_val.get("avg") is not None or h_val.get("total", 0) > 0:
+                    if h_val.get("avg") is not None:
                         try:
                             active_hours.add(int(h_str.split(":")[0]))
                         except Exception:
@@ -215,7 +215,7 @@ class MonitoringService:
                 max_hour = max(active_hours)
                 hours_labels = [f"{h:02d}:00" for h in range(min_hour, max_hour + 1)]
             else:
-                hours_labels = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"]
+                hours_labels = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"]
             
             today_values = []
             today_details = []
@@ -224,7 +224,7 @@ class MonitoringService:
 
             for h_str in hours_labels:
                 t_item = data_today.get(h_str)
-                if t_item:
+                if t_item and t_item.get("avg") is not None:
                     today_values.append(t_item["avg"])
                     today_details.append(t_item)
                 else:
@@ -232,7 +232,7 @@ class MonitoringService:
                     today_details.append(None)
 
                 y_item = data_yesterday.get(h_str)
-                if y_item:
+                if y_item and y_item.get("avg") is not None:
                     yest_values.append(y_item["avg"])
                     yest_details.append(y_item)
                 else:
@@ -293,11 +293,11 @@ class MonitoringService:
             start_7d = anchor_date - timedelta(days=6)
             range_data = query_range_hourly(start_7d, anchor_date)
             
-            # Cari jam paling awal dan jam paling akhir yang memiliki data riil di seluruh 7 hari
+            # Cari jam paling awal dan jam paling akhir yang memiliki data riil rx_power di seluruh 7 hari
             active_hours = set()
             for d_map in range_data.values():
                 for h_str, h_val in d_map.items():
-                    if h_val.get("avg") is not None or h_val.get("total", 0) > 0:
+                    if h_val.get("avg") is not None:
                         try:
                             active_hours.add(int(h_str.split(":")[0]))
                         except Exception:
@@ -308,7 +308,7 @@ class MonitoringService:
                 max_hour = max(active_hours)
                 hours_labels = [f"{h:02d}:00" for h in range(min_hour, max_hour + 1)]
             else:
-                hours_labels = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"]
+                hours_labels = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"]
 
             datasets = []
             all_valid = []
@@ -322,7 +322,7 @@ class MonitoringService:
 
                 for h_str in hours_labels:
                     item = d_data.get(h_str)
-                    if item:
+                    if item and item.get("avg") is not None:
                         d_values.append(item["avg"])
                         d_details.append(item)
                     else:

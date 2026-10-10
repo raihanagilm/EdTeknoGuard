@@ -19,7 +19,9 @@ import {
   User,
   Lock,
   ShieldCheck,
-  LogOut
+  LogOut,
+  ChevronDown,
+  Phone
 } from 'lucide-react'
 
 export function ModulPengaturan({
@@ -65,7 +67,10 @@ export function ModulPengaturan({
   onLogout
 }) {
   // State Edit Profil Pengguna (Super Admin, Admin, & Teknisi)
+  const [isEditProfile, setIsEditProfile] = useState(false)
+  const [isPasswordExpanded, setIsPasswordExpanded] = useState(false)
   const [editNama, setEditNama] = useState(currentUser?.nama_lengkap || '')
+  const [editNoWa, setEditNoWa] = useState(currentUser?.no_wa || '')
   const [passwordBaru, setPasswordBaru] = useState('')
   const [konfirmPasswordBaru, setKonfirmPasswordBaru] = useState('')
   const [showPassBaru, setShowPassBaru] = useState(false)
@@ -75,13 +80,47 @@ export function ModulPengaturan({
   const [profileError, setProfileError] = useState('')
 
   useEffect(() => {
-    if (currentUser?.nama_lengkap) {
-      setEditNama(currentUser.nama_lengkap)
+    if (currentUser) {
+      setEditNama(currentUser.nama_lengkap || '')
+      setEditNoWa(currentUser.no_wa || '')
     }
   }, [currentUser])
 
-  // Handler Simpan Perubahan Nama & Password Pengguna
-  const handleSaveProfile = async (e) => {
+  // Handler Simpan Data Diri (Nama & No WA)
+  const handleSaveDataDiri = async (e) => {
+    e.preventDefault()
+    setProfileLoading(true)
+    setProfileSuccess('')
+    setProfileError('')
+
+    try {
+      const res = await fetch('/api/auth/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nama_lengkap: editNama,
+          no_wa: editNoWa
+        })
+      })
+      const data = await res.json()
+      if (res.ok && data.ok) {
+        setProfileSuccess(data.message || 'Data diri Anda berhasil diperbarui!')
+        if (data.user && setCurrentUser) {
+          setCurrentUser(data.user)
+        }
+        setIsEditProfile(false)
+      } else {
+        setProfileError(data.message || 'Gagal memperbarui data diri.')
+      }
+    } catch (err) {
+      setProfileError('Gagal terhubung ke server backend.')
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  // Handler Ganti Kata Sandi Akun
+  const handleChangePassword = async (e) => {
     e.preventDefault()
     setProfileLoading(true)
     setProfileSuccess('')
@@ -93,7 +132,7 @@ export function ModulPengaturan({
       return
     }
 
-    if (passwordBaru && passwordBaru !== konfirmPasswordBaru) {
+    if (passwordBaru !== konfirmPasswordBaru) {
       setProfileError('Konfirmasi kata sandi baru tidak cocok!')
       setProfileLoading(false)
       return
@@ -104,20 +143,17 @@ export function ModulPengaturan({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          nama_lengkap: editNama,
           password_baru: passwordBaru
         })
       })
       const data = await res.json()
       if (res.ok && data.ok) {
-        setProfileSuccess(data.message || 'Profil dan kata sandi Anda berhasil diperbarui!')
-        if (data.user && setCurrentUser) {
-          setCurrentUser(data.user)
-        }
+        setProfileSuccess('Kata sandi akun Anda berhasil diubah!')
         setPasswordBaru('')
         setKonfirmPasswordBaru('')
+        setIsPasswordExpanded(false)
       } else {
-        setProfileError(data.message || 'Gagal memperbarui profil.')
+        setProfileError(data.message || 'Gagal mengubah kata sandi.')
       }
     } catch (err) {
       setProfileError('Gagal terhubung ke server backend.')
@@ -199,32 +235,28 @@ export function ModulPengaturan({
             )}
           </div>
 
-          {/* Grid Menu Ala DANA saat Kategori NOC Aktif di Mobile */}
+          {/* Grid Menu Simpel (Hanya Ikon Bersih, Tanpa Border Kotak, Tanpa Background Bulat, Tanpa Badge Angka) */}
           {!isTeknisi && settingsCategory === 'noc' && (
-            <div className="p-3 bg-white/95 rounded-2xl border border-sky-200/90 shadow-xs animate-in fade-in duration-200">
-              <div className="grid grid-cols-3 gap-2">
+            <div className="p-2 bg-white/95 rounded-2xl border border-sky-100 shadow-xs animate-in fade-in duration-200">
+              <div className="grid grid-cols-3 gap-1">
                 
                 {/* 1. Parameter Redaman */}
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('thresholds')}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition cursor-pointer text-center ${
+                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${
                     settingsActiveSubTab === 'thresholds'
-                      ? 'bg-cyan-50/80 border border-cyan-300 ring-2 ring-cyan-400/40 shadow-xs'
-                      : 'hover:bg-slate-50 border border-transparent'
+                      ? 'text-cyan-700 font-black'
+                      : 'text-slate-500 hover:text-slate-800 font-semibold'
                   }`}
                 >
-                  <div className={`w-11 h-11 rounded-full flex items-center justify-center mb-1.5 shadow-sm transition ${
-                    settingsActiveSubTab === 'thresholds'
-                      ? 'bg-gradient-to-tr from-cyan-600 to-sky-500 ring-2 ring-cyan-200 text-white'
-                      : 'bg-gradient-to-tr from-sky-500 to-cyan-400 text-white'
-                  }`}>
-                    <SlidersHorizontal className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-extrabold text-slate-800 leading-tight">
+                  <SlidersHorizontal className={`w-6 h-6 mb-1.5 transition ${
+                    settingsActiveSubTab === 'thresholds' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                  }`} />
+                  <span className="text-xs leading-tight">
                     Parameter
                   </span>
-                  <span className="text-[10px] font-bold text-cyan-600 mt-0.5 font-mono">
+                  <span className="text-[10px] text-slate-400 mt-0.5 font-mono">
                     {pollingInterval}m • {Number(warnThreshold).toFixed(0)}dBm
                   </span>
                 </button>
@@ -233,28 +265,19 @@ export function ModulPengaturan({
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('credentials')}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition cursor-pointer text-center relative ${
+                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${
                     settingsActiveSubTab === 'credentials'
-                      ? 'bg-cyan-50/80 border border-cyan-300 ring-2 ring-cyan-400/40 shadow-xs'
-                      : 'hover:bg-slate-50 border border-transparent'
+                      ? 'text-cyan-700 font-black'
+                      : 'text-slate-500 hover:text-slate-800 font-semibold'
                   }`}
                 >
-                  <div className={`w-11 h-11 rounded-full flex items-center justify-center mb-1.5 shadow-sm transition relative ${
-                    settingsActiveSubTab === 'credentials'
-                      ? 'bg-gradient-to-tr from-cyan-600 to-sky-500 ring-2 ring-cyan-200 text-white'
-                      : 'bg-gradient-to-tr from-sky-500 to-cyan-400 text-white'
-                  }`}>
-                    <KeyRound className="w-5 h-5" />
-                    {modemCredentials.length > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] font-black text-white">
-                        {modemCredentials.length}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs font-extrabold text-slate-800 leading-tight">
+                  <KeyRound className={`w-6 h-6 mb-1.5 transition ${
+                    settingsActiveSubTab === 'credentials' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                  }`} />
+                  <span className="text-xs leading-tight">
                     Kredensial ONT
                   </span>
-                  <span className="text-[10px] font-bold text-cyan-600 mt-0.5 font-mono">
+                  <span className="text-[10px] text-slate-400 mt-0.5 font-mono">
                     {modemCredentials.length} Akun
                   </span>
                 </button>
@@ -263,23 +286,19 @@ export function ModulPengaturan({
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('notifications')}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl transition cursor-pointer text-center ${
+                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${
                     settingsActiveSubTab === 'notifications'
-                      ? 'bg-cyan-50/80 border border-cyan-300 ring-2 ring-cyan-400/40 shadow-xs'
-                      : 'hover:bg-slate-50 border border-transparent'
+                      ? 'text-cyan-700 font-black'
+                      : 'text-slate-500 hover:text-slate-800 font-semibold'
                   }`}
                 >
-                  <div className={`w-11 h-11 rounded-full flex items-center justify-center mb-1.5 shadow-sm transition ${
-                    settingsActiveSubTab === 'notifications'
-                      ? 'bg-gradient-to-tr from-cyan-600 to-sky-500 ring-2 ring-cyan-200 text-white'
-                      : 'bg-gradient-to-tr from-sky-500 to-cyan-400 text-white'
-                  }`}>
-                    <Bell className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-extrabold text-slate-800 leading-tight">
+                  <Bell className={`w-6 h-6 mb-1.5 transition ${
+                    settingsActiveSubTab === 'notifications' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                  }`} />
+                  <span className="text-xs leading-tight">
                     Notifikasi
                   </span>
-                  <span className="text-[10px] font-bold text-cyan-600 mt-0.5">
+                  <span className="text-[10px] text-slate-400 mt-0.5">
                     {appVibration ? 'Getar Aktif' : 'Senyap'}
                   </span>
                 </button>
@@ -397,7 +416,7 @@ export function ModulPengaturan({
         <div className="lg:col-span-3 bg-white/90 backdrop-blur-md rounded-2xl p-5 border border-sky-200/80 shadow-sm">
           
           {/* TAB 1: PARAMETER & AMBANG BATAS (Khusus Super Admin & Admin) */}
-          {!isTeknisi && settingsActiveSubTab === 'thresholds' && (
+          {!isTeknisi && (settingsActiveSubTab === 'thresholds' || settingsActiveSubTab === 'threshold') && (
             <form
               onSubmit={(e) => {
                 e.preventDefault()
@@ -774,133 +793,231 @@ export function ModulPengaturan({
             </form>
           )}
 
-          {/* TAB 4: PROFIL & AKUN SAYA (Semua Role: Super Admin, Admin, & Teknisi) */}
+          {/* TAB 4: PROFIL & AKUN SAYA (Semua Role: Super Admin, Admin, & Teknisi) — Gaya TeknoCust */}
           {(settingsActiveSubTab === 'account' || (isTeknisi && settingsActiveSubTab !== 'account')) && (
-            <div className="space-y-5">
-              <div className="border-b border-sky-100 pb-3">
-                <h3 className="text-sm font-extrabold text-slate-900">Profil &amp; Keamanan Akun Saya</h3>
-                <p className="text-xs text-slate-500">Kelola identitas nama lengkap, kata sandi akses, dan sesi aktif akun NOC Anda.</p>
-              </div>
-
+            <div className="space-y-4 animate-in fade-in duration-200">
               {profileSuccess && (
-                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>{profileSuccess}</span>
                 </div>
               )}
 
               {profileError && (
-                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
+                <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
                   <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>{profileError}</span>
                 </div>
               )}
 
-              {/* Form Ubah Nama & Password */}
-              <form onSubmit={handleSaveProfile} className="space-y-4">
-                {/* Informasi Readonly Akun */}
-                <div className="p-4 rounded-xl bg-cyan-50/50 border border-cyan-200/80 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <span className="text-slate-500 text-[11px] block">Username Login</span>
-                    <span className="font-mono font-bold text-slate-900">{currentUser?.username || 'admin'}</span>
+              {/* Card 1: Info Identitas Akun Petugas */}
+              <div className="p-5 bg-white/95 rounded-3xl border border-sky-100 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 via-sky-600 to-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+                      {currentUser?.nama_lengkap ? currentUser.nama_lengkap.charAt(0).toUpperCase() : (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : 'A')}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-black text-slate-900 truncate">
+                        {currentUser?.nama_lengkap || 'Administrator NOC'}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-slate-500 text-[11px] block">Hak Akses / Role</span>
-                    <span className="font-bold text-cyan-800 uppercase text-[11px] bg-cyan-100 px-2 py-0.5 rounded-md inline-block mt-0.5">
-                      {currentUser?.role || 'super admin'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 text-[11px] block">Wilayah Kantor Diizinkan</span>
-                    <span className="font-bold text-slate-800 uppercase text-[11px]">
-                      {Array.isArray(currentUser?.allowed_kantor) ? currentUser.allowed_kantor.join(', ') : (currentUser?.allowed_kantor || 'SEMUA')}
-                    </span>
-                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsEditProfile(!isEditProfile)}
+                    className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>{isEditProfile ? 'Batal' : 'Edit Data'}</span>
+                  </button>
                 </div>
 
-                {/* Input Nama Lengkap */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 flex items-center gap-2">
-                    <User className="w-4 h-4 text-cyan-600" />
-                    <span>Nama Lengkap / Nama Karyawan</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editNama}
-                    onChange={(e) => setEditNama(e.target.value)}
-                    placeholder="Contoh: Raihan Agil / Teknisi NOC"
-                    className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
-                  />
-                  <p className="text-[11px] text-slate-400">
-                    Nama ini akan tercatat pada log aktivitas audit sistem saat melakukan tindakan operasional.
-                  </p>
-                </div>
-
-                {/* Input Kata Sandi Baru */}
-                <div className="space-y-1.5 pt-1">
-                  <label className="block text-xs font-bold text-slate-700 flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-cyan-600" />
-                    <span>Kata Sandi Baru (Kosongkan jika tidak ingin mengubah)</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassBaru ? 'text' : 'password'}
-                      value={passwordBaru}
-                      onChange={(e) => setPasswordBaru(e.target.value)}
-                      placeholder="Masukkan kata sandi baru (minimal 6 karakter)"
-                      className="w-full rounded-xl border border-sky-200 pl-3.5 pr-10 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassBaru(!showPassBaru)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                      aria-label="Toggle lihat password baru"
-                    >
-                      {showPassBaru ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Input Konfirmasi Kata Sandi Baru */}
-                {passwordBaru && (
-                  <div className="space-y-1.5 pt-1 animate-in fade-in duration-150">
-                    <label className="block text-xs font-bold text-slate-700 flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-cyan-600" />
-                      <span>Konfirmasi Kata Sandi Baru</span>
-                    </label>
-                    <div className="relative">
+                {isEditProfile ? (
+                  /* Form Edit Data Diri */
+                  <form onSubmit={handleSaveDataDiri} className="pt-3 border-t border-slate-100 space-y-3 text-xs font-semibold">
+                    <div className="space-y-1">
+                      <label className="text-slate-700 font-bold flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-cyan-600" />
+                        <span>Nama Lengkap Petugas</span>
+                      </label>
                       <input
-                        type={showKonfirmPass ? 'text' : 'password'}
-                        value={konfirmPasswordBaru}
-                        onChange={(e) => setKonfirmPasswordBaru(e.target.value)}
-                        placeholder="Ketik ulang kata sandi baru"
-                        className="w-full rounded-xl border border-sky-200 pl-3.5 pr-10 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
+                        type="text"
+                        required
+                        value={editNama}
+                        onChange={(e) => setEditNama(e.target.value)}
+                        placeholder="Contoh: Raihan Agil / Teknisi NOC"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-semibold focus:outline-none focus:border-cyan-600 min-h-[42px]"
                       />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-700 font-bold flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-cyan-600" />
+                        <span>No. WhatsApp / Kontak Petugas</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={editNoWa}
+                        onChange={(e) => setEditNoWa(e.target.value)}
+                        placeholder="Contoh: 08888015154142"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
+                      />
+                    </div>
+
+                    <div className="flex gap-2 pt-1">
                       <button
                         type="button"
-                        onClick={() => setShowKonfirmPass(!showKonfirmPass)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                        aria-label="Toggle lihat konfirmasi password"
+                        onClick={() => setIsEditProfile(false)}
+                        className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
                       >
-                        {showKonfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        Batal
                       </button>
+                      <button
+                        type="submit"
+                        disabled={profileLoading}
+                        className="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-cyan-600/20 cursor-pointer"
+                      >
+                        {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Simpan Data Diri</span>}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  /* View List Data Diri Petugas ala TeknoCust */
+                  <div className="pt-3 border-t border-slate-100 space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">ID Pengguna</span>
+                      <span className="font-mono font-bold text-slate-900">{currentUser?.id || '1'}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Username Login</span>
+                      <span className="font-mono font-bold text-slate-900">{currentUser?.username || 'admin'}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Kantor Layanan</span>
+                      <span className="font-bold text-cyan-800 uppercase text-[11px] bg-cyan-50 px-2.5 py-0.5 rounded-lg border border-cyan-200">
+                        {(() => {
+                          const val = currentUser?.allowed_kantor
+                          if (Array.isArray(val)) {
+                            return val.map(k => String(k).toUpperCase()).join(', ')
+                          }
+                          if (typeof val === 'string') {
+                            try {
+                              const parsed = JSON.parse(val)
+                              if (Array.isArray(parsed)) {
+                                return parsed.map(k => String(k).toUpperCase()).join(', ')
+                              }
+                            } catch (e) {
+                              // fallback string cleaning
+                            }
+                            return val.replace(/[\[\]"']/g, '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean).join(', ') || 'CABANG'
+                          }
+                          return 'CABANG'
+                        })()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">No. WhatsApp / Telp</span>
+                      <span className="font-mono font-bold text-slate-900">{currentUser?.no_wa || '-'}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Hak Akses / Peran</span>
+                      <span className="font-bold text-slate-900 uppercase">{currentUser?.role || 'super admin'}</span>
                     </div>
                   </div>
                 )}
+              </div>
 
-                {/* Tombol Simpan Profil */}
-                <div className="pt-3 border-t border-sky-100 flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={profileLoading}
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 flex items-center gap-2 transition min-h-[42px] cursor-pointer"
-                  >
-                    {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    <span>Simpan Perubahan Akun</span>
-                  </button>
-                </div>
-              </form>
+              {/* Card 2: Expandable Form Ganti Kata Sandi Akun ala TeknoCust */}
+              <div className="bg-white/95 rounded-3xl border border-sky-100 shadow-xs overflow-hidden transition-all duration-300">
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordExpanded(!isPasswordExpanded)}
+                  className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2.5 rounded-xl bg-cyan-50 text-cyan-700">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-900">Ganti Kata Sandi Akun</div>
+                      <div className="text-[10px] text-slate-400">Klik untuk membuka / menutup form</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-cyan-700 font-semibold">
+                    <span>{isPasswordExpanded ? 'Tutup' : 'Ubah Sandi'}</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isPasswordExpanded ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+
+                {isPasswordExpanded && (
+                  <div className="p-5 pt-0 space-y-3 border-t border-slate-100 animate-in fade-in duration-200">
+                    <form onSubmit={handleChangePassword} className="space-y-3 text-xs font-semibold mt-4">
+                      <div className="space-y-1.5">
+                        <label className="text-slate-700 block">Kata Sandi Baru</label>
+                        <div className="relative">
+                          <input
+                            type={showPassBaru ? 'text' : 'password'}
+                            required
+                            value={passwordBaru}
+                            onChange={(e) => setPasswordBaru(e.target.value)}
+                            placeholder="Minimal 6 karakter"
+                            className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassBaru(!showPassBaru)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                            aria-label="Lihat kata sandi baru"
+                          >
+                            {showPassBaru ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-slate-700 block">Konfirmasi Kata Sandi Baru</label>
+                        <div className="relative">
+                          <input
+                            type={showKonfirmPass ? 'text' : 'password'}
+                            required
+                            value={konfirmPasswordBaru}
+                            onChange={(e) => setKonfirmPasswordBaru(e.target.value)}
+                            placeholder="Ulangi kata sandi baru"
+                            className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowKonfirmPass(!showKonfirmPass)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                            aria-label="Lihat konfirmasi kata sandi"
+                          >
+                            {showKonfirmPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={profileLoading}
+                        className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/20 active:scale-[0.99] transition flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
+                      >
+                        {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Simpan Kata Sandi Baru</span>}
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
+
+              {/* Card 3: Tombol Keluar dari Akun Portal NOC ala TeknoCust */}
+              <button
+                type="button"
+                onClick={onLogout}
+                className="w-full py-3.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Keluar dari Akun TeknoGuard</span>
+              </button>
             </div>
           )}
 
@@ -908,28 +1025,6 @@ export function ModulPengaturan({
 
       </div>
 
-      {/* Seksi Logout Akun Sesi NOC (Diletakkan Permanen di Paling Bawah Pengaturan untuk Semua Role) */}
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-rose-200/80 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h4 className="text-xs font-bold text-rose-900 flex items-center gap-1.5">
-              <LogOut className="w-4 h-4 text-rose-600" />
-              <span>Keluar dari Sesi TeknoGuard</span>
-            </h4>
-            <p className="text-[11px] text-rose-700 mt-0.5">
-              Akhiri sesi login aktif di perangkat ini secara aman dan kembali ke halaman login.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onLogout}
-            className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm shrink-0 min-h-[40px] cursor-pointer"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Keluar Akun (Logout)</span>
-          </button>
-        </div>
-      </div>
     </div>
   )
 }

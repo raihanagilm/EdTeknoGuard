@@ -21,7 +21,15 @@ import {
   X,
   Plus,
   ArrowUpDown,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ChevronRight,
+  ArrowLeft,
+  ArrowRight,
+  Wand2,
+  Sparkles,
+  AlertCircle,
+  Info,
+  Check
 } from 'lucide-react'
 import {
   ModuleHeader,
@@ -29,6 +37,7 @@ import {
   FilterContainer,
   DataTableContainer
 } from './CommonUI'
+import { WizardImportPelanggan } from './WizardImportPelanggan'
 
 export function ModulPelanggan({
   activeOffice = 'cabang',
@@ -78,6 +87,9 @@ export function ModulPelanggan({
   const [formSaving, setFormSaving] = useState(false)
   const [formError, setFormError] = useState('')
   const [formSuccess, setFormSuccess] = useState('')
+
+  // Modal Wizard Import State
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   // Single probe test state
   const [probingId, setProbingId] = useState(null)
@@ -133,15 +145,33 @@ export function ModulPelanggan({
     }
   }
 
+  // Helper generator ID pelanggan terstruktur sesuai standar aturan DB-05 (antislop-vibecoding): <prefix><YYYYMMDD><4 digit acak>
+  const generateStructuredCustomerId = (existingSet) => {
+    const now = new Date()
+    const yyyy = now.getFullYear()
+    const mm = String(now.getMonth() + 1).padStart(2, '0')
+    const dd = String(now.getDate()).padStart(2, '0')
+    const dateStr = `${yyyy}${mm}${dd}`
+    
+    let candidate = ''
+    do {
+      const randomDigits = Math.floor(1000 + Math.random() * 9000).toString()
+      candidate = `cust${dateStr}${randomDigits}`
+    } while (existingSet && existingSet.has(candidate))
+    
+    return candidate
+  }
+
   // Open Modal Create
   const handleOpenCreate = () => {
     setIsEditing(false)
+    const existingSet = new Set(customers.map((c) => c.id_pelanggan))
     setFormData({
-      id_pelanggan: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
+      id_pelanggan: generateStructuredCustomerId(existingSet),
       nama: '',
       ip_router: '10.10.',
       pop: 'POP-01',
-      kantor: 'cabang',
+      kantor: activeOffice || 'cabang',
       paket: '20 Mbps Unlimited',
       jenis_modem: 'ZTE GM220-S',
       user_admin: 'admin',
@@ -165,7 +195,7 @@ export function ModulPelanggan({
       nama: customer.nama || customer.name || '',
       ip_router: customer.ip_router || customer.ip || '',
       pop: customer.pop || 'POP-01',
-      kantor: customer.kantor || 'cabang',
+      kantor: customer.kantor || activeOffice || 'cabang',
       paket: customer.paket || '20 Mbps Unlimited',
       jenis_modem: customer.jenis_modem || 'ZTE GM220-S',
       user_admin: customer.user_admin || 'admin',
@@ -232,43 +262,11 @@ export function ModulPelanggan({
     }
   }
 
+
+
   return (
     <div className="space-y-4">
-      {/* 1. Header Banner */}
-      <ModuleHeader
-        badge="FTTH MASTER"
-        icon={Radio}
-        title="Manajemen Data Pelanggan"
-        subtitle="Kelola profil pelanggan, IP router ONT, status pemantauan redaman acuan, dan kredensial perangkat."
-      >
-        <button
-          onClick={handleOpenCreate}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-md shadow-cyan-600/25 min-h-[38px]"
-        >
-          <UserPlus className="w-3.5 h-3.5" />
-          <span>Tambah Pelanggan</span>
-        </button>
-
-        <a
-          href="/api/customers/export-excel"
-          download="data_pelanggan_edteknoguard.xlsx"
-          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-xs min-h-[38px]"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Ekspor Excel</span>
-        </a>
-
-        <button
-          onClick={fetchCustomers}
-          disabled={loading}
-          className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[38px] flex items-center justify-center"
-          title="Muat Ulang Data"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-        </button>
-      </ModuleHeader>
-
-      {/* 2. 4 Kartu KPI Interaktif */}
+      {/* 1. 4 Kartu KPI Interaktif */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <MetricCard
           label="Total Terpantau"
@@ -308,7 +306,7 @@ export function ModulPelanggan({
         />
       </div>
 
-      {/* 3. Filter Bar */}
+      {/* 2. Filter Bar & Tombol Aksi */}
       <FilterContainer>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 flex-1">
@@ -336,6 +334,43 @@ export function ModulPelanggan({
                 <option value="POP-03">POP-03</option>
               </select>
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleOpenCreate}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-xs min-h-[36px]"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Tambah Pelanggan</span>
+            </button>
+
+            <button
+              onClick={() => setImportModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-xs min-h-[36px]"
+              title="Import Berkas Excel / CSV (Wizard 3 Langkah)"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>Import Excel/CSV</span>
+            </button>
+
+            <a
+              href="/api/customers/export-excel"
+              download="data_pelanggan_edteknoguard.xlsx"
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-xs min-h-[36px]"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Ekspor Excel</span>
+            </a>
+
+            <button
+              onClick={fetchCustomers}
+              disabled={loading}
+              className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[36px] flex items-center justify-center"
+              title="Muat Ulang Data"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
       </FilterContainer>
@@ -566,6 +601,14 @@ export function ModulPelanggan({
           </div>
         </div>
       )}
+
+      {/* Component Wizard Import Pelanggan Terpisah */}
+      <WizardImportPelanggan
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        activeOffice={activeOffice}
+        onSuccess={fetchCustomers}
+      />
     </div>
   )
 }

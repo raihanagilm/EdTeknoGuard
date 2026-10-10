@@ -90,23 +90,7 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
 
   return (
     <div className="space-y-4">
-      {/* 1. Header Banner */}
-      <ModuleHeader
-        badge="TELEMETRI WAKTU"
-        icon={Clock}
-        title="Riwayat Redaman Optik ONT"
-        subtitle="Catatan berkala pengukuran daya terima optik (Rx dBm), suhu perangkat, dan latency jaringan."
-      >
-        <button
-          onClick={resetFilters}
-          className="px-3.5 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[38px]"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Reset Filter</span>
-        </button>
-      </ModuleHeader>
-
-      {/* 2. 4 Kartu KPI Interaktif */}
+      {/* 1. 4 Kartu KPI Interaktif */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <MetricCard
           label="Total Terpantau"
@@ -142,9 +126,9 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
         />
       </div>
 
-      {/* 3. Filter Bar */}
+      {/* 2. Filter Bar */}
       <FilterContainer>
-        <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-2.5">
+        <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-2.5">
           <div className="relative">
             <input
               type="text"
@@ -190,7 +174,18 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
               className="w-full py-2 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white rounded-xl text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 min-h-[38px] shadow-xs"
             >
               <Filter className="w-3.5 h-3.5" />
-              <span>Terapkan Filter</span>
+              <span>Filter</span>
+            </button>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="w-full py-2 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 rounded-xl text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 min-h-[38px]"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span>Reset</span>
             </button>
           </div>
         </form>
