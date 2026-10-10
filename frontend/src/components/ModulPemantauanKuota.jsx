@@ -9,22 +9,25 @@ import {
   Filter,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Check
 } from 'lucide-react';
 import { QuotaService } from '../services/api';
 import {
   ModuleHeader,
   MetricCard,
+  SegmentedStatusBar,
   FilterContainer,
   DataTableContainer
 } from './CommonUI';
 
-export function ModulPemantauanKuota({ activeOffice = 'cabang' }) {
+export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustomer }) {
   const [quotaList, setQuotaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterPaket, setFilterPaket] = useState('all');
   const [filterLevel, setFilterLevel] = useState('all');
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [paketOptions, setPaketOptions] = useState([]);
   const [currentPeriod, setCurrentPeriod] = useState('');
   const [activeKantor, setActiveKantor] = useState(activeOffice);
@@ -95,89 +98,156 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang' }) {
 
   return (
     <div className="space-y-4">
-      {/* 1. 3 Kartu Metrik Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <MetricCard
-          label="Total Pelanggan Terdata"
-          value={`${filteredQuota.length}`}
-          unit={`/ ${quotaList.length} ONT`}
-          icon={Users}
-          colorScheme="cyan"
-          subLabel="Wilayah Kantor Aktif"
-        />
-        <MetricCard
-          label="Total Trafik Akumulasi"
-          value={`${totalTraffic.toFixed(1)}`}
-          unit="GB"
-          icon={HardDrive}
-          colorScheme="emerald"
-          subLabel="Konsumsi Bulan Berjalan"
-        />
-        <MetricCard
-          label="Rata-Rata Per Pelanggan"
-          value={`${avgTraffic.toFixed(1)}`}
-          unit="GB/user"
-          icon={BarChart2}
-          colorScheme="purple"
-          subLabel="Estimasi Penggunaan Rata-rata"
-        />
-      </div>
+      {/* 1. Segmented Status Ticker Bar Terpadu (Opsi B: 1 Baris Penuh Muat 1 Layar Tanpa Swipe) */}
+      <SegmentedStatusBar
+        items={[
+          {
+            label: 'Total Terdata',
+            value: `${filteredQuota.length}`,
+            colorScheme: 'cyan',
+            subLabel: `dari ${quotaList.length} ONT`
+          },
+          {
+            label: 'Total Trafik',
+            value: `${totalTraffic.toFixed(1)} GB`,
+            colorScheme: 'emerald',
+            subLabel: 'Bulan Berjalan'
+          },
+          {
+            label: 'Rata-Rata',
+            value: `${avgTraffic.toFixed(1)} GB`,
+            colorScheme: 'purple',
+            subLabel: 'Per Pelanggan'
+          }
+        ]}
+      />
 
-      {/* 2. Filter Bar & Aksi */}
+      {/* 2. Filter Bar & Aksi Ringkas */}
       <FilterContainer>
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 flex-1">
-            <div className="relative">
+        <div className="flex items-center justify-between gap-2">
+          {/* Kotak Pencarian & Tombol Filter Popover */}
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className="relative flex-1 min-w-[150px]">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Cari ID, Nama, atau IP..."
-                className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+                className="w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
               />
-              <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
             </div>
 
-            <div>
-              <select
-                value={filterPaket}
-                onChange={(e) => setFilterPaket(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+            {/* Tombol Popover Filter Paket & Level */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                className={`p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[34px] sm:min-h-[36px] shrink-0 ${
+                  filterPaket !== 'all' || filterLevel !== 'all'
+                    ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
+                    : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
+                }`}
+                title="Filter Paket & Level Pemakaian"
               >
-                <option value="all">Semua Paket Layanan</option>
-                {paketOptions.map((pkt) => (
-                  <option key={pkt} value={pkt}>{pkt}</option>
-                ))}
-              </select>
-            </div>
+                <Filter className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">
+                  {filterPaket !== 'all' ? filterPaket : filterLevel !== 'all' ? `Level: ${filterLevel}` : 'Filter'}
+                </span>
+                {(filterPaket !== 'all' || filterLevel !== 'all') && (
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                )}
+              </button>
 
-            <div>
-              <select
-                value={filterLevel}
-                onChange={(e) => setFilterLevel(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
-              >
-                <option value="all">Semua Level Pemakaian</option>
-                <option value="sangat_tinggi">Sangat Tinggi (&gt; 150 GB)</option>
-                <option value="tinggi">Tinggi (100 - 150 GB)</option>
-                <option value="sedang">Sedang (50 - 100 GB)</option>
-                <option value="ringan">Ringan (&lt; 50 GB)</option>
-                <option value="nol">Nol (0 GB)</option>
-              </select>
+              {/* Popover Menu Filter */}
+              {filterDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setFilterDropdownOpen(false)}
+                  />
+                  <div className="absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-64 bg-white/95 backdrop-blur-md rounded-2xl p-3 shadow-xl border border-sky-200 space-y-2.5 font-mono text-xs">
+                    {/* Seksi 1: Paket */}
+                    <div>
+                      <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">
+                        Paket Layanan:
+                      </div>
+                      <select
+                        value={filterPaket}
+                        onChange={(e) => setFilterPaket(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+                      >
+                        <option value="all">Semua Paket</option>
+                        {paketOptions.map((pkt) => (
+                          <option key={pkt} value={pkt}>{pkt}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Seksi 2: Level Pemakaian */}
+                    <div>
+                      <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">
+                        Level Pemakaian:
+                      </div>
+                      <div className="grid grid-cols-2 gap-1">
+                        {[
+                          { id: 'all', label: 'Semua' },
+                          { id: 'sangat_tinggi', label: '> 150 GB' },
+                          { id: 'tinggi', label: '100-150 GB' },
+                          { id: 'sedang', label: '50-100 GB' },
+                          { id: 'ringan', label: '< 50 GB' },
+                          { id: 'nol', label: '0 GB' }
+                        ].map((lvl) => (
+                          <button
+                            key={lvl.id}
+                            type="button"
+                            onClick={() => setFilterLevel(lvl.id)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold text-center transition ${
+                              filterLevel === lvl.id
+                                ? 'bg-cyan-600 text-white'
+                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                            }`}
+                          >
+                            {lvl.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-sky-100 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFilterPaket('all');
+                          setFilterLevel('all');
+                        }}
+                        className="text-[10px] font-bold text-slate-400 hover:text-slate-700"
+                      >
+                        Reset Filter
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFilterDropdownOpen(false)}
+                        className="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-[10px] font-bold"
+                      >
+                        Terapkan
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 justify-end">
-            <span className="px-2.5 py-1.5 rounded-xl bg-cyan-100/80 border border-cyan-300 text-cyan-900 font-mono text-[11px] font-bold shrink-0">
-              Wilayah: {activeKantor.toUpperCase() || 'CABANG'}
-            </span>
+          {/* Tombol Reload */}
+          <div className="flex items-center gap-1.5 justify-end shrink-0">
             <button
               onClick={fetchQuota}
               disabled={loading}
-              className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[36px] flex items-center justify-center shrink-0"
+              className="p-1.5 sm:p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center shrink-0"
               title="Muat Ulang"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -265,7 +335,18 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang' }) {
                   <td className="py-2.5 px-3 text-center text-slate-500 font-bold text-xs">{idx + 1}</td>
                   <td className="py-2.5 px-3 font-bold text-cyan-900">{item.id_pelanggan}</td>
                   <td className="py-2.5 px-3">
-                    <div className="font-sans font-bold text-slate-900">{item.nama}</div>
+                    {onNavigateCustomer && item.nama ? (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateCustomer(item.nama)}
+                        className="font-sans font-bold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition block"
+                        title={`Lihat detail ${item.nama} di Data Pelanggan`}
+                      >
+                        {item.nama}
+                      </button>
+                    ) : (
+                      <div className="font-sans font-bold text-slate-900">{item.nama}</div>
+                    )}
                     <div className="text-[10px] text-slate-400">{item.alamat || '-'}</div>
                   </td>
                   <td className="py-2.5 px-3">

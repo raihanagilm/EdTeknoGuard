@@ -26,6 +26,15 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penyusunan Rapi Kolom Tabel Pelanggan, Modal Detail Pribadi & Integrasi Pesan WhatsApp**:
+  - **Tata Letak Tabel Ringkas & Fungsional NOC** ([`ModulPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx)):
+    - Kolom tabel disederhanakan dan disusun proporsional: `No`, `ID Pelanggan`, `Nama Pelanggan` (dengan alamat ringkas), `IP & Wilayah` (IP Router + POP + Badge Kantor), `WiFi & Admin ONT` (Nama SSID WiFi & Akun Modem), `Redaman (dBm)`, `Status`, dan `Aksi`.
+    - **Modal Detail Pelanggan & Kontak WhatsApp**: Aksi dropdown "Detail Pelanggan" dan klik nama pelanggan membuka modal detail lengkap (Nomor WhatsApp, Paket Layanan, Server POP, Alamat Fisik + Titik GPS Maps, Kredensial WiFi SSID/Password, IP ONT & Jenis Modem) dilengkapi tombol langsung **"Kirim Pesan WA"** (`https://wa.me/62...`).
+  - **Aksi Hubungi Pelanggan di Tiket Keluhan** ([`ModulTiketKeluhan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulTiketKeluhan.jsx)):
+    - Menu dropdown aksi titik tiga (`...`) dilengkapi opsi **"Hubungi WA"** dengan template pesan WhatsApp terformat otomatis memuat nomor tiket, kategori, dan deskripsi gangguan pelanggan.
+  - **Navigasi Silang Nama Pelanggan Antar-Modul**:
+    - Di modul **Riwayat Redaman** ([`ModulRiwayatRedaman.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulRiwayatRedaman.jsx)), **Pemantauan Kuota** ([`ModulPemantauanKuota.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPemantauanKuota.jsx)), dan **Tiket Keluhan** ([`ModulTiketKeluhan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulTiketKeluhan.jsx)), seluruh nama pelanggan yang tampil dapat diklik langsung untuk mengarahkan pengguna ke halaman **Data Pelanggan** dengan filter pencarian otomatis sesuai nama pelanggan terkait.
+
 - **Sorting Kolom Interaktif & Bulk Action Bar (Hapus Terpilih & Batal)**:
   - **Tabel Tanpa Checkbox**:
     - [`ModulRiwayatRedaman.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulRiwayatRedaman.jsx): Checkbox dibersihkan, sorting kolom terintegrasi ke backend (`sort_by`, `sort_dir`), kolom `No` urut rapi.

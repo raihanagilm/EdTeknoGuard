@@ -30,7 +30,7 @@ import {
 } from 'lucide-react'
 import Chart from 'chart.js/auto'
 import { MonitoringService } from '../services/api'
-import { ModuleHeader, MetricCard } from './CommonUI'
+import { ModuleHeader, MetricCard, SegmentedStatusBar } from './CommonUI'
 
 // Transformasi Non-linear Sumbu Y (Piecewise Stretched Scale)
 const TICK_DBM_LIST = [0, 5, 10, 15, 20, 25.0, 25.5, 26.0, 26.5, 27.0, 30.0, 35.0]
@@ -638,13 +638,13 @@ export function ModulBeranda({
     <div className="space-y-4 font-sans">
 
       {/* 1. TABLER COMMAND CONTROL BAR: STATUS ENGINE & ACTION BUTTONS (Ditaruh di Paling Atas) */}
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-sky-200/80 shadow-xs space-y-3.5 relative overflow-hidden">
+      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-3.5 sm:p-5 border border-sky-200/80 shadow-xs space-y-3 sm:space-y-3.5 relative overflow-hidden">
         {/* Baris Utama: Status, Timer Interval & Tombol Kontrol */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Sisi Kiri: Status Pemantau Otomatis */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3">
             <div
-              className={`h-4 w-4 rounded-full flex items-center justify-center shrink-0 ${
+              className={`h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 ${
                 isNetworkError
                   ? 'bg-rose-500 shadow-xs shadow-rose-200'
                   : engineStatus === 'RUNNING'
@@ -653,24 +653,20 @@ export function ModulBeranda({
               }`}
             >
               <div
-                className={`h-2 w-2 rounded-full bg-white ${
+                className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-white ${
                   engineStatus === 'RUNNING' && !isNetworkError ? 'animate-ping' : ''
                 }`}
               />
             </div>
 
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs sm:text-sm font-black text-slate-900 font-mono">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="text-xs sm:text-sm font-black text-slate-900 font-mono leading-tight">
                   {isNetworkError ? (
-                    <span className="text-rose-600">Status: Gagal Terhubung ke Jaringan Modem ONT</span>
+                    <span className="text-rose-600">Gagal Jaringan Modem ONT</span>
                   ) : engineStatus === 'RUNNING' ? (
                     <span>
-                      Pemantauan Otomatis: Aktif (Setiap{' '}
-                      <strong className="text-cyan-700 font-black underline decoration-cyan-300">
-                        {intervalMinutes}
-                      </strong>{' '}
-                      Menit)
+                      Pemantauan Otomatis: Aktif ({intervalMinutes}m)
                     </span>
                   ) : (
                     <span className="text-amber-700">Pemantauan Otomatis: Dijeda</span>
@@ -678,7 +674,7 @@ export function ModulBeranda({
                 </span>
 
                 <span
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-black font-mono uppercase tracking-wide border ${
+                  className={`px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-black font-mono uppercase tracking-wide border ${
                     isNetworkError
                       ? 'bg-rose-50 text-rose-700 border-rose-200'
                       : engineStatus === 'RUNNING'
@@ -690,12 +686,12 @@ export function ModulBeranda({
                 </span>
               </div>
 
-              <div className="text-xs text-slate-500 flex flex-wrap items-center gap-1.5 mt-0.5 font-mono">
-                <span>Pemeriksaan Terakhir:</span>
+              <div className="text-[11px] sm:text-xs text-slate-500 flex flex-wrap items-center gap-1 mt-0.5 font-mono">
+                <span>Cek Terakhir:</span>
                 <strong className="text-slate-800 font-bold">{lastScanTime}</strong>
-                <span className="text-slate-300">|</span>
+                <span className="text-slate-300 hidden sm:inline">|</span>
                 <span
-                  className={`text-[11px] font-bold ${
+                  className={`text-[10px] sm:text-[11px] font-bold ${
                     isNetworkError
                       ? 'text-rose-600'
                       : engineStatus === 'RUNNING'
@@ -704,10 +700,10 @@ export function ModulBeranda({
                   }`}
                 >
                   {isNetworkError
-                    ? 'Gateway modem ONT tidak merespons (Periksa koneksi LAN/VLAN)'
+                    ? 'Gateway tidak merespons'
                     : engineStatus === 'RUNNING'
-                    ? `Sedang Berjalan: Memindai otomatis setiap ${intervalMinutes} menit`
-                    : 'Sedang Dijeda: Jadwal pemantauan dihentikan sementara'}
+                    ? `Otomatis tiap ${intervalMinutes}m`
+                    : 'Jadwal dihentikan'}
                 </span>
               </div>
             </div>
@@ -715,7 +711,7 @@ export function ModulBeranda({
 
           {/* Sisi Kanan: Tombol Kontrol Cerdas */}
           {isAdminOrSuper && (
-            <div className="flex items-center justify-between sm:justify-end gap-2.5 flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-sky-100">
+            <div className="flex items-center justify-between sm:justify-end gap-2 flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-sky-100">
               {isToggling && (
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-mono font-bold shrink-0">
                   <RefreshCw className="animate-spin h-3.5 w-3.5 text-cyan-600" />
@@ -898,18 +894,18 @@ export function ModulBeranda({
 
           {/* Standby */}
           {!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused)) && (
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-slate-700 bg-cyan-50/40 px-3.5 py-2.5 rounded-xl border border-sky-100">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-700" />
-                <span className="text-slate-500 font-medium">Durasi Pemindaian Terakhir:</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono text-slate-700 bg-cyan-50/40 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-sky-100">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-700 shrink-0" />
+                <span className="text-slate-500 font-medium">Durasi Terakhir:</span>
                 <strong className="text-slate-800 font-bold">
                   {scanProgress?.last_scan_duration > 0
                     ? `${formatDuration(scanProgress.last_scan_duration)} / siklus`
-                    : 'Belum ada riwayat pemindaian'}
+                    : 'Belum ada data'}
                 </strong>
               </div>
-              <div className="text-[11px] text-slate-500 font-bold">
-                <span>Total Target: {scanProgress?.total || kpi.total_monitored || 0} Modem ONT</span>
+              <div className="text-[10px] sm:text-[11px] text-slate-500 font-bold">
+                <span>Target: {scanProgress?.total || kpi.total_monitored || 0} ONT</span>
               </div>
             </div>
           )}
@@ -933,88 +929,88 @@ export function ModulBeranda({
       </div>
 
       {/* 2. MENU LAYANAN & OPERASIONAL (TABLER MODULAR ACTION TILES - KHUSUS MOBILE / AKSES CEPAT) */}
-      <section className="lg:hidden bg-white/90 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-sky-200/80 shadow-xs">
-        <header className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-1 bg-cyan-600 rounded-full" />
+      <section className="lg:hidden bg-white/90 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-sky-200/80 shadow-xs">
+        <header className="flex items-center justify-between mb-2 sm:mb-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="h-3.5 w-1 bg-cyan-600 rounded-full" />
             <h2 className="text-xs sm:text-sm font-black text-slate-900 font-mono uppercase tracking-wide">
-              Menu Layanan &amp; Operasional
+              Menu Layanan
             </h2>
           </div>
           <span className="text-[10px] text-slate-400 font-mono font-bold">Akses Cepat</span>
         </header>
 
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-4 sm:gap-2.5">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2.5">
           {/* 1. Data Pelanggan */}
           <button
             onClick={() => onNavigate('pelanggan')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
           >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Users className="w-5 h-5" />
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Data Pelanggan</span>
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Pelanggan</span>
           </button>
 
           {/* 2. Tiket Keluhan */}
           <button
             onClick={() => onNavigate('tiket')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative"
           >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
-              <Ticket className="w-5 h-5" />
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
+              <Ticket className="w-4 h-4 sm:w-5 sm:h-5" />
               {unreadTicketsCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[18px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
+                <span className="absolute -top-1 -right-1 px-1 py-0.2 min-w-[15px] text-center text-[8px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
                   {unreadTicketsCount}
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Tiket Keluhan</span>
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Tiket</span>
           </button>
 
           {/* 3. Pemantauan Kuota */}
           <button
             onClick={() => onNavigate('kuota')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
           >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Database className="w-5 h-5" />
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <Database className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Pemantauan Kuota</span>
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Kuota</span>
           </button>
 
           {/* 4. Riwayat Redaman */}
           <button
             onClick={() => onNavigate('riwayat')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
           >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Activity className="w-5 h-5" />
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Riwayat Redaman</span>
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Redaman</span>
           </button>
 
           {/* 5. Log Aktivitas */}
           <button
             onClick={() => onNavigate('log')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
           >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <FileText className="w-5 h-5" />
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Log Aktivitas</span>
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Log</span>
           </button>
 
           {/* 6. Pengaturan Sistem */}
           {isAdminOrSuper && (
             <button
               onClick={() => onNavigate('pengaturan')}
-              className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+              className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
             >
-              <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-                <Settings className="w-5 h-5" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+                <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Pengaturan Sistem</span>
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Pengaturan</span>
             </button>
           )}
 
@@ -1022,12 +1018,12 @@ export function ModulBeranda({
           {isSuperAdmin && (
             <button
               onClick={() => onNavigate('pengguna')}
-              className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+              className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
             >
-              <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-                <UserCheck className="w-5 h-5" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+                <UserCheck className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Manajemen Pengguna</span>
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Pengguna</span>
             </button>
           )}
 
@@ -1036,75 +1032,77 @@ export function ModulBeranda({
             href="/teknocust"
             target="_blank"
             rel="noreferrer"
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
           >
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Smartphone className="w-5 h-5" />
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold text-slate-700 leading-tight">Portal TeknoCust</span>
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">TeknoCust</span>
           </a>
         </div>
       </section>
 
-      {/* 4. TABLER MODULAR KPI STAT CARDS (4 KARTU KESEHATAN JARINGAN KONSISTEN COMMONUI) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <MetricCard
-          label="Total Terpantau"
-          value={kpi.total_monitored}
-          unit="Modem"
-          icon={Activity}
-          colorScheme="cyan"
-          subLabel={kpi.monitored_inactive > 0 ? `(${kpi.monitored_inactive} OFF)` : 'Modem aktif terdaftar'}
-        />
-
-        <MetricCard
-          label="Sinyal Normal"
-          value={kpi.normal}
-          unit="> -26 dBm"
-          icon={CheckCircle2}
-          colorScheme="emerald"
-          subLabel="Kondisi sinyal prima"
-        />
-
-        <MetricCard
-          label="Peringatan Redaman"
-          value={kpi.warning}
-          unit="≤ -26 dBm"
-          icon={AlertTriangle}
-          colorScheme="amber"
-          subLabel="Kabel tertekuk / redaman turun"
-        />
-
-        <MetricCard
-          label="Modem Putus / Mati"
-          value={kpi.los + kpi.critical}
-          unit="Offline"
-          icon={ZapOff}
-          colorScheme="rose"
-          subLabel="Sinyal putus / modem padam"
-        />
-      </div>
+      {/* 4. Segmented Status Ticker Bar Terpadu (Opsi B: 1 Baris Penuh Muat 1 Layar Tanpa Swipe) */}
+      <SegmentedStatusBar
+        items={[
+          {
+            label: 'Total',
+            value: kpi.total_monitored,
+            colorScheme: 'cyan',
+            onClick: () => onNavigate('pelanggan'),
+            subLabel: kpi.monitored_inactive > 0 ? `(${kpi.monitored_inactive} OFF)` : 'Modem'
+          },
+          {
+            label: 'Optimal',
+            value: kpi.normal,
+            colorScheme: 'emerald',
+            onClick: () => onNavigate('pelanggan'),
+            subLabel: '> -26 dBm'
+          },
+          {
+            label: 'Waspada',
+            value: kpi.warning,
+            colorScheme: 'amber',
+            onClick: () => onNavigate('pelanggan'),
+            subLabel: '≤ -26 dBm'
+          },
+          {
+            label: 'Kritis',
+            value: kpi.critical,
+            colorScheme: 'rose',
+            onClick: () => onNavigate('pelanggan'),
+            subLabel: '≤ -27 dBm'
+          },
+          {
+            label: 'LOS',
+            value: kpi.los,
+            colorScheme: 'purple',
+            onClick: () => onNavigate('pelanggan'),
+            subLabel: 'Putus'
+          }
+        ]}
+      />
 
       {/* 5. VISUALISASI GRAFIK RIWAYAT REDAMAN (CHART.JS TELEMETRY DENGAN STYLE KACA MODERN) */}
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-sky-200/80 shadow-sm relative overflow-hidden space-y-3.5">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3.5 pt-1">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono uppercase tracking-wider flex items-center gap-2">
-                <Activity className="w-4 h-4 text-cyan-600" />
-                <span>Tren Riwayat Kualitas Redaman (dBm)</span>
+      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-3.5 sm:p-5 border border-sky-200/80 shadow-xs relative overflow-hidden space-y-3 sm:space-y-3.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3.5">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-600" />
+                <span>Tren Kualitas Redaman</span>
               </h3>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                Batas Peringatan: -26.0 dBm
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                Batas: -26.0 dBm
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 font-medium">
-              Pemantauan kurva fluktuasi sinyal optik rata-rata jaringan ISP dari tabel database
+            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 font-medium line-clamp-1 sm:line-clamp-none">
+              Fluktuasi sinyal optik rata-rata jaringan ISP
             </p>
           </div>
 
           {/* Filter Tanggal & Segmented Control */}
-          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto font-mono">
+          <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto font-mono">
             <input
               type="date"
               value={selectedDate}
@@ -1113,16 +1111,16 @@ export function ModulBeranda({
                 setChartRange('custom')
               }}
               title="Pilih tanggal spesifik"
-              className="px-2.5 py-1.5 text-xs bg-cyan-50/40 hover:bg-cyan-50 focus:bg-white text-slate-800 border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 min-h-[36px] font-bold transition cursor-pointer"
+              className="flex-1 sm:flex-none px-2 py-1 text-[11px] sm:text-xs bg-cyan-50/40 hover:bg-cyan-50 focus:bg-white text-slate-800 border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 min-h-[34px] sm:min-h-[36px] font-bold transition cursor-pointer"
             />
 
-            <div className="flex items-center bg-cyan-50/60 p-1 rounded-xl border border-sky-200 text-xs font-bold">
+            <div className="flex items-center bg-cyan-50/60 p-0.5 sm:p-1 rounded-xl border border-sky-200 text-[11px] sm:text-xs font-bold shrink-0">
               <button
                 onClick={() => {
                   setChartRange('today')
                   setSelectedDate(todayStr)
                 }}
-                className={`px-3 py-1 rounded-lg transition ${
+                className={`px-2 sm:px-3 py-1 rounded-lg transition ${
                   chartRange === 'today' ? 'bg-cyan-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -1133,7 +1131,7 @@ export function ModulBeranda({
                   setChartRange('yesterday')
                   setSelectedDate(todayStr)
                 }}
-                className={`px-3 py-1 rounded-lg transition ${
+                className={`px-2 sm:px-3 py-1 rounded-lg transition ${
                   chartRange === 'yesterday' ? 'bg-cyan-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -1144,7 +1142,7 @@ export function ModulBeranda({
                   setChartRange('week')
                   setSelectedDate(todayStr)
                 }}
-                className={`px-3 py-1 rounded-lg transition ${
+                className={`px-2 sm:px-3 py-1 rounded-lg transition ${
                   chartRange === 'week' ? 'bg-cyan-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -1155,86 +1153,86 @@ export function ModulBeranda({
         </div>
 
         {/* Data Summary Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 bg-cyan-50/40 rounded-xl border border-sky-100 text-xs text-slate-700 font-mono">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-cyan-100 text-cyan-700 shrink-0">
-              <TrendingUp className="w-4 h-4" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 p-2 sm:p-2.5 bg-cyan-50/40 rounded-xl border border-sky-100 text-xs text-slate-700 font-mono">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-cyan-100 text-cyan-700 shrink-0">
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
                 Rata-rata:
               </span>
-              <span className="font-extrabold text-slate-800">
+              <span className="font-extrabold text-slate-800 text-[11px] sm:text-xs">
                 {chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : '-'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
-              <ArrowUpCircle className="w-4 h-4" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
+              <ArrowUpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">
+              <span className="text-[9px] sm:text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">
                 Terbaik:
               </span>
-              <span className="font-extrabold text-emerald-700">
+              <span className="font-extrabold text-emerald-700 text-[11px] sm:text-xs">
                 {chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : '-'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-rose-100 text-rose-700 shrink-0">
-              <ArrowDownCircle className="w-4 h-4" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-rose-100 text-rose-700 shrink-0">
+              <ArrowDownCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <span className="text-[10px] text-rose-700 font-bold uppercase tracking-wider block">
+              <span className="text-[9px] sm:text-[10px] text-rose-700 font-bold uppercase tracking-wider block">
                 Terendah:
               </span>
-              <span className="font-extrabold text-rose-700">
+              <span className="font-extrabold text-rose-700 text-[11px] sm:text-xs">
                 {chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : '-'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-slate-200 text-slate-700 shrink-0">
-              <BarChart2 className="w-4 h-4" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-slate-200 text-slate-700 shrink-0">
+              <BarChart2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
                 Total Sampel:
               </span>
-              <span className="font-extrabold text-slate-800">{chartStats.total_points} Scan</span>
+              <span className="font-extrabold text-slate-800 text-[11px] sm:text-xs">{chartStats.total_points} Scan</span>
             </div>
           </div>
         </div>
 
         {/* Chart Canvas Container dengan Zoom Controls */}
-        <div className="relative w-full h-[250px] sm:h-[290px] overflow-hidden rounded-xl bg-white border border-sky-100">
+        <div className="relative w-full h-[220px] sm:h-[290px] overflow-hidden rounded-xl bg-white border border-sky-100">
           {/* Zoom Buttons Mobile */}
-          <div className="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-1 rounded-xl border border-sky-200 shadow-xs">
+          <div className="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-0.5 rounded-lg border border-sky-200 shadow-xs">
             <button
               onClick={handleZoomIn}
-              className="w-6 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 flex items-center justify-center transition active:scale-90"
+              className="w-5 h-5 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 flex items-center justify-center transition active:scale-90"
               title="Perbesar"
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <ZoomIn className="w-3 h-3" />
             </button>
             <button
               onClick={handleZoomOut}
-              className="w-6 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 flex items-center justify-center transition active:scale-90"
+              className="w-5 h-5 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 flex items-center justify-center transition active:scale-90"
               title="Perkecil"
             >
-              <ZoomOut className="w-3.5 h-3.5" />
+              <ZoomOut className="w-3 h-3" />
             </button>
             <button
               onClick={handleZoomReset}
-              className="px-1.5 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 text-[10px] font-mono font-extrabold flex items-center justify-center gap-1 transition active:scale-90"
+              className="px-1 h-5 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 text-[9px] font-mono font-extrabold flex items-center justify-center gap-0.5 transition active:scale-90"
               title="Reset"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-2.5 h-2.5" />
               <span>Reset</span>
             </button>
           </div>
@@ -1248,19 +1246,19 @@ export function ModulBeranda({
         </div>
 
         {/* Legend Footer */}
-        <div className="pt-3 border-t border-sky-100 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-500">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="pt-2 sm:pt-3 border-t border-sky-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-mono text-slate-500">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {activeDatasets
               .filter((d) => !d.isThreshold)
               .map((ds, idx) => (
                 <button
                   key={idx}
                   onClick={() => toggleDataset(ds.index)}
-                  className="flex items-center gap-1.5 hover:opacity-80 transition select-none cursor-pointer"
-                  title={`Klik untuk menyembunyikan/menampilkan ${ds.label}`}
+                  className="flex items-center gap-1 hover:opacity-80 transition select-none cursor-pointer"
+                  title={`Klik untuk toggle ${ds.label}`}
                 >
                   <span
-                    className="h-2.5 w-2.5 rounded-full inline-block shrink-0"
+                    className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full inline-block shrink-0"
                     style={{ backgroundColor: ds.color }}
                   />
                   <span
@@ -1273,17 +1271,17 @@ export function ModulBeranda({
                 </button>
               ))}
 
-            <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-sky-200">
-              <span className="h-0.5 w-3 bg-amber-400 inline-block" />
-              <span className="text-amber-700 font-bold">Garis Warning (-26.0 dBm)</span>
+            <div className="flex items-center gap-1 ml-0.5 pl-1.5 border-l border-sky-200">
+              <span className="h-0.5 w-2 sm:w-3 bg-amber-400 inline-block" />
+              <span className="text-amber-700 font-bold">Warning (-26dBm)</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-0.5 w-3 bg-rose-400 inline-block" />
-              <span className="text-rose-700 font-bold">Garis Kritis (-27.0 dBm)</span>
+            <div className="flex items-center gap-1">
+              <span className="h-0.5 w-2 sm:w-3 bg-rose-400 inline-block" />
+              <span className="text-rose-700 font-bold">Kritis (-27dBm)</span>
             </div>
           </div>
-          <div>
-            Nilai optimal: <span className="font-extrabold text-emerald-600">-12 s/d -25.9 dBm</span>
+          <div className="text-slate-400 text-[9px] sm:text-[10px]">
+            Optimal: <span className="font-extrabold text-emerald-600">-12 ~ -25.9 dBm</span>
           </div>
         </div>
       </div>

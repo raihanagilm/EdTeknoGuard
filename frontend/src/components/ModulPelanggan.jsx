@@ -34,6 +34,7 @@ import {
 import {
   ModuleHeader,
   MetricCard,
+  SegmentedStatusBar,
   FilterContainer,
   DataTableContainer
 } from './CommonUI'
@@ -42,14 +43,17 @@ import { WizardImportPelanggan } from './WizardImportPelanggan'
 export function ModulPelanggan({
   activeOffice = 'cabang',
   warnThreshold,
-  critThreshold
+  critThreshold,
+  initialSearch = '',
+  onClearInitialSearch
 }) {
   const [customers, setCustomers] = useState([])
   const [totalRecords, setTotalRecords] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(initialSearch || '')
   const [filterStatus, setFilterStatus] = useState('ALL')
   const [filterPop, setFilterPop] = useState('ALL')
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false)
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(15)
   const [sortField, setSortField] = useState('id')
@@ -60,13 +64,18 @@ export function ModulPelanggan({
     total: 0,
     normal: 0,
     warning: 0,
-    critical_los: 0,
+    critical: 0,
+    los: 0,
     monitored_inactive: 0
   })
 
   // Selected for bulk actions
   const [selectedIds, setSelectedIds] = useState([])
   const [bulkDeleting, setBulkDeleting] = useState(false)
+
+  // Modal Detail State (Informasi Pribadi & Kontak WA)
+  const [detailCustomer, setDetailCustomer] = useState(null)
+  const [detailLoading, setDetailLoading] = useState(false)
 
   // Modal Create / Edit State
   const [modalOpen, setModalOpen] = useState(false)
@@ -97,6 +106,34 @@ export function ModulPelanggan({
   // Single probe test state
   const [probingId, setProbingId] = useState(null)
   const [probeResult, setProbeResult] = useState(null)
+
+  // Sync initialSearch if prop changes
+  useEffect(() => {
+    if (initialSearch) {
+      setSearchQuery(initialSearch)
+      setPage(1)
+    }
+  }, [initialSearch])
+
+  // Open Detail Modal (Fetches full customer info if needed)
+  const handleOpenDetail = async (c) => {
+    const cId = c.id_pelanggan || c.id
+    setDetailLoading(true)
+    setDetailCustomer(c)
+    try {
+      const res = await fetch(`/api/customers/${cId}`)
+      if (res.ok) {
+        const json = await res.json()
+        if (json.customer) {
+          setDetailCustomer(json.customer)
+        }
+      }
+    } catch (err) {
+      console.warn('Gagal memuat detail mendalam, gunakan data lokal:', err)
+    } finally {
+      setDetailLoading(false)
+    }
+  }
 
   // Toggle sorting
   const handleSort = (field) => {
@@ -310,107 +347,155 @@ export function ModulPelanggan({
 
   return (
     <div className="space-y-4">
-      {/* 1. 4 Kartu KPI Interaktif */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <MetricCard
-          label="Total Terpantau"
-          value={`${stats.total || totalRecords}`}
-          unit="ONT"
-          icon={Radio}
-          colorScheme="cyan"
-          isActive={filterStatus === 'ALL'}
-          onClick={() => setFilterStatus('ALL')}
-        />
-        <MetricCard
-          label="Sinyal Optimal"
-          value={`${stats.normal || 0}`}
-          unit="ONT"
-          icon={CheckCircle2}
-          colorScheme="emerald"
-          isActive={filterStatus === 'NORMAL'}
-          onClick={() => setFilterStatus('NORMAL')}
-        />
-        <MetricCard
-          label="Waspada"
-          value={`${stats.warning || 0}`}
-          unit="ONT"
-          icon={AlertTriangle}
-          colorScheme="amber"
-          isActive={filterStatus === 'WARNING'}
-          onClick={() => setFilterStatus('WARNING')}
-        />
-        <MetricCard
-          label="Kritis / LOS"
-          value={`${stats.critical_los || 0}`}
-          unit="ONT"
-          icon={ZapOff}
-          colorScheme="rose"
-          isActive={filterStatus === 'CRITICAL'}
-          onClick={() => setFilterStatus('CRITICAL')}
-        />
-      </div>
+      {/* 1. Segmented Status Ticker Bar Terpadu (Opsi B: 1 Baris Penuh Muat 1 Layar Tanpa Swipe) */}
+      <SegmentedStatusBar
+        items={[
+          {
+            label: 'Total',
+            value: stats.total || totalRecords,
+            colorScheme: 'cyan',
+            isActive: filterStatus === 'ALL',
+            onClick: () => setFilterStatus('ALL'),
+            subLabel: 'Semua ONT'
+          },
+          {
+            label: 'Optimal',
+            value: stats.normal || 0,
+            colorScheme: 'emerald',
+            isActive: filterStatus === 'NORMAL',
+            onClick: () => setFilterStatus('NORMAL'),
+            subLabel: '> -26 dBm'
+          },
+          {
+            label: 'Waspada',
+            value: stats.warning || 0,
+            colorScheme: 'amber',
+            isActive: filterStatus === 'WARNING',
+            onClick: () => setFilterStatus('WARNING'),
+            subLabel: '-26~-27 dBm'
+          },
+          {
+            label: 'Kritis',
+            value: stats.critical || 0,
+            colorScheme: 'rose',
+            isActive: filterStatus === 'CRITICAL',
+            onClick: () => setFilterStatus('CRITICAL'),
+            subLabel: '≤ -27 dBm'
+          },
+          {
+            label: 'LOS',
+            value: stats.los || 0,
+            colorScheme: 'purple',
+            isActive: filterStatus === 'LOS',
+            onClick: () => setFilterStatus('LOS'),
+            subLabel: 'Putus'
+          }
+        ]}
+      />
 
-      {/* 2. Filter Bar & Tombol Aksi */}
+      {/* 2. Filter Bar & Tombol Aksi Ringkas */}
       <FilterContainer>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2 flex-1">
-            <div className="relative flex-1 min-w-[200px]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+          {/* Kotak Pencarian & Tombol Popover Filter */}
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className="relative flex-1 min-w-[150px]">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari ID, Nama, IP Router, atau POP..."
-                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[36px]"
+                placeholder="Cari ID, Nama, IP..."
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px]"
               />
             </div>
 
-            <div className="flex items-center gap-1 bg-cyan-50/60 p-1 rounded-xl border border-sky-200 text-xs font-mono">
-              <span className="text-[10px] text-slate-400 font-bold px-1.5">POP:</span>
-              <select
-                value={filterPop}
-                onChange={(e) => setFilterPop(e.target.value)}
-                className="bg-transparent text-slate-700 font-bold text-xs focus:outline-none"
+            {/* Tombol Ikon Filter Dropdown Popover */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                className={`p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[34px] sm:min-h-[36px] shrink-0 ${
+                  filterPop !== 'ALL'
+                    ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
+                    : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
+                }`}
+                title="Filter Wilayah POP"
               >
-                <option value="ALL">Semua POP</option>
-                <option value="POP-01">POP-01</option>
-                <option value="POP-02">POP-02</option>
-                <option value="POP-03">POP-03</option>
-              </select>
+                <Filter className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{filterPop === 'ALL' ? 'Filter POP' : filterPop}</span>
+                {filterPop !== 'ALL' && (
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                )}
+              </button>
+
+              {/* Popover Dropdown Menu */}
+              {filterDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setFilterDropdownOpen(false)}
+                  />
+                  <div className="absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-48 bg-white/95 backdrop-blur-md rounded-2xl p-2 shadow-xl border border-sky-200 space-y-1 font-mono text-xs">
+                    <div className="px-2.5 py-1 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                      Pilih Server POP:
+                    </div>
+                    {['ALL', 'POP-01', 'POP-02', 'POP-03'].map((pop) => (
+                      <button
+                        key={pop}
+                        type="button"
+                        onClick={() => {
+                          setFilterPop(pop);
+                          setFilterDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-xl transition flex items-center justify-between ${
+                          filterPop === pop
+                            ? 'bg-cyan-500 text-white font-bold'
+                            : 'hover:bg-cyan-50 text-slate-700'
+                        }`}
+                      >
+                        <span>{pop === 'ALL' ? 'Semua Server POP' : pop}</span>
+                        {filterPop === pop && <Check className="w-3.5 h-3.5" />}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Tombol Aksi Tambah, Import, Export, Reload */}
+          <div className="flex items-center gap-1.5 justify-end shrink-0">
             <button
               onClick={handleOpenCreate}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-xs min-h-[36px]"
+              className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>Tambah Pelanggan</span>
+              <span>Tambah</span>
             </button>
 
             <button
               onClick={() => setImportModalOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-xs min-h-[36px]"
+              className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
               title="Import Berkas Excel / CSV (Wizard 3 Langkah)"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>Import Excel/CSV</span>
+              <span className="hidden sm:inline">Import</span>
             </button>
 
             <a
               href="/api/customers/export-excel"
               download="data_pelanggan_edteknoguard.xlsx"
-              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-xs min-h-[36px]"
+              className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
+              title="Ekspor Seluruh Data ke Excel"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Ekspor Excel</span>
+              <span className="hidden sm:inline">Ekspor</span>
             </a>
 
             <button
               onClick={fetchCustomers}
               disabled={loading}
-              className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[36px] flex items-center justify-center"
+              className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center"
               title="Muat Ulang Data"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -497,19 +582,11 @@ export function ModulPelanggan({
                 onClick={() => handleSort('ip_router')}
               >
                 <div className="flex items-center gap-1">
-                  <span>IP Router ONT</span>
+                  <span>IP &amp; Wilayah</span>
                   <ArrowUpDown className={`w-3 h-3 ${sortField === 'ip_router' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
-              <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
-                onClick={() => handleSort('pop')}
-              >
-                <div className="flex items-center gap-1">
-                  <span>POP &amp; Wilayah</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'pop' ? 'text-cyan-800' : 'text-slate-400'}`} />
-                </div>
-              </th>
+              <th className="py-2.5 px-3">WiFi &amp; Admin ONT</th>
               <th 
                 className="py-2.5 px-3 text-right cursor-pointer select-none hover:bg-cyan-100/60 transition"
                 onClick={() => handleSort('rx_power')}
@@ -568,40 +645,80 @@ export function ModulPelanggan({
                     <td className="py-2.5 px-2 text-center text-slate-500 font-bold text-xs">{rowNo}</td>
                     <td className="py-2.5 px-3 font-bold text-cyan-900">{cId}</td>
                     <td className="py-2.5 px-3">
-                      <div className="font-sans font-bold text-slate-900">{c.nama || c.name}</div>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDetail(c)}
+                        className="font-sans font-bold text-slate-900 hover:text-cyan-800 hover:underline text-left cursor-pointer transition block"
+                        title="Klik untuk melihat Detail Lengkap & Kontak Pelanggan"
+                      >
+                        {c.nama || c.name}
+                      </button>
                       <div className="text-[10px] text-slate-400 font-sans truncate max-w-xs">{c.alamat || c.address || '-'}</div>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600">{c.ip_router || c.ip}</td>
-                    <td className="py-2.5 px-3 text-slate-600">{c.pop || 'POP-01'} ({c.kantor || 'cabang'})</td>
+                    <td className="py-2.5 px-3">
+                      <div className="text-slate-800 font-bold">{c.ip_router || c.ip}</div>
+                      <div className="text-[10px] text-slate-400 font-mono">{c.pop || 'POP-01'} • <span className="uppercase">{c.kantor || 'cabang'}</span></div>
+                    </td>
+                    <td className="py-2.5 px-3">
+                      <div className="flex items-center gap-1 text-[11px] text-slate-700 font-mono truncate max-w-[170px]">
+                        <Wifi className="w-3 h-3 text-cyan-600 shrink-0" />
+                        <span className="font-bold truncate">{c.nama_wifi || '-'}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono">
+                        Modem: <span className="font-semibold text-slate-600">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
+                      </div>
+                    </td>
                     <td className="py-2.5 px-3 text-right font-black">
-                      <span
-                        className={
-                          (c.rx_power ?? c.rx) <= critThreshold
-                            ? 'text-rose-600'
-                            : (c.rx_power ?? c.rx) <= warnThreshold
-                            ? 'text-amber-600'
-                            : 'text-emerald-600'
+                      {(() => {
+                        const rxVal = c.rx_power ?? c.rx ?? c.redaman_current ?? c.redaman_baseline;
+                        const isNumeric = rxVal !== null && rxVal !== undefined && !isNaN(Number(rxVal));
+                        const statusVal = c.status_koneksi || c.status || 'NORMAL';
+                        
+                        if (isNumeric) {
+                          const num = Number(rxVal);
+                          return (
+                            <span
+                              className={
+                                num <= critThreshold
+                                  ? 'text-rose-600'
+                                  : num <= warnThreshold
+                                  ? 'text-amber-600'
+                                  : 'text-emerald-600'
+                              }
+                            >
+                              {num.toFixed(1)} dBm
+                            </span>
+                          );
+                        } else {
+                          return (
+                            <span className="text-slate-400 font-bold">
+                              {statusVal === 'LOS' ? 'LOS' : '-'}
+                            </span>
+                          );
                         }
-                      >
-                        {(c.rx_power ?? c.rx) != null ? `${Number(c.rx_power ?? c.rx).toFixed(1)}` : 'LOS'}
-                      </span>
+                      })()}
                     </td>
                     <td className="py-2.5 px-3 text-center">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                          (c.status_koneksi || c.status) === 'NORMAL'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : (c.status_koneksi || c.status) === 'WARNING'
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-rose-50 text-rose-700 border border-rose-200'
-                        }`}
-                      >
-                        {c.status_koneksi || c.status || 'NORMAL'}
-                      </span>
+                      {(() => {
+                        const statusVal = (c.status_koneksi || c.status || 'NORMAL').toUpperCase();
+                        let badgeClass = 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                        if (statusVal === 'WARNING') {
+                          badgeClass = 'bg-amber-50 text-amber-700 border border-amber-200';
+                        } else if (statusVal === 'CRITICAL') {
+                          badgeClass = 'bg-rose-50 text-rose-700 border border-rose-200';
+                        } else if (statusVal === 'LOS') {
+                          badgeClass = 'bg-purple-50 text-purple-700 border border-purple-200';
+                        }
+                        return (
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${badgeClass}`}>
+                            {statusVal}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="py-2.5 px-3 text-right">
                       {/* Dropdown Aksi Titik Tiga */}
-                      <div className="relative inline-block text-left" x-data="{ open: false }">
+                      <div className="relative inline-block text-left">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => handleSingleProbe(cId)}
@@ -622,11 +739,31 @@ export function ModulPelanggan({
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                             </button>
 
-                            <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[130px]">
+                            <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[160px]">
                               <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
                                 <button
-                                  onClick={() => handleOpenEdit(c)}
+                                  onClick={() => handleOpenDetail(c)}
                                   className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition"
+                                >
+                                  <Info className="w-3.5 h-3.5 text-cyan-600" />
+                                  <span>Detail Pelanggan</span>
+                                </button>
+                                {(c.no_wa || c.no_hp) && (
+                                  <a
+                                    href={`https://wa.me/${(c.no_wa || c.no_hp).replace(/[^0-9]/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(
+                                      `Halo Bapak/Ibu ${c.nama || c.name}, kami dari Tim Teknis TeknoGuard NOC terkait layanan internet Anda.`
+                                    )}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition"
+                                  >
+                                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>Hubungi WA</span>
+                                  </a>
+                                )}
+                                <button
+                                  onClick={() => handleOpenEdit(c)}
+                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition border-t border-slate-100"
                                 >
                                   <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
                                   <span>Edit Data</span>
@@ -778,6 +915,167 @@ export function ModulPelanggan({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail Pelanggan (Informasi Pribadi & Kontak Pesan WA) */}
+      {detailCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-sky-200 space-y-4 font-mono">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-sky-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 to-sky-600 flex items-center justify-center text-white shadow-md shadow-cyan-600/20">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 font-sans">
+                    {detailCustomer.nama || detailCustomer.name}
+                  </h3>
+                  <p className="text-xs text-cyan-700 font-bold">
+                    ID: {detailCustomer.id_pelanggan || detailCustomer.id} • Wilayah: <span className="uppercase">{detailCustomer.kantor || activeOffice || 'cabang'}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDetailCustomer(null)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Konten Rinci Pelanggan */}
+            <div className="space-y-3 text-xs">
+              {/* Box Kontak & WhatsApp */}
+              <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-bold text-emerald-950 flex items-center gap-1.5 font-sans">
+                    <Phone className="w-4 h-4 text-emerald-600" />
+                    <span>Kontak WhatsApp Pelanggan</span>
+                  </span>
+                  <div className="text-xs font-black text-emerald-800 font-mono">
+                    {detailCustomer.no_wa || detailCustomer.no_hp || 'Nomor WhatsApp belum terdaftar'}
+                  </div>
+                </div>
+
+                {(detailCustomer.no_wa || detailCustomer.no_hp) && (
+                  <a
+                    href={`https://wa.me/${(detailCustomer.no_wa || detailCustomer.no_hp).replace(/[^0-9]/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(
+                      `Halo Bapak/Ibu ${detailCustomer.nama || detailCustomer.name}, kami dari Tim Teknis NOC TeknoGuard ingin mengonfirmasi terkait koneksi internet modem Anda (IP: ${detailCustomer.ip_router || '-'}).`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs font-mono flex items-center justify-center gap-1.5 transition shadow-xs"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span>Kirim Pesan WA</span>
+                  </a>
+                )}
+              </div>
+
+              {/* Grid Informasi Pribadi & Layanan */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-0.5">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">Paket Layanan</span>
+                  <div className="font-bold text-slate-800 font-sans truncate">{detailCustomer.paket || '20 Mbps Unlimited'}</div>
+                </div>
+
+                {/* Titik Lokasi GPS (Klik langsung buka Google Maps) */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-0.5">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-cyan-600 shrink-0" />
+                    <span>Titik Lokasi GPS</span>
+                  </span>
+                  {detailCustomer.lokasi_gps ? (
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detailCustomer.lokasi_gps)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-cyan-700 hover:text-cyan-900 hover:underline flex items-center gap-1 text-xs truncate transition"
+                      title="Buka lokasi di Google Maps"
+                    >
+                      <span className="truncate">{detailCustomer.lokasi_gps}</span>
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0 text-cyan-600" />
+                    </a>
+                  ) : detailCustomer.alamat ? (
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detailCustomer.alamat)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-cyan-700 hover:text-cyan-900 hover:underline flex items-center gap-1 text-xs truncate transition"
+                      title="Cari alamat di Google Maps"
+                    >
+                      <span className="truncate">Cari di GMaps</span>
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0 text-cyan-600" />
+                    </a>
+                  ) : (
+                    <span className="text-slate-400 italic text-[11px] block">-</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Alamat Pemasangan Fisik */}
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-cyan-600" />
+                  <span>Alamat Lengkap Rumah / Lokasi Pemasangan</span>
+                </span>
+                <p className="text-xs text-slate-800 font-sans font-medium leading-relaxed">
+                  {detailCustomer.alamat || detailCustomer.address || 'Alamat fisik belum diisi'}
+                </p>
+              </div>
+
+              {/* Detail Kredensial WiFi & Router ONT */}
+              <div className="p-3 rounded-xl bg-cyan-50/60 border border-cyan-200 space-y-2">
+                <span className="text-[10px] text-cyan-900 font-bold uppercase flex items-center gap-1">
+                  <Wifi className="w-3.5 h-3.5 text-cyan-600" />
+                  <span>Kredensial WiFi Rumah &amp; Login Modem</span>
+                </span>
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Nama WiFi (SSID):</span>
+                    <span className="font-bold text-slate-900">{detailCustomer.nama_wifi || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Password WiFi:</span>
+                    <span className="font-bold text-slate-900">{detailCustomer.password_wifi || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">IP Router ONT:</span>
+                    <span className="font-bold text-cyan-800">{detailCustomer.ip_router || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Jenis Modem:</span>
+                    <span className="font-bold text-slate-900">{detailCustomer.jenis_modem || 'ZTE GM220-S'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-sky-100">
+              <button
+                type="button"
+                onClick={() => {
+                  const targetToEdit = detailCustomer
+                  setDetailCustomer(null)
+                  handleOpenEdit(targetToEdit)
+                }}
+                className="px-3.5 py-1.5 rounded-xl border border-sky-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100 text-xs font-bold font-mono transition flex items-center gap-1.5"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>Edit Informasi</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDetailCustomer(null)}
+                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold font-mono transition"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

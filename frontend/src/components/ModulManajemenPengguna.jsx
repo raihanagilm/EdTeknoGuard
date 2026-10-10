@@ -9,7 +9,8 @@ import {
   Trash2,
   CheckCircle2,
   X,
-  ArrowUpDown
+  ArrowUpDown,
+  Check
 } from 'lucide-react';
 import { UsersService } from '../services/api';
 import {
@@ -24,6 +25,7 @@ export function ModulManajemenPengguna() {
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [sortField, setSortField] = useState('username');
   const [sortDir, setSortDir] = useState('asc');
   const [allKantor, setAllKantor] = useState(['cabang', 'pusat', 'banyumas']);
@@ -315,48 +317,122 @@ export function ModulManajemenPengguna() {
         </div>
       )}
 
-      {/* 1. Filter Bar & Aksi */}
+      {/* 1. Filter Bar & Aksi Ringkas */}
       <FilterContainer>
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 flex-1">
-            <div className="relative">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+          {/* Kotak Pencarian & Tombol Filter Popover */}
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
+            <div className="relative flex-1 min-w-[120px] sm:min-w-[180px]">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari username atau nama..."
-                className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+                placeholder="Cari user / nama..."
+                className="w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
               />
-              <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
             </div>
 
-            <div>
-              <select
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+            {/* Tombol Popover Filter Role & Status */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                className={`p-1.5 sm:p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shrink-0 ${
+                  filterRole !== 'all' || filterStatus !== 'all'
+                    ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
+                    : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
+                }`}
+                title="Filter Role & Status Akun"
               >
-                <option value="all">Semua Role Pengguna</option>
-                <option value="super admin">Super Admin</option>
-                <option value="admin">Admin Cabang</option>
-                <option value="teknisi">Teknisi</option>
-              </select>
-            </div>
+                <Filter className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">
+                  {filterRole !== 'all' ? filterRole : filterStatus !== 'all' ? `Status: ${filterStatus}` : 'Filter'}
+                </span>
+                {(filterRole !== 'all' || filterStatus !== 'all') && (
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" />
+                )}
+              </button>
 
-            <div>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
-              >
-                <option value="all">Semua Status Akun</option>
-                <option value="active">Status Aktif</option>
-                <option value="inactive">Status Nonaktif</option>
-              </select>
+              {/* Popover Menu Filter */}
+              {filterDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setFilterDropdownOpen(false)}
+                  />
+                  <div className="absolute left-0 sm:left-0 top-full mt-1.5 z-50 w-60 bg-white/95 backdrop-blur-md rounded-2xl p-3 shadow-xl border border-sky-200 space-y-2.5 font-mono text-xs">
+                    {/* Seksi 1: Role Pengguna */}
+                    <div>
+                      <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">
+                        Role Pengguna:
+                      </div>
+                      <select
+                        value={filterRole}
+                        onChange={(e) => setFilterRole(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
+                      >
+                        <option value="all">Semua Role</option>
+                        <option value="super admin">Super Admin</option>
+                        <option value="admin">Admin Cabang</option>
+                        <option value="teknisi">Teknisi</option>
+                      </select>
+                    </div>
+
+                    {/* Seksi 2: Status Akun */}
+                    <div>
+                      <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">
+                        Status Akun:
+                      </div>
+                      <div className="grid grid-cols-3 gap-1">
+                        {[
+                          { id: 'all', label: 'Semua' },
+                          { id: 'active', label: 'Aktif' },
+                          { id: 'inactive', label: 'Nonaktif' }
+                        ].map((st) => (
+                          <button
+                            key={st.id}
+                            type="button"
+                            onClick={() => setFilterStatus(st.id)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold text-center transition ${
+                              filterStatus === st.id
+                                ? 'bg-cyan-600 text-white'
+                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                            }`}
+                          >
+                            {st.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-sky-100 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFilterRole('all');
+                          setFilterStatus('all');
+                        }}
+                        className="text-[10px] font-bold text-slate-400 hover:text-slate-700"
+                      >
+                        Reset Filter
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFilterDropdownOpen(false)}
+                        className="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-[10px] font-bold"
+                      >
+                        Terapkan
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 shrink-0">
+          {/* Tombol Aksi Tambah Kantor, Tambah Pengguna, Refresh */}
+          <div className="flex items-center gap-1 sm:gap-1.5 justify-end shrink-0">
             <button
               onClick={() => {
                 setKantorError('');
@@ -365,18 +441,27 @@ export function ModulManajemenPengguna() {
                 setKantorAlamat('');
                 setModalKantorOpen(true);
               }}
-              className="px-3.5 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-sky-200 text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[38px]"
+              className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-sky-200 text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px]"
               title="Tambah Kantor Wilayah Baru"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-cyan-700" />
-              <span>Tambah Kantor</span>
+              <span className="hidden sm:inline">Kantor</span>
             </button>
             <button
               onClick={openAddModal}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[38px] shadow-xs"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shadow-xs"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>Tambah Pengguna</span>
+              <span className="hidden sm:inline">Tambah User</span>
+              <span className="sm:hidden">Tambah</span>
+            </button>
+            <button
+              onClick={fetchUsers}
+              disabled={loading}
+              className="p-1.5 sm:p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[32px] sm:min-h-[36px] flex items-center justify-center shrink-0"
+              title="Muat Ulang Data"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>

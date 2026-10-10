@@ -9,6 +9,8 @@ import {
   Edit2,
   FileText,
   User,
+  Phone,
+  MessageCircle,
   ArrowUpDown,
   ArrowUp,
   ArrowDown
@@ -17,11 +19,12 @@ import { TicketsService } from '../services/api';
 import {
   ModuleHeader,
   MetricCard,
+  SegmentedStatusBar,
   FilterContainer,
   DataTableContainer
 } from './CommonUI';
 
-export function ModulTiketKeluhan({ activeOffice = 'cabang' }) {
+export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('SEMUA');
@@ -131,45 +134,51 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang' }) {
         </div>
       )}
 
-      {/* 1. 4 Kartu KPI Interaktif */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <MetricCard
-          label="Menunggu"
-          value={`${countByStatus('MENUNGGU')} Tiket`}
-          icon={Clock}
-          colorScheme="amber"
-          isActive={filterStatus === 'MENUNGGU'}
-          onClick={() => setFilterStatus(filterStatus === 'MENUNGGU' ? 'SEMUA' : 'MENUNGGU')}
-          subLabel="Belum Ditangani"
-        />
-        <MetricCard
-          label="Dicek Admin"
-          value={`${countByStatus('DICEK_ADMIN')} Tiket`}
-          icon={Search}
-          colorScheme="purple"
-          isActive={filterStatus === 'DICEK_ADMIN'}
-          onClick={() => setFilterStatus(filterStatus === 'DICEK_ADMIN' ? 'SEMUA' : 'DICEK_ADMIN')}
-          subLabel="Investigasi NOC"
-        />
-        <MetricCard
-          label="Diproses"
-          value={`${countByStatus('DIPROSES')} Tiket`}
-          icon={AlertTriangle}
-          colorScheme="cyan"
-          isActive={filterStatus === 'DIPROSES'}
-          onClick={() => setFilterStatus(filterStatus === 'DIPROSES' ? 'SEMUA' : 'DIPROSES')}
-          subLabel="Teknisi Lapangan"
-        />
-        <MetricCard
-          label="Selesai"
-          value={`${countByStatus('SELESAI')} Tiket`}
-          icon={CheckCircle2}
-          colorScheme="emerald"
-          isActive={filterStatus === 'SELESAI'}
-          onClick={() => setFilterStatus(filterStatus === 'SELESAI' ? 'SEMUA' : 'SELESAI')}
-          subLabel="Tuntas Ditangani"
-        />
-      </div>
+      {/* 1. Segmented Status Ticker Bar Terpadu (Opsi B: 1 Baris Penuh Muat 1 Layar Tanpa Swipe) */}
+      <SegmentedStatusBar
+        items={[
+          {
+            label: 'Semua',
+            value: tickets.length,
+            colorScheme: 'cyan',
+            isActive: filterStatus === 'SEMUA',
+            onClick: () => setFilterStatus('SEMUA'),
+            subLabel: 'Total Tiket'
+          },
+          {
+            label: 'Menunggu',
+            value: countByStatus('MENUNGGU'),
+            colorScheme: 'amber',
+            isActive: filterStatus === 'MENUNGGU',
+            onClick: () => setFilterStatus(filterStatus === 'MENUNGGU' ? 'SEMUA' : 'MENUNGGU'),
+            subLabel: 'Belum Ditangani'
+          },
+          {
+            label: 'Dicek Admin',
+            value: countByStatus('DICEK_ADMIN'),
+            colorScheme: 'purple',
+            isActive: filterStatus === 'DICEK_ADMIN',
+            onClick: () => setFilterStatus(filterStatus === 'DICEK_ADMIN' ? 'SEMUA' : 'DICEK_ADMIN'),
+            subLabel: 'Investigasi NOC'
+          },
+          {
+            label: 'Diproses',
+            value: countByStatus('DIPROSES'),
+            colorScheme: 'cyan',
+            isActive: filterStatus === 'DIPROSES',
+            onClick: () => setFilterStatus(filterStatus === 'DIPROSES' ? 'SEMUA' : 'DIPROSES'),
+            subLabel: 'Teknisi'
+          },
+          {
+            label: 'Selesai',
+            value: countByStatus('SELESAI'),
+            colorScheme: 'emerald',
+            isActive: filterStatus === 'SELESAI',
+            onClick: () => setFilterStatus(filterStatus === 'SELESAI' ? 'SEMUA' : 'SELESAI'),
+            subLabel: 'Tuntas'
+          }
+        ]}
+      />
 
       {/* 2. Search Bar & Aksi */}
       <FilterContainer>
@@ -186,9 +195,6 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang' }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1.5 rounded-xl bg-cyan-100/80 border border-cyan-300 text-cyan-900 font-mono text-[11px] font-bold">
-              Total: {tickets.length} Tiket
-            </span>
             <button
               onClick={fetchTickets}
               disabled={loading}
@@ -299,7 +305,18 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang' }) {
                     <div className="text-[10px] text-slate-400">{t.created_at_str}</div>
                   </td>
                   <td className="py-2.5 px-3">
-                    <div className="font-sans font-bold text-slate-900">{t.nama_pelanggan}</div>
+                    {onNavigateCustomer && t.nama_pelanggan ? (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateCustomer(t.nama_pelanggan)}
+                        className="font-sans font-bold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition block"
+                        title={`Lihat detail ${t.nama_pelanggan} di Data Pelanggan`}
+                      >
+                        {t.nama_pelanggan}
+                      </button>
+                    ) : (
+                      <div className="font-sans font-bold text-slate-900">{t.nama_pelanggan}</div>
+                    )}
                     <div className="text-[10px] text-slate-500 font-mono">
                       {t.id_pelanggan} {t.no_wa && `• WA: ${t.no_wa}`}
                     </div>
@@ -344,7 +361,7 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang' }) {
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                         </button>
 
-                        <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[140px]">
+                        <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[170px]">
                           <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
                             <button
                               onClick={() => handleOpenModal(t)}
@@ -353,6 +370,19 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang' }) {
                               <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
                               <span>Kelola Status</span>
                             </button>
+                            {t.no_wa && (
+                              <a
+                                href={`https://wa.me/${t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(
+                                  `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100"
+                              >
+                                <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Hubungi WA</span>
+                              </a>
+                            )}
                           </div>
                         </div>
                       </div>

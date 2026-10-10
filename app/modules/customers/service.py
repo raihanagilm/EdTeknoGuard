@@ -506,13 +506,15 @@ class CustomerService:
         elif allowed_kantor:
             query = query.filter(Pelanggan.kantor.in_(allowed_kantor))
 
-        if status and status != "Semua Status":
+        if status and status != "Semua Status" and status != "ALL":
             if status == "NORMAL":
                 query = query.filter(or_(LogPerformaONT.status_koneksi == "NORMAL", LogPerformaONT.status_koneksi == None))
             elif status == "WARNING":
                 query = query.filter(LogPerformaONT.status_koneksi == "WARNING")
-            elif status in ("CRITICAL", "LOS"):
-                query = query.filter(or_(LogPerformaONT.status_koneksi == "CRITICAL", LogPerformaONT.status_koneksi == "LOS"))
+            elif status == "CRITICAL":
+                query = query.filter(LogPerformaONT.status_koneksi == "CRITICAL")
+            elif status == "LOS":
+                query = query.filter(LogPerformaONT.status_koneksi == "LOS")
             elif status in ("NONAKTIF", "OFF"):
                 query = query.filter(Pelanggan.is_monitored == False)
             else:
@@ -590,9 +592,12 @@ class CustomerService:
                 "jenis_modem": c.jenis_modem,
                 "mac_address": c.mac_address or "-",
                 "redaman_baseline": float(c.redaman_baseline) if c.redaman_baseline else None,
+                "rx_power": current_rx,
+                "rx": current_rx,
                 "redaman_current": current_rx,
                 "redaman_terakhir": current_rx,
                 "status": current_status,
+                "status_koneksi": current_status,
                 "status_terakhir": current_status,
                 "last_check": last_check,
                 "waktu_terakhir": waktu_terakhir_iso,

@@ -92,18 +92,18 @@ export function MetricCard({
 
   const content = (
     <>
-      <div className={`p-2 rounded-lg font-bold shrink-0 ${scheme.iconBg}`}>
-        {Icon && <Icon className="w-4 h-4" />}
+      <div className={`p-2 sm:p-2.5 rounded-xl font-bold shrink-0 flex items-center justify-center ${scheme.iconBg}`}>
+        {Icon && <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
       </div>
-      <div className="overflow-hidden text-left">
-        <div className={`text-[11px] font-mono font-bold uppercase truncate ${scheme.labelColor}`}>
+      <div className="overflow-hidden text-left flex-1 min-w-0">
+        <div className={`text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider truncate leading-tight ${scheme.labelColor}`}>
           {label}
         </div>
-        <div className={`text-sm sm:text-base font-black font-mono tracking-tight ${scheme.textNum}`}>
-          {value} {unit && <span className="text-xs font-normal text-slate-600">{unit}</span>}
+        <div className={`text-sm sm:text-base font-black font-mono tracking-tight leading-tight mt-0.5 whitespace-nowrap ${scheme.textNum}`}>
+          {value} {unit && <span className="text-[10px] sm:text-xs font-normal text-slate-500 ml-0.5">{unit}</span>}
         </div>
         {subLabel && (
-          <div className="text-[11px] text-slate-600 font-mono truncate">{subLabel}</div>
+          <div className="hidden md:block text-[10px] sm:text-[11px] text-slate-500 font-mono truncate mt-0.5">{subLabel}</div>
         )}
       </div>
     </>
@@ -114,8 +114,10 @@ export function MetricCard({
       <button
         onClick={onClick}
         type="button"
-        className={`p-3 rounded-xl border text-left transition flex items-center gap-3 ${
-          isActive ? scheme.bgActive : 'bg-white/90 border-sky-200/80 hover:bg-cyan-50/40'
+        className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left transition-all flex items-center gap-2 sm:gap-3 shadow-2xs cursor-pointer ${
+          isActive
+            ? scheme.bgActive
+            : 'bg-white/95 border-sky-200/80 hover:bg-cyan-50/40 hover:border-cyan-300'
         }`}
       >
         {content}
@@ -124,8 +126,67 @@ export function MetricCard({
   }
 
   return (
-    <div className="p-3 rounded-xl bg-white/90 border border-sky-200/80 shadow-xs flex items-center gap-3">
+    <div className="w-full p-2.5 sm:p-3 rounded-2xl bg-white/95 border border-sky-200/80 shadow-2xs flex items-center gap-2 sm:gap-3">
       {content}
+    </div>
+  );
+}
+
+/**
+ * Standard Unified Segmented Status Ticker Bar (Option B - Ultra-Clean Single-Container)
+ */
+export function SegmentedStatusBar({ items = [] }) {
+  const schemes = {
+    cyan: { active: 'bg-cyan-600 text-white shadow-xs', textNum: 'text-cyan-900', label: 'text-cyan-800' },
+    emerald: { active: 'bg-emerald-600 text-white shadow-xs', textNum: 'text-emerald-900', label: 'text-emerald-800' },
+    amber: { active: 'bg-amber-500 text-white shadow-xs', textNum: 'text-amber-900', label: 'text-amber-800' },
+    rose: { active: 'bg-rose-600 text-white shadow-xs', textNum: 'text-rose-900', label: 'text-rose-800' },
+    purple: { active: 'bg-purple-600 text-white shadow-xs', textNum: 'text-purple-900', label: 'text-purple-800' },
+  };
+
+  return (
+    <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-sky-200/80 shadow-2xs p-1.5 flex items-center divide-x divide-sky-100">
+      {items.map((it, idx) => {
+        const sc = schemes[it.colorScheme || 'cyan'] || schemes.cyan;
+        const isActive = Boolean(it.isActive);
+
+        return (
+          <button
+            key={idx}
+            type="button"
+            onClick={it.onClick}
+            className={`flex-1 py-1.5 px-1 sm:py-2.5 sm:px-2 rounded-xl transition-all flex flex-col items-center justify-center text-center cursor-pointer select-none ${
+              isActive
+                ? `${sc.active} ring-1 ring-black/5`
+                : 'hover:bg-cyan-50/50 text-slate-700'
+            }`}
+          >
+            <span
+              className={`text-[9px] sm:text-[11px] font-mono font-bold uppercase tracking-wider truncate max-w-full ${
+                isActive ? 'text-white/90' : sc.label
+              }`}
+            >
+              {it.label}
+            </span>
+            <span
+              className={`text-sm sm:text-base font-black font-mono tracking-tight leading-none mt-0.5 ${
+                isActive ? 'text-white' : sc.textNum
+              }`}
+            >
+              {it.value}
+            </span>
+            {it.subLabel && (
+              <span
+                className={`hidden md:block text-[9px] font-mono truncate mt-0.5 ${
+                  isActive ? 'text-white/80' : 'text-slate-400'
+                }`}
+              >
+                {it.subLabel}
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -133,9 +194,9 @@ export function MetricCard({
 /**
  * Standard Filter Bar Container
  */
-export function FilterContainer({ children }) {
+export function FilterContainer({ children, className = '' }) {
   return (
-    <div className="bg-white/90 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-sky-200/80 shadow-xs space-y-3">
+    <div className={`bg-white/90 backdrop-blur-md rounded-2xl p-2 sm:p-2.5 border border-sky-200/80 shadow-xs ${className}`}>
       {children}
     </div>
   );

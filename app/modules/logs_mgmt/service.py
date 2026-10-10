@@ -61,11 +61,7 @@ class LogsMgmtService:
         summary_base_query = query
 
         if status and status != "Semua Status":
-            # Saat filter CRITICAL, ikutkan juga LOS karena keduanya masuk kategori Kritis
-            if status == 'CRITICAL':
-                query = query.filter(LogPerformaONT.status_koneksi.in_(['CRITICAL', 'LOS']))
-            else:
-                query = query.filter(LogPerformaONT.status_koneksi == status)
+            query = query.filter(LogPerformaONT.status_koneksi == status)
 
         if q:
             search_pattern = f"%{q.strip()}%"
@@ -85,13 +81,15 @@ class LogsMgmtService:
             func.count(LogPerformaONT.id),
             func.sum(case((LogPerformaONT.status_koneksi == 'NORMAL', 1), else_=0)),
             func.sum(case((LogPerformaONT.status_koneksi == 'WARNING', 1), else_=0)),
-            func.sum(case((LogPerformaONT.status_koneksi.in_(['CRITICAL', 'LOS']), 1), else_=0)),
+            func.sum(case((LogPerformaONT.status_koneksi == 'CRITICAL', 1), else_=0)),
+            func.sum(case((LogPerformaONT.status_koneksi == 'LOS', 1), else_=0)),
         ).first()
 
         total_records = summary_stats[0] if summary_stats and summary_stats[0] else 0
         normal_count = summary_stats[1] if summary_stats and summary_stats[1] else 0
         warning_count = summary_stats[2] if summary_stats and summary_stats[2] else 0
-        kritis_los_count = summary_stats[3] if summary_stats and summary_stats[3] else 0
+        critical_count = summary_stats[3] if summary_stats and summary_stats[3] else 0
+        los_count = summary_stats[4] if summary_stats and summary_stats[4] else 0
 
         # Sorting logic
         sort_column_map = {
@@ -137,7 +135,8 @@ class LogsMgmtService:
             "total_records": total_records,
             "normal": int(normal_count),
             "warning": int(warning_count),
-            "kritis_los": int(kritis_los_count)
+            "critical": int(critical_count),
+            "los": int(los_count)
         }
 
         return total_count, data, summary

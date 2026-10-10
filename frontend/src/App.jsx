@@ -40,6 +40,7 @@ export default function App() {
 
   // Navigation & Office Scope State (SOP Multi-Kantor Cabang)
   const [activeTab, setActiveTab] = useState('beranda')
+  const [customerSearchQuery, setCustomerSearchQuery] = useState('')
   const [activeOffice, setActiveOffice] = useState(() => {
     return localStorage.getItem('edtekno_active_office') || 'cabang'
   })
@@ -58,6 +59,11 @@ export default function App() {
   const [unreadTickets, setUnreadTickets] = useState(0)
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false)
   const headerMenuRef = useRef(null)
+
+  const handleNavigateCustomer = (namaOrId) => {
+    setCustomerSearchQuery(namaOrId || '')
+    handleTabChange('pelanggan')
+  }
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -981,10 +987,35 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'riwayat' && <ModulRiwayatRedaman activeOffice={activeOffice} warnThreshold={warnThreshold} critThreshold={critThreshold} />}
-          {activeTab === 'kuota' && <ModulPemantauanKuota activeOffice={activeOffice} />}
-          {activeTab === 'pelanggan' && <ModulPelanggan activeOffice={activeOffice} warnThreshold={warnThreshold} critThreshold={critThreshold} />}
-          {activeTab === 'tiket' && <ModulTiketKeluhan activeOffice={activeOffice} />}
+          {activeTab === 'riwayat' && (
+            <ModulRiwayatRedaman
+              activeOffice={activeOffice}
+              warnThreshold={warnThreshold}
+              critThreshold={critThreshold}
+              onNavigateCustomer={handleNavigateCustomer}
+            />
+          )}
+          {activeTab === 'kuota' && (
+            <ModulPemantauanKuota
+              activeOffice={activeOffice}
+              onNavigateCustomer={handleNavigateCustomer}
+            />
+          )}
+          {activeTab === 'pelanggan' && (
+            <ModulPelanggan
+              activeOffice={activeOffice}
+              warnThreshold={warnThreshold}
+              critThreshold={critThreshold}
+              initialSearch={customerSearchQuery}
+              onClearInitialSearch={() => setCustomerSearchQuery('')}
+            />
+          )}
+          {activeTab === 'tiket' && (
+            <ModulTiketKeluhan
+              activeOffice={activeOffice}
+              onNavigateCustomer={handleNavigateCustomer}
+            />
+          )}
           {activeTab === 'log' && <ModulLogAktivitas />}
           {activeTab === 'pengguna' && <ModulManajemenPengguna />}
 
