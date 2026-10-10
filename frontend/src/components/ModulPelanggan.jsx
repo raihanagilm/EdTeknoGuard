@@ -52,6 +52,8 @@ export function ModulPelanggan({
   const [filterPop, setFilterPop] = useState('ALL')
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(15)
+  const [sortField, setSortField] = useState('id')
+  const [sortDir, setSortDir] = useState('asc')
 
   // Quick stats
   const [stats, setStats] = useState({
@@ -64,6 +66,7 @@ export function ModulPelanggan({
 
   // Selected for bulk actions
   const [selectedIds, setSelectedIds] = useState([])
+  const [bulkDeleting, setBulkDeleting] = useState(false)
 
   // Modal Create / Edit State
   const [modalOpen, setModalOpen] = useState(false)
@@ -95,11 +98,21 @@ export function ModulPelanggan({
   const [probingId, setProbingId] = useState(null)
   const [probeResult, setProbeResult] = useState(null)
 
+  // Toggle sorting
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDir('asc')
+    }
+  }
+
   // Fetch Customers From FastAPI Backend (/api/customers)
   const fetchCustomers = async () => {
     setLoading(true)
     try {
-      let url = `/api/customers?page=${page}&limit=${limit}`
+      let url = `/api/customers?page=${page}&limit=${limit}&sort_by=${sortField}&sort_dir=${sortDir}`
       if (activeOffice && activeOffice !== 'all') url += `&kantor=${encodeURIComponent(activeOffice)}`
       if (searchQuery.trim()) url += `&q=${encodeURIComponent(searchQuery)}`
       if (filterStatus !== 'ALL') url += `&status=${filterStatus}`
@@ -126,7 +139,38 @@ export function ModulPelanggan({
 
   useEffect(() => {
     fetchCustomers()
-  }, [page, limit, filterStatus, filterPop, activeOffice])
+  }, [page, limit, filterStatus, filterPop, activeOffice, sortField, sortDir])
+
+  // Bulk Delete Selected Customers
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return
+    const confirmed = window.confirm(
+      `PERINGATAN BAHAYA (CASCADE):\nApakah Anda yakin ingin menghapus ${selectedIds.length} data pelanggan terpilih?\n\nSeluruh data anakan yang terhubung (log redaman, tiket gangguan, kuota pelanggan) akan DIHAPUS PERMANEN secara otomatis dari database!`
+    )
+    if (!confirmed) return
+
+    setBulkDeleting(true)
+    try {
+      const res = await fetch('/api/customers/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedIds })
+      })
+
+      if (res.ok) {
+        setSelectedIds([])
+        fetchCustomers()
+      } else {
+        const errJson = await res.json().catch(() => ({}))
+        alert(errJson.detail || 'Gagal menghapus data terpilih.')
+      }
+    } catch (err) {
+      console.error('Error bulk delete customers:', err)
+      alert('Terjadi kesalahan koneksi saat menghapus massal.')
+    } finally {
+      setBulkDeleting(false)
+    }
+  }
 
   // Single on-demand ONT probe
   const handleSingleProbe = async (id_pelanggan) => {
@@ -375,98 +419,234 @@ export function ModulPelanggan({
         </div>
       </FilterContainer>
 
+      {/* Selection / Bulk Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 transition">
+          <div className="flex items-center gap-2">
+            <span className="p-1 rounded-lg bg-rose-100 text-rose-700">
+              <Trash2 className="w-4 h-4" />
+            </span>
+            <div>
+              <span className="text-xs font-bold text-rose-950 font-sans">
+                {selectedIds.length} Pelanggan Terpilih
+              </span>
+              <p className="text-[11px] text-rose-700 font-sans">
+                Aksi hapus massal akan menghapus pelanggan dan data terkait secara permanen (CASCADE).
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => setSelectedIds([])}
+              className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-mono font-bold transition"
+            >
+              Batal
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{bulkDeleting ? 'Menghapus...' : `Hapus Terpilih (${selectedIds.length})`}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 4. Tabel Pelanggan */}
       <DataTableContainer loading={loading}>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[10px] uppercase tracking-wider font-bold">
-              <th className="py-2.5 px-3">ID Pelanggan</th>
-              <th className="py-2.5 px-3">Nama Pelanggan</th>
-              <th className="py-2.5 px-3">IP Router ONT</th>
-              <th className="py-2.5 px-3">POP &amp; Wilayah</th>
-              <th className="py-2.5 px-3 text-right">Redaman (dBm)</th>
-              <th className="py-2.5 px-3 text-center">Status</th>
+              <th className="py-2.5 px-3 w-10 text-center">
+                <input
+                  type="checkbox"
+                  checked={customers.length > 0 && selectedIds.length === customers.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedIds(customers.map(c => c.id_pelanggan || c.id));
+                    } else {
+                      setSelectedIds([]);
+                    }
+                  }}
+                  className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+                />
+              </th>
+              <th className="py-2.5 px-2 w-12 text-center">No</th>
+              <th 
+                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                onClick={() => handleSort('id')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>ID Pelanggan</span>
+                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'id' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                </div>
+              </th>
+              <th 
+                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                onClick={() => handleSort('nama')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>Nama Pelanggan</span>
+                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'nama' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                </div>
+              </th>
+              <th 
+                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                onClick={() => handleSort('ip_router')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>IP Router ONT</span>
+                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'ip_router' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                </div>
+              </th>
+              <th 
+                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                onClick={() => handleSort('pop')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>POP &amp; Wilayah</span>
+                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'pop' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                </div>
+              </th>
+              <th 
+                className="py-2.5 px-3 text-right cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                onClick={() => handleSort('rx_power')}
+              >
+                <div className="flex items-center justify-end gap-1">
+                  <span>Redaman (dBm)</span>
+                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'rx_power' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                </div>
+              </th>
+              <th 
+                className="py-2.5 px-3 text-center cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                onClick={() => handleSort('status_koneksi')}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  <span>Status</span>
+                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'status_koneksi' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                </div>
+              </th>
               <th className="py-2.5 px-3 text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
               <tr>
-                <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="9" className="text-center py-10 text-slate-400 font-mono">
                   <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
                   <div>Memuat data pelanggan...</div>
                 </td>
               </tr>
             ) : customers.length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="9" className="text-center py-10 text-slate-400 font-mono">
                   Tidak ada data pelanggan ditemukan.
                 </td>
               </tr>
             ) : (
-              customers.map((c) => (
-                <tr key={c.id_pelanggan || c.id} className="hover:bg-cyan-50/40 transition">
-                  <td className="py-2.5 px-3 font-bold text-cyan-900">{c.id_pelanggan || c.id}</td>
-                  <td className="py-2.5 px-3">
-                    <div className="font-sans font-bold text-slate-900">{c.nama || c.name}</div>
-                    <div className="text-[10px] text-slate-400 font-sans truncate max-w-xs">{c.alamat || c.address || '-'}</div>
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-600">{c.ip_router || c.ip}</td>
-                  <td className="py-2.5 px-3 text-slate-600">{c.pop || 'POP-01'} ({c.kantor || 'cabang'})</td>
-                  <td className="py-2.5 px-3 text-right font-black">
-                    <span
-                      className={
-                        (c.rx_power ?? c.rx) <= critThreshold
-                          ? 'text-rose-600'
-                          : (c.rx_power ?? c.rx) <= warnThreshold
-                          ? 'text-amber-600'
-                          : 'text-emerald-600'
-                      }
-                    >
-                      {(c.rx_power ?? c.rx) != null ? `${Number(c.rx_power ?? c.rx).toFixed(1)}` : 'LOS'}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                        (c.status_koneksi || c.status) === 'NORMAL'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : (c.status_koneksi || c.status) === 'WARNING'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : 'bg-rose-50 text-rose-700 border border-rose-200'
-                      }`}
-                    >
-                      {c.status_koneksi || c.status || 'NORMAL'}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => handleSingleProbe(c.id_pelanggan || c.id)}
-                        disabled={probingId === (c.id_pelanggan || c.id)}
-                        className="px-2 py-1 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-900 border border-cyan-200 rounded-lg text-[10px] font-bold transition"
-                        title="Uji Sinyal Langsung"
+              customers.map((c, idx) => {
+                const cId = c.id_pelanggan || c.id;
+                const rowNo = (page - 1) * limit + idx + 1;
+                const isSelected = selectedIds.includes(cId);
+
+                return (
+                  <tr key={cId} className={`transition ${isSelected ? 'bg-cyan-50/70' : 'hover:bg-cyan-50/40'}`}>
+                    <td className="py-2.5 px-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          setSelectedIds(prev =>
+                            prev.includes(cId) ? prev.filter(id => id !== cId) : [...prev, cId]
+                          );
+                        }}
+                        className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+                      />
+                    </td>
+                    <td className="py-2.5 px-2 text-center text-slate-500 font-bold text-xs">{rowNo}</td>
+                    <td className="py-2.5 px-3 font-bold text-cyan-900">{cId}</td>
+                    <td className="py-2.5 px-3">
+                      <div className="font-sans font-bold text-slate-900">{c.nama || c.name}</div>
+                      <div className="text-[10px] text-slate-400 font-sans truncate max-w-xs">{c.alamat || c.address || '-'}</div>
+                    </td>
+                    <td className="py-2.5 px-3 text-slate-600">{c.ip_router || c.ip}</td>
+                    <td className="py-2.5 px-3 text-slate-600">{c.pop || 'POP-01'} ({c.kantor || 'cabang'})</td>
+                    <td className="py-2.5 px-3 text-right font-black">
+                      <span
+                        className={
+                          (c.rx_power ?? c.rx) <= critThreshold
+                            ? 'text-rose-600'
+                            : (c.rx_power ?? c.rx) <= warnThreshold
+                            ? 'text-amber-600'
+                            : 'text-emerald-600'
+                        }
                       >
-                        {probingId === (c.id_pelanggan || c.id) ? 'Memeriksa...' : 'Uji Sinyal'}
-                      </button>
-                      <button
-                        onClick={() => handleOpenEdit(c)}
-                        className="p-1 text-slate-500 hover:text-cyan-700 transition"
-                        title="Edit Data"
+                        {(c.rx_power ?? c.rx) != null ? `${Number(c.rx_power ?? c.rx).toFixed(1)}` : 'LOS'}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-center">
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                          (c.status_koneksi || c.status) === 'NORMAL'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : (c.status_koneksi || c.status) === 'WARNING'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        }`}
                       >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCustomer(c.id_pelanggan || c.id)}
-                        className="p-1 text-slate-400 hover:text-rose-600 transition"
-                        title="Hapus Pelanggan"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                        {c.status_koneksi || c.status || 'NORMAL'}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      {/* Dropdown Aksi Titik Tiga */}
+                      <div className="relative inline-block text-left" x-data="{ open: false }">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => handleSingleProbe(cId)}
+                            disabled={probingId === cId}
+                            className="px-2 py-1 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-900 border border-cyan-200 rounded-lg text-[10px] font-bold transition mr-1"
+                            title="Uji Sinyal Langsung"
+                          >
+                            {probingId === cId ? 'Uji...' : 'Uji Sinyal'}
+                          </button>
+                          
+                          {/* Menu Titik Tiga */}
+                          <div className="relative group">
+                            <button
+                              type="button"
+                              className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+                              title="Pilihan Aksi"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                            </button>
+
+                            <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[130px]">
+                              <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
+                                <button
+                                  onClick={() => handleOpenEdit(c)}
+                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                  <span>Edit Data</span>
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteCustomer(cId)}
+                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition border-t border-slate-100"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Hapus</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

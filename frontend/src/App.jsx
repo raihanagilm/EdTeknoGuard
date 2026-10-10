@@ -43,6 +43,11 @@ export default function App() {
   const [activeOffice, setActiveOffice] = useState(() => {
     return localStorage.getItem('edtekno_active_office') || 'cabang'
   })
+  const [kantorList, setKantorList] = useState([
+    { kode: 'pusat', nama: 'Pusat' },
+    { kode: 'cabang', nama: 'Cabang' },
+    { kode: 'banyumas', nama: 'Banyumas' }
+  ])
   const [currentUser, setCurrentUser] = useState({
     id: 1,
     username: 'admin',
@@ -69,6 +74,28 @@ export default function App() {
     localStorage.setItem('edtekno_active_office', officeKey)
     document.cookie = `active_kantor=${officeKey}; path=/; max-age=2592000; samesite=lax`
   }
+
+  // Fetch daftar kantor dinamis
+  const fetchKantorList = async () => {
+    try {
+      const res = await fetch('/users/api/kantor/list')
+      if (res.ok) {
+        const data = await res.json()
+        if (data.status === 'success' && data.kantors && data.kantors.length > 0) {
+          setKantorList(data.kantors)
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch kantor list:', e)
+    }
+  }
+
+  useEffect(() => {
+    fetchKantorList()
+    const handleKantorUpdate = () => fetchKantorList()
+    window.addEventListener('edtekno_kantor_updated', handleKantorUpdate)
+    return () => window.removeEventListener('edtekno_kantor_updated', handleKantorUpdate)
+  }, [])
 
   // Telemetry Scanner & Realtime Clock State
   const [isScanningActive, setIsScanningActive] = useState(true)
@@ -848,21 +875,56 @@ export default function App() {
               )}
             </button>
 
-            {/* Office Switcher Dropdown (Pilih Kantor Sesuai SOP) */}
-            <div className="flex items-center gap-1.5 bg-cyan-50/90 hover:bg-cyan-100/80 p-1 pl-2 sm:pl-2.5 rounded-xl border border-sky-200 text-xs font-mono transition shadow-2xs">
-              <Building2 className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase hidden md:inline">Kantor:</span>
-              <select
-                value={activeOffice}
-                onChange={(e) => handleSwitchOffice(e.target.value)}
-                className="bg-transparent text-cyan-900 font-bold focus:outline-none cursor-pointer pr-1 py-0.5 text-xs"
-                title="Pilih Wilayah Kantor Operasional"
-              >
-                <option value="cabang">Kantor Cabang</option>
-                <option value="pusat">Kantor Pusat</option>
-                <option value="banyumas">Kantor Banyumas</option>
-              </select>
-            </div>
+            {/* Office Switcher Dropdown (Pusat, Cabang, Banyumas, dsb - Sesuai Hak Akses Role) */}
+            {(() => {
+              // Hitung kantor yang diizinkan untuk user aktif
+              let allowedCodes = [];
+              if (currentUser?.role === 'super admin') {
+                allowedCodes = kantorList.map(k => k.kode);
+              } else if (Array.isArray(currentUser?.allowed_kantor)) {
+                allowedCodes = currentUser.allowed_kantor;
+              } else if (typeof currentUser?.allowed_kantor === 'string') {
+                try {
+                  const parsed = JSON.parse(currentUser.allowed_kantor);
+                  allowedCodes = Array.isArray(parsed) ? parsed : [currentUser.allowed_kantor];
+                } catch {
+                  allowedCodes = currentUser.allowed_kantor.split(',').map(s => s.trim()).filter(Boolean);
+                }
+              }
+
+              const visibleKantors = kantorList.filter(k => 
+                currentUser?.role === 'super admin' || allowedCodes.includes(k.kode)
+              );
+
+              // Bersihkan nama kantor: "Kantor Pusat" -> "Pusat", "Kantor Cabang" -> "Cabang"
+              const cleanOfficeName = (name, code) => {
+                if (!name) return code ? code.toUpperCase() : 'Kantor';
+                return name.replace(/^Kantor\s+/i, '').trim();
+              };
+
+              return (
+                <div className="flex items-center gap-1.5 bg-cyan-50/90 hover:bg-cyan-100/80 p-1 pl-2 sm:pl-2.5 rounded-xl border border-sky-200 text-xs font-mono transition shadow-2xs">
+                  <Building2 className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase hidden md:inline">Kantor:</span>
+                  <select
+                    value={activeOffice}
+                    onChange={(e) => handleSwitchOffice(e.target.value)}
+                    className="bg-transparent text-cyan-900 font-bold focus:outline-none cursor-pointer pr-1 py-0.5 text-xs"
+                    title="Pilih Wilayah Kantor Operasional"
+                  >
+                    {visibleKantors.length > 0 ? (
+                      visibleKantors.map((k) => (
+                        <option key={k.kode} value={k.kode}>
+                          {cleanOfficeName(k.nama, k.kode)}
+                        </option>
+                      ))
+                    ) : (
+                      <option value={activeOffice}>{activeOffice.toUpperCase()}</option>
+                    )}
+                  </select>
+                </div>
+              );
+            })()}
 
             {/* Tombol Titik Tiga (More Menu & Logout Dropdown) */}
             <div className="relative" ref={headerMenuRef}>

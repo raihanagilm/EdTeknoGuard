@@ -26,6 +26,37 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Sorting Kolom Interaktif & Bulk Action Bar (Hapus Terpilih & Batal)**:
+  - **Tabel Tanpa Checkbox**:
+    - [`ModulRiwayatRedaman.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulRiwayatRedaman.jsx): Checkbox dibersihkan, sorting kolom terintegrasi ke backend (`sort_by`, `sort_dir`), kolom `No` urut rapi.
+    - [`ModulPemantauanKuota.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPemantauanKuota.jsx): Checkbox dibersihkan, sorting kolom ID Pelanggan, Nama, Paket, Total GB, kolom `No` urut rapi.
+    - [`ModulTiketKeluhan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulTiketKeluhan.jsx): Checkbox dibersihkan, sorting kolom ID Tiket, Nama Pelanggan, Kategori, Redaman, Status Tiket, kolom `No` urut rapi.
+    - [`ModulLogAktivitas.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulLogAktivitas.jsx): Checkbox dibersihkan, sorting kolom Waktu, User, Aksi, Status terhubung ke backend, kolom `No` urut rapi.
+  - **Tabel Dengan Checkbox & Bulk Action Bar**:
+    - [`ModulPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx): Sorting kolom ID, Nama, IP, POP, Redaman, Status; saat baris dicentang muncul Bar Aksi di atas tabel dengan tombol **"Hapus Terpilih (X)"** (dengan konfirmasi bahaya CASCADE) dan **"Batal"**.
+    - [`ModulManajemenPengguna.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulManajemenPengguna.jsx): Sorting kolom Username, Role, Status; saat baris dicentang muncul Bar Aksi di atas tabel dengan tombol **"Hapus Terpilih (X)"** (proteksi akun super admin) dan **"Batal"**.
+
+- **Standardisasi Tabel Data (No Urut, Checkbox Seleksi Baris, & Menu Aksi Titik Tiga)**:
+  - **Penambahan Kolom Nomor Urut (`No`)**: Menambahkan kolom penomoran urut otomatis dinamis di seluruh tabel data:
+    1. *Riwayat Redaman* (`ModulRiwayatRedaman.jsx`)
+    2. *Pemantauan Kuota* (`ModulPemantauanKuota.jsx`)
+    3. *Data Master Pelanggan* (`ModulPelanggan.jsx`)
+    4. *Tiket Keluhan Warga* (`ModulTiketKeluhan.jsx`)
+    5. *Log Audit Aktivitas* (`ModulLogAktivitas.jsx`)
+    6. *Manajemen Pengguna* (`ModulManajemenPengguna.jsx`)
+  - **Penambahan Checkbox Seleksi Baris**: Menyediakan *select all* di header tabel serta checkbox individual di setiap baris data untuk konsistensi seleksi.
+  - **Menu Aksi Titik Tiga (Three Dots Menu)**: Menggantikan deretan tombol aksi langsung dengan menu dropdown titik tiga (Edit, Hapus, Kelola Status) yang bersih, modular, dan rapi pada modul Pelanggan, Tiket Keluhan, dan Manajemen Pengguna.
+
+- **Penyempurnaan Hak Akses Switcher Multi-Kantor & Penambahan Kantor Dinamis**:
+  - **Penyederhanaan Label Office Switcher**: Label opsi dropdown kantor di navbar diubah menjadi ringkas (`Pusat`, `Cabang`, `Banyumas`, dsb.) tanpa kata redundant "Kantor".
+  - **Role-Based Office Switching (SOP Multi-Kantor)**:
+    - `super admin`: Memiliki akses penuh ke seluruh kantor yang terdaftar di database.
+    - `admin` & `teknisi`: Dropdown kantor di navbar dibatasi murni hanya pada kantor yang diizinkan oleh Super Admin (`allowed_kantor`). Kantor di luar izin tidak muncul di dropdown.
+  - **Fitur Tambah Kantor Baru (Khusus Super Admin)**:
+    - Menyediakan endpoint API `POST /users/api/kantor/add` dan tombol/modal UI *"Tambah Kantor"* di modul Manajemen Pengguna.
+    - Kantor baru yang ditambahkan langsung aktif, tersimpan di database, dan otomatis memicu event pembaruan dropdown switcher di seluruh antarmuka secara instan dan aman.
+    - Penyediaan endpoint `GET /users/api/kantor/list` untuk sinkronisasi dinamis daftar kantor di frontend dan backend.
+
 - **Modularisasi & Peningkatan Wizard Import Data Pelanggan (`WizardImportPelanggan.jsx`)**:
   - **Pemisahan Komponen Mandiri**: Mengekstraksi wizard import data pelanggan dari `ModulPelanggan.jsx` menjadi file komponen mandiri [`WizardImportPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/WizardImportPelanggan.jsx).
   - **Penghapusan Opsi Kantor Wilayah Manual**: Menghapus field pemetaan kantor pada Langkah 2 karena kantor otomatis mengikuti kantor aktif yang sedang dibuka pengguna di navbar atas sesuai standar SOP multi-cabang.

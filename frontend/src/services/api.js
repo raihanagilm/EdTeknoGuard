@@ -202,6 +202,14 @@ export class UsersService {
   static async delete(userId) {
     return new ApiService().post(`/users/api/delete/${userId}`);
   }
+
+  static async getKantors() {
+    return new ApiService().get('/users/api/kantor/list');
+  }
+
+  static async addKantor(payload) {
+    return new ApiService().post('/users/api/kantor/add', payload);
+  }
 }
 
 export class AuthService {

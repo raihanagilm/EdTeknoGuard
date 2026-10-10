@@ -9,9 +9,35 @@ import bcrypt
 
 SESSION_COOKIE_NAME = "edteknoguard_session"
 MAX_SESSION_AGE = 86400 * 30  # 30 hari inaktivitas (2.592.000 detik)
-ALL_KANTOR = ["cabang", "pusat", "banyumas"]
+DEFAULT_KANTORS = ["cabang", "pusat", "banyumas"]
+ALL_KANTOR = DEFAULT_KANTORS
 
 _serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
+
+def get_all_kantor_codes(db=None) -> List[str]:
+    """Mengambil seluruh kode kantor aktif dari database, fallback ke DEFAULT_KANTORS"""
+    if db is not None:
+        try:
+            from app.db.models import Kantor
+            codes = [k[0].lower().strip() for k in db.query(Kantor.kode).all() if k[0]]
+            if codes:
+                return codes
+        except Exception:
+            pass
+    else:
+        try:
+            from app.core.database import SessionLocal
+            from app.db.models import Kantor
+            session = SessionLocal()
+            try:
+                codes = [k[0].lower().strip() for k in session.query(Kantor.kode).all() if k[0]]
+                if codes:
+                    return codes
+            finally:
+                session.close()
+        except Exception:
+            pass
+    return DEFAULT_KANTORS
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
@@ -22,26 +48,30 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-def parse_allowed_kantor(allowed_kantor_val) -> List[str]:
+def parse_allowed_kantor(allowed_kantor_val, valid_kantors: Optional[List[str]] = None) -> List[str]:
+    valid_list = [k.lower().strip() for k in (valid_kantors or get_all_kantor_codes())]
     if isinstance(allowed_kantor_val, list):
-        return [k.lower().strip() for k in allowed_kantor_val if k.lower().strip() in ALL_KANTOR]
+        filtered = [k.lower().strip() for k in allowed_kantor_val if k.lower().strip() in valid_list]
+        return filtered if filtered else [valid_list[0]] if valid_list else ["cabang"]
     if isinstance(allowed_kantor_val, str):
         try:
             parsed = json.loads(allowed_kantor_val)
             if isinstance(parsed, list):
-                return [k.lower().strip() for k in parsed if k.lower().strip() in ALL_KANTOR]
+                filtered = [k.lower().strip() for k in parsed if k.lower().strip() in valid_list]
+                return filtered if filtered else [valid_list[0]] if valid_list else ["cabang"]
         except Exception:
             pass
-        items = [k.lower().strip() for k in allowed_kantor_val.split(",") if k.lower().strip() in ALL_KANTOR]
+        items = [k.lower().strip() for k in allowed_kantor_val.split(",") if k.lower().strip() in valid_list]
         if items:
             return items
-    return ["cabang"]
+    return [valid_list[0]] if valid_list else ["cabang"]
 
 def create_session_token(username: str, role: str = "teknisi", nama_karyawan: str = "User", allowed_kantor: Optional[List[str]] = None) -> str:
+    all_k = get_all_kantor_codes()
     if role == "super admin" or username == "admin":
-        kantor_list = ALL_KANTOR
+        kantor_list = all_k
     else:
-        kantor_list = parse_allowed_kantor(allowed_kantor) if allowed_kantor else ["cabang"]
+        kantor_list = parse_allowed_kantor(allowed_kantor, all_k) if allowed_kantor else [all_k[0] if all_k else "cabang"]
     return _serializer.dumps({
         "user": username,
         "role": role,
@@ -54,12 +84,13 @@ def verify_session_token(token: str) -> Optional[Dict[str, Any]]:
         return None
     try:
         data = _serializer.loads(token, max_age=MAX_SESSION_AGE)
-        # Pastikan allowed_kantor selalu ada
-        if "allowed_kantor" not in data:
+        all_k = get_all_kantor_codes()
+        # Pastikan allowed_kantor selalu ada dan up to date
+        if "allowed_kantor" not in data or data.get("role") == "super admin" or data.get("user") == "admin":
             if data.get("role") == "super admin" or data.get("user") == "admin":
-                data["allowed_kantor"] = ALL_KANTOR
+                data["allowed_kantor"] = all_k
             else:
-                data["allowed_kantor"] = ["cabang"]
+                data["allowed_kantor"] = [all_k[0] if all_k else "cabang"]
         return data
     except (BadSignature, SignatureExpired):
         return None
@@ -67,13 +98,15 @@ def verify_session_token(token: str) -> Optional[Dict[str, Any]]:
 def get_user_allowed_kantor(user: Dict[str, Any]) -> List[str]:
     if not user:
         return []
+    all_k = get_all_kantor_codes()
     if user.get("role") == "super admin" or user.get("user") == "admin":
-        return ALL_KANTOR
-    return parse_allowed_kantor(user.get("allowed_kantor"))
+        return all_k
+    return parse_allowed_kantor(user.get("allowed_kantor"), all_k)
 
 def get_active_kantor(request: Request, user: Optional[Dict[str, Any]]) -> str:
+    all_k = get_all_kantor_codes()
     if not user:
-        return "cabang"
+        return all_k[0] if all_k else "cabang"
     
     allowed = get_user_allowed_kantor(user)
     cookie_val = request.cookies.get("active_kantor", "").strip().lower()
@@ -81,7 +114,7 @@ def get_active_kantor(request: Request, user: Optional[Dict[str, Any]]) -> str:
     if cookie_val in allowed and cookie_val != "all":
         return cookie_val
         
-    return allowed[0] if allowed else "cabang"
+    return allowed[0] if allowed else (all_k[0] if all_k else "cabang")
 
 def get_current_user_optional(request: Request) -> Optional[Dict[str, Any]]:
     token = request.cookies.get(SESSION_COOKIE_NAME)

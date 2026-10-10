@@ -7,7 +7,10 @@ import {
   ZapOff,
   RefreshCw,
   Search,
-  Filter
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { LogsService } from '../services/api';
 import {
@@ -30,6 +33,18 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
   const [limit, setLimit] = useState(15);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [sortField, setSortField] = useState('waktu_cek');
+  const [sortDir, setSortDir] = useState('desc');
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+    setPage(1);
+  };
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -38,8 +53,8 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
         page,
         limit,
         range: filterRange,
-        sort_by: 'waktu_cek',
-        sort_dir: 'desc'
+        sort_by: sortField,
+        sort_dir: sortDir
       };
       if (activeOffice && activeOffice !== 'all') params.kantor = activeOffice;
       if (search) params.q = search;
@@ -210,7 +225,7 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
         )}
       </FilterContainer>
 
-      {/* 4. Tabel Riwayat */}
+      {/* 4. Tabel Riwayat (Sorting Aktif, Tanpa Checkbox Sesuai SOP) */}
       <DataTableContainer
         page={page}
         totalPages={totalPages}
@@ -222,69 +237,134 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[10px] uppercase tracking-wider font-bold">
-              <th className="py-2.5 px-3">Waktu Cek</th>
-              <th className="py-2.5 px-3">ID Pelanggan</th>
-              <th className="py-2.5 px-3">Nama Pelanggan</th>
+              <th className="py-2.5 px-3 w-12 text-center">No</th>
+              <th
+                onClick={() => handleSort('waktu_cek')}
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Waktu Cek</span>
+                  {sortField === 'waktu_cek' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort('id_pelanggan')}
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center gap-1">
+                  <span>ID Pelanggan</span>
+                  {sortField === 'id_pelanggan' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort('nama')}
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Nama Pelanggan</span>
+                  {sortField === 'nama' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
               <th className="py-2.5 px-3">IP Router ONT</th>
-              <th className="py-2.5 px-3 text-right">Daya Rx (dBm)</th>
+              <th
+                onClick={() => handleSort('rx_power')}
+                className="py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center justify-end gap-1">
+                  <span>Daya Rx (dBm)</span>
+                  {sortField === 'rx_power' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
               <th className="py-2.5 px-3 text-center">Suhu</th>
               <th className="py-2.5 px-3 text-center">Latency</th>
-              <th className="py-2.5 px-3 text-center">Status</th>
+              <th
+                onClick={() => handleSort('status_koneksi')}
+                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center justify-center gap-1">
+                  <span>Status</span>
+                  {sortField === 'status_koneksi' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
               <tr>
-                <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="9" className="text-center py-10 text-slate-400 font-mono">
                   <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
                   <div>Memuat data riwayat...</div>
                 </td>
               </tr>
             ) : logs.length === 0 ? (
               <tr>
-                <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="9" className="text-center py-10 text-slate-400 font-mono">
                   Tidak ada rekaman log ditemukan.
                 </td>
               </tr>
             ) : (
-              logs.map((item, idx) => (
-                <tr key={idx} className="hover:bg-cyan-50/40 transition">
-                  <td className="py-2.5 px-3 text-slate-500 font-medium text-[11px] whitespace-nowrap">
-                    {item.waktu_cek || '-'}
-                  </td>
-                  <td className="py-2.5 px-3 font-bold text-cyan-900">{item.id_pelanggan}</td>
-                  <td className="py-2.5 px-3 font-sans font-semibold text-slate-900">{item.nama || '-'}</td>
-                  <td className="py-2.5 px-3 text-slate-600">{item.ip_router || '-'}</td>
-                  <td className="py-2.5 px-3 text-right">
-                    <span
-                      className={`font-black ${
-                        item.rx_power <= critThreshold ? 'text-rose-600' : item.rx_power <= warnThreshold ? 'text-amber-600' : 'text-emerald-600'
-                      }`}
-                    >
-                      {item.rx_power != null ? `${item.rx_power.toFixed(1)}` : 'LOS'}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-center text-slate-600">
-                    {item.suhu_ont != null ? `${item.suhu_ont}°C` : '-'}
-                  </td>
-                  <td className="py-2.5 px-3 text-center text-slate-600">
-                    {item.latency_ms != null ? `${item.latency_ms}ms` : '-'}
-                  </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                        item.status_koneksi === 'NORMAL'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : item.status_koneksi === 'WARNING'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : 'bg-rose-50 text-rose-700 border border-rose-200'
-                      }`}
-                    >
-                      {item.status_koneksi || 'NORMAL'}
-                    </span>
-                  </td>
-                </tr>
-              ))
+              logs.map((item, idx) => {
+                const rowNo = (page - 1) * limit + idx + 1;
+                return (
+                  <tr key={idx} className="hover:bg-cyan-50/40 transition">
+                    <td className="py-2.5 px-3 text-center text-slate-500 font-bold text-xs">{rowNo}</td>
+                    <td className="py-2.5 px-3 text-slate-500 font-medium text-[11px] whitespace-nowrap">
+                      {item.waktu_cek || '-'}
+                    </td>
+                    <td className="py-2.5 px-3 font-bold text-cyan-900">{item.id_pelanggan}</td>
+                    <td className="py-2.5 px-3 font-sans font-semibold text-slate-900">{item.nama || '-'}</td>
+                    <td className="py-2.5 px-3 text-slate-600">{item.ip_router || '-'}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <span
+                        className={`font-black ${
+                          item.rx_power <= critThreshold ? 'text-rose-600' : item.rx_power <= warnThreshold ? 'text-amber-600' : 'text-emerald-600'
+                        }`}
+                      >
+                        {item.rx_power != null ? `${item.rx_power.toFixed(1)}` : 'LOS'}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-center text-slate-600">
+                      {item.suhu_ont != null ? `${item.suhu_ont}°C` : '-'}
+                    </td>
+                    <td className="py-2.5 px-3 text-center text-slate-600">
+                      {item.latency_ms != null ? `${item.latency_ms}ms` : '-'}
+                    </td>
+                    <td className="py-2.5 px-3 text-center">
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                          item.status_koneksi === 'NORMAL'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : item.status_koneksi === 'WARNING'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        }`}
+                      >
+                        {item.status_koneksi || 'NORMAL'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

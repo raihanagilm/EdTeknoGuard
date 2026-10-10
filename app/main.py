@@ -214,9 +214,8 @@ async def get_users_alias(request: Request):
 @app.get("/api/auth/me")
 def get_current_user_profile(request: Request):
     from app.core.database import SessionLocal
-    from app.core.security import get_current_user_optional, get_user_allowed_kantor
+    from app.core.security import get_current_user_optional, get_user_allowed_kantor, get_all_kantor_codes, parse_allowed_kantor
     from app.db.models import User
-    from fastapi.responses import JSONResponse
     
     user_sess = get_current_user_optional(request)
     if not user_sess:
@@ -224,9 +223,11 @@ def get_current_user_profile(request: Request):
         
     db = SessionLocal()
     try:
+        all_kantors = get_all_kantor_codes(db=db)
         username = user_sess.get("user")
         db_user = db.query(User).filter(User.username == username).first()
         if db_user:
+            allowed = all_kantors if db_user.role == "super admin" or db_user.username == "admin" else parse_allowed_kantor(db_user.allowed_kantor, all_kantors)
             return {
                 "ok": True,
                 "authenticated": True,
@@ -235,10 +236,13 @@ def get_current_user_profile(request: Request):
                     "username": db_user.username,
                     "nama_lengkap": db_user.nama_karyawan or "Administrator NOC",
                     "role": db_user.role,
-                    "allowed_kantor": db_user.allowed_kantor
-                }
+                    "allowed_kantor": allowed
+                },
+                "all_kantor": all_kantors
             }
         
+        role = user_sess.get("role", "super admin")
+        allowed = all_kantors if role == "super admin" or username == "admin" else parse_allowed_kantor(user_sess.get("allowed_kantor"), all_kantors)
         return {
             "ok": True,
             "authenticated": True,
@@ -246,9 +250,10 @@ def get_current_user_profile(request: Request):
                 "id": 1,
                 "username": username,
                 "nama_lengkap": "Administrator NOC",
-                "role": user_sess.get("role", "super admin"),
-                "allowed_kantor": user_sess.get("allowed_kantor", ["cabang", "pusat", "banyumas"])
-            }
+                "role": role,
+                "allowed_kantor": allowed
+            },
+            "all_kantor": all_kantors
         }
     finally:
         db.close()

@@ -6,7 +6,10 @@ import {
   BarChart2,
   RefreshCw,
   Search,
-  Filter
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { QuotaService } from '../services/api';
 import {
@@ -25,6 +28,17 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang' }) {
   const [paketOptions, setPaketOptions] = useState([]);
   const [currentPeriod, setCurrentPeriod] = useState('');
   const [activeKantor, setActiveKantor] = useState(activeOffice);
+  const [sortField, setSortField] = useState('terpakai_gb');
+  const [sortDir, setSortDir] = useState('desc');
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+  };
 
   const fetchQuota = async () => {
     setLoading(true);
@@ -66,6 +80,14 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang' }) {
       );
     }
     return true;
+  }).sort((a, b) => {
+    let valA = a[sortField];
+    let valB = b[sortField];
+    if (typeof valA === 'string') valA = valA.toLowerCase();
+    if (typeof valB === 'string') valB = valB.toLowerCase();
+    if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+    if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+    return 0;
   });
 
   const totalTraffic = filteredQuota.reduce((acc, item) => acc + (item.terpakai_gb || 0), 0);
@@ -161,36 +183,86 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang' }) {
         </div>
       </FilterContainer>
 
-      {/* 4. Tabel Pemakaian Kuota */}
+      {/* 4. Tabel Pemakaian Kuota (Sorting Aktif, Tanpa Checkbox Sesuai SOP) */}
       <DataTableContainer loading={loading}>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[10px] uppercase tracking-wider font-bold">
-              <th className="py-2.5 px-3">ID Pelanggan</th>
-              <th className="py-2.5 px-3">Nama Pelanggan</th>
-              <th className="py-2.5 px-3">Paket Layanan</th>
+              <th className="py-2.5 px-3 w-12 text-center">No</th>
+              <th
+                onClick={() => handleSort('id_pelanggan')}
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center gap-1">
+                  <span>ID Pelanggan</span>
+                  {sortField === 'id_pelanggan' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort('nama')}
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Nama Pelanggan</span>
+                  {sortField === 'nama' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort('paket')}
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Paket Layanan</span>
+                  {sortField === 'paket' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
               <th className="py-2.5 px-3 font-mono">IP Router</th>
-              <th className="py-2.5 px-3 text-center">Pemakaian Bulan Ini</th>
+              <th
+                onClick={() => handleSort('terpakai_gb')}
+                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none"
+              >
+                <div className="flex items-center justify-center gap-1">
+                  <span>Pemakaian Bulan Ini</span>
+                  {sortField === 'terpakai_gb' ? (
+                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                  ) : (
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  )}
+                </div>
+              </th>
               <th className="py-2.5 px-3 text-center">Status Bandwidth</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
               <tr>
-                <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
                   <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
                   <div>Memuat data pemakaian kuota...</div>
                 </td>
               </tr>
             ) : filteredQuota.length === 0 ? (
               <tr>
-                <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
                   Tidak ada data kuota ditemukan.
                 </td>
               </tr>
             ) : (
-              filteredQuota.map((item) => (
+              filteredQuota.map((item, idx) => (
                 <tr key={item.id_pelanggan} className="hover:bg-cyan-50/40 transition">
+                  <td className="py-2.5 px-3 text-center text-slate-500 font-bold text-xs">{idx + 1}</td>
                   <td className="py-2.5 px-3 font-bold text-cyan-900">{item.id_pelanggan}</td>
                   <td className="py-2.5 px-3">
                     <div className="font-sans font-bold text-slate-900">{item.nama}</div>
