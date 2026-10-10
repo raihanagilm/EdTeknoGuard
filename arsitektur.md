@@ -135,35 +135,44 @@ EdTeknoGuard/
 
 TiDB Cloud menggunakan dialek MySQL dengan dukungan penuh engine InnoDB, collation `utf8mb4_unicode_ci`, dan UUID/BIGINT indexing.
 
-### 3.1 Tabel `pelanggan` (Master Data)
+### 3.1 Tabel `pelanggan` (Master Data Tunggal & Kredensial Portal)
 ```sql
 CREATE TABLE IF NOT EXISTS pelanggan (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     id_pelanggan VARCHAR(64) NOT NULL UNIQUE,       -- Contoh: 2072026320 / 260620000000
     nama VARCHAR(150) NOT NULL,
     alamat TEXT,
-    no_hp VARCHAR(30),
-    pop VARCHAR(80) NOT NULL DEFAULT 'Server Cabang', -- Server Cabang, Pusat, Pabelan, Klero, BMS
+    no_hp VARCHAR(50),
+    pop VARCHAR(100) NOT NULL DEFAULT 'Server Cabang', -- Server Cabang, Pusat, Banyumas
+    kantor VARCHAR(50) NOT NULL DEFAULT 'cabang',   -- cabang, pusat, banyumas
     ip_router VARCHAR(45) NOT NULL,                 -- IP Manajemen ONT (misal: 10.10.2.15)
-    paket VARCHAR(50),                              -- Misal: 10MB CAB, 5MB Residential
-    jenis_modem VARCHAR(50) NOT NULL,               -- GM220-S, F663NV3a, HG8546M, ZL-2113X
+    paket VARCHAR(50),                              -- Misal: 20 Mbps, 50 Mbps
+    jenis_modem VARCHAR(50) NOT NULL DEFAULT 'GM220-S', -- GM220-S, XPON, etc.
     mac_address VARCHAR(30),
     redaman_baseline NUMERIC(5,2),                  -- Redaman awal saat instalasi (dBm)
     nama_wifi VARCHAR(100),
     password_wifi VARCHAR(100),
     user_admin VARCHAR(50),
     pass_admin VARCHAR(100),
+    status_kredensial VARCHAR(20) NOT NULL DEFAULT 'UNTESTED',
     snmp_community VARCHAR(50) DEFAULT 'public',
+    los_count INT NOT NULL DEFAULT 0,
+    is_monitored BOOLEAN NOT NULL DEFAULT TRUE,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    password_hash VARCHAR(255) NULL,
+    lokasi_gps VARCHAR(100) NULL,
+    status_verifikasi VARCHAR(30) NOT NULL DEFAULT 'TERVERIFIKASI',
+    last_login DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_pelanggan_pop (pop),
+    INDEX idx_pelanggan_kantor (kantor),
     INDEX idx_pelanggan_ip (ip_router),
-    INDEX idx_pelanggan_modem (jenis_modem)
+    INDEX idx_pelanggan_status (is_monitored, is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 3.2 Tabel `log_performa_ont` (Time-Series Log)
+### 3.2 Tabel `log_performa_ont` (Time-Series Log Redaman)
 ```sql
 CREATE TABLE IF NOT EXISTS log_performa_ont (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -175,14 +184,14 @@ CREATE TABLE IF NOT EXISTS log_performa_ont (
     status_koneksi VARCHAR(20) NOT NULL,            -- NORMAL, WARNING, CRITICAL, LOS
     latency_ms INT NULL,                            -- Latensi ping/SNMP (ms)
     keterangan VARCHAR(255) NULL,
-    INDEX idx_log_pelanggan_waktu (id_pelanggan, waktu_cek),
+    INDEX idx_pelanggan_waktu (id_pelanggan, waktu_cek),
     INDEX idx_log_status (status_koneksi),
     INDEX idx_log_waktu (waktu_cek),
     FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 3.3 Tabel `alert_logs` (Histori Peringatan & Anti-Spam)
+### 3.3 Tabel `alert_logs` (Histori Peringatan Notifikasi)
 ```sql
 CREATE TABLE IF NOT EXISTS alert_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -193,35 +202,13 @@ CREATE TABLE IF NOT EXISTS alert_logs (
     target_recipients TEXT NOT NULL,                -- Chat ID penerima di Telegram
     status_kirim VARCHAR(20) NOT NULL DEFAULT 'SUCCESS', -- SUCCESS, FAILED
     waktu_kirim DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_alert_pelanggan (id_pelanggan),
+    INDEX idx_alert_pelanggan_waktu (id_pelanggan, waktu_kirim),
     INDEX idx_alert_waktu (waktu_kirim),
     FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 3.4 Tabel `akun_pelanggan` (Portal Warga Self-Service)
-```sql
-CREATE TABLE IF NOT EXISTS akun_pelanggan (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    id_pelanggan VARCHAR(64) NULL UNIQUE,
-    username VARCHAR(100) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    nama_lengkap VARCHAR(200) NULL,
-    alamat_pendaftar TEXT NULL,
-    lokasi_gps VARCHAR(100) NULL,
-    kantor VARCHAR(50) NOT NULL DEFAULT 'cabang',
-    status_verifikasi VARCHAR(30) NOT NULL DEFAULT 'PENDING',
-    no_hp VARCHAR(50) NULL,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    last_login DATETIME NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_akun_pelanggan (id_pelanggan),
-    FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
-
-### 3.5 Tabel `tiket_kendala` (Laporan Gangguan Pelanggan)
+### 3.4 Tabel `tiket_kendala` (Laporan Gangguan Pelanggan)
 ```sql
 CREATE TABLE IF NOT EXISTS tiket_kendala (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -237,12 +224,13 @@ CREATE TABLE IF NOT EXISTS tiket_kendala (
     catatan_teknisi TEXT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_tiket_pelanggan (id_pelanggan),
+    INDEX idx_tiket_status_kantor (status, kantor),
+    INDEX idx_tiket_pelanggan_waktu (id_pelanggan, created_at),
     FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 3.6 Tabel `kuota_pelanggan` (Histori Pemakaian Kuota)
+### 3.5 Tabel `kuota_pelanggan` (Histori Pemakaian Kuota)
 ```sql
 CREATE TABLE IF NOT EXISTS kuota_pelanggan (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -252,12 +240,48 @@ CREATE TABLE IF NOT EXISTS kuota_pelanggan (
     kecepatan_paket VARCHAR(50) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_kuota_pelanggan (id_pelanggan),
+    INDEX idx_kuota_pelanggan_periode (id_pelanggan, periode_bulan),
     FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 3.4 Tabel `system_settings` (Konfigurasi Dinamis)
+### 3.6 Tabel `users` (Pengguna & Petugas NOC)
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    hashed_password VARCHAR(255) NOT NULL,
+    nama_karyawan VARCHAR(150) NULL,
+    no_wa VARCHAR(50) NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'teknisi',
+    allowed_kantor VARCHAR(255) NOT NULL DEFAULT '["cabang"]',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_users_username (username),
+    INDEX idx_users_role (role)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### 3.7 Tabel `user_activity_logs` (Audit Aktivitas Sistem)
+```sql
+CREATE TABLE IF NOT EXISTS user_activity_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    nama_karyawan VARCHAR(150) NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'admin',
+    action VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'SUCCESS',
+    keterangan TEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_activity_user_action (username, action),
+    INDEX idx_activity_action_created (action, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### 3.8 Tabel `system_settings` (Konfigurasi Dinamis)
 ```sql
 CREATE TABLE IF NOT EXISTS system_settings (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -266,6 +290,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
+
 *Pengaturan default:*
 - `scheduler_status`: `'RUNNING'` (atau `'STOPPED'`)
 - `polling_interval_minutes`: `'5'`

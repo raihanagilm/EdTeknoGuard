@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime
 from app.core.database import SessionLocal
 from app.db.models import (
@@ -26,7 +25,7 @@ def test_pelanggan_cascade_relationships_and_delete():
             pop="Server Cabang",
             kantor="cabang",
             ip_router="10.10.99.254",
-            paket="20 Mbps",
+            paket="20MB CAB",
             jenis_modem="GM220-S",
             redaman_baseline=-21.5,
             password_hash="fakehash123",
@@ -114,13 +113,13 @@ def test_bulk_delete_cascade():
                 CustomerService.delete_customer(db, tid)
 
         # Buat 2 pelanggan dengan anakannya
-        for tid in test_ids:
+        for i, tid in enumerate(test_ids, start=11):
             c = Pelanggan(
                 id_pelanggan=tid,
                 nama=f"Bulk {tid}",
                 pop="Server Cabang",
                 kantor="cabang",
-                ip_router="10.10.99.11",
+                ip_router=f"10.10.99.{i}",
                 is_monitored=True,
                 is_active=True
             )

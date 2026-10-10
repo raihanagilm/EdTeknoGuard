@@ -32,6 +32,7 @@ export function ModulManajemenPengguna() {
   const [formUsername, setFormUsername] = useState('');
   const [formPassword, setFormPassword] = useState('');
   const [formNama, setFormNama] = useState('');
+  const [formNoWa, setFormNoWa] = useState('');
   const [formRole, setFormRole] = useState('teknisi');
   const [formKantor, setFormKantor] = useState(['cabang']);
   const [formError, setFormError] = useState('');
@@ -71,6 +72,7 @@ export function ModulManajemenPengguna() {
     setFormUsername('');
     setFormPassword('');
     setFormNama('');
+    setFormNoWa('');
     setFormRole('teknisi');
     setFormKantor(['cabang']);
     setFormError('');
@@ -83,11 +85,13 @@ export function ModulManajemenPengguna() {
     setFormUsername(user.username);
     setFormPassword('');
     setFormNama(user.nama_karyawan || '');
+    setFormNoWa(user.no_wa || '');
     setFormRole(user.role);
     setFormKantor(user.allowed_kantor || ['cabang']);
     setFormError('');
     setModalOpen(true);
   };
+
 
   const handleKantorCheckbox = (k) => {
     if (formKantor.includes(k)) {
@@ -117,6 +121,7 @@ export function ModulManajemenPengguna() {
         username: formUsername,
         password: formPassword || undefined,
         nama_karyawan: formNama,
+        no_wa: formNoWa,
         role: formRole,
         kantor: formRole === 'super admin' ? allKantor : formKantor
       };
@@ -266,6 +271,7 @@ export function ModulManajemenPengguna() {
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[10px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3">Username / Nama</th>
+              <th className="py-2.5 px-3">Kontak WA</th>
               <th className="py-2.5 px-3">Role Sistem</th>
               <th className="py-2.5 px-3">Wilayah Kantor</th>
               <th className="py-2.5 px-3 text-center">Status</th>
@@ -275,14 +281,14 @@ export function ModulManajemenPengguna() {
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
               <tr>
-                <td colSpan="5" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
                   <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
                   <div>Memuat data pengguna...</div>
                 </td>
               </tr>
             ) : filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan="5" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
                   Tidak ada pengguna ditemukan.
                 </td>
               </tr>
@@ -292,6 +298,15 @@ export function ModulManajemenPengguna() {
                   <td className="py-2.5 px-3">
                     <div className="font-bold text-cyan-900">{u.username}</div>
                     <div className="text-[10px] text-slate-500 font-sans">{u.nama_karyawan || 'Karyawan NOC'}</div>
+                  </td>
+                  <td className="py-2.5 px-3 font-mono text-xs text-slate-700">
+                    {u.no_wa ? (
+                      <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        {u.no_wa}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 italic text-[11px]">-</span>
+                    )}
                   </td>
                   <td className="py-2.5 px-3">
                     <span
@@ -407,6 +422,17 @@ export function ModulManajemenPengguna() {
               </div>
 
               <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nomor WhatsApp (WA)</label>
+                <input
+                  type="text"
+                  value={formNoWa}
+                  onChange={(e) => setFormNoWa(e.target.value)}
+                  placeholder="Contoh: 081234567890..."
+                  className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-mono font-medium focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
                   {modalMode === 'add' ? 'Password' : 'Password Baru (Kosongkan jika tetap)'}
                 </label>
@@ -423,6 +449,7 @@ export function ModulManajemenPengguna() {
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Role / Peran</label>
                 <select
                   value={formRole}
+
                   onChange={(e) => setFormRole(e.target.value)}
                   disabled={modalMode === 'edit' && formUsername === 'admin'}
                   className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"

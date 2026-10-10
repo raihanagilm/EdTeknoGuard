@@ -26,6 +26,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Normalisasi Database 3NF, Dekomposisi Entitas Perangkat ONT & Relasi Terpadu**:
+  - **Dekomposisi Tabel Modem (`perangkat_ont`)**: Memecah atribut fisik modem (IP router, jenis modem, MAC address, redaman baseline, kredensial Web GUI ONT, dan password WiFi) dari tabel master `pelanggan` ke entitas baru `perangkat_ont` dengan relasi 1-to-1 dan `ON DELETE CASCADE`.
+  - **Master Data Referensi**: Membuat tabel `kantors`, `pops`, dan `pakets` untuk normalisasi master wilayah operasional, POP jaringan, dan paket bandwidth layanan.
+  - **Dokumentasi ERD 3NF Resmi**: Memperbarui berkas [db/schema.md](file:///d:/databaru/Magang/EdTeknoGuard/db/schema.md) yang memuat diagram Mermaid ERD ternormalisasi, kamus data lengkap untuk seluruh entitas, serta aturan integritas referensial.
+  - **Integritas Relasi Berjenjang (*Cascade Deletion*)**: Memastikan seluruh tabel anakan pelanggan (`perangkat_ont`, `log_performa_ont`, `alert_logs`, `tiket_kendala`, `kuota_pelanggan`) terikat `ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE")` dan `cascade="all, delete-orphan", passive_deletes=True`.
+  - **Optimasi Indexing Query Database**: Menambahkan indeks komposit pada tabel berukuran besar (`idx_pelanggan_waktu`, `idx_alert_pelanggan_waktu`, `idx_tiket_status_kantor`, `idx_tiket_pelanggan_waktu`, `idx_kuota_pelanggan_periode`, `idx_activity_user_action`, `idx_activity_action_created`).
+  - **Penambahan Kontak WhatsApp Petugas (`no_wa`)**: Menambahkan kolom `no_wa VARCHAR(50) NULL` pada tabel `users`, model SQLAlchemy [`User`](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py), endpoint backend API (`/users/api/list`, `/users/api/add`, `/users/api/edit`), serta antarmuka tabel dan form modal pada [`ModulManajemenPengguna.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulManajemenPengguna.jsx).
+
 - **Pembaruan Top Header Bar (Ikon Lonceng Notifikasi & Menu Titik Tiga dengan Logout)**:
   - **Ikon Lonceng Notifikasi Cepat**: Menambahkan tombol lonceng di header atas dengan counter badge real-time untuk jumlah tiket keluhan yang belum dibaca (`unreadTickets`).
   - **Menu Dropdown Titik Tiga (`MoreVertical`)**: Menambahkan tombol menu titik tiga di pojok kanan header yang menyajikan ringkasan identitas akun (nama, username, role) dan tombol **Keluar Akun (Logout)** secara eksklusif dan terfokus.

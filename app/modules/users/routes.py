@@ -28,6 +28,7 @@ async def get_users_json(request: Request, db: Session = Depends(get_db)):
             "id": u.id,
             "username": u.username,
             "nama_karyawan": u.nama_karyawan or "",
+            "no_wa": u.no_wa or "",
             "role": u.role,
             "allowed_kantor": parse_allowed_kantor(u.allowed_kantor),
             "is_active": u.is_active,
@@ -52,6 +53,7 @@ async def add_user_json(request: Request, db: Session = Depends(get_db)):
         username = data.get("username", "").strip()
         password = data.get("password", "")
         nama_karyawan = data.get("nama_karyawan", "").strip()
+        no_wa = data.get("no_wa", "").strip()
         role = data.get("role", "teknisi").lower().strip()
         kantor = data.get("kantor", ["cabang"])
     except Exception:
@@ -75,6 +77,7 @@ async def add_user_json(request: Request, db: Session = Depends(get_db)):
             username=username,
             hashed_password=hashed_password,
             nama_karyawan=nama_karyawan if nama_karyawan else None,
+            no_wa=no_wa if no_wa else None,
             role=role,
             allowed_kantor=kantor_json,
             is_active=True
@@ -111,6 +114,7 @@ async def edit_user_json(request: Request, user_id: int, db: Session = Depends(g
         username = data.get("username", "").strip()
         password = data.get("password")
         nama_karyawan = data.get("nama_karyawan", "").strip()
+        no_wa = data.get("no_wa", "").strip()
         role = data.get("role", user.role).lower().strip()
         kantor = data.get("kantor", ["cabang"])
     except Exception:
@@ -131,6 +135,7 @@ async def edit_user_json(request: Request, user_id: int, db: Session = Depends(g
     if username:
         user.username = username
     user.nama_karyawan = nama_karyawan if nama_karyawan else None
+    user.no_wa = no_wa if no_wa else None
     user.role = role
     user.allowed_kantor = kantor_json
 
@@ -147,6 +152,7 @@ async def edit_user_json(request: Request, user_id: int, db: Session = Depends(g
         keterangan=f"Berhasil mengedit data user: {user.username}"
     )
     return {"status": "success", "message": f"Data pengguna '{user.username}' berhasil diperbarui."}
+
 
 @router.post("/api/toggle/{user_id}")
 async def toggle_user_json(request: Request, user_id: int, db: Session = Depends(get_db)):
