@@ -394,115 +394,121 @@ export function ModulPelanggan({
       />
 
       {/* 2. Filter Bar & Tombol Aksi Ringkas */}
-      <FilterContainer>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-          {/* Kotak Pencarian & Tombol Popover Filter */}
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <div className="relative flex-1 min-w-[150px]">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari ID, Nama, IP..."
-                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px]"
-              />
+      <div className="relative z-30">
+        <FilterContainer>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            {/* Kotak Pencarian & Tombol Popover Filter */}
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <div className="relative flex-1 min-w-[150px]">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Cari ID, Nama, IP..."
+                  className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px]"
+                />
+              </div>
+
+              {/* Tombol Ikon Filter Dropdown Popover */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                  className={`p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[34px] sm:min-h-[36px] shrink-0 cursor-pointer ${
+                    filterPop !== 'ALL'
+                      ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
+                      : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
+                  }`}
+                  title="Filter Wilayah POP"
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{filterPop === 'ALL' ? 'Filter POP' : filterPop}</span>
+                  {filterPop !== 'ALL' && (
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  )}
+                </button>
+
+                {/* Popover Dropdown Menu */}
+                {filterDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setFilterDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-52 bg-white rounded-xl p-2.5 shadow-xl border border-slate-300 space-y-1 font-mono text-xs">
+                      <div className="px-2.5 py-1 text-[11px] font-black uppercase text-slate-700 tracking-wider">
+                        Pilih Server POP:
+                      </div>
+                      {['ALL', 'POP-01', 'POP-02', 'POP-03'].map((pop) => (
+                        <button
+                          key={pop}
+                          type="button"
+                          onClick={() => {
+                            setFilterPop(pop);
+                            setPage(1);
+                            setFilterDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-2.5 py-1.5 rounded-lg transition flex items-center justify-between cursor-pointer ${
+                            filterPop === pop
+                              ? 'bg-cyan-700 text-white font-bold'
+                              : 'hover:bg-slate-100 text-slate-800'
+                          }`}
+                        >
+                          <span className="font-medium">{pop === 'ALL' ? 'Semua Server POP' : pop}</span>
+                          {filterPop === pop && <Check className="w-3.5 h-3.5 text-white" />}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
-            {/* Tombol Ikon Filter Dropdown Popover */}
-            <div className="relative">
+            {/* Tombol Aksi Tambah, Import, Export, Reload */}
+            <div className="flex items-center gap-1.5 justify-end shrink-0">
               <button
-                type="button"
-                onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
-                className={`p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[34px] sm:min-h-[36px] shrink-0 ${
-                  filterPop !== 'ALL'
-                    ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
-                    : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
-                }`}
-                title="Filter Wilayah POP"
+                onClick={handleOpenCreate}
+                className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
               >
-                <Filter className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{filterPop === 'ALL' ? 'Filter POP' : filterPop}</span>
-                {filterPop !== 'ALL' && (
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                )}
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Tambah</span>
               </button>
 
-              {/* Popover Dropdown Menu */}
-              {filterDropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setFilterDropdownOpen(false)}
-                  />
-                  <div className="absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-48 bg-white/95 backdrop-blur-md rounded-2xl p-2 shadow-xl border border-sky-200 space-y-1 font-mono text-xs">
-                    <div className="px-2.5 py-1 text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                      Pilih Server POP:
-                    </div>
-                    {['ALL', 'POP-01', 'POP-02', 'POP-03'].map((pop) => (
-                      <button
-                        key={pop}
-                        type="button"
-                        onClick={() => {
-                          setFilterPop(pop);
-                          setFilterDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-2.5 py-1.5 rounded-xl transition flex items-center justify-between ${
-                          filterPop === pop
-                            ? 'bg-cyan-500 text-white font-bold'
-                            : 'hover:bg-cyan-50 text-slate-700'
-                        }`}
-                      >
-                        <span>{pop === 'ALL' ? 'Semua Server POP' : pop}</span>
-                        {filterPop === pop && <Check className="w-3.5 h-3.5" />}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+              <button
+                onClick={() => setImportModalOpen(true)}
+                className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
+                title="Import Berkas Excel / CSV (Wizard 3 Langkah)"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Import</span>
+              </button>
+
+              <a
+                href="/api/customers/export-excel"
+                download="data_pelanggan_edteknoguard.xlsx"
+                className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
+                title="Ekspor Seluruh Data ke Excel"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Ekspor</span>
+              </a>
+
+              <button
+                onClick={fetchCustomers}
+                disabled={loading}
+                className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center cursor-pointer"
+                title="Muat Ulang Data"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
             </div>
           </div>
-
-          {/* Tombol Aksi Tambah, Import, Export, Reload */}
-          <div className="flex items-center gap-1.5 justify-end shrink-0">
-            <button
-              onClick={handleOpenCreate}
-              className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Tambah</span>
-            </button>
-
-            <button
-              onClick={() => setImportModalOpen(true)}
-              className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
-              title="Import Berkas Excel / CSV (Wizard 3 Langkah)"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Import</span>
-            </button>
-
-            <a
-              href="/api/customers/export-excel"
-              download="data_pelanggan_edteknoguard.xlsx"
-              className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
-              title="Ekspor Seluruh Data ke Excel"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Ekspor</span>
-            </a>
-
-            <button
-              onClick={fetchCustomers}
-              disabled={loading}
-              className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center"
-              title="Muat Ulang Data"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </div>
-      </FilterContainer>
+        </FilterContainer>
+      </div>
 
       {/* Selection / Bulk Action Bar */}
       {selectedIds.length > 0 && (
@@ -540,10 +546,17 @@ export function ModulPelanggan({
       )}
 
       {/* 4. Tabel Pelanggan */}
-      <DataTableContainer loading={loading}>
-        <table className="w-full text-left border-collapse">
+      <DataTableContainer
+        page={page}
+        totalPages={Math.max(1, Math.ceil(totalRecords / limit))}
+        totalCount={totalRecords}
+        onPrevPage={() => setPage(p => Math.max(1, p - 1))}
+        onNextPage={() => setPage(p => Math.min(Math.max(1, Math.ceil(totalRecords / limit)), p + 1))}
+        loading={loading}
+      >
+        <table className="w-full text-left border-collapse table-auto md:table-fixed">
           <thead>
-            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[10px] uppercase tracking-wider font-bold">
+            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3 w-10 text-center">
                 <input
                   type="checkbox"
@@ -560,12 +573,12 @@ export function ModulPelanggan({
               </th>
               <th className="py-2.5 px-2 w-12 text-center">No</th>
               <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-32"
                 onClick={() => handleSort('id')}
               >
                 <div className="flex items-center gap-1">
                   <span>ID Pelanggan</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'id' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'id' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
               <th 
@@ -574,38 +587,38 @@ export function ModulPelanggan({
               >
                 <div className="flex items-center gap-1">
                   <span>Nama Pelanggan</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'nama' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'nama' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
               <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-36"
                 onClick={() => handleSort('ip_router')}
               >
                 <div className="flex items-center gap-1">
                   <span>IP &amp; Wilayah</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'ip_router' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'ip_router' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
-              <th className="py-2.5 px-3">WiFi &amp; Admin ONT</th>
+              <th className="py-2.5 px-3 w-40">WiFi &amp; Admin ONT</th>
               <th 
-                className="py-2.5 px-3 text-right cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                className="py-2.5 px-3 text-right cursor-pointer select-none hover:bg-cyan-100/60 transition w-32"
                 onClick={() => handleSort('rx_power')}
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Redaman (dBm)</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'rx_power' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'rx_power' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
               <th 
-                className="py-2.5 px-3 text-center cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                className="py-2.5 px-3 text-center cursor-pointer select-none hover:bg-cyan-100/60 transition w-28"
                 onClick={() => handleSort('status_koneksi')}
               >
                 <div className="flex items-center justify-center gap-1">
                   <span>Status</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'status_koneksi' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'status_koneksi' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
-              <th className="py-2.5 px-3 text-right">Aksi</th>
+              <th className="py-2.5 px-3 text-right w-32">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
@@ -653,19 +666,19 @@ export function ModulPelanggan({
                       >
                         {c.nama || c.name}
                       </button>
-                      <div className="text-[10px] text-slate-400 font-sans truncate max-w-xs">{c.alamat || c.address || '-'}</div>
+                      <div className="text-xs text-slate-600 font-sans truncate max-w-xs">{c.alamat || c.address || '-'}</div>
                     </td>
                     <td className="py-2.5 px-3">
                       <div className="text-slate-800 font-bold">{c.ip_router || c.ip}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">{c.pop || 'POP-01'} • <span className="uppercase">{c.kantor || 'cabang'}</span></div>
+                      <div className="text-[11px] text-slate-600 font-mono font-medium">{c.pop || 'POP-01'} • <span className="uppercase">{c.kantor || 'cabang'}</span></div>
                     </td>
                     <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1 text-[11px] text-slate-700 font-mono truncate max-w-[170px]">
-                        <Wifi className="w-3 h-3 text-cyan-600 shrink-0" />
+                        <Wifi className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
                         <span className="font-bold truncate">{c.nama_wifi || '-'}</span>
                       </div>
-                      <div className="text-[10px] text-slate-400 font-mono">
-                        Modem: <span className="font-semibold text-slate-600">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
+                      <div className="text-[11px] text-slate-600 font-mono">
+                        Modem: <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
                       </div>
                     </td>
                     <td className="py-2.5 px-3 text-right font-black">
@@ -691,7 +704,7 @@ export function ModulPelanggan({
                           );
                         } else {
                           return (
-                            <span className="text-slate-400 font-bold">
+                            <span className="text-slate-500 font-bold">
                               {statusVal === 'LOS' ? 'LOS' : '-'}
                             </span>
                           );
@@ -701,16 +714,16 @@ export function ModulPelanggan({
                     <td className="py-2.5 px-3 text-center">
                       {(() => {
                         const statusVal = (c.status_koneksi || c.status || 'NORMAL').toUpperCase();
-                        let badgeClass = 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                        let badgeClass = 'bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold';
                         if (statusVal === 'WARNING') {
-                          badgeClass = 'bg-amber-50 text-amber-700 border border-amber-200';
+                          badgeClass = 'bg-amber-50 text-amber-800 border border-amber-300 font-bold';
                         } else if (statusVal === 'CRITICAL') {
-                          badgeClass = 'bg-rose-50 text-rose-700 border border-rose-200';
+                          badgeClass = 'bg-rose-50 text-rose-800 border border-rose-300 font-bold';
                         } else if (statusVal === 'LOS') {
-                          badgeClass = 'bg-purple-50 text-purple-700 border border-purple-200';
+                          badgeClass = 'bg-purple-50 text-purple-800 border border-purple-300 font-bold';
                         }
                         return (
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${badgeClass}`}>
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-black uppercase ${badgeClass}`}>
                             {statusVal}
                           </span>
                         );
@@ -723,7 +736,7 @@ export function ModulPelanggan({
                           <button
                             onClick={() => handleSingleProbe(cId)}
                             disabled={probingId === cId}
-                            className="px-2 py-1 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-900 border border-cyan-200 rounded-lg text-[10px] font-bold transition mr-1"
+                            className="px-2.5 py-1 bg-cyan-50 hover:bg-cyan-700 hover:text-white text-cyan-900 border border-cyan-300 rounded-lg text-[11px] font-bold transition mr-1"
                             title="Uji Sinyal Langsung"
                           >
                             {probingId === cId ? 'Uji...' : 'Uji Sinyal'}

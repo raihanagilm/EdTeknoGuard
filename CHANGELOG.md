@@ -26,6 +26,17 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penyelesaian Audit Impeccable, Filter Stacking & Integrasi Pagination Modul Pelanggan (`ModulPelanggan.jsx`)**:
+  - **Eliminasi AI Tell Warna Gradien**: Mengubah tombol aksi `"Tambah"` dari gradien multi-stop (`bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600`) menjadi warna solid profesional `bg-cyan-700 hover:bg-cyan-800 text-white shadow-sm`.
+  - **Integrasi Penuh Bar Navigasi Pagination**: Mengintegrasikan bar navigasi pagination pada `DataTableContainer` dengan props `page`, `totalPages`, `totalCount`, `onPrevPage`, dan `onNextPage` (15 baris per halaman), memberikan kontrol paginasi standar penuh bagi daftar master pelanggan.
+  - **Resolusi Z-Index Stacking Context Popover Filter**: Membungkus seluruh wadah filter dengan `relative z-30` dan menaikkan popover dropdown ke `z-50 border-slate-300 shadow-xl` dengan penutup backdrop klik-luar (`fixed inset-0 z-40`), memastikan menu filter selalu melayang mulus di atas header dan baris tabel tanpa tertumpuk ke bawah.
+  - **Peningkatan Tipografi Fungsional Header Kolom (Undersized Functional Text)**: Menaikkan seluruh label header kolom tabel (`No`, `ID Pelanggan`, `Nama Pelanggan`, `IP & Wilayah`, `WiFi & Admin ONT`, `Redaman (dBm)`, `Status`, `Aksi`) dari `text-[10px]` ke `text-[11px] font-mono font-bold text-slate-700` (memenuhi standar minimum 11px floor).
+  - **Perbaikan Kontras & Keterbacaan Teks Sel Tabel (WCAG AA >= 4.5:1)**:
+    - Menaikkan teks sublabel alamat pelanggan dari `text-[10px] text-slate-400` (2.6:1) menjadi `text-xs text-slate-600 font-sans` (> 5.2:1).
+    - Menaikkan teks POP, kantor cabang, dan kredensial modem dari `text-[10px] text-slate-400` menjadi `text-[11px] text-slate-600 font-mono font-medium`.
+    - Menaikkan badge status (`NORMAL`, `WARNING`, `CRITICAL`, `LOS`) dari `text-[10px]` ke `text-[11px] font-black uppercase` dengan kontras warna teks dan border terdefinisi.
+    - Menaikkan tombol *"Uji Sinyal"* dari `text-[10px]` ke `text-[11px] font-bold text-cyan-900 bg-cyan-50 border-cyan-300 hover:bg-cyan-700 hover:text-white`.
+
 - **Penyelarasan Navigasi, Stacking & Impeccable Audit Modul Pemantauan Kuota (`ModulPemantauanKuota.jsx` & `App.jsx`)**:
   - **Eliminasi AI Tell Nested Card pada Header**: Meratakan wadah office switcher di top navigation [`App.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx) (`bg-white/60 border border-sky-200`) untuk menghilangkan tumpukan kartu ganda di dalam header.
   - **Integrasi Bar Navigasi Pagination**: Mengintegrasikan bar pagination terpadu pada `DataTableContainer` lengkap dengan props `page`, `totalPages`, `totalCount`, `onPrevPage`, dan `onNextPage` (15 baris per halaman), selaras dengan modul tabel lainnya di TeknoGuard NOC.
