@@ -26,6 +26,27 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penerapan Global Tipografi Roboto Flex (`frontend/src`)**:
+  - Memastikan seluruh modul aplikasi web NOC (`TeknoGuard`) dan Portal Mandiri Pelanggan (`TeknoCust`) secara konsisten menggunakan keluarga huruf **Roboto Flex** (`--font-sans: 'Roboto Flex', sans-serif`).
+  - Menetapkan deklarasi eksplisit `font-family: 'Roboto Flex'` pada `:root`, `html`, `body`, serta elemen formulir (`button`, `input`, `select`, `textarea`) di [index.css](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/index.css), menjamin perenderan tipografi seragam dan presisi di seluruh browser dan perangkat.
+
+- **Penyelarasan Tipografi Roboto Flex & Audit Impeccable Modul Pengaturan (`ModulPengaturan.jsx`)**:
+  - **Eliminasi AI Tell Warna Gradien & AI Palette**: Mengubah seluruh tombol simpan (Tab 1, Tab 2, Tab 3, dan Tab 4) dari gradien multi-stop (`bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600`) menjadi warna solid profesional `bg-cyan-700 hover:bg-cyan-800 text-white shadow-sm`. Mengganti latar avatar pengguna pada profil dari gradien menjadi `bg-cyan-700 text-white`.
+  - **Eliminasi Total Pola Nested Cards (AI Tell)**:
+    - Menyederhanakan kontainer ketentuan ambang batas redaman pada Tab 1 menjadi seksi border-left semantik (`border-emerald-500`, `border-amber-500`, `border-rose-500`) tanpa kotak kartu bertingkat di dalam kartu (`card inside card`).
+    - Menyederhanakan kotak panduan fallback multi-kredensial Tab 2 menjadi divider `border-t` dengan list indent rapi.
+    - Menghilangkan kontainer kartu bertingkat pada opsi notifikasi & jam tenang Tab 3 menjadi baris divider form semantik.
+    - Menghapus kontainer kartu sekunder pada Profil & Ubah Sandi Tab 4 menjadi seksi terpadu langsung pada kontainer form utama.
+  - **Peningkatan Kontras & Keterbacaan Teks (WCAG AA >= 4.5:1)**:
+    - Menaikkan heading sidebar menu dan judul seksi dari `text-slate-400 font-extrabold` (2.6:1) menjadi `text-slate-700 font-black` (> 5.5:1).
+    - Memperbaiki teks deskripsi, petunjuk form, dan helper text dari warna pudar `text-slate-400` menjadi `text-slate-600 font-sans` atau `text-slate-700 font-bold`.
+    - Menaikkan label identitas profil (ID Pengguna, Username, Kantor, WA, Hak Akses) dari `text-slate-500` menjadi `text-slate-600 font-medium`.
+  - **Peningkatan Tipografi Fungsional & Eliminasi Tiny Body Text**:
+    - Menaikkan sublabel pada mobile tabs switcher (`30m • -26dBm`, `1 Akun`, `Getar Aktif`) dari `text-[10px]` ke `text-[11px] font-mono font-medium text-slate-600` (memenuhi standar minimum 11px floor).
+    - Menaikkan teks hint jam tenang notifikasi (`Default: 22:00 WIB`, `Default: 06:00 WIB`) dari `text-[10px]` ke `text-[11px] font-mono font-medium text-slate-600`.
+    - Menaikkan teks hint dropdown ubah kata sandi dari `text-[10px]` ke `text-[11px] font-medium text-slate-600`.
+    - Mengupgrade seluruh body text deskriptif redaman dan panduan fallback dari `11px` ke ukuran standar minimum body text `text-xs` (12px).
+
 - **Integrasi Pagination, Tipografi Roboto Flex & Audit Impeccable Modul Manajemen Pengguna (`ModulManajemenPengguna.jsx`)**:
   - **Eliminasi AI Tell Warna Gradien**: Mengubah tombol aksi `"Tambah User"` dari gradien multi-stop (`bg-gradient-to-r from-cyan-600 to-sky-600`) menjadi warna solid profesional `bg-cyan-700 hover:bg-cyan-800 text-white shadow-sm`.
   - **Integrasi Penuh Bar Navigasi Pagination**: Mengintegrasikan bar navigasi paginasi pada `DataTableContainer` lengkap dengan props `page`, `totalPages`, `totalCount`, `onPrevPage`, dan `onNextPage` (15 baris per halaman), memberikan kontrol paginasi standar penuh bagi data master pengguna sistem.

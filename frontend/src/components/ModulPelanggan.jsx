@@ -670,14 +670,14 @@ export function ModulPelanggan({
                     </td>
                     <td className="py-2.5 px-3">
                       <div className="text-slate-800 font-bold">{c.ip_router || c.ip}</div>
-                      <div className="text-[11px] text-slate-600 font-mono font-medium">{c.pop || 'POP-01'} • <span className="uppercase">{c.kantor || 'cabang'}</span></div>
+                      <div className="text-xs text-slate-600 font-mono font-medium">{c.pop || 'POP-01'} • <span className="uppercase">{c.kantor || 'cabang'}</span></div>
                     </td>
                     <td className="py-2.5 px-3">
-                      <div className="flex items-center gap-1 text-[11px] text-slate-700 font-mono truncate max-w-[170px]">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-700 font-mono truncate max-w-[170px]">
                         <Wifi className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
                         <span className="font-bold truncate">{c.nama_wifi || '-'}</span>
                       </div>
-                      <div className="text-[11px] text-slate-600 font-mono">
+                      <div className="text-xs text-slate-600 font-mono">
                         Modem: <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
                       </div>
                     </td>

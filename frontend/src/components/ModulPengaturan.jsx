@@ -163,7 +163,7 @@ export function ModulPengaturan({
   }
 
   const isTeknisi = currentUser?.role === 'teknisi'
-  
+
   // State Kategori (Personal vs Pengaturan NOC)
   const [settingsCategory, setSettingsCategory] = useState(
     isTeknisi || settingsActiveSubTab === 'account' ? 'personal' : 'noc'
@@ -205,11 +205,10 @@ export function ModulPengaturan({
                 setSettingsCategory('personal')
                 setSettingsActiveSubTab('account')
               }}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                settingsCategory === 'personal' || isTeknisi
-                  ? 'bg-white text-cyan-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${settingsCategory === 'personal' || isTeknisi
+                ? 'bg-white text-cyan-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
+                }`}
             >
               <User className="w-3.5 h-3.5" />
               <span>Personal</span>
@@ -223,11 +222,10 @@ export function ModulPengaturan({
                     setSettingsActiveSubTab('thresholds')
                   }
                 }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  settingsCategory === 'noc'
-                    ? 'bg-cyan-600 text-white shadow-xs'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${settingsCategory === 'noc'
+                  ? 'bg-cyan-600 text-white shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800'
+                  }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>Pengaturan NOC</span>
@@ -239,24 +237,22 @@ export function ModulPengaturan({
           {!isTeknisi && settingsCategory === 'noc' && (
             <div className="p-2 bg-white/95 rounded-2xl border border-sky-100 shadow-xs animate-in fade-in duration-200">
               <div className="grid grid-cols-3 gap-1">
-                
+
                 {/* 1. Parameter Redaman */}
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('thresholds')}
-                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${
-                    settingsActiveSubTab === 'thresholds'
-                      ? 'text-cyan-700 font-black'
-                      : 'text-slate-500 hover:text-slate-800 font-semibold'
-                  }`}
+                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'thresholds'
+                    ? 'text-cyan-700 font-black'
+                    : 'text-slate-500 hover:text-slate-800 font-semibold'
+                    }`}
                 >
-                  <SlidersHorizontal className={`w-6 h-6 mb-1.5 transition ${
-                    settingsActiveSubTab === 'thresholds' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
-                  }`} />
+                  <SlidersHorizontal className={`w-6 h-6 mb-1.5 transition ${settingsActiveSubTab === 'thresholds' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                    }`} />
                   <span className="text-xs leading-tight">
                     Parameter
                   </span>
-                  <span className="text-[10px] text-slate-400 mt-0.5 font-mono">
+                  <span className="text-[11px] text-slate-600 mt-0.5 font-mono font-medium">
                     {pollingInterval}m • {Number(warnThreshold).toFixed(0)}dBm
                   </span>
                 </button>
@@ -265,19 +261,17 @@ export function ModulPengaturan({
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('credentials')}
-                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${
-                    settingsActiveSubTab === 'credentials'
-                      ? 'text-cyan-700 font-black'
-                      : 'text-slate-500 hover:text-slate-800 font-semibold'
-                  }`}
+                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'credentials'
+                    ? 'text-cyan-700 font-black'
+                    : 'text-slate-500 hover:text-slate-800 font-semibold'
+                    }`}
                 >
-                  <KeyRound className={`w-6 h-6 mb-1.5 transition ${
-                    settingsActiveSubTab === 'credentials' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
-                  }`} />
+                  <KeyRound className={`w-6 h-6 mb-1.5 transition ${settingsActiveSubTab === 'credentials' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                    }`} />
                   <span className="text-xs leading-tight">
                     Kredensial ONT
                   </span>
-                  <span className="text-[10px] text-slate-400 mt-0.5 font-mono">
+                  <span className="text-[11px] text-slate-600 mt-0.5 font-mono font-medium">
                     {modemCredentials.length} Akun
                   </span>
                 </button>
@@ -286,19 +280,17 @@ export function ModulPengaturan({
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('notifications')}
-                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${
-                    settingsActiveSubTab === 'notifications'
-                      ? 'text-cyan-700 font-black'
-                      : 'text-slate-500 hover:text-slate-800 font-semibold'
-                  }`}
+                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'notifications'
+                    ? 'text-cyan-700 font-black'
+                    : 'text-slate-500 hover:text-slate-800 font-semibold'
+                    }`}
                 >
-                  <Bell className={`w-6 h-6 mb-1.5 transition ${
-                    settingsActiveSubTab === 'notifications' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
-                  }`} />
+                  <Bell className={`w-6 h-6 mb-1.5 transition ${settingsActiveSubTab === 'notifications' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                    }`} />
                   <span className="text-xs leading-tight">
                     Notifikasi
                   </span>
-                  <span className="text-[10px] text-slate-400 mt-0.5">
+                  <span className="text-[11px] text-slate-600 mt-0.5 font-medium">
                     {appVibration ? 'Getar Aktif' : 'Senyap'}
                   </span>
                 </button>
@@ -311,11 +303,11 @@ export function ModulPengaturan({
 
       {/* Konten Form & Desktop Tree Menu */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        
+
         {/* DESKTOP TREE MENU (Sidebar Kolom Kiri 1/4) */}
         <div className="hidden lg:block lg:col-span-1 space-y-3">
           <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-sky-200/80 shadow-sm space-y-4">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 px-1">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 px-1">
               Menu Pengaturan
             </h3>
 
@@ -331,11 +323,10 @@ export function ModulPengaturan({
                     setSettingsCategory('personal')
                     setSettingsActiveSubTab('account')
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${
-                    settingsActiveSubTab === 'account'
-                      ? 'bg-cyan-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
-                  }`}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'account'
+                    ? 'bg-cyan-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                    }`}
                 >
                   <span className="flex items-center gap-2">
                     <Lock className="w-3.5 h-3.5" />
@@ -358,11 +349,10 @@ export function ModulPengaturan({
                       setSettingsCategory('noc')
                       setSettingsActiveSubTab('thresholds')
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${
-                      settingsActiveSubTab === 'thresholds'
-                        ? 'bg-cyan-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
-                    }`}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'thresholds'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -375,18 +365,14 @@ export function ModulPengaturan({
                       setSettingsCategory('noc')
                       setSettingsActiveSubTab('credentials')
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${
-                      settingsActiveSubTab === 'credentials'
-                        ? 'bg-cyan-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
-                    }`}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'credentials'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <KeyRound className="w-3.5 h-3.5" />
                       <span>Kredensial ONT</span>
-                    </span>
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-cyan-100 text-cyan-800 font-mono font-bold">
-                      {modemCredentials.length}
                     </span>
                   </button>
 
@@ -395,11 +381,10 @@ export function ModulPengaturan({
                       setSettingsCategory('noc')
                       setSettingsActiveSubTab('notifications')
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${
-                      settingsActiveSubTab === 'notifications'
-                        ? 'bg-cyan-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
-                    }`}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'notifications'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <Bell className="w-3.5 h-3.5" />
@@ -414,7 +399,7 @@ export function ModulPengaturan({
 
         {/* 3 Kolom Form Input (Desktop 3/4) */}
         <div className="lg:col-span-3 bg-white/90 backdrop-blur-md rounded-2xl p-5 border border-sky-200/80 shadow-sm">
-          
+
           {/* TAB 1: PARAMETER & AMBANG BATAS (Khusus Super Admin & Admin) */}
           {!isTeknisi && (settingsActiveSubTab === 'thresholds' || settingsActiveSubTab === 'threshold') && (
             <form
@@ -444,7 +429,7 @@ export function ModulPengaturan({
                   onChange={(e) => setPollingInterval(e.target.value)}
                   className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
                 />
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-600 font-sans">
                   Waktu jeda antar siklus background scheduler untuk memeriksa redaman seluruh modem ONT aktif.
                 </p>
               </div>
@@ -465,10 +450,10 @@ export function ModulPengaturan({
                     onChange={(e) => setWarnThreshold(e.target.value)}
                     className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
                   />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-400">dBm</span>
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-500">dBm</span>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Status <strong>WARNING</strong> dipicu saat redaman turun menyentuh nilai ini (Default: <code className="bg-slate-100 px-1 rounded font-mono">-26.0 dBm</code>).
+                <p className="text-xs text-slate-600 font-sans">
+                  Status <strong className="text-amber-800 font-bold">WARNING</strong> dipicu saat redaman turun menyentuh nilai ini (Default: <code className="bg-slate-200 px-1 rounded font-mono text-slate-800 font-semibold">-26.0 dBm</code>).
                 </p>
               </div>
 
@@ -488,10 +473,10 @@ export function ModulPengaturan({
                     onChange={(e) => setCritThreshold(e.target.value)}
                     className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
                   />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-400">dBm</span>
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-500">dBm</span>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Status <strong>CRITICAL</strong> dipicu jika redaman lebih buruk atau sama dengan nilai ini (Default: <code className="bg-slate-100 px-1 rounded font-mono">-27.0 dBm</code>).
+                <p className="text-xs text-slate-600 font-sans">
+                  Status <strong className="text-rose-800 font-bold">CRITICAL</strong> dipicu jika redaman lebih buruk atau sama dengan nilai ini (Default: <code className="bg-slate-200 px-1 rounded font-mono text-slate-800 font-semibold">-27.0 dBm</code>).
                 </p>
               </div>
 
@@ -500,42 +485,40 @@ export function ModulPengaturan({
                 <button
                   type="submit"
                   disabled={settingsLoading}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 flex items-center gap-2 transition min-h-[42px] cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Simpan Parameter</span>
                 </button>
               </div>
 
-              {/* Card Standar Redaman Baru Dinamis (Khusus Tampilan Desktop) */}
-              <div className="hidden lg:block pt-3 border-t border-sky-100">
-                <div className="p-4 rounded-xl bg-sky-50/60 border border-sky-200/80 space-y-3">
-                  <h4 className="font-bold text-slate-900 flex items-center gap-2 text-xs">
-                    <Sliders className="w-4 h-4 text-cyan-600" />
-                    <span>Ketentuan Ambang Batas Redaman (Aktif)</span>
-                  </h4>
-                  <div className="grid grid-cols-3 gap-2.5 text-[11px]">
-                    <div className="p-2.5 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <div className="flex items-center justify-between font-bold text-emerald-800">
-                        <span>Sinyal Optimal</span>
-                        <span className="font-mono">&gt; {Number(warnThreshold).toFixed(1)} dBm</span>
-                      </div>
-                      <p className="text-slate-600 text-[10px] mt-0.5">Koneksi prima &amp; throughput lancar.</p>
+              {/* Standar Redaman Baru Dinamis (Khusus Tampilan Desktop) */}
+              <div className="hidden lg:block pt-3 border-t border-sky-100 space-y-3">
+                <h4 className="font-bold text-slate-900 flex items-center gap-2 text-xs">
+                  <Sliders className="w-4 h-4 text-cyan-600" />
+                  <span>Ketentuan Ambang Batas Redaman (Aktif)</span>
+                </h4>
+                <div className="grid grid-cols-3 gap-3 text-xs">
+                  <div className="py-2 px-3 border-l-2 border-emerald-500 bg-emerald-50/40">
+                    <div className="flex items-center justify-between font-bold text-emerald-800">
+                      <span>Sinyal Optimal</span>
+                      <span className="font-mono font-black">&gt; {Number(warnThreshold).toFixed(1)} dBm</span>
                     </div>
-                    <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-200">
-                      <div className="flex items-center justify-between font-bold text-amber-800">
-                        <span>Peringatan Ringan</span>
-                        <span className="font-mono">&le; {Number(warnThreshold).toFixed(1)} dBm</span>
-                      </div>
-                      <p className="text-amber-900 text-[10px] mt-0.5">Deteksi dini redaman mulai turun.</p>
+                    <p className="text-slate-600 text-xs mt-1">Koneksi prima &amp; throughput lancar.</p>
+                  </div>
+                  <div className="py-2 px-3 border-l-2 border-amber-500 bg-amber-50/40">
+                    <div className="flex items-center justify-between font-bold text-amber-800">
+                      <span>Peringatan Ringan</span>
+                      <span className="font-mono font-black">&le; {Number(warnThreshold).toFixed(1)} dBm</span>
                     </div>
-                    <div className="p-2.5 bg-rose-50 rounded-lg border border-rose-200">
-                      <div className="flex items-center justify-between font-bold text-rose-800">
-                        <span>Kritis / Alarm Merah</span>
-                        <span className="font-mono">&le; {Number(critThreshold).toFixed(1)} dBm</span>
-                      </div>
-                      <p className="text-rose-900 text-[10px] mt-0.5">Gangguan serius, risiko tinggi LOS!</p>
+                    <p className="text-amber-900 text-xs mt-1">Deteksi dini redaman mulai turun.</p>
+                  </div>
+                  <div className="py-2 px-3 border-l-2 border-rose-500 bg-rose-50/40">
+                    <div className="flex items-center justify-between font-bold text-rose-800">
+                      <span>Kritis / Alarm Merah</span>
+                      <span className="font-mono font-black">&le; {Number(critThreshold).toFixed(1)} dBm</span>
                     </div>
+                    <p className="text-rose-900 text-xs mt-1">Gangguan serius, risiko tinggi LOS!</p>
                   </div>
                 </div>
               </div>
@@ -579,11 +562,10 @@ export function ModulPengaturan({
                     onDragOver={(e) => handleCredDragOver(e, idx)}
                     onDrop={() => handleCredDrop(idx)}
                     onDragEnd={handleCredDragEnd}
-                    className={`p-3 rounded-xl border bg-white/90 transition flex flex-col sm:flex-row sm:items-center gap-2.5 ${
-                      dragOverCredIdx === idx
-                        ? 'border-cyan-500 ring-2 ring-cyan-200 bg-cyan-50/40'
-                        : 'border-sky-200/80 hover:border-cyan-300'
-                    }`}
+                    className={`p-3 rounded-xl border bg-white/90 transition flex flex-col sm:flex-row sm:items-center gap-2.5 ${dragOverCredIdx === idx
+                      ? 'border-cyan-500 ring-2 ring-cyan-200 bg-cyan-50/40'
+                      : 'border-sky-200/80 hover:border-cyan-300'
+                      }`}
                   >
                     <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400 shrink-0">
                       <span className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600">⠿</span>
@@ -623,11 +605,10 @@ export function ModulPengaturan({
                       type="button"
                       onClick={() => removeModemCredentialRow(idx)}
                       disabled={modemCredentials.length <= 1}
-                      className={`p-2 rounded-lg text-slate-400 transition ${
-                        modemCredentials.length > 1
-                          ? 'hover:bg-rose-50 hover:text-rose-600 cursor-pointer'
-                          : 'opacity-30 cursor-not-allowed'
-                      }`}
+                      className={`p-2 rounded-lg text-slate-400 transition ${modemCredentials.length > 1
+                        ? 'hover:bg-rose-50 hover:text-rose-600 cursor-pointer'
+                        : 'opacity-30 cursor-not-allowed'
+                        }`}
                       title="Hapus baris kredensial"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -659,26 +640,24 @@ export function ModulPengaturan({
                 <button
                   type="submit"
                   disabled={settingsLoading}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 flex items-center gap-2 transition min-h-[42px] cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Simpan Kredensial Modem</span>
                 </button>
               </div>
 
-              {/* Card Panduan Cara Kerja Multi-Kredensial (Khusus Desktop) */}
-              <div className="hidden lg:block pt-3 border-t border-sky-100">
-                <div className="p-4 rounded-xl bg-sky-50/60 border border-sky-200/80 space-y-2 text-xs">
-                  <h4 className="font-bold text-slate-900 flex items-center gap-2 text-xs">
-                    <KeyRound className="w-4 h-4 text-cyan-600" />
-                    <span>Cara Kerja Multi-Kredensial Fallback</span>
-                  </h4>
-                  <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
-                    <li>Sistem mencoba kredensial tersimpan milik pelanggan terlebih dahulu.</li>
-                    <li>Jika ditolak, sistem mencoba semua username/password default di atas satu per satu.</li>
-                    <li>Jika berhasil, status kredensial pelanggan otomatis diperbarui menjadi <code className="bg-emerald-100 px-1 rounded text-emerald-800 font-mono text-[10px]">VALID</code>.</li>
-                  </ol>
-                </div>
+              {/* Panduan Cara Kerja Multi-Kredensial (Khusus Desktop) */}
+              <div className="hidden lg:block pt-3 border-t border-sky-100 space-y-2 text-xs">
+                <h4 className="font-bold text-slate-900 flex items-center gap-2 text-xs">
+                  <KeyRound className="w-4 h-4 text-cyan-600" />
+                  <span>Cara Kerja Multi-Kredensial Fallback</span>
+                </h4>
+                <ol className="list-decimal list-inside space-y-1.5 text-xs text-slate-600 leading-relaxed font-sans pl-1">
+                  <li>Sistem mencoba kredensial tersimpan milik pelanggan terlebih dahulu.</li>
+                  <li>Jika ditolak, sistem mencoba semua username/password default di atas satu per satu.</li>
+                  <li>Jika berhasil, status kredensial pelanggan otomatis diperbarui menjadi <code className="bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800 font-mono text-[11px] font-bold">VALID</code>.</li>
+                </ol>
               </div>
             </form>
           )}
@@ -698,26 +677,26 @@ export function ModulPengaturan({
               </div>
 
               {/* Opsi 1: Getaran Aplikasi Native */}
-              <div className="p-3.5 rounded-xl border border-sky-200 bg-white/90 space-y-2">
+              <div className="py-2 space-y-2 border-b border-sky-100">
                 <label className="flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-2.5">
                     <Smartphone className="w-4 h-4 text-cyan-600" />
                     <div>
                       <span className="text-xs font-bold text-slate-800">Getaran Aplikasi Native (Web Wrapper APK)</span>
-                      <p className="text-[11px] text-slate-400">Aktifkan getaran perangkat Android saat alarm kritis terdeteksi.</p>
+                      <p className="text-xs text-slate-600 font-sans mt-0.5">Aktifkan getaran perangkat Android saat alarm kritis terdeteksi.</p>
                     </div>
                   </div>
                   <input
                     type="checkbox"
                     checked={appVibration}
                     onChange={(e) => setAppVibration(e.target.checked)}
-                    className="rounded text-cyan-600 focus:ring-cyan-500 w-4 h-4"
+                    className="rounded text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
                   />
                 </label>
               </div>
 
               {/* Opsi 2: Pengingat Pemantauan Terjeda */}
-              <div className="space-y-1.5 pt-1">
+              <div className="space-y-1.5 py-1">
                 <label className="block text-xs font-bold text-slate-700 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-cyan-600" />
                   <span>Interval Pengingat Pemantauan Terjeda (Menit)</span>
@@ -730,31 +709,31 @@ export function ModulPengaturan({
                   onChange={(e) => setAlertWaitingInterval(e.target.value)}
                   className="w-full rounded-xl border border-sky-200 px-3.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[40px]"
                 />
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-600 font-sans">
                   Notifikasi pengingat muncul di dashboard jika pemindaian terjeda lebih dari waktu ini.
                 </p>
               </div>
 
               {/* Opsi 3: Jam Tenang Malam (Quiet Hours) */}
-              <div className="p-3.5 rounded-xl border border-sky-200 bg-white/90 space-y-3">
+              <div className="py-2 space-y-3 border-t border-sky-100">
                 <label className="flex items-center justify-between cursor-pointer">
                   <div className="flex items-center gap-2.5">
                     <Moon className="w-4 h-4 text-cyan-600" />
                     <div>
                       <span className="text-xs font-bold text-slate-800">Jam Tenang Malam (Quiet Hours)</span>
-                      <p className="text-[11px] text-slate-400">Membungkam notifikasi non-kritis selama rentang jam istirahat teknisi.</p>
+                      <p className="text-xs text-slate-600 font-sans mt-0.5">Membungkam notifikasi non-kritis selama rentang jam istirahat teknisi.</p>
                     </div>
                   </div>
                   <input
                     type="checkbox"
                     checked={nightModeEnabled}
                     onChange={(e) => setNightModeEnabled(e.target.checked)}
-                    className="rounded text-cyan-600 focus:ring-cyan-500 w-4 h-4"
+                    className="rounded text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
                   />
                 </label>
 
                 {nightModeEnabled && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-sky-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 mb-1">Jam Mulai Senyap</label>
                       <input
@@ -763,7 +742,7 @@ export function ModulPengaturan({
                         onChange={(e) => setNightModeStart(e.target.value)}
                         className="w-full rounded-xl border border-sky-200 px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[40px]"
                       />
-                      <span className="block text-[10px] text-slate-400 mt-0.5">Default: 22:00 WIB</span>
+                      <span className="block text-[11px] font-mono text-slate-600 mt-0.5 font-medium">Default: 22:00 WIB</span>
                     </div>
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 mb-1">Jam Berakhir Senyap</label>
@@ -773,7 +752,7 @@ export function ModulPengaturan({
                         onChange={(e) => setNightModeEnd(e.target.value)}
                         className="w-full rounded-xl border border-sky-200 px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[40px]"
                       />
-                      <span className="block text-[10px] text-slate-400 mt-0.5">Default: 06:00 WIB</span>
+                      <span className="block text-[11px] font-mono text-slate-600 mt-0.5 font-medium">Default: 06:00 WIB</span>
                     </div>
                   </div>
                 )}
@@ -784,7 +763,7 @@ export function ModulPengaturan({
                 <button
                   type="submit"
                   disabled={settingsLoading}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 flex items-center gap-2 transition min-h-[42px]"
+                  className="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Simpan Pengaturan Notifikasi</span>
@@ -810,11 +789,11 @@ export function ModulPengaturan({
                 </div>
               )}
 
-              {/* Card 1: Info Identitas Akun Petugas */}
-              <div className="p-5 bg-white/95 rounded-3xl border border-sky-100 shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
+              {/* Section 1: Info Identitas Akun Petugas */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-sky-100">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 via-sky-600 to-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-700 text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
                       {currentUser?.nama_lengkap ? currentUser.nama_lengkap.charAt(0).toUpperCase() : (currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : 'A')}
                     </div>
                     <div className="min-w-0">
@@ -835,10 +814,10 @@ export function ModulPengaturan({
 
                 {isEditProfile ? (
                   /* Form Edit Data Diri */
-                  <form onSubmit={handleSaveDataDiri} className="pt-3 border-t border-slate-100 space-y-3 text-xs font-semibold">
+                  <form onSubmit={handleSaveDataDiri} className="space-y-3 text-xs font-semibold">
                     <div className="space-y-1">
                       <label className="text-slate-700 font-bold flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-cyan-600" />
+                        <User className="w-3.5 h-3.5 text-cyan-700" />
                         <span>Nama Lengkap Petugas</span>
                       </label>
                       <input
@@ -853,7 +832,7 @@ export function ModulPengaturan({
 
                     <div className="space-y-1">
                       <label className="text-slate-700 font-bold flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-cyan-600" />
+                        <Phone className="w-3.5 h-3.5 text-cyan-700" />
                         <span>No. WhatsApp / Kontak Petugas</span>
                       </label>
                       <input
@@ -876,7 +855,7 @@ export function ModulPengaturan({
                       <button
                         type="submit"
                         disabled={profileLoading}
-                        className="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-cyan-600/20 cursor-pointer"
+                        className="flex-1 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                       >
                         {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Simpan Data Diri</span>}
                       </button>
@@ -884,64 +863,64 @@ export function ModulPengaturan({
                   </form>
                 ) : (
                   /* View List Data Diri Petugas ala TeknoCust */
-                  <div className="pt-3 border-t border-slate-100 space-y-2.5 text-xs">
+                  <div className="space-y-2.5 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">ID Pengguna</span>
+                      <span className="text-slate-600 font-medium">ID Pengguna</span>
                       <span className="font-mono font-bold text-slate-900">{currentUser?.id || '1'}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Username Login</span>
+                      <span className="text-slate-600 font-medium">Username Login</span>
                       <span className="font-mono font-bold text-slate-900">{currentUser?.username || 'admin'}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Kantor Layanan</span>
-                      <span className="font-bold text-cyan-800 uppercase text-[11px] bg-cyan-50 px-2.5 py-0.5 rounded-lg border border-cyan-200">
+                      <span className="text-slate-600 font-medium">Kantor Layanan</span>
+                      <span className="font-bold text-slate-900 capitalize">
                         {(() => {
                           const val = currentUser?.allowed_kantor
                           if (Array.isArray(val)) {
-                            return val.map(k => String(k).toUpperCase()).join(', ')
+                            return val.map(k => String(k)).join(', ')
                           }
                           if (typeof val === 'string') {
                             try {
                               const parsed = JSON.parse(val)
                               if (Array.isArray(parsed)) {
-                                return parsed.map(k => String(k).toUpperCase()).join(', ')
+                                return parsed.map(k => String(k)).join(', ')
                               }
                             } catch (e) {
                               // fallback string cleaning
                             }
-                            return val.replace(/[\[\]"']/g, '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean).join(', ') || 'CABANG'
+                            return val.replace(/[\[\]"']/g, '').split(',').map(s => s.trim()).filter(Boolean).join(', ') || 'Cabang'
                           }
-                          return 'CABANG'
+                          return 'Cabang'
                         })()}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">No. WhatsApp / Telp</span>
+                      <span className="text-slate-600 font-medium">No. WhatsApp / Telp</span>
                       <span className="font-mono font-bold text-slate-900">{currentUser?.no_wa || '-'}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Hak Akses / Peran</span>
-                      <span className="font-bold text-slate-900 uppercase">{currentUser?.role || 'super admin'}</span>
+                      <span className="text-slate-600 font-medium">Hak Akses / Peran</span>
+                      <span className="font-bold text-slate-900 capitalize">{currentUser?.role || 'super admin'}</span>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Card 2: Expandable Form Ganti Kata Sandi Akun ala TeknoCust */}
-              <div className="bg-white/95 rounded-3xl border border-sky-100 shadow-xs overflow-hidden transition-all duration-300">
+              {/* Section 2: Expandable Form Ganti Kata Sandi Akun */}
+              <div className="pt-3 border-t border-sky-100">
                 <button
                   type="button"
                   onClick={() => setIsPasswordExpanded(!isPasswordExpanded)}
-                  className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer"
+                  className="w-full py-2 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="p-2.5 rounded-xl bg-cyan-50 text-cyan-700">
+                    <div className="p-2 rounded-lg bg-cyan-50 text-cyan-700">
                       <Lock className="w-4 h-4" />
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-900">Ganti Kata Sandi Akun</div>
-                      <div className="text-[10px] text-slate-400">Klik untuk membuka / menutup form</div>
+                      <div className="text-[11px] text-slate-600 font-medium">Klik untuk membuka / menutup form</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-cyan-700 font-semibold">
@@ -951,8 +930,8 @@ export function ModulPengaturan({
                 </button>
 
                 {isPasswordExpanded && (
-                  <div className="p-5 pt-0 space-y-3 border-t border-slate-100 animate-in fade-in duration-200">
-                    <form onSubmit={handleChangePassword} className="space-y-3 text-xs font-semibold mt-4">
+                  <div className="pt-3 space-y-3 animate-in fade-in duration-200">
+                    <form onSubmit={handleChangePassword} className="space-y-3 text-xs font-semibold">
                       <div className="space-y-1.5">
                         <label className="text-slate-700 block">Kata Sandi Baru</label>
                         <div className="relative">
@@ -967,7 +946,7 @@ export function ModulPengaturan({
                           <button
                             type="button"
                             onClick={() => setShowPassBaru(!showPassBaru)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 p-1 cursor-pointer"
                             aria-label="Lihat kata sandi baru"
                           >
                             {showPassBaru ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -989,7 +968,7 @@ export function ModulPengaturan({
                           <button
                             type="button"
                             onClick={() => setShowKonfirmPass(!showKonfirmPass)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 p-1 cursor-pointer"
                             aria-label="Lihat konfirmasi kata sandi"
                           >
                             {showKonfirmPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -1000,7 +979,7 @@ export function ModulPengaturan({
                       <button
                         type="submit"
                         disabled={profileLoading}
-                        className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/20 active:scale-[0.99] transition flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
+                        className="w-full mt-2 py-3 px-4 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm active:scale-[0.99] transition flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
                       >
                         {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Simpan Kata Sandi Baru</span>}
                       </button>
