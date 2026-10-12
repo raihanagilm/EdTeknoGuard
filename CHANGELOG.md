@@ -26,6 +26,16 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penyelarasan Tipografi Roboto Flex & Audit Impeccable Modul Log Aktivitas (`ModulLogAktivitas.jsx`)**:
+  - **Peningkatan Tipografi Fungsional Header Kolom (Undersized Functional Text)**: Menaikkan seluruh label header kolom tabel (`No`, `Waktu Kejadian`, `Pengguna`, `Aksi / Tindakan`, `Keterangan Audit`, `Alamat IP`, `Status`) dari `text-[10px]` ke `text-[11px] font-mono font-bold text-slate-700` (memenuhi standar minimum 11px floor).
+  - **Perbaikan Kontras & Keterbacaan Teks Sel Tabel (WCAG AA >= 4.5:1)**:
+    - Menaikkan teks nama pengguna / daemon sistem dari warna pudar `text-[10px] text-slate-400` (2.6:1) menjadi `text-xs text-slate-600 font-sans` (> 5.2:1).
+    - Menaikkan teks timestamp kejadian dan alamat IP dari `text-[11px] text-slate-500` menjadi `text-xs text-slate-600 font-mono`.
+    - Menaikkan badge aksi audit dari `text-[10px] px-2 py-0.5` menjadi `text-xs font-bold font-mono px-2.5 py-1 border-slate-300`.
+    - Menaikkan badge status (`SUCCESS`, `ERROR`) dari `text-[10px]` ke `text-[11px] font-black uppercase px-2.5 py-1` dengan kontras tinggi (`text-emerald-800 border-emerald-300`, `text-rose-800 border-rose-300`).
+  - **Penyelarasan Popover Filter Rentang Waktu**: Menggantikan border difus dan heading `text-[10px]` pada popover dropdown dengan border terdefinisi (`border-slate-300`), heading `text-[11px] font-black uppercase text-slate-700`, dan tombol opsi aktif solid (`bg-cyan-700 text-white font-bold`).
+  - **Tata Letak Kolom Presisi**: Menerapkan kelas `table-auto md:table-fixed` dengan lebar kolom terdefinisi untuk mencegah horizontal overflow.
+
 - **Integrasi Pagination, Tipografi Roboto Flex & Audit Impeccable Modul Tiket Keluhan (`ModulTiketKeluhan.jsx`)**:
   - **Integrasi Bar Navigasi Pagination Terpadu**: Mengintegrasikan bar navigasi paginasi pada `DataTableContainer` lengkap dengan props `page`, `totalPages`, `totalCount`, `onPrevPage`, dan `onNextPage` (15 baris per halaman), memberikan kontrol paginasi standar penuh bagi daftar tiket keluhan warga.
   - **Peningkatan Tipografi Fungsional Header Kolom (Undersized Functional Text)**: Menaikkan seluruh label header kolom tabel (`No`, `No. Tiket / Waktu`, `Pelanggan`, `Kategori Kendala`, `Deskripsi Keluhan`, `Rx Saat Lapor`, `Status`, `Aksi`) dari `text-[10px]` ke `text-[11px] font-mono font-bold text-slate-700` (memenuhi standar minimum 11px floor).

@@ -141,8 +141,8 @@ export function ModulLogAktivitas() {
                     className="fixed inset-0 z-40"
                     onClick={() => setFilterDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-52 bg-white/95 backdrop-blur-md rounded-2xl p-2.5 shadow-xl border border-sky-200 space-y-1 font-mono text-xs">
-                    <div className="px-2 py-1 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                  <div className="absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-56 bg-white rounded-xl p-2.5 shadow-xl border border-slate-300 space-y-1 font-mono text-xs">
+                    <div className="px-2.5 py-1 text-[11px] font-black uppercase text-slate-700 tracking-wider">
                       Pilih Rentang Waktu:
                     </div>
                     {[
@@ -160,41 +160,41 @@ export function ModulLogAktivitas() {
                           setPage(1);
                           if (rng.id !== 'custom') setFilterDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-2.5 py-1.5 rounded-xl transition flex items-center justify-between ${
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg transition flex items-center justify-between cursor-pointer ${
                           filterRange === rng.id
-                            ? 'bg-cyan-500 text-white font-bold'
-                            : 'hover:bg-cyan-50 text-slate-700'
+                            ? 'bg-cyan-700 text-white font-bold'
+                            : 'hover:bg-slate-100 text-slate-800'
                         }`}
                       >
-                        <span>{rng.label}</span>
-                        {filterRange === rng.id && <Check className="w-3.5 h-3.5" />}
+                        <span className="font-medium">{rng.label}</span>
+                        {filterRange === rng.id && <Check className="w-3.5 h-3.5 text-white" />}
                       </button>
                     ))}
 
                     {filterRange === 'custom' && (
-                      <div className="pt-2 border-t border-sky-100 space-y-1.5 text-[11px]">
+                      <div className="pt-2 border-t border-slate-200 space-y-2 text-[11px]">
                         <div>
-                          <span className="text-slate-400 block text-[10px]">Mulai:</span>
+                          <span className="text-slate-700 font-bold block text-[11px] mb-0.5">Mulai:</span>
                           <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full px-2 py-1 rounded-lg border border-sky-200 bg-white"
+                            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-[11px]"
                           />
                         </div>
                         <div>
-                          <span className="text-slate-400 block text-[10px]">Sampai:</span>
+                          <span className="text-slate-700 font-bold block text-[11px] mb-0.5">Sampai:</span>
                           <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full px-2 py-1 rounded-lg border border-sky-200 bg-white"
+                            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-[11px]"
                           />
                         </div>
                         <button
                           type="button"
                           onClick={() => setFilterDropdownOpen(false)}
-                          className="w-full mt-1 py-1 bg-cyan-600 text-white rounded-lg font-bold text-center"
+                          className="w-full mt-1.5 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg font-bold text-center cursor-pointer text-xs"
                         >
                           Terapkan
                         </button>
@@ -229,61 +229,61 @@ export function ModulLogAktivitas() {
         onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
         loading={loading}
       >
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border-collapse table-auto md:table-fixed">
           <thead>
-            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[10px] uppercase tracking-wider font-bold">
+            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3 w-12 text-center">No</th>
               <th
                 onClick={() => handleSort('created_at')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-44"
               >
                 <div className="flex items-center gap-1">
                   <span>Waktu Kejadian</span>
                   {sortField === 'created_at' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
               <th
                 onClick={() => handleSort('username')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-40"
               >
                 <div className="flex items-center gap-1">
                   <span>Pengguna</span>
                   {sortField === 'username' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
               <th
                 onClick={() => handleSort('action')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-44"
               >
                 <div className="flex items-center gap-1">
                   <span>Aksi / Tindakan</span>
                   {sortField === 'action' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
               <th className="py-2.5 px-3">Keterangan Audit</th>
-              <th className="py-2.5 px-3">Alamat IP</th>
+              <th className="py-2.5 px-3 w-36">Alamat IP</th>
               <th
                 onClick={() => handleSort('status')}
-                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none w-28"
               >
                 <div className="flex items-center justify-center gap-1">
                   <span>Status</span>
                   {sortField === 'status' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
@@ -310,30 +310,30 @@ export function ModulLogAktivitas() {
                 return (
                   <tr key={idx} className="hover:bg-cyan-50/40 transition">
                     <td className="py-2.5 px-3 text-center text-slate-500 font-bold text-xs">{rowNo}</td>
-                    <td className="py-2.5 px-3 text-slate-500 text-[11px] whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-slate-600 text-xs whitespace-nowrap">
                       {item.created_at || item.waktu || '-'}
                     </td>
                     <td className="py-2.5 px-3">
                       <div className="font-bold text-cyan-900">{item.username || item.user || 'Sistem'}</div>
                       {item.nama_karyawan && (
-                        <div className="text-[10px] text-slate-400 font-sans">{item.nama_karyawan}</div>
+                        <div className="text-xs text-slate-600 font-sans">{item.nama_karyawan}</div>
                       )}
                     </td>
                     <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[10px] font-bold">
+                      <span className="inline-block px-2.5 py-1 rounded bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold font-mono">
                         {item.action || item.aksi || 'ACTIVITY'}
                       </span>
                     </td>
                     <td className="py-2.5 px-3 font-sans text-slate-600 max-w-sm">
-                      <div className="line-clamp-2">{item.keterangan || item.detail || '-'}</div>
+                      <div className="line-clamp-2 text-xs">{item.keterangan || item.detail || '-'}</div>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-500 text-[11px]">{item.ip_address || '-'}</td>
+                    <td className="py-2.5 px-3 text-slate-600 text-xs font-mono">{item.ip_address || '-'}</td>
                     <td className="py-2.5 px-3 text-center">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                        className={`inline-block px-2.5 py-1 rounded text-[11px] font-black uppercase ${
                           item.status === 'SUCCESS' || item.status === 'BERHASIL'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                            : 'bg-rose-50 text-rose-800 border border-rose-300'
                         }`}
                       >
                         {item.status || 'OK'}
