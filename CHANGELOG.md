@@ -26,10 +26,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
-- **Penyelarasan Navigasi & Stacking Modul Pemantauan Kuota (`ModulPemantauanKuota.jsx`)**:
+- **Penyelarasan Navigasi, Stacking & Impeccable Audit Modul Pemantauan Kuota (`ModulPemantauanKuota.jsx` & `App.jsx`)**:
+  - **Eliminasi AI Tell Nested Card pada Header**: Meratakan wadah office switcher di top navigation [`App.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx) (`bg-white/60 border border-sky-200`) untuk menghilangkan tumpukan kartu ganda di dalam header.
   - **Integrasi Bar Navigasi Pagination**: Mengintegrasikan bar pagination terpadu pada `DataTableContainer` lengkap dengan props `page`, `totalPages`, `totalCount`, `onPrevPage`, dan `onNextPage` (15 baris per halaman), selaras dengan modul tabel lainnya di TeknoGuard NOC.
-  - **Resolusi Stacking Context Filter Popover**: Membungkus filter bar dengan `relative z-30` dan popover dropdown dengan `z-50` agar melayang di atas tabel tanpa terpotong atau tertumpuk di bawah header tabel.
-  - **Peningkatan Tipografi Fungsional & Kontras**: Menaikkan label header kolom (`th`) dan badge dari `10px` ke `text-[11px] font-mono font-bold text-slate-700` dengan rasio kontras WCAG AA.
+  - **Resolusi Stacking Context & Text Occlusion Filter Popover**: Membungkus filter bar dengan `relative z-30` dan popover dropdown dengan `z-50` agar melayang di atas tabel tanpa menutupi atau tertumpuk di bawah header tabel.
+  - **Peningkatan Tipografi Fungsional & Kontras WCAG AA**:
+    - Menaikkan teks alamat pelanggan dari warna pudar `text-slate-400` (2.6:1) menjadi `text-xs text-slate-600` (kontras > 5.2:1).
+    - Menaikkan badge status `UNLIMITED` dari `text-[10px]` ke `text-[11px] font-black uppercase bg-emerald-50 text-emerald-800 border-emerald-200` (memenuhi 11px floor).
+    - Memastikan font Roboto Flex terdistribusi secara konsisten ke seluruh teks body dan tabel.
   - **Tata Letak Kolom Presisi**: Menerapkan kelas `table-auto md:table-fixed` dengan lebar kolom proporsional untuk mencegah horizontal overflow.
 
 - **Penyelesaian Audit Impeccable Modul Riwayat Redaman (`ModulRiwayatRedaman.jsx` & `CommonUI.jsx`)**:

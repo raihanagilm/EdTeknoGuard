@@ -361,7 +361,7 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
                   <tr key={item.id_pelanggan} className="hover:bg-cyan-50/40 transition">
                     <td className="py-2.5 px-3 text-center text-slate-500 font-bold text-xs">{rowNo}</td>
                     <td className="py-2.5 px-3 font-bold text-cyan-900">{item.id_pelanggan}</td>
-                    <td className="py-2.5 px-3 font-sans">
+                    <td className="py-2.5 px-3">
                       {onNavigateCustomer && item.nama ? (
                         <button
                           type="button"
@@ -374,7 +374,7 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
                       ) : (
                         <div className="font-bold text-slate-900">{item.nama}</div>
                       )}
-                      <div className="text-[11px] text-slate-400">{item.alamat || '-'}</div>
+                      <div className="text-xs text-slate-600 mt-0.5">{item.alamat || '-'}</div>
                     </td>
                     <td className="py-2.5 px-3">
                       <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[11px] font-bold">
@@ -384,7 +384,7 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
                     <td className="py-2.5 px-3 text-slate-600">{item.ip_router}</td>
                     <td className="py-2.5 px-3 text-center">
                       <div className="font-black text-slate-900">
-                        {item.terpakai_gb != null ? item.terpakai_gb.toFixed(1) : '0.0'} <span className="text-[11px] text-slate-500 font-normal">GB</span>
+                        {item.terpakai_gb != null ? item.terpakai_gb.toFixed(1) : '0.0'} <span className="text-xs text-slate-600 font-normal">GB</span>
                       </div>
                       <div className="w-20 bg-slate-100 h-1.5 rounded-full mx-auto mt-1 overflow-hidden">
                         <div
@@ -396,7 +396,7 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
                       </div>
                     </td>
                     <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
                         UNLIMITED
                       </span>
                     </td>
