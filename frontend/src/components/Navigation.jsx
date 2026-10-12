@@ -52,19 +52,19 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
   return (
     <aside className="hidden lg:flex w-60 bg-white/95 backdrop-blur-md flex-col fixed inset-y-0 z-40 border-r border-sky-200/80 shadow-sm">
       {/* Header Identitas */}
-      <div className="h-14 flex items-center justify-between px-4 border-b border-sky-100 bg-gradient-to-r from-cyan-50/50 to-sky-50/50">
+      <div className="h-14 flex items-center justify-between px-4 border-b border-sky-100 bg-sky-50/60">
         <div className="flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-cyan-600 to-sky-600 flex items-center justify-center text-white shadow-xs">
+          <div className="h-8 w-8 rounded-lg bg-cyan-700 flex items-center justify-center text-white shadow-xs">
             <Radio className="w-4 h-4" />
           </div>
           <div>
             <div className="text-xs font-black text-slate-900 tracking-tight leading-none">
-              Tekno<span className="text-cyan-600">Guard</span>
+              Tekno<span className="text-cyan-700">Guard</span>
             </div>
-            <div className="text-[9px] text-slate-400 font-mono font-bold mt-0.5">NOC RESMI NOC</div>
+            <div className="text-[11px] text-slate-500 font-mono font-bold mt-0.5 tracking-tight">NOC RESMI NOC</div>
           </div>
         </div>
-        <span className="px-1.5 py-0.5 rounded bg-cyan-100 border border-cyan-300 text-[9px] font-mono text-cyan-800 font-bold">
+        <span className="px-2 py-0.5 rounded bg-cyan-100 border border-cyan-300 text-[11px] font-mono text-cyan-900 font-bold">
           AKTIF
         </span>
       </div>
@@ -77,7 +77,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
 
           return (
             <div key={sIdx} className="space-y-0.5">
-              <div className="px-2 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-800/70">
+              <div className="px-2 pb-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600">
                 {sec.title}
               </div>
               {visibleItems.map((item) => {
@@ -89,16 +89,16 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
                     onClick={() => setActiveTab(item.id)}
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl transition text-left text-xs ${
                       isActive
-                        ? 'bg-gradient-to-r from-cyan-500/15 to-sky-500/15 text-cyan-900 font-bold border border-cyan-300/80 shadow-2xs'
-                        : 'hover:bg-cyan-50/50 text-slate-600 hover:text-slate-900'
+                        ? 'bg-cyan-100/70 text-cyan-950 font-bold border border-cyan-300/90 shadow-2xs'
+                        : 'hover:bg-cyan-50/60 text-slate-700 hover:text-slate-900'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-600' : 'text-slate-400'}`} />
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-700' : 'text-slate-500'}`} />
                       <span>{item.label}</span>
                     </div>
                     {item.badge && (
-                      <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-mono text-[9px] font-black animate-pulse">
+                      <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white font-mono text-[11px] font-black animate-pulse">
                         {item.badge}
                       </span>
                     )}
@@ -111,27 +111,27 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
       </div>
 
       {/* Footer Profil User */}
-      <div className="p-3 border-t border-sky-100 bg-cyan-50/40">
+      <div className="p-3 border-t border-sky-200/80 bg-white/60">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-cyan-600 to-sky-600 text-white font-mono text-xs flex items-center justify-center font-bold shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="h-8 w-8 rounded-lg bg-cyan-700 text-white font-mono text-xs flex items-center justify-center font-bold shrink-0">
               {getInitials(currentUser?.nama_lengkap || currentUser?.username)}
             </div>
             <div className="min-w-0">
               <div className="text-xs font-bold text-slate-900 truncate">
                 {currentUser?.nama_lengkap || currentUser?.username || 'Admin NOC'}
               </div>
-              <div className="text-[9px] text-slate-400 font-mono capitalize">
+              <div className="text-[11px] text-slate-600 font-mono font-bold capitalize">
                 {currentUser?.role || 'super admin'}
               </div>
             </div>
           </div>
           <button
             onClick={onLogout}
-            className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition shrink-0"
+            className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition shrink-0"
             title="Keluar Sesi"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -141,42 +141,42 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
 
 export function MobileNav({ activeTab, setActiveTab, unreadTickets = 0 }) {
   return (
-    <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-sky-200 z-40 h-14 flex items-center px-1 shadow-md">
+    <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-sky-200 z-40 h-16 flex items-center px-1 shadow-md">
       <div className="grid grid-cols-5 w-full items-center text-xs">
         <button
           onClick={() => setActiveTab('pelanggan')}
-          className={`flex flex-col items-center justify-center min-h-[40px] ${activeTab === 'pelanggan' ? 'text-cyan-600 font-bold' : 'text-slate-400'}`}
+          className={`flex flex-col items-center justify-center min-h-[48px] ${activeTab === 'pelanggan' ? 'text-cyan-800 font-bold' : 'text-slate-600'}`}
         >
-          <Users className="w-4 h-4" />
-          <span className="text-[9px] font-bold mt-0.5">Pelanggan</span>
+          <Users className="w-5 h-5" />
+          <span className="text-[11px] font-bold mt-0.5">Pelanggan</span>
         </button>
 
         <button
           onClick={() => setActiveTab('riwayat')}
-          className={`flex flex-col items-center justify-center min-h-[40px] ${activeTab === 'riwayat' ? 'text-cyan-600 font-bold' : 'text-slate-400'}`}
+          className={`flex flex-col items-center justify-center min-h-[48px] ${activeTab === 'riwayat' ? 'text-cyan-800 font-bold' : 'text-slate-600'}`}
         >
-          <History className="w-4 h-4" />
-          <span className="text-[9px] font-bold mt-0.5">Riwayat</span>
+          <History className="w-5 h-5" />
+          <span className="text-[11px] font-bold mt-0.5">Riwayat</span>
         </button>
 
         <button
           onClick={() => setActiveTab('beranda')}
-          className="flex flex-col items-center justify-center -mt-3 min-h-[40px]"
+          className="flex flex-col items-center justify-center -mt-3 min-h-[48px]"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-sky-600 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-cyan-500/30 border-2 border-white">
-            <LayoutGrid className="w-4 h-4" />
+          <div className="w-11 h-11 rounded-xl bg-cyan-700 text-white flex items-center justify-center shadow-md shadow-cyan-900/20 border-2 border-white">
+            <LayoutGrid className="w-5 h-5" />
           </div>
-          <span className="text-[9px] font-black text-cyan-800 mt-0.5">Beranda</span>
+          <span className="text-[11px] font-black text-cyan-950 mt-0.5">Beranda</span>
         </button>
 
         <button
           onClick={() => setActiveTab('tiket')}
-          className={`flex flex-col items-center justify-center min-h-[40px] relative ${activeTab === 'tiket' ? 'text-cyan-600 font-bold' : 'text-slate-400'}`}
+          className={`flex flex-col items-center justify-center min-h-[48px] relative ${activeTab === 'tiket' ? 'text-cyan-800 font-bold' : 'text-slate-600'}`}
         >
-          <Ticket className="w-4 h-4" />
-          <span className="text-[9px] font-bold mt-0.5">Tiket</span>
+          <Ticket className="w-5 h-5" />
+          <span className="text-[11px] font-bold mt-0.5">Tiket</span>
           {unreadTickets > 0 && (
-            <span className="absolute top-1 right-3.5 px-1 rounded-full bg-rose-500 text-white text-[8px] font-black font-mono">
+            <span className="absolute top-1 right-3 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-black font-mono">
               {unreadTickets}
             </span>
           )}
@@ -184,10 +184,10 @@ export function MobileNav({ activeTab, setActiveTab, unreadTickets = 0 }) {
 
         <button
           onClick={() => setActiveTab('pengaturan')}
-          className={`flex flex-col items-center justify-center min-h-[40px] ${activeTab === 'pengaturan' ? 'text-cyan-600 font-bold' : 'text-slate-400'}`}
+          className={`flex flex-col items-center justify-center min-h-[48px] ${activeTab === 'pengaturan' ? 'text-cyan-800 font-bold' : 'text-slate-600'}`}
         >
-          <Sliders className="w-4 h-4" />
-          <span className="text-[9px] font-bold mt-0.5">Pengaturan</span>
+          <Sliders className="w-5 h-5" />
+          <span className="text-[11px] font-bold mt-0.5">Pengaturan</span>
         </button>
       </div>
     </nav>

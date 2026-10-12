@@ -910,12 +910,12 @@ export default function App() {
 
               return (
                 <div className="flex items-center gap-1.5 bg-cyan-50/90 hover:bg-cyan-100/80 p-1 pl-2 sm:pl-2.5 rounded-xl border border-sky-200 text-xs font-mono transition shadow-2xs">
-                  <Building2 className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase hidden md:inline">Kantor:</span>
+                  <Building2 className="w-4 h-4 text-cyan-800 shrink-0" />
+                  <span className="text-[11px] font-bold text-slate-600 uppercase hidden md:inline">Kantor:</span>
                   <select
                     value={activeOffice}
                     onChange={(e) => handleSwitchOffice(e.target.value)}
-                    className="bg-transparent text-cyan-900 font-bold focus:outline-none cursor-pointer pr-1 py-0.5 text-xs"
+                    className="bg-transparent text-cyan-950 font-bold focus:outline-none cursor-pointer pr-1 py-0.5 text-xs"
                     title="Pilih Wilayah Kantor Operasional"
                   >
                     {visibleKantors.length > 0 ? (

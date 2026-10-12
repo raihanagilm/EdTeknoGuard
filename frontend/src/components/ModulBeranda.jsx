@@ -669,34 +669,34 @@ export function ModulBeranda({
                       Pemantauan Otomatis: Aktif ({intervalMinutes}m)
                     </span>
                   ) : (
-                    <span className="text-amber-700">Pemantauan Otomatis: Dijeda</span>
+                    <span className="text-amber-800">Pemantauan Otomatis: Dijeda</span>
                   )}
                 </span>
 
                 <span
-                  className={`px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-black font-mono uppercase tracking-wide border ${
+                  className={`px-1.5 py-0.5 rounded text-[11px] font-black font-mono uppercase tracking-wide border ${
                     isNetworkError
-                      ? 'bg-rose-50 text-rose-700 border-rose-200'
+                      ? 'bg-rose-50 text-rose-800 border-rose-200'
                       : engineStatus === 'RUNNING'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
                   }`}
                 >
                   {isNetworkError ? 'GAGAL JARINGAN' : engineStatus === 'RUNNING' ? 'BERJALAN' : 'DIJEDA'}
                 </span>
               </div>
 
-              <div className="text-[11px] sm:text-xs text-slate-500 flex flex-wrap items-center gap-1 mt-0.5 font-mono">
+              <div className="text-[11px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-1 mt-0.5 font-mono">
                 <span>Cek Terakhir:</span>
                 <strong className="text-slate-800 font-bold">{lastScanTime}</strong>
                 <span className="text-slate-300 hidden sm:inline">|</span>
                 <span
-                  className={`text-[10px] sm:text-[11px] font-bold ${
+                  className={`text-[11px] font-bold ${
                     isNetworkError
                       ? 'text-rose-600'
                       : engineStatus === 'RUNNING'
-                      ? 'text-emerald-700'
-                      : 'text-amber-700'
+                      ? 'text-emerald-800'
+                      : 'text-amber-800'
                   }`}
                 >
                   {isNetworkError
@@ -713,8 +713,8 @@ export function ModulBeranda({
           {isAdminOrSuper && (
             <div className="flex items-center justify-between sm:justify-end gap-2 flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-sky-100">
               {isToggling && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-mono font-bold shrink-0">
-                  <RefreshCw className="animate-spin h-3.5 w-3.5 text-cyan-600" />
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-900 text-xs font-mono font-bold shrink-0">
+                  <RefreshCw className="animate-spin h-3.5 w-3.5 text-cyan-700" />
                   <span>Menyimpan...</span>
                 </div>
               )}
@@ -725,7 +725,7 @@ export function ModulBeranda({
                   <button
                     onClick={handleStartScan}
                     disabled={isToggling}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-700 hover:to-sky-700 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs shadow-cyan-600/20 min-h-[38px]"
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px] cursor-pointer"
                   >
                     <Play className="w-4 h-4 fill-white" />
                     <span>
@@ -852,7 +852,7 @@ export function ModulBeranda({
               </div>
               <div className="w-full bg-cyan-100 rounded-full h-2.5 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-cyan-500 to-sky-600 h-2.5 rounded-full transition-all duration-300 ease-out shadow-xs"
+                  className="bg-cyan-700 h-2.5 rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${Math.max(scanProgress.percent || 3, 3)}%` }}
                 />
               </div>
@@ -885,7 +885,7 @@ export function ModulBeranda({
               </div>
               <div className="w-full bg-amber-200 rounded-full h-2.5 overflow-hidden">
                 <div
-                  className="bg-amber-500 h-2.5 rounded-full transition-all duration-300 ease-out"
+                  className="bg-amber-600 h-2.5 rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${Math.max(scanProgress.percent || 3, 3)}%` }}
                 />
               </div>
@@ -894,17 +894,17 @@ export function ModulBeranda({
 
           {/* Standby */}
           {!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused)) && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono text-slate-700 bg-cyan-50/40 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-sky-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono text-slate-700 bg-sky-50/60 px-3.5 py-2.5 rounded-xl border border-sky-100">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-700 shrink-0" />
-                <span className="text-slate-500 font-medium">Durasi Terakhir:</span>
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-800 shrink-0" />
+                <span className="text-slate-600 font-medium">Durasi Terakhir:</span>
                 <strong className="text-slate-800 font-bold">
                   {scanProgress?.last_scan_duration > 0
                     ? `${formatDuration(scanProgress.last_scan_duration)} / siklus`
                     : 'Belum ada data'}
                 </strong>
               </div>
-              <div className="text-[10px] sm:text-[11px] text-slate-500 font-bold">
+              <div className="text-[11px] text-slate-600 font-bold">
                 <span>Target: {scanProgress?.total || kpi.total_monitored || 0} ONT</span>
               </div>
             </div>
@@ -912,15 +912,15 @@ export function ModulBeranda({
         </div>
 
         {/* Informasi Edukatif Jaringan Lokal */}
-        <div className="hidden sm:flex pt-3 border-t border-sky-100 items-start gap-2.5 text-xs text-slate-600 bg-cyan-50/40 p-3 rounded-xl border border-sky-100">
-          <Info className="w-4 h-4 text-cyan-600 shrink-0 mt-0.5" />
+        <div className="hidden sm:flex pt-3 border-t border-sky-100 items-start gap-2.5 text-xs text-slate-600 bg-sky-50/60 p-3 rounded-xl border border-sky-100">
+          <Info className="w-4 h-4 text-cyan-700 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             <strong className="text-slate-900 font-mono">Panduan Jaringan:</strong> Server pemantau{' '}
-            <span className="text-slate-900 font-semibold underline decoration-cyan-300">
+            <span className="text-slate-900 font-semibold underline decoration-cyan-400">
               harus berada dalam satu segmen jaringan atau VLAN ISP yang sama
             </span>{' '}
             dengan modem ONT pelanggan (contoh: IP gateway{' '}
-            <code className="font-mono bg-cyan-100/80 px-1.5 py-0.5 rounded border border-cyan-300 text-cyan-900 font-bold">
+            <code className="font-mono bg-cyan-100 px-1.5 py-0.5 rounded border border-cyan-300 text-cyan-950 font-bold">
               10.10.x.x
             </code>
             ) agar status perangkat terbaca normal.
@@ -932,85 +932,85 @@ export function ModulBeranda({
       <section className="lg:hidden bg-white/90 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-sky-200/80 shadow-xs">
         <header className="flex items-center justify-between mb-2 sm:mb-3">
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="h-3.5 w-1 bg-cyan-600 rounded-full" />
+            <div className="h-3.5 w-1 bg-cyan-700 rounded-full" />
             <h2 className="text-xs sm:text-sm font-black text-slate-900 font-mono uppercase tracking-wide">
               Menu Layanan
             </h2>
           </div>
-          <span className="text-[10px] text-slate-400 font-mono font-bold">Akses Cepat</span>
+          <span className="text-[11px] text-slate-600 font-mono font-bold">Akses Cepat</span>
         </header>
 
         <div className="grid grid-cols-4 gap-1.5 sm:gap-2.5">
           {/* 1. Data Pelanggan */}
           <button
             onClick={() => onNavigate('pelanggan')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
               <Users className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Pelanggan</span>
+            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Pelanggan</span>
           </button>
 
           {/* 2. Tiket Keluhan */}
           <button
             onClick={() => onNavigate('tiket')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative min-h-[58px]"
           >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
               <Ticket className="w-4 h-4 sm:w-5 sm:h-5" />
               {unreadTicketsCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1 py-0.2 min-w-[15px] text-center text-[8px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
+                <span className="absolute -top-1 -right-1 px-1 py-0.2 min-w-[15px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
                   {unreadTicketsCount}
                 </span>
               )}
             </div>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Tiket</span>
+            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Tiket</span>
           </button>
 
           {/* 3. Pemantauan Kuota */}
           <button
             onClick={() => onNavigate('kuota')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
               <Database className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Kuota</span>
+            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Kuota</span>
           </button>
 
           {/* 4. Riwayat Redaman */}
           <button
             onClick={() => onNavigate('riwayat')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
               <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Redaman</span>
+            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Redaman</span>
           </button>
 
           {/* 5. Log Aktivitas */}
           <button
             onClick={() => onNavigate('log')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
               <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Log</span>
+            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Log</span>
           </button>
 
           {/* 6. Pengaturan Sistem */}
           {isAdminOrSuper && (
             <button
               onClick={() => onNavigate('pengaturan')}
-              className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+              className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
             >
-              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
                 <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Pengaturan</span>
+              <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Pengaturan</span>
             </button>
           )}
 
@@ -1018,12 +1018,12 @@ export function ModulBeranda({
           {isSuperAdmin && (
             <button
               onClick={() => onNavigate('pengguna')}
-              className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+              className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
             >
-              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
                 <UserCheck className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">Pengguna</span>
+              <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Pengguna</span>
             </button>
           )}
 
@@ -1032,12 +1032,12 @@ export function ModulBeranda({
             href="/teknocust"
             target="_blank"
             rel="noreferrer"
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/40 hover:bg-cyan-50 border border-sky-200/60 hover:border-cyan-400 transition group text-center"
+            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
               <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-700 leading-tight">TeknoCust</span>
+            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">TeknoCust</span>
           </a>
         </div>
       </section>
@@ -1153,58 +1153,58 @@ export function ModulBeranda({
         </div>
 
         {/* Data Summary Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 p-2 sm:p-2.5 bg-cyan-50/40 rounded-xl border border-sky-100 text-xs text-slate-700 font-mono">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 p-2 sm:p-2.5 bg-sky-50/60 rounded-xl border border-sky-100 text-xs text-slate-700 font-mono">
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-cyan-100 text-cyan-700 shrink-0">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-cyan-100 text-cyan-800 shrink-0">
               <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+              <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider block">
                 Rata-rata:
               </span>
-              <span className="font-extrabold text-slate-800 text-[11px] sm:text-xs">
+              <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
                 {chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : '-'}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-emerald-100 text-emerald-800 shrink-0">
               <ArrowUpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <span className="text-[9px] sm:text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">
+              <span className="text-[11px] text-emerald-800 font-bold uppercase tracking-wider block">
                 Terbaik:
               </span>
-              <span className="font-extrabold text-emerald-700 text-[11px] sm:text-xs">
+              <span className="font-extrabold text-emerald-800 text-xs sm:text-sm">
                 {chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : '-'}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-rose-100 text-rose-700 shrink-0">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-rose-100 text-rose-800 shrink-0">
               <ArrowDownCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <span className="text-[9px] sm:text-[10px] text-rose-700 font-bold uppercase tracking-wider block">
+              <span className="text-[11px] text-rose-800 font-bold uppercase tracking-wider block">
                 Terendah:
               </span>
-              <span className="font-extrabold text-rose-700 text-[11px] sm:text-xs">
+              <span className="font-extrabold text-rose-800 text-xs sm:text-sm">
                 {chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : '-'}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-slate-200 text-slate-700 shrink-0">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-slate-200 text-slate-800 shrink-0">
               <BarChart2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div>
-              <span className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+              <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider block">
                 Total Sampel:
               </span>
-              <span className="font-extrabold text-slate-800 text-[11px] sm:text-xs">{chartStats.total_points} Scan</span>
+              <span className="font-extrabold text-slate-900 text-xs sm:text-sm">{chartStats.total_points} Scan</span>
             </div>
           </div>
         </div>
@@ -1215,24 +1215,24 @@ export function ModulBeranda({
           <div className="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-0.5 rounded-lg border border-sky-200 shadow-xs">
             <button
               onClick={handleZoomIn}
-              className="w-5 h-5 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 flex items-center justify-center transition active:scale-90"
+              className="w-6 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-900 flex items-center justify-center transition active:scale-90"
               title="Perbesar"
             >
-              <ZoomIn className="w-3 h-3" />
+              <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleZoomOut}
-              className="w-5 h-5 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 flex items-center justify-center transition active:scale-90"
+              className="w-6 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-900 flex items-center justify-center transition active:scale-90"
               title="Perkecil"
             >
-              <ZoomOut className="w-3 h-3" />
+              <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleZoomReset}
-              className="px-1 h-5 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-800 text-[9px] font-mono font-extrabold flex items-center justify-center gap-0.5 transition active:scale-90"
+              className="px-1.5 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-950 text-[11px] font-mono font-extrabold flex items-center justify-center gap-0.5 transition active:scale-90"
               title="Reset"
             >
-              <RotateCcw className="w-2.5 h-2.5" />
+              <RotateCcw className="w-3 h-3" />
               <span>Reset</span>
             </button>
           </div>
@@ -1246,7 +1246,7 @@ export function ModulBeranda({
         </div>
 
         {/* Legend Footer */}
-        <div className="pt-2 sm:pt-3 border-t border-sky-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-mono text-slate-500">
+        <div className="pt-2 sm:pt-3 border-t border-sky-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] font-mono text-slate-600">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {activeDatasets
               .filter((d) => !d.isThreshold)
@@ -1258,11 +1258,11 @@ export function ModulBeranda({
                   title={`Klik untuk toggle ${ds.label}`}
                 >
                   <span
-                    className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full inline-block shrink-0"
+                    className="h-2.5 w-2.5 rounded-full inline-block shrink-0"
                     style={{ backgroundColor: ds.color }}
                   />
                   <span
-                    className={`font-bold text-slate-700 ${
+                    className={`font-bold text-slate-800 ${
                       ds.hidden ? 'line-through opacity-40' : ''
                     }`}
                   >
@@ -1272,16 +1272,16 @@ export function ModulBeranda({
               ))}
 
             <div className="flex items-center gap-1 ml-0.5 pl-1.5 border-l border-sky-200">
-              <span className="h-0.5 w-2 sm:w-3 bg-amber-400 inline-block" />
-              <span className="text-amber-700 font-bold">Warning (-26dBm)</span>
+              <span className="h-0.5 w-2 sm:w-3 bg-amber-500 inline-block" />
+              <span className="text-amber-800 font-bold">Warning (-26dBm)</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="h-0.5 w-2 sm:w-3 bg-rose-400 inline-block" />
-              <span className="text-rose-700 font-bold">Kritis (-27dBm)</span>
+              <span className="h-0.5 w-2 sm:w-3 bg-rose-500 inline-block" />
+              <span className="text-rose-800 font-bold">Kritis (-27dBm)</span>
             </div>
           </div>
-          <div className="text-slate-400 text-[9px] sm:text-[10px]">
-            Optimal: <span className="font-extrabold text-emerald-600">-12 ~ -25.9 dBm</span>
+          <div className="text-slate-600 text-[11px]">
+            Optimal: <span className="font-extrabold text-emerald-800">-12 ~ -25.9 dBm</span>
           </div>
         </div>
       </div>

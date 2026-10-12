@@ -162,8 +162,8 @@ export function SegmentedStatusBar({ items = [] }) {
             }`}
           >
             <span
-              className={`text-[9px] sm:text-[11px] font-mono font-bold uppercase tracking-wider truncate max-w-full ${
-                isActive ? 'text-white/90' : sc.label
+              className={`text-[11px] font-mono font-bold uppercase tracking-wider truncate max-w-full ${
+                isActive ? 'text-white' : sc.label
               }`}
             >
               {it.label}
@@ -177,8 +177,8 @@ export function SegmentedStatusBar({ items = [] }) {
             </span>
             {it.subLabel && (
               <span
-                className={`hidden md:block text-[9px] font-mono truncate mt-0.5 ${
-                  isActive ? 'text-white/80' : 'text-slate-400'
+                className={`hidden md:block text-[11px] font-mono truncate mt-0.5 ${
+                  isActive ? 'text-white/90' : 'text-slate-500'
                 }`}
               >
                 {it.subLabel}
