@@ -1101,7 +1101,7 @@ export function ModulBeranda({
             </p>
           </div>
 
-          {/* Filter Tanggal & Segmented Control */}
+          {/* Filter Tanggal & Segmented Control (Flatter inline controls) */}
           <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto font-mono">
             <input
               type="date"
@@ -1111,17 +1111,19 @@ export function ModulBeranda({
                 setChartRange('custom')
               }}
               title="Pilih tanggal spesifik"
-              className="flex-1 sm:flex-none px-2 py-1 text-[11px] sm:text-xs bg-cyan-50/40 hover:bg-cyan-50 focus:bg-white text-slate-800 border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 min-h-[34px] sm:min-h-[36px] font-bold transition cursor-pointer"
+              className="flex-1 sm:flex-none px-2.5 py-1 text-[11px] sm:text-xs bg-sky-50/70 hover:bg-sky-100/70 focus:bg-white text-slate-800 border border-sky-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-600 min-h-[34px] sm:min-h-[36px] font-bold transition cursor-pointer"
             />
 
-            <div className="flex items-center bg-cyan-50/60 p-0.5 sm:p-1 rounded-xl border border-sky-200 text-[11px] sm:text-xs font-bold shrink-0">
+            <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold shrink-0">
               <button
                 onClick={() => {
                   setChartRange('today')
                   setSelectedDate(todayStr)
                 }}
-                className={`px-2.5 sm:px-3 py-1 rounded-lg transition ${
-                  chartRange === 'today' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                  chartRange === 'today'
+                    ? 'bg-cyan-700 text-white'
+                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
                 }`}
               >
                 Hari Ini
@@ -1131,8 +1133,10 @@ export function ModulBeranda({
                   setChartRange('yesterday')
                   setSelectedDate(todayStr)
                 }}
-                className={`px-2.5 sm:px-3 py-1 rounded-lg transition ${
-                  chartRange === 'yesterday' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                  chartRange === 'yesterday'
+                    ? 'bg-cyan-700 text-white'
+                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
                 }`}
               >
                 Kemarin
@@ -1142,8 +1146,10 @@ export function ModulBeranda({
                   setChartRange('week')
                   setSelectedDate(todayStr)
                 }}
-                className={`px-2.5 sm:px-3 py-1 rounded-lg transition ${
-                  chartRange === 'week' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                  chartRange === 'week'
+                    ? 'bg-cyan-700 text-white'
+                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
                 }`}
               >
                 7 Hari
@@ -1286,42 +1292,42 @@ export function ModulBeranda({
         </div>
       </div>
 
-      {/* 6. QUICK SHORTCUT NAVIGATION (2 MODULAR FEATURE ACTIONS) */}
+      {/* 6. QUICK SHORTCUT NAVIGATION (2 MODULAR ACTION TILES) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <button
           onClick={() => onNavigate('pelanggan')}
-          className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-sky-200/80 shadow-xs hover:border-cyan-500 hover:shadow-sm transition flex items-center justify-between group text-left cursor-pointer"
+          className="rounded-2xl p-4 bg-white hover:bg-sky-50/40 border border-sky-200 transition-colors flex items-center justify-between group text-left cursor-pointer"
         >
           <div className="flex items-center gap-3.5">
-            <div className="h-10 w-10 rounded-xl bg-cyan-50 text-cyan-800 flex items-center justify-center group-hover:bg-cyan-700 group-hover:text-white transition shrink-0">
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center group-hover:bg-cyan-700 group-hover:text-white transition-colors shrink-0">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono group-hover:text-cyan-900 transition">
+              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono group-hover:text-cyan-900 transition-colors">
                 Kelola Master Pelanggan
               </h3>
               <p className="text-xs text-slate-600 font-medium">Tabel seluruh modem ONT, filter POP/Kantor, dan live probe</p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition shrink-0" />
+          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition-transform shrink-0" />
         </button>
 
         <button
           onClick={() => onNavigate('tiket')}
-          className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-sky-200/80 shadow-xs hover:border-cyan-500 hover:shadow-sm transition flex items-center justify-between group text-left cursor-pointer"
+          className="rounded-2xl p-4 bg-white hover:bg-sky-50/40 border border-sky-200 transition-colors flex items-center justify-between group text-left cursor-pointer"
         >
           <div className="flex items-center gap-3.5">
-            <div className="h-10 w-10 rounded-xl bg-cyan-50 text-cyan-800 flex items-center justify-center group-hover:bg-cyan-700 group-hover:text-white transition shrink-0">
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center group-hover:bg-cyan-700 group-hover:text-white transition-colors shrink-0">
               <Ticket className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono group-hover:text-cyan-900 transition">
+              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono group-hover:text-cyan-900 transition-colors">
                 Tiket Keluhan Pelanggan
               </h3>
               <p className="text-xs text-slate-600 font-medium">Pantau laporan aduan warga desa dan update status penanganan</p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition shrink-0" />
+          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition-transform shrink-0" />
         </button>
       </div>
 

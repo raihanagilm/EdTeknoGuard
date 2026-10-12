@@ -26,6 +26,10 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Pembersihan Nested Cards & Border Stacking Modul Beranda (Impeccable Audit)**:
+  - **Eliminasi Nested Cards di Kontrol Chart**: Meratakan kontainer pembungkus filter tanggal dan tombol segmented range grafik di [`ModulBeranda.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) menjadi kontrol inline flat tanpa wadah border bertumpuk.
+  - **Eliminasi Nested Cards di Grid Pintasan Bawah**: Meratakan dua kartu pintasan master pelanggan dan tiket aduan (`div.grid.grid-cols-2`) menjadi tile interaktif solid (`bg-white border border-sky-200`) tanpa penumpukan elevasi kartu ganda.
+
 - **Migrasi Tipografi ke Google Fonts Roboto Flex (Material You / Wear OS Design)**:
   - **Penyelarasan Font Utama Sistem**: Menggantikan font keluarga `Inter` dengan **`Roboto Flex`** (`wght@100..1000` variable font) pada [`index.html`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/index.html) dan CSS root token [`index.css`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/index.css) (`font-family: 'Roboto Flex', 'Inter', system-ui, -apple-system, sans-serif`).
   - **Dukungan Tipografi Grafik Telemetri**: Mengintegrasikan `Roboto Flex` ke sumbu ordinat dan absis serta tooltip Chart.js di [`ModulBeranda.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) untuk konsistensi pembacaan data telemetri optik.
