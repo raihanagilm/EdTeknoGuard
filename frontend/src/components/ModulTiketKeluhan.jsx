@@ -35,6 +35,8 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer 
   const [updating, setUpdating] = useState(false);
   const [sortField, setSortField] = useState('id_tiket');
   const [sortDir, setSortDir] = useState('desc');
+  const [page, setPage] = useState(1);
+  const limit = 15;
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   const handleSort = (field) => {
@@ -44,6 +46,7 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer 
       setSortField(field);
       setSortDir('asc');
     }
+    setPage(1);
   };
 
   const showToast = (message, type = 'success') => {
@@ -68,6 +71,7 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer 
 
   useEffect(() => {
     fetchTickets();
+    setPage(1);
   }, [filterStatus, activeOffice]);
 
   const handleOpenModal = (ticket) => {
@@ -116,6 +120,9 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer 
     if (valA > valB) return sortDir === 'asc' ? 1 : -1;
     return 0;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredTickets.length / limit));
+  const paginatedTickets = filteredTickets.slice((page - 1) * limit, page * limit);
 
   const countByStatus = (st) => tickets.filter((t) => t.status === st).length;
 
@@ -208,78 +215,85 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer 
       </FilterContainer>
 
       {/* 4. Tabel Tiket (Sorting Aktif, Tanpa Checkbox Sesuai SOP) */}
-      <DataTableContainer loading={loading}>
-        <table className="w-full text-left border-collapse">
+      <DataTableContainer
+        page={page}
+        totalPages={totalPages}
+        totalCount={filteredTickets.length}
+        onPrevPage={() => setPage((p) => Math.max(1, p - 1))}
+        onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
+        loading={loading}
+      >
+        <table className="w-full text-left border-collapse table-auto md:table-fixed">
           <thead>
-            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[10px] uppercase tracking-wider font-bold">
+            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3 w-12 text-center">No</th>
               <th
                 onClick={() => handleSort('id_tiket')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-36"
               >
                 <div className="flex items-center gap-1">
                   <span>No. Tiket / Waktu</span>
                   {sortField === 'id_tiket' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
               <th
                 onClick={() => handleSort('nama_pelanggan')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-44"
               >
                 <div className="flex items-center gap-1">
                   <span>Pelanggan</span>
                   {sortField === 'nama_pelanggan' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
               <th
                 onClick={() => handleSort('kategori')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-44"
               >
                 <div className="flex items-center gap-1">
                   <span>Kategori Kendala</span>
                   {sortField === 'kategori' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
               <th className="py-2.5 px-3">Deskripsi Keluhan</th>
               <th
                 onClick={() => handleSort('redaman_saat_lapor')}
-                className="py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none w-32"
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Rx Saat Lapor</span>
                   {sortField === 'redaman_saat_lapor' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
               <th
                 onClick={() => handleSort('status')}
-                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none w-32"
               >
                 <div className="flex items-center justify-center gap-1">
                   <span>Status</span>
                   {sortField === 'status' ? (
-                    sortDir === 'asc' ? <ArrowUp className="w-3 h-3 text-cyan-700" /> : <ArrowDown className="w-3 h-3 text-cyan-700" />
+                    sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-cyan-700" /> : <ArrowDown className="w-3.5 h-3.5 text-cyan-700" />
                   ) : (
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3 text-right">Aksi</th>
+              <th className="py-2.5 px-3 text-right w-24">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
@@ -290,19 +304,19 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer 
                   <div>Memuat daftar tiket keluhan...</div>
                 </td>
               </tr>
-            ) : filteredTickets.length === 0 ? (
+            ) : paginatedTickets.length === 0 ? (
               <tr>
                 <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
                   Tidak ada tiket keluhan ditemukan.
                 </td>
               </tr>
             ) : (
-              filteredTickets.map((t, idx) => (
+              paginatedTickets.map((t, idx) => (
                 <tr key={t.id_tiket} className="hover:bg-cyan-50/40 transition">
-                  <td className="py-2.5 px-3 text-center text-slate-500 font-bold text-xs">{idx + 1}</td>
+                  <td className="py-2.5 px-3 text-center text-slate-500 font-bold text-xs">{(page - 1) * limit + idx + 1}</td>
                   <td className="py-2.5 px-3 whitespace-nowrap">
                     <div className="font-bold text-cyan-900">{t.id_tiket}</div>
-                    <div className="text-[10px] text-slate-400">{t.created_at_str}</div>
+                    <div className="text-xs text-slate-600 font-mono">{t.created_at_str}</div>
                   </td>
                   <td className="py-2.5 px-3">
                     {onNavigateCustomer && t.nama_pelanggan ? (
@@ -317,17 +331,17 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer 
                     ) : (
                       <div className="font-sans font-bold text-slate-900">{t.nama_pelanggan}</div>
                     )}
-                    <div className="text-[10px] text-slate-500 font-mono">
+                    <div className="text-xs text-slate-600 font-mono">
                       {t.id_pelanggan} {t.no_wa && `• WA: ${t.no_wa}`}
                     </div>
                   </td>
                   <td className="py-2.5 px-3">
-                    <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[10px] font-bold font-mono">
+                    <span className="inline-block px-2.5 py-1 rounded bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold font-mono">
                       {t.kategori}
                     </span>
                   </td>
                   <td className="py-2.5 px-3 font-sans text-slate-600 max-w-xs">
-                    <div className="line-clamp-2">{t.deskripsi || '-'}</div>
+                    <div className="line-clamp-2 text-xs">{t.deskripsi || '-'}</div>
                   </td>
                   <td className="py-2.5 px-3 text-right font-black">
                     <span className={t.redaman_saat_lapor <= -27 ? 'text-rose-600' : 'text-slate-700'}>
@@ -336,14 +350,14 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer 
                   </td>
                   <td className="py-2.5 px-3 text-center">
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                      className={`inline-block px-2.5 py-1 rounded text-[11px] font-black uppercase ${
                         t.status === 'MENUNGGU'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          ? 'bg-amber-50 text-amber-800 border border-amber-300'
                           : t.status === 'DICEK_ADMIN'
-                          ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                          ? 'bg-purple-50 text-purple-800 border border-purple-300'
                           : t.status === 'DIPROSES'
-                          ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
-                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          ? 'bg-cyan-50 text-cyan-800 border border-cyan-300'
+                          : 'bg-emerald-50 text-emerald-800 border border-emerald-300'
                       }`}
                     >
                       {t.status}
