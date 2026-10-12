@@ -26,6 +26,10 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Migrasi Tipografi ke Google Fonts Roboto Flex (Material You / Wear OS Design)**:
+  - **Penyelarasan Font Utama Sistem**: Menggantikan font keluarga `Inter` dengan **`Roboto Flex`** (`wght@100..1000` variable font) pada [`index.html`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/index.html) dan CSS root token [`index.css`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/index.css) (`font-family: 'Roboto Flex', 'Inter', system-ui, -apple-system, sans-serif`).
+  - **Dukungan Tipografi Grafik Telemetri**: Mengintegrasikan `Roboto Flex` ke sumbu ordinat dan absis serta tooltip Chart.js di [`ModulBeranda.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) untuk konsistensi pembacaan data telemetri optik.
+
 - **Penyelesaian Audit Impeccable & Anti-Slop (Konsistensi Kontras WCAG AA, Tipografi Fungsional, & Eliminasi AI Palette)**:
   - **Resolusi Masalah Missing Module Backend**:
     - Menambahkan file konfigurasi [`.vscode/settings.json`](file:///d:/databaru/Magang/EdTeknoGuard/.vscode/settings.json) dengan parameter `python.defaultInterpreterPath` yang mengarah ke instalasi Python 3.14 sistem pengguna, memperbaiki deteksi interpreter bawaan Inkscape yang menyebabkan error `Cannot find module` pada FastAPI, SQLAlchemy, dan bcrypt.

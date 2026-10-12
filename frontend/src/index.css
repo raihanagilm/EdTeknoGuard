@@ -13,7 +13,7 @@
     --brand-blue: #0284c7;    /* Sky 600 */
     --brand-indigo: #4f46e5;  /* Indigo 600 */
     
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Roboto Flex', 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   html {

@@ -400,7 +400,7 @@ export function ModulBeranda({
                 return `-${Math.round(dbm)} dBm`
               },
               color: '#64748B',
-              font: { size: 10.5, family: 'Inter', weight: '600' }
+              font: { size: 10.5, family: "'Roboto Flex', system-ui, sans-serif", weight: '600' }
             },
             grid: {
               color: (ctx) => {
@@ -415,7 +415,7 @@ export function ModulBeranda({
           x: {
             ticks: {
               color: '#64748B',
-              font: { size: 11, family: 'Inter' },
+              font: { size: 11, family: "'Roboto Flex', system-ui, sans-serif" },
               maxRotation: 0,
               autoSkip: true,
               maxTicksLimit: 12
@@ -427,8 +427,8 @@ export function ModulBeranda({
           legend: { display: false },
           tooltip: {
             backgroundColor: 'rgba(15, 23, 42, 0.94)',
-            titleFont: { family: 'Inter', size: 11, weight: 'bold' },
-            bodyFont: { family: 'Inter', size: 10, weight: '500' },
+            titleFont: { family: "'Roboto Flex', system-ui, sans-serif", size: 11, weight: 'bold' },
+            bodyFont: { family: "'Roboto Flex', system-ui, sans-serif", size: 10, weight: '500' },
             padding: { top: 8, bottom: 8, left: 10, right: 10 },
             cornerRadius: 8,
             displayColors: false,
