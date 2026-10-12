@@ -203,11 +203,11 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
               {filterDropdownOpen && (
                 <>
                   <div
-                    className="fixed inset-0 z-50"
+                    className="fixed inset-0 z-40"
                     onClick={() => setFilterDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 sm:left-0 top-full mt-2 z-50 w-56 bg-white rounded-2xl p-2.5 shadow-2xl border border-sky-200 space-y-1 font-mono text-xs">
-                    <div className="px-2.5 py-1.5 text-[11px] font-black uppercase text-slate-600 tracking-wider">
+                  <div className="absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-56 bg-white rounded-xl p-2.5 shadow-lg border border-slate-300 space-y-1 font-mono text-xs">
+                    <div className="px-2.5 py-1.5 text-[11px] font-black uppercase text-slate-700 tracking-wider">
                       Pilih Rentang Waktu:
                     </div>
                     {[
@@ -225,41 +225,41 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                           setPage(1);
                           if (rng.id !== 'custom') setFilterDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2 rounded-xl transition flex items-center justify-between cursor-pointer ${
+                        className={`w-full text-left px-3 py-2 rounded-lg transition flex items-center justify-between cursor-pointer ${
                           filterRange === rng.id
-                            ? 'bg-cyan-700 text-white font-bold shadow-xs'
-                            : 'hover:bg-cyan-50/70 text-slate-800'
+                            ? 'bg-cyan-700 text-white font-bold'
+                            : 'hover:bg-slate-100 text-slate-800'
                         }`}
                       >
-                        <span>{rng.label}</span>
+                        <span className="font-medium">{rng.label}</span>
                         {filterRange === rng.id && <Check className="w-4 h-4 text-white" />}
                       </button>
                     ))}
 
                     {filterRange === 'custom' && (
-                      <div className="pt-2 border-t border-sky-100 space-y-2 text-[11px]">
+                      <div className="pt-2 border-t border-slate-200 space-y-2 text-[11px]">
                         <div>
-                          <span className="text-slate-600 font-bold block text-[11px] mb-0.5">Mulai:</span>
+                          <span className="text-slate-700 font-bold block text-[11px] mb-0.5">Mulai:</span>
                           <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-sky-200 bg-white text-slate-800 text-[11px]"
+                            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-[11px]"
                           />
                         </div>
                         <div>
-                          <span className="text-slate-600 font-bold block text-[11px] mb-0.5">Sampai:</span>
+                          <span className="text-slate-700 font-bold block text-[11px] mb-0.5">Sampai:</span>
                           <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-sky-200 bg-white text-slate-800 text-[11px]"
+                            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-[11px]"
                           />
                         </div>
                         <button
                           type="button"
                           onClick={() => setFilterDropdownOpen(false)}
-                          className="w-full mt-1.5 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl font-bold text-center cursor-pointer text-xs"
+                          className="w-full mt-1.5 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg font-bold text-center cursor-pointer text-xs"
                         >
                           Terapkan
                         </button>

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Roboto Flex', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 @layer base {
   :root {
     --bg-page-from: #ecfeff;  /* Cyan 50 */
@@ -13,7 +18,7 @@
     --brand-blue: #0284c7;    /* Sky 600 */
     --brand-indigo: #4f46e5;  /* Indigo 600 */
     
-    font-family: 'Roboto Flex', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Roboto Flex', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   html {
