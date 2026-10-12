@@ -52,7 +52,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
   return (
     <aside className="hidden lg:flex w-60 bg-white/95 backdrop-blur-md flex-col fixed inset-y-0 z-40 border-r border-sky-200/80 shadow-sm">
       {/* Header Identitas */}
-      <div className="h-14 flex items-center justify-between px-4 border-b border-sky-100 bg-sky-50/60">
+      <div className="h-14 flex items-center justify-between px-4 border-b border-sky-100">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-lg bg-cyan-700 flex items-center justify-center text-white shadow-xs">
             <Radio className="w-4 h-4" />
@@ -111,7 +111,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
       </div>
 
       {/* Footer Profil User */}
-      <div className="p-3 border-t border-sky-200/80 bg-white/60">
+      <div className="p-3 border-t border-sky-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="h-8 w-8 rounded-lg bg-cyan-700 text-white font-mono text-xs flex items-center justify-center font-bold shrink-0">
