@@ -28,6 +28,8 @@ export function ModulManajemenPengguna() {
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [sortField, setSortField] = useState('username');
   const [sortDir, setSortDir] = useState('asc');
+  const [page, setPage] = useState(1);
+  const limit = 15;
   const [allKantor, setAllKantor] = useState(['cabang', 'pusat', 'banyumas']);
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -258,6 +260,9 @@ export function ModulManajemenPengguna() {
       return 0;
     });
 
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / limit));
+  const paginatedUsers = filteredUsers.slice((page - 1) * limit, page * limit);
+
   // Tambah Kantor State (Khusus Super Admin)
   const [modalKantorOpen, setModalKantorOpen] = useState(false);
   const [kantorNama, setKantorNama] = useState('');
@@ -318,154 +323,166 @@ export function ModulManajemenPengguna() {
       )}
 
       {/* 1. Filter Bar & Aksi Ringkas */}
-      <FilterContainer>
-        <div className="flex items-center justify-between gap-1.5 sm:gap-2">
-          {/* Kotak Pencarian & Tombol Filter Popover */}
-          <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
-            <div className="relative flex-1 min-w-[120px] sm:min-w-[180px]">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari user / nama..."
-                className="w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-              />
-            </div>
+      <div className="relative z-30">
+        <FilterContainer>
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+            {/* Kotak Pencarian & Tombol Filter Popover */}
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
+              <div className="relative flex-1 min-w-[120px] sm:min-w-[180px]">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Cari user / nama..."
+                  className="w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+                />
+              </div>
 
-            {/* Tombol Popover Filter Role & Status */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
-                className={`p-1.5 sm:p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shrink-0 ${
-                  filterRole !== 'all' || filterStatus !== 'all'
-                    ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
-                    : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
-                }`}
-                title="Filter Role & Status Akun"
-              >
-                <Filter className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">
-                  {filterRole !== 'all' ? filterRole : filterStatus !== 'all' ? `Status: ${filterStatus}` : 'Filter'}
-                </span>
-                {(filterRole !== 'all' || filterStatus !== 'all') && (
-                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" />
+              {/* Tombol Popover Filter Role & Status */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                  className={`p-1.5 sm:p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shrink-0 cursor-pointer ${
+                    filterRole !== 'all' || filterStatus !== 'all'
+                      ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
+                      : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
+                  }`}
+                  title="Filter Role & Status Akun"
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">
+                    {filterRole !== 'all' ? filterRole : filterStatus !== 'all' ? `Status: ${filterStatus}` : 'Filter'}
+                  </span>
+                  {(filterRole !== 'all' || filterStatus !== 'all') && (
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" />
+                  )}
+                </button>
+
+                {/* Popover Menu Filter */}
+                {filterDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setFilterDropdownOpen(false)}
+                    />
+                    <div className="absolute left-0 sm:left-0 top-full mt-1.5 z-50 w-64 bg-white rounded-2xl p-3 shadow-xl border border-slate-300 space-y-3 font-mono text-xs">
+                      {/* Seksi 1: Role Pengguna */}
+                      <div>
+                        <div className="text-[11px] font-black uppercase text-slate-700 tracking-wider mb-1">
+                          Role Pengguna:
+                        </div>
+                        <select
+                          value={filterRole}
+                          onChange={(e) => {
+                            setFilterRole(e.target.value);
+                            setPage(1);
+                          }}
+                          className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white text-slate-800"
+                        >
+                          <option value="all">Semua Role</option>
+                          <option value="super admin">Super Admin</option>
+                          <option value="admin">Admin Cabang</option>
+                          <option value="teknisi">Teknisi</option>
+                        </select>
+                      </div>
+
+                      {/* Seksi 2: Status Akun */}
+                      <div>
+                        <div className="text-[11px] font-black uppercase text-slate-700 tracking-wider mb-1">
+                          Status Akun:
+                        </div>
+                        <div className="grid grid-cols-3 gap-1">
+                          {[
+                            { id: 'all', label: 'Semua' },
+                            { id: 'active', label: 'Aktif' },
+                            { id: 'inactive', label: 'Nonaktif' }
+                          ].map((st) => (
+                            <button
+                              key={st.id}
+                              type="button"
+                              onClick={() => {
+                                setFilterStatus(st.id);
+                                setPage(1);
+                              }}
+                              className={`px-2 py-1.5 rounded-lg text-[11px] font-bold text-center transition cursor-pointer ${
+                                filterStatus === st.id
+                                  ? 'bg-cyan-700 text-white'
+                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                              }`}
+                            >
+                              {st.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFilterRole('all');
+                            setFilterStatus('all');
+                            setPage(1);
+                          }}
+                          className="text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer"
+                        >
+                          Reset Filter
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFilterDropdownOpen(false)}
+                          className="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg text-[11px] font-bold cursor-pointer"
+                        >
+                          Terapkan
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
+              </div>
+            </div>
+
+            {/* Tombol Aksi Tambah Kantor, Tambah Pengguna, Refresh */}
+            <div className="flex items-center gap-1 sm:gap-1.5 justify-end shrink-0">
+              <button
+                onClick={() => {
+                  setKantorError('');
+                  setKantorNama('');
+                  setKantorKode('');
+                  setKantorAlamat('');
+                  setModalKantorOpen(true);
+                }}
+                className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-sky-200 text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] cursor-pointer"
+                title="Tambah Kantor Wilayah Baru"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-700" />
+                <span className="hidden sm:inline">Kantor</span>
               </button>
-
-              {/* Popover Menu Filter */}
-              {filterDropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setFilterDropdownOpen(false)}
-                  />
-                  <div className="absolute left-0 sm:left-0 top-full mt-1.5 z-50 w-60 bg-white/95 backdrop-blur-md rounded-2xl p-3 shadow-xl border border-sky-200 space-y-2.5 font-mono text-xs">
-                    {/* Seksi 1: Role Pengguna */}
-                    <div>
-                      <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">
-                        Role Pengguna:
-                      </div>
-                      <select
-                        value={filterRole}
-                        onChange={(e) => setFilterRole(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white"
-                      >
-                        <option value="all">Semua Role</option>
-                        <option value="super admin">Super Admin</option>
-                        <option value="admin">Admin Cabang</option>
-                        <option value="teknisi">Teknisi</option>
-                      </select>
-                    </div>
-
-                    {/* Seksi 2: Status Akun */}
-                    <div>
-                      <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">
-                        Status Akun:
-                      </div>
-                      <div className="grid grid-cols-3 gap-1">
-                        {[
-                          { id: 'all', label: 'Semua' },
-                          { id: 'active', label: 'Aktif' },
-                          { id: 'inactive', label: 'Nonaktif' }
-                        ].map((st) => (
-                          <button
-                            key={st.id}
-                            type="button"
-                            onClick={() => setFilterStatus(st.id)}
-                            className={`px-2 py-1 rounded-lg text-[10px] font-bold text-center transition ${
-                              filterStatus === st.id
-                                ? 'bg-cyan-600 text-white'
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                            }`}
-                          >
-                            {st.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-sky-100 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFilterRole('all');
-                          setFilterStatus('all');
-                        }}
-                        className="text-[10px] font-bold text-slate-400 hover:text-slate-700"
-                      >
-                        Reset Filter
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFilterDropdownOpen(false)}
-                        className="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-[10px] font-bold"
-                      >
-                        Terapkan
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
+              <button
+                onClick={openAddModal}
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shadow-sm cursor-pointer"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Tambah User</span>
+                <span className="sm:hidden">Tambah</span>
+              </button>
+              <button
+                onClick={fetchUsers}
+                disabled={loading}
+                className="p-1.5 sm:p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[32px] sm:min-h-[36px] flex items-center justify-center shrink-0 cursor-pointer"
+                title="Muat Ulang Data"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
             </div>
           </div>
-
-          {/* Tombol Aksi Tambah Kantor, Tambah Pengguna, Refresh */}
-          <div className="flex items-center gap-1 sm:gap-1.5 justify-end shrink-0">
-            <button
-              onClick={() => {
-                setKantorError('');
-                setKantorNama('');
-                setKantorKode('');
-                setKantorAlamat('');
-                setModalKantorOpen(true);
-              }}
-              className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-sky-200 text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px]"
-              title="Tambah Kantor Wilayah Baru"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-cyan-700" />
-              <span className="hidden sm:inline">Kantor</span>
-            </button>
-            <button
-              onClick={openAddModal}
-              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shadow-xs"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Tambah User</span>
-              <span className="sm:hidden">Tambah</span>
-            </button>
-            <button
-              onClick={fetchUsers}
-              disabled={loading}
-              className="p-1.5 sm:p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[32px] sm:min-h-[36px] flex items-center justify-center shrink-0"
-              title="Muat Ulang Data"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </div>
-      </FilterContainer>
+        </FilterContainer>
+      </div>
 
       {/* Selection / Bulk Action Bar */}
       {selectedIds.length > 0 && (
@@ -503,10 +520,17 @@ export function ModulManajemenPengguna() {
       )}
 
       {/* 3. Tabel Pengguna */}
-      <DataTableContainer loading={loading}>
-        <table className="w-full text-left border-collapse">
+      <DataTableContainer
+        page={page}
+        totalPages={totalPages}
+        totalCount={filteredUsers.length}
+        onPrevPage={() => setPage((p) => Math.max(1, p - 1))}
+        onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
+        loading={loading}
+      >
+        <table className="w-full text-left border-collapse table-auto md:table-fixed">
           <thead>
-            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[10px] uppercase tracking-wider font-bold">
+            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3 w-10 text-center">
                 <input
                   type="checkbox"
@@ -523,35 +547,35 @@ export function ModulManajemenPengguna() {
               </th>
               <th className="py-2.5 px-2 w-12 text-center">No</th>
               <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-44"
                 onClick={() => handleSort('username')}
               >
                 <div className="flex items-center gap-1">
                   <span>Username / Nama</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'username' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'username' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
-              <th className="py-2.5 px-3">Kontak WA</th>
+              <th className="py-2.5 px-3 w-36">Kontak WA</th>
               <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-36"
                 onClick={() => handleSort('role')}
               >
                 <div className="flex items-center gap-1">
                   <span>Role Sistem</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'role' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'role' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
               <th className="py-2.5 px-3">Wilayah Kantor</th>
               <th 
-                className="py-2.5 px-3 text-center cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                className="py-2.5 px-3 text-center cursor-pointer select-none hover:bg-cyan-100/60 transition w-28"
                 onClick={() => handleSort('is_active')}
               >
                 <div className="flex items-center justify-center gap-1">
                   <span>Status</span>
-                  <ArrowUpDown className={`w-3 h-3 ${sortField === 'is_active' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'is_active' ? 'text-cyan-800' : 'text-slate-400'}`} />
                 </div>
               </th>
-              <th className="py-2.5 px-3 text-right">Aksi</th>
+              <th className="py-2.5 px-3 text-right w-20">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
@@ -562,14 +586,14 @@ export function ModulManajemenPengguna() {
                   <div>Memuat data pengguna...</div>
                 </td>
               </tr>
-            ) : filteredUsers.length === 0 ? (
+            ) : paginatedUsers.length === 0 ? (
               <tr>
                 <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
                   Tidak ada pengguna ditemukan.
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((u, idx) => {
+              paginatedUsers.map((u, idx) => {
                 const isSelected = selectedIds.includes(u.id);
 
                 return (
@@ -586,28 +610,28 @@ export function ModulManajemenPengguna() {
                         className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
                       />
                     </td>
-                    <td className="py-2.5 px-2 text-center text-slate-500 font-bold text-xs">{idx + 1}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-500 font-bold text-xs">{(page - 1) * limit + idx + 1}</td>
                     <td className="py-2.5 px-3">
                       <div className="font-bold text-cyan-900">{u.username}</div>
-                      <div className="text-[10px] text-slate-500 font-sans">{u.nama_karyawan || 'Karyawan NOC'}</div>
+                      <div className="text-xs text-slate-600 font-sans">{u.nama_karyawan || 'Karyawan NOC'}</div>
                     </td>
                     <td className="py-2.5 px-3 font-mono text-xs text-slate-700">
                       {u.no_wa ? (
-                        <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-300">
                           {u.no_wa}
                         </span>
                       ) : (
-                        <span className="text-slate-400 italic text-[11px]">-</span>
+                        <span className="text-slate-400 italic text-xs">-</span>
                       )}
                     </td>
                     <td className="py-2.5 px-3">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        className={`inline-block px-2.5 py-1 rounded text-[11px] font-bold uppercase ${
                           u.role === 'super admin'
-                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                            ? 'bg-purple-50 text-purple-800 border border-purple-300'
                             : u.role === 'admin'
-                            ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
-                            : 'bg-slate-100 text-slate-700 border border-slate-200'
+                            ? 'bg-cyan-50 text-cyan-800 border border-cyan-300'
+                            : 'bg-slate-100 text-slate-800 border border-slate-300'
                         }`}
                       >
                         {u.role}
@@ -616,12 +640,12 @@ export function ModulManajemenPengguna() {
                     <td className="py-2.5 px-3">
                       <div className="flex flex-wrap gap-1">
                         {u.role === 'super admin' ? (
-                          <span className="px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 text-[10px] border border-purple-200">
+                          <span className="inline-block px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[11px] font-medium border border-purple-300">
                             Semua Kantor
                           </span>
                         ) : (
                           (u.allowed_kantor || []).map((k) => (
-                            <span key={k} className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 text-[10px] uppercase">
+                            <span key={k} className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px] font-medium uppercase border border-slate-200">
                               {k}
                             </span>
                           ))
@@ -632,10 +656,10 @@ export function ModulManajemenPengguna() {
                       <button
                         onClick={() => handleToggleActive(u)}
                         disabled={u.username === 'admin'}
-                        className={`px-2 py-0.5 rounded text-[10px] font-black uppercase transition ${
+                        className={`inline-block px-2.5 py-1 rounded text-[11px] font-black uppercase transition cursor-pointer ${
                           u.is_active
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                            : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                            : 'bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100'
                         } ${u.username === 'admin' ? 'opacity-60 cursor-not-allowed' : ''}`}
                       >
                         {u.is_active ? 'AKTIF' : 'NONAKTIF'}
