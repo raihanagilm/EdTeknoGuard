@@ -26,6 +26,12 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penyelesaian Audit Impeccable Modul Riwayat Redaman (`ModulRiwayatRedaman.jsx` & `CommonUI.jsx`)**:
+  - **Eliminasi Nested Cards di Footer Tabel**: Meratakan wadah navigasi pagination `DataTableContainer` pada [`CommonUI.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/CommonUI.jsx) dengan menghapus background `bg-cyan-50/30`, menjadikannya bagian seamless dari kontainer tabel tanpa kesan kartu bertumpuk.
+  - **Peningkatan Ukuran Teks Fungsional (Undersized Functional Text)**: Menaikkan seluruh label header kolom tabel (`No`, `Waktu Cek`, `ID Pelanggan`, `Nama Pelanggan`, `IP Router ONT`, `Daya Rx (dBm)`, `Suhu`, `Latency`, `Status`) dari `text-[10px]` ke `text-[11px] font-mono font-bold text-slate-700` (memenuhi batas minimum 11px floor).
+  - **Perbaikan Kontras Popover Filter (Low Contrast Text)**: Memperbaiki kontras teks heading popover `"Pilih Rentang Waktu:"` dari warna pudar `#90a1b9` (2.6:1) menjadi `text-[11px] font-black uppercase text-slate-600` dengan rasio kontras 5.2:1 (lolos WCAG AA >= 4.5:1).
+  - **Pencegahan Teks Terhalang (Text Occlusion)**: Mengatur backdrop modal fixed overlay dan elevasi z-index `z-50` pada dropdown popover filter waktu sehingga tidak tumpang-tindih atau menutupi elemen tabel dan pagination di bawahnya.
+
 - **Pembersihan Nested Cards & Border Stacking Modul Beranda (Impeccable Audit)**:
   - **Eliminasi Nested Cards di Kontrol Chart**: Meratakan kontainer pembungkus filter tanggal dan tombol segmented range grafik di [`ModulBeranda.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) menjadi kontrol inline flat tanpa wadah border bertumpuk.
   - **Eliminasi Nested Cards di Grid Pintasan Bawah**: Meratakan dua kartu pintasan master pelanggan dan tiket aduan (`div.grid.grid-cols-2`) menjadi tile interaktif solid (`bg-white border border-sky-200`) tanpa penumpukan elevasi kartu ganda.

@@ -222,7 +222,7 @@ export function DataTableContainer({
       </div>
 
       {(page !== undefined && totalPages !== undefined) && (
-        <div className="p-3.5 border-t border-sky-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-slate-600 bg-cyan-50/30">
+        <div className="p-3.5 border-t border-sky-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-slate-600">
           <div>
             Halaman <span className="font-bold text-cyan-900">{page}</span> dari <span className="font-bold text-cyan-900">{totalPages}</span> {totalCount !== undefined && `(${totalCount} total rekaman)`}
           </div>
