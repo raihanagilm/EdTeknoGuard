@@ -26,6 +26,12 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penyelarasan Navigasi & Stacking Modul Pemantauan Kuota (`ModulPemantauanKuota.jsx`)**:
+  - **Integrasi Bar Navigasi Pagination**: Mengintegrasikan bar pagination terpadu pada `DataTableContainer` lengkap dengan props `page`, `totalPages`, `totalCount`, `onPrevPage`, dan `onNextPage` (15 baris per halaman), selaras dengan modul tabel lainnya di TeknoGuard NOC.
+  - **Resolusi Stacking Context Filter Popover**: Membungkus filter bar dengan `relative z-30` dan popover dropdown dengan `z-50` agar melayang di atas tabel tanpa terpotong atau tertumpuk di bawah header tabel.
+  - **Peningkatan Tipografi Fungsional & Kontras**: Menaikkan label header kolom (`th`) dan badge dari `10px` ke `text-[11px] font-mono font-bold text-slate-700` dengan rasio kontras WCAG AA.
+  - **Tata Letak Kolom Presisi**: Menerapkan kelas `table-auto md:table-fixed` dengan lebar kolom proporsional untuk mencegah horizontal overflow.
+
 - **Penyelesaian Audit Impeccable Modul Riwayat Redaman (`ModulRiwayatRedaman.jsx` & `CommonUI.jsx`)**:
   - **Eliminasi Hairline Border with Wide Shadow**: Menggantikan border tipis 0.8px dan efek bayangan terlalu difus (`shadow-2xl` 50px blur) pada popover dropdown dengan border tegas terdefinisi (`border-slate-300`) dan bayangan natural (`shadow-lg`).
   - **Eliminasi Glowing Shadow Accents**: Merapikan active indicator glow menjadi solid ring (`ring-1 ring-black/5` dan border solid) yang ramah kontras tanpa efek pendar neon buatan.
