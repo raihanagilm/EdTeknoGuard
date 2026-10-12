@@ -21,6 +21,7 @@ def render_customers_page(
 
 
 # ----------------- REST API ROUTES -----------------
+@router.get("/api/pelanggan")
 @router.get("/api/customers")
 def list_customers(
     request: Request,

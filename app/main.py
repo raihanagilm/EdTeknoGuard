@@ -201,6 +201,7 @@ def get_quota_alias(request: Request):
     finally:
         db.close()
 
+@app.get("/api/pengguna/list")
 @app.get("/api/users/list")
 async def get_users_alias(request: Request):
     from app.core.database import SessionLocal
@@ -208,6 +209,56 @@ async def get_users_alias(request: Request):
     db = SessionLocal()
     try:
         return await get_users_json(request=request, db=db)
+    finally:
+        db.close()
+
+@app.get("/api/kantor/list")
+async def get_kantor_list_alias(request: Request):
+    from app.core.database import SessionLocal
+    from app.db.models import Kantor
+    db = SessionLocal()
+    try:
+        kantors = db.query(Kantor).order_by(Kantor.id.asc()).all()
+        if not kantors:
+            default_items = [
+                ("pusat", "Pusat", "Kantor Pusat ISP"),
+                ("cabang", "Cabang", "Kantor Cabang Operasional"),
+                ("banyumas", "Banyumas", "Kantor Wilayah Banyumas")
+            ]
+            for k_code, k_name, k_desc in default_items:
+                db.add(Kantor(kode=k_code, nama=k_name, alamat=k_desc))
+            db.commit()
+            kantors = db.query(Kantor).order_by(Kantor.id.asc()).all()
+        return {
+            "status": "success",
+            "kantors": [{"id": k.id, "kode": k.kode, "nama": k.nama, "alamat": k.alamat or ""} for k in kantors]
+        }
+    finally:
+        db.close()
+
+@app.get("/api/log")
+def get_log_alias(request: Request):
+    from app.core.database import SessionLocal
+    from app.modules.activity_logs.controller import ActivityLogController
+    from app.core.security import require_admin
+    db = SessionLocal()
+    try:
+        require_admin(request)
+        params = dict(request.query_params)
+        return ActivityLogController.get_logs_data(
+            db=db,
+            username=params.get("username"),
+            q=params.get("q"),
+            action=params.get("action"),
+            range_type=params.get("range", "today"),
+            start_date=params.get("start_date"),
+            end_date=params.get("end_date"),
+            date=params.get("date"),
+            sort_by=params.get("sort_by", "created_at"),
+            sort_dir=params.get("sort_dir", "desc"),
+            page=int(params.get("page", 1)),
+            limit=int(params.get("limit", 15))
+        )
     finally:
         db.close()
 
@@ -269,6 +320,7 @@ async def api_auth_login(request: Request):
     body = await request.json()
     username = body.get("username", "").strip()
     password = body.get("password", "")
+    remember_me = body.get("remember_me", True)
     
     db = SessionLocal()
     try:
@@ -316,14 +368,18 @@ async def api_auth_login(request: Request):
                 }
             }
         )
-        response.set_cookie(
-            key=SESSION_COOKIE_NAME,
-            value=token,
-            max_age=MAX_SESSION_AGE,
-            httponly=True,
-            samesite="lax",
-            path="/"
-        )
+        # Jika 'Ingat Saya' dicentang, cookie bertahan 30 hari (MAX_SESSION_AGE = 2.592.000 detik)
+        # Jika tidak dicentang, cookie menjadi Session Cookie (otomatis hangus saat browser ditutup)
+        cookie_kwargs = {
+            "key": SESSION_COOKIE_NAME,
+            "value": token,
+            "httponly": True,
+            "samesite": "lax",
+            "path": "/"
+        }
+        if remember_me:
+            cookie_kwargs["max_age"] = MAX_SESSION_AGE
+        response.set_cookie(**cookie_kwargs)
         return response
     finally:
         db.close()

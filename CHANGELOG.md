@@ -26,7 +26,37 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
-- **Penerapan Global Tipografi Roboto Flex (`frontend/src`)**:
+- **Pemisahan Halaman Login Mandiri (`HalamanLogin.jsx`) & Fitur Ingat Saya (30 Hari Inaktivitas)**:
+  - **Modularisasi Komponen Mandiri**: Memisahkan antarmuka login dari [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx) ke file mandiri [HalamanLogin.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/HalamanLogin.jsx) di folder `frontend/src/components/`, merapikan hierarki kode dan menyederhanakan maintainability komponen root.
+  - **Fitur Checkbox Ingat Saya**:
+    - Menambahkan checkbox *Ingat Saya* di form login dengan keterangan: *"Sesi aktif otomatis selama 30 hari sejak akses terakhir"*.
+    - Terintegrasi dengan backend FastAPI via parameter `remember_me` di `POST /api/auth/login`. Jika dicentang, cookie sesi disetel dengan masa berlaku 30 hari (`max_age=2.592.000` detik); jika tidak, disetel sebagai *session cookie* (otomatis kedaluwarsa begitu browser ditutup).
+  - **Proteksi Inaktivitas 30 Hari (Auto Logout)**:
+    - Melacak waktu terakhir aplikasi dibuka (`edtekno_last_active_time`).
+    - Jika pengguna tidak pernah membuka aplikasi selama 30 hari berturut-turut (`> 30 * 24 * 3600 * 1000` ms), sistem otomatis menghanguskan sesi lokal dan cookie serta mengarahkan pengguna kembali ke halaman login.
+    - Setiap kali pengguna aktif membuka atau me-refresh aplikasi, waktu aktif diperbarui secara otomatis (*Sliding Expiration Window*).
+
+- **Penyelarasan URL Browser & REST API Sesuai Nama Navigasi**:
+  - **Kesesuaian 100% Nama Navigasi ke URL Browser (SPA Routing)**:
+    - `Beranda` -> `/`
+    - `Riwayat Redaman` -> `/riwayat` (sebelumnya `/logs`)
+    - `Pemakaian Kuota` -> `/kuota` (sebelumnya `/admin/kuota`)
+    - `Data Pelanggan` -> `/pelanggan` (tetap `/pelanggan`)
+    - `Tiket Keluhan` -> `/tiket` (sebelumnya `/admin/tiket`)
+    - `Log Aktivitas Audit` -> `/log` (sebelumnya `/activity-logs`)
+    - `Manajemen Pengguna` -> `/pengguna` (sebelumnya `/users`)
+    - `Pengaturan Sistem` -> `/pengaturan` (sebelumnya `/settings`)
+    - Path lama tetap didukung di [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx) sebagai alias/fallback agar tidak memutus tautan yang sudah tersimpan atau bookmark.
+  - **Kesesuaian Endpoint REST API Backend**:
+    - Data Pelanggan: `/api/pelanggan` (di [routes.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/routes.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
+    - Riwayat Redaman: `/api/riwayat` (di [routes.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/logs_mgmt/routes.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
+    - Pemakaian Kuota: `/api/kuota` (di [main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
+    - Tiket Gangguan: `/api/tiket` (di [main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
+    - Log Aktivitas: `/api/log` (di [main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
+    - Pengguna: `/api/pengguna/list` (di [main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
+    - Pengaturan: `/api/pengaturan` (di [routes.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/routes.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
+  - **Pembersihan Modul Pengaturan**: Menghapus badge counter pada tab sidebar Kredensial ONT dan menampilkan Kantor Layanan sebagai teks biasa tanpa uppercase penuh.
+
   - Memastikan seluruh modul aplikasi web NOC (`TeknoGuard`) dan Portal Mandiri Pelanggan (`TeknoCust`) secara konsisten menggunakan keluarga huruf **Roboto Flex** (`--font-sans: 'Roboto Flex', sans-serif`).
   - Menetapkan deklarasi eksplisit `font-family: 'Roboto Flex'` pada `:root`, `html`, `body`, serta elemen formulir (`button`, `input`, `select`, `textarea`) di [index.css](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/index.css), menjamin perenderan tipografi seragam dan presisi di seluruh browser dan perangkat.
 

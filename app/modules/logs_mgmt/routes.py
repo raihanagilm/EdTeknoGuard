@@ -9,6 +9,7 @@ from app.modules.logs_mgmt.controller import LogsMgmtController
 router = APIRouter(tags=["logs"])
 
 # ----------------- HTML PAGE ROUTE -----------------
+@router.get("/riwayat")
 @router.get("/logs")
 def render_logs_page(
     request: Request,
@@ -20,6 +21,7 @@ def render_logs_page(
 
 
 # ----------------- REST API ROUTE -----------------
+@router.get("/api/riwayat")
 @router.get("/api/logs")
 def list_logs(
     request: Request,

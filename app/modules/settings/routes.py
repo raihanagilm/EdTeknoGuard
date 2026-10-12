@@ -21,6 +21,7 @@ def render_settings_page(
 
 
 # ----------------- REST API ROUTES -----------------
+@router.get("/api/pengaturan")
 @router.get("/api/settings")
 def get_system_settings(
     db: Session = Depends(get_db),
@@ -29,6 +30,7 @@ def get_system_settings(
     """Ambil parameter aktif interval monitoring dan threshold (Read-only untuk seluruh user NOC terotentikasi)"""
     return SystemSettingsController.get_settings(db=db)
 
+@router.post("/api/pengaturan")
 @router.post("/api/settings")
 def update_system_settings(
     request: Request,

@@ -121,7 +121,7 @@ export class MonitoringService {
 
 export class CustomerService {
   static async list(params = {}) {
-    return new ApiService().get('/api/customers', params);
+    return new ApiService().get('/api/pelanggan', params);
   }
 
   static async create(payload) {
@@ -143,23 +143,23 @@ export class CustomerService {
 
 export class SettingsService {
   static async get() {
-    return new ApiService().get('/api/settings');
+    return new ApiService().get('/api/pengaturan');
   }
 
   static async save(payload) {
-    return new ApiService().post('/api/settings', payload);
+    return new ApiService().post('/api/pengaturan', payload);
   }
 }
 
 export class LogsService {
   static async list(params = {}) {
-    return new ApiService().get('/api/logs', params);
+    return new ApiService().get('/api/riwayat', params);
   }
 }
 
 export class TicketsService {
   static async list(status = 'SEMUA') {
-    return new ApiService().get('/admin/api/tiket', { status });
+    return new ApiService().get('/api/tiket', { status });
   }
 
   static async updateStatus(ticketId, newStatus, catatan = '') {
@@ -172,19 +172,19 @@ export class TicketsService {
 
 export class QuotaService {
   static async getOverview() {
-    return new ApiService().get('/admin/api/kuota');
+    return new ApiService().get('/api/kuota');
   }
 }
 
 export class ActivityLogsService {
   static async list(params = {}) {
-    return new ApiService().get('/api/activity-logs', params);
+    return new ApiService().get('/api/log', params);
   }
 }
 
 export class UsersService {
   static async list() {
-    return new ApiService().get('/users/api/list');
+    return new ApiService().get('/api/pengguna/list');
   }
 
   static async create(payload) {

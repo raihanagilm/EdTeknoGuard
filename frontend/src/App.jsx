@@ -27,16 +27,14 @@ import { ModulLogAktivitas } from './components/ModulLogAktivitas'
 import { ModulManajemenPengguna } from './components/ModulManajemenPengguna'
 import { ErrorView } from './components/ErrorView'
 import { ConfirmSaveModal, OntDetailModal } from './components/Modals'
+import { HalamanLogin } from './components/HalamanLogin'
 import { PortalPelangganApp } from './portal/PortalPelangganApp'
 
 export default function App() {
   // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState(true)
-  const [loginUsername, setLoginUsername] = useState('admin')
-  const [loginPassword, setLoginPassword] = useState('agiltampan')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loginLoading, setLoginLoading] = useState(false)
-  const [loginError, setLoginError] = useState('')
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('edtekno_auth_status') === 'logged_in' || document.cookie.includes('edteknoguard_session=')
+  })
 
   // Navigation & Office Scope State (SOP Multi-Kantor Cabang)
   const [activeTab, setActiveTab] = useState('beranda')
@@ -84,7 +82,7 @@ export default function App() {
   // Fetch daftar kantor dinamis
   const fetchKantorList = async () => {
     try {
-      const res = await fetch('/users/api/kantor/list')
+      const res = await fetch('/api/kantor/list')
       if (res.ok) {
         const data = await res.json()
         if (data.status === 'success' && data.kantors && data.kantors.length > 0) {
@@ -157,9 +155,10 @@ export default function App() {
 
   // Fetch Settings From Backend FastAPI (Thresholds & Credentials)
   const fetchBackendSettings = async () => {
+    if (!isAuthenticated) return
     setSettingsLoading(true)
     try {
-      const res = await fetch('/api/settings')
+      const res = await fetch('/api/pengaturan')
       if (res.ok) {
         const data = await res.json()
         if (data.polling_interval_minutes) setPollingInterval(data.polling_interval_minutes)
@@ -233,10 +232,10 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (currentUser && currentUser.role !== 'teknisi') {
+    if (isAuthenticated && currentUser && currentUser.role !== 'teknisi') {
       fetchBackendSettings()
     }
-  }, [currentUser?.role])
+  }, [isAuthenticated, currentUser?.role])
 
   // Save Settings To Backend FastAPI
   const handleSaveSettings = async (e) => {
@@ -278,7 +277,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/settings', {
+      const res = await fetch('/api/pengaturan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -541,36 +540,6 @@ export default function App() {
     return -90 + ratio * 180
   }
 
-  // Handle Real Backend Login Authentication
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault()
-    setLoginLoading(true)
-    setLoginError('')
-
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: loginUsername,
-          password: loginPassword
-        })
-      })
-      const data = await res.json().catch(() => ({}))
-
-      if (res.ok && data.ok) {
-        setIsAuthenticated(true)
-        if (data.user) setCurrentUser(data.user)
-        localStorage.setItem('edtekno_auth_status', 'logged_in')
-      } else {
-        setLoginError(data.message || 'Kombinasi Pengguna atau Kata Sandi NOC tidak valid.')
-      }
-    } catch (err) {
-      setLoginError('Gagal terhubung ke server backend FastAPI.')
-    } finally {
-      setLoginLoading(false)
-    }
-  }
 
   // Handle Real Backend Logout
   const handleLogout = async () => {
@@ -581,6 +550,7 @@ export default function App() {
     } finally {
       setIsAuthenticated(false)
       localStorage.removeItem('edtekno_auth_status')
+      localStorage.removeItem('edtekno_last_active_time')
       document.cookie = "edteknoguard_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT"
       window.history.pushState({}, '', '/login')
     }
@@ -609,18 +579,18 @@ export default function App() {
     return '404_not_found'
   }
 
-  // Path to URL path string mapper
+  // Path to URL path string mapper (Diselaraskan persis dengan nama navigasi)
   const getPathFromTab = (tab) => {
     switch (tab) {
       case 'beranda': return '/'
       case 'portal': return '/portal'
-      case 'riwayat': return '/logs'
-      case 'kuota': return '/admin/kuota'
+      case 'riwayat': return '/riwayat'
+      case 'kuota': return '/kuota'
       case 'pelanggan': return '/pelanggan'
-      case 'tiket': return '/admin/tiket'
-      case 'log': return '/activity-logs'
-      case 'pengguna': return '/users'
-      case 'pengaturan': return '/settings'
+      case 'tiket': return '/tiket'
+      case 'log': return '/log'
+      case 'pengguna': return '/pengguna'
+      case 'pengaturan': return '/pengaturan'
       default: return `/${tab}`
     }
   }
@@ -654,6 +624,29 @@ export default function App() {
     }
 
     const checkAuthStatus = async () => {
+      // Validasi inaktivitas 30 hari (30 * 24 * 60 * 60 * 1000 ms = 2.592.000.000 ms)
+      const lastActiveStr = localStorage.getItem('edtekno_last_active_time')
+      if (lastActiveStr) {
+        const lastActive = parseInt(lastActiveStr, 10)
+        const now = Date.now()
+        const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000
+        if (!isNaN(lastActive) && now - lastActive > thirtyDaysMs) {
+          // Melebihi 30 hari tidak pernah buka aplikasi / login -> hanguskan sesi dan paksa login ulang
+          localStorage.removeItem('edtekno_auth_status')
+          localStorage.removeItem('edtekno_last_active_time')
+          document.cookie = "edteknoguard_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+          setIsAuthenticated(false)
+          if (
+            window.location.pathname !== '/login' &&
+            !window.location.pathname.startsWith('/portal') &&
+            !window.location.pathname.startsWith('/teknocust')
+          ) {
+            window.history.pushState({}, '', '/login')
+          }
+          return
+        }
+      }
+
       try {
         const res = await fetch('/api/auth/check')
         const data = await res.json().catch(() => ({}))
@@ -661,10 +654,13 @@ export default function App() {
           setIsAuthenticated(true)
           if (data.user) setCurrentUser(data.user)
           localStorage.setItem('edtekno_auth_status', 'logged_in')
+          // Perbarui waktu aktif terakhir (Sliding Inactivity Window)
+          localStorage.setItem('edtekno_last_active_time', String(Date.now()))
           syncFromLocation()
         } else {
           setIsAuthenticated(false)
           localStorage.removeItem('edtekno_auth_status')
+          localStorage.removeItem('edtekno_last_active_time')
           if (
             window.location.pathname !== '/login' &&
             !window.location.pathname.startsWith('/portal') &&
@@ -700,100 +696,18 @@ export default function App() {
   }
 
   // =========================================================================
-  // VIEW B: HALAMAN LOGIN NOC
+  // VIEW B: HALAMAN LOGIN NOC (Komponen Terpisah HalamanLogin.jsx)
   // =========================================================================
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 sm:p-6 text-slate-900 font-sans">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="max-w-md w-full bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-sky-200 shadow-xl space-y-6">
-            
-            {/* Header Login */}
-            <div className="text-center space-y-2">
-              <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-600 via-sky-600 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-600/25">
-                <Radio className="w-7 h-7 animate-pulse" />
-              </div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                Tekno<span className="text-cyan-600">Guard</span> NOC
-              </h1>
-              <p className="text-xs text-slate-500 font-medium">
-                Sistem Deteksi Dini &amp; Pemantauan Redaman Optik Terpadu
-              </p>
-            </div>
-
-            {/* Error Banner */}
-            {loginError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
-                <span>{loginError}</span>
-              </div>
-            )}
-
-            {/* Form Login */}
-            <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs font-semibold">
-              <div className="space-y-1.5">
-                <label className="text-slate-700 block">Nama Pengguna (Username)</label>
-                <div className="relative">
-                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600" />
-                  <input
-                    type="text"
-                    required
-                    value={loginUsername}
-                    onChange={(e) => setLoginUsername(e.target.value)}
-                    placeholder="admin"
-                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 transition min-h-[40px] font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-slate-700 block">Kata Sandi (Password)</label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pl-9 pr-10 py-2 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 transition min-h-[40px] font-mono"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                  >
-                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loginLoading}
-                className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 active:scale-[0.99] transition min-h-[42px]"
-              >
-                {loginLoading ? (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <>
-                    <span>Buka Panel Kendali</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="pt-2 text-center text-[11px] text-slate-600 font-mono">
-              Akun Bawaan: <strong className="text-cyan-800">admin</strong> / <strong className="text-cyan-800">agiltampan</strong>
-            </div>
-          </div>
-        </div>
-
-        <div className="py-4 text-center text-[11px] text-slate-500 font-mono">
-          &copy; 2026 TeknoGuard NOC &bull; Sistem Monitoring Redaman Jaringan Fiber Optik
-        </div>
-      </div>
+      <HalamanLogin
+        onLoginSuccess={(userData) => {
+          setIsAuthenticated(true)
+          if (userData) setCurrentUser(userData)
+          const targetTab = getTabFromPath(window.location.pathname)
+          handleTabChange(targetTab === 'login' ? 'beranda' : targetTab)
+        }}
+      />
     )
   }
 
