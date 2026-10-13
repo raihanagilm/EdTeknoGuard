@@ -162,28 +162,47 @@ export function PortalPelangganApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] text-slate-900 font-sans antialiased">
-      {/* Top Header Navbar */}
-      <PortalNavbar customer={customer} onLogout={handleLogout} />
+    <div className="min-h-screen bg-[#e5e7eb] sm:p-4 sm:flex sm:justify-center sm:items-center text-[#111827] font-sans antialiased">
+      {/* Mobile Shell Wrapper (Max 440px sesuai desain user) */}
+      <div className="w-full max-w-[440px] mx-auto min-h-screen sm:min-h-0 sm:h-[92dvh] bg-[#f3f4f6] relative flex flex-col sm:rounded-2xl sm:overflow-hidden sm:shadow-2xl sm:shadow-slate-900/15 sm:border sm:border-slate-200">
+        {/* Area Konten Utama Mandiri Seluruh Tab */}
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+          {activeTab === 'beranda' && (
+            <TabBerandaPelanggan
+              data={dashboardData}
+              onNavigate={(tab) => switchTab(tab)}
+            />
+          )}
+          {activeTab === 'kendala' && (
+            <TabKendalaPelanggan
+              customer={customer}
+              dashboardData={dashboardData}
+            />
+          )}
+          {activeTab === 'wifi' && (
+            <TabWifiPelanggan
+              customer={customer}
+              dashboardData={dashboardData}
+            />
+          )}
+          {activeTab === 'kuota' && (
+            <TabKuotaPelanggan
+              customer={customer}
+              dashboardData={dashboardData}
+            />
+          )}
+          {activeTab === 'profil' && (
+            <TabProfilPelanggan
+              customer={customer}
+              dashboardData={dashboardData}
+              onLogout={handleLogout}
+            />
+          )}
+        </div>
 
-      {/* Main Container Phone Shell (Max-w-md Mobile First) */}
-      <main className="max-w-md mx-auto p-4 pt-3">
-        {activeTab === 'beranda' && (
-          <TabBerandaPelanggan
-            data={dashboardData}
-            onNavigate={(tab) => switchTab(tab)}
-          />
-        )}
-        {activeTab === 'kendala' && <TabKendalaPelanggan customer={customer} />}
-        {activeTab === 'wifi' && <TabWifiPelanggan customer={customer} />}
-        {activeTab === 'kuota' && <TabKuotaPelanggan customer={customer} />}
-        {activeTab === 'profil' && (
-          <TabProfilPelanggan customer={customer} onLogout={handleLogout} />
-        )}
-      </main>
-
-      {/* Sticky Bottom 5-Tab Navigation Bar */}
-      <PortalBottomNav activeTab={activeTab} onTabChange={(tab) => switchTab(tab)} />
+        {/* Sticky Bottom Navigation Bar di Dalam Shell */}
+        <PortalBottomNav activeTab={activeTab} onTabChange={(tab) => switchTab(tab)} />
+      </div>
     </div>
   );
 }

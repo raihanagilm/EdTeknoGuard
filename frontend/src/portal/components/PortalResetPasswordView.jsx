@@ -1,29 +1,30 @@
 import React from 'react';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
+import '../../styles/mascots/mascot-pusing.css';
 
 /* ░░░ Komponen Maskot Animasi Si Router Pusing (pusing.html) ░░░ */
 function RouterPusingMascot({ className = "w-32 h-24" }) {
   return (
     <div className={`${className} flex items-center justify-center pointer-events-none drop-shadow-md`}>
       <svg
-        className="w-full h-full overflow-visible"
+        className="mascot-svg"
         viewBox="0 0 240 200"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <g className="pusing-rig-torso">
+        <g className="rig-torso">
           {/* Kaki Kiri & Kanan */}
-          <g className="pusing-rig-leg-l">
+          <g className="rig-leg-l">
             <path d="M85 118V154H101V118" fill="#20C5D2" />
             <path d="M85 118V154H101V118" stroke="#0F172A" strokeWidth="4" strokeLinejoin="round" />
           </g>
-          <g className="pusing-rig-leg-r">
+          <g className="rig-leg-r">
             <path d="M139 118V154H155V118" fill="#20C5D2" />
             <path d="M139 118V154H155V118" stroke="#0F172A" strokeWidth="4" strokeLinejoin="round" />
           </g>
 
           {/* Antena Kiri & Kanan */}
-          <g className="pusing-rig-antenna-l">
+          <g className="rig-antenna-l">
             <path
               d="M78 53.9999L68 17.9999C67 13.9999 73 12.9999 76 15.9999L88 51.9999L78 53.9999Z"
               fill="#2563EB"
@@ -32,7 +33,7 @@ function RouterPusingMascot({ className = "w-32 h-24" }) {
               strokeLinejoin="round"
             />
           </g>
-          <g className="pusing-rig-antenna-r">
+          <g className="rig-antenna-r">
             <path
               d="M162 53.9999L172 17.9999C173 13.9999 167 12.9999 164 15.9999L152 51.9999L162 53.9999Z"
               fill="#2563EB"
@@ -43,7 +44,7 @@ function RouterPusingMascot({ className = "w-32 h-24" }) {
           </g>
 
           {/* Bodi Router */}
-          <g className="pusing-rig-body">
+          <g className="rig-body">
             <path
               d="M58 54C72 50 168 50 182 54C196 58 206 102 200 120C196 128 178 132 120 132C62 132 44 128 40 120C34 102 44 58 58 54Z"
               fill="#20C5D2"
@@ -61,26 +62,26 @@ function RouterPusingMascot({ className = "w-32 h-24" }) {
           </g>
 
           {/* Lampu Indikator LED Kuning Berdenyut */}
-          <g className="pusing-rig-leds">
+          <g className="rig-leds">
             <path
-              className="pusing-led-1"
+              className="led-1"
               d="M64 124.5C65.3807 124.5 66.5 123.381 66.5 122C66.5 120.619 65.3807 119.5 64 119.5C62.6193 119.5 61.5 120.619 61.5 122C61.5 123.381 62.6193 124.5 64 124.5Z"
               fill="#0F172A"
             />
             <path
-              className="pusing-led-2"
+              className="led-2"
               d="M72 124.5C73.3807 124.5 74.5 123.381 74.5 122C74.5 120.619 73.3807 119.5 72 119.5C70.6193 119.5 69.5 120.619 69.5 122C69.5 123.381 70.6193 124.5 72 124.5Z"
               fill="#0F172A"
             />
             <path
-              className="pusing-led-3"
+              className="led-3"
               d="M80 124.5C81.3807 124.5 82.5 123.381 82.5 122C82.5 120.619 81.3807 119.5 80 119.5C78.6193 119.5 77.5 120.619 77.5 122C77.5 123.381 78.6193 124.5 80 124.5Z"
               fill="#0F172A"
             />
           </g>
 
           {/* Mata Pusing Berputar Spiral */}
-          <g className="pusing-rig-eyes">
+          <g className="rig-eyes">
             <path
               d="M86 84C86 85.5913 86.6321 87.1174 87.7574 88.2426C88.8826 89.3679 90.4087 90 92 90C93.5913 90 95.1174 89.3679 96.2426 88.2426C97.3679 87.1174 98 85.5913 98 84C98 82.4087 97.3679 80.8826 96.2426 79.7574C95.1174 78.6321 93.5913 78 92 78C90.4087 78 88.8826 78.6321 87.7574 79.7574C86.6321 80.8826 86 82.4087 86 84ZM89 84C89 84.7956 89.3161 85.5587 89.8787 86.1213C90.4413 86.6839 91.2044 87 92 87C92.7956 87 93.5587 86.6839 94.1213 86.1213C94.6839 85.5587 95 84.7956 95 84C95 83.2044 94.6839 82.4413 94.1213 81.8787C93.5587 81.3161 92.7956 81 92 81C91.2044 81 90.4413 81.3161 89.8787 81.8787C89.3161 82.4413 89 83.2044 89 84Z"
               stroke="#0F172A"
@@ -96,7 +97,7 @@ function RouterPusingMascot({ className = "w-32 h-24" }) {
           </g>
 
           {/* Mulut Pusing Bergelombang */}
-          <g className="pusing-rig-mouth">
+          <g className="rig-mouth">
             <path
               d="M110 98C113.333 95.3333 116.667 95.3333 120 98C123.333 100.667 126.667 100.667 130 98"
               stroke="#0F172A"
@@ -106,7 +107,7 @@ function RouterPusingMascot({ className = "w-32 h-24" }) {
           </g>
 
           {/* Tangan Kiri Menempel Kepala */}
-          <g className="pusing-rig-arm-l">
+          <g className="rig-arm-l">
             <path
               d="M39 103C16.81 89.9516 22.1448 63.7323 51.2985 62.0229"
               stroke="#0F172A"
@@ -122,7 +123,7 @@ function RouterPusingMascot({ className = "w-32 h-24" }) {
           </g>
 
           {/* Tangan Kanan Menempel Kepala */}
-          <g className="pusing-rig-arm-r">
+          <g className="rig-arm-r">
             <path
               d="M201.761 102.567C223.951 89.5185 218.616 63.2992 189.463 61.5898"
               stroke="#0F172A"
@@ -138,7 +139,7 @@ function RouterPusingMascot({ className = "w-32 h-24" }) {
           </g>
 
           {/* Bintang-Bintang Pusing Berputar Melayang di Atas Kepala */}
-          <g className="pusing-rig-prop">
+          <g className="rig-prop">
             <path
               d="M103.833 41.9131L106.778 48.0512L112.667 49.0742L107.759 53.1663L109.722 59.3044L103.833 55.2123L97.9444 59.3044L99.9074 53.1663L95 49.0742L100.889 48.0512L103.833 41.9131Z"
               fill="#F59E0B"
@@ -202,7 +203,7 @@ export function PortalResetPasswordView({ onBackToLogin }) {
 
           {/* MASKOT Si Router Pusing di tengah panel biru */}
           <div className="absolute inset-0 flex items-center justify-center pt-14 pb-2 pointer-events-none">
-            <RouterPusingMascot className="w-32 h-24 sm:w-36 sm:h-28" />
+            <RouterPusingMascot className="w-24 h-20 sm:w-28 sm:h-22" />
           </div>
         </div>
 

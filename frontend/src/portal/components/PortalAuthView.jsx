@@ -10,6 +10,7 @@ import {
   Info
 } from 'lucide-react';
 import { PortalAuthService } from '../services/portalApi';
+import '../../styles/mascots/mascot-menyapa.css';
 
 /* ░░░ Komponen Maskot Animasi Si Router Menyapa (menyapa.html) ░░░ */
 function RouterMenyapaMascot({ className = "w-32 h-24" }) {
@@ -210,7 +211,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 
           {/* MASKOT Si Router Menyapa di tengah panel biru */}
           <div className="absolute inset-0 flex items-center justify-center pt-14 pb-2 pointer-events-none">
-            <RouterMenyapaMascot className="w-32 h-24 sm:w-36 sm:h-28" />
+            <RouterMenyapaMascot className="w-24 h-20 sm:w-28 sm:h-22" />
           </div>
         </div>
 

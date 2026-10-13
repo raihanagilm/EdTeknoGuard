@@ -26,6 +26,45 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penyelarasan Seluruh Tab Portal TeknoCust (`TabKendalaPelanggan.jsx` & `TabProfilPelanggan.jsx`)**:
+  - **Header Biru Penuh (Full-Width)**: Seluruh tab portal pelanggan kini seragam menggunakan header biru `#2563eb` dengan ornamen lingkaran gradasi, maskot interaktif di kiri atas, brand `TeknoCust`, deskripsi *"Portal Layanan Mandiri Pelanggan TeknoIndonet"*, dan tombol lonceng notifikasi di kanan atas.
+  - **Card Putih Menimpa Header (`-mt-3`)**: Konten utama di dalam `scroll-area` diatur dengan margin negatif `-mt-3 mx-3` berbalut `rounded-2xl shadow-lg border border-gray-100 overflow-hidden`, memberikan efek floating modern yang konsisten di semua tab.
+  - **Tab Kendala (`TabKendalaPelanggan.jsx`)**: Header biru penuh, card Lapor Gangguan menimpa header, modal lapor kendala, realtime search, filter status badge, pagination 5 item/halaman, dan modal konfirmasi hapus tiket tetap berfungsi utuh.
+  - **Tab Profil (`TabProfilPelanggan.jsx`)**: Header biru penuh, card Identitas Pelanggan menimpa header lengkap dengan edit data diri inline, card expandable ganti kata sandi akun, serta tombol logout bertema rapi.
+
+- **Pembaruan Tab Kelola WiFi Rumah (`TabWifiPelanggan.jsx`)**:
+  - **Header Biru Penuh (Full-Width)**: Membentang penuh dengan background biru `#2563eb`, ornamen lingkaran gradasi, maskot dinamis cerdas di kiri atas, brand `TeknoCust`, dan deskripsi *"Portal Layanan Mandiri Pelanggan TeknoIndonet"*, serta tombol lonceng notifikasi di kanan.
+  - **Card Form Kelola WiFi Menimpa Header (`-mt-3`)**: Menggunakan `bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden` di dalam `scroll-area`, menimpa background biru secara rapi.
+  - **Fitur Form Lengkap**: Input nama WiFi (SSID) baru, input kata sandi baru (minimal 8 karakter) dengan toggle intip/sembunyikan password, konfirmasi kata sandi, tombol simpan berlatar biru `#2563eb`, notifikasi feedback alert (sukses/gagal), dan kotak edukasi warga berlatar `#eff6ff`.
+
+- **Penyelarasan Header Biru & Model Card Tab Kuota (`TabKuotaPelanggan.jsx`)**:
+  - **Preservasi Maskot & Brand TeknoCust**: Header atas biru membentang penuh (`shrink-0 relative overflow-hidden bg-[#2563eb]`) mempertahankan maskot dinamis `PortalActiveMascot` di kiri atas, judul brand `TeknoCust`, dan deskripsi resmi *"Portal Layanan Mandiri Pelanggan TeknoIndonet"*, serta tombol lonceng notifikasi di kanan atas.
+  - **Model Card Pertama Identik Card Beranda**: Bagian atas Card Total Pemakaian kini menggunakan styling identik Card Kualitas Sinyal Beranda:
+    - Background gradient `linear-gradient(135deg, rgb(239, 246, 255) 0%, rgb(255, 255, 255) 100%)`.
+    - Radial glow biru halus di sudut kanan atas.
+    - Maskot interaktif kompak (`w-20 h-16`) di pojok kanan atas yang bereaksi dinamis sesuai kondisi pelanggan.
+    - Judul di sebelah kiri dengan icon bar chart biru berlatar `bg-blue-100` dan padding `pr-24`.
+    - Bagian bawah menampilkan metrik angka GB, progress bar pemakaian, paket aktif, dan strip edukasi bebas FUP.
+
+- **Pembaruan Beranda Pelanggan & Mesin Maskot Dinamis Berbasis Event & Rotasi (`TabBerandaPelanggan.jsx` & `PortalActiveMascot.jsx`)**:
+  - **Header Navigasi Utuh**: Mempertahankan header navbar atas `TeknoCust` bersama sticky bottom navigation 5-tab.
+  - **Kartu Kualitas Sinyal Presisi & Maskot Kompak**: Kartu utama menampilkan metrik real-time (*Daya Terima dBm, Suhu ONT °C, Latensi ms*) dengan maskot berukuran kompak dan manis di pojok kanan atas berlatar radial glow.
+  - **Mesin Maskot Dinamis 7 Event Aktivitas**:
+    1. `gangguan.html` aktif otomatis jika redaman optik >= -28.0 dBm (kondisi redaman drop/kritis/LOS).
+    2. `marah.html` disiapkan untuk status pelanggan yang menunggak/belum bayar tagihan.
+    3. `gembira.html` aktif saat status tagihan sudah lunas.
+    4. `sedih.html` aktif jika akun pelanggan berstatus nonaktif.
+    5. `pelanggan.html` aktif ketika pelanggan baru saja melaporkan tiket kendala (`MENUNGGU`).
+    6. `layanan-pelanggan.html` aktif ketika keluhan sedang dicek oleh admin CS NOC (`DICEK_ADMIN`).
+    7. `teknisi.html` aktif saat laporan keluhan sedang ditangani oleh teknisi di lapangan (`DIPROSES`).
+  - **Rotasi Otomatis 5 Menit Sekali**: Jika tidak ada event darurat, sistem otomatis merotasi 6 varian maskot santai bergantian setiap 5 menit (`menyapa` -> `rekomendasi` -> `analisis-redaman` -> `percaya-diri` -> `tersipu` -> `bosan`).
+  - **Optimasi Ukuran Maskot Global**: Memperkecil skala maskot pada halaman Login, Lupa Password, dan Beranda agar proporsional dan tidak menutupi informasi penting formulir.
+
+- **Modularisasi & Pemisahan File CSS Maskot (`frontend/src/styles/mascots/`)**:
+  - **Ekstraksi CSS Mandiri Per Maskot**: Seluruh stylesheet animasi dan rigging dari 33 maskot HTML di `media/` dipisahkan menjadi file CSS mandiri di `frontend/src/styles/mascots/` (seperti `mascot-menyapa.css`, `mascot-pusing.css`, `mascot-teknisi.css`, dsb.) dengan index barrel loader.
+  - **Sanitasi `frontend/src/index.css`**: Menghapus seluruh ratusan baris keyframes dan class rigging maskot dari `index.css` agar styling global aplikasi tetap ramping, bersih, dan mudah dikelola.
+  - **Import Terisolasi Pada Komponen**: Komponen portal seperti [PortalAuthView.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalAuthView.jsx) dan [PortalResetPasswordView.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalResetPasswordView.jsx) kini mengimpor file CSS maskot masing-masing secara terpisah tanpa saling mempengaruhi komponen lain.
+
 - **Redesain Antarmuka Login Portal Pelanggan TeknoCust (`PortalAuthView.jsx`)**:
   - **Arsitektur Dual-Panel Mobile Shell Kompak & Terfokus Pada Form**:
     - **Panel Atas Kompak (Header & Identitas Visual)**: Dibuat lebih ringkas (`h-[175px] sm:h-[195px]`) agar prioritas visual utama berfokus penuh pada formulir login tanpa terpotong di layar HP.

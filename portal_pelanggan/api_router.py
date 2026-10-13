@@ -146,6 +146,8 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
             "nama_wifi": pel.nama_wifi if pel else "-",
             "kantor": pel.kantor if pel else "cabang",
             "pop": pel.pop if pel else "Server Cabang",
+            "is_active": pel.is_active if pel else True,
+            "status_pembayaran": getattr(pel, "status_pembayaran", "LUNAS"),
             "status_verifikasi": pel.status_verifikasi if pel else "TERVERIFIKASI"
         },
         "signal": {
@@ -161,7 +163,8 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
             "periode_bulan": kuota.periode_bulan if kuota else "2026-10",
             "kecepatan_paket": kuota.kecepatan_paket if kuota else "20 Mbps Unlimited"
         },
-        "active_tickets_count": data.get("active_tickets_count", 0)
+        "active_tickets_count": data.get("active_tickets_count", 0),
+        "latest_ticket": data.get("latest_ticket")
     }
 
 @api_router.get("/kuota")

@@ -34,7 +34,7 @@ export function PortalNavbar({ customer }) {
 
 export function PortalBottomNav({ activeTab, onTabChange }) {
   return (
-    <nav className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-sky-100 z-50 h-16 max-w-md mx-auto shadow-lg">
+    <nav className="shrink-0 bg-white border-t border-gray-200 z-50 h-14 w-full">
       <div className="grid grid-cols-5 h-full items-center px-1">
         {/* 1. Kendala */}
         <button

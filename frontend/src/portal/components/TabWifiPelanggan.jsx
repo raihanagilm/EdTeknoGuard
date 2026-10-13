@@ -4,16 +4,18 @@ import {
   Lock,
   Eye,
   EyeOff,
+  Save,
   CheckCircle2,
   AlertCircle,
   RefreshCw,
-  ShieldCheck,
+  Bell,
   Smartphone
 } from 'lucide-react';
 import { PortalWifiService } from '../services/portalApi';
+import { PortalActiveMascot } from './PortalActiveMascot';
 
-export function TabWifiPelanggan({ customer }) {
-  const [namaWifi, setNamaWifi] = useState(customer?.nama_wifi || 'WiFi-Rumah');
+export function TabWifiPelanggan({ customer, dashboardData }) {
+  const [namaWifi, setNamaWifi] = useState(customer?.nama_wifi || 'AISYAH');
   const [passwordWifi, setPasswordWifi] = useState('');
   const [konfirmasiPassword, setKonfirmasiPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -52,105 +54,186 @@ export function TabWifiPelanggan({ customer }) {
   };
 
   return (
-    <div className="space-y-4 pb-20 animate-fadeIn">
-      {message.text && (
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
+      {/* ═══ HEADER BIRU FULL KOTAK (PERSIS SESUAI HTML USER & BERANDA) ═══ */}
+      <div className="shrink-0 relative overflow-hidden" style={{ background: '#2563eb' }}>
+        {/* Ornamen lingkaran */}
         <div
-          className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 ${
-            message.type === 'success'
-              ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
-              : 'bg-rose-50 border border-rose-200 text-rose-800'
-          }`}
-        >
-          {message.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-          )}
-          <span>{message.text}</span>
-        </div>
-      )}
+          className="absolute top-1/2 -translate-y-1/2 -right-12 w-40 h-40 rounded-full pointer-events-none"
+          style={{ background: '#3b82f6' }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 -right-4 w-24 h-24 rounded-full pointer-events-none"
+          style={{ background: '#60a5fa', opacity: 0.55 }}
+        />
+        <div
+          className="absolute -bottom-14 -left-8 w-24 h-24 rounded-full pointer-events-none"
+          style={{ background: '#3b82f6', opacity: 0.7 }}
+        />
 
-      {/* Form Ganti WiFi Card */}
-      <div className="p-5 bg-white rounded-3xl border border-sky-100 shadow-xs space-y-4">
-        {/* Card Header Info */}
-        <div className="pb-3 border-b border-slate-100">
-          <h2 className="text-base font-black text-slate-900">Kelola WiFi Rumah</h2>
-          <p className="text-[11px] text-slate-500">Ubah nama WiFi (SSID) dan kata sandi tanpa perlu memanggil teknisi</p>
-        </div>
-
-        <form onSubmit={handleChangeWifi} className="space-y-3.5 text-xs font-semibold">
-          <div className="space-y-1">
-            <label className="text-slate-700">Nama WiFi (SSID) Baru</label>
-            <div className="relative">
-              <Wifi className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600" />
-              <input
-                type="text"
-                required
-                value={namaWifi}
-                onChange={(e) => setNamaWifi(e.target.value)}
-                placeholder="Contoh: WiFi-Keluarga-Berkah"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 focus:outline-none focus:border-cyan-600"
+        {/* Top bar: maskot + TeknoCust + bell */}
+        <div className="relative px-5 pt-4 pb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Maskot Kiri Atas */}
+            <div className="w-12 h-10 shrink-0 flex items-center justify-center overflow-visible">
+              <PortalActiveMascot
+                data={dashboardData || { customer }}
+                className="w-12 h-10"
               />
+            </div>
+            {/* TeknoCust + subtitle */}
+            <div className="min-w-0">
+              <div className="text-[14px] font-black tracking-tight leading-none text-white">
+                Tekno<span className="text-blue-200">Cust</span>
+              </div>
+              <div className="text-[9px] text-blue-100 mt-1 leading-tight font-medium">
+                Portal Layanan Mandiri Pelanggan TeknoIndonet
+              </div>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-slate-700">Kata Sandi WiFi Baru (Minimal 8 Karakter)</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={passwordWifi}
-                onChange={(e) => setPasswordWifi(e.target.value)}
-                placeholder="Minimal 8 karakter kombinasi"
-                className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-              >
-                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-slate-700">Konfirmasi Kata Sandi Baru</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={konfirmasiPassword}
-                onChange={(e) => setKonfirmasiPassword(e.target.value)}
-                placeholder="Ketik ulang kata sandi baru"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600"
-              />
-            </div>
-          </div>
-
+          {/* Bell */}
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/20 active:scale-[0.99] transition flex items-center justify-center gap-2"
+            type="button"
+            className="relative w-9 h-9 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition cursor-pointer shrink-0"
           >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Simpan Perubahan WiFi</span>}
+            <Bell className="w-4 h-4 stroke-[2.2]" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border border-blue-600 animate-pulse" />
           </button>
-        </form>
+        </div>
       </div>
 
-      {/* Edukasi Warga */}
-      <div className="p-4 rounded-2xl bg-cyan-50/70 border border-cyan-200/80 text-[11px] text-slate-600 space-y-1.5">
-        <div className="font-bold text-cyan-900 flex items-center gap-1.5">
-          <Smartphone className="w-4 h-4 text-cyan-600" />
-          <span>Pemberitahuan Setelah Ganti Sandi:</span>
+      {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
+      <main className="scroll-area -mt-3 flex-1 overflow-y-auto">
+        <div className="pb-24 space-y-3">
+
+          {/* Feedback Notifikasi Alert */}
+          {message.text && (
+            <div className="px-3">
+              <div
+                className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 ${
+                  message.type === 'success'
+                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                    : 'bg-rose-50 border border-rose-200 text-rose-800'
+                }`}
+              >
+                {message.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                )}
+                <span>{message.text}</span>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ CARD PUTIH (naik menimpa header) ═══ */}
+          <div className="relative mx-3">
+            <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
+
+              <div className="p-4 pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#dbeafe' }}>
+                    <Wifi className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[14px] font-black text-gray-900 leading-tight">Kelola WiFi Rumah</div>
+                    <div className="text-[10px] text-gray-500 mt-0.5 leading-tight font-medium">
+                      Ubah nama WiFi (SSID) dan kata sandi tanpa perlu memanggil teknisi
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <form onSubmit={handleChangeWifi} className="p-4 space-y-3.5 text-xs font-semibold">
+                <div className="space-y-1.5">
+                  <label className="text-slate-700 block">Nama WiFi (SSID) Baru</label>
+                  <div className="relative">
+                    <Wifi className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      required
+                      value={namaWifi}
+                      onChange={(e) => setNamaWifi(e.target.value)}
+                      placeholder="Contoh: WiFi-Keluarga-Berkah"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-700 block">Kata Sandi WiFi Baru (Minimal 8 Karakter)</label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      minLength={8}
+                      value={passwordWifi}
+                      onChange={(e) => setPasswordWifi(e.target.value)}
+                      placeholder="Minimal 8 karakter kombinasi"
+                      className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-700 block">Konfirmasi Kata Sandi Baru</label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      minLength={8}
+                      value={konfirmasiPassword}
+                      onChange={(e) => setKonfirmasiPassword(e.target.value)}
+                      placeholder="Ketik ulang kata sandi baru"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-1 py-3 px-4 rounded-xl text-white font-bold text-xs shadow-md active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+                  style={{ background: '#2563eb' }}
+                >
+                  {loading ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>Simpan Perubahan WiFi</span>
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="px-4 py-3 border-t border-gray-100 flex items-start gap-2.5" style={{ background: '#eff6ff' }}>
+                <Smartphone className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
+                <div className="min-w-0">
+                  <div className="text-[11px] font-bold text-gray-900 mb-1">Pemberitahuan Setelah Ganti Sandi:</div>
+                  <p className="text-[10.5px] text-gray-600 leading-relaxed">
+                    Setelah menyimpan nama/kata sandi baru, seluruh HP dan laptop di rumah Anda akan terputus sesaat. Silakan sambungkan ulang HP Anda menggunakan kata sandi yang baru.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
-        <p className="leading-relaxed">
-          Setelah menyimpan nama/kata sandi baru, seluruh HP dan laptop di rumah Anda akan terputus sesaat. Silakan sambungkan ulang HP Anda menggunakan kata sandi yang baru.
-        </p>
-      </div>
+      </main>
     </div>
   );
 }
+
+export default TabWifiPelanggan;
