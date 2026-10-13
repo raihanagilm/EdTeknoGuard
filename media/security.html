@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peran Cyber Security</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 48px 94px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 183px 98px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #38BDF8; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-5px) scale(1.015); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(6deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-6deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-7deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(7deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-2px); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(-2px, 0px) scaleY(1); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+        75% { transform: translate(2px, 0px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        50% { transform: scale(1.15, 1.2); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(10deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-8deg) translateY(-2px); }
+      }
+    
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Peran Cyber Security</h1>
+    <svg class="mascot-svg" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Badan Utama & Seluruh Anggota Tubuh Menyatu (Torso Rig) -->
+      <g class="rig-torso">
+        <!-- Kaki Kiri & Kaki Kanan (Menyatu di belakang bodi agar tidak pernah copot & ikut bergerak) -->
+        <g class="rig-leg-l">
+          <path d="M85 118V154H101V118" fill="#20C5D2"/>
+          <path d="M85 118V154H101V118" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+        </g>
+        <g class="rig-leg-r">
+          <path d="M139 118V154H155V118" fill="#20C5D2"/>
+          <path d="M139 118V154H155V118" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Antena Kiri & Kanan -->
+        <g class="rig-antenna-l">
+          <path d="M78 53.9999L68 17.9999C67 13.9999 73 12.9999 76 15.9999L88 51.9999L78 53.9999Z" fill="#2563EB" stroke="#0F172A" stroke-width="5" stroke-linejoin="round"/>
+        </g>
+        <g class="rig-antenna-r">
+          <path d="M162 53.9999L172 17.9999C173 13.9999 167 12.9999 164 15.9999L152 51.9999L162 53.9999Z" fill="#2563EB" stroke="#0F172A" stroke-width="5" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Bodi Router -->
+        <g class="rig-body">
+          <path d="M58 54C72 50 168 50 182 54C196 58 206 102 200 120C196 128 178 132 120 132C62 132 44 128 40 120C34 102 44 58 58 54Z" fill="#20C5D2" stroke="#0F172A" stroke-width="5.5" stroke-linejoin="round"/>
+          <path d="M44 114C70 118 170 118 196 114" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M120 125.5C121.933 125.5 123.5 123.933 123.5 122C123.5 120.067 121.933 118.5 120 118.5C118.067 118.5 116.5 120.067 116.5 122C116.5 123.933 118.067 125.5 120 125.5Z" stroke="#0F172A" stroke-width="1.8"/>
+          <path d="M120 119V122" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M70 52H170" stroke="#0F172A" stroke-width="5.5" stroke-linecap="round"/>
+          <path d="M78 52C78 30 162 30 162 52H78Z" fill="#2563EB" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M120 35L125 40L120 47L115 40L120 35Z" fill="#F59E0B" stroke="#0F172A" stroke-width="1.5"/>
+        </g>
+
+        <!-- Lampu Indikator LED -->
+        <g class="rig-leds">
+          
+          <path class="led-1" d="M64 124.5C65.3807 124.5 66.5 123.381 66.5 122C66.5 120.619 65.3807 119.5 64 119.5C62.6193 119.5 61.5 120.619 61.5 122C61.5 123.381 62.6193 124.5 64 124.5Z" fill="#0F172A"/>
+          <path class="led-2" d="M72 124.5C73.3807 124.5 74.5 123.381 74.5 122C74.5 120.619 73.3807 119.5 72 119.5C70.6193 119.5 69.5 120.619 69.5 122C69.5 123.381 70.6193 124.5 72 124.5Z" fill="#0F172A"/>
+          <path class="led-3" d="M80 124.5C81.3807 124.5 82.5 123.381 82.5 122C82.5 120.619 81.3807 119.5 80 119.5C78.6193 119.5 77.5 120.619 77.5 122C77.5 123.381 78.6193 124.5 80 124.5Z" fill="#0F172A"/>
+        </g>
+
+        <!-- Alis (Jika ada) -->
+        <g class="rig-brows">
+          <path d="M80 72L100 76" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M160 72L140 76" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round"/>
+        </g>
+
+        <!-- Bola Mata (Berkedip & Melirik) -->
+        <g class="rig-eyes">
+          <path d="M92 92.5C96.6944 92.5 100.5 88.6944 100.5 84C100.5 79.3056 96.6944 75.5 92 75.5C87.3056 75.5 83.5 79.3056 83.5 84C83.5 88.6944 87.3056 92.5 92 92.5Z" fill="#0F172A"/>
+          <path d="M94.5 84.5C96.1569 84.5 97.5 83.1569 97.5 81.5C97.5 79.8431 96.1569 78.5 94.5 78.5C92.8431 78.5 91.5 79.8431 91.5 81.5C91.5 83.1569 92.8431 84.5 94.5 84.5Z" fill="white"/>
+          <path d="M148 92.5C152.694 92.5 156.5 88.6944 156.5 84C156.5 79.3056 152.694 75.5 148 75.5C143.306 75.5 139.5 79.3056 139.5 84C139.5 88.6944 143.306 92.5 148 92.5Z" fill="#0F172A"/>
+          <path d="M150.5 84.5C152.157 84.5 153.5 83.1569 153.5 81.5C153.5 79.8431 152.157 78.5 150.5 78.5C148.843 78.5 147.5 79.8431 147.5 81.5C147.5 83.1569 148.843 84.5 150.5 84.5Z" fill="white"/>
+        </g>
+
+        <!-- Kacamata / Visor (Tidak ikut terpejam saat mata berkedip) -->
+        <g class="rig-glasses">
+          
+        </g>
+
+        <!-- Mulut -->
+        <g class="rig-mouth">
+          <path d="M112 96C116 102 126 102 130 94" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <!-- Objek Meja / Monitor / Laptop (Di belakang tangan) -->
+        <g class="rig-desk-prop">
+          
+        </g>
+
+        <!-- Tangan Kiri -->
+        <g class="rig-arm-l">
+          <path d="M48 94C32 86 30 68 46 62" stroke="#0F172A" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M46 68C49.3137 68 52 65.3137 52 62C52 58.6863 49.3137 56 46 56C42.6863 56 40 58.6863 40 62C40 65.3137 42.6863 68 46 68Z" fill="#20C5D2" stroke="#0F172A" stroke-width="3.5"/>
+        </g>
+
+        <!-- Tangan Kanan -->
+        <g class="rig-arm-r">
+          <path d="M183 97.9429C197.46 96.2333 205.779 105.762 204.871 119.148" stroke="#0F172A" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M207.186 124.683C210.243 123.405 211.685 119.891 210.407 116.833C209.129 113.776 205.614 112.334 202.557 113.612C199.5 114.89 198.058 118.405 199.336 121.462C200.614 124.519 204.128 125.962 207.186 124.683Z" fill="#20C5D2" stroke="#0F172A" stroke-width="3.5"/>
+          <path d="M182.5 84L210 91.8571C210 115.429 199.306 131.143 182.5 139C165.694 131.143 155 115.429 155 91.8571L182.5 84Z" fill="#2563EB" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M182.5 90.2856L203.889 96.5714C203.889 113.857 194.722 124.857 182.5 131.143C170.278 124.857 161.111 113.857 161.111 96.5714L182.5 90.2856Z" fill="#20C5D2"/>
+          <path d="M186.319 107.572H178.681C177.415 107.572 176.389 108.627 176.389 109.929V116.214C176.389 117.516 177.415 118.572 178.681 118.572H186.319C187.585 118.572 188.611 117.516 188.611 116.214V109.929C188.611 108.627 187.585 107.572 186.319 107.572Z" fill="#0F172A"/>
+          <path d="M178.681 107.571V102.857C178.681 99.7143 186.319 99.7143 186.319 102.857V107.571" stroke="#0F172A" stroke-width="3"/>
+        </g>
+
+        <!-- Properti & Efek Pendukung -->
+        <g class="rig-prop">
+          
+        </g>
+      </g>
+    </svg>
+    <div class="shadow"></div>
+  </div>
+</body>
+</html>

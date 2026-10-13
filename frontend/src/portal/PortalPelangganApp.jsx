@@ -3,10 +3,8 @@ import {
   PortalNavbar,
   PortalBottomNav
 } from './components/PortalNavigation';
-import {
-  PortalLoginView,
-  PortalResetPasswordView
-} from './components/PortalAuthView';
+import { PortalLoginView } from './components/PortalAuthView';
+import { PortalResetPasswordView } from './components/PortalResetPasswordView';
 import { TabBerandaPelanggan } from './components/TabBerandaPelanggan';
 import { TabKendalaPelanggan } from './components/TabKendalaPelanggan';
 import { TabWifiPelanggan } from './components/TabWifiPelanggan';

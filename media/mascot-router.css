@@ -1,0 +1,5766 @@
+/* ===== admin-noc ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 39px 99px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 201px 110px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        40% { transform: translateY(-5px) rotate(-1.5deg); }
+        75% { transform: translateY(-2px) rotate(1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(-6deg) translateY(-2px); }
+        75% { transform: rotate(5deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(-4deg); }
+        75% { transform: rotate(6deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-8deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(8deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(-3px, 1px) scaleY(1); }
+        48% { transform: translate(-1px, 0px) scaleY(0.1); }
+        75% { transform: translate(1px, 0px) scaleY(1); }
+      }
+      @keyframes glassesAnim {
+        0%, 100% { transform: translateY(0px); }
+        40% { transform: translateY(-1px); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        30% { transform: scale(1.15, 1.3); }
+        65% { transform: scale(0.92, 0.85); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(8deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-14deg); }
+        65% { transform: rotate(8deg); }
+      }
+
+/* ===== ai-bot ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 46px 94px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 194px 94px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #38BDF8; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-8px) rotate(1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.08); opacity: 1; }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: scale(1) translateY(0px); opacity: 0.75; }
+        50% { transform: scale(0.92) translateY(4px); opacity: 1; }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-10deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(10deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(2px, -1px) scaleY(1.05); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+        75% { transform: translate(-2px, -1px) scaleY(1.05); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        30% { transform: scale(1.18, 1.32); }
+        65% { transform: scale(0.94, 0.88); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-12deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(12deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: scale(0.85) translateY(0px); opacity: 0.7; }
+        50% { transform: scale(1.2) translateY(-4px); opacity: 1; }
+      }
+
+/* ===== analisis-redaman ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 47px 94px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 188px 94px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #10B981; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        40% { transform: translateY(-6px) rotate(1.5deg); }
+        75% { transform: translateY(-2px) rotate(-1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(7deg) translateY(-2px); }
+        75% { transform: rotate(-5deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(5deg); }
+        75% { transform: rotate(-7deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-7deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(9deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(3px, -2px) scaleY(1); }
+        48% { transform: translate(2px, -1px) scaleY(0.1); }
+        75% { transform: translate(0px, 0px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        25% { transform: scale(1.15, 1.35); }
+        50% { transform: scale(0.95, 0.9); }
+        75% { transform: scale(1.12, 1.25); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-14deg); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(10deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-5px) scale(1.04); }
+      }
+
+/* ===== atur-kabel ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 100px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 201px 102px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        35% { transform: translateY(-4px) rotate(-2deg); }
+        70% { transform: translateY(-5px) rotate(2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-7deg) translateY(-2px); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-5deg); }
+        70% { transform: rotate(7deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-9deg); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-6deg); }
+        70% { transform: rotate(9deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(-3px, 2px) scaleY(1); }
+        48% { transform: translate(0px, 1px) scaleY(0.1); }
+        75% { transform: translate(3px, -1px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        35% { transform: scale(1.18, 1.3); }
+        70% { transform: scale(0.92, 0.9); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-18deg); }
+        60% { transform: rotate(10deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(10deg); }
+        80% { transform: rotate(-6deg); }
+      }
+
+/* ===== berhasil ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 100px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 201px 102px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) scale(1, 1); }
+        35% { transform: translateY(-8px) scale(0.98, 1.02); }
+        70% { transform: translateY(-2px) scale(1.01, 0.99); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(9deg) translateY(-3px); }
+        70% { transform: rotate(-6deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-9deg) translateY(-3px); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-11deg); }
+        70% { transform: rotate(5deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(11deg); }
+        70% { transform: rotate(-5deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        35% { transform: translate(0px, -2px) scaleY(1.05); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        35% { transform: scale(1.18, 1.25); }
+        70% { transform: scale(0.95, 0.92); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-18deg); }
+        70% { transform: rotate(8deg); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(14deg); }
+        70% { transform: rotate(-5deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        35% { transform: translateY(-6px) scale(1.12); }
+      }
+
+/* ===== berpikir ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 39px 99px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 202px 105px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #10B981; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        45% { transform: translateY(-5px) rotate(1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(6deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-6deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-10deg); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(10deg); }
+        70% { transform: rotate(-6deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-2px); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(-2px, 0px) scaleY(1); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+        75% { transform: translate(2px, 0px) scaleY(1); }
+      }
+      @keyframes glassesAnim {
+        0%, 100% { transform: translateY(0px); }
+        45% { transform: translateY(-1px); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        50% { transform: scale(1.15, 1.2); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(8deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-10deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-5px) scale(1.08); }
+      }
+
+/* ===== bingung ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 48px 94px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 196px 104px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #F59E0B; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        35% { transform: translateY(-4px) rotate(-3deg); }
+        70% { transform: translateY(-2px) rotate(2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-7deg) translateY(-1px); }
+        70% { transform: rotate(5deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-5deg); }
+        70% { transform: rotate(7deg) translateY(-1px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-12deg); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(6deg); }
+        70% { transform: rotate(-10deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        35% { transform: translateY(-3px) rotate(-3deg); }
+        70% { transform: translateY(1px) rotate(2deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(2px, -2px) scaleY(1); }
+        48% { transform: translate(1px, -1px) scaleY(0.1); }
+        75% { transform: translate(-2px, 0px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: translateX(0px) scale(1, 1); }
+        35% { transform: translateX(-2px) scale(0.9, 1.2); }
+        70% { transform: translateX(2px) scale(1.1, 0.9); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-12deg); }
+        60% { transform: rotate(6deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-8deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        50% { transform: translateY(-6px) rotate(10deg) scale(1.15); }
+      }
+
+/* ===== bintang ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 48px 94px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 192px 94px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        25% { transform: translateY(-7px) rotate(2deg); }
+        50% { transform: translateY(-2px) rotate(0deg); }
+        75% { transform: translateY(-7px) rotate(-2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(10deg) translateY(-2px); }
+        75% { transform: rotate(-8deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(8deg); }
+        75% { transform: rotate(-10deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-10deg); }
+        75% { transform: rotate(8deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(10deg); }
+        75% { transform: rotate(-8deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 100% { transform: translateY(0px) scaleY(1); }
+        25%, 75% { transform: translateY(-2px) scaleY(1.1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        25% { transform: scale(1.15, 1.28); }
+        50% { transform: scale(0.92, 0.85); }
+        75% { transform: scale(1.18, 1.3); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25%, 75% { transform: rotate(16deg); }
+        50% { transform: rotate(-4deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25%, 75% { transform: rotate(-16deg); }
+        50% { transform: rotate(4deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: scale(0.85) rotate(0deg); }
+        50% { transform: scale(1.25) rotate(20deg); }
+      }
+
+/* ===== bosan ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 50px 96px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 190px 96px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #64748B; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) scale(1, 1); }
+        50% { transform: translateY(4px) scale(1.02, 0.97); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-5deg) translateY(-1px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(5deg) translateY(-1px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-10deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(10deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 54%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(2px, 1px) scaleY(0.9); }
+        50% { transform: translate(1px, 2px) scaleY(0.15); }
+        75% { transform: translate(-1px, 1px) scaleY(0.9); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scaleX(1); }
+        50% { transform: scaleX(1.2) translateY(1px); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-6deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(6deg); }
+      }
+
+/* ===== gangguan ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 50px 99px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 194px 98px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #EF4444; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        25% { transform: translateY(-6px) rotate(-2deg); }
+        50% { transform: translateY(-2px) rotate(2deg); }
+        75% { transform: translateY(-5px) rotate(-1.5deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-8deg) translateY(-2px); }
+        50% { transform: rotate(6deg); }
+        75% { transform: rotate(-7deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-6deg); }
+        50% { transform: rotate(8deg) translateY(-2px); }
+        75% { transform: rotate(-5deg); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-12deg); }
+        50% { transform: rotate(6deg); }
+        75% { transform: rotate(-10deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(12deg); }
+        50% { transform: rotate(-6deg); }
+        75% { transform: rotate(10deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scale(1); }
+        25% { transform: translate(3px, -1px) scale(1.08); }
+        48% { transform: translate(2px, 0px) scale(1, 0.1); }
+        75% { transform: translate(3px, 1px) scale(1.06); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        25% { transform: scale(1.2, 1.35); }
+        50% { transform: scale(0.9, 0.85); }
+        75% { transform: scale(1.15, 1.25); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-8deg); }
+        70% { transform: rotate(4deg); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-8deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-6px) scale(1.12); }
+      }
+
+/* ===== gembira ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 48px 94px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 192px 94px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        25% { transform: translateY(-7px) rotate(2deg); }
+        50% { transform: translateY(-2px) rotate(0deg); }
+        75% { transform: translateY(-7px) rotate(-2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(10deg) translateY(-2px); }
+        75% { transform: rotate(-8deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(8deg); }
+        75% { transform: rotate(-10deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-10deg); }
+        75% { transform: rotate(8deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(10deg); }
+        75% { transform: rotate(-8deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 100% { transform: translateY(0px) scaleY(1); }
+        25%, 75% { transform: translateY(-2px) scaleY(1.1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        25% { transform: scale(1.15, 1.28); }
+        50% { transform: scale(0.92, 0.85); }
+        75% { transform: scale(1.18, 1.3); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25%, 75% { transform: rotate(16deg); }
+        50% { transform: rotate(-4deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25%, 75% { transform: rotate(-16deg); }
+        50% { transform: rotate(4deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: scale(0.85) rotate(0deg); }
+        50% { transform: scale(1.25) rotate(20deg); }
+      }
+
+/* ===== jijik ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 98px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 202px 98px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #F59E0B; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+        45% { transform: translate(-5px, -3px) rotate(-3deg); }
+        75% { transform: translate(-2px, -1px) rotate(-1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(8deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(10deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-12deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(10deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 100% { transform: scale(1, 1); }
+        45% { transform: scale(1.08, 0.82); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: translateY(0px) scale(1, 1); }
+        45% { transform: translateY(2px) scale(1.12, 1.28); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(14deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-14deg); }
+      }
+
+/* ===== juara ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 101px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 202px 101px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-6px) rotate(2deg); }
+        66% { transform: translateY(-4px) rotate(-1.5deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(8deg) translateY(-2px); }
+        66% { transform: rotate(-6deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(6deg); }
+        66% { transform: rotate(-8deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(-9deg); }
+        66% { transform: rotate(6deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(9deg); }
+        66% { transform: rotate(-6deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(2px, -1px) scaleY(1); }
+        48% { transform: translate(1px, 0px) scaleY(0.1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        25% { transform: scale(1.15, 1.3); }
+        50% { transform: scale(0.92, 0.85); }
+        75% { transform: scale(1.15, 1.25); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(14deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-14deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-6px) scale(1.1); }
+      }
+
+/* ===== layanan-pelanggan ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 44px 98px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 200px 101px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-4px) rotate(1.2deg); }
+        66% { transform: translateY(-3px) rotate(-1.2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(6deg) translateY(-2px); }
+        66% { transform: rotate(-5deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(5deg); }
+        66% { transform: rotate(-6deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(-7deg); }
+        66% { transform: rotate(5deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(7deg); }
+        66% { transform: rotate(-5deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(2px, 1px) scaleY(1); }
+        25% { transform: translate(4px, 2px) scaleY(1); }
+        48% { transform: translate(3px, 1px) scaleY(0.1); }
+        75% { transform: translate(1px, 0px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        18% { transform: scale(1.15, 1.4); }
+        36% { transform: scale(0.9, 0.8); }
+        55% { transform: scale(1.2, 1.45); }
+        75% { transform: scale(0.95, 0.9); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        20% { transform: rotate(-8deg); }
+        40% { transform: rotate(4deg); }
+        60% { transform: rotate(-9deg); }
+        80% { transform: rotate(3deg); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(6deg); }
+      }
+
+/* ===== manager-it ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 114px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 201px 93px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #F59E0B; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        45% { transform: translateY(-7px) scale(1.02); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(8deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-8deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-10deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(10deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        45% { transform: translateY(-2px); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(-2px, -1px) scaleY(1); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        45% { transform: scale(1.18, 1.28); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(16deg) translateY(-3px); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-12deg); }
+      }
+
+/* ===== marah ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 83px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 202px 86px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #EF4444; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg) scale(1, 1); }
+        25% { transform: translateY(-5px) rotate(-2deg) scale(1.03, 0.98); }
+        50% { transform: translateY(1px) rotate(2deg) scale(1.02, 0.98); }
+        75% { transform: translateY(-4px) rotate(-1.5deg) scale(1.03, 0.98); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg) translateY(0px); }
+        25% { transform: rotate(10deg) translateY(-5px); }
+        50% { transform: rotate(0deg) translateY(0px); }
+        75% { transform: rotate(-5deg) translateY(0px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg) translateY(0px); }
+        25% { transform: rotate(5deg) translateY(0px); }
+        50% { transform: rotate(0deg) translateY(0px); }
+        75% { transform: rotate(-10deg) translateY(-5px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(12deg); }
+        50% { transform: rotate(6deg); }
+        75% { transform: rotate(14deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-12deg); }
+        50% { transform: rotate(-6deg); }
+        75% { transform: rotate(-14deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        35% { transform: translateY(3px) scaleX(1.05); }
+        70% { transform: translateY(2px); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(0px, 1px) scaleY(0.85); }
+        48% { transform: translate(0px, 1px) scaleY(0.12); }
+        75% { transform: translate(0px, 1px) scaleY(0.85); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        25% { transform: scale(1.16, 1.25); }
+        50% { transform: scale(0.95, 0.9); }
+        75% { transform: scale(1.14, 1.2); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(16deg); }
+        50% { transform: rotate(-4deg); }
+        75% { transform: rotate(14deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-16deg); }
+        50% { transform: rotate(4deg); }
+        75% { transform: rotate(-14deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: scale(0.9); opacity: 0.75; }
+        25%, 75% { transform: scale(1.22); opacity: 1; }
+        50% { transform: scale(1); opacity: 0.85; }
+      }
+
+/* ===== memantau ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 60px 100px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 204px 102px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #38BDF8; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        35% { transform: translateY(-4px) rotate(1.5deg); }
+        70% { transform: translateY(-2px) rotate(-1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(6deg) translateY(-1px); }
+        70% { transform: rotate(-5deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(5deg); }
+        70% { transform: rotate(-6deg) translateY(-1px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(6deg); }
+        75% { transform: rotate(-5deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(8deg); }
+        75% { transform: rotate(-4deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 45%, 53%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(3px, -1px) scaleY(1); }
+        49% { transform: translate(3px, 0px) scaleY(0.1); }
+        75% { transform: translate(1px, 1px) scaleY(1); }
+      }
+      @keyframes glassesAnim {
+        0%, 100% { transform: translateY(0px); }
+        35% { transform: translateY(-1px); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        35% { transform: scale(1.12, 1.2); }
+        70% { transform: scale(0.92, 0.9); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-10deg); }
+        70% { transform: rotate(5deg); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-6deg); }
+      }
+
+/* ===== menganalisis ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 50px 96px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 202px 100px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #F59E0B; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        45% { transform: translateY(-4px) rotate(-2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-6deg) translateY(-1px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(6deg) translateY(-1px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-7deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(9deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(-2px, 2px) scaleY(0.92); }
+        48% { transform: translate(-2px, 2px) scaleY(0.1); }
+        75% { transform: translate(-1px, 1px) scaleY(0.95); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        45% { transform: scale(0.88, 1.2) translateX(-2px); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(8deg) translate(-3px, -2px); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-8deg); }
+      }
+
+/* ===== mengantuk ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 50px 96px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 194px 106px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #38BDF8; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(5px) rotate(3deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-5deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(5deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-12deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(12deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 100% { transform: translateY(0px) scaleX(1); }
+        50% { transform: translateY(2px) scaleX(0.95); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(0.85, 0.75); }
+        50% { transform: scale(1.15, 1.3); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-10deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(8deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translate(0px, 0px) scale(0.9); opacity: 0.5; }
+        50% { transform: translate(4px, -6px) scale(1.12); opacity: 1; }
+      }
+
+/* ===== menyapa ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 100px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 200px 95px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        25% { transform: translateY(-5px) rotate(1.5deg); }
+        50% { transform: translateY(-1px) rotate(0deg); }
+        75% { transform: translateY(-5px) rotate(-1.2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg) translateY(0px); }
+        25% { transform: rotate(8deg) translateY(-2px); }
+        75% { transform: rotate(-6deg) translateY(0px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg) translateY(0px); }
+        25% { transform: rotate(6deg) translateY(0px); }
+        75% { transform: rotate(-8deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-8deg); }
+        65% { transform: rotate(5deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(9deg); }
+        65% { transform: rotate(-6deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 42%, 50%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        20% { transform: translate(2px, -1px) scaleY(1); }
+        46% { transform: translate(1px, 0px) scaleY(0.1); }
+        75% { transform: translate(-1px, -1px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        20% { transform: scale(1.18, 1.35) translateY(1px); }
+        40% { transform: scale(0.95, 0.85); }
+        65% { transform: scale(1.15, 1.3) translateY(1px); }
+        85% { transform: scale(1, 1); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        20% { transform: rotate(-20deg); }
+        40% { transform: rotate(10deg); }
+        60% { transform: rotate(-20deg); }
+        80% { transform: rotate(6deg); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(7deg); }
+      }
+
+/* ===== pelanggan ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 39px 99px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 200px 97px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-5px) rotate(2deg); }
+        66% { transform: translateY(-4px) rotate(-2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(8deg) translateY(-2px); }
+        66% { transform: rotate(-6deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(6deg); }
+        66% { transform: rotate(-8deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(-9deg); }
+        66% { transform: rotate(7deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(7deg); }
+        66% { transform: rotate(-9deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(-2px, 1px) scaleY(1); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+        75% { transform: translate(2px, 1px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        33% { transform: scale(1.15, 1.25); }
+        66% { transform: scale(0.95, 0.9); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(10deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-12deg); }
+      }
+
+/* ===== percaya-diri ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 49px 105px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 203px 93px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        45% { transform: translateY(-6px) rotate(1.5deg) scale(1.02); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(6deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-6deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-7deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(9deg); }
+      }
+      @keyframes glassesAnim {
+        0%, 100% { transform: translateY(0px); }
+        45% { transform: translateY(-2px); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        45% { transform: scale(1.18, 1.15) rotate(-3deg); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-8deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-12deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: scale(0.8) rotate(0deg); opacity: 0.6; }
+        45% { transform: scale(1.3) rotate(25deg); opacity: 1; }
+      }
+
+/* ===== pusing ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 39px 103px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 201px 102px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #F59E0B; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+        25% { transform: translate(-4px, 2px) rotate(-3.5deg); }
+        50% { transform: translate(0px, 4px) rotate(0deg); }
+        75% { transform: translate(4px, 2px) rotate(3.5deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(8deg) translateY(-2px); }
+        50% { transform: rotate(-3deg); }
+        75% { transform: rotate(-8deg) translateY(-1px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(8deg) translateY(-1px); }
+        50% { transform: rotate(3deg); }
+        75% { transform: rotate(-8deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-14deg); }
+        50% { transform: rotate(6deg); }
+        75% { transform: rotate(-10deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(10deg); }
+        50% { transform: rotate(-6deg); }
+        75% { transform: rotate(14deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 100% { transform: translate(0px, -2.5px) scale(1, 1); }
+        25% { transform: translate(2.5px, 0px) scale(1.06, 0.94); }
+        50% { transform: translate(0px, 2.5px) scale(0.94, 1.06); }
+        75% { transform: translate(-2.5px, 0px) scale(1.06, 0.94); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: translate(0px, 0px) scale(1, 1); }
+        25% { transform: translate(-2px, 1px) scale(1.08, 0.85); }
+        50% { transform: translate(0px, 2px) scale(0.92, 1.2); }
+        75% { transform: translate(2px, 1px) scale(1.08, 0.85); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(6deg) translateY(1px); }
+        50% { transform: rotate(-4deg); }
+        75% { transform: rotate(5deg) translateY(1px); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-5deg) translateY(1px); }
+        50% { transform: rotate(4deg); }
+        75% { transform: rotate(-6deg) translateY(1px); }
+      }
+      .rig-prop {
+        transform-box: view-box;
+        transform-origin: 121.5px 43px;
+        animation: propAnim 3s linear infinite;
+      }
+      .rig-prop path {
+        transform-box: fill-box;
+        transform-origin: center center;
+        animation: starSelfSpin 3s linear infinite;
+      }
+      @keyframes propAnim {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes starSelfSpin {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(-180deg) scale(1.12); }
+        100% { transform: rotate(-360deg) scale(1); }
+      }
+
+/* ===== rekomendasi ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 101px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 200px 92px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        35% { transform: translateY(-7px) rotate(-1.5deg); }
+        70% { transform: translateY(-2px) rotate(1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-8deg) translateY(-2px); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-5deg); }
+        70% { transform: rotate(8deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-10deg); }
+        70% { transform: rotate(5deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(10deg); }
+        70% { transform: rotate(-5deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(-3px, -2px) scaleY(1); }
+        48% { transform: translate(-2px, -1px) scaleY(0.1); }
+        75% { transform: translate(2px, 1px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        25% { transform: scale(1.12, 1.25); }
+        50% { transform: scale(0.92, 0.85); }
+        75% { transform: scale(1.15, 1.3); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(14deg); }
+        70% { transform: rotate(-5deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-8deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: scale(0.9) translateY(0px); opacity: 0.7; }
+        35% { transform: scale(1.18) translateY(-4px); opacity: 1; }
+        70% { transform: scale(0.95) translateY(-1px); opacity: 0.85; }
+      }
+
+/* ===== sales-marketing ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 34px 83px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 198px 114px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        30% { transform: translateY(-6px) rotate(-2deg); }
+        65% { transform: translateY(-3px) rotate(1.5deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(8deg) translateY(-2px); }
+        65% { transform: rotate(-6deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(6deg); }
+        65% { transform: rotate(-8deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-10deg); }
+        65% { transform: rotate(6deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(10deg); }
+        65% { transform: rotate(-6deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(2px, -1px) scaleY(1.05); }
+        48% { transform: translate(1px, 0px) scaleY(0.1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        20% { transform: scale(1.18, 1.35); }
+        45% { transform: scale(0.9, 0.82); }
+        70% { transform: scale(1.2, 1.35); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(10deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-16deg); }
+        65% { transform: rotate(6deg); }
+      }
+
+/* ===== security ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 48px 94px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 183px 98px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #38BDF8; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-5px) scale(1.015); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(6deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-6deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-7deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(7deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-2px); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(-2px, 0px) scaleY(1); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+        75% { transform: translate(2px, 0px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        50% { transform: scale(1.15, 1.2); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(10deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-8deg) translateY(-2px); }
+      }
+
+/* ===== sedih ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 50px 96px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 190px 96px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #38BDF8; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg) scale(1, 1); }
+        50% { transform: translateY(5px) rotate(-1.5deg) scale(1.02, 0.97); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-5deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(5deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-14deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(14deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(2px) rotate(-2deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 54%, 100% { transform: translateY(0px) scaleY(1); }
+        50% { transform: translateY(2px) scaleY(0.2); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: translateY(0px) scale(1, 1); }
+        35% { transform: translateY(2px) scale(1.12, 1.25); }
+        70% { transform: translateY(1px) scale(0.92, 0.9); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-8deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(8deg); }
+      }
+      @keyframes propAnim {
+        0% { transform: translateY(-2px); opacity: 0.2; }
+        50% { transform: translateY(6px); opacity: 1; }
+        100% { transform: translateY(14px); opacity: 0; }
+      }
+
+/* ===== siaga-24jam ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 100px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 201px 102px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-6px) rotate(1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(6deg) translateY(-2px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-6deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-8deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(8deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(-2px, 1px) scaleY(1); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+        75% { transform: translate(2px, -1px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        35% { transform: scale(1.15, 1.2); }
+        70% { transform: scale(0.9, 0.85); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-12deg); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(8deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-5px) rotate(8deg); }
+      }
+
+/* ===== surveyor ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 40px 93px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 204px 99px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        35% { transform: translateY(-5px) rotate(-1.5deg); }
+        70% { transform: translateY(-3px) rotate(1.5deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-7deg) translateY(-2px); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-5deg); }
+        70% { transform: rotate(7deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-8deg); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(8deg); }
+        70% { transform: rotate(-6deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(-3px, 1px) scaleY(1); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+        75% { transform: translate(3px, -2px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        35% { transform: scale(1.15, 1.3); }
+        70% { transform: scale(0.95, 0.9); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(8deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(-14deg); }
+        75% { transform: rotate(5deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-7px) scale(1.08); }
+      }
+
+/* ===== takut ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 38px 96px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 202px 96px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #F59E0B; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        25% { transform: translateY(3px) rotate(-1.8deg); }
+        50% { transform: translateY(1px) rotate(1.8deg); }
+        75% { transform: translateY(4px) rotate(-1.5deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25%, 75% { transform: rotate(-7deg) translateY(-1px); }
+        50% { transform: rotate(5deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        25%, 75% { transform: rotate(7deg) translateY(-1px); }
+        50% { transform: rotate(-5deg); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-14deg); }
+        70% { transform: rotate(-6deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(14deg); }
+        70% { transform: rotate(6deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-3px); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scale(1); }
+        25% { transform: translate(-3px, 0px) scale(1.06); }
+        48% { transform: translate(0px, 0px) scale(1, 0.12); }
+        75% { transform: translate(3px, 0px) scale(1.06); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        25% { transform: scale(1.15, 1.3); }
+        50% { transform: scale(0.9, 0.85); }
+        75% { transform: scale(1.12, 1.25); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-10deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(10deg); }
+      }
+      @keyframes propAnim {
+        0% { transform: translateY(-2px); opacity: 0.2; }
+        50% { transform: translateY(5px); opacity: 1; }
+        100% { transform: translateY(12px); opacity: 0; }
+      }
+
+/* ===== teknisi ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 46px 92px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 202px 93px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        35% { transform: translateY(-5px) rotate(1.5deg); }
+        70% { transform: translateY(-2px) rotate(-1deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(7deg) translateY(-2px); }
+        70% { transform: rotate(-5deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(5deg); }
+        70% { transform: rotate(-7deg) translateY(-2px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(-8deg); }
+        70% { transform: rotate(5deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        35% { transform: rotate(8deg); }
+        70% { transform: rotate(-5deg); }
+      }
+      @keyframes browAnim {
+        0%, 100% { transform: translateY(0px); }
+        35% { transform: translateY(-2px); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(-2px, -1px) scaleY(1); }
+        48% { transform: translate(0px, 0px) scaleY(0.1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        35% { transform: scale(1.16, 1.25); }
+        70% { transform: scale(0.95, 0.9); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-18deg); }
+        65% { transform: rotate(10deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-10deg); }
+      }
+
+/* ===== terkejut ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 46px 106px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 194px 106px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #EF4444; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) scale(1, 1); }
+        30% { transform: translateY(-8px) scale(0.97, 1.03); }
+        65% { transform: translateY(-2px) scale(1.01, 0.99); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(10deg) translateY(-3px); }
+        65% { transform: rotate(-4deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-10deg) translateY(-3px); }
+        65% { transform: rotate(4deg); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-14deg); }
+        65% { transform: rotate(4deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(14deg); }
+        65% { transform: rotate(-4deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 50%, 58%, 100% { transform: scale(1); }
+        30% { transform: scale(1.1); }
+        54% { transform: scale(1, 0.12); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        30% { transform: scale(1.15, 1.25); }
+        65% { transform: scale(0.9, 0.85); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(14deg); }
+        65% { transform: rotate(-4deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-14deg); }
+        65% { transform: rotate(4deg); }
+      }
+      @keyframes propAnim {
+        0%, 100% { transform: scale(0.9); opacity: 0.6; }
+        30% { transform: scale(1.25); opacity: 1; }
+      }
+
+/* ===== tersipu ===== */
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 50px 96px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 190px 96px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #22C55E; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(2px) rotate(2.5deg); }
+        66% { transform: translateY(2px) rotate(-2.5deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(-7deg); }
+        66% { transform: rotate(5deg); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(-5deg); }
+        66% { transform: rotate(7deg); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(-10deg); }
+        66% { transform: rotate(4deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        33% { transform: rotate(-4deg); }
+        66% { transform: rotate(10deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 42%, 50%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        25% { transform: translate(-2px, 2px) scaleY(1); }
+        46% { transform: translate(0px, 2px) scaleY(0.1); }
+        75% { transform: translate(2px, 2px) scaleY(1); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        50% { transform: scale(1.18, 1.2) translateY(-1px); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(-7deg); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(7deg); }
+      }

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menganalisis Kabel Fiber</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+    }
+    .mascot-svg {
+      width: 240px;
+      height: 200px;
+      overflow: visible;
+    }
+    .shadow {
+      width: 120px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      margin-top: -10px;
+      animation: shadowSync 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* ==========================================================
+       SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
+       ========================================================== */
+    .rig-torso {
+      transform-box: view-box;
+      transform-origin: 120px 132px;
+      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-l {
+      transform-box: view-box;
+      transform-origin: 93px 130px;
+      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-leg-r {
+      transform-box: view-box;
+      transform-origin: 147px 130px;
+      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-l {
+      transform-box: view-box;
+      transform-origin: 83px 53px;
+      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-antenna-r {
+      transform-box: view-box;
+      transform-origin: 157px 53px;
+      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-brows {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-eyes {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-glasses {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-mouth {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-l {
+      transform-box: view-box;
+      transform-origin: 50px 96px;
+      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-arm-r {
+      transform-box: view-box;
+      transform-origin: 202px 100px;
+      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    .rig-prop {
+      transform-box: fill-box;
+      transform-origin: center center;
+      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+
+    /* Sinkronisasi Bayangan & LED selama 3 Detik */
+    @keyframes shadowSync {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(0.88); opacity: 0.48; }
+    }
+    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
+    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
+    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes ledPulse {
+      0%, 100% { fill: #0F172A; }
+      50% { fill: #F59E0B; }
+    }
+
+    /* Default fallback jika bagian opsional kosong */
+    @keyframes browAnim { 0%, 100% { transform: none; } }
+    @keyframes glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes propAnim { 0%, 100% { transform: none; } }
+
+    /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
+    
+      @keyframes torsoAnim {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        45% { transform: translateY(-4px) rotate(-2deg); }
+      }
+      @keyframes legLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-6deg) translateY(-1px); }
+      }
+      @keyframes legRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(6deg) translateY(-1px); }
+      }
+      @keyframes antLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-7deg); }
+      }
+      @keyframes antRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(9deg); }
+      }
+      @keyframes eyesAnim {
+        0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
+        30% { transform: translate(-2px, 2px) scaleY(0.92); }
+        48% { transform: translate(-2px, 2px) scaleY(0.1); }
+        75% { transform: translate(-1px, 1px) scaleY(0.95); }
+      }
+      @keyframes mouthAnim {
+        0%, 100% { transform: scale(1, 1); }
+        45% { transform: scale(0.88, 1.2) translateX(-2px); }
+      }
+      @keyframes armRAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(8deg) translate(-3px, -2px); }
+      }
+      @keyframes armLAnim {
+        0%, 100% { transform: rotate(0deg); }
+        45% { transform: rotate(-8deg); }
+      }
+    
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Menganalisis Kabel Fiber</h1>
+    <svg class="mascot-svg" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Badan Utama & Seluruh Anggota Tubuh Menyatu (Torso Rig) -->
+      <g class="rig-torso">
+        <!-- Kaki Kiri & Kaki Kanan (Menyatu di belakang bodi agar tidak pernah copot & ikut bergerak) -->
+        <g class="rig-leg-l">
+          <path d="M85 118V154H101V118" fill="#20C5D2"/>
+          <path d="M85 118V154H101V118" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+        </g>
+        <g class="rig-leg-r">
+          <path d="M139 118V154H155V118" fill="#20C5D2"/>
+          <path d="M139 118V154H155V118" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Antena Kiri & Kanan -->
+        <g class="rig-antenna-l">
+          <path d="M78 53.9999L68 17.9999C67 13.9999 73 12.9999 76 15.9999L88 51.9999L78 53.9999Z" fill="#2563EB" stroke="#0F172A" stroke-width="5" stroke-linejoin="round"/>
+        </g>
+        <g class="rig-antenna-r">
+          <path d="M162 53.9999L172 17.9999C173 13.9999 167 12.9999 164 15.9999L152 51.9999L162 53.9999Z" fill="#2563EB" stroke="#0F172A" stroke-width="5" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Bodi Router -->
+        <g class="rig-body">
+          <path d="M58 54C72 50 168 50 182 54C196 58 206 102 200 120C196 128 178 132 120 132C62 132 44 128 40 120C34 102 44 58 58 54Z" fill="#20C5D2" stroke="#0F172A" stroke-width="5.5" stroke-linejoin="round"/>
+          <path d="M44 114C70 118 170 118 196 114" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M120 125.5C121.933 125.5 123.5 123.933 123.5 122C123.5 120.067 121.933 118.5 120 118.5C118.067 118.5 116.5 120.067 116.5 122C116.5 123.933 118.067 125.5 120 125.5Z" stroke="#0F172A" stroke-width="1.8"/>
+          <path d="M120 119V122" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round"/>
+        </g>
+
+        <!-- Lampu Indikator LED -->
+        <g class="rig-leds">
+          
+          <path class="led-1" d="M64 124.5C65.3807 124.5 66.5 123.381 66.5 122C66.5 120.619 65.3807 119.5 64 119.5C62.6193 119.5 61.5 120.619 61.5 122C61.5 123.381 62.6193 124.5 64 124.5Z" fill="#0F172A"/>
+          <path class="led-2" d="M72 124.5C73.3807 124.5 74.5 123.381 74.5 122C74.5 120.619 73.3807 119.5 72 119.5C70.6193 119.5 69.5 120.619 69.5 122C69.5 123.381 70.6193 124.5 72 124.5Z" fill="#0F172A"/>
+          <path class="led-3" d="M80 124.5C81.3807 124.5 82.5 123.381 82.5 122C82.5 120.619 81.3807 119.5 80 119.5C78.6193 119.5 77.5 120.619 77.5 122C77.5 123.381 78.6193 124.5 80 124.5Z" fill="#0F172A"/>
+        </g>
+
+        <!-- Alis (Jika ada) -->
+        <g class="rig-brows">
+          
+        </g>
+
+        <!-- Bola Mata (Berkedip & Melirik) -->
+        <g class="rig-eyes">
+          <path d="M92 92.5C96.6944 92.5 100.5 88.6944 100.5 84C100.5 79.3056 96.6944 75.5 92 75.5C87.3056 75.5 83.5 79.3056 83.5 84C83.5 88.6944 87.3056 92.5 92 92.5Z" fill="#0F172A"/>
+          <path d="M94.5 84.5C96.1569 84.5 97.5 83.1569 97.5 81.5C97.5 79.8431 96.1569 78.5 94.5 78.5C92.8431 78.5 91.5 79.8431 91.5 81.5C91.5 83.1569 92.8431 84.5 94.5 84.5Z" fill="white"/>
+          <path d="M148 92.5C152.694 92.5 156.5 88.6944 156.5 84C156.5 79.3056 152.694 75.5 148 75.5C143.306 75.5 139.5 79.3056 139.5 84C139.5 88.6944 143.306 92.5 148 92.5Z" fill="#0F172A"/>
+          <path d="M150.5 84.5C152.157 84.5 153.5 83.1569 153.5 81.5C153.5 79.8431 152.157 78.5 150.5 78.5C148.843 78.5 147.5 79.8431 147.5 81.5C147.5 83.1569 148.843 84.5 150.5 84.5Z" fill="white"/>
+        </g>
+
+        <!-- Kacamata / Visor (Tidak ikut terpejam saat mata berkedip) -->
+        <g class="rig-glasses">
+          
+        </g>
+
+        <!-- Mulut -->
+        <g class="rig-mouth">
+          <path d="M112 95C114 103 126 103 128 95" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <!-- Objek Meja / Monitor / Laptop (Di belakang tangan) -->
+        <g class="rig-desk-prop">
+          
+        </g>
+
+        <!-- Tangan Kiri -->
+        <g class="rig-arm-l">
+          <path d="M50 96C40 102 36 122 52 130" stroke="#0F172A" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M54 134C57.3137 134 60 131.314 60 128C60 124.686 57.3137 122 54 122C50.6863 122 48 124.686 48 128C48 131.314 50.6863 134 54 134Z" fill="#20C5D2" stroke="#0F172A" stroke-width="3.5"/>
+          <path d="M22 152C34 140 46 130 64 126" stroke="#2563EB" stroke-width="6" stroke-linecap="round"/>
+          <path d="M64 126L76 120" stroke="#20C5D2" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M64 126H78" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M64 126L74 132" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"/>
+        </g>
+
+        <!-- Tangan Kanan -->
+        <g class="rig-arm-r">
+          <path d="M202 100C204.707 108.49 188.964 116.316 176.277 119.427" stroke="#0F172A" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M178.038 124.951C174.881 125.957 171.506 124.214 170.499 121.057C169.492 117.9 171.236 114.525 174.393 113.518C177.55 112.511 180.925 114.254 181.932 117.411C182.939 120.568 181.195 123.944 178.038 124.951Z" fill="#20C5D2" stroke="#0F172A" stroke-width="3.5"/>
+          <path d="M140 106C152.15 106 162 96.1503 162 84C162 71.8497 152.15 62 140 62C127.85 62 118 71.8497 118 84C118 96.1503 127.85 106 140 106Z" fill="#E0F2FE" fill-opacity="0.3" stroke="#0F172A" stroke-width="5"/>
+          <path d="M156 98L176 118" stroke="#0F172A" stroke-width="7" stroke-linecap="round"/>
+          <path d="M134 84C137.314 84 140 81.3137 140 78C140 74.6863 137.314 72 134 72C130.686 72 128 74.6863 128 78C128 81.3137 130.686 84 134 84Z" fill="white" fill-opacity="0.6"/>
+        </g>
+
+        <!-- Properti & Efek Pendukung -->
+        <g class="rig-prop">
+          
+        </g>
+      </g>
+    </svg>
+    <div class="shadow"></div>
+  </div>
+</body>
+</html>

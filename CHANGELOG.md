@@ -26,6 +26,18 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Redesain Antarmuka Login Portal Pelanggan TeknoCust (`PortalAuthView.jsx`)**:
+  - **Arsitektur Dual-Panel Mobile Shell Kompak & Terfokus Pada Form**:
+    - **Panel Atas Kompak (Header & Identitas Visual)**: Dibuat lebih ringkas (`h-[175px] sm:h-[195px]`) agar prioritas visual utama berfokus penuh pada formulir login tanpa terpotong di layar HP.
+    - **Logo Resmi Frame 36**: Menambahkan logo resmi ISP `Frame 36.png` di sisi kiri teks brand `TeknoCust` pada top bar mini, berdampingan dengan badge status *Portal Pelanggan*.
+    - **Maskot Animasi "Si Router Menyapa" (`menyapa.html`)**: Menggantikan logo statis di tengah panel biru dengan karakter maskot SVG interaktif berbasis rigging mulus 3 detik yang melambaikan tangan kanan menyapa pelanggan, mata melirik & berkedip, antena bergerak, serta lampu indikator LED hijau yang berdenyut aktif.
+    - **Panel Bawah (Card Putih Overlapping & Form Login)**: Formulir login, tombol masuk bergradien, toggle lihat sandi, checkbox *Ingat Saya*, serta accordion *Informasi Masuk Pelanggan* kini tampil utuh dan pas 1 layar penuh (*above the fold*) pada berbagai resolusi perangkat seluler.
+
+- **Redesain Antarmuka Bantuan Lupa Password (`PortalResetPasswordView.jsx`)**:
+  - **Penyelarasan Desain dengan Halaman Login**: Mengadopsi arsitektur dual-panel yang selaras, memuat header brand `Frame 36.png`, teks `TeknoCust`, dan subtitle *"Layanan Mandiri Khusus Pelanggan TeknoIndonet"*.
+  - **Maskot Animasi "Si Router Pusing" (`pusing.html`)**: Menampilkan karakter router SVG interaktif berekspresi pusing (mata berputar spiral, mulut bergelombang, tangan menempel di kepala, LED oranye, serta animasi bintang-bintang kuning melayang dan berputar di atas kepala).
+  - **Judul Terpusat & Konten Panduan**: Mengusung judul **`Lupa Password`**, panduan pemulihan akun oleh Admin NOC, serta tombol *"Kembali ke Halaman Masuk"* yang responsif dan interaktif.
+
 - **Pemisahan Halaman Login Mandiri (`HalamanLogin.jsx`) & Fitur Ingat Saya (30 Hari Inaktivitas)**:
   - **Modularisasi Komponen Mandiri**: Memisahkan antarmuka login dari [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx) ke file mandiri [HalamanLogin.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/HalamanLogin.jsx) di folder `frontend/src/components/`, merapikan hierarki kode dan menyederhanakan maintainability komponen root.
   - **Fitur Checkbox Ingat Saya**:

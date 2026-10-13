@@ -86,3 +86,263 @@
 .frost-pulse {
   animation: frostPulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* TeknoCust Portal Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.floaty {
+  animation: floaty 3s ease-in-out infinite;
+}
+
+/* ==========================================================
+   SISTEM RIGGING SMOOTH MASKOT ROUTER MENYAPA (menyapa.html)
+   ========================================================== */
+.mascot-router-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.rig-torso {
+  transform-box: view-box;
+  transform-origin: 120px 132px;
+  animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.rig-leg-l {
+  transform-box: view-box;
+  transform-origin: 93px 130px;
+  animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.rig-leg-r {
+  transform-box: view-box;
+  transform-origin: 147px 130px;
+  animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.rig-antenna-l {
+  transform-box: view-box;
+  transform-origin: 83px 53px;
+  animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.rig-antenna-r {
+  transform-box: view-box;
+  transform-origin: 157px 53px;
+  animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.rig-eyes {
+  transform-box: fill-box;
+  transform-origin: center center;
+  animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.rig-mouth {
+  transform-box: fill-box;
+  transform-origin: center center;
+  animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.rig-arm-l {
+  transform-box: view-box;
+  transform-origin: 38px 100px;
+  animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.rig-arm-r {
+  transform-box: view-box;
+  transform-origin: 200px 95px;
+  animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+.router-led-1 { animation: routerLedPulse 3s ease-in-out infinite 0s; }
+.router-led-2 { animation: routerLedPulse 3s ease-in-out infinite 0.4s; }
+.router-led-3 { animation: routerLedPulse 3s ease-in-out infinite 0.8s; }
+@keyframes routerLedPulse {
+  0%, 100% { fill: #0F172A; }
+  50% { fill: #22C55E; }
+}
+
+@keyframes torsoAnim {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(1.5deg); }
+  50% { transform: translateY(-1px) rotate(0deg); }
+  75% { transform: translateY(-4px) rotate(-1.2deg); }
+}
+@keyframes legLAnim {
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  25% { transform: rotate(8deg) translateY(-2px); }
+  75% { transform: rotate(-6deg) translateY(0px); }
+}
+@keyframes legRAnim {
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  25% { transform: rotate(6deg) translateY(0px); }
+  75% { transform: rotate(-8deg) translateY(-2px); }
+}
+@keyframes antLAnim {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-8deg); }
+  65% { transform: rotate(5deg); }
+}
+@keyframes antRAnim {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(9deg); }
+  65% { transform: rotate(-6deg); }
+}
+@keyframes eyesAnim {
+  0%, 42%, 50%, 100% { transform: translate(0px, 0px) scaleY(1); }
+  20% { transform: translate(2px, -1px) scaleY(1); }
+  46% { transform: translate(1px, 0px) scaleY(0.1); }
+  75% { transform: translate(-1px, -1px) scaleY(1); }
+}
+@keyframes mouthAnim {
+  0%, 100% { transform: scale(1, 1); }
+  20% { transform: scale(1.18, 1.35) translateY(1px); }
+  40% { transform: scale(0.95, 0.85); }
+  65% { transform: scale(1.15, 1.3) translateY(1px); }
+  85% { transform: scale(1, 1); }
+}
+@keyframes armRAnim {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-20deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-20deg); }
+  80% { transform: rotate(6deg); }
+}
+/* ==========================================================
+   SISTEM RIGGING MASKOT ROUTER PUSING (pusing.html)
+   ========================================================== */
+.pusing-rig-torso {
+  transform-box: view-box;
+  transform-origin: 120px 132px;
+  animation: pusingTorsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-leg-l {
+  transform-box: view-box;
+  transform-origin: 93px 130px;
+  animation: pusingLegLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-leg-r {
+  transform-box: view-box;
+  transform-origin: 147px 130px;
+  animation: pusingLegRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-antenna-l {
+  transform-box: view-box;
+  transform-origin: 83px 53px;
+  animation: pusingAntLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-antenna-r {
+  transform-box: view-box;
+  transform-origin: 157px 53px;
+  animation: pusingAntRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-eyes {
+  transform-box: fill-box;
+  transform-origin: center center;
+  animation: pusingEyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-mouth {
+  transform-box: fill-box;
+  transform-origin: center center;
+  animation: pusingMouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-arm-l {
+  transform-box: view-box;
+  transform-origin: 39px 103px;
+  animation: pusingArmLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-arm-r {
+  transform-box: view-box;
+  transform-origin: 201px 102px;
+  animation: pusingArmRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.pusing-rig-prop {
+  transform-box: view-box;
+  transform-origin: 121.5px 43px;
+  animation: pusingPropAnim 3s linear infinite;
+}
+.pusing-rig-prop path {
+  transform-box: fill-box;
+  transform-origin: center center;
+  animation: pusingStarSelfSpin 3s linear infinite;
+}
+
+.pusing-led-1 { animation: pusingLedPulse 3s ease-in-out infinite 0s; }
+.pusing-led-2 { animation: pusingLedPulse 3s ease-in-out infinite 0.4s; }
+.pusing-led-3 { animation: pusingLedPulse 3s ease-in-out infinite 0.8s; }
+
+@keyframes pusingLedPulse {
+  0%, 100% { fill: #0F172A; }
+  50% { fill: #F59E0B; }
+}
+
+@keyframes pusingTorsoAnim {
+  0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+  25% { transform: translate(-4px, 2px) rotate(-3.5deg); }
+  50% { transform: translate(0px, 4px) rotate(0deg); }
+  75% { transform: translate(4px, 2px) rotate(3.5deg); }
+}
+@keyframes pusingLegLAnim {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(8deg) translateY(-2px); }
+  50% { transform: rotate(-3deg); }
+  75% { transform: rotate(-8deg) translateY(-1px); }
+}
+@keyframes pusingLegRAnim {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(8deg) translateY(-1px); }
+  50% { transform: rotate(3deg); }
+  75% { transform: rotate(-8deg) translateY(-2px); }
+}
+@keyframes pusingAntLAnim {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-14deg); }
+  50% { transform: rotate(6deg); }
+  75% { transform: rotate(-10deg); }
+}
+@keyframes pusingAntRAnim {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(10deg); }
+  50% { transform: rotate(-6deg); }
+  75% { transform: rotate(14deg); }
+}
+@keyframes pusingEyesAnim {
+  0%, 100% { transform: translate(0px, -2.5px) scale(1, 1); }
+  25% { transform: translate(2.5px, 0px) scale(1.06, 0.94); }
+  50% { transform: translate(0px, 2.5px) scale(0.94, 1.06); }
+  75% { transform: translate(-2.5px, 0px) scale(1.06, 0.94); }
+}
+@keyframes pusingMouthAnim {
+  0%, 100% { transform: translate(0px, 0px) scale(1, 1); }
+  25% { transform: translate(-2px, 1px) scale(1.08, 0.85); }
+  50% { transform: translate(0px, 2px) scale(0.92, 1.2); }
+  75% { transform: translate(2px, 1px) scale(1.08, 0.85); }
+}
+@keyframes pusingArmLAnim {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(6deg) translateY(1px); }
+  50% { transform: rotate(-4deg); }
+  75% { transform: rotate(5deg) translateY(1px); }
+}
+@keyframes pusingArmRAnim {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg) translateY(1px); }
+  50% { transform: rotate(4deg); }
+  75% { transform: rotate(-6deg) translateY(1px); }
+}
+@keyframes pusingPropAnim {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes pusingStarSelfSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(-180deg) scale(1.12); }
+  100% { transform: rotate(-360deg) scale(1); }
+}
+
+

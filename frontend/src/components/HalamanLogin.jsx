@@ -61,7 +61,7 @@ export function HalamanLogin({
     <div className="min-h-screen bg-slate-100 flex flex-col justify-between p-4 sm:p-6 text-slate-900 font-sans">
       <div className="flex-1 flex items-center justify-center">
         <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl space-y-6">
-          
+
           {/* Header Login */}
           <div className="text-center space-y-1.5">
             <div className="flex items-center justify-center gap-2.5">
