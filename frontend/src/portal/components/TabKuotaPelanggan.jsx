@@ -80,136 +80,126 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
         customer={customer}
       />
 
-      {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) PERSIS BERANDA ═══ */}
-      <main className="scroll-area -mt-3 flex-1 overflow-y-auto">
+      {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) PERSIS TAB LAIN ═══ */}
+      <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
         <div className="pb-6 space-y-4">
 
-          {/* ═══ CARD 1: PEMAKAIAN BULAN INI (Sama persis ukuran & corner dengan menu lain) ═══ */}
-          <div className="relative mx-3">
-            <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
-
-              {/* Card Header Konsisten dengan Tab Lain */}
-              <div className="p-4 pb-3 border-b border-gray-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#dbeafe' }}>
-                    <BarChart3 className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[14px] font-black text-gray-900 leading-tight">Total Pemakaian Bulan Ini</div>
-                    <div className="text-[10px] text-gray-500 mt-0.5 leading-tight font-medium">
-                      Ringkasan pemakaian kuota internet
-                    </div>
-                  </div>
-                </div>
+          {/* ═══ SECTION 1: PEMAKAIAN BULAN INI ═══ */}
+          <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 overflow-hidden">
+            {/* Card Header */}
+            <div className="p-4 pb-3 border-b border-gray-100 flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+                <BarChart3 className="w-5 h-5" />
               </div>
-
-              {/* Angka + progress bar pemakaian */}
-              <div className="px-4 pt-3 pb-4 bg-white">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-4xl font-black tracking-tight font-mono" style={{ color: '#2563eb' }}>
-                    {totalGB}
-                  </span>
-                  <span className="text-lg font-bold text-gray-400">GB</span>
-                </div>
-                <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-700" style={{ width: '68%', background: '#2563eb' }} />
-                </div>
-                <div className="mt-3 flex items-center justify-between text-[10px]">
-                  <span className="text-gray-500 font-medium">Paket aktif:</span>
-                  <span className="font-bold px-2 py-0.5 rounded" style={{ background: '#dbeafe', color: '#2563eb' }}>
-                    {paketNama}
-                  </span>
-                </div>
-              </div>
-
-              {/* Strip info unlimited */}
-              <div className="px-4 py-3 border-t border-gray-100 flex items-start gap-2.5" style={{ background: '#eff6ff' }}>
-                <Infinity className="w-4 h-4 mt-0.5 shrink-0" style={{ color: '#2563eb' }} />
-                <p className="text-[11px] text-gray-700 leading-relaxed">
-                  Internet Anda bersifat <strong className="text-gray-900">Tanpa Batas Kuota (Unlimited)</strong> tanpa batas FUP kuota harian.
+              <div className="min-w-0">
+                <h2 className="text-sm font-black text-gray-900 leading-tight">Total Pemakaian Bulan Ini</h2>
+                <p className="text-xs text-gray-600 mt-0.5 leading-tight font-medium">
+                  Ringkasan pemakaian kuota internet
                 </p>
               </div>
-
             </div>
-          </div>
 
-          {/* ═══ CARD 2: HISTORI 7 HARI ═══ */}
-          <div className="relative mx-3">
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" style={{ color: '#2563eb' }} />
-                  <div className="text-[13px] font-black text-gray-900">Histori 7 Hari Terakhir</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={fetchKuota}
-                  className="w-7 h-7 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-blue-600 transition cursor-pointer"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                </button>
+            {/* Angka + progress bar pemakaian */}
+            <div className="px-4 pt-3 pb-4 bg-white">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-4xl font-black tracking-tight font-mono text-blue-600">
+                  {totalGB}
+                </span>
+                <span className="text-lg font-bold text-gray-500">GB</span>
               </div>
-              <div className="text-[10px] text-gray-500 mb-4 font-medium">Rata-rata pemakaian data harian</div>
+              <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-700 bg-blue-600" style={{ width: '68%' }} />
+              </div>
+              <div className="mt-3 flex items-center justify-between text-xs">
+                <span className="text-gray-600 font-medium">Paket aktif:</span>
+                <span className="font-bold px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                  {paketNama}
+                </span>
+              </div>
+            </div>
 
-              <div className="flex items-end justify-between gap-2 h-32 px-1">
-                {history.map((item, idx) => {
-                  const val = Number(item.pemakaian_gb || 0);
-                  const heightPercent = maxGB > 0 ? Math.max(18, Math.round((val / maxGB) * 100)) : 50;
-                  const dayLabel = (item.tanggal || '').split(' ')[0] || (idx + 1);
+            {/* Strip info unlimited */}
+            <div className="px-4 py-3 border-t border-gray-100 flex items-start gap-2.5 bg-blue-50/70">
+              <Infinity className="w-4 h-4 mt-0.5 shrink-0 text-blue-700" />
+              <p className="text-xs text-gray-700 leading-relaxed font-normal">
+                Internet Anda bersifat <strong className="text-gray-900 font-semibold">Tanpa Batas Kuota (Unlimited)</strong> tanpa batas FUP kuota harian.
+              </p>
+            </div>
+          </section>
 
-                  return (
-                    <div key={idx} className="flex-1 h-full flex flex-col items-center justify-end gap-1.5">
-                      <div className="text-[9px] font-bold text-gray-700 font-mono">
-                        {val}
-                      </div>
-                      <div className="w-full flex-1 max-h-[82px] flex items-end justify-center">
-                        <div
-                          className="w-full rounded-t-md transition-all duration-700"
-                          style={{
-                            height: `${heightPercent}%`,
-                            background: '#2563eb',
-                            opacity: heightPercent >= 95 ? 1 : 0.65
-                          }}
-                        />
-                      </div>
-                      <div className="text-[9px] font-semibold text-gray-500 font-mono">
-                        {dayLabel}
-                      </div>
+          {/* ═══ SECTION 2: HISTORI 7 HARI ═══ */}
+          <section className="mx-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-blue-700" />
+                <h2 className="text-sm font-black text-gray-900">Histori 7 Hari Terakhir</h2>
+              </div>
+              <button
+                type="button"
+                onClick={fetchKuota}
+                aria-label="Segarkan data kuota"
+                className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 hover:text-blue-600 transition cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+            <p className="text-xs text-gray-600 mb-4 font-medium">Rata-rata pemakaian data harian</p>
+
+            <div className="flex items-end justify-between gap-2 h-36 px-1">
+              {history.map((item, idx) => {
+                const val = Number(item.pemakaian_gb || 0);
+                const heightPercent = maxGB > 0 ? Math.max(18, Math.round((val / maxGB) * 100)) : 50;
+                const dayLabel = (item.tanggal || '').split(' ')[0] || (idx + 1);
+
+                return (
+                  <div key={idx} className="flex-1 h-full flex flex-col items-center justify-end gap-1.5">
+                    <span className="text-[11px] font-bold text-gray-800 font-mono leading-none">
+                      {val}
+                    </span>
+                    <div className="w-full flex-1 max-h-[86px] flex items-end justify-center">
+                      <div
+                        className="w-full rounded-t-md transition-all duration-700 bg-blue-600"
+                        style={{
+                          height: `${heightPercent}%`,
+                          opacity: heightPercent >= 95 ? 1 : 0.7
+                        }}
+                      />
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-500">
-                <span>Satuan: GB (Gigabyte)</span>
-                <span className="font-mono font-bold text-gray-700">Total 7 hari: {total7Days} GB</span>
-              </div>
-            </div>
-          </div>
-
-          {/* ═══ CARD 3: RINCIAN PEMAKAIAN ═══ */}
-          <div className="relative mx-3">
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <List className="w-4 h-4" style={{ color: '#2563eb' }} />
-                  <div className="text-[12px] font-black text-gray-900">Rincian Pemakaian</div>
-                </div>
-                <span className="text-[10px] text-gray-400 font-medium">7 hari</span>
-              </div>
-
-              <div className="divide-y divide-gray-50">
-                {history.map((item, idx) => (
-                  <div key={idx} className="px-4 py-2.5 flex items-center justify-between">
-                    <span className="text-[12px] text-gray-700 font-medium">{item.tanggal}</span>
-                    <span className="text-[12px] font-bold font-mono text-gray-900">
-                      {Number(item.pemakaian_gb || 0)} GB
+                    <span className="text-[11px] font-semibold text-gray-600 font-mono leading-none">
+                      {dayLabel}
                     </span>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          </div>
+
+            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
+              <span>Satuan: GB (Gigabyte)</span>
+              <span className="font-mono font-bold text-gray-800">Total 7 hari: {total7Days} GB</span>
+            </div>
+          </section>
+
+          {/* ═══ SECTION 3: RINCIAN PEMAKAIAN ═══ */}
+          <section className="mx-3 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <List className="w-4 h-4 text-blue-700" />
+                <h2 className="text-sm font-black text-gray-900">Rincian Pemakaian</h2>
+              </div>
+              <span className="text-xs text-gray-600 font-medium">7 hari</span>
+            </div>
+
+            <div className="divide-y divide-gray-100">
+              {history.map((item, idx) => (
+                <div key={idx} className="px-4 py-2.5 flex items-center justify-between">
+                  <span className="text-xs text-gray-700 font-medium">{item.tanggal}</span>
+                  <span className="text-xs font-bold font-mono text-gray-900">
+                    {Number(item.pemakaian_gb || 0)} GB
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
 
         </div>
       </main>

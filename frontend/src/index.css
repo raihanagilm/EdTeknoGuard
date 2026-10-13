@@ -28,6 +28,8 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    overscroll-behavior: none;
   }
 
   body {
@@ -40,26 +42,58 @@
     -webkit-font-smoothing: antialiased;
     padding-bottom: env(safe-area-inset-bottom);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overscroll-behavior-y: none;
+    overscroll-behavior: none;
   }
 
-  /* Frost Cyan Slim Scrollbars */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  /* Frost Cyan Slim Scrollbars (Desktop only) */
+  @media (min-width: 640px) {
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(236, 254, 255, 0.6);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #bae6fd;
+      border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #38bdf8;
+    }
   }
 
-  ::-webkit-scrollbar-track {
-    background: rgba(236, 254, 255, 0.6);
+  /* Sembunyikan scrollbar di layar mobile secara default */
+  @media (max-width: 639px) {
+    ::-webkit-scrollbar {
+      display: none;
+      width: 0px;
+      height: 0px;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   }
+}
 
-  ::-webkit-scrollbar-thumb {
-    background: #bae6fd;
-    border-radius: 9999px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #38bdf8;
-  }
+/* Utilitas Bebas Scrollbar & Anti-Rubber-Band */
+.no-scrollbar::-webkit-scrollbar,
+.scroll-area::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.no-scrollbar,
+.scroll-area {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Glassmorphism Frost Card */

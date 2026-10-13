@@ -13,12 +13,15 @@ import { PortalAuthService } from '../services/portalApi';
 import '../../styles/mascots/mascot-menyapa.css';
 
 /* ░░░ Komponen Maskot Animasi Si Router Menyapa (menyapa.html) ░░░ */
-function RouterMenyapaMascot({ className = "w-32 h-24" }) {
+function RouterMenyapaMascot({ className = "w-28 h-20" }) {
   return (
-    <div className={`${className} flex items-center justify-center pointer-events-none drop-shadow-md`}>
+    <div
+      className={`${className} inline-flex items-center justify-center pointer-events-none drop-shadow-md leading-none`}
+      style={{ lineHeight: 0 }}
+    >
       <svg
         className="mascot-router-svg"
-        viewBox="0 0 240 200"
+        viewBox="0 10 240 150"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >

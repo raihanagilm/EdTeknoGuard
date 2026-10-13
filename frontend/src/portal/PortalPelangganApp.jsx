@@ -10,6 +10,7 @@ import { TabKendalaPelanggan } from './components/TabKendalaPelanggan';
 import { TabWifiPelanggan } from './components/TabWifiPelanggan';
 import { TabKuotaPelanggan } from './components/TabKuotaPelanggan';
 import { TabProfilPelanggan } from './components/TabProfilPelanggan';
+import { TabPembayaranPelanggan } from './components/TabPembayaranPelanggan';
 import {
   PortalAuthService,
   PortalDashboardService
@@ -26,7 +27,7 @@ export function PortalPelangganApp() {
     if (parts.length === 1 && (parts[0] === 'teknocust' || parts[0] === 'portal')) return 'beranda';
     if (parts.length >= 2 && (parts[0] === 'teknocust' || parts[0] === 'portal')) {
       const sub = parts[1];
-      if (['beranda', 'kendala', 'wifi', 'kuota', 'profil'].includes(sub)) {
+      if (['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran'].includes(sub)) {
         return sub;
       }
       if (['login', 'masuk', 'auth', 'daftar'].includes(sub)) {
@@ -141,7 +142,7 @@ export function PortalPelangganApp() {
     );
   }
 
-  const validPortalTabs = ['beranda', 'kendala', 'wifi', 'kuota', 'profil'];
+  const validPortalTabs = ['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran'];
   if (!validPortalTabs.includes(activeTab)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 text-slate-900 font-sans antialiased">
@@ -162,11 +163,11 @@ export function PortalPelangganApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#e5e7eb] sm:p-4 sm:flex sm:justify-center sm:items-center text-[#111827] font-sans antialiased">
-      {/* Mobile Shell Wrapper (Max 440px sesuai desain user) */}
-      <div className="w-full max-w-[440px] mx-auto min-h-screen sm:min-h-0 sm:h-[92dvh] bg-[#f3f4f6] relative flex flex-col sm:rounded-2xl sm:overflow-hidden sm:shadow-2xl sm:shadow-slate-900/15 sm:border sm:border-slate-200">
+    <div className="fixed inset-0 sm:relative sm:min-h-[100dvh] bg-[#e5e7eb] p-0 sm:p-4 pb-0 sm:pb-4 flex justify-center items-center text-[#111827] font-sans antialiased overflow-hidden overscroll-none select-none">
+      {/* Mobile Shell Wrapper (Max 440px dengan full dynamic viewport height) */}
+      <div className="w-full max-w-[440px] mx-auto h-[100dvh] sm:h-[92dvh] bg-[#f3f4f6] relative flex flex-col sm:rounded-2xl sm:shadow-2xl sm:shadow-slate-900/15 sm:border sm:border-slate-200 overflow-hidden overscroll-none">
         {/* Area Konten Utama Mandiri Seluruh Tab */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+        <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
           {activeTab === 'beranda' && (
             <TabBerandaPelanggan
               data={dashboardData}
@@ -198,9 +199,16 @@ export function PortalPelangganApp() {
               onLogout={handleLogout}
             />
           )}
+          {activeTab === 'pembayaran' && (
+            <TabPembayaranPelanggan
+              customer={customer}
+              dashboardData={dashboardData}
+              onBack={() => switchTab('beranda')}
+            />
+          )}
         </div>
 
-        {/* Sticky Bottom Navigation Bar di Dalam Shell */}
+        {/* Bottom Navigation Bar di Dalam Shell */}
         <PortalBottomNav activeTab={activeTab} onTabChange={(tab) => switchTab(tab)} />
       </div>
     </div>

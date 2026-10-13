@@ -65,7 +65,7 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
       />
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
-      <main className="scroll-area -mt-3 flex-1 overflow-y-auto">
+      <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
         <div className="pb-24 space-y-3">
 
           {/* Feedback Notifikasi Alert */}
@@ -88,108 +88,104 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
             </div>
           )}
 
-          {/* ═══ CARD PUTIH (naik menimpa header) ═══ */}
-          <div className="relative mx-3">
-            <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
-
-              <div className="p-4 pb-3 border-b border-gray-100">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#dbeafe' }}>
-                    <Wifi className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[14px] font-black text-gray-900 leading-tight">Kelola WiFi Rumah</div>
-                    <div className="text-[10px] text-gray-500 mt-0.5 leading-tight font-medium">
-                      Ubah nama WiFi (SSID) dan kata sandi tanpa perlu memanggil teknisi
-                    </div>
-                  </div>
+          {/* ═══ CARD PUTIH KELOLA WIFI (naik menimpa header) ═══ */}
+          <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
+            <div className="p-4 pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#dbeafe' }}>
+                  <Wifi className="w-5 h-5 text-blue-600" />
                 </div>
-              </div>
-
-              <form onSubmit={handleChangeWifi} className="p-4 space-y-3.5 text-xs font-semibold">
-                <div className="space-y-1.5">
-                  <label className="text-slate-700 block">Nama WiFi (SSID) Baru</label>
-                  <div className="relative">
-                    <Wifi className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <input
-                      type="text"
-                      required
-                      value={namaWifi}
-                      onChange={(e) => setNamaWifi(e.target.value)}
-                      placeholder="Contoh: WiFi-Keluarga-Berkah"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-slate-700 block">Kata Sandi WiFi Baru (Minimal 8 Karakter)</label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      minLength={8}
-                      value={passwordWifi}
-                      onChange={(e) => setPasswordWifi(e.target.value)}
-                      placeholder="Minimal 8 karakter kombinasi"
-                      className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                    >
-                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-slate-700 block">Konfirmasi Kata Sandi Baru</label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      minLength={8}
-                      value={konfirmasiPassword}
-                      onChange={(e) => setKonfirmasiPassword(e.target.value)}
-                      placeholder="Ketik ulang kata sandi baru"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full mt-1 py-3 px-4 rounded-xl text-white font-bold text-xs shadow-md active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
-                  style={{ background: '#2563eb' }}
-                >
-                  {loading ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      <span>Simpan Perubahan WiFi</span>
-                    </>
-                  )}
-                </button>
-              </form>
-
-              <div className="px-4 py-3 border-t border-gray-100 flex items-start gap-2.5" style={{ background: '#eff6ff' }}>
-                <Smartphone className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
                 <div className="min-w-0">
-                  <div className="text-[11px] font-bold text-gray-900 mb-1">Pemberitahuan Setelah Ganti Sandi:</div>
-                  <p className="text-[10.5px] text-gray-600 leading-relaxed">
-                    Setelah menyimpan nama/kata sandi baru, seluruh HP dan laptop di rumah Anda akan terputus sesaat. Silakan sambungkan ulang HP Anda menggunakan kata sandi yang baru.
-                  </p>
+                  <div className="text-[14px] font-black text-gray-900 leading-tight">Kelola WiFi Rumah</div>
+                  <div className="text-xs text-gray-600 mt-0.5 leading-normal font-medium">
+                    Ubah nama WiFi (SSID) dan kata sandi tanpa perlu memanggil teknisi
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleChangeWifi} className="p-4 space-y-3.5 text-xs font-semibold">
+              <div className="space-y-1.5">
+                <label className="text-slate-700 block">Nama WiFi (SSID) Baru</label>
+                <div className="relative">
+                  <Wifi className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    required
+                    value={namaWifi}
+                    onChange={(e) => setNamaWifi(e.target.value)}
+                    placeholder="Contoh: WiFi-Keluarga-Berkah"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                  />
                 </div>
               </div>
 
-            </div>
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-slate-700 block">Kata Sandi WiFi Baru (Minimal 8 Karakter)</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={passwordWifi}
+                    onChange={(e) => setPasswordWifi(e.target.value)}
+                    placeholder="Minimal 8 karakter kombinasi"
+                    className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-slate-700 block">Konfirmasi Kata Sandi Baru</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={konfirmasiPassword}
+                    onChange={(e) => setKonfirmasiPassword(e.target.value)}
+                    placeholder="Ketik ulang kata sandi baru"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-1 py-3 px-4 rounded-xl text-white font-bold text-xs shadow-md active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+                style={{ background: '#2563eb' }}
+              >
+                {loading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>Simpan Perubahan WiFi</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            <footer className="px-4 py-3 border-t border-blue-100/70 bg-blue-50/60 flex items-start gap-2.5">
+              <Smartphone className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-blue-900 mb-1">Pemberitahuan Setelah Ganti Sandi:</div>
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                  Setelah menyimpan nama/kata sandi baru, seluruh HP dan laptop di rumah Anda akan terputus sesaat. Silakan sambungkan ulang HP Anda menggunakan kata sandi yang baru.
+                </p>
+              </div>
+            </footer>
+          </section>
 
         </div>
       </main>

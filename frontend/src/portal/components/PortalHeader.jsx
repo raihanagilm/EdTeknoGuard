@@ -13,33 +13,31 @@ export function PortalHeader({
   onNotificationClick = null
 }) {
   return (
-    <div className="shrink-0 relative overflow-hidden" style={{ background: '#2563eb' }}>
-      {/* Ornamen Lingkaran Header */}
-      <div
-        className="absolute top-1/2 -translate-y-1/2 -right-12 w-40 h-40 rounded-full pointer-events-none"
-        style={{ background: '#3b82f6' }}
-      />
-      <div
-        className="absolute top-1/2 -translate-y-1/2 -right-4 w-24 h-24 rounded-full pointer-events-none"
-        style={{ background: '#60a5fa', opacity: 0.55 }}
-      />
-      <div
-        className="absolute -bottom-14 -left-8 w-24 h-24 rounded-full pointer-events-none"
-        style={{ background: '#3b82f6', opacity: 0.7 }}
-      />
+    <div className="shrink-0 relative z-0" style={{ background: '#2563eb' }}>
+      {/* Ornamen Lingkaran Header Terkapsulasi */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute top-0 right-0 w-32 h-32 rounded-bl-full"
+          style={{ background: '#3b82f6', opacity: 0.6 }}
+        />
+        <div
+          className="absolute bottom-0 left-0 w-24 h-24 rounded-tr-full"
+          style={{ background: '#3b82f6', opacity: 0.4 }}
+        />
+      </div>
 
       {/* Top bar: Avatar/Maskot + Judul/Subjudul/Greeting + Lonceng Notifikasi */}
-      <div className="relative px-5 pt-4 pb-4 flex items-center justify-between gap-3">
+      <div className="relative px-5 pt-4 pb-7 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           {avatarInitials ? (
-            <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div className="w-10 h-10 rounded-full bg-blue-900/40 border border-white/40 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-xs">
               {avatarInitials}
             </div>
           ) : (
-            <div className="w-12 h-10 shrink-0 flex items-center justify-center overflow-visible">
+            <div className="shrink-0 inline-flex items-center justify-center leading-none overflow-visible" style={{ lineHeight: 0 }}>
               <PortalActiveMascot
                 data={dashboardData || { customer }}
-                className="w-12 h-10"
+                className="w-11 h-9"
               />
             </div>
           )}
@@ -48,8 +46,8 @@ export function PortalHeader({
           <div className="min-w-0 flex-1">
             {greeting ? (
               <>
-                <div className="text-[11px] text-white/80 leading-none">{greeting}</div>
-                <div className="text-[14px] font-bold text-white leading-tight mt-0.5 truncate">
+                <div className="text-xs text-white/90 font-medium leading-none">{greeting}</div>
+                <div className="text-[15px] font-bold text-white leading-tight mt-1 truncate">
                   {title}
                 </div>
               </>
@@ -58,7 +56,7 @@ export function PortalHeader({
                 <h1 className="text-[15px] font-black tracking-tight leading-none text-white truncate">
                   {title}
                 </h1>
-                <p className="text-[9px] text-blue-100 mt-1 leading-tight font-medium truncate">
+                <p className="text-xs text-white/95 mt-1 leading-tight font-medium truncate">
                   {subtitle}
                 </p>
               </>
@@ -71,11 +69,11 @@ export function PortalHeader({
           type="button"
           onClick={onNotificationClick}
           aria-label="Notifikasi"
-          className="relative w-9 h-9 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition cursor-pointer shrink-0"
+          className="relative w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition cursor-pointer shrink-0"
         >
           <Bell className="w-4 h-4 stroke-[2.2]" />
           {showNotificationDot && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border border-blue-600 animate-pulse" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border border-blue-600" />
           )}
         </button>
       </div>

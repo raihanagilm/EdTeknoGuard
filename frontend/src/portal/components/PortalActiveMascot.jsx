@@ -106,8 +106,8 @@ export function PortalActiveMascot({ data, className = 'w-20 h-16' }) {
 
   return (
     <div
-      className={`relative pointer-events-none select-none flex items-center justify-center mascot-container-${mascotKey} ${className} [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:object-contain`}
-      style={{ overflow: 'visible' }}
+      className={`relative pointer-events-none select-none inline-flex items-center justify-center leading-none mascot-container-${mascotKey} ${className} [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:object-contain`}
+      style={{ overflow: 'visible', lineHeight: 0 }}
       dangerouslySetInnerHTML={{ __html: svgHtml }}
     />
   );
