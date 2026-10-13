@@ -8,7 +8,7 @@ import {
   Bell
 } from 'lucide-react';
 import { PortalKuotaService } from '../services/portalApi';
-import { PortalActiveMascot } from './PortalActiveMascot';
+import { PortalHeader } from './PortalHeader';
 
 export function TabKuotaPelanggan({ customer, dashboardData }) {
   const [kuotaData, setKuotaData] = useState(null);
@@ -72,88 +72,39 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
 
   return (
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
-      {/* ═══ HEADER BIRU DENGAN MASKOT, BRAND TEKNOCUST, DAN LONCENG NOTIFIKASI ═══ */}
-      <div className="shrink-0 relative overflow-hidden" style={{ background: '#2563eb' }}>
-        <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full pointer-events-none" />
-        <div className="absolute -bottom-10 -left-6 w-28 h-28 bg-white/5 rounded-full pointer-events-none" />
-
-        <div className="relative px-5 pt-4 pb-3 flex items-center justify-between gap-3">
-          {/* Maskot Kiri Atas */}
-          <div className="w-12 h-10 shrink-0 flex items-center justify-center overflow-visible">
-            <PortalActiveMascot
-              data={dashboardData || { customer }}
-              className="w-12 h-10"
-            />
-          </div>
-
-          {/* Tulisan Brand Tekno & Portal Layanan Mandiri Pelanggan TeknoIndonet */}
-          <div className="min-w-0 flex-1">
-            <div className="text-[14px] font-black tracking-tight leading-none text-white">
-              Tekno<span className="text-blue-200">Cust</span>
-            </div>
-            <div className="text-[9px] text-blue-100 mt-1 leading-tight font-medium">
-              Portal Layanan Mandiri Pelanggan TeknoIndonet
-            </div>
-          </div>
-
-          {/* Bell */}
-          <button
-            type="button"
-            className="relative w-9 h-9 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-white shrink-0 hover:bg-white/25 transition cursor-pointer"
-          >
-            <Bell className="w-4 h-4 stroke-[2.2]" />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-          </button>
-        </div>
-      </div>
+      {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
+      <PortalHeader
+        title="Pemakaian Kuota"
+        subtitle="Monitoring Penggunaan Data & FUP Internet"
+        dashboardData={dashboardData}
+        customer={customer}
+      />
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) PERSIS BERANDA ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto">
         <div className="pb-6 space-y-4">
 
-          {/* ═══ CARD 1: MODEL PERSIS SEPERTI CARD DI BERANDA DENGAN MASKOT KANAN ATAS ═══ */}
-          <div className="px-4">
+          {/* ═══ CARD 1: PEMAKAIAN BULAN INI (Sama persis ukuran & corner dengan menu lain) ═══ */}
+          <div className="relative mx-3">
             <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
 
-              {/* Bagian Atas: Header info + Maskot Pintar di Kanan Atas berlatar Gradient & Radial Glow */}
-              <div
-                className="relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, rgb(239, 246, 255) 0%, rgb(255, 255, 255) 100%)' }}
-              >
-                {/* Radial Glow Halus di Belakang Maskot */}
-                <div
-                  className="absolute top-0 right-0 w-28 h-28 pointer-events-none rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, transparent 70%)'
-                  }}
-                />
-
-                {/* Maskot KECIL & UTUH di Pojok Kanan Atas (Berubah Otomatis Sesuai Kondisi) */}
-                <div className="absolute top-2 right-2 w-20 h-16 pointer-events-none z-10 flex items-center justify-center overflow-visible">
-                  <PortalActiveMascot
-                    data={dashboardData || { customer }}
-                    className="w-20 h-16"
-                  />
-                </div>
-
-                {/* Teks Kiri (Diberi padding kanan pr-24 agar tidak tertimpa maskot) */}
-                <div className="relative p-4 pr-24">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-100 text-blue-600 shrink-0">
-                      <BarChart3 className="w-4 h-4 stroke-[2.2]" />
-                    </div>
-                    <div className="text-[13px] font-bold text-gray-900 leading-tight">
-                      Total Pemakaian Bulan Ini
-                    </div>
+              {/* Card Header Konsisten dengan Tab Lain */}
+              <div className="p-4 pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#dbeafe' }}>
+                    <BarChart3 className="w-5 h-5 text-blue-600" />
                   </div>
-                  <div className="text-[10px] text-gray-500 mt-2 font-medium">
-                    Ringkasan pemakaian kuota internet
+                  <div className="min-w-0">
+                    <div className="text-[14px] font-black text-gray-900 leading-tight">Total Pemakaian Bulan Ini</div>
+                    <div className="text-[10px] text-gray-500 mt-0.5 leading-tight font-medium">
+                      Ringkasan pemakaian kuota internet
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Angka + progress bar pemakaian */}
-              <div className="px-4 pt-3 pb-4 border-t border-gray-100 bg-white">
+              <div className="px-4 pt-3 pb-4 bg-white">
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-4xl font-black tracking-tight font-mono" style={{ color: '#2563eb' }}>
                     {totalGB}
@@ -182,8 +133,8 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
             </div>
           </div>
 
-          {/* ═══ CARD: HISTORI 7 HARI ═══ */}
-          <div className="px-4 pt-3">
+          {/* ═══ CARD 2: HISTORI 7 HARI ═══ */}
+          <div className="relative mx-3">
             <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
@@ -236,8 +187,8 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
             </div>
           </div>
 
-          {/* ═══ CARD: RINCIAN PEMAKAIAN ═══ */}
-          <div className="px-4 pt-3">
+          {/* ═══ CARD 3: RINCIAN PEMAKAIAN ═══ */}
+          <div className="relative mx-3">
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">

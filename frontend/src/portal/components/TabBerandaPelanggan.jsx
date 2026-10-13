@@ -12,6 +12,7 @@ import {
   Bell
 } from 'lucide-react';
 import { PortalActiveMascot } from './PortalActiveMascot';
+import { PortalHeader } from './PortalHeader';
 
 export function TabBerandaPelanggan({ data, onNavigate }) {
   const signal = data?.signal || {
@@ -49,33 +50,14 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
 
   return (
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
-      {/* ═══ HEADER BIRU KHUSUS BERANDA SESUAI INSTRUKSI ═══ */}
-      <div className="shrink-0 relative overflow-hidden" style={{ background: '#2563eb' }}>
-        <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full pointer-events-none" />
-        <div className="absolute -bottom-10 -left-6 w-28 h-28 bg-white/5 rounded-full pointer-events-none" />
-
-        <div className="relative px-5 pt-4 pb-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {customerInitials}
-            </div>
-            <div className="min-w-0">
-              <div className="text-[11px] text-white/80 leading-none">Selamat Datang,</div>
-              <div className="text-[14px] font-bold text-white leading-tight mt-0.5 truncate">
-                {customer.nama || 'Aisyah / Tuti'}
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="relative w-9 h-9 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition cursor-pointer"
-          >
-            <Bell className="w-4 h-4 stroke-[2.2]" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border border-blue-600 animate-pulse" />
-          </button>
-        </div>
-      </div>
+      {/* ═══ HEADER BIRU TERPADU DENGAN GREETING & LONCENG NOTIFIKASI KONSISTEN ═══ */}
+      <PortalHeader
+        greeting="Selamat Datang,"
+        title={customer.nama || 'Aisyah / Tuti'}
+        avatarInitials={customerInitials}
+        dashboardData={data}
+        customer={customer}
+      />
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN SESUAI DESAIN HTML USER ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto">
