@@ -32,6 +32,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Pelepasan Ngrok**: Menghapus service container `ngrok` dari `docker-compose.yml`, membersihkan token/domain ngrok, dan menyetel `APP_URL` default ke `http://localhost:7890`.
   - **Docker Compose Siap Deploy Lokal**: Menambahkan service container `mysql:8.0` (port `33070:3306`) dengan persistent volume `mysql_data`, healthcheck otomatis, konfigurasi charset `utf8mb4`, dan dependency linking yang aman ke service `edteknoguard` (port `7890:7890`).
   - **Skrip Migrasi Basis Data MySQL Lokal (`db/init.sql`)**: Menyediakan skrip DDL SQL lengkap (3NF) dengan foreign key cascade deletion, indexing optimal, dan initial seed data (kantor pusat/cabang/banyumas, POP, paket layanan, system settings default, dan akun super admin) yang dimount langsung ke `/docker-entrypoint-initdb.d/init.sql` pada container MySQL.
+  - **Skrip Eksekutor Migrasi Mandiri Python (`migrate.py`)**: Membuat CLI script migrasi berbasis Python dengan fitur auto-detect database, pembuatan schema otomatis, seed data master, opsi `--fresh` (drop & rebuild dari awal), dan opsi `--sql` (eksekusi langsung berkas `db/init.sql`).
   - **Auto-Migration Startup Lifecycle**: Menambahkan eksekusi `init_db()` pada startup lifecycle `app/main.py` agar pembuatan skema tabel relasional otomatis berjalan saat aplikasi pertama kali boot jika dijalankan di luar docker.
 
 
