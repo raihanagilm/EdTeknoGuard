@@ -27,7 +27,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 - **Kesiapan Deploy Server Lokal, Port Custom Non-Umum & Migrasi Penuh Database MySQL Lokal (Tanpa TiDB Cloud & Tanpa Ngrok)**:
-  - **Port Custom Non-Umum untuk Keamanan Server**: Mengganti port default umum `8000` menjadi **`7890`** (aplikasi backend FastAPI/Uvicorn) dan port database MySQL `3306` menjadi **`33070`** di `docker-compose.yml`, `Dockerfile`, `.env`, `.env.example`, `config.py`, dan proxy `vite.config.js` guna menghindari tabrakan port layanan bawaan OS/web server lain serta memperkuat isolasi keamanan.
+  - **Port Custom Non-Umum untuk Keamanan Server**: Mengganti port default umum `8000` menjadi **`7890`** (aplikasi backend FastAPI/Uvicorn), port dev server frontend Vite `3000` menjadi **`7891`**, dan port database MySQL `3306` menjadi **`33070`** di `docker-compose.yml`, `Dockerfile`, `.env`, `.env.example`, `config.py`, `package.json`, dan `vite.config.js` guna menghindari tabrakan port layanan bawaan OS/web server lain serta memperkuat isolasi keamanan.
   - **Pelepasan TiDB Cloud**: Mengubah konfigurasi koneksi database di `.env`, `.env.example`, `config.py`, dan `database.py` ke MySQL lokal (`DB_PORT=33070`) tanpa ketergantungan cloud.
   - **Pelepasan Ngrok**: Menghapus service container `ngrok` dari `docker-compose.yml`, membersihkan token/domain ngrok, dan menyetel `APP_URL` default ke `http://localhost:7890`.
   - **Docker Compose Siap Deploy Lokal**: Menambahkan service container `mysql:8.0` (port `33070:3306`) dengan persistent volume `mysql_data`, healthcheck otomatis, konfigurasi charset `utf8mb4`, dan dependency linking yang aman ke service `edteknoguard` (port `7890:7890`).
