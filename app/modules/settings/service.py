@@ -137,7 +137,7 @@ class SystemSettingsService:
         tg_interval_hours = data.telegram_alert_interval_hours if data.telegram_alert_interval_hours is not None else 1.0
         debounce_minutes = max(1, int(tg_interval_hours * 60))
 
-        # 1. Simpan ke database TiDB Cloud
+        # 1. Simpan ke database MySQL lokal
         pairs = {
             "polling_interval_minutes": str(data.polling_interval_minutes),
             "warning_threshold_dbm": str(data.warning_threshold_dbm),

@@ -26,6 +26,15 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Kesiapan Deploy Server Lokal, Port Custom Non-Umum & Migrasi Penuh Database MySQL Lokal (Tanpa TiDB Cloud & Tanpa Ngrok)**:
+  - **Port Custom Non-Umum untuk Keamanan Server**: Mengganti port default umum `8000` menjadi **`7890`** (aplikasi backend FastAPI/Uvicorn) dan port database MySQL `3306` menjadi **`33070`** di `docker-compose.yml`, `Dockerfile`, `.env`, `.env.example`, `config.py`, dan proxy `vite.config.js` guna menghindari tabrakan port layanan bawaan OS/web server lain serta memperkuat isolasi keamanan.
+  - **Pelepasan TiDB Cloud**: Mengubah konfigurasi koneksi database di `.env`, `.env.example`, `config.py`, dan `database.py` ke MySQL lokal (`DB_PORT=33070`) tanpa ketergantungan cloud.
+  - **Pelepasan Ngrok**: Menghapus service container `ngrok` dari `docker-compose.yml`, membersihkan token/domain ngrok, dan menyetel `APP_URL` default ke `http://localhost:7890`.
+  - **Docker Compose Siap Deploy Lokal**: Menambahkan service container `mysql:8.0` (port `33070:3306`) dengan persistent volume `mysql_data`, healthcheck otomatis, konfigurasi charset `utf8mb4`, dan dependency linking yang aman ke service `edteknoguard` (port `7890:7890`).
+  - **Skrip Migrasi Basis Data MySQL Lokal (`db/init.sql`)**: Menyediakan skrip DDL SQL lengkap (3NF) dengan foreign key cascade deletion, indexing optimal, dan initial seed data (kantor pusat/cabang/banyumas, POP, paket layanan, system settings default, dan akun super admin) yang dimount langsung ke `/docker-entrypoint-initdb.d/init.sql` pada container MySQL.
+  - **Auto-Migration Startup Lifecycle**: Menambahkan eksekusi `init_db()` pada startup lifecycle `app/main.py` agar pembuatan skema tabel relasional otomatis berjalan saat aplikasi pertama kali boot jika dijalankan di luar docker.
+
+
 - **Penyelarasan Seluruh Tab Portal TeknoCust (`TabKendalaPelanggan.jsx` & `TabProfilPelanggan.jsx`)**:
   - **Header Biru Penuh (Full-Width)**: Seluruh tab portal pelanggan kini seragam menggunakan header biru `#2563eb` dengan ornamen lingkaran gradasi, maskot interaktif di kiri atas, brand `TeknoCust`, deskripsi *"Portal Layanan Mandiri Pelanggan TeknoIndonet"*, dan tombol lonceng notifikasi di kanan atas.
   - **Card Putih Menimpa Header (`-mt-3`)**: Konten utama di dalam `scroll-area` diatur dengan margin negatif `-mt-3 mx-3` berbalut `rounded-2xl shadow-lg border border-gray-100 overflow-hidden`, memberikan efek floating modern yang konsisten di semua tab.

@@ -18,9 +18,9 @@ if sys.stdout.encoding != "utf-8":
         pass
 
 def init_db():
-    print("[1/4] Membuat tabel di TiDB Cloud...")
+    print("[1/4] Membuat tabel di Database MySQL Lokal...")
     Base.metadata.create_all(bind=engine)
-    print("[OK] Tabel berhasil dibuat di TiDB Cloud.")
+    print("[OK] Tabel berhasil dibuat di Database MySQL Lokal.")
 
     db = SessionLocal()
     try:
@@ -40,6 +40,33 @@ def init_db():
         db.commit()
         print("[OK] System settings terkonfigurasi.")
 
+        # Inisialisasi Master Kantor
+        from app.db.models import Kantor
+        if db.query(Kantor).count() == 0:
+            db.add_all([
+                Kantor(kode="pusat", nama="Pusat", alamat="Kantor Pusat ISP TeknoIndonet"),
+                Kantor(kode="cabang", nama="Cabang", alamat="Kantor Cabang Operasional Utama"),
+                Kantor(kode="banyumas", nama="Banyumas", alamat="Kantor Wilayah Operasional Banyumas"),
+            ])
+            db.commit()
+            print("[OK] Master data kantor diinisialisasi.")
+
+        # Inisialisasi User Super Admin Default
+        from app.core.security import get_password_hash
+        admin_user = db.query(User).filter(User.username == "admin").first()
+        if not admin_user:
+            db.add(User(
+                username="admin",
+                hashed_password=get_password_hash("agiltampan"),
+                nama_karyawan="Super Administrator NOC",
+                no_wa="081234567890",
+                role="super admin",
+                allowed_kantor='["cabang","pusat","banyumas"]',
+                is_active=True
+            ))
+            db.commit()
+            print("[OK] Akun Super Admin default berhasil dibuat.")
+
         print("[3/4] Memeriksa data master pelanggan...")
         customer_count = db.query(Pelanggan).count()
         if customer_count == 0:
@@ -47,7 +74,7 @@ def init_db():
             if os.path.exists(csv_path):
                 print(f"[IMPORT] Mengimpor pelanggan dari {csv_path}...")
                 total = ImporterService.import_from_csv(csv_path, db)
-                print(f"[OK] Berhasil mengimpor {total} pelanggan ke TiDB Cloud.")
+                print(f"[OK] Berhasil mengimpor {total} pelanggan ke Database MySQL Lokal.")
             else:
                 print(f"[WARN] File {csv_path} tidak ditemukan, melewati tahap import.")
         else:

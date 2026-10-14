@@ -9,7 +9,7 @@ def get_now_wib() -> datetime:
     """
     Mengembalikan waktu saat ini dalam zona waktu Asia/Jakarta (WIB)
     sebagai naive datetime (tanpa offset tzinfo) agar tersimpan secara presisi
-    dan konsisten pada kolom DATETIME MySQL / TiDB.
+    dan konsisten pada kolom DATETIME MySQL.
     """
     return datetime.now(WIB_TZ).replace(tzinfo=None)
 

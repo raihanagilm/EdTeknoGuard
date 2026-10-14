@@ -35,6 +35,12 @@ logger = logging.getLogger("main")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Memulai {settings.APP_NAME}...")
+    # Jalankan inisialisasi & migrasi tabel basis data jika belum ada
+    try:
+        from app.db.init_db import init_db
+        init_db()
+    except Exception as e:
+        logger.warning(f"Inisialisasi database terlewati atau terjadi kendala: {e}")
     # Mulai scheduler background pemantau 5 menit
     scheduler.start()
     yield

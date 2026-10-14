@@ -1,6 +1,30 @@
-# EdTeknoGuard - Docker Compose (Live Sync & Hot Reload)
-# Terhubung ke TiDB Cloud & Domain Ngrok: https://duty-astride-outright.ngrok-free.dev
+# EdTeknoGuard - Docker Compose (Local Server Deployment)
+# Database MySQL Lokal & Tanpa Ngrok
 services:
+  # Database MySQL Lokal (Containerized)
+  mysql:
+    image: mysql:8.0
+    container_name: edtekno-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-edteknoguard}
+      MYSQL_USER: ${DB_USER:-edtekno}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      TZ: Asia/Jakarta
+    ports:
+      - "${DB_PORT:-33070}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend FastAPI & Aplikasi Web
   edteknoguard:
     build:
       context: .
@@ -11,57 +35,30 @@ services:
     env_file:
       - .env
     environment:
-      - APP_URL=${APP_URL:-https://duty-astride-outright.ngrok-free.dev}
+      - APP_PORT=7890
+      - APP_URL=${APP_URL:-http://localhost:7890}
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-edtekno}
+      - DB_PASSWORD=${DB_PASSWORD:-rootpassword}
+      - DB_NAME=${DB_NAME:-edteknoguard}
       - TZ=Asia/Jakarta
       - PYTHONUNBUFFERED=1
     ports:
-      - "8000:8000"   # Akses jaringan lokal / host
+      - "7890:7890"   # Port Akses Aplikasi NOC & Portal (Custom non-standar)
     volumes:
       - ./data:/app/data                           # Persistensi scan_state.json & runtime data
-      - ./app:/app/app                             # Live sync otomatis kode backend
-      - ./templates:/app/templates                 # Live sync otomatis template HTML Jinja2
-      - ./static:/app/static                       # Live sync otomatis aset CSS & JS
-      - ./portal_pelanggan:/app/portal_pelanggan   # Live sync otomatis modul & template portal warga
-    develop:
-      watch:
-        - action: sync
-          path: ./app
-          target: /app/app
-        - action: sync
-          path: ./templates
-          target: /app/templates
-        - action: sync
-          path: ./static
-          target: /app/static
-        - action: sync
-          path: ./portal_pelanggan
-          target: /app/portal_pelanggan
-        - action: rebuild
-          path: ./requirements.txt
+    depends_on:
+      mysql:
+        condition: service_healthy
     command: [
       "uvicorn", "app.main:app",
       "--host", "0.0.0.0",
-      "--port", "8000",
-      "--reload",
-      "--reload-dir", "/app/app",
-      "--reload-dir", "/app/templates",
-      "--reload-dir", "/app/portal_pelanggan",
+      "--port", "7890",
       "--proxy-headers",
       "--forwarded-allow-ips=*"
     ]
 
-  ngrok:
-    image: ngrok/ngrok:latest
-    container_name: ngrok-edtekno
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
-    command:
-      - "http"
-      - "edteknoguard:8000"
-      - "--url=duty-astride-outright.ngrok-free.dev"
-      - "--log=stdout"
-    depends_on:
-      - edteknoguard
+volumes:
+  mysql_data:
+    driver: local
