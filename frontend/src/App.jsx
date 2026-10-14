@@ -153,6 +153,14 @@ export default function App() {
   const [draggedCredIdx, setDraggedCredIdx] = useState(null)
   const [dragOverCredIdx, setDragOverCredIdx] = useState(null)
 
+  // State Integrasi MikroTik RouterOS
+  const [mikrotikHost, setMikrotikHost] = useState('192.168.202.50')
+  const [mikrotikPort, setMikrotikPort] = useState(8728)
+  const [mikrotikUser, setMikrotikUser] = useState('tekno')
+  const [mikrotikPassword, setMikrotikPassword] = useState('')
+  const [mikrotikKantor, setMikrotikKantor] = useState('banyumas')
+  const [mikrotikAutoSync, setMikrotikAutoSync] = useState(true)
+
   // Fetch Settings From Backend FastAPI (Thresholds & Credentials)
   const fetchBackendSettings = async () => {
     if (!isAuthenticated) return
@@ -172,6 +180,12 @@ export default function App() {
         if (data.default_modem_credentials && Array.isArray(data.default_modem_credentials) && data.default_modem_credentials.length > 0) {
           setModemCredentials(data.default_modem_credentials)
         }
+        if (data.mikrotik_host) setMikrotikHost(data.mikrotik_host)
+        if (data.mikrotik_port) setMikrotikPort(data.mikrotik_port)
+        if (data.mikrotik_user) setMikrotikUser(data.mikrotik_user)
+        if (data.mikrotik_password !== undefined) setMikrotikPassword(data.mikrotik_password)
+        if (data.mikrotik_kantor) setMikrotikKantor(data.mikrotik_kantor)
+        if (data.mikrotik_auto_sync !== undefined) setMikrotikAutoSync(data.mikrotik_auto_sync)
       }
     } catch (err) {
       console.warn('Backend offline / using simulated state:', err)
@@ -273,7 +287,13 @@ export default function App() {
       telegram_night_mode_start: nightModeStart || '22:00',
       telegram_night_mode_end: nightModeEnd || '06:00',
       app_vibration_enabled: Boolean(appVibration),
-      alert_waiting_interval_minutes: isNaN(parseInt(alertWaitingInterval, 10)) ? 5 : parseInt(alertWaitingInterval, 10)
+      alert_waiting_interval_minutes: isNaN(parseInt(alertWaitingInterval, 10)) ? 5 : parseInt(alertWaitingInterval, 10),
+      mikrotik_host: mikrotikHost || '192.168.202.50',
+      mikrotik_port: isNaN(parseInt(mikrotikPort, 10)) ? 8728 : parseInt(mikrotikPort, 10),
+      mikrotik_user: mikrotikUser || 'tekno',
+      mikrotik_password: mikrotikPassword || '',
+      mikrotik_kantor: mikrotikKantor || 'banyumas',
+      mikrotik_auto_sync: Boolean(mikrotikAutoSync)
     }
 
     try {
@@ -975,6 +995,18 @@ export default function App() {
               currentUser={currentUser}
               setCurrentUser={setCurrentUser}
               onLogout={handleLogout}
+              mikrotikHost={mikrotikHost}
+              setMikrotikHost={setMikrotikHost}
+              mikrotikPort={mikrotikPort}
+              setMikrotikPort={setMikrotikPort}
+              mikrotikUser={mikrotikUser}
+              setMikrotikUser={setMikrotikUser}
+              mikrotikPassword={mikrotikPassword}
+              setMikrotikPassword={setMikrotikPassword}
+              mikrotikKantor={mikrotikKantor}
+              setMikrotikKantor={setMikrotikKantor}
+              mikrotikAutoSync={mikrotikAutoSync}
+              setMikrotikAutoSync={setMikrotikAutoSync}
             />
           )}
         </main>

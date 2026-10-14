@@ -27,29 +27,50 @@ async def get_kantors_json(request: Request, db: Session = Depends(get_db)):
     if not kantors:
         # Auto seed default jika kosong
         default_items = [
-            ("pusat", "Pusat", "Kantor Pusat ISP"),
-            ("cabang", "Cabang", "Kantor Cabang Operasional"),
-            ("banyumas", "Banyumas", "Kantor Wilayah Banyumas")
+            ("pusat", "Pusat", "Kantor Pusat ISP", None, None, None, None),
+            ("cabang", "Cabang", "Kantor Cabang Operasional", None, None, None, None),
+            ("banyumas", "Banyumas", "Kantor Wilayah Banyumas", "192.168.202.50", 8728, "tekno", "tekno2025")
         ]
-        for k_code, k_name, k_desc in default_items:
-            db.add(Kantor(kode=k_code, nama=k_name, alamat=k_desc))
+        for k_code, k_name, k_desc, m_host, m_port, m_user, m_pass in default_items:
+            db.add(Kantor(
+                kode=k_code,
+                nama=k_name,
+                alamat=k_desc,
+                mikrotik_host=m_host,
+                mikrotik_port=m_port,
+                mikrotik_user=m_user,
+                mikrotik_pass=m_pass
+            ))
         db.commit()
         kantors = db.query(Kantor).order_by(Kantor.id.asc()).all()
 
     return {
         "status": "success",
-        "kantors": [{"id": k.id, "kode": k.kode, "nama": k.nama, "alamat": k.alamat or ""} for k in kantors]
+        "kantors": [{
+            "id": k.id,
+            "kode": k.kode,
+            "nama": k.nama,
+            "alamat": k.alamat or "",
+            "mikrotik_host": k.mikrotik_host or "",
+            "mikrotik_port": k.mikrotik_port or "",
+            "mikrotik_user": k.mikrotik_user or "",
+            "mikrotik_pass": k.mikrotik_pass or ""
+        } for k in kantors]
     }
 
 @router.post("/api/kantor/add")
 async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
-    """Menambahkan kantor wilayah baru (Khusus Super Admin)"""
+    """Menambahkan kantor wilayah baru lengkap dengan setting router MikroTik (Khusus Super Admin)"""
     user_session = require_super_admin(request)
     try:
         data = await request.json()
         nama = data.get("nama", "").strip()
         kode = data.get("kode", "").lower().strip()
         alamat = data.get("alamat", "").strip()
+        mikrotik_host = data.get("mikrotik_host", "").strip()
+        mikrotik_port = data.get("mikrotik_port")
+        mikrotik_user = data.get("mikrotik_user", "").strip()
+        mikrotik_pass = data.get("mikrotik_pass", "").strip()
     except Exception:
         return {"status": "error", "message": "Payload JSON tidak valid."}
 
@@ -67,7 +88,23 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
     if existing:
         return {"status": "error", "message": f"Kantor dengan kode '{kode}' sudah terdaftar."}
 
-    new_kantor = Kantor(kode=kode, nama=nama, alamat=alamat if alamat else None)
+    # Format port
+    parsed_port = None
+    if mikrotik_port is not None and str(mikrotik_port).strip():
+        try:
+            parsed_port = int(str(mikrotik_port).strip())
+        except ValueError:
+            parsed_port = None
+
+    new_kantor = Kantor(
+        kode=kode,
+        nama=nama,
+        alamat=alamat if alamat else None,
+        mikrotik_host=mikrotik_host if mikrotik_host else None,
+        mikrotik_port=parsed_port,
+        mikrotik_user=mikrotik_user if mikrotik_user else None,
+        mikrotik_pass=mikrotik_pass if mikrotik_pass else None
+    )
     db.add(new_kantor)
     db.commit()
     db.refresh(new_kantor)
@@ -78,14 +115,123 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
         action="ADD_KANTOR",
         ip_address=request.client.host if request.client else "unknown",
         status="SUCCESS",
-        keterangan=f"Berhasil menambahkan kantor baru: {nama} ({kode})"
+        keterangan=f"Berhasil menambahkan kantor baru: {nama} ({kode}) dengan setting MikroTik {mikrotik_host or '-'}"
     )
 
     all_k = get_all_kantor_codes(db=db)
     return {
         "status": "success", 
         "message": f"Kantor '{nama}' berhasil ditambahkan dan siap digunakan.",
-        "kantor": {"id": new_kantor.id, "kode": new_kantor.kode, "nama": new_kantor.nama, "alamat": new_kantor.alamat or ""},
+        "kantor": {
+            "id": new_kantor.id,
+            "kode": new_kantor.kode,
+            "nama": new_kantor.nama,
+            "alamat": new_kantor.alamat or "",
+            "mikrotik_host": new_kantor.mikrotik_host or "",
+            "mikrotik_port": new_kantor.mikrotik_port or "",
+            "mikrotik_user": new_kantor.mikrotik_user or "",
+            "mikrotik_pass": new_kantor.mikrotik_pass or ""
+        },
+        "all_kantor": all_k
+    }
+
+@router.post("/api/kantor/edit/{kantor_id}")
+async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depends(get_db)):
+    """Mengubah data kantor wilayah & setting router MikroTik (Khusus Super Admin)"""
+    user_session = require_super_admin(request)
+    kantor = db.query(Kantor).filter(Kantor.id == kantor_id).first()
+    if not kantor:
+        return {"status": "error", "message": "Kantor tidak ditemukan."}
+
+    try:
+        data = await request.json()
+        nama = data.get("nama", "").strip()
+        alamat = data.get("alamat", "").strip()
+        mikrotik_host = data.get("mikrotik_host", "").strip()
+        mikrotik_port = data.get("mikrotik_port")
+        mikrotik_user = data.get("mikrotik_user", "").strip()
+        mikrotik_pass = data.get("mikrotik_pass", "").strip()
+    except Exception:
+        return {"status": "error", "message": "Payload JSON tidak valid."}
+
+    if not nama:
+        return {"status": "error", "message": "Nama kantor wajib diisi."}
+
+    kantor.nama = nama
+    kantor.alamat = alamat if alamat else None
+
+    # Update mikrotik settings
+    kantor.mikrotik_host = mikrotik_host if mikrotik_host else None
+    if mikrotik_port is not None and str(mikrotik_port).strip():
+        try:
+            kantor.mikrotik_port = int(str(mikrotik_port).strip())
+        except ValueError:
+            kantor.mikrotik_port = None
+    else:
+        kantor.mikrotik_port = None
+
+    kantor.mikrotik_user = mikrotik_user if mikrotik_user else None
+    if mikrotik_pass:
+        kantor.mikrotik_pass = mikrotik_pass
+
+    db.commit()
+
+    ActivityLogService.log_activity(
+        db=db,
+        username=user_session.get("user"),
+        action="EDIT_KANTOR",
+        ip_address=request.client.host if request.client else "unknown",
+        status="SUCCESS",
+        keterangan=f"Berhasil mengubah data kantor: {nama} ({kantor.kode})"
+    )
+
+    all_k = get_all_kantor_codes(db=db)
+    return {
+        "status": "success",
+        "message": f"Data kantor '{nama}' berhasil diperbarui.",
+        "kantor": {
+            "id": kantor.id,
+            "kode": kantor.kode,
+            "nama": kantor.nama,
+            "alamat": kantor.alamat or "",
+            "mikrotik_host": kantor.mikrotik_host or "",
+            "mikrotik_port": kantor.mikrotik_port or "",
+            "mikrotik_user": kantor.mikrotik_user or "",
+            "mikrotik_pass": kantor.mikrotik_pass or ""
+        },
+        "all_kantor": all_k
+    }
+
+@router.post("/api/kantor/delete/{kantor_id}")
+async def delete_kantor_json(request: Request, kantor_id: int, db: Session = Depends(get_db)):
+    """Menghapus kantor wilayah (Khusus Super Admin)"""
+    user_session = require_super_admin(request)
+    kantor = db.query(Kantor).filter(Kantor.id == kantor_id).first()
+    if not kantor:
+        return {"status": "error", "message": "Kantor tidak ditemukan."}
+
+    # Kantor default penting dilindungi
+    if kantor.kode in ["pusat", "cabang", "banyumas"]:
+        return {"status": "error", "message": f"Kantor default '{kantor.nama}' tidak dapat dihapus."}
+
+    deleted_nama = kantor.nama
+    deleted_kode = kantor.kode
+    db.delete(kantor)
+    db.commit()
+
+    ActivityLogService.log_activity(
+        db=db,
+        username=user_session.get("user"),
+        action="DELETE_KANTOR",
+        ip_address=request.client.host if request.client else "unknown",
+        status="SUCCESS",
+        keterangan=f"Berhasil menghapus kantor: {deleted_nama} ({deleted_kode})"
+    )
+
+    all_k = get_all_kantor_codes(db=db)
+    return {
+        "status": "success",
+        "message": f"Kantor '{deleted_nama}' berhasil dihapus permanen.",
         "all_kantor": all_k
     }
 

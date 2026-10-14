@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import require_admin_role, require_admin
 from app.modules.settings.controller import SystemSettingsController
-from app.modules.settings.schemas import SystemSettingsSchema
+from app.modules.settings.schemas import SystemSettingsSchema, MikroTikTestSchema, MikroTikSyncNowSchema
 
 router = APIRouter(tags=["settings"])
 
@@ -40,3 +40,20 @@ def update_system_settings(
 ):
     """Simpan perubahan interval monitoring dan ambang batas redaman"""
     return SystemSettingsController.update_settings(db=db, data=data, request=request, user=user)
+
+@router.post("/api/settings/mikrotik/test")
+def test_mikrotik_connection(
+    data: MikroTikTestSchema,
+    user: dict = Depends(require_admin_role)
+):
+    """Uji konektivitas soket dan autentikasi ke router MikroTik"""
+    return SystemSettingsController.test_mikrotik(data=data)
+
+@router.post("/api/settings/mikrotik/sync-now")
+def sync_mikrotik_now(
+    data: MikroTikSyncNowSchema = None,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin_role)
+):
+    """Pemicu manual sinkronisasi pelanggan dari DHCP Leases bound MikroTik"""
+    return SystemSettingsController.sync_mikrotik(db=db, data=data)

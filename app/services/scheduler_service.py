@@ -459,7 +459,19 @@ class MonitoringScheduler:
         finally:
             db.close()
 
-        # Eksekusi scanning untuk seluruh kantor
+        # 1. Jalankan sinkronisasi otomatis pelanggan baru dari MikroTik jika auto-sync aktif
+        try:
+            from app.services.mikrotik_service import MikroTikSyncService
+            db_sync = SessionLocal()
+            try:
+                # Sinkronkan seluruh router MikroTik per kantor yang terkonfigurasi
+                MikroTikSyncService.sync_all_configured_kantors(db_sync)
+            finally:
+                db_sync.close()
+        except Exception as e:
+            logger.warning(f"[SCHEDULER] Gagal auto-sync MikroTik: {e}")
+
+        # 2. Eksekusi scanning untuk seluruh kantor
         self.execute_scan_sync(kantor=None)
 
     def execute_scan_sync(self, kantor: Optional[str] = None) -> Dict[str, Any]:

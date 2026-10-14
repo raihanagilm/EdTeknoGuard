@@ -14,6 +14,10 @@ class Kantor(Base):
     kode = Column(String(50), unique=True, nullable=False, index=True)
     nama = Column(String(100), nullable=False)
     alamat = Column(Text, nullable=True)
+    mikrotik_host = Column(String(100), nullable=True)
+    mikrotik_port = Column(Integer, nullable=True)
+    mikrotik_user = Column(String(100), nullable=True)
+    mikrotik_pass = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
 
     pops = relationship("Pop", back_populates="kantor_ref")
@@ -82,6 +86,7 @@ class Pelanggan(Base):
     paket = Column(String(50), ForeignKey("pakets.nama", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
     is_monitored = Column(Boolean, default=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
+    status_lease = Column(String(20), default="bound", nullable=False, index=True) # bound (online), waiting (offline)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 

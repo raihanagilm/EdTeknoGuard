@@ -69,16 +69,7 @@ def init_db():
 
         print("[3/4] Memeriksa data master pelanggan...")
         customer_count = db.query(Pelanggan).count()
-        if customer_count == 0:
-            csv_path = os.path.join(os.getcwd(), "DAFTAR PELANGGAN TIJ(PELANGGAN CABANG).csv")
-            if os.path.exists(csv_path):
-                print(f"[IMPORT] Mengimpor pelanggan dari {csv_path}...")
-                total = ImporterService.import_from_csv(csv_path, db)
-                print(f"[OK] Berhasil mengimpor {total} pelanggan ke Database MySQL Lokal.")
-            else:
-                print(f"[WARN] File {csv_path} tidak ditemukan, melewati tahap import.")
-        else:
-            print(f"[INFO] Database sudah memiliki {customer_count} pelanggan.")
+        print(f"[INFO] Database memiliki {customer_count} pelanggan terdaftar (Data tersinkronisasi otomatis via MikroTik DHCP Leases).")
 
         print("[4/4] Memeriksa data historis log performa...")
         log_count = db.query(LogPerformaONT).count()

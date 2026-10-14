@@ -1,0 +1,293 @@
+# MASTER PROMPT: PANDUAN LENGKAP UPDATE & BUILD ANDROID STUDIO & IOS NATIVE WRAPPER
+# DENGAN SISTEM NOTIFIKASI NATIVE OS LENGKAP (ANDROID NOTIFICATION MANAGER & IOS USERNOTIFICATIONS)
+# PROYEK: TeknoGuard (Aplikasi Karyawan/NOC) & TeknoCust (Aplikasi Pelanggan/Warga)
+# LOKASI PROYEK ANDROID: D:\databaru\Magang\EdTeknoGuard-Android
+
+========================================================================================
+PENJELASAN ARSITEKTUR NOTIFIKASI NATIVE (BUKAN DARI WEB BROWSER):
+========================================================================================
+Aplikasi Android dan iOS yang dibuat BUKAN sekadar menampilkan notifikasi alert/pop-up di dalam browser web.
+Sistem ini menggunakan DUA LAYER NOTIFIKASI NATIVE MURNI DARI SISTEM OPERASI HP:
+
+1. LAYER BACKGROUND SERVICE (Saat Aplikasi Sedang Ditutup / HP Standby di Kantong):
+   - Android: `EdTeknoBackgroundService` (Foreground Service + WakeLock + Alarm Tone).
+   - iOS: `BGAppRefreshTask` / Background URLSession Polling.
+   - Hasil: Bunyi alarm sirine darurat berdering dari status bar sistem Android/iPhone saat redaman drop <= -27 dBm atau ada tiket gangguan baru, meskipun aplikasi TIDAK sedang dibuka.
+
+2. LAYER JAVASCRIPT INTERFACE / BRIDGE (Saat Aplikasi Sedang Dibuka di Layar):
+   - Saat user membuka aplikasi dan web ingin memberi notifikasi (misal: "Tiket terkirim", "Data tersimpan", "Peringatan"), web memanggil fungsi bridge:
+     `window.AndroidBridge.showNativeNotification(title, message, isEmergency)` di Android, atau
+     `window.webkit.messageHandlers.iosBridge.postMessage(...)` di iOS.
+   - Hasil: Muncul push notifikasi native resmi dari sistem operasi (bukan sekadar toast/modal web HTML).
+
+========================================================================================
+BAGIAN 1: PANDUAN INSTRUKSI / PROMPT UNTUK ANDROID STUDIO (AI / DEVELOPER)
+========================================================================================
+
+Salin dan berikan instruksi berikut ke AI Agent atau gunakan sebagai panduan kerja di Android Studio:
+
+"""
+Halo! Tolong lakukan pembaruan menyeluruh pada proyek Android Studio di `D:\databaru\Magang\EdTeknoGuard-Android` untuk kedua varian aplikasi:
+1. TeknoGuard (Aplikasi Operasional Karyawan & NOC)
+2. TeknoCust (Aplikasi Layanan Mandiri Pelanggan Warga)
+
+Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
+
+1. TARGET SDK & KOMPATIBILITAS OS (Android 7.0 s/d Android 16/17):
+   - Ubah `minSdk = 24` (Mendukung Android 7.0 Nougat ke atas agar HP teknisi/warga lama tetap dapat menginstall).
+   - Ubah `compileSdk = 35` (Mendukung API level terbaru Android 15, 16, hingga pratinjau 17).
+   - Ubah `targetSdk = 35`.
+   - Pastikan runtime permission `POST_NOTIFICATIONS` otomatis diminta saat pertama kali app dibuka di Android 13+.
+
+2. NOTIFIKASI NATIVE MURNI OS (BUKAN WEB NOTIFICATION):
+   A. BACKGROUND ENGINE (Saat Aplikasi Ditutup / HP Terkunci):
+      - Di `EdTeknoBackgroundService.kt`, pertahankan implementasi `NotificationCompat.Builder` dengan Notification Channel:
+        * Channel Peringatan Darurat (`CHANNEL_EMERGENCY_ID`): Suara Sirine Alarm (`TYPE_ALARM`), getaran pola panjang `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`, lampu merah menyala, prioritas `PRIORITY_MAX`.
+        * Channel Pelanggan (`CHANNEL_CUSTOMER_ID`): Suara Notifikasi (`TYPE_NOTIFICATION`), prioritas `PRIORITY_HIGH`.
+      - Endpoint Polling Lokal Baru:
+        * Notifikasi Tiket (TeknoGuard): `http://172.21.20.44:7891/api/notifications/poll`
+        * Status Redaman (TeknoGuard) : `http://172.21.20.44:7891/api/monitoring/status`
+        * Status Tiket Pelanggan (TeknoCust): `http://172.21.20.44:7891/api/portal/ticket-status`
+   
+   B. JAVASCRIPT BRIDGE NATIVE (Saat Aplikasi Sedang Dibuka):
+      - Di `MainActivity.kt`, buat kelas `WebAppInterface`:
+        ```kotlin
+        class WebAppInterface(private val context: Context) {
+            @JavascriptInterface
+            fun showNativeNotification(title: String, message: String, isEmergency: Boolean) {
+                val channelId = if (isEmergency) EdTeknoBackgroundService.CHANNEL_EMERGENCY_ID else EdTeknoBackgroundService.CHANNEL_CUSTOMER_ID
+                val notification = NotificationCompat.Builder(context, channelId)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setAutoCancel(true)
+                    .setPriority(if (isEmergency) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
+                    .build()
+                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.notify(System.currentTimeMillis().toInt(), notification)
+            }
+        }
+        ```
+      - Sambungkan ke WebView:
+        `binding.webView.addJavascriptInterface(WebAppInterface(this), "AndroidBridge")`
+      - Dengan ini, event web otomatis memunculkan bar notifikasi native Android!
+
+3. PEMBARUAN IP SERVER LOKAL & PENGHAPUSAN NGROK:
+   - Bersihkan seluruh sisa domain ngrok (`duty-astride-outright.ngrok-free.dev`) dan header `ngrok-skip-browser-warning`.
+   - Base URL TeknoGuard: `http://172.21.20.44:7891/login`
+   - Base URL TeknoCust : `http://172.21.20.44:7891/portal`
+   - Pastikan `android:usesCleartextTraffic="true"` pada AndroidManifest.xml.
+
+4. IKON APLIKASI KHUSUS PER VARIANT (PRODUCT FLAVOR):
+   Gunakan aset gambar dari folder `D:\Si Router\` sebagai launcher icon masing-masing flavor:
+   - Flavor 'guard' (TeknoGuard): Gunakan file `D:\Si Router\Group197.png`
+     -> Generate ke folder `app/src/guard/res/mipmap-xxxx/` (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi)
+   - Flavor 'cust' (TeknoCust)  : Gunakan file `D:\Si Router\Frame36.png`
+     -> Generate ke folder `app/src/cust/res/mipmap-xxxx/` (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi)
+
+Lakukan build APK rilis/debug dan pastikan output berupa `TeknoGuard.apk` dan `TeknoCust.apk`.
+"""
+
+========================================================================================
+BAGIAN 2: CARA BUILD APK DI ANDROID STUDIO
+========================================================================================
+1. Buka project `D:\databaru\Magang\EdTeknoGuard-Android` di Android Studio.
+2. Tunggu Gradle sync selesai.
+3. Buka menu samping kiri: **Build Variants**.
+4. Untuk membuat APK Teknisi/NOC: pilih `guardDebug` atau `guardRelease`.
+5. Untuk membuat APK Pelanggan Warga: pilih `custDebug` atau `custRelease`.
+6. Klik menu atas: **Build -> Build Bundle(s) / APK(s) -> Build APK(s)**.
+7. File APK otomatis selesai di:
+   - `app/build/outputs/apk/guard/debug/TeknoGuard.apk`
+   - `app/build/outputs/apk/cust/debug/TeknoCust.apk`
+
+========================================================================================
+BAGIAN 3: PANDUAN NATIVE WRAPPER & NOTIFIKASI UNTUK IOS (APPLE IPHONE / IPAD)
+========================================================================================
+
+Pada sistem operasi iOS (iPhone/iPad), notifikasi native ditangani melalui framework `UserNotifications` (`UNUserNotificationCenter`).
+
+1. FITUR UTAMA WRAPPER IOS:
+   - Menggunakan `WKWebView` berperforma tinggi dengan WebKit modern.
+   - Menggunakan `UNUserNotificationCenter` untuk notifikasi push banner native iOS dengan suara alarm/chime dan getaran haptic Taptic Engine.
+   - Menghubungkan JavaScript ke Swift via `WKScriptMessageHandler` (`window.webkit.messageHandlers.iosBridge.postMessage(...)`).
+
+2. CARA SETUP PROJECT DI XCODE (MAC):
+   a. Buka Xcode -> Create a new Xcode project -> App (iOS) -> Beri nama `TeknoApp`.
+   b. Tambahkan 2 Target / Scheme:
+      - Target 1: `TeknoGuard`
+        * Bundle Identifier: `com.edtekno.guard`
+        * Display Name: `TeknoGuard`
+        * App Icon: Gunakan gambar `Group197.png` di Assets.xcassets -> AppIcon.
+        * URL Start: `http://172.21.20.44:7891/login`
+      - Target 2: `TeknoCust`
+        * Bundle Identifier: `com.edtekno.cust`
+        * Display Name: `TeknoCust`
+        * App Icon: Gunakan gambar `Frame36.png` di Assets.xcassets -> AppIcon.
+        * URL Start: `http://172.21.20.44:7891/portal`
+
+3. KONFIGURASI `Info.plist` (IZIN HTTP LOKAL, NOTIFIKASI & HARDWARE):
+   ```xml
+   <!-- Izin HTTP Server Lokal (Bypass ATS) -->
+   <key>NSAppTransportSecurity</key>
+   <dict>
+       <key>NSAllowsArbitraryLoads</key>
+       <true/>
+       <key>NSExceptionDomains</key>
+       <dict>
+           <key>172.21.20.44</key>
+           <dict>
+               <key>NSExceptionAllowsInsecureHTTPLoads</key>
+               <true/>
+               <key>NSIncludesSubdomains</key>
+               <true/>
+           </dict>
+       </dict>
+   </dict>
+   <!-- Izin Lokasi GPS untuk Maps Pelanggan -->
+   <key>NSLocationWhenInUseUsageDescription</key>
+   <string>Dibutuhkan untuk menandai titik koordinat pemasangan modem ONT pelanggan.</string>
+   <!-- Izin Kamera untuk Lampiran Foto Tiket Kendala -->
+   <key>NSCameraUsageDescription</key>
+   <string>Dibutuhkan untuk memotret kondisi modem dan indikator redaman kabel optik.</string>
+   <!-- Izin Background Fetch Pemantauan -->
+   <key>UIBackgroundModes</key>
+   <array>
+       <string>fetch</string>
+       <string>processing</string>
+   </array>
+   ```
+
+4. KODE LENGKAP SWIFT (`ViewController.swift`):
+   ```swift
+   import UIKit
+   import WebKit
+   import UserNotifications
+
+   class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
+       
+       var webView: WKWebView!
+
+       override func viewDidLoad() {
+           super.viewDidLoad()
+           
+           // 1. Minta Izin Notifikasi Native iOS saat App Pertama Dibuka
+           UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+               if granted {
+                   print("Izin notifikasi native iOS diberikan")
+               }
+           }
+           
+           // 2. Setup WKWebView Configuration & JavaScript Bridge
+           let contentController = WKUserContentController()
+           contentController.add(self, name: "iosBridge")
+           
+           let config = WKWebViewConfiguration()
+           config.userContentController = contentController
+           config.allowsInlineMediaPlayback = true
+           
+           webView = WKWebView(frame: view.bounds, configuration: config)
+           webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+           webView.navigationDelegate = self
+           webView.uiDelegate = self
+           view.addSubview(webView)
+           
+           // 3. Tentukan URL berdasarkan Target / Scheme
+           #if TARGET_GUARD
+           let initialUrl = "http://172.21.20.44:7891/login"
+           #else
+           let initialUrl = "http://172.21.20.44:7891/portal"
+           #endif
+           
+           if let url = URL(string: initialUrl) {
+               let request = URLRequest(url: url)
+               webView.load(request)
+           }
+           
+           // 4. Polling Latar Belakang (Timer 30 Detik) untuk Cek Notifikasi Server
+           Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { [weak self] _ in
+               self?.pollServerNotification()
+           }
+       }
+
+       // MARK: - JavaScript Bridge (Dipanggil saat Web mentrigger Notifikasi Native)
+       func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+           if message.name == "iosBridge", let body = message.body as? [String: Any] {
+               let title = body["title"] as? String ?? "Pemberitahuan"
+               let msg = body["message"] as? String ?? ""
+               let isEmergency = body["isEmergency"] as? Boolean ?? false
+               showNativeIOSNotification(title: title, message: msg, isEmergency: isEmergency)
+           }
+       }
+
+       // MARK: - Eksekusi Notifikasi Native Sistem Operasi iOS
+       func showNativeIOSNotification(title: String, message: String, isEmergency: Bool) {
+           let content = UNMutableNotificationContent()
+           content.title = title
+           content.body = message
+           content.sound = isEmergency ? UNNotificationSound.defaultCritical : UNNotificationSound.default
+           
+           // Trigger seketika (1 detik)
+           let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+           let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+           
+           UNUserNotificationCenter.current().add(request) { error in
+               if let error = error {
+                   print("Gagal menampilkan notifikasi iOS: \(error)")
+               }
+           }
+       }
+
+       // MARK: - Polling Status Latar Belakang ke Backend Lokal
+       func pollServerNotification() {
+           guard let url = URL(string: "http://172.21.20.44:7891/api/notifications/poll") else { return }
+           
+           URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+               guard let data = data, error == nil else { return }
+               do {
+                   if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let unread = json["unread_tickets_count"] as? Int, unread > 0,
+                      let latest = json["latest_ticket"] as? [String: Any] {
+                       
+                       let ticketId = latest["id_tiket"] as? String ?? "TIKET-BARU"
+                       let cust = latest["nama_pelanggan"] as? String ?? "Pelanggan"
+                       let desc = latest["deskripsi"] as? String ?? ""
+                       
+                       DispatchQueue.main.async {
+                           self?.showNativeIOSNotification(
+                               title: "🚨 NOTIFIKASI TIKET NOC",
+                               message: "[\(ticketId)] \(cust): \(desc)",
+                               isEmergency: true
+                           )
+                       }
+                   }
+               } catch { }
+           }.resume()
+       }
+   }
+   ```
+
+========================================================================================
+BAGIAN 4: CARA BUILD OUTPUT DI XCODE (FILE IPA / APLIKASI IPHONE TERPISAH)
+========================================================================================
+
+Sama seperti Android yang menghasilkan 2 file APK terpisah, di Xcode (Mac) Anda dapat mem-build 2 aplikasi terpisah:
+
+1. MEMILIH SKEMA YANG AKAN DI-BUILD:
+   - Di toolbar atas Xcode (sebelah tombol Run/Play), pilih Scheme:
+     * Pilih `TeknoGuard` -> lalu pilih device (misal: "Any iOS Device (arm64)" atau iPhone fisik Anda).
+     * Atau pilih `TeknoCust` -> lalu pilih device.
+
+2. BUILD APLIKASI IPHONE (FILE .IPA / ARCHIVE):
+   - Klik menu atas: **Product -> Archive**.
+   - Xcode Organizer akan terbuka secara otomatis setelah proses compile selesai.
+   - Klik tombol **Distribute App**:
+     * Pilih **Ad Hoc** atau **Development** (untuk install langsung ke iPhone teknisi/pelanggan via kabel data / tools seperti 3uTools, AltServer, atau Apple Configurator).
+     * Atau pilih **App Store Connect / TestFlight** (jika ingin dibagikan secara resmi).
+   - Klik **Next** sampai selesai (Export).
+
+3. HASIL OUTPUT APLIKASI IPHONE TERPISAH:
+   - Hasil Build Scheme `TeknoGuard` -> Menghasilkan: **`TeknoGuard.ipa`** (Aplikasi NOC & Karyawan dengan logo `Group197.png`).
+   - Hasil Build Scheme `TeknoCust`  -> Menghasilkan: **`TeknoCust.ipa`** (Aplikasi Warga & Pelanggan dengan logo `Frame36.png`).
+

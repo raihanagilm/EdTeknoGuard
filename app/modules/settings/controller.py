@@ -60,3 +60,28 @@ class SystemSettingsController:
             "message": "Pengaturan interval dan ambang batas redaman berhasil disimpan!",
             "data": updated
         }
+
+    @staticmethod
+    def test_mikrotik(data: Any) -> Dict[str, Any]:
+        from app.services.mikrotik_service import MikroTikSyncService
+        return MikroTikSyncService.test_connection(
+            host=data.host,
+            port=data.port,
+            username=data.username,
+            password=data.password or ""
+        )
+
+    @staticmethod
+    def sync_mikrotik(db: Session, data: Optional[Any] = None) -> Dict[str, Any]:
+        from app.services.mikrotik_service import MikroTikSyncService
+        custom_params = None
+        if data and data.host and data.username:
+            custom_params = {
+                "host": data.host,
+                "port": data.port or 8728,
+                "username": data.username,
+                "password": data.password or "",
+                "kantor": data.kantor or "banyumas",
+                "auto_sync": True
+            }
+        return MikroTikSyncService.sync_customers_from_mikrotik(db=db, custom_params=custom_params)

@@ -26,6 +26,35 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penambahan Manajemen Kantor & Konfigurasi MikroTik per Wilayah di Modul Manajemen Pengguna (Tab Kantor Cabang)**:
+  - **Sistem Multi-Tab di Manajemen Pengguna (`ModulManajemenPengguna.jsx`)**: Mengelompokkan antarmuka menjadi 2 sub-tab ergonomis:
+    - **Tab 1: Pengguna NOC** — Mengelola akun petugas (Super Admin, Admin Cabang, Teknisi), izin multi-kantor, status aktif/nonaktif, dan hapus akun.
+    - **Tab 2: Kantor Cabang** — Manajemen lengkap (*CRUD*) master data wilayah kantor operasional ISP (Kode Kantor, Nama Wilayah, Alamat/Deskripsi, dan Konfigurasi Router MikroTik).
+  - **Input Kredensial MikroTik Melekat per Kantor (Tanpa Nilai Bawaan Statis Global)**:
+    - Menambahkan kolom `mikrotik_host`, `mikrotik_port`, `mikrotik_user`, dan `mikrotik_pass` pada tabel `kantors` MySQL dan model SQLAlchemy.
+    - Formulir Tambah/Edit Kantor kini menyediakan seksi khusus: **IP Router / Host** (contoh: `192.168.202.50`), **Port API** (custom sesuai router, misal `8728`), **Username Router** (`tekno`), dan **Password Router** (`tekno2025` untuk Kantor Banyumas).
+    - Kolom baru pada tabel kantor: *MikroTik RouterOS* (menampilkan IP:Port dan Username router).
+  - **Auto-Sync Otomatis Latar Belakang (Tanpa Tombol Manual Tambahan)**:
+    - Latar belakang scheduler APScheduler otomatis mengiterasi seluruh kantor yang memiliki konfigurasi MikroTik dan menarik DHCP bound leases secara berkala untuk masing-masing wilayah kantor.
+  - **Kapabilitas CRUD Kantor & Proteksi**:
+    - Tombol "Tambah Kantor" dengan modal formulir terpadu (Identitas Kantor + Konfigurasi MikroTik).
+    - Aksi "Edit Kantor" untuk memperbarui parameter wilayah dan kredensial router.
+    - Aksi "Hapus Kantor" dengan proteksi ketat (kantor default `pusat`, `cabang`, dan `banyumas` dilindungi agar tidak terhapus).
+    - Sinkronisasi instan ke dropdown *Office Switcher* di navbar via event `edtekno_kantor_updated`.
+  - **Mekanisme Sinkronisasi Dinamis Bound (Online) vs Waiting (Offline)**:
+    - Seluruh perangkat DHCP leases di router (baik `bound` maupun `waiting`) disimpan lengkap ke database agar master pelanggan tidak hilang.
+    - Kolom `status_lease` (`bound` vs `waiting`) ditambahkan pada tabel `pelanggan`.
+    - Perangkat `bound` otomatis disetel sebagai **ONLINE** (`is_monitored = True`) dan dipantau redaman optiknya secara berkala.
+    - Perangkat `waiting` otomatis disetel sebagai **OFFLINE** (`is_monitored = False`) dan dilewati dari pemindaian redaman berkala agar tidak memicu error timeout.
+    - Siklus scheduler otomatis menyelaraskan transisi status: saat pelanggan yang tadinya `waiting` menyala menjadi `bound`, sistem langsung menyalakan kembali pemantauannya; sebaliknya saat `bound` mati menjadi `waiting`, pemantauan redamannya otomatis diistirahatkan.
+    - Tabel Data Pelanggan kini memuat badge status konektivitas `ONLINE` dan `OFFLINE (WAITING)`.
+  - **Penghapusan Fitur Telegram**: Sesuai keputusan arsitektur, seluruh pengiriman notifikasi darurat Telegram telah ditiadakan dan sepenuhnya digantikan oleh Notifikasi Native OS Android/iOS (Push Banner, Alarm Ringtone & Haptic Vibration via Web Wrapper APK).
+  - **API Endpoint Backend**: Endpoint `/users/api/kantor/list`, `/users/api/kantor/add`, `/users/api/kantor/edit/{id}`, dan `/users/api/kantor/delete/{id}` dengan otorisasi Super Admin.
+
+  - **Inisialisasi Tabel Bersih Tanpa Migrasi**: Tabel `system_settings` diinisialisasi langsung dengan konfigurasi router MikroTik (`192.168.202.50:8728`), ambang batas redaman (-26.0 dBm & -27.0 dBm), dan interval pemantauan 5 menit.
+  - **Pelepasan Ketergantungan Impor CSV Otomatis**: Menghapus pemanggilan impor otomatis file CSV lama (`DAFTAR PELANGGAN TIJ(PELANGGAN CABANG).csv`) dari startup lifecycle backend dan `init_db.py`, sehingga terbebas dari kendala *Foreign Key Constraint Violation*.
+  - **Preservasi Fitur Tambah & Import Pelanggan**: Tombol Tambah manual dan Wizard Import Pelanggan di antarmuka frontend tetap dipertahankan utuh untuk kebutuhan operasional darurat teknisi/admin.
+
 - **Kesiapan Deploy Server Lokal, Port Custom Non-Umum & Migrasi Penuh Database MySQL Lokal (Tanpa TiDB Cloud & Tanpa Ngrok)**:
   - **Port Custom Non-Umum untuk Keamanan Server**: Mengganti port default umum `8000` menjadi **`7890`** (aplikasi backend FastAPI/Uvicorn), port dev server frontend Vite `3000` menjadi **`7891`**, dan port database MySQL `3306` menjadi **`33070`** di `docker-compose.yml`, `Dockerfile`, `.env`, `.env.example`, `config.py`, `package.json`, dan `vite.config.js` guna menghindari tabrakan port layanan bawaan OS/web server lain serta memperkuat isolasi keamanan.
   - **Pelepasan TiDB Cloud**: Mengubah konfigurasi koneksi database di `.env`, `.env.example`, `config.py`, dan `database.py` ke MySQL lokal (`DB_PORT=33070`) tanpa ketergantungan cloud.
@@ -33,6 +62,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Docker Compose Siap Deploy Lokal**: Menambahkan service container `mysql:8.0` (port `33070:3306`) dengan persistent volume `mysql_data`, healthcheck otomatis, konfigurasi charset `utf8mb4`, dan dependency linking yang aman ke service `edteknoguard` (port `7890:7890`).
   - **Skrip Migrasi Basis Data MySQL Lokal (`db/init.sql`)**: Menyediakan skrip DDL SQL lengkap (3NF) dengan foreign key cascade deletion, indexing optimal, dan initial seed data (kantor pusat/cabang/banyumas, POP, paket layanan, system settings default, dan akun super admin) yang dimount langsung ke `/docker-entrypoint-initdb.d/init.sql` pada container MySQL.
   - **Skrip Eksekutor Migrasi Mandiri Python (`migrate.py`)**: Membuat CLI script migrasi berbasis Python dengan fitur auto-detect database, pembuatan schema otomatis, seed data master, opsi `--fresh` (drop & rebuild dari awal), dan opsi `--sql` (eksekusi langsung berkas `db/init.sql`).
+  - **Integrasi Notifikasi Native Murni OS Android & iOS**: Memperbarui berkas panduan [`PROMTBUATKEANDROIDSTUDIO.txt`](file:///d:/databaru/Magang/EdTeknoGuard/PROMTBUATKEANDROIDSTUDIO.txt) dan kode `MainActivity.kt` dengan `JavascriptInterface` (`AndroidBridge.showNativeNotification`) serta framework `UNUserNotificationCenter` pada iOS Swift. Notifikasi darurat (alarm drop redaman / tiket baru) kini bersumber langsung dari sistem operasi smartphone (Notification Bar / Push Banner OS dengan ringtone & haptic vibration), baik saat aplikasi aktif maupun saat HP dalam kondisi standby/layar mati.
   - **Auto-Migration Startup Lifecycle**: Menambahkan eksekusi `init_db()` pada startup lifecycle `app/main.py` agar pembuatan skema tabel relasional otomatis berjalan saat aplikasi pertama kali boot jika dijalankan di luar docker.
 
 

@@ -35,12 +35,6 @@ logger = logging.getLogger("main")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Memulai {settings.APP_NAME}...")
-    # Jalankan inisialisasi & migrasi tabel basis data jika belum ada
-    try:
-        from app.db.init_db import init_db
-        init_db()
-    except Exception as e:
-        logger.warning(f"Inisialisasi database terlewati atau terjadi kendala: {e}")
     # Mulai scheduler background pemantau 5 menit
     scheduler.start()
     yield
@@ -237,7 +231,16 @@ async def get_kantor_list_alias(request: Request):
             kantors = db.query(Kantor).order_by(Kantor.id.asc()).all()
         return {
             "status": "success",
-            "kantors": [{"id": k.id, "kode": k.kode, "nama": k.nama, "alamat": k.alamat or ""} for k in kantors]
+            "kantors": [{
+                "id": k.id,
+                "kode": k.kode,
+                "nama": k.nama,
+                "alamat": k.alamat or "",
+                "mikrotik_host": k.mikrotik_host or "",
+                "mikrotik_port": k.mikrotik_port or "",
+                "mikrotik_user": k.mikrotik_user or "",
+                "mikrotik_pass": k.mikrotik_pass or ""
+            } for k in kantors]
         }
     finally:
         db.close()

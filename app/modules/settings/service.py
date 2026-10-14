@@ -26,7 +26,13 @@ class SystemSettingsService:
             "telegram_night_mode_start",
             "telegram_night_mode_end",
             "app_vibration_enabled",
-            "alert_waiting_interval_minutes"
+            "alert_waiting_interval_minutes",
+            "mikrotik_host",
+            "mikrotik_port",
+            "mikrotik_user",
+            "mikrotik_password",
+            "mikrotik_kantor",
+            "mikrotik_auto_sync"
         ]
         db_settings = {}
         rows = db.query(SystemSetting).filter(SystemSetting.key_name.in_(keys)).all()
@@ -90,6 +96,17 @@ class SystemSettingsService:
                 {"username": "tekno", "password": "tekno2025"}
             ]
 
+        # MikroTik Settings
+        mikrotik_host = db_settings.get("mikrotik_host", getattr(settings, "MIKROTIK_HOST", "192.168.202.50"))
+        try:
+            mikrotik_port = int(db_settings.get("mikrotik_port", getattr(settings, "MIKROTIK_PORT", 8728)))
+        except (ValueError, TypeError):
+            mikrotik_port = 8728
+        mikrotik_user = db_settings.get("mikrotik_user", getattr(settings, "MIKROTIK_USER", "tekno"))
+        mikrotik_pass = db_settings.get("mikrotik_password", getattr(settings, "MIKROTIK_PASSWORD", ""))
+        mikrotik_kantor = db_settings.get("mikrotik_kantor", getattr(settings, "MIKROTIK_DEFAULT_KANTOR", "banyumas"))
+        mikrotik_auto = db_settings.get("mikrotik_auto_sync", "true").lower() in ["true", "1", "yes"]
+
         # Status token dari .env
         bot_token = settings.TELEGRAM_BOT_TOKEN or ""
         masked_token = f"{bot_token[:6]}...{bot_token[-4:]}" if len(bot_token) > 10 else ("Terkonfigurasi" if bot_token else "Belum diisi di .env")
@@ -110,7 +127,13 @@ class SystemSettingsService:
             "alert_waiting_interval_minutes": alert_waiting_minutes,
             "telegram_token_configured": bool(settings.TELEGRAM_BOT_TOKEN),
             "telegram_token_masked": masked_token,
-            "telegram_chat_ids_configured": settings.TELEGRAM_CHAT_IDS or "-"
+            "telegram_chat_ids_configured": settings.TELEGRAM_CHAT_IDS or "-",
+            "mikrotik_host": mikrotik_host,
+            "mikrotik_port": mikrotik_port,
+            "mikrotik_user": mikrotik_user,
+            "mikrotik_password": mikrotik_pass,
+            "mikrotik_kantor": mikrotik_kantor,
+            "mikrotik_auto_sync": mikrotik_auto
         }
 
     @staticmethod
@@ -152,7 +175,13 @@ class SystemSettingsService:
             "telegram_night_mode_start": (data.telegram_night_mode_start or "22:00").strip(),
             "telegram_night_mode_end": (data.telegram_night_mode_end or "06:00").strip(),
             "app_vibration_enabled": "true" if data.app_vibration_enabled else "false",
-            "alert_waiting_interval_minutes": str(data.alert_waiting_interval_minutes or 5)
+            "alert_waiting_interval_minutes": str(data.alert_waiting_interval_minutes or 5),
+            "mikrotik_host": (data.mikrotik_host or "192.168.202.50").strip(),
+            "mikrotik_port": str(data.mikrotik_port or 8728),
+            "mikrotik_user": (data.mikrotik_user or "tekno").strip(),
+            "mikrotik_password": (data.mikrotik_password or "").strip(),
+            "mikrotik_kantor": (data.mikrotik_kantor or "banyumas").strip(),
+            "mikrotik_auto_sync": "true" if data.mikrotik_auto_sync else "false"
         }
 
         for k, v in pairs.items():

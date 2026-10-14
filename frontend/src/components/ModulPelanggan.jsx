@@ -713,6 +713,14 @@ export function ModulPelanggan({
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       {(() => {
+                        const isWaiting = (c.status_lease === 'waiting') || (!c.is_monitored && !c.rx_power);
+                        if (isWaiting) {
+                          return (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-slate-100 text-slate-600 border border-slate-300">
+                              OFFLINE (WAITING)
+                            </span>
+                          );
+                        }
                         const statusVal = (c.status_koneksi || c.status || 'NORMAL').toUpperCase();
                         let badgeClass = 'bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold';
                         if (statusVal === 'WARNING') {
@@ -723,9 +731,14 @@ export function ModulPelanggan({
                           badgeClass = 'bg-purple-50 text-purple-800 border border-purple-300 font-bold';
                         }
                         return (
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-black uppercase ${badgeClass}`}>
-                            {statusVal}
-                          </span>
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${badgeClass}`}>
+                              {statusVal}
+                            </span>
+                            <span className="text-[9px] font-mono font-bold text-emerald-600 uppercase">
+                              ONLINE
+                            </span>
+                          </div>
                         );
                       })()}
                     </td>

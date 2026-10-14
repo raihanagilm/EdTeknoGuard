@@ -204,11 +204,19 @@ export class UsersService {
   }
 
   static async getKantors() {
-    return new ApiService().get('/users/api/kantor/list');
+    return new ApiService().get('/api/kantor/list');
   }
 
   static async addKantor(payload) {
     return new ApiService().post('/users/api/kantor/add', payload);
+  }
+
+  static async updateKantor(kantorId, payload) {
+    return new ApiService().post(`/users/api/kantor/edit/${kantorId}`, payload);
+  }
+
+  static async deleteKantor(kantorId) {
+    return new ApiService().post(`/users/api/kantor/delete/${kantorId}`);
   }
 }
 

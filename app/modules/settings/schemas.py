@@ -23,4 +23,25 @@ class SystemSettingsSchema(BaseModel):
     telegram_night_mode_end: Optional[str] = Field("06:00", description="Jam selesai mode malam (HH:MM)")
     app_vibration_enabled: Optional[bool] = Field(True, description="Aktifkan getaran notifikasi pada aplikasi Android")
     alert_waiting_interval_minutes: Optional[int] = Field(5, ge=1, le=60, description="Interval pengulangan notifikasi tiket menunggu (menit)")
+    
+    # MikroTik RouterOS Sync Settings
+    mikrotik_host: Optional[str] = Field("192.168.202.50", description="IP Host router MikroTik")
+    mikrotik_port: Optional[int] = Field(8728, description="Port API RouterOS MikroTik (default 8728)")
+    mikrotik_user: Optional[str] = Field("tekno", description="Username API MikroTik")
+    mikrotik_password: Optional[str] = Field("", description="Password API MikroTik")
+    mikrotik_kantor: Optional[str] = Field("banyumas", description="Kantor cabang router MikroTik")
+    mikrotik_auto_sync: Optional[bool] = Field(True, description="Aktifkan sinkronisasi otomatis realtime dari MikroTik")
+
+class MikroTikTestSchema(BaseModel):
+    host: str = Field(..., description="IP Host router MikroTik")
+    port: int = Field(8728, description="Port API router MikroTik")
+    username: str = Field(..., description="Username router MikroTik")
+    password: Optional[str] = Field("", description="Password router MikroTik")
+
+class MikroTikSyncNowSchema(BaseModel):
+    host: Optional[str] = None
+    port: Optional[int] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    kantor: Optional[str] = None
 

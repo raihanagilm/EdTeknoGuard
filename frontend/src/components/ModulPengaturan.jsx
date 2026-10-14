@@ -21,7 +21,9 @@ import {
   ShieldCheck,
   LogOut,
   ChevronDown,
-  Phone
+  Phone,
+  Router,
+  Server
 } from 'lucide-react'
 
 export function ModulPengaturan({
@@ -64,8 +66,81 @@ export function ModulPengaturan({
   onOpenConfirmModal,
   currentUser,
   setCurrentUser,
-  onLogout
+  onLogout,
+  mikrotikHost,
+  setMikrotikHost,
+  mikrotikPort,
+  setMikrotikPort,
+  mikrotikUser,
+  setMikrotikUser,
+  mikrotikPassword,
+  setMikrotikPassword,
+  mikrotikKantor,
+  setMikrotikKantor,
+  mikrotikAutoSync,
+  setMikrotikAutoSync
 }) {
+  // State Tes Koneksi & Sinkronisasi MikroTik
+  const [mikrotikTesting, setMikrotikTesting] = useState(false)
+  const [mikrotikTestResult, setMikrotikTestResult] = useState(null)
+  const [mikrotikSyncing, setMikrotikSyncing] = useState(false)
+  const [mikrotikSyncResult, setMikrotikSyncResult] = useState(null)
+
+  // Handler Tes Koneksi MikroTik
+  const handleTestMikrotik = async () => {
+    setMikrotikTesting(true)
+    setMikrotikTestResult(null)
+    try {
+      const res = await fetch('/api/settings/mikrotik/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          host: mikrotikHost,
+          port: parseInt(mikrotikPort, 10) || 8728,
+          username: mikrotikUser,
+          password: mikrotikPassword
+        })
+      })
+      const data = await res.json()
+      setMikrotikTestResult(data)
+    } catch (err) {
+      setMikrotikTestResult({
+        success: false,
+        message: 'Gagal menghubungi backend untuk tes koneksi.'
+      })
+    } finally {
+      setMikrotikTesting(false)
+    }
+  }
+
+  // Handler Manual Sync MikroTik Sekarang
+  const handleSyncMikrotikNow = async () => {
+    setMikrotikSyncing(true)
+    setMikrotikSyncResult(null)
+    try {
+      const res = await fetch('/api/settings/mikrotik/sync-now', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          host: mikrotikHost,
+          port: parseInt(mikrotikPort, 10) || 8728,
+          username: mikrotikUser,
+          password: mikrotikPassword,
+          kantor: mikrotikKantor
+        })
+      })
+      const data = await res.json()
+      setMikrotikSyncResult(data)
+    } catch (err) {
+      setMikrotikSyncResult({
+        success: false,
+        message: 'Gagal mengeksekusi sinkronisasi MikroTik.'
+      })
+    } finally {
+      setMikrotikSyncing(false)
+    }
+  }
+
   // State Edit Profil Pengguna (Super Admin, Admin, & Teknisi)
   const [isEditProfile, setIsEditProfile] = useState(false)
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false)
@@ -236,7 +311,7 @@ export function ModulPengaturan({
           {/* Grid Menu Simpel (Hanya Ikon Bersih, Tanpa Border Kotak, Tanpa Background Bulat, Tanpa Badge Angka) */}
           {!isTeknisi && settingsCategory === 'noc' && (
             <div className="p-2 bg-white/95 rounded-2xl border border-sky-100 shadow-xs animate-in fade-in duration-200">
-              <div className="grid grid-cols-3 gap-1">
+              <div className="grid grid-cols-4 gap-1">
 
                 {/* 1. Parameter Redaman */}
                 <button
@@ -247,17 +322,30 @@ export function ModulPengaturan({
                     : 'text-slate-500 hover:text-slate-800 font-semibold'
                     }`}
                 >
-                  <SlidersHorizontal className={`w-6 h-6 mb-1.5 transition ${settingsActiveSubTab === 'thresholds' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                  <SlidersHorizontal className={`w-5 h-5 mb-1 transition ${settingsActiveSubTab === 'thresholds' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
                     }`} />
-                  <span className="text-xs leading-tight">
+                  <span className="text-[11px] leading-tight font-bold">
                     Parameter
-                  </span>
-                  <span className="text-[11px] text-slate-600 mt-0.5 font-mono font-medium">
-                    {pollingInterval}m • {Number(warnThreshold).toFixed(0)}dBm
                   </span>
                 </button>
 
-                {/* 2. Kredensial ONT */}
+                {/* 2. MikroTik RouterOS */}
+                <button
+                  type="button"
+                  onClick={() => setSettingsActiveSubTab('mikrotik')}
+                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'mikrotik'
+                    ? 'text-cyan-700 font-black'
+                    : 'text-slate-500 hover:text-slate-800 font-semibold'
+                    }`}
+                >
+                  <Router className={`w-5 h-5 mb-1 transition ${settingsActiveSubTab === 'mikrotik' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                    }`} />
+                  <span className="text-[11px] leading-tight font-bold">
+                    MikroTik
+                  </span>
+                </button>
+
+                {/* 3. Kredensial ONT */}
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('credentials')}
@@ -266,17 +354,14 @@ export function ModulPengaturan({
                     : 'text-slate-500 hover:text-slate-800 font-semibold'
                     }`}
                 >
-                  <KeyRound className={`w-6 h-6 mb-1.5 transition ${settingsActiveSubTab === 'credentials' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                  <KeyRound className={`w-5 h-5 mb-1 transition ${settingsActiveSubTab === 'credentials' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
                     }`} />
-                  <span className="text-xs leading-tight">
-                    Kredensial ONT
-                  </span>
-                  <span className="text-[11px] text-slate-600 mt-0.5 font-mono font-medium">
-                    {modemCredentials.length} Akun
+                  <span className="text-[11px] leading-tight font-bold">
+                    ONT
                   </span>
                 </button>
 
-                {/* 3. Notifikasi */}
+                {/* 4. Notifikasi */}
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('notifications')}
@@ -285,13 +370,10 @@ export function ModulPengaturan({
                     : 'text-slate-500 hover:text-slate-800 font-semibold'
                     }`}
                 >
-                  <Bell className={`w-6 h-6 mb-1.5 transition ${settingsActiveSubTab === 'notifications' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
+                  <Bell className={`w-5 h-5 mb-1 transition ${settingsActiveSubTab === 'notifications' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
                     }`} />
-                  <span className="text-xs leading-tight">
+                  <span className="text-[11px] leading-tight font-bold">
                     Notifikasi
-                  </span>
-                  <span className="text-[11px] text-slate-600 mt-0.5 font-medium">
-                    {appVibration ? 'Getar Aktif' : 'Senyap'}
                   </span>
                 </button>
 
@@ -363,6 +445,22 @@ export function ModulPengaturan({
                   <button
                     onClick={() => {
                       setSettingsCategory('noc')
+                      setSettingsActiveSubTab('mikrotik')
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'mikrotik'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                      }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Router className="w-3.5 h-3.5" />
+                      <span>Router MikroTik</span>
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSettingsCategory('noc')
                       setSettingsActiveSubTab('credentials')
                     }}
                     className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'credentials'
@@ -399,6 +497,227 @@ export function ModulPengaturan({
 
         {/* 3 Kolom Form Input (Desktop 3/4) */}
         <div className="lg:col-span-3 bg-white/90 backdrop-blur-md rounded-2xl p-5 border border-sky-200/80 shadow-sm">
+
+          {/* TAB MIKROTIK ROUTEROS (Khusus Super Admin & Admin) */}
+          {!isTeknisi && settingsActiveSubTab === 'mikrotik' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <div className="border-b border-sky-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                    <Router className="w-4 h-4 text-cyan-600" />
+                    <span>Integrasi Router MikroTik</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Otomatisasi penarikan data pelanggan dari DHCP Server Leases berstatus <code className="bg-cyan-100 text-cyan-800 px-1.5 py-0.5 rounded font-mono text-[11px] font-bold">bound</code>.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleTestMikrotik}
+                    disabled={mikrotikTesting}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${mikrotikTesting ? 'animate-spin' : ''}`} />
+                    <span>{mikrotikTesting ? 'Menguji...' : 'Uji Koneksi'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSyncMikrotikNow}
+                    disabled={mikrotikSyncing}
+                    className="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer disabled:opacity-50"
+                  >
+                    <Server className={`w-3.5 h-3.5 ${mikrotikSyncing ? 'animate-spin' : ''}`} />
+                    <span>{mikrotikSyncing ? 'Menarik Data...' : 'Tarik Sekarang'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Banner Hasil Tes Koneksi */}
+              {mikrotikTestResult && (
+                <div className={`p-3.5 rounded-xl border text-xs font-semibold flex items-start gap-2.5 animate-in fade-in ${
+                  mikrotikTestResult.success 
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                    : 'bg-rose-50 border-rose-200 text-rose-800'
+                }`}>
+                  {mikrotikTestResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <span className="font-bold">{mikrotikTestResult.message}</span>
+                    {mikrotikTestResult.router_name && (
+                      <p className="text-[11px] mt-0.5 font-mono">
+                        Identity: {mikrotikTestResult.router_name} | Versi: {mikrotikTestResult.version}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Banner Hasil Sync Manual */}
+              {mikrotikSyncResult && (
+                <div className={`p-3.5 rounded-xl border text-xs font-semibold flex items-start gap-2.5 animate-in fade-in ${
+                  mikrotikSyncResult.success 
+                    ? 'bg-cyan-50 border-cyan-200 text-cyan-900' 
+                    : 'bg-rose-50 border-rose-200 text-rose-800'
+                }`}>
+                  {mikrotikSyncResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 text-cyan-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <span className="font-bold">{mikrotikSyncResult.message}</span>
+                    {mikrotikSyncResult.total_bound !== undefined && (
+                      <div className="flex gap-3 text-[11px] font-mono mt-1">
+                        <span>Total Bound: <b>{mikrotikSyncResult.total_bound}</b></span>
+                        <span>Ditambah: <b className="text-emerald-700">+{mikrotikSyncResult.added_count}</b></span>
+                        <span>Dilewati: <b>{mikrotikSyncResult.skipped_count}</b></span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  onOpenConfirmModal()
+                }}
+                className="space-y-4"
+              >
+                {/* Baris 1: Host IP & Port API */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      IP Host / Alamat Router MikroTik
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="192.168.202.50"
+                      value={mikrotikHost}
+                      onChange={(e) => setMikrotikHost(e.target.value)}
+                      className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
+                    />
+                    <p className="text-[11px] text-slate-500 font-sans">
+                      IP Router MikroTik yang dapat dijangkau oleh server TeknoGuard.
+                    </p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Port API RouterOS
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="8728"
+                      value={mikrotikPort}
+                      onChange={(e) => setMikrotikPort(e.target.value)}
+                      className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
+                    />
+                    <p className="text-[11px] text-slate-500 font-sans">
+                      Port default: 8728 (IP &gt; Services &gt; api di WinBox).
+                    </p>
+                  </div>
+                </div>
+
+                {/* Baris 2: Username & Password */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Username API MikroTik
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="tekno"
+                      value={mikrotikUser}
+                      onChange={(e) => setMikrotikUser(e.target.value)}
+                      className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Password API MikroTik
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Masukkan password user MikroTik"
+                      value={mikrotikPassword}
+                      onChange={(e) => setMikrotikPassword(e.target.value)}
+                      className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px]"
+                    />
+                  </div>
+                </div>
+
+                {/* Baris 3: Kantor Cabang Target & Toggle Auto Sync */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Wilayah Kantor Alokasi Pelanggan
+                    </label>
+                    <select
+                      value={mikrotikKantor}
+                      onChange={(e) => setMikrotikKantor(e.target.value)}
+                      className="w-full rounded-xl border border-sky-200 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[42px] bg-white cursor-pointer"
+                    >
+                      <option value="banyumas">Kantor Banyumas (TIJ-NET_BMS)</option>
+                      <option value="cabang">Kantor Cabang</option>
+                      <option value="pusat">Kantor Pusat</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center pt-5">
+                    <label className="flex items-start gap-2.5 p-3 rounded-xl bg-cyan-50/60 border border-sky-200 cursor-pointer w-full">
+                      <input
+                        type="checkbox"
+                        checked={mikrotikAutoSync}
+                        onChange={(e) => setMikrotikAutoSync(e.target.checked)}
+                        className="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500"
+                      />
+                      <div className="text-xs">
+                        <span className="font-bold text-slate-800">Sinkronisasi Otomatis Realtime</span>
+                        <p className="text-[11px] text-slate-500 mt-0.5 font-sans">
+                          Tarik otomatis pelanggan DHCP baru sebelum tiap siklus pemantauan redaman berkala.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Tombol Simpan Konfigurasi */}
+                <div className="pt-3 border-t border-sky-100 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={settingsLoading}
+                    className="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Simpan Pengaturan MikroTik</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* Panduan SOP MikroTik */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-600" />
+                  <span>Standar Operasional Sinkronisasi DHCP Leases:</span>
+                </h4>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 leading-relaxed font-sans pl-1">
+                  <li>Pastikan service <b>api</b> di WinBox (<b>IP &gt; Services</b>) bertanda centang biru (Enable) dengan port <b>8728</b>.</li>
+                  <li>Hanya perangkat dengan status <b>bound</b> dan memiliki <b>Comment</b> (nama pelanggan) yang akan didaftarkan ke TeknoGuard.</li>
+                  <li>Perangkat internal kantor (seperti <code>TV</code>, <code>DVR</code>, <code>PC ADM</code>) otomatis dilewati oleh filter sistem.</li>
+                  <li>Setelah terdaftar otomatis, redaman optik dBm akan langsung dibaca secara live ke IP modem fisik pelanggan (<code>192.168.10.x</code>).</li>
+                </ul>
+              </div>
+            </div>
+          )}
 
           {/* TAB 1: PARAMETER & AMBANG BATAS (Khusus Super Admin & Admin) */}
           {!isTeknisi && (settingsActiveSubTab === 'thresholds' || settingsActiveSubTab === 'threshold') && (

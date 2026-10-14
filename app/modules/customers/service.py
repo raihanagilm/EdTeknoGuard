@@ -611,6 +611,7 @@ class CustomerService:
                 "pass_admin": c.pass_admin or "-",
                 "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(c, "is_monitored", True)),
+                "status_lease": getattr(c, "status_lease", "bound") or "bound",
                 "kantor": getattr(c, "kantor", "cabang") or "cabang"
             })
 

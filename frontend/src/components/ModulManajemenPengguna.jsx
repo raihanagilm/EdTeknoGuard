@@ -10,16 +10,25 @@ import {
   CheckCircle2,
   X,
   ArrowUpDown,
-  Check
+  Check,
+  Users,
+  Building2,
+  MapPin,
+  Plus,
+  Router,
+  KeyRound
 } from 'lucide-react';
 import { UsersService } from '../services/api';
 import {
-  ModuleHeader,
   FilterContainer,
   DataTableContainer
 } from './CommonUI';
 
 export function ModulManajemenPengguna() {
+  // Tab State: 'users' (Pengguna NOC) vs 'kantor' (Kantor Cabang)
+  const [activeTab, setActiveTab] = useState('users');
+
+  // ================= USERS STATE =================
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -34,7 +43,7 @@ export function ModulManajemenPengguna() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
-  // Modal State
+  // Modal State User
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('add');
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -47,6 +56,23 @@ export function ModulManajemenPengguna() {
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // ================= KANTOR STATE =================
+  const [kantorList, setKantorList] = useState([]);
+  const [kantorLoading, setKantorLoading] = useState(false);
+  const [kantorSearch, setKantorSearch] = useState('');
+  const [modalKantorOpen, setModalKantorOpen] = useState(false);
+  const [kantorModalMode, setKantorModalMode] = useState('add'); // 'add' | 'edit'
+  const [currentKantorId, setCurrentKantorId] = useState(null);
+  const [kantorNama, setKantorNama] = useState('');
+  const [kantorKode, setKantorKode] = useState('');
+  const [kantorAlamat, setKantorAlamat] = useState('');
+  const [kantorMikrotikHost, setKantorMikrotikHost] = useState('');
+  const [kantorMikrotikPort, setKantorMikrotikPort] = useState('');
+  const [kantorMikrotikUser, setKantorMikrotikUser] = useState('');
+  const [kantorMikrotikPass, setKantorMikrotikPass] = useState('');
+  const [kantorError, setKantorError] = useState('');
+  const [kantorSubmitting, setKantorSubmitting] = useState(false);
+
   // Toast
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -55,6 +81,7 @@ export function ModulManajemenPengguna() {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
   };
 
+  // Fetch Users
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -71,10 +98,30 @@ export function ModulManajemenPengguna() {
     }
   };
 
+  // Fetch Kantor List
+  const fetchKantors = async () => {
+    setKantorLoading(true);
+    try {
+      const res = await UsersService.getKantors();
+      if (res.ok && res.data && res.data.kantors) {
+        setKantorList(res.data.kantors);
+        const codes = res.data.kantors.map((k) => k.kode);
+        if (codes.length > 0) setAllKantor(codes);
+      }
+    } catch (err) {
+      console.error('Gagal memuat kantor:', err);
+      showToast('Gagal memuat daftar kantor', 'error');
+    } finally {
+      setKantorLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchKantors();
   }, []);
 
+  // Modal User Handlers
   const openAddModal = () => {
     setModalMode('add');
     setCurrentUserId(null);
@@ -100,7 +147,6 @@ export function ModulManajemenPengguna() {
     setFormError('');
     setModalOpen(true);
   };
-
 
   const handleKantorCheckbox = (k) => {
     if (formKantor.includes(k)) {
@@ -200,7 +246,6 @@ export function ModulManajemenPengguna() {
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
     
-    // Filter out 'admin' username protection
     const validUsersToDelete = users.filter(
       (u) => selectedIds.includes(u.id) && u.username !== 'admin'
     );
@@ -263,15 +308,36 @@ export function ModulManajemenPengguna() {
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / limit));
   const paginatedUsers = filteredUsers.slice((page - 1) * limit, page * limit);
 
-  // Tambah Kantor State (Khusus Super Admin)
-  const [modalKantorOpen, setModalKantorOpen] = useState(false);
-  const [kantorNama, setKantorNama] = useState('');
-  const [kantorKode, setKantorKode] = useState('');
-  const [kantorAlamat, setKantorAlamat] = useState('');
-  const [kantorError, setKantorError] = useState('');
-  const [kantorSubmitting, setKantorSubmitting] = useState(false);
+  // ================= KANTOR MODAL & ACTION HANDLERS =================
+  const openAddKantorModal = () => {
+    setKantorModalMode('add');
+    setCurrentKantorId(null);
+    setKantorNama('');
+    setKantorKode('');
+    setKantorAlamat('');
+    setKantorMikrotikHost('');
+    setKantorMikrotikPort('');
+    setKantorMikrotikUser('');
+    setKantorMikrotikPass('');
+    setKantorError('');
+    setModalKantorOpen(true);
+  };
 
-  const handleAddKantorSubmit = async (e) => {
+  const openEditKantorModal = (k) => {
+    setKantorModalMode('edit');
+    setCurrentKantorId(k.id);
+    setKantorNama(k.nama || '');
+    setKantorKode(k.kode || '');
+    setKantorAlamat(k.alamat || '');
+    setKantorMikrotikHost(k.mikrotik_host || '');
+    setKantorMikrotikPort(k.mikrotik_port ? String(k.mikrotik_port) : '');
+    setKantorMikrotikUser(k.mikrotik_user || '');
+    setKantorMikrotikPass(k.mikrotik_pass || '');
+    setKantorError('');
+    setModalKantorOpen(true);
+  };
+
+  const handleKantorFormSubmit = async (e) => {
     e.preventDefault();
     setKantorError('');
     if (!kantorNama.trim()) {
@@ -281,31 +347,84 @@ export function ModulManajemenPengguna() {
 
     setKantorSubmitting(true);
     try {
-      const res = await UsersService.addKantor({
+      const payload = {
         nama: kantorNama.trim(),
-        kode: kantorKode.trim() || undefined,
-        alamat: kantorAlamat.trim() || undefined
-      });
+        alamat: kantorAlamat.trim() || undefined,
+        mikrotik_host: kantorMikrotikHost.trim() || undefined,
+        mikrotik_port: kantorMikrotikPort.trim() ? parseInt(kantorMikrotikPort.trim(), 10) : undefined,
+        mikrotik_user: kantorMikrotikUser.trim() || undefined,
+        mikrotik_pass: kantorMikrotikPass.trim() || undefined
+      };
+
+      if (kantorModalMode === 'add') {
+        payload.kode = kantorKode.trim() || undefined;
+      }
+
+      const res = kantorModalMode === 'add'
+        ? await UsersService.addKantor(payload)
+        : await UsersService.updateKantor(currentKantorId, payload);
 
       if (res.ok && res.data && res.data.status === 'success') {
-        showToast(res.data.message || 'Kantor berhasil ditambahkan!');
+        showToast(res.data.message || (kantorModalMode === 'add' ? 'Kantor berhasil ditambahkan!' : 'Data kantor berhasil diperbarui!'));
         setModalKantorOpen(false);
         setKantorNama('');
         setKantorKode('');
         setKantorAlamat('');
+        setKantorMikrotikHost('');
+        setKantorMikrotikPort('');
+        setKantorMikrotikUser('');
+        setKantorMikrotikPass('');
+        fetchKantors();
         fetchUsers();
         // Emit global event agar dropdown kantor di navbar terupdate
         window.dispatchEvent(new CustomEvent('edtekno_kantor_updated'));
       } else {
-        setKantorError(res.data?.message || 'Gagal menambahkan kantor');
+        setKantorError(res.data?.message || 'Gagal memproses data kantor');
       }
     } catch (err) {
-      console.error('Error add kantor:', err);
+      console.error('Error submit kantor:', err);
       setKantorError('Gagal terhubung ke server');
     } finally {
       setKantorSubmitting(false);
     }
   };
+
+  const handleDeleteKantor = async (k) => {
+    if (['pusat', 'cabang', 'banyumas'].includes(k.kode)) {
+      alert(`Kantor default "${k.nama}" (${k.kode}) dilindungi dan tidak dapat dihapus.`);
+      return;
+    }
+
+    if (!window.confirm(`Yakin ingin menghapus kantor "${k.nama}" (${k.kode}) secara permanen?`)) {
+      return;
+    }
+
+    try {
+      const res = await UsersService.deleteKantor(k.id);
+      if (res.ok && res.data && res.data.status === 'success') {
+        showToast(res.data.message || 'Kantor berhasil dihapus!');
+        fetchKantors();
+        fetchUsers();
+        window.dispatchEvent(new CustomEvent('edtekno_kantor_updated'));
+      } else {
+        showToast(res.data?.message || 'Gagal menghapus kantor', 'error');
+      }
+    } catch (err) {
+      console.error('Error delete kantor:', err);
+      showToast('Gagal terhubung ke server', 'error');
+    }
+  };
+
+  const filteredKantors = kantorList.filter((k) => {
+    if (!kantorSearch) return true;
+    const q = kantorSearch.toLowerCase();
+    return (
+      (k.nama && k.nama.toLowerCase().includes(q)) ||
+      (k.kode && k.kode.toLowerCase().includes(q)) ||
+      (k.alamat && k.alamat.toLowerCase().includes(q)) ||
+      (k.mikrotik_host && k.mikrotik_host.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <div className="space-y-4">
@@ -322,391 +441,588 @@ export function ModulManajemenPengguna() {
         </div>
       )}
 
-      {/* 1. Filter Bar & Aksi Ringkas */}
-      <div className="relative z-30">
-        <FilterContainer>
-          <div className="flex items-center justify-between gap-1.5 sm:gap-2">
-            {/* Kotak Pencarian & Tombol Filter Popover */}
-            <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
-              <div className="relative flex-1 min-w-[120px] sm:min-w-[180px]">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                  placeholder="Cari user / nama..."
-                  className="w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-                />
-              </div>
+      {/* TAB NAVIGATION: Pengguna vs Kantor Cabang */}
+      <div className="bg-white/90 backdrop-blur-md rounded-2xl p-2 border border-sky-200/80 shadow-xs flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/80">
+          <button
+            type="button"
+            onClick={() => setActiveTab('users')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
+              activeTab === 'users'
+                ? 'bg-cyan-700 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Pengguna NOC</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+              activeTab === 'users' ? 'bg-cyan-800 text-white' : 'bg-slate-200 text-slate-700'
+            }`}>
+              {users.length}
+            </span>
+          </button>
 
-              {/* Tombol Popover Filter Role & Status */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
-                  className={`p-1.5 sm:p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shrink-0 cursor-pointer ${
-                    filterRole !== 'all' || filterStatus !== 'all'
-                      ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
-                      : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
-                  }`}
-                  title="Filter Role & Status Akun"
-                >
-                  <Filter className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">
-                    {filterRole !== 'all' ? filterRole : filterStatus !== 'all' ? `Status: ${filterStatus}` : 'Filter'}
-                  </span>
-                  {(filterRole !== 'all' || filterStatus !== 'all') && (
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" />
-                  )}
-                </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('kantor')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
+              activeTab === 'kantor'
+                ? 'bg-cyan-700 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Kantor Cabang</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+              activeTab === 'kantor' ? 'bg-cyan-800 text-white' : 'bg-slate-200 text-slate-700'
+            }`}>
+              {kantorList.length}
+            </span>
+          </button>
+        </div>
 
-                {/* Popover Menu Filter */}
-                {filterDropdownOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setFilterDropdownOpen(false)}
-                    />
-                    <div className="absolute left-0 sm:left-0 top-full mt-1.5 z-50 w-64 bg-white rounded-2xl p-3 shadow-xl border border-slate-300 space-y-3 font-mono text-xs">
-                      {/* Seksi 1: Role Pengguna */}
-                      <div>
-                        <div className="text-[11px] font-black uppercase text-slate-700 tracking-wider mb-1">
-                          Role Pengguna:
-                        </div>
-                        <select
-                          value={filterRole}
-                          onChange={(e) => {
-                            setFilterRole(e.target.value);
-                            setPage(1);
-                          }}
-                          className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white text-slate-800"
-                        >
-                          <option value="all">Semua Role</option>
-                          <option value="super admin">Super Admin</option>
-                          <option value="admin">Admin Cabang</option>
-                          <option value="teknisi">Teknisi</option>
-                        </select>
-                      </div>
-
-                      {/* Seksi 2: Status Akun */}
-                      <div>
-                        <div className="text-[11px] font-black uppercase text-slate-700 tracking-wider mb-1">
-                          Status Akun:
-                        </div>
-                        <div className="grid grid-cols-3 gap-1">
-                          {[
-                            { id: 'all', label: 'Semua' },
-                            { id: 'active', label: 'Aktif' },
-                            { id: 'inactive', label: 'Nonaktif' }
-                          ].map((st) => (
-                            <button
-                              key={st.id}
-                              type="button"
-                              onClick={() => {
-                                setFilterStatus(st.id);
-                                setPage(1);
-                              }}
-                              className={`px-2 py-1.5 rounded-lg text-[11px] font-bold text-center transition cursor-pointer ${
-                                filterStatus === st.id
-                                  ? 'bg-cyan-700 text-white'
-                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-                              }`}
-                            >
-                              {st.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFilterRole('all');
-                            setFilterStatus('all');
-                            setPage(1);
-                          }}
-                          className="text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer"
-                        >
-                          Reset Filter
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFilterDropdownOpen(false)}
-                          className="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg text-[11px] font-bold cursor-pointer"
-                        >
-                          Terapkan
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Tombol Aksi Tambah Kantor, Tambah Pengguna, Refresh */}
-            <div className="flex items-center gap-1 sm:gap-1.5 justify-end shrink-0">
-              <button
-                onClick={() => {
-                  setKantorError('');
-                  setKantorNama('');
-                  setKantorKode('');
-                  setKantorAlamat('');
-                  setModalKantorOpen(true);
-                }}
-                className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-sky-200 text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] cursor-pointer"
-                title="Tambah Kantor Wilayah Baru"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-cyan-700" />
-                <span className="hidden sm:inline">Kantor</span>
-              </button>
-              <button
-                onClick={openAddModal}
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shadow-sm cursor-pointer"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Tambah User</span>
-                <span className="sm:hidden">Tambah</span>
-              </button>
-              <button
-                onClick={fetchUsers}
-                disabled={loading}
-                className="p-1.5 sm:p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[32px] sm:min-h-[36px] flex items-center justify-center shrink-0 cursor-pointer"
-                title="Muat Ulang Data"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-          </div>
-        </FilterContainer>
+        {/* Info Ringkas Tab Aktif */}
+        <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-slate-500 pr-2">
+          {activeTab === 'users' ? (
+            <span>Kelola hak akses &amp; akun petugas</span>
+          ) : (
+            <span>Master kantor &amp; konfigurasi MikroTik RouterOS per wilayah</span>
+          )}
+        </div>
       </div>
 
-      {/* Selection / Bulk Action Bar */}
-      {selectedIds.length > 0 && (
-        <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 transition">
-          <div className="flex items-center gap-2">
-            <span className="p-1 rounded-lg bg-rose-100 text-rose-700">
-              <Trash2 className="w-4 h-4" />
-            </span>
-            <div>
-              <span className="text-xs font-bold text-rose-950 font-sans">
-                {selectedIds.length} Pengguna Terpilih
-              </span>
-              <p className="text-[11px] text-rose-700 font-sans">
-                Hapus permanen akun pengguna yang dicentang (kecuali akun super admin default).
-              </p>
+      {/* ================= TAB 1: PENGGUNA NOC ================= */}
+      {activeTab === 'users' && (
+        <>
+          {/* 1. Filter Bar & Aksi Ringkas */}
+          <div className="relative z-30">
+            <FilterContainer>
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+                {/* Kotak Pencarian & Tombol Filter Popover */}
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
+                  <div className="relative flex-1 min-w-[120px] sm:min-w-[180px]">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" />
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) => {
+                        setSearch(e.target.value);
+                        setPage(1);
+                      }}
+                      placeholder="Cari user / nama..."
+                      className="w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+                    />
+                  </div>
+
+                  {/* Tombol Popover Filter Role & Status */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                      className={`p-1.5 sm:p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shrink-0 cursor-pointer ${
+                        filterRole !== 'all' || filterStatus !== 'all'
+                          ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
+                          : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
+                      }`}
+                      title="Filter Role & Status Akun"
+                    >
+                      <Filter className="w-3.5 h-3.5" />
+                      <span className="hidden md:inline">
+                        {filterRole !== 'all' ? filterRole : filterStatus !== 'all' ? `Status: ${filterStatus}` : 'Filter'}
+                      </span>
+                      {(filterRole !== 'all' || filterStatus !== 'all') && (
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" />
+                      )}
+                    </button>
+
+                    {/* Popover Menu Filter */}
+                    {filterDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setFilterDropdownOpen(false)}
+                        />
+                        <div className="absolute left-0 sm:left-0 top-full mt-1.5 z-50 w-64 bg-white rounded-2xl p-3 shadow-xl border border-slate-300 space-y-3 font-mono text-xs">
+                          {/* Seksi 1: Role Pengguna */}
+                          <div>
+                            <div className="text-[11px] font-black uppercase text-slate-700 tracking-wider mb-1">
+                              Role Pengguna:
+                            </div>
+                            <select
+                              value={filterRole}
+                              onChange={(e) => {
+                                setFilterRole(e.target.value);
+                                setPage(1);
+                              }}
+                              className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white text-slate-800"
+                            >
+                              <option value="all">Semua Role</option>
+                              <option value="super admin">Super Admin</option>
+                              <option value="admin">Admin Cabang</option>
+                              <option value="teknisi">Teknisi</option>
+                            </select>
+                          </div>
+
+                          {/* Seksi 2: Status Akun */}
+                          <div>
+                            <div className="text-[11px] font-black uppercase text-slate-700 tracking-wider mb-1">
+                              Status Akun:
+                            </div>
+                            <div className="grid grid-cols-3 gap-1">
+                              {[
+                                { id: 'all', label: 'Semua' },
+                                { id: 'active', label: 'Aktif' },
+                                { id: 'inactive', label: 'Nonaktif' }
+                              ].map((st) => (
+                                <button
+                                  key={st.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setFilterStatus(st.id);
+                                    setPage(1);
+                                  }}
+                                  className={`px-2 py-1.5 rounded-lg text-[11px] font-bold text-center transition cursor-pointer ${
+                                    filterStatus === st.id
+                                      ? 'bg-cyan-700 text-white'
+                                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                                  }`}
+                                >
+                                  {st.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFilterRole('all');
+                                setFilterStatus('all');
+                                setPage(1);
+                              }}
+                              className="text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer"
+                            >
+                              Reset Filter
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setFilterDropdownOpen(false)}
+                              className="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg text-[11px] font-bold cursor-pointer"
+                            >
+                              Terapkan
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Tombol Aksi Tambah Pengguna & Refresh */}
+                <div className="flex items-center gap-1 sm:gap-1.5 justify-end shrink-0">
+                  <button
+                    onClick={openAddModal}
+                    className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shadow-sm cursor-pointer"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Tambah User</span>
+                    <span className="sm:hidden">Tambah</span>
+                  </button>
+                  <button
+                    onClick={fetchUsers}
+                    disabled={loading}
+                    className="p-1.5 sm:p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[32px] sm:min-h-[36px] flex items-center justify-center shrink-0 cursor-pointer"
+                    title="Muat Ulang Data"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+            </FilterContainer>
+          </div>
+
+          {/* Selection / Bulk Action Bar */}
+          {selectedIds.length > 0 && (
+            <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 transition">
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded-lg bg-rose-100 text-rose-700">
+                  <Trash2 className="w-4 h-4" />
+                </span>
+                <div>
+                  <span className="text-xs font-bold text-rose-950 font-sans">
+                    {selectedIds.length} Pengguna Terpilih
+                  </span>
+                  <p className="text-[11px] text-rose-700 font-sans">
+                    Hapus permanen akun pengguna yang dicentang (kecuali akun super admin default).
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setSelectedIds([])}
+                  className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-mono font-bold transition"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleting}
+                  className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{bulkDeleting ? 'Menghapus...' : `Hapus Terpilih (${selectedIds.length})`}</span>
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <button
-              onClick={() => setSelectedIds([])}
-              className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-mono font-bold transition"
-            >
-              Batal
-            </button>
-            <button
-              onClick={handleBulkDelete}
-              disabled={bulkDeleting}
-              className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>{bulkDeleting ? 'Menghapus...' : `Hapus Terpilih (${selectedIds.length})`}</span>
-            </button>
-          </div>
-        </div>
+          )}
+
+          {/* Tabel Pengguna */}
+          <DataTableContainer
+            page={page}
+            totalPages={totalPages}
+            totalCount={filteredUsers.length}
+            onPrevPage={() => setPage((p) => Math.max(1, p - 1))}
+            onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
+            loading={loading}
+          >
+            <table className="w-full text-left border-collapse table-auto md:table-fixed">
+              <thead>
+                <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
+                  <th className="py-2.5 px-3 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={filteredUsers.length > 0 && selectedIds.length === filteredUsers.length}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds(filteredUsers.map(u => u.id));
+                        } else {
+                          setSelectedIds([]);
+                        }
+                      }}
+                      className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+                    />
+                  </th>
+                  <th className="py-2.5 px-2 w-12 text-center">No</th>
+                  <th 
+                    className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-44"
+                    onClick={() => handleSort('username')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Username / Nama</span>
+                      <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'username' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                    </div>
+                  </th>
+                  <th className="py-2.5 px-3 w-36">Kontak WA</th>
+                  <th 
+                    className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-36"
+                    onClick={() => handleSort('role')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Role Sistem</span>
+                      <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'role' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                    </div>
+                  </th>
+                  <th className="py-2.5 px-3">Wilayah Kantor</th>
+                  <th 
+                    className="py-2.5 px-3 text-center cursor-pointer select-none hover:bg-cyan-100/60 transition w-28"
+                    onClick={() => handleSort('is_active')}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>Status</span>
+                      <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'is_active' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                    </div>
+                  </th>
+                  <th className="py-2.5 px-3 text-right w-20">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-sky-100 font-mono text-xs">
+                {loading ? (
+                  <tr>
+                    <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
+                      <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
+                      <div>Memuat data pengguna...</div>
+                    </td>
+                  </tr>
+                ) : paginatedUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
+                      Tidak ada pengguna ditemukan.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedUsers.map((u, idx) => {
+                    const isSelected = selectedIds.includes(u.id);
+
+                    return (
+                      <tr key={u.id} className={`transition ${isSelected ? 'bg-cyan-50/70' : 'hover:bg-cyan-50/40'}`}>
+                        <td className="py-2.5 px-3 text-center">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {
+                              setSelectedIds(prev =>
+                                prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id]
+                              );
+                            }}
+                            className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+                          />
+                        </td>
+                        <td className="py-2.5 px-2 text-center text-slate-500 font-bold text-xs">{(page - 1) * limit + idx + 1}</td>
+                        <td className="py-2.5 px-3">
+                          <div className="font-bold text-cyan-900">{u.username}</div>
+                          <div className="text-xs text-slate-600 font-sans">{u.nama_karyawan || 'Karyawan NOC'}</div>
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-xs text-slate-700">
+                          {u.no_wa ? (
+                            <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-300">
+                              {u.no_wa}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 italic text-xs">-</span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <span
+                            className={`inline-block px-2.5 py-1 rounded text-[11px] font-bold uppercase ${
+                              u.role === 'super admin'
+                                ? 'bg-purple-50 text-purple-800 border border-purple-300'
+                                : u.role === 'admin'
+                                ? 'bg-cyan-50 text-cyan-800 border border-cyan-300'
+                                : 'bg-slate-100 text-slate-800 border border-slate-300'
+                            }`}
+                          >
+                            {u.role}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex flex-wrap gap-1">
+                            {u.role === 'super admin' ? (
+                              <span className="inline-block px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[11px] font-medium border border-purple-300">
+                                Semua Kantor
+                              </span>
+                            ) : (
+                              (u.allowed_kantor || []).map((k) => (
+                                <span key={k} className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px] font-medium uppercase border border-slate-200">
+                                  {k}
+                                </span>
+                              ))
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-center">
+                          <button
+                            onClick={() => handleToggleActive(u)}
+                            disabled={u.username === 'admin'}
+                            className={`inline-block px-2.5 py-1 rounded text-[11px] font-black uppercase transition cursor-pointer ${
+                              u.is_active
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                                : 'bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100'
+                            } ${u.username === 'admin' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                          >
+                            {u.is_active ? 'AKTIF' : 'NONAKTIF'}
+                          </button>
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          <div className="relative inline-block text-left">
+                            <div className="relative group">
+                              <button
+                                type="button"
+                                className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+                                title="Pilihan Aksi"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                              </button>
+
+                              <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[130px]">
+                                <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
+                                  <button
+                                    onClick={() => openEditModal(u)}
+                                    className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                    <span>Edit Akun</span>
+                                  </button>
+                                  {u.username !== 'admin' && (
+                                    <button
+                                      onClick={() => handleDeleteUser(u)}
+                                      className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition border-t border-slate-100"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                      <span>Hapus</span>
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </DataTableContainer>
+        </>
       )}
 
-      {/* 3. Tabel Pengguna */}
-      <DataTableContainer
-        page={page}
-        totalPages={totalPages}
-        totalCount={filteredUsers.length}
-        onPrevPage={() => setPage((p) => Math.max(1, p - 1))}
-        onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
-        loading={loading}
-      >
-        <table className="w-full text-left border-collapse table-auto md:table-fixed">
-          <thead>
-            <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
-              <th className="py-2.5 px-3 w-10 text-center">
-                <input
-                  type="checkbox"
-                  checked={filteredUsers.length > 0 && selectedIds.length === filteredUsers.length}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedIds(filteredUsers.map(u => u.id));
-                    } else {
-                      setSelectedIds([]);
-                    }
-                  }}
-                  className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
-                />
-              </th>
-              <th className="py-2.5 px-2 w-12 text-center">No</th>
-              <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-44"
-                onClick={() => handleSort('username')}
-              >
-                <div className="flex items-center gap-1">
-                  <span>Username / Nama</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'username' ? 'text-cyan-800' : 'text-slate-400'}`} />
+      {/* ================= TAB 2: KANTOR CABANG ================= */}
+      {activeTab === 'kantor' && (
+        <>
+          {/* Filter Bar & Tombol Tambah Kantor */}
+          <div className="relative z-30">
+            <FilterContainer>
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
+                  <div className="relative flex-1 min-w-[140px] sm:min-w-[220px]">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" />
+                    <input
+                      type="text"
+                      value={kantorSearch}
+                      onChange={(e) => setKantorSearch(e.target.value)}
+                      placeholder="Cari nama kantor / kode / router IP..."
+                      className="w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+                    />
+                  </div>
                 </div>
-              </th>
-              <th className="py-2.5 px-3 w-36">Kontak WA</th>
-              <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-36"
-                onClick={() => handleSort('role')}
-              >
-                <div className="flex items-center gap-1">
-                  <span>Role Sistem</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'role' ? 'text-cyan-800' : 'text-slate-400'}`} />
-                </div>
-              </th>
-              <th className="py-2.5 px-3">Wilayah Kantor</th>
-              <th 
-                className="py-2.5 px-3 text-center cursor-pointer select-none hover:bg-cyan-100/60 transition w-28"
-                onClick={() => handleSort('is_active')}
-              >
-                <div className="flex items-center justify-center gap-1">
-                  <span>Status</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'is_active' ? 'text-cyan-800' : 'text-slate-400'}`} />
-                </div>
-              </th>
-              <th className="py-2.5 px-3 text-right w-20">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-sky-100 font-mono text-xs">
-            {loading ? (
-              <tr>
-                <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
-                  <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-                  <div>Memuat data pengguna...</div>
-                </td>
-              </tr>
-            ) : paginatedUsers.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
-                  Tidak ada pengguna ditemukan.
-                </td>
-              </tr>
-            ) : (
-              paginatedUsers.map((u, idx) => {
-                const isSelected = selectedIds.includes(u.id);
 
-                return (
-                  <tr key={u.id} className={`transition ${isSelected ? 'bg-cyan-50/70' : 'hover:bg-cyan-50/40'}`}>
-                    <td className="py-2.5 px-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => {
-                          setSelectedIds(prev =>
-                            prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id]
-                          );
-                        }}
-                        className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
-                      />
-                    </td>
-                    <td className="py-2.5 px-2 text-center text-slate-500 font-bold text-xs">{(page - 1) * limit + idx + 1}</td>
-                    <td className="py-2.5 px-3">
-                      <div className="font-bold text-cyan-900">{u.username}</div>
-                      <div className="text-xs text-slate-600 font-sans">{u.nama_karyawan || 'Karyawan NOC'}</div>
-                    </td>
-                    <td className="py-2.5 px-3 font-mono text-xs text-slate-700">
-                      {u.no_wa ? (
-                        <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-300">
-                          {u.no_wa}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 italic text-xs">-</span>
-                      )}
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <span
-                        className={`inline-block px-2.5 py-1 rounded text-[11px] font-bold uppercase ${
-                          u.role === 'super admin'
-                            ? 'bg-purple-50 text-purple-800 border border-purple-300'
-                            : u.role === 'admin'
-                            ? 'bg-cyan-50 text-cyan-800 border border-cyan-300'
-                            : 'bg-slate-100 text-slate-800 border border-slate-300'
-                        }`}
-                      >
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <div className="flex flex-wrap gap-1">
-                        {u.role === 'super admin' ? (
-                          <span className="inline-block px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[11px] font-medium border border-purple-300">
-                            Semua Kantor
-                          </span>
-                        ) : (
-                          (u.allowed_kantor || []).map((k) => (
-                            <span key={k} className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px] font-medium uppercase border border-slate-200">
-                              {k}
+                <div className="flex items-center gap-1.5 justify-end shrink-0">
+                  <button
+                    onClick={openAddKantorModal}
+                    className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1 min-h-[32px] sm:min-h-[36px] shadow-sm cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Tambah Kantor</span>
+                    <span className="sm:hidden">Tambah</span>
+                  </button>
+                  <button
+                    onClick={fetchKantors}
+                    disabled={kantorLoading}
+                    className="p-1.5 sm:p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[32px] sm:min-h-[36px] flex items-center justify-center shrink-0 cursor-pointer"
+                    title="Muat Ulang Daftar Kantor"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${kantorLoading ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+            </FilterContainer>
+          </div>
+
+          {/* Tabel Kantor Cabang */}
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl border border-sky-200/80 shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse table-auto md:table-fixed">
+                <thead>
+                  <tr className="bg-cyan-50/80 border-b border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
+                    <th className="py-2.5 px-3 w-12 text-center">No</th>
+                    <th className="py-2.5 px-3 w-36">Kode Kantor</th>
+                    <th className="py-2.5 px-3 w-48">Nama Wilayah</th>
+                    <th className="py-2.5 px-3 w-64">MikroTik RouterOS</th>
+                    <th className="py-2.5 px-3">Alamat / Keterangan</th>
+                    <th className="py-2.5 px-3 w-28 text-center">Tipe</th>
+                    <th className="py-2.5 px-3 text-right w-20">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-sky-100 font-mono text-xs">
+                  {kantorLoading ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
+                        <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
+                        <div>Memuat data kantor...</div>
+                      </td>
+                    </tr>
+                  ) : filteredKantors.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
+                        Tidak ada kantor ditemukan.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredKantors.map((k, idx) => {
+                      const isDefault = ['pusat', 'cabang', 'banyumas'].includes(k.kode);
+
+                      return (
+                        <tr key={k.id || idx} className="hover:bg-cyan-50/40 transition">
+                          <td className="py-3 px-3 text-center text-slate-500 font-bold">{idx + 1}</td>
+                          <td className="py-3 px-3">
+                            <span className="font-mono font-black text-cyan-900 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200 uppercase text-[11px]">
+                              {k.kode}
                             </span>
-                          ))
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-3 text-center">
-                      <button
-                        onClick={() => handleToggleActive(u)}
-                        disabled={u.username === 'admin'}
-                        className={`inline-block px-2.5 py-1 rounded text-[11px] font-black uppercase transition cursor-pointer ${
-                          u.is_active
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
-                            : 'bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100'
-                        } ${u.username === 'admin' ? 'opacity-60 cursor-not-allowed' : ''}`}
-                      >
-                        {u.is_active ? 'AKTIF' : 'NONAKTIF'}
-                      </button>
-                    </td>
-                    <td className="py-2.5 px-3 text-right">
-                      {/* Menu Titik Tiga / Aksi Pengguna */}
-                      <div className="relative inline-block text-left">
-                        <div className="relative group">
-                          <button
-                            type="button"
-                            className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
-                            title="Pilihan Aksi"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                          </button>
-
-                          <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[130px]">
-                            <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
+                          </td>
+                          <td className="py-3 px-3">
+                            <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                              <Building2 className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                              <span>{k.nama}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-3">
+                            {k.mikrotik_host ? (
+                              <div className="space-y-0.5">
+                                <div className="flex items-center gap-1 font-bold text-slate-800">
+                                  <Router className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                                  <span>{k.mikrotik_host}:{k.mikrotik_port || 8728}</span>
+                                </div>
+                                <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                                  <KeyRound className="w-3 h-3 text-slate-400 shrink-0" />
+                                  <span>user: <strong>{k.mikrotik_user || '-'}</strong></span>
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic text-[11px]">Belum diatur</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-slate-600 font-sans text-xs">
+                            {k.alamat ? (
+                              <div className="flex items-start gap-1">
+                                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                                <span>{k.alamat}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic text-xs">-</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            {isDefault ? (
+                              <span className="inline-block px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[10px] font-bold uppercase border border-purple-200">
+                                Sistem Default
+                              </span>
+                            ) : (
+                              <span className="inline-block px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold uppercase border border-emerald-200">
+                                Kustom
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
                               <button
-                                onClick={() => openEditModal(u)}
-                                className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition"
+                                onClick={() => openEditKantorModal(k)}
+                                className="p-1.5 rounded-lg hover:bg-cyan-50 text-cyan-700 hover:text-cyan-900 border border-sky-200 transition cursor-pointer"
+                                title="Edit Kantor & Router"
                               >
-                                <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                                <span>Edit Akun</span>
+                                <Edit2 className="w-3.5 h-3.5" />
                               </button>
-                              {u.username !== 'admin' && (
+                              {!isDefault && (
                                 <button
-                                  onClick={() => handleDeleteUser(u)}
-                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition border-t border-slate-100"
+                                  onClick={() => handleDeleteKantor(k)}
+                                  className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-600 hover:text-rose-800 border border-rose-200 transition cursor-pointer"
+                                  title="Hapus Kantor"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                                  <span>Hapus</span>
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               )}
                             </div>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </DataTableContainer>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Modal Form User */}
       {modalOpen && (
@@ -738,14 +1054,14 @@ export function ModulManajemenPengguna() {
                   required
                   value={formUsername}
                   onChange={(e) => setFormUsername(e.target.value)}
-                  disabled={modalMode === 'edit' && formUsername === 'admin'}
-                  placeholder="Username login..."
-                  className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                  disabled={modalMode === 'edit'}
+                  placeholder="Contoh: teknisi_banyumas..."
+                  className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none disabled:bg-slate-100"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nama Karyawan</label>
+                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nama Petugas</label>
                 <input
                   type="text"
                   value={formNama}
@@ -783,7 +1099,6 @@ export function ModulManajemenPengguna() {
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Role / Peran</label>
                 <select
                   value={formRole}
-
                   onChange={(e) => setFormRole(e.target.value)}
                   disabled={modalMode === 'edit' && formUsername === 'admin'}
                   className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
@@ -840,14 +1155,15 @@ export function ModulManajemenPengguna() {
           </div>
         </div>
       )}
-      {/* Modal Tambah Kantor Wilayah */}
+
+      {/* Modal Tambah / Edit Kantor Wilayah & Setting Router MikroTik */}
       {modalKantorOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-5 max-w-md w-full border border-sky-200 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full border border-sky-200 shadow-2xl space-y-4 my-8">
             <div className="flex items-center justify-between pb-3 border-b border-sky-100">
-              <h3 className="text-sm font-black font-mono text-slate-800 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-cyan-600" />
-                <span>Tambah Kantor Wilayah Baru</span>
+              <h3 className="text-sm sm:text-base font-black font-mono text-slate-800 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-cyan-600" />
+                <span>{kantorModalMode === 'add' ? 'Tambah Kantor Wilayah Baru' : `Edit Kantor: ${kantorNama}`}</span>
               </h3>
               <button
                 onClick={() => setModalKantorOpen(false)}
@@ -863,66 +1179,137 @@ export function ModulManajemenPengguna() {
               </div>
             )}
 
-            <form onSubmit={handleAddKantorSubmit} className="space-y-3 font-mono text-xs">
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                  Nama Kantor <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={kantorNama}
-                  onChange={(e) => {
-                    setKantorNama(e.target.value);
-                    if (!kantorKode) {
-                      setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''));
-                    }
-                  }}
-                  placeholder="Contoh: Purwokerto, Cilacap, Pusat..."
-                  className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                />
+            <form onSubmit={handleKantorFormSubmit} className="space-y-3 font-mono text-xs">
+              {/* Seksi 1: Data Identitas Kantor */}
+              <div className="space-y-3">
+                <div className="text-[11px] font-black uppercase tracking-wider text-cyan-900 pb-1 border-b border-sky-100 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-cyan-700" />
+                  <span>1. Identitas Kantor Cabang</span>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                    Nama Kantor <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={kantorNama}
+                    onChange={(e) => {
+                      setKantorNama(e.target.value);
+                      if (kantorModalMode === 'add' && !kantorKode) {
+                        setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''));
+                      }
+                    }}
+                    placeholder="Contoh: Kantor Banyumas, Kantor Cabang..."
+                    className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                    Kode Kantor {kantorModalMode === 'add' ? '(Opsional - dibuat otomatis jika kosong)' : '(Permanen)'}
+                  </label>
+                  <input
+                    type="text"
+                    disabled={kantorModalMode === 'edit'}
+                    value={kantorKode}
+                    onChange={(e) => setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+                    placeholder="contoh: banyumas"
+                    className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none lowercase disabled:bg-slate-100 disabled:text-slate-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                    Deskripsi / Alamat Kantor
+                  </label>
+                  <textarea
+                    value={kantorAlamat}
+                    onChange={(e) => setKantorAlamat(e.target.value)}
+                    placeholder="Alamat atau keterangan operasional kantor cabang..."
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                  Kode Kantor (Opsional - dibuat otomatis jika kosong)
-                </label>
-                <input
-                  type="text"
-                  value={kantorKode}
-                  onChange={(e) => setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                  placeholder="contoh: purwokerto"
-                  className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none lowercase"
-                />
+              {/* Seksi 2: Konfigurasi Router MikroTik Kantor */}
+              <div className="space-y-3 pt-2">
+                <div className="text-[11px] font-black uppercase tracking-wider text-cyan-900 pb-1 border-b border-sky-100 flex items-center gap-1.5">
+                  <Router className="w-3.5 h-3.5 text-cyan-700" />
+                  <span>2. Konfigurasi Router MikroTik (Auto-Sync DHCP Bound)</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="sm:col-span-2">
+                    <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                      IP Router / Host
+                    </label>
+                    <input
+                      type="text"
+                      value={kantorMikrotikHost}
+                      onChange={(e) => setKantorMikrotikHost(e.target.value)}
+                      placeholder="Contoh: 192.168.202.50"
+                      className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                      Port API
+                    </label>
+                    <input
+                      type="number"
+                      value={kantorMikrotikPort}
+                      onChange={(e) => setKantorMikrotikPort(e.target.value)}
+                      placeholder="8728"
+                      className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                      Username Router
+                    </label>
+                    <input
+                      type="text"
+                      value={kantorMikrotikUser}
+                      onChange={(e) => setKantorMikrotikUser(e.target.value)}
+                      placeholder="Contoh: tekno"
+                      className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                      Password Router
+                    </label>
+                    <input
+                      type="password"
+                      value={kantorMikrotikPass}
+                      onChange={(e) => setKantorMikrotikPass(e.target.value)}
+                      placeholder="Contoh: tekno2025"
+                      className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                  Deskripsi / Alamat Kantor (Opsional)
-                </label>
-                <textarea
-                  value={kantorAlamat}
-                  onChange={(e) => setKantorAlamat(e.target.value)}
-                  placeholder="Alamat atau keterangan kantor cabang..."
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-sky-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-sky-100">
                 <button
                   type="button"
                   onClick={() => setModalKantorOpen(false)}
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={kantorSubmitting}
-                  className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition"
+                  className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
                 >
-                  {kantorSubmitting ? 'Menyimpan...' : 'Simpan Kantor'}
+                  {kantorSubmitting ? 'Menyimpan...' : (kantorModalMode === 'add' ? 'Simpan Kantor' : 'Simpan Perubahan')}
                 </button>
               </div>
             </form>

@@ -20,6 +20,10 @@ CREATE TABLE IF NOT EXISTS `kantors` (
   `kode` VARCHAR(50) NOT NULL UNIQUE,
   `nama` VARCHAR(100) NOT NULL,
   `alamat` TEXT NULL,
+  `mikrotik_host` VARCHAR(100) NULL,
+  `mikrotik_port` INT NULL,
+  `mikrotik_user` VARCHAR(100) NULL,
+  `mikrotik_pass` VARCHAR(255) NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_kantor_kode` (`kode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -94,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `pelanggan` (
   `paket` VARCHAR(50) NULL,
   `is_monitored` BOOLEAN NOT NULL DEFAULT TRUE,
   `is_active` BOOLEAN NOT NULL DEFAULT TRUE,
+  `status_lease` VARCHAR(20) NOT NULL DEFAULT 'bound',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `password_hash` VARCHAR(255) NULL,
