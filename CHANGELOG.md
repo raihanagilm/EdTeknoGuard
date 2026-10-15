@@ -26,7 +26,30 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
-- **Perbaikan Masalah Filter, Sorting, dan Pagination Tabel Pelanggan ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) & [service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+- **Fitur Ekstraksi & Pembaruan Kredensial WiFi ONT (Live Web GUI ZTE GM220-S)**:
+  - **Ekstraksi SSID & WPA Password Otomatis**: Layanan [ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py) kini otomatis membuka path `/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch` dan `net_wlan_secrity_t.gch` untuk membaca SSID (`Transfer_meaning('ESSID')`) dan kata sandi WPA (`Transfer_meaning('KeyPassphrase'/'PreSharedKey')`).
+  - **Sinkronisasi Otomatis ke Database**: Pada pemindaian berkala (`scheduled_job_wrapper`) maupun *Single Probe Check* (`single_ont_check`), SSID dan Password WiFi yang berhasil diekstrak otomatis disimpan ke entitas `PerangkatONT` / `Pelanggan` di database.
+  - **Fungsi Update WiFi Berproteksi Safe Mode (`dry_run=True`)**:
+    - Disiapkan metode `ONTScraperService.update_wifi_credentials(ip, user, password, new_ssid, new_password, dry_run=True)` untuk mengirim perubahan WiFi ke modem.
+    - Sesuai instruksi pengguna, mode aman aktif secara default (`dry_run=True`) sehingga perubahan tersimpan di database dan tervalidasi tanpa mengeksekusi request fisik yang merusak perangkat modem.
+    - Endpoint REST API baru: `POST /api/customers/{id_pelanggan}/change-wifi`.
+  - **Antarmuka Form Edit Pelanggan**: Modal edit data pelanggan di [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) telah dilengkapi kolom input **Nama WiFi (SSID)** dan **Password WiFi** font monospace.
+
+- **Konsolidasi Monitoring MikroTik & Eliminasi Perangkat Kantor Internal**:
+  - **Eksklusi Perangkat Kantor Internal**: Seluruh perangkat internal kantor (`SERVER-NOC-LOCAL`, `Modem Office`, `CCTV-NVR-OFFICE`, `DESKTOP-F0AS19V`, dsb.) otomatis difilter keluar dari pemantauan Simple Queues MikroTik sehingga data monitoring murni berisi pelanggan ISP.
+  - **Pembersihan Modul MikroTik Terpisah**: Menghapus `ModulMikroTikNOC.jsx` dan navigasi tab `/mikrotik` di Sidebar dan router aplikasi.
+  - **Integrasi Single Source of Truth ke Modul Pelanggan**:
+    - **Data Kuota & Traffic Real-Time**: Endpoint `GET /api/customers` dan `GET /api/customers/{id_pelanggan}` kini langsung melakukan *outer join* ke `KuotaPelanggan` periode bulan berjalan (`YYYY-MM`), menyajikan `kuota_terpakai_gb`, `upload_bytes`, `download_bytes`, `status_isolir`, dan `queue_name` secara presisi dan real-time.
+    - **Kolom Kuota & Badge Isolir di Tabel**: Tabel pelanggan di [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) kini memuat kolom **Kuota (Bln Ini)** dengan rincian total GB, breakdown ▲ Upload • ▼ Download, serta label **DIISOLIR** jika akses pelanggan diputus.
+    - **Tombol Sync MikroTik**: Menambahkan tombol pemicu sinkronisasi manual langsung pada toolbar tabel pelanggan (`POST /api/mikrotik/sync-quota`).
+    - **Aksi Isolir / Buka Isolir Cepat**: Menambahkan opsi isolir / unblock langsung pada menu titik tiga setiap baris pelanggan (`POST /api/mikrotik/toggle-isolir`).
+    - **Informasi Jaringan MikroTik di Modal Detail**: Menampilkan status isolir, rincian traffic, nama rule Simple Queue, dan timestamp sinkronisasi pada pop-up detail pelanggan.
+  - **Monitoring Simple Queues & Trafik**: Menampilkan seluruh 173 rule Simple Queues dengan pemetaan otomatis ke 142 data pelanggan TeknoGuard, deteksi perangkat internal kantor (Modem Office, CCTV, Desktop NOC), Max Limit Up/Down, dan akumulasi kuota GB.
+  - **Sinkronisasi Kuota Otomatis ke Database**: Counter akumulasi `bytes` dari Simple Queues otomatis disinkronkan ke tabel `kuota_pelanggan` pada periode bulan berjalan (`YYYY-MM`) melalui background worker tiap 3 menit atau tombol on-demand `Sync MikroTik`.
+  - **Aksi Kontrol Isolir Pelanggan 1-Klik**: Dukungan isolir/unblock akses internet pelanggan langsung dari TeknoGuard via API MikroTik (`Address List` / Queue toggle) lengkap dengan audit log aktivitas.
+  - **Antarmuka Modul MikroTik NOC Modern**: Komponen `ModulMikroTikNOC.jsx` dibangun mengikuti standar `designsystempro.md` dengan Segmented Status Bar, filter tipe (Semua, Pelanggan, Kantor, Isolir), live search, dan paginasi tabel.
+
+- **Perbaikan Masalah Filter, Sorting, dan Pagination Tabel Pelanggan ([ModulPelanggan.jsx](file:///d:/databaru\Magang\EdTeknoGuard\frontend\src\components\ModulPelanggan.jsx) & [service.py](file:///d:/databaru\Magang\EdTeknoGuard\app\modules\customers\service.py))**:
   - **Penyebab Bug Pencarian**: Sebelumnya pencarian menggunakan `Pelanggan.ip_router.ilike()`, padahal `ip_router` dan `ip_ont` adalah properti shortcut ke relasi `PerangkatONT`. Hal ini memicu error internal 500 (`AttributeError: 'property' object has no attribute 'ilike'`), sehingga pencarian data gagal dan mengosongkan tabel.
   - **Solusi Query SQL Terpadu**: Dilakukan `outerjoin(PerangkatONT)` pada query SQLAlchemy dan pencarian `q` diperluas ke `Pelanggan.nama`, `Pelanggan.id_pelanggan`, `Pelanggan.alamat`, `PerangkatONT.ip_router`, `PerangkatONT.ip_ont`, `PerangkatONT.mac_address`, dan `PerangkatONT.nama_wifi`.
   - **Dukungan Debounce Input Pencarian (350ms)**: Menambahkan state `debouncedSearch` di React agar pencarian tidak spamming API setiap karakter diketik dan otomatis mereset halaman ke `page: 1`.

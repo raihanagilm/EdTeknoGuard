@@ -113,6 +113,19 @@ class CustomerController:
         alamat_final = cust.alamat or "-"
         no_hp_final = cust.no_hp or "-"
 
+        from app.db.models import KuotaPelanggan
+        from app.core.timezone import get_current_period
+        current_period = get_current_period()
+        kuota_rec = db.query(KuotaPelanggan).filter(
+            KuotaPelanggan.id_pelanggan == id_pelanggan,
+            KuotaPelanggan.periode_bulan == current_period
+        ).first()
+
+        kuota_gb = float(kuota_rec.kuota_terpakai_gb) if kuota_rec and kuota_rec.kuota_terpakai_gb is not None else 0.0
+        up_bytes = int(kuota_rec.upload_bytes) if kuota_rec and kuota_rec.upload_bytes else 0
+        dl_bytes = int(kuota_rec.download_bytes) if kuota_rec and kuota_rec.download_bytes else 0
+        last_sync_str = kuota_rec.last_sync_mikrotik.strftime("%d/%m %H:%M") if kuota_rec and kuota_rec.last_sync_mikrotik else None
+
         return {
             "customer": {
                 "id_pelanggan": cust.id_pelanggan,
@@ -133,7 +146,13 @@ class CustomerController:
                 "pass_admin": cust.pass_admin or "-",
                 "status_kredensial": getattr(cust, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(cust, "is_monitored", True)),
-                "snmp_community": cust.snmp_community
+                "snmp_community": cust.snmp_community,
+                "status_isolir": bool(getattr(cust, "status_isolir", False)),
+                "queue_name": getattr(cust, "queue_name", None) or cust.nama,
+                "kuota_terpakai_gb": kuota_gb,
+                "upload_bytes": up_bytes,
+                "download_bytes": dl_bytes,
+                "last_sync_mikrotik": last_sync_str
             },
             "recent_logs": [
                 {
@@ -248,6 +267,65 @@ class CustomerController:
         return {
             "status": "success",
             "message": f"Pelanggan '{cust_name}' (ID: {id_pelanggan}) beserta seluruh data anakannya berhasil dihapus."
+        }
+
+    @staticmethod
+    def change_wifi(
+        db: Session,
+        id_pelanggan: str,
+        nama_wifi: Optional[str] = None,
+        password_wifi: Optional[str] = None,
+        dry_run: bool = True,
+        request: Optional[Request] = None,
+        user: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """Memperbarui kredensial WiFi (SSID/Password) di DB dan di modem ONT (dengan proteksi mode aman dry_run)."""
+        from app.db.models import Pelanggan
+        from app.services.ont_scraper_service import ONTScraperService
+        from app.modules.activity_logs.service import ActivityLogService
+
+        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+        if not cust:
+            raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+
+        # 1. Update ke database TeknoGuard
+        if nama_wifi is not None:
+            cust.nama_wifi = nama_wifi.strip()
+        if password_wifi is not None:
+            cust.password_wifi = password_wifi.strip()
+        db.commit()
+        db.refresh(cust)
+
+        # 2. Eksekusi scraper service (dengan proteksi dry_run=True secara default)
+        scraper_res = {}
+        ip_target = cust.ip_ont or cust.ip_router
+        if ip_target:
+            scraper_res = ONTScraperService.update_wifi_credentials(
+                ip=ip_target,
+                user_admin=cust.user_admin or "admin",
+                pass_admin=cust.pass_admin or "tekno2024",
+                new_ssid=cust.nama_wifi,
+                new_wifi_password=cust.password_wifi,
+                dry_run=dry_run
+            )
+
+        if request:
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="UBAH_WIFI_PELANGGAN",
+                status="SUCCESS",
+                keterangan=f"Ubah WiFi {cust.nama} (SSID: '{cust.nama_wifi}', Mode: {'DRY-RUN (Aman)' if dry_run else 'LIVE'})",
+                user=user
+            )
+
+        return {
+            "status": "success",
+            "message": f"Kredensial WiFi pelanggan '{cust.nama}' berhasil disimpan di sistem ({'Mode Aman / Belum Dites ke Fisik' if dry_run else 'Terkirim ke Modem'}).",
+            "id_pelanggan": cust.id_pelanggan,
+            "nama_wifi": cust.nama_wifi,
+            "password_wifi": cust.password_wifi,
+            "ont_result": scraper_res
         }
 
     @staticmethod

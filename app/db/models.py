@@ -88,6 +88,8 @@ class Pelanggan(Base):
     is_monitored = Column(Boolean, default=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
     status_lease = Column(String(20), default="bound", nullable=False, index=True) # bound (online), waiting (offline)
+    status_isolir = Column(Boolean, default=False, nullable=False, index=True) # True jika diisolir di MikroTik
+    queue_name = Column(String(150), nullable=True, index=True) # Nama rule di Simple Queues MikroTik
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
@@ -333,6 +335,9 @@ class KuotaPelanggan(Base):
     id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
     periode_bulan = Column(String(10), nullable=False, index=True) # format YYYY-MM
     kuota_terpakai_gb = Column(Numeric(8, 2), default=0, nullable=False)
+    upload_bytes = Column(BigInteger, default=0, nullable=False) # Akumulasi Upload byte dari Simple Queue
+    download_bytes = Column(BigInteger, default=0, nullable=False) # Akumulasi Download byte dari Simple Queue
+    last_sync_mikrotik = Column(DateTime, nullable=True) # Waktu sinkronisasi counter MikroTik terakhir
     kecepatan_paket = Column(String(50), nullable=True)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)

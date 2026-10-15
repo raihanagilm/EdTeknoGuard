@@ -10,7 +10,8 @@ import {
   ShieldAlert,
   Building2,
   Sliders,
-  LogOut
+  LogOut,
+  Server
 } from 'lucide-react'
 
 export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { role: 'super admin', nama_lengkap: 'Admin NOC', username: 'admin' }, unreadTickets = 0 }) {

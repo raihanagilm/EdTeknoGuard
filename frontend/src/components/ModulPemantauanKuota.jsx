@@ -256,8 +256,32 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
               </div>
             </div>
 
-            {/* Tombol Reload */}
+            {/* Tombol Sync MikroTik & Reload */}
             <div className="flex items-center gap-1.5 justify-end shrink-0">
+              <button
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    await fetch('/api/mikrotik/sync-quota', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ kantor: activeOffice })
+                    });
+                    await fetchQuota();
+                  } catch (e) {
+                    console.error('Gagal sync kuota:', e);
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="px-2.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition min-h-[34px] sm:min-h-[36px] flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs disabled:opacity-50"
+                title="Sinkronkan data kuota langsung dari Simple Queues MikroTik"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Sync MikroTik</span>
+              </button>
+
               <button
                 onClick={fetchQuota}
                 disabled={loading}

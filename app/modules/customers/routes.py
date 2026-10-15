@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import require_admin
 from app.modules.customers.controller import CustomerController
-from app.modules.customers.schemas import CustomerCreate, CustomerUpdate, BulkDeleteSchema
+from app.modules.customers.schemas import CustomerCreate, CustomerUpdate, BulkDeleteSchema, CustomerWifiUpdateSchema
 
 router = APIRouter(tags=["customers"])
 
@@ -108,6 +108,25 @@ def delete_customer(
 ):
     """Hapus pelanggan (Soft Delete)"""
     return CustomerController.delete_customer(db=db, id_pelanggan=id_pelanggan, request=request, user=user)
+
+@router.post("/api/customers/{id_pelanggan}/change-wifi")
+def change_customer_wifi(
+    request: Request,
+    id_pelanggan: str,
+    payload: CustomerWifiUpdateSchema,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Route untuk mengubah nama WiFi & password WiFi (dengan proteksi mode aman dry_run)"""
+    return CustomerController.change_wifi(
+        db=db,
+        id_pelanggan=id_pelanggan,
+        nama_wifi=payload.nama_wifi,
+        password_wifi=payload.password_wifi,
+        dry_run=payload.dry_run,
+        request=request,
+        user=user
+    )
 
 @router.post("/api/customers/{id_pelanggan}/toggle-monitoring")
 @router.patch("/api/customers/{id_pelanggan}/toggle-monitoring")

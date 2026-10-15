@@ -25,6 +25,7 @@ from app.modules.settings.routes import router as settings_router
 from app.modules.activity_logs.routes import router as activity_logs_router
 from app.modules.users.routes import router as users_router
 from app.modules.admin_customer_mgmt.routes import router as admin_customer_router
+from app.modules.mikrotik.routes import router as mikrotik_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -163,6 +164,7 @@ app.include_router(settings_router)
 app.include_router(activity_logs_router)
 app.include_router(users_router)
 app.include_router(admin_customer_router)
+app.include_router(mikrotik_router)
 
 # Mount Portal Pelanggan
 from portal_pelanggan.main import app as portal_app

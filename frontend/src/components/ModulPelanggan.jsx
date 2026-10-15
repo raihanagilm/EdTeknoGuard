@@ -29,7 +29,9 @@ import {
   Sparkles,
   AlertCircle,
   Info,
-  Check
+  Check,
+  Activity,
+  ShieldAlert
 } from 'lucide-react'
 import {
   ModuleHeader,
@@ -240,6 +242,72 @@ export function ModulPelanggan({
       console.error('Probe failed:', err)
     } finally {
       setProbingId(null)
+    }
+  }
+
+  // MikroTik sync & isolir action states
+  const [mikrotikSyncing, setMikrotikSyncing] = useState(false)
+  const [isolirLoadingId, setIsolirLoadingId] = useState(null)
+
+  // Trigger manual sync kuota Simple Queues MikroTik ke database
+  const handleSyncMikrotik = async () => {
+    setMikrotikSyncing(true)
+    try {
+      const res = await fetch('/api/mikrotik/sync-quota', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kantor: activeOffice || 'cabang' })
+      })
+      if (res.ok) {
+        const json = await res.json()
+        await fetchCustomers()
+        alert(`Berhasil sinkronisasi ${json.total_synced || 0} kuota & traffic pelanggan dari MikroTik!`)
+      } else {
+        const errJson = await res.json().catch(() => ({}))
+        alert(errJson.detail || 'Gagal sinkronisasi dengan router MikroTik.')
+      }
+    } catch (err) {
+      console.error('MikroTik sync error:', err)
+      alert('Terjadi kesalahan koneksi ke server saat sinkronisasi MikroTik.')
+    } finally {
+      setMikrotikSyncing(false)
+    }
+  }
+
+  // Toggle isolir pelanggan on-demand (Firewall Address List)
+  const handleToggleIsolir = async (c) => {
+    const cId = c.id_pelanggan || c.id
+    const currentIsolir = Boolean(c.status_isolir)
+    const newStatus = !currentIsolir
+
+    const actionText = newStatus ? 'MENGISOLIR (Memutus Akses Internet)' : 'MEMBUKA ISOLIR (Memulihkan Akses Internet)'
+    const confirmed = window.confirm(
+      `Konfirmasi Aksi MikroTik:\nApakah Anda yakin ingin ${actionText} untuk pelanggan:\n"${c.nama}" (ID: ${cId})?`
+    )
+    if (!confirmed) return
+
+    setIsolirLoadingId(cId)
+    try {
+      const res = await fetch('/api/mikrotik/toggle-isolir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_pelanggan: cId,
+          isolir: newStatus
+        })
+      })
+
+      if (res.ok) {
+        await fetchCustomers()
+      } else {
+        const errJson = await res.json().catch(() => ({}))
+        alert(errJson.detail || 'Gagal mengubah status isolir pelanggan di MikroTik.')
+      }
+    } catch (err) {
+      console.error('Toggle isolir error:', err)
+      alert('Terjadi kesalahan koneksi ke router MikroTik.')
+    } finally {
+      setIsolirLoadingId(null)
     }
   }
 
@@ -488,6 +556,16 @@ export function ModulPelanggan({
             {/* Tombol Aksi Lengkapi Data, Ekspor, Reload */}
             <div className="flex items-center gap-1.5 justify-end shrink-0">
               <button
+                onClick={handleSyncMikrotik}
+                disabled={mikrotikSyncing}
+                className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
+                title="Sinkronisasi Kuota & Traffic Real-Time dari Router MikroTik"
+              >
+                <Activity className={`w-3.5 h-3.5 text-indigo-600 ${mikrotikSyncing ? 'animate-spin' : ''}`} />
+                <span>{mikrotikSyncing ? 'Syncing...' : 'Sync MikroTik'}</span>
+              </button>
+
+              <button
                 onClick={() => setImportModalOpen(true)}
                 className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
                 title="Lengkapi Data Pelanggan (No. WA, Alamat, Kredensial WiFi)"
@@ -618,6 +696,12 @@ export function ModulPelanggan({
                 </div>
               </th>
               <th className="py-2.5 px-3 w-40">WiFi &amp; Admin ONT</th>
+              <th className="py-2.5 px-3 text-right w-36">
+                <div className="flex items-center justify-end gap-1">
+                  <Activity className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Kuota (Bln Ini)</span>
+                </div>
+              </th>
               <th 
                 className={`py-2.5 px-3 text-right cursor-pointer select-none transition w-32 ${sortField === 'rx_power' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
                 onClick={() => handleSort('rx_power')}
@@ -648,14 +732,14 @@ export function ModulPelanggan({
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
               <tr>
-                <td colSpan="9" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="10" className="text-center py-10 text-slate-400 font-mono">
                   <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
                   <div>Memuat data pelanggan...</div>
                 </td>
               </tr>
             ) : customers.length === 0 ? (
               <tr>
-                <td colSpan="9" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="10" className="text-center py-10 text-slate-400 font-mono">
                   Tidak ada data pelanggan ditemukan.
                 </td>
               </tr>
@@ -722,6 +806,19 @@ export function ModulPelanggan({
                       <div className="text-xs text-slate-600 font-mono">
                         Modem: <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
                       </div>
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <div className="font-sans font-bold text-slate-900 text-xs">
+                        {(c.kuota_terpakai_gb || 0).toFixed(2)} <span className="text-[10px] font-normal text-slate-500 font-mono">GB</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-mono">
+                        ▲{((c.upload_bytes || 0) / (1024**3)).toFixed(1)}GB • ▼{((c.download_bytes || 0) / (1024**3)).toFixed(1)}GB
+                      </div>
+                      {c.status_isolir ? (
+                        <span className="inline-block px-1.5 py-0.2 mt-0.5 rounded text-[9px] font-black uppercase bg-rose-100 text-rose-700 border border-rose-300">
+                          DIISOLIR
+                        </span>
+                      ) : null}
                     </td>
                     <td className="py-2.5 px-3 text-right font-black">
                       {(() => {
@@ -807,7 +904,7 @@ export function ModulPelanggan({
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                             </button>
 
-                            <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[160px]">
+                            <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[170px]">
                               <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
                                 <button
                                   onClick={() => handleOpenDetail(c)}
@@ -829,6 +926,24 @@ export function ModulPelanggan({
                                     <span>Hubungi WA</span>
                                   </a>
                                 )}
+                                <button
+                                  onClick={() => handleToggleIsolir(c)}
+                                  disabled={isolirLoadingId === cId}
+                                  className={`w-full px-3 py-1.5 text-left flex items-center gap-2 transition border-t border-slate-100 ${
+                                    c.status_isolir
+                                      ? 'text-emerald-700 hover:bg-emerald-50'
+                                      : 'text-amber-700 hover:bg-amber-50'
+                                  }`}
+                                >
+                                  <ShieldAlert className={`w-3.5 h-3.5 ${c.status_isolir ? 'text-emerald-600' : 'text-amber-600'}`} />
+                                  <span>
+                                    {isolirLoadingId === cId
+                                      ? 'Memproses...'
+                                      : c.status_isolir
+                                      ? 'Buka Isolir'
+                                      : 'Isolir Akses'}
+                                  </span>
+                                </button>
                                 <button
                                   onClick={() => handleOpenEdit(c)}
                                   className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition border-t border-slate-100"
@@ -952,6 +1067,29 @@ export function ModulPelanggan({
                     value={formData.paket}
                     onChange={(e) => setFormData({ ...formData, paket: e.target.value })}
                     className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nama WiFi (SSID)</label>
+                  <input
+                    type="text"
+                    value={formData.nama_wifi}
+                    onChange={(e) => setFormData({ ...formData, nama_wifi: e.target.value })}
+                    placeholder="Contoh: WiFi_Rumah"
+                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Password WiFi</label>
+                  <input
+                    type="text"
+                    value={formData.password_wifi}
+                    onChange={(e) => setFormData({ ...formData, password_wifi: e.target.value })}
+                    placeholder="Minimal 8 karakter"
+                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none font-mono"
                   />
                 </div>
               </div>
@@ -1121,6 +1259,45 @@ export function ModulPelanggan({
                   <div>
                     <span className="text-slate-400 block text-[10px]">Jenis Modem:</span>
                     <span className="font-bold text-slate-900">{detailCustomer.jenis_modem || 'ZTE GM220-S'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detail MikroTik & Pemakaian Kuota Real-Time */}
+              <div className="p-3 rounded-xl bg-indigo-50/60 border border-indigo-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-indigo-950 font-bold uppercase flex items-center gap-1">
+                    <Activity className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Status Jaringan &amp; Kuota MikroTik</span>
+                  </span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                    detailCustomer.status_isolir
+                      ? 'bg-rose-100 text-rose-700 border border-rose-300'
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  }`}>
+                    {detailCustomer.status_isolir ? 'TERISOLIR (SUSPENDED)' : 'AKTIF NORMAL'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Total Terpakai (Bln Ini):</span>
+                    <span className="font-black text-slate-900 font-sans text-xs">{(detailCustomer.kuota_terpakai_gb || 0).toFixed(2)} GB</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Upload Traffic:</span>
+                    <span className="font-bold text-slate-800 font-mono text-[11px]">▲ {((detailCustomer.upload_bytes || 0) / (1024**3)).toFixed(2)} GB</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Download Traffic:</span>
+                    <span className="font-bold text-slate-800 font-mono text-[11px]">▼ {((detailCustomer.download_bytes || 0) / (1024**3)).toFixed(2)} GB</span>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <span className="text-slate-400 block text-[10px]">Rule Simple Queue:</span>
+                    <span className="font-bold text-indigo-900 font-mono text-[11px] truncate block">{detailCustomer.queue_name || detailCustomer.nama || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">Sync Terakhir:</span>
+                    <span className="font-mono text-slate-600 text-[11px]">{detailCustomer.last_sync_mikrotik || 'Otomatis'}</span>
                   </div>
                 </div>
               </div>

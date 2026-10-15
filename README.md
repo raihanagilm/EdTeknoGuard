@@ -4,6 +4,23 @@
 
 ---
 
+               ┌────────────────────────────────────────────────────────┐
+               │                  SERVER TEKNOGUARD                     │
+               └───────────────┬────────────────────────┬───────────────┘
+                               │                        │
+       JALUR 1: MIKROTIK ROUTEROS API            JALUR 2: LIVE ONT HTTP SCRAPER
+      (Ke Router Utama ISP 192.168.202.50)      (Ke Modem ONT ZTE GM220-S 192.168.10.x)
+                               │                        │
+             ┌─────────────────┴──────────┐   ┌─────────┴───────────────────────┐
+             │ • IP & MAC Address         │   │ • Redaman Optik Rx Power (dBm)  │
+             │ • Simple Queue Bandwidth   │   │ • Suhu Modem (°C) & Uptime      │
+             │ • Limit Upload & Download  │   │ • Tx Power & GPON Link State    │
+             │ • Kuota Terpakai (GB)      │   │ • Nama SSID & Password WiFi     │
+             │ • Status Dial PPPoE        │   │   (Hanya jika scraper login ke  │
+             └────────────────────────────┘   │    halaman wlan_security.gch)   │
+                                              └─────────────────────────────────┘
+
+
 ## 📑 Navigasi Dokumen & Standar Proyek
 
 Seluruh dokumentasi proyek dirancang saling terhubung dan memiliki pembagian fokus yang jelas:

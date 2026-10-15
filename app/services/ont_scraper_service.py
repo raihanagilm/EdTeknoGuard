@@ -18,6 +18,8 @@ logger = logging.getLogger("ont_scraper_service")
 
 PON_STATUS_PATH = "/getpage.gch?pid=1002&nextpage=gpon_status_link_t.gch"
 STATUS_DEV_PATH = "/getpage.gch?pid=1002&nextpage=status_dev_info_t.gch"
+WLAN_ESSID_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch"
+WLAN_SECURITY_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_secrity_t.gch"
 
 class ONTScraperService:
 
@@ -234,9 +236,131 @@ class ONTScraperService:
         if not res["mac_address"]:
             res["mac_address"] = cls.get_mac_from_arp(host)
 
-        # Catatan: SSID dan Password WiFi diatur secara manual oleh teknisi
-        # karena modem di lapangan sering menggunakan router/AP eksternal atau konfigurasi terpisah.
+        # 2. SSID (Nama WiFi) dari WLAN_ESSID_PATH
+        try:
+            r_essid = session.get(f"{base_url}{WLAN_ESSID_PATH}", headers=headers, timeout=8)
+            if r_essid.status_code == 200:
+                txt_essid = html.unescape(r_essid.text)
+                m_tm_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_essid)
+                if m_tm_essid:
+                    for item in m_tm_essid:
+                        if item.strip():
+                            res["nama_wifi"] = item.strip()
+                            break
+                if not res["nama_wifi"]:
+                    m_var = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_essid, re.I)
+                    if m_var and m_var.group(1).strip():
+                        res["nama_wifi"] = m_var.group(1).strip()
+        except Exception as e:
+            logger.debug(f"Gagal membaca WLAN ESSID dari {host}: {e}")
+
+        # 3. Password WiFi (WPA PreSharedKey) dari WLAN_SECURITY_PATH
+        try:
+            r_sec = session.get(f"{base_url}{WLAN_SECURITY_PATH}", headers=headers, timeout=8)
+            if r_sec.status_code == 200:
+                txt_sec = html.unescape(r_sec.text)
+                m_tm_pass = re.findall(r"Transfer_meaning\s*\(\s*['\"](?:KeyPassphrase|PreSharedKey)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
+                if m_tm_pass:
+                    for item in m_tm_pass:
+                        if item.strip():
+                            res["password_wifi"] = item.strip()
+                            break
+
+                # Fallback jika SSID belum terbaca dari essid_t.gch, coba dari security
+                if not res["nama_wifi"]:
+                    m_tm_essid2 = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
+                    if m_tm_essid2:
+                        for item in m_tm_essid2:
+                            if item.strip():
+                                res["nama_wifi"] = item.strip()
+                                break
+
+                # Fallback input value
+                if not res["password_wifi"]:
+                    m_wpa_inp = re.search(r'id=["\'](?:Frm_KeyPassphrase|Frm_Passphrase)["\'][^>]*value=["\']([^"\']+)["\']', txt_sec, re.I)
+                    if m_wpa_inp and m_wpa_inp.group(1).strip():
+                        res["password_wifi"] = m_wpa_inp.group(1).strip()
+        except Exception as e:
+            logger.debug(f"Gagal membaca WLAN Security dari {host}: {e}")
+
         return res
+
+    @classmethod
+    def update_wifi_credentials(
+        cls,
+        ip: str,
+        user_admin: str,
+        pass_admin: str,
+        new_ssid: Optional[str] = None,
+        new_wifi_password: Optional[str] = None,
+        dry_run: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Mengubah SSID & Password WiFi modem ONT ZTE GM220-S via Web GUI.
+        PROTEKSI AMAN: dry_run=True secara default, TIDAK AKAN mengubah perangkat fisik kecuali eksplisit dry_run=False.
+        """
+        host = ip.strip()
+        base_url = f"http://{host}"
+
+        if dry_run:
+            logger.info(f"[DRY-RUN] Permintaan ganti WiFi ONT {host} -> SSID: '{new_ssid}', Pass: '{new_wifi_password}' (Disimpan di DB, eksekusi fisik dilewati).")
+            return {
+                "success": True,
+                "mode": "DRY_RUN",
+                "message": "Mode aman aktif (dry_run=True): Perubahan WiFi berhasil divalidasi dan dicatat tanpa modifikasi perangkat fisik.",
+                "ip": host,
+                "nama_wifi": new_ssid,
+                "password_wifi": new_wifi_password
+            }
+
+        # Eksekusi fisik ke modem jika dry_run=False
+        session = requests.Session()
+        headers = {
+            "Host": host,
+            "Referer": f"{base_url}/template.gch",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+
+        # 1. Login ke modem
+        ok, _ = cls.attempt_login(session, base_url, host, user_admin, pass_admin)
+        if not ok:
+            return {
+                "success": False,
+                "error_type": "AUTH_FAILED",
+                "message": f"Gagal login ke modem ONT {host} saat mencoba memperbarui WiFi."
+            }
+
+        # 2. Update SSID jika diberikan
+        if new_ssid:
+            try:
+                payload_ssid = {
+                    "IF_ACTION": "apply",
+                    "IF_INDEX": "1",
+                    "Frm_ESSID": new_ssid.strip()
+                }
+                session.post(f"{base_url}{WLAN_ESSID_PATH}", data=payload_ssid, headers=headers, timeout=10)
+            except Exception as e:
+                return {"success": False, "message": f"Gagal mengirim SSID baru ke modem: {str(e)}"}
+
+        # 3. Update WPA Password jika diberikan
+        if new_wifi_password:
+            try:
+                payload_sec = {
+                    "IF_ACTION": "apply",
+                    "IF_INDEX": "1",
+                    "Frm_KeyPassphrase": new_wifi_password.strip()
+                }
+                session.post(f"{base_url}{WLAN_SECURITY_PATH}", data=payload_sec, headers=headers, timeout=10)
+            except Exception as e:
+                return {"success": False, "message": f"Gagal mengirim Password WiFi baru ke modem: {str(e)}"}
+
+        return {
+            "success": True,
+            "mode": "LIVE_EXECUTION",
+            "message": f"Kredensial WiFi modem ONT {host} berhasil diperbarui secara fisik.",
+            "nama_wifi": new_ssid,
+            "password_wifi": new_wifi_password
+        }
 
     @classmethod
     def scrape_ont(

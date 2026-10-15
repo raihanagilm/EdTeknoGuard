@@ -597,6 +597,7 @@ export default function App() {
     if (clean === 'log' || clean === 'activity-logs') return 'log'
     if (clean === 'pengguna' || clean === 'users') return 'pengguna'
     if (clean === 'kantor') return 'kantor'
+    if (clean === 'mikrotik' || clean === 'routeros') return 'mikrotik'
     if (clean === 'pengaturan' || clean === 'settings') return 'pengaturan'
     return '404_not_found'
   }
@@ -613,6 +614,7 @@ export default function App() {
       case 'log': return '/log'
       case 'pengguna': return '/pengguna'
       case 'kantor': return '/kantor'
+      case 'mikrotik': return '/mikrotik'
       case 'pengaturan': return '/pengaturan'
       default: return `/${tab}`
     }
@@ -737,7 +739,7 @@ export default function App() {
   // =========================================================================
   // VIEW C: HALAMAN 404 / MODUL TIDAK DITEMUKAN (FULL PAGE BERSIH TANPA SIDEBAR/HEADER)
   // =========================================================================
-  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'pengguna', 'kantor', 'pengaturan']
+  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'pengguna', 'kantor', 'mikrotik', 'pengaturan']
   if (!validModules.includes(activeTab)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 sm:p-6 text-slate-900 font-sans">

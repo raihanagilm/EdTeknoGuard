@@ -41,6 +41,11 @@ class CustomerUpdate(BaseModel):
     is_monitored: Optional[bool] = None
     is_active: Optional[bool] = None
 
+class CustomerWifiUpdateSchema(BaseModel):
+    nama_wifi: Optional[str] = Field(None, max_length=100, description="SSID WiFi Baru")
+    password_wifi: Optional[str] = Field(None, max_length=100, description="Password WiFi Baru")
+    dry_run: bool = Field(True, description="Proteksi mode aman (True = tidak modifikasi modem fisik)")
+
 class BulkDeleteSchema(BaseModel):
     ids: list[str] = Field(..., description="Daftar ID pelanggan yang akan dihapus")
 

@@ -14,8 +14,8 @@ import json
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-from app.core.timezone import get_now_wib
-from app.db.models import Pelanggan, LogPerformaONT, PerangkatONT
+from app.core.timezone import get_now_wib, get_current_period
+from app.db.models import Pelanggan, LogPerformaONT, PerangkatONT, KuotaPelanggan
 from app.modules.customers.schemas import CustomerCreate, CustomerUpdate
 
 class CustomerService:
@@ -580,11 +580,18 @@ class CustomerService:
             .subquery()
         )
 
+        current_period = get_current_period()
+
         query = (
-            db.query(Pelanggan, LogPerformaONT)
+            db.query(Pelanggan, LogPerformaONT, KuotaPelanggan)
             .outerjoin(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
             .outerjoin(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
             .outerjoin(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
+            .outerjoin(
+                KuotaPelanggan,
+                (KuotaPelanggan.id_pelanggan == Pelanggan.id_pelanggan) & 
+                (KuotaPelanggan.periode_bulan == current_period)
+            )
             .filter(Pelanggan.is_active == True)
         )
 
@@ -682,11 +689,16 @@ class CustomerService:
         rows = query.offset(offset).limit(limit).all()
 
         result = []
-        for c, latest_log in rows:
+        for c, latest_log, kuota_rec in rows:
             current_status = latest_log.status_koneksi if latest_log else "NORMAL"
             current_rx = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else (float(c.redaman_baseline) if c.redaman_baseline else None)
             last_check = latest_log.waktu_cek.strftime("%d/%m %H:%M") if (latest_log and latest_log.waktu_cek) else "-"
             waktu_terakhir_iso = latest_log.waktu_cek.isoformat() if (latest_log and latest_log.waktu_cek) else None
+
+            kuota_gb = float(kuota_rec.kuota_terpakai_gb) if kuota_rec and kuota_rec.kuota_terpakai_gb is not None else 0.0
+            up_bytes = int(kuota_rec.upload_bytes) if kuota_rec and kuota_rec.upload_bytes else 0
+            dl_bytes = int(kuota_rec.download_bytes) if kuota_rec and kuota_rec.download_bytes else 0
+            last_sync_str = kuota_rec.last_sync_mikrotik.strftime("%d/%m %H:%M") if kuota_rec and kuota_rec.last_sync_mikrotik else None
 
             result.append({
                 "id_pelanggan": c.id_pelanggan,
@@ -720,7 +732,13 @@ class CustomerService:
                 "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(c, "is_monitored", True)),
                 "status_lease": getattr(c, "status_lease", "bound") or "bound",
-                "kantor": getattr(c, "kantor", "cabang") or "cabang"
+                "kantor": getattr(c, "kantor", "cabang") or "cabang",
+                "status_isolir": bool(getattr(c, "status_isolir", False)),
+                "queue_name": getattr(c, "queue_name", None) or c.nama,
+                "kuota_terpakai_gb": kuota_gb,
+                "upload_bytes": up_bytes,
+                "download_bytes": dl_bytes,
+                "last_sync_mikrotik": last_sync_str
             })
 
         return total_count, result

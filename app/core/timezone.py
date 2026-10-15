@@ -36,3 +36,10 @@ def format_wib(dt: Optional[datetime], fmt: str = "%d/%m/%Y %H:%M:%S") -> str:
     if not dt:
         return "-"
     return dt.strftime(fmt)
+
+def get_current_period() -> str:
+    """
+    Mengembalikan periode bulan berjalan dalam format YYYY-MM (misal '2026-10').
+    """
+    return get_now_wib().strftime("%Y-%m")
+

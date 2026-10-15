@@ -459,12 +459,15 @@ class MonitoringScheduler:
         }
 
     def mikrotik_sync_job_wrapper(self):
-        """Dijalankan tiap 3 menit secara mandiri oleh APScheduler untuk menyinkronkan data router MikroTik."""
+        """Dijalankan tiap 3 menit secara mandiri oleh APScheduler untuk menyinkronkan data router & kuota MikroTik."""
         try:
             from app.services.mikrotik_service import MikroTikSyncService
             db_sync = SessionLocal()
             try:
+                # 1. Sinkronisasi lease & pelanggan baru/bound
                 MikroTikSyncService.sync_all_configured_kantors(db_sync)
+                # 2. Sinkronisasi counter bytes Simple Queues ke tabel kuota_pelanggan
+                MikroTikSyncService.sync_traffic_quota_to_db(db_sync)
             finally:
                 db_sync.close()
         except Exception as e:
@@ -600,9 +603,13 @@ class MonitoringScheduler:
                     res = scrape_res
                     ket = f"Error: {scrape_res.get('message', 'Gagal')}"
 
-                # Auto-deteksi: Hanya simpan MAC Address jika berhasil terbaca (WiFi diatur manual)
+                # Auto-deteksi: Simpan MAC Address & Kredensial WiFi jika berhasil terbaca dari ONT
                 if res.get("mac_address"):
                     cust.mac_address = res["mac_address"]
+                if res.get("nama_wifi"):
+                    cust.nama_wifi = res["nama_wifi"]
+                if res.get("password_wifi"):
+                    cust.password_wifi = res["password_wifi"]
 
                 log_entry = LogPerformaONT(
                     id_pelanggan=cust.id_pelanggan,
@@ -772,9 +779,13 @@ class MonitoringScheduler:
                 res = scrape_res
                 ket = f"Single Check Error: {scrape_res.get('message', 'Unreachable')}"
 
-            # Auto-deteksi: Update MAC Address jika terdeteksi (WiFi manual)
+            # Auto-deteksi: Update MAC Address & Kredensial WiFi jika terdeteksi dari Web GUI ONT
             if res.get("mac_address"):
                 cust.mac_address = res["mac_address"]
+            if res.get("nama_wifi"):
+                cust.nama_wifi = res["nama_wifi"]
+            if res.get("password_wifi"):
+                cust.password_wifi = res["password_wifi"]
 
             now = get_now_wib()
             log_entry = LogPerformaONT(
