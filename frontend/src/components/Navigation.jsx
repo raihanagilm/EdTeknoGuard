@@ -8,6 +8,7 @@ import {
   Ticket,
   ScrollText,
   ShieldAlert,
+  Building2,
   Sliders,
   LogOut
 } from 'lucide-react'
@@ -36,7 +37,8 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
       title: 'Sistem & Audit',
       items: [
         { id: 'log', label: 'Log Aktivitas', icon: ScrollText, visible: !isTeknisi },
-        { id: 'pengguna', label: 'Manajemen Pengguna', icon: ShieldAlert, visible: isSuperAdmin },
+        { id: 'pengguna', label: 'Pengguna NOC', icon: ShieldAlert, visible: isSuperAdmin },
+        { id: 'kantor', label: 'Kantor', icon: Building2, visible: isSuperAdmin },
         { id: 'pengaturan', label: 'Pengaturan Sistem', icon: Sliders, visible: !isTeknisi }
       ]
     }

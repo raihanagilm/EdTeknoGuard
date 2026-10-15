@@ -12,6 +12,9 @@ export default defineConfig({
     host: true,
     port: 7891,
     allowedHosts: true,
+    hmr: {
+      clientPort: 7891,
+    },
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:7890',

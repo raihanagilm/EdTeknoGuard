@@ -15,7 +15,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 from app.core.timezone import get_now_wib
-from app.db.models import Pelanggan, LogPerformaONT
+from app.db.models import Pelanggan, LogPerformaONT, PerangkatONT
 from app.modules.customers.schemas import CustomerCreate, CustomerUpdate
 
 class CustomerService:
@@ -181,18 +181,41 @@ class CustomerService:
 
             # Query data existing di database untuk deteksi ID dan IP unik (join PerangkatONT)
             existing_customers = (
-                db.query(Pelanggan.id_pelanggan, PerangkatONT.ip_router, Pelanggan.nama)
+                db.query(
+                    Pelanggan.id_pelanggan, 
+                    PerangkatONT.ip_router, 
+                    Pelanggan.nama,
+                    Pelanggan.no_hp,
+                    Pelanggan.alamat,
+                    Pelanggan.paket,
+                    Pelanggan.pop,
+                    Pelanggan.kantor,
+                    PerangkatONT.nama_wifi,
+                    PerangkatONT.password_wifi,
+                    PerangkatONT.jenis_modem
+                )
                 .outerjoin(PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)
                 .filter(Pelanggan.is_active == True)
                 .all()
             )
             existing_ids = {row[0] for row in existing_customers if row[0]}
-            existing_ips = {row[1]: (row[0], row[2]) for row in existing_customers if row[1]}
+            existing_by_ip = {
+                row[1]: {
+                    "id_pelanggan": row[0],
+                    "nama": row[2] or "",
+                    "no_wa": row[3] or "",
+                    "alamat": row[4] or "",
+                    "paket": row[5] or "",
+                    "pop": row[6] or "",
+                    "kantor": row[7] or "",
+                    "nama_wifi": row[8] or "",
+                    "password_wifi": row[9] or "",
+                    "jenis_modem": row[10] or "GM220-S"
+                }
+                for row in existing_customers if row[1]
+            }
 
-            seen_ids_in_batch = {} # id_pelanggan -> original_row
             seen_ips_in_batch = {}  # ip_router -> original_row
-            ip_sequence_counter = {} # clean_ip -> sequence
-
             mapped_data = []
 
             for index, row in df.iterrows():
@@ -218,67 +241,85 @@ class CustomerService:
                 if not has_any_data:
                     continue
 
-                nama = mapped_row.get('nama', '').strip()
                 ip_router = mapped_row.get('ip_router', '').strip()
-
-                # Cek ID pelanggan: Jika kosong, buat format terstruktur DB-05 (<prefix><YYYYMMDD><4 digit acak>)
-                id_pel = mapped_row.get('id_pelanggan', '').strip()
-                if not id_pel:
-                    all_known_ids = existing_ids.union(set(seen_ids_in_batch.keys()))
-                    id_pel = CustomerService.generate_structured_customer_id(all_known_ids)
-                    mapped_row['id_pelanggan'] = id_pel
+                nama = mapped_row.get('nama', '').strip()
 
                 _status = "valid"
-                _message = "Data baru siap di-import"
+                _action = "update"
+                _message = ""
+                old_data = None
+                has_conflicts = False
 
-                if not nama or not ip_router:
+                if not ip_router:
                     _status = "error"
-                    _message = "Nama Pelanggan dan IP Router wajib diisi"
-                # 1. Pengecekan Duplikat IP Router (Prioritas Utama)
-                elif ip_router in existing_ips:
-                    _status = "duplicate"
-                    ex_id, ex_name = existing_ips[ip_router]
-                    _message = f"IP Router '{ip_router}' sudah terdaftar di database (Pelanggan: {ex_name} [{ex_id}])"
+                    _action = "skip"
+                    _message = "IP Router wajib diisi sebagai kunci pencocokan"
                 elif ip_router in seen_ips_in_batch:
-                    _status = "duplicate"
+                    _status = "error"
+                    _action = "skip"
                     _message = f"IP Router '{ip_router}' duplikat di berkas ini (sama dengan baris {seen_ips_in_batch[ip_router]})"
-                # 2. Pengecekan Duplikat ID Pelanggan
-                elif id_pel in existing_ids:
-                    _status = "duplicate"
-                    _message = f"ID Pelanggan '{id_pel}' sudah terdaftar di database"
-                elif id_pel in seen_ids_in_batch:
-                    _status = "duplicate"
-                    _message = f"ID Pelanggan '{id_pel}' duplikat di berkas ini (sama dengan baris {seen_ids_in_batch[id_pel]})"
                 else:
-                    seen_ids_in_batch[id_pel] = index + 1
                     seen_ips_in_batch[ip_router] = index + 1
+                    
+                    if ip_router in existing_by_ip:
+                        # IP terdaftar di database (Target Update / Lengkapi Data)
+                        old_data = existing_by_ip[ip_router]
+                        mapped_row['id_pelanggan'] = old_data['id_pelanggan']
+                        if not nama:
+                            mapped_row['nama'] = old_data['nama']
 
-                # Catat ke seen_batch jika duplikat agar baris berikutnya juga terdeteksi
-                if ip_router and ip_router not in seen_ips_in_batch:
-                    seen_ips_in_batch[ip_router] = index + 1
-                if id_pel and id_pel not in seen_ids_in_batch:
-                    seen_ids_in_batch[id_pel] = index + 1
+                        # Cek apakah ada konflik field yang sudah ada isinya di DB
+                        conflicts = []
+                        new_wa = mapped_row.get('no_wa', '') or mapped_row.get('no_hp', '')
+                        if old_data.get('no_wa') and new_wa and old_data['no_wa'] != new_wa:
+                            conflicts.append("No. WA")
+                        if old_data.get('alamat') and mapped_row.get('alamat') and old_data['alamat'] != mapped_row['alamat']:
+                            conflicts.append("Alamat")
+                        if old_data.get('nama_wifi') and mapped_row.get('nama_wifi') and old_data['nama_wifi'] != mapped_row['nama_wifi']:
+                            conflicts.append("WiFi")
+
+                        if conflicts:
+                            has_conflicts = True
+                            _status = "conflict"
+                            _action = "update" # default gunakan yang baru atau pertahankan lama sesuai preferensi admin
+                            _message = f"Ditemukan perbedaan data pada {', '.join(conflicts)}. Pilih data yang ingin digunakan."
+                        else:
+                            _status = "match"
+                            _action = "update"
+                            _message = f"Cocok dengan pelanggan {old_data['nama']} ({old_data['id_pelanggan']}). Siap melengkapi data."
+                    else:
+                        # IP belum ada di database
+                        _status = "unregistered"
+                        _action = "skip" # default skip, atau simpan baru offline jika admin memilih
+                        _message = f"IP '{ip_router}' belum terdaftar dari MikroTik. Admin dapat melewati atau menyimpan sebagai baru (Offline)."
+                        if not mapped_row.get('id_pelanggan'):
+                            mapped_row['id_pelanggan'] = CustomerService.generate_structured_customer_id(existing_ids)
 
                 mapped_data.append({
                     "original_row": index + 1,
                     "data": mapped_row,
+                    "old_data": old_data,
+                    "has_conflicts": has_conflicts,
+                    "selected_version": "new", # "new" atau "old"
                     "_status": _status,
-                    "_action": "skip" if _status == "duplicate" else "insert",
+                    "_action": _action,
                     "_message": _message
                 })
 
-            valid_count = sum(1 for r in mapped_data if r["_status"] == "valid")
-            dup_count = sum(1 for r in mapped_data if r["_status"] == "duplicate")
+            match_count = sum(1 for r in mapped_data if r["_status"] in ("match", "conflict"))
+            unreg_count = sum(1 for r in mapped_data if r["_status"] == "unregistered")
+            conflict_count = sum(1 for r in mapped_data if r["_status"] == "conflict")
             err_count = sum(1 for r in mapped_data if r["_status"] == "error")
 
             return {
                 "total_rows": len(mapped_data),
-                "valid_count": valid_count,
-                "duplicates_count": dup_count,
+                "match_count": match_count,
+                "unregistered_count": unreg_count,
+                "conflict_count": conflict_count,
                 "errors_count": err_count,
                 "preview_data": mapped_data,
                 "existing_ids": list(existing_ids),
-                "existing_ips": list(existing_ips.keys())
+                "existing_ips": list(existing_by_ip.keys())
             }
         except Exception as e:
             raise ValueError(f"Gagal memproses file untuk preview: {str(e)}")
@@ -307,14 +348,9 @@ class CustomerService:
 
         for idx, item in enumerate(active_items, start=1):
             row_data = item.get("data", item)
+            action = item.get("_action", "update")
             id_pel = str(row_data.get("id_pelanggan", "")).strip()
             ip_r = str(row_data.get("ip_router", "")).strip()
-
-            if id_pel:
-                if id_pel in batch_ids:
-                    duplicate_reasons.append(f"ID Pelanggan '{id_pel}' ganda di berkas (baris {batch_ids[id_pel]} dan {idx})")
-                else:
-                    batch_ids[id_pel] = idx
 
             if ip_r:
                 if ip_r in batch_ips:
@@ -322,14 +358,15 @@ class CustomerService:
                 else:
                     batch_ips[ip_r] = idx
 
-                if ip_r in db_ips and db_ips[ip_r] != id_pel:
+                # Hanya tolak jika action adalah insert (simpan baru) tapi IP sudah dipakai di DB
+                if action == "insert" and ip_r in db_ips:
                     duplicate_reasons.append(f"IP Router '{ip_r}' sudah digunakan pelanggan lain di DB (ID: {db_ips[ip_r]})")
 
         if duplicate_reasons:
             reasons_summary = ", ".join(duplicate_reasons[:3])
             if len(duplicate_reasons) > 3:
                 reasons_summary += f" ... dan {len(duplicate_reasons) - 3} lainnya"
-            raise ValueError(f"Eksekusi Ditolak: Ditemukan duplikasi ({reasons_summary}). Seluruh ID Pelanggan dan IP Router yang bertabrakan WAJIB dibenarkan terlebih dahulu sebelum import dapat dieksekusi!")
+            raise ValueError(f"Eksekusi Ditolak: Ditemukan duplikasi ({reasons_summary}). Harap perbaiki sebelum melanjutkan!")
 
         imported_count = 0
         updated_count = 0
@@ -372,13 +409,74 @@ class CustomerService:
                     else:
                         row_kantor = "cabang"
 
-                existing = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
-                if existing:
-                    # SOP: Data pelanggan yang sudah ada di database dilarang ditimpa saat import
-                    skipped_count += 1
-                    errors.append(f"Pelanggan ID '{id_pel}' sudah ada di database (penimpaan ditolak)")
-                    continue
+                # Cari pelanggan existing berdasarkan IP Router atau ID Pelanggan
+                existing_ont = db.query(PerangkatONT).filter(PerangkatONT.ip_router == ip_router).first()
+                existing_pel = None
+                if existing_ont:
+                    existing_pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == existing_ont.id_pelanggan).first()
+                elif id_pel:
+                    existing_pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if existing_pel:
+                        existing_ont = db.query(PerangkatONT).filter(PerangkatONT.id_pelanggan == existing_pel.id_pelanggan).first()
+
+                # Pilihan versi data jika terjadi konflik (default "new")
+                selected_version = item.get("selected_version", "new")
+                new_wa = str(row_data.get("no_wa", "") or row_data.get("no_hp", "")).strip()
+                new_alamat = str(row_data.get("alamat", "")).strip()
+                new_wifi_ssid = str(row_data.get("nama_wifi", "")).strip()
+                new_wifi_pass = str(row_data.get("password_wifi", "")).strip()
+
+                if existing_pel and existing_ont:
+                    # MODE LENGKAPI DATA (Enrichment Update)
+                    has_change = False
+
+                    # 1. Update No. WhatsApp
+                    if new_wa:
+                        if not existing_pel.no_hp:
+                            # Jika kosong, langsung isi
+                            existing_pel.no_hp = new_wa
+                            has_change = True
+                        elif selected_version == "new" and existing_pel.no_hp != new_wa:
+                            # Jika ada konflik dan admin memilih 'new'
+                            existing_pel.no_hp = new_wa
+                            has_change = True
+
+                    # 2. Update Alamat
+                    if new_alamat:
+                        if not existing_pel.alamat or existing_pel.alamat.startswith("Wilayah "):
+                            existing_pel.alamat = new_alamat
+                            has_change = True
+                        elif selected_version == "new" and existing_pel.alamat != new_alamat:
+                            existing_pel.alamat = new_alamat
+                            has_change = True
+
+                    # 3. Update Nama jika di database masih placeholder
+                    if nama and existing_pel.nama in ("Pelanggan", "Customer", "") or (selected_version == "new" and nama and existing_pel.nama != nama):
+                        existing_pel.nama = nama
+                        has_change = True
+
+                    # 4. Update WiFi SSID & Password
+                    if new_wifi_ssid:
+                        if not existing_ont.nama_wifi or selected_version == "new":
+                            existing_ont.nama_wifi = new_wifi_ssid
+                            has_change = True
+                    if new_wifi_pass:
+                        if not existing_ont.password_wifi or selected_version == "new":
+                            existing_ont.password_wifi = new_wifi_pass
+                            has_change = True
+
+                    if has_change:
+                        from app.core.timezone import get_now_wib
+                        existing_pel.updated_at = get_now_wib()
+                        updated_count += 1
+                    else:
+                        skipped_count += 1
                 else:
+                    # MODE SIMPAN BARU (OFFLINE)
+                    if action != "insert":
+                        skipped_count += 1
+                        continue
+
                     redaman_baseline = None
                     if row_data.get("redaman_baseline"):
                         try:
@@ -410,16 +508,18 @@ class CustomerService:
                             db.rollback()
                             raw_paket = None
                             
+                    # Simpan sebagai pelanggan baru offline (tidak aktif dipantau dulu sampai bound di MikroTik)
                     new_pelanggan = Pelanggan(
                         id_pelanggan=id_pel,
                         nama=nama,
-                        alamat=str(row_data.get("alamat", "")).strip() or None,
-                        no_hp=str(row_data.get("no_hp", "") or row_data.get("no_wa", "")).strip() or None,
+                        alamat=new_alamat or None,
+                        no_hp=new_wa or None,
                         pop=raw_pop,
                         kantor=row_kantor,
                         paket=raw_paket,
-                        is_monitored=True,
-                        is_active=True
+                        is_monitored=False, # Sesuai Q5: jadikan offline
+                        is_active=True,
+                        status_lease="waiting"
                     )
                     db.add(new_pelanggan)
                     db.flush()
@@ -430,8 +530,8 @@ class CustomerService:
                         jenis_modem=str(row_data.get("jenis_modem", "GM220-S")).strip() or "GM220-S",
                         mac_address=str(row_data.get("mac_address", "")).strip() or None,
                         redaman_baseline=redaman_baseline,
-                        nama_wifi=str(row_data.get("nama_wifi", "")).strip() or None,
-                        password_wifi=str(row_data.get("password_wifi", "")).strip() or None,
+                        nama_wifi=new_wifi_ssid or None,
+                        password_wifi=new_wifi_pass or None,
                         user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
                         pass_admin=str(row_data.get("pass_admin", "tekno2024")).strip() or "tekno2024",
                         status_kredensial="UNTESTED"
@@ -440,7 +540,7 @@ class CustomerService:
                     imported_count += 1
             except Exception as e:
                 failed_count += 1
-                errors.append(f"Gagal memproses ID {row_data.get('id_pelanggan', 'Unknown')}: {str(e)}")
+                errors.append(f"Gagal memproses IP {row_data.get('ip_router', 'Unknown')}: {str(e)}")
 
         db.commit()
 
@@ -482,6 +582,7 @@ class CustomerService:
 
         query = (
             db.query(Pelanggan, LogPerformaONT)
+            .outerjoin(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
             .outerjoin(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
             .outerjoin(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
             .filter(Pelanggan.is_active == True)
@@ -492,13 +593,16 @@ class CustomerService:
             query = query.filter(
                 or_(
                     Pelanggan.nama.ilike(search_pattern),
-                    Pelanggan.ip_router.ilike(search_pattern),
-                    Pelanggan.mac_address.ilike(search_pattern),
-                    Pelanggan.id_pelanggan.ilike(search_pattern)
+                    Pelanggan.id_pelanggan.ilike(search_pattern),
+                    Pelanggan.alamat.ilike(search_pattern),
+                    PerangkatONT.ip_router.ilike(search_pattern),
+                    PerangkatONT.ip_ont.ilike(search_pattern),
+                    PerangkatONT.mac_address.ilike(search_pattern),
+                    PerangkatONT.nama_wifi.ilike(search_pattern)
                 )
             )
 
-        if pop and pop != "Semua POP":
+        if pop and pop != "Semua POP" and pop != "ALL":
             query = query.filter(Pelanggan.pop == pop)
 
         if kantor and kantor != "all":
@@ -548,22 +652,25 @@ class CustomerService:
 
         total_count = query.count()
 
-        # Dynamic sorting
+        # Dynamic sorting yang aman dan sesuai kolom tabel
         col_map = {
+            "id": Pelanggan.id,
             "id_pelanggan": Pelanggan.id_pelanggan,
             "nama": Pelanggan.nama,
             "pop": Pelanggan.pop,
-            "ip_router": Pelanggan.ip_router,
+            "ip_router": PerangkatONT.ip_router,
+            "ip_ont": PerangkatONT.ip_ont,
             "paket": Pelanggan.paket,
-            "jenis_modem": Pelanggan.jenis_modem,
-            "redaman_baseline": Pelanggan.redaman_baseline,
-            "status_kredensial": Pelanggan.status_kredensial,
+            "jenis_modem": PerangkatONT.jenis_modem,
+            "redaman_baseline": PerangkatONT.redaman_baseline,
+            "status_kredensial": PerangkatONT.status_kredensial,
             "redaman_current": LogPerformaONT.rx_power,
+            "rx_power": LogPerformaONT.rx_power,
             "status": LogPerformaONT.status_koneksi,
+            "status_koneksi": LogPerformaONT.status_koneksi,
             "is_monitored": Pelanggan.is_monitored,
             "waktu_cek": LogPerformaONT.waktu_cek,
-            "created_at": Pelanggan.created_at,
-            "id": Pelanggan.id
+            "created_at": Pelanggan.created_at
         }
         target_col = col_map.get(sort_by, Pelanggan.id)
         if sort_dir.lower() == "desc":
@@ -588,6 +695,7 @@ class CustomerService:
                 "no_hp": c.no_hp or "-",
                 "pop": c.pop,
                 "ip_router": c.ip_router,
+                "ip_ont": getattr(c, "ip_ont", None),
                 "paket": c.paket or "-",
                 "jenis_modem": c.jenis_modem,
                 "mac_address": c.mac_address or "-",

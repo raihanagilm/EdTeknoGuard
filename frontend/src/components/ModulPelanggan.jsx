@@ -107,10 +107,23 @@ export function ModulPelanggan({
   const [probingId, setProbingId] = useState(null)
   const [probeResult, setProbeResult] = useState(null)
 
+  const [popOptions, setPopOptions] = useState([])
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch || '')
+
+  // Debounce search input agar tidak memicu query beruntun dan halaman tidak glitch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setPage(1)
+    }, 350)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
   // Sync initialSearch if prop changes
   useEffect(() => {
-    if (initialSearch) {
+    if (initialSearch !== undefined) {
       setSearchQuery(initialSearch)
+      setDebouncedSearch(initialSearch)
       setPage(1)
     }
   }, [initialSearch])
@@ -143,6 +156,7 @@ export function ModulPelanggan({
       setSortField(field)
       setSortDir('asc')
     }
+    setPage(1)
   }
 
   // Fetch Customers From FastAPI Backend (/api/customers)
@@ -151,7 +165,7 @@ export function ModulPelanggan({
     try {
       let url = `/api/customers?page=${page}&limit=${limit}&sort_by=${sortField}&sort_dir=${sortDir}`
       if (activeOffice && activeOffice !== 'all') url += `&kantor=${encodeURIComponent(activeOffice)}`
-      if (searchQuery.trim()) url += `&q=${encodeURIComponent(searchQuery)}`
+      if (debouncedSearch && debouncedSearch.trim()) url += `&q=${encodeURIComponent(debouncedSearch.trim())}`
       if (filterStatus !== 'ALL') url += `&status=${filterStatus}`
       if (filterPop !== 'ALL') url += `&pop=${encodeURIComponent(filterPop)}`
 
@@ -162,6 +176,9 @@ export function ModulPelanggan({
           setCustomers(json.data)
           setTotalRecords(json.total || json.data.length)
           if (json.stats) setStats(json.stats)
+          if (json.pops && Array.isArray(json.pops) && json.pops.length > 0) {
+            setPopOptions(json.pops)
+          }
         } else if (Array.isArray(json)) {
           setCustomers(json)
           setTotalRecords(json.length)
@@ -176,7 +193,7 @@ export function ModulPelanggan({
 
   useEffect(() => {
     fetchCustomers()
-  }, [page, limit, filterStatus, filterPop, activeOffice, sortField, sortDir])
+  }, [page, limit, filterStatus, filterPop, activeOffice, sortField, sortDir, debouncedSearch])
 
   // Bulk Delete Selected Customers
   const handleBulkDelete = async () => {
@@ -443,7 +460,7 @@ export function ModulPelanggan({
                       <div className="px-2.5 py-1 text-[11px] font-black uppercase text-slate-700 tracking-wider">
                         Pilih Server POP:
                       </div>
-                      {['ALL', 'POP-01', 'POP-02', 'POP-03'].map((pop) => (
+                      {['ALL', ...(popOptions.length > 0 ? popOptions : ['POP-01', 'POP-02', 'POP-03'])].map((pop) => (
                         <button
                           key={pop}
                           type="button"
@@ -468,23 +485,15 @@ export function ModulPelanggan({
               </div>
             </div>
 
-            {/* Tombol Aksi Tambah, Import, Export, Reload */}
+            {/* Tombol Aksi Lengkapi Data, Ekspor, Reload */}
             <div className="flex items-center gap-1.5 justify-end shrink-0">
               <button
-                onClick={handleOpenCreate}
-                className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>Tambah</span>
-              </button>
-
-              <button
                 onClick={() => setImportModalOpen(true)}
-                className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
-                title="Import Berkas Excel / CSV (Wizard 3 Langkah)"
+                className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
+                title="Lengkapi Data Pelanggan (No. WA, Alamat, Kredensial WiFi)"
               >
-                <Upload className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Import</span>
+                <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-200" />
+                <span>Lengkapi Data</span>
               </button>
 
               <a
@@ -573,49 +582,64 @@ export function ModulPelanggan({
               </th>
               <th className="py-2.5 px-2 w-12 text-center">No</th>
               <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-32"
+                className={`py-2.5 px-3 cursor-pointer select-none transition w-32 ${sortField === 'id' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
                 onClick={() => handleSort('id')}
               >
                 <div className="flex items-center gap-1">
                   <span>ID Pelanggan</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'id' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'id' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
+                  {sortField === 'id' && (
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
                 </div>
               </th>
               <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition"
+                className={`py-2.5 px-3 cursor-pointer select-none transition ${sortField === 'nama' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
                 onClick={() => handleSort('nama')}
               >
                 <div className="flex items-center gap-1">
                   <span>Nama Pelanggan</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'nama' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'nama' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
+                  {sortField === 'nama' && (
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
                 </div>
               </th>
               <th 
-                className="py-2.5 px-3 cursor-pointer select-none hover:bg-cyan-100/60 transition w-36"
+                className={`py-2.5 px-3 cursor-pointer select-none transition w-36 ${sortField === 'ip_router' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
                 onClick={() => handleSort('ip_router')}
               >
                 <div className="flex items-center gap-1">
                   <span>IP &amp; Wilayah</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'ip_router' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'ip_router' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
+                  {sortField === 'ip_router' && (
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
                 </div>
               </th>
               <th className="py-2.5 px-3 w-40">WiFi &amp; Admin ONT</th>
               <th 
-                className="py-2.5 px-3 text-right cursor-pointer select-none hover:bg-cyan-100/60 transition w-32"
+                className={`py-2.5 px-3 text-right cursor-pointer select-none transition w-32 ${sortField === 'rx_power' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
                 onClick={() => handleSort('rx_power')}
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Redaman (dBm)</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'rx_power' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'rx_power' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
+                  {sortField === 'rx_power' && (
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
                 </div>
               </th>
               <th 
-                className="py-2.5 px-3 text-center cursor-pointer select-none hover:bg-cyan-100/60 transition w-28"
+                className={`py-2.5 px-3 text-center cursor-pointer select-none transition w-28 ${sortField === 'status_koneksi' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
                 onClick={() => handleSort('status_koneksi')}
               >
                 <div className="flex items-center justify-center gap-1">
                   <span>Status</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'status_koneksi' ? 'text-cyan-800' : 'text-slate-400'}`} />
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'status_koneksi' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
+                  {sortField === 'status_koneksi' && (
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
                 </div>
               </th>
               <th className="py-2.5 px-3 text-right w-32">Aksi</th>
@@ -669,8 +693,26 @@ export function ModulPelanggan({
                       <div className="text-xs text-slate-600 font-sans truncate max-w-xs">{c.alamat || c.address || '-'}</div>
                     </td>
                     <td className="py-2.5 px-3">
-                      <div className="text-slate-800 font-bold">{c.ip_router || c.ip}</div>
-                      <div className="text-xs text-slate-600 font-mono font-medium">{c.pop || 'POP-01'} • <span className="uppercase">{c.kantor || 'cabang'}</span></div>
+                      <div className="space-y-0.5">
+                        {c.ip_ont && (
+                          <div className="text-slate-900 font-bold font-mono text-[11px] flex items-center gap-1.5">
+                            <span className="text-[9px] text-cyan-800 bg-cyan-100/80 px-1 py-0.2 rounded font-black tracking-tight uppercase">ONT</span>
+                            <span>{c.ip_ont}</span>
+                          </div>
+                        )}
+                        {(c.ip_router && c.ip_router !== c.ip_ont) && (
+                          <div className="text-slate-700 font-mono text-[11px] flex items-center gap-1.5">
+                            <span className="text-[9px] text-slate-600 bg-slate-100 px-1 py-0.2 rounded font-black tracking-tight uppercase">Router</span>
+                            <span>{c.ip_router}</span>
+                          </div>
+                        )}
+                        {(!c.ip_ont && !c.ip_router) && (
+                          <div className="text-slate-400 font-mono text-[11px] italic">-</div>
+                        )}
+                        <div className="text-[10px] text-slate-500 font-mono font-medium pt-0.5">
+                          {c.pop || 'POP-01'} • <span className="uppercase">{c.kantor || 'cabang'}</span>
+                        </div>
+                      </div>
                     </td>
                     <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5 text-xs text-slate-700 font-mono truncate max-w-[170px]">
@@ -1069,8 +1111,12 @@ export function ModulPelanggan({
                     <span className="font-bold text-slate-900">{detailCustomer.password_wifi || '-'}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[10px]">IP Router ONT:</span>
-                    <span className="font-bold text-cyan-800">{detailCustomer.ip_router || '-'}</span>
+                    <span className="text-slate-400 block text-[10px]">IP ONT (GPON/VLAN):</span>
+                    <span className="font-bold text-cyan-800">{detailCustomer.ip_ont || detailCustomer.ip_router || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px]">IP Router (DHCP/LAN):</span>
+                    <span className="font-bold text-slate-800">{detailCustomer.ip_router || '-'}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[10px]">Jenis Modem:</span>

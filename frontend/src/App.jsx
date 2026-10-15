@@ -24,7 +24,8 @@ import { ModulRiwayatRedaman } from './components/ModulRiwayatRedaman'
 import { ModulTiketKeluhan } from './components/ModulTiketKeluhan'
 import { ModulPemantauanKuota } from './components/ModulPemantauanKuota'
 import { ModulLogAktivitas } from './components/ModulLogAktivitas'
-import { ModulManajemenPengguna } from './components/ModulManajemenPengguna'
+import { ModulPenggunaNOC } from './components/ModulPenggunaNOC'
+import { ModulKantorCabang } from './components/ModulKantorCabang'
 import { ErrorView } from './components/ErrorView'
 import { ConfirmSaveModal, OntDetailModal } from './components/Modals'
 import { HalamanLogin } from './components/HalamanLogin'
@@ -595,6 +596,7 @@ export default function App() {
     if (clean === 'tiket' || clean === 'admin/tiket') return 'tiket'
     if (clean === 'log' || clean === 'activity-logs') return 'log'
     if (clean === 'pengguna' || clean === 'users') return 'pengguna'
+    if (clean === 'kantor') return 'kantor'
     if (clean === 'pengaturan' || clean === 'settings') return 'pengaturan'
     return '404_not_found'
   }
@@ -610,6 +612,7 @@ export default function App() {
       case 'tiket': return '/tiket'
       case 'log': return '/log'
       case 'pengguna': return '/pengguna'
+      case 'kantor': return '/kantor'
       case 'pengaturan': return '/pengaturan'
       default: return `/${tab}`
     }
@@ -734,7 +737,7 @@ export default function App() {
   // =========================================================================
   // VIEW C: HALAMAN 404 / MODUL TIDAK DITEMUKAN (FULL PAGE BERSIH TANPA SIDEBAR/HEADER)
   // =========================================================================
-  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'pengguna', 'pengaturan']
+  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'pengguna', 'kantor', 'pengaturan']
   if (!validModules.includes(activeTab)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 sm:p-6 text-slate-900 font-sans">
@@ -951,7 +954,8 @@ export default function App() {
             />
           )}
           {activeTab === 'log' && <ModulLogAktivitas />}
-          {activeTab === 'pengguna' && <ModulManajemenPengguna />}
+          {activeTab === 'pengguna' && <ModulPenggunaNOC />}
+          {activeTab === 'kantor' && <ModulKantorCabang />}
 
           {activeTab === 'pengaturan' && (
             <ModulPengaturan

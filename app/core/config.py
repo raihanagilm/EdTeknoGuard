@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     MIKROTIK_AUTO_SYNC_ENABLED: bool = True
     MIKROTIK_DEFAULT_KANTOR: str = "banyumas"
     MIKROTIK_TIMEOUT: int = 6
+    MIKROTIK_SIMULATION_MODE: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -56,12 +56,14 @@ class CustomerController:
             kantor=kantor, allowed_kantor=allowed_kantor
         )
         stats = CustomerService.get_customer_stats(db, kantor=kantor, allowed_kantor=allowed_kantor)
+        pops = CustomerService.get_pop_list(db, kantor=kantor, allowed_kantor=allowed_kantor)
         return {
             "total": total,
             "page": page,
             "limit": limit,
             "data": data,
-            "stats": stats
+            "stats": stats,
+            "pops": pops
         }
 
     @staticmethod
@@ -120,6 +122,7 @@ class CustomerController:
                 "lokasi_gps": lokasi_gps,
                 "pop": cust.pop,
                 "ip_router": cust.ip_router,
+                "ip_ont": cust.ip_ont,
                 "paket": cust.paket,
                 "jenis_modem": cust.jenis_modem,
                 "mac_address": cust.mac_address,

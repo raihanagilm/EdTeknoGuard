@@ -235,6 +235,60 @@ async def delete_kantor_json(request: Request, kantor_id: int, db: Session = Dep
         "all_kantor": all_k
     }
 
+@router.post("/api/kantor/sync/{kantor_id}")
+async def sync_kantor_mikrotik_json(request: Request, kantor_id: int, db: Session = Depends(get_db)):
+    """Memicu penarikan data pelanggan langsung (on-demand) dari router MikroTik kantor terkait"""
+    user_session = require_admin(request)
+    kantor = db.query(Kantor).filter(Kantor.id == kantor_id).first()
+    if not kantor:
+        return {"status": "error", "message": "Kantor tidak ditemukan."}
+
+    if not kantor.mikrotik_host or not kantor.mikrotik_user:
+        return {
+            "status": "error",
+            "message": f"Kredensial MikroTik untuk kantor '{kantor.nama}' belum diatur (Host & Username wajib diisi)."
+        }
+
+    from app.services.mikrotik_service import MikroTikSyncService
+    params = {
+        "host": kantor.mikrotik_host,
+        "port": kantor.mikrotik_port or 8728,
+        "username": kantor.mikrotik_user,
+        "password": kantor.mikrotik_pass or "",
+        "kantor": kantor.kode
+    }
+
+    try:
+        res = MikroTikSyncService.sync_customers_from_mikrotik(db, params)
+        if res.get("success"):
+            ActivityLogService.log_activity(
+                db=db,
+                username=user_session.get("user"),
+                action="MANUAL_SYNC_MIKROTIK",
+                ip_address=request.client.host if request.client else "unknown",
+                status="SUCCESS",
+                keterangan=f"Sinkronisasi manual MikroTik kantor {kantor.nama} ({kantor.mikrotik_host}): {res.get('added_count', 0)} baru, {res.get('updated_count', 0)} diperbarui."
+            )
+            return {
+                "status": "success",
+                "message": res.get("message", "Sinkronisasi MikroTik berhasil!"),
+                "data": res
+            }
+        else:
+            host_str = f"{kantor.mikrotik_host}:{kantor.mikrotik_port or 8728}"
+            error_msg = f"Router MikroTik ({host_str}) tidak dapat dijangkau. Pastikan jaringan server terhubung ke jaringan router."
+            return {
+                "status": "error",
+                "message": error_msg,
+                "raw_error": res.get("message")
+            }
+    except Exception as e:
+        host_str = f"{kantor.mikrotik_host}:{kantor.mikrotik_port or 8728}"
+        return {
+            "status": "error",
+            "message": f"Router MikroTik ({host_str}) tidak dapat dijangkau. Pastikan jaringan server terhubung ke jaringan router. Detail: {e}"
+        }
+
 @router.get("/api/list")
 async def get_users_json(request: Request, db: Session = Depends(get_db)):
     user_session = require_admin(request)

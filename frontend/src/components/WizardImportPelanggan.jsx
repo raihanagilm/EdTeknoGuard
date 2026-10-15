@@ -4,6 +4,8 @@ import {
   RefreshCw,
   X,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   ArrowLeft,
   Wand2,
   Sparkles,
@@ -23,6 +25,7 @@ export function WizardImportPelanggan({
   onSuccess
 }) {
   const [importStep, setImportStep] = useState(1) // 1: Upload & Analisis, 2: Pemetaan Kolom, 3: Pratinjau & Eksekusi
+  const [showAdvancedFields, setShowAdvancedFields] = useState(false)
   const [importFile, setImportFile] = useState(null)
   const [importAnalyzing, setImportAnalyzing] = useState(false)
   const [isExcelFile, setIsExcelFile] = useState(false)
@@ -39,21 +42,27 @@ export function WizardImportPelanggan({
   const [importSuccess, setImportSuccess] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL') // ALL | VALID | DUPLICATE | ERROR
 
-  // Field Database untuk Pemetaan Kolom (SOP EdTeknoGuard: Kantor Wilayah otomatis dari navbar kantor aktif)
-  const DB_IMPORT_FIELDS = [
-    { key: 'nama', label: 'Nama Pelanggan', required: true, hint: 'Wajib diisi (identitas pelanggan)' },
-    { key: 'ip_router', label: 'IP Router / ONT', required: true, hint: 'Wajib diisi (format: 10.10.x.x / 192.168.x.x)' },
-    { key: 'id_pelanggan', label: 'ID Pelanggan', required: false, hint: 'Opsional (dibuat terstruktur unik jika kosong)' },
-    { key: 'no_wa', label: 'Nomor WhatsApp', required: false, hint: 'Nomor kontak HP / WhatsApp pelanggan' },
+  // 1. Kolom Utama Pengayaan Data (Fokus No WA, Alamat & WiFi)
+  const PRIMARY_FIELDS = [
+    { key: 'ip_router', label: 'IP Router / ONT (Kunci Pencocokan)', required: true, hint: 'Wajib diisi: 10.10.x.x (Standar ONT) atau 192.168.x.x (IP Lokal)' },
+    { key: 'nama', label: 'Nama Pelanggan', required: false, hint: 'Opsional: Perbarui nama jika di database masih default' },
+    { key: 'no_wa', label: 'Nomor WhatsApp / HP', required: false, hint: 'Diisi ke profil WhatsApp pelanggan' },
+    { key: 'alamat', label: 'Alamat Pemasangan Rumah', required: false, hint: 'Alamat fisik pelanggan di lapangan' },
+    { key: 'nama_wifi', label: 'Nama WiFi (SSID)', required: false, hint: 'SSID WiFi Pelanggan' },
+    { key: 'password_wifi', label: 'Password WiFi', required: false, hint: 'Kata sandi WiFi' }
+  ]
+
+  // 2. Kolom Teknis Lanjutan (Opsional)
+  const ADVANCED_FIELDS = [
     { key: 'pop', label: 'Lokasi POP / ODP', required: false, hint: 'Default: POP-01' },
-    { key: 'paket', label: 'Paket Layanan', required: false, hint: 'Default: 20 Mbps Unlimited' },
+    { key: 'paket', label: 'Paket Layanan', required: false, hint: 'Default: Sesuai MikroTik' },
     { key: 'jenis_modem', label: 'Tipe Modem ONT', required: false, hint: 'Default: ZTE GM220-S' },
     { key: 'user_admin', label: 'Username ONT', required: false, hint: 'Default: admin' },
     { key: 'pass_admin', label: 'Password ONT', required: false, hint: 'Default: tekno2024' },
-    { key: 'nama_wifi', label: 'Nama WiFi (SSID)', required: false, hint: 'SSID WiFi Pelanggan' },
-    { key: 'password_wifi', label: 'Password WiFi', required: false, hint: 'Kata sandi WiFi' },
-    { key: 'alamat', label: 'Alamat Pemasangan', required: false, hint: 'Alamat fisik pelanggan' }
+    { key: 'id_pelanggan', label: 'ID Pelanggan', required: false, hint: 'Opsional (otomatis sesuai database)' }
   ]
+
+  const DB_IMPORT_FIELDS = [...PRIMARY_FIELDS, ...ADVANCED_FIELDS]
 
   // Helper generator ID pelanggan terstruktur sesuai standar aturan DB-05 (antislop-vibecoding): cust<YYYYMMDD><4 digit acak>
   const generateStructuredCustomerId = (existingSet) => {
@@ -186,8 +195,8 @@ export function WizardImportPelanggan({
   }
 
   const handleProceedToStep3 = async () => {
-    if (!importMapping.nama || !importMapping.ip_router) {
-      setImportError('Kolom "Nama Pelanggan" dan "IP Router" wajib dipetakan!')
+    if (!importMapping.ip_router) {
+      setImportError('Kolom "IP Router / ONT" wajib dipetakan sebagai kunci pencocokan data!')
       return
     }
 
@@ -208,12 +217,19 @@ export function WizardImportPelanggan({
 
       if (res.ok && data.result) {
         const rawPreview = data.result.preview_data || []
+        const matchCount = data.result.match_count || 0
         setExistingDbIds(data.result.existing_ids || [])
         setExistingDbIps(data.result.existing_ips || [])
         setImportPreviewData(rawPreview)
         setSelectedImportIndices([])
         setStatusFilter('ALL')
         setImportStep(3)
+
+        if (rawPreview.length > 0 && matchCount === 0) {
+          setImportError(
+            `Perhatian: Tidak ada IP yang cocok dengan data pelanggan ${activeOffice.toUpperCase()} di database. Harap periksa kembali apakah lembar kerja (sheet) "${importSelectedSheet}" atau berkas Excel yang Anda pilih sudah sesuai dengan kantor aktif saat ini!`
+          )
+        }
       } else {
         setImportError(data.detail || 'Gagal membuat pratinjau data import.')
       }
@@ -228,8 +244,9 @@ export function WizardImportPelanggan({
   const filteredIndices = importPreviewData
     .map((row, idx) => ({ row, idx }))
     .filter(({ row }) => {
-      if (statusFilter === 'VALID') return row._status === 'valid' && row._action !== 'skip'
-      if (statusFilter === 'DUPLICATE') return row._status === 'duplicate'
+      if (statusFilter === 'MATCH') return row._status === 'match'
+      if (statusFilter === 'CONFLICT') return row._status === 'conflict'
+      if (statusFilter === 'UNREGISTERED') return row._status === 'unregistered'
       if (statusFilter === 'ERROR') return row._status === 'error'
       return true
     })
@@ -399,10 +416,10 @@ export function WizardImportPelanggan({
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 font-sans">
-                  Wizard Import Data Pelanggan
+                  Lengkapi Data Pelanggan
                 </h3>
                 <p className="text-xs text-slate-400 font-mono">
-                  Unggah berkas Excel / CSV dengan pemetaan kolom &amp; resolusi duplikasi terintegrasi
+                  Lengkapi Nomor WhatsApp, Alamat Pemasangan, dan Kredensial WiFi berdasarkan IP Router ONT
                 </p>
               </div>
             </div>
@@ -557,6 +574,9 @@ export function WizardImportPelanggan({
                           </option>
                         ))}
                       </select>
+                      <p className="text-[10px] text-cyan-800 font-sans">
+                        Pilih sheet yang sesuai dengan kantor aktif saat ini (<strong className="uppercase">{activeOffice}</strong>). Contoh: sheet <span className="font-mono font-bold">PELANGGAN BMS</span> untuk Banyumas, atau <span className="font-mono font-bold">PELANGGAN CABANG</span> untuk Cabang.
+                      </p>
                     </div>
                   )}
 
@@ -619,8 +639,7 @@ export function WizardImportPelanggan({
                   <span>Cocokkan Kolom Berkas ke Kolom Database</span>
                 </h4>
                 <p className="text-[11px] text-slate-500 font-sans">
-                  Pastikan kolom <strong className="text-cyan-900">Nama Pelanggan</strong> dan{' '}
-                  <strong className="text-cyan-900">IP Router</strong> terpetakan dengan benar.
+                  Pastikan kolom <strong className="text-cyan-900">IP Router / ONT (10.10.x.x / 192.168.x.x)</strong> terpetakan sebagai kunci utama pencocokan ke pelanggan.
                 </p>
               </div>
               <button
@@ -634,54 +653,116 @@ export function WizardImportPelanggan({
             </div>
 
             {/* Mapping Grid */}
-            <div className="max-h-[380px] overflow-y-auto pr-1 space-y-2.5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                {DB_IMPORT_FIELDS.map((field) => {
-                  const isMapped = !!importMapping[field.key]
-                  return (
-                    <div
-                      key={field.key}
-                      className={`p-3 rounded-2xl border transition ${
-                        field.required && !isMapped
-                          ? 'bg-amber-50/50 border-amber-300'
-                          : isMapped
-                          ? 'bg-cyan-50/30 border-cyan-200'
-                          : 'bg-slate-50/50 border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
-                          <span>{field.label}</span>
-                          {field.required ? (
-                            <span className="text-rose-600 font-bold">*Wajib</span>
-                          ) : (
-                            <span className="text-slate-400 font-normal text-[10px]">(Opsional)</span>
-                          )}
-                        </label>
-                        {isMapped && (
-                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded-md">
-                            Terpetakan
-                          </span>
-                        )}
-                      </div>
-                      <select
-                        value={importMapping[field.key] || ''}
-                        onChange={(e) => setImportMapping({ ...importMapping, [field.key]: e.target.value })}
-                        className={`w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 ${
-                          field.required && !isMapped ? 'border-amber-400 bg-white' : 'border-slate-300 bg-white'
+            <div className="max-h-[400px] overflow-y-auto pr-1 space-y-3">
+              {/* Seksi Kolom Utama */}
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                  Kolom Utama Pengayaan Data
+                </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  {PRIMARY_FIELDS.map((field) => {
+                    const isMapped = !!importMapping[field.key]
+                    return (
+                      <div
+                        key={field.key}
+                        className={`p-3 rounded-2xl border transition ${
+                          field.required && !isMapped
+                            ? 'bg-amber-50/50 border-amber-300'
+                            : isMapped
+                            ? 'bg-cyan-50/30 border-cyan-200'
+                            : 'bg-slate-50/50 border-slate-200'
                         }`}
                       >
-                        <option value="">-- [ Kosong / Nilai Default ] --</option>
-                        {importColumns.map((col, cIdx) => (
-                          <option key={cIdx} value={col}>
-                            Kolom Berkas: {col}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-[10px] text-slate-400 font-sans mt-1">{field.hint}</p>
-                    </div>
-                  )
-                })}
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
+                            <span>{field.label}</span>
+                            {field.required ? (
+                              <span className="text-rose-600 font-bold">*Wajib</span>
+                            ) : (
+                              <span className="text-slate-400 font-normal text-[10px]">(Opsional)</span>
+                            )}
+                          </label>
+                          {isMapped && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded-md">
+                              Terpetakan
+                            </span>
+                          )}
+                        </div>
+                        <select
+                          value={importMapping[field.key] || ''}
+                          onChange={(e) => setImportMapping({ ...importMapping, [field.key]: e.target.value })}
+                          className={`w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 ${
+                            field.required && !isMapped ? 'border-amber-400 bg-white' : 'border-slate-300 bg-white'
+                          }`}
+                        >
+                          <option value="">-- [ Kosong / Nilai Default ] --</option>
+                          {importColumns.map((col, cIdx) => (
+                            <option key={cIdx} value={col}>
+                              Kolom Berkas: {col}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="text-[10px] text-slate-400 font-sans mt-1">{field.hint}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Accordion Kolom Teknis Lanjutan */}
+              <div className="pt-1 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedFields(!showAdvancedFields)}
+                  className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition cursor-pointer border border-slate-200"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span>Pengaturan Kolom Teknis Lanjutan (Modem, User Admin, POP, Paket)</span>
+                    <span className="text-[10px] font-normal text-slate-400">(Opsional)</span>
+                  </span>
+                  {showAdvancedFields ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+
+                {showAdvancedFields && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2.5 animate-in fade-in duration-150">
+                    {ADVANCED_FIELDS.map((field) => {
+                      const isMapped = !!importMapping[field.key]
+                      return (
+                        <div
+                          key={field.key}
+                          className={`p-3 rounded-2xl border transition ${
+                            isMapped ? 'bg-cyan-50/30 border-cyan-200' : 'bg-slate-50/50 border-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
+                              <span>{field.label}</span>
+                              <span className="text-slate-400 font-normal text-[10px]">(Opsional)</span>
+                            </label>
+                            {isMapped && (
+                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded-md">
+                                Terpetakan
+                              </span>
+                            )}
+                          </div>
+                          <select
+                            value={importMapping[field.key] || ''}
+                            onChange={(e) => setImportMapping({ ...importMapping, [field.key]: e.target.value })}
+                            className="w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 border-slate-300 bg-white"
+                          >
+                            <option value="">-- [ Kosong / Nilai Default ] --</option>
+                            {importColumns.map((col, cIdx) => (
+                              <option key={cIdx} value={col}>
+                                Kolom Berkas: {col}
+                              </option>
+                            ))}
+                          </select>
+                          <p className="text-[10px] text-slate-400 font-sans mt-1">{field.hint}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -737,46 +818,46 @@ export function WizardImportPelanggan({
 
               <button
                 type="button"
-                onClick={() => setStatusFilter('VALID')}
+                onClick={() => setStatusFilter('MATCH')}
                 className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
-                  statusFilter === 'VALID'
+                  statusFilter === 'MATCH'
                     ? 'bg-emerald-100/90 border-emerald-400 text-emerald-950 ring-2 ring-emerald-400/40 shadow-xs'
                     : 'bg-emerald-50/70 border-emerald-200 text-emerald-900 hover:bg-emerald-100/50'
                 }`}
               >
-                <span className="text-[10px] font-bold text-emerald-700 block">Siap Diimpor (Valid)</span>
+                <span className="text-[10px] font-bold text-emerald-700 block">Siap Lengkapi (Cocok)</span>
                 <strong className="text-base font-black">
-                  {importPreviewData.filter((r) => r._status === 'valid' && r._action !== 'skip').length}
+                  {importPreviewData.filter((r) => r._status === 'match' && r._action !== 'skip').length}
                 </strong>
               </button>
 
               <button
                 type="button"
-                onClick={() => setStatusFilter('DUPLICATE')}
+                onClick={() => setStatusFilter('CONFLICT')}
                 className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
-                  statusFilter === 'DUPLICATE'
+                  statusFilter === 'CONFLICT'
                     ? 'bg-amber-100/90 border-amber-400 text-amber-950 ring-2 ring-amber-400/40 shadow-xs'
                     : 'bg-amber-50/70 border-amber-200 text-amber-900 hover:bg-amber-100/50'
                 }`}
               >
-                <span className="text-[10px] font-bold text-amber-700 block">Duplikat Terdeteksi</span>
+                <span className="text-[10px] font-bold text-amber-700 block">Data Berbeda (Pilih Versi)</span>
                 <strong className="text-base font-black">
-                  {importPreviewData.filter((r) => r._status === 'duplicate').length}
+                  {importPreviewData.filter((r) => r._status === 'conflict').length}
                 </strong>
               </button>
 
               <button
                 type="button"
-                onClick={() => setStatusFilter('ERROR')}
+                onClick={() => setStatusFilter('UNREGISTERED')}
                 className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
-                  statusFilter === 'ERROR'
-                    ? 'bg-rose-100/90 border-rose-400 text-rose-950 ring-2 ring-rose-400/40 shadow-xs'
-                    : 'bg-rose-50/70 border-rose-200 text-rose-900 hover:bg-rose-100/50'
+                  statusFilter === 'UNREGISTERED'
+                    ? 'bg-slate-200 border-slate-400 text-slate-900 ring-2 ring-slate-400/40 shadow-xs'
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100/70'
                 }`}
               >
-                <span className="text-[10px] font-bold text-rose-700 block">Tidak Lengkap (Error)</span>
+                <span className="text-[10px] font-bold text-slate-600 block">IP Belum Terdaftar</span>
                 <strong className="text-base font-black">
-                  {importPreviewData.filter((r) => r._status === 'error').length}
+                  {importPreviewData.filter((r) => r._status === 'unregistered').length}
                 </strong>
               </button>
             </div>
@@ -784,80 +865,182 @@ export function WizardImportPelanggan({
             {/* Action Bar (Hanya muncul jika ada baris yang dicentang / terpilih) */}
             {selectedImportIndices.length > 0 && (
               <div
-                className={`p-3 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 animate-in fade-in zoom-in-95 duration-150 ${
-                  hasSelectedDuplicates || hasSelectedErrors
-                    ? 'bg-amber-50/80 border-amber-200'
-                    : 'bg-emerald-50/80 border-emerald-200'
-                }`}
+                className="p-3 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 animate-in fade-in zoom-in-95 duration-150 bg-cyan-50/70 border-cyan-200"
               >
                 <div className="space-y-0.5">
-                  <span
-                    className={`text-xs font-bold flex items-center gap-1.5 font-sans ${
-                      hasSelectedDuplicates || hasSelectedErrors ? 'text-amber-950' : 'text-emerald-950'
-                    }`}
-                  >
-                    {hasSelectedDuplicates || hasSelectedErrors ? (
-                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    )}
+                  <span className="text-xs font-bold flex items-center gap-1.5 font-sans text-cyan-950">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-600 shrink-0" />
                     <span>
-                      {hasSelectedDuplicates
-                        ? `Resolusi Duplikasi Data (${selectedImportIndices.length} Baris Tercentang)`
-                        : `Aksi Baris Terpilih (${selectedImportIndices.length} Baris Tercentang)`}
+                      {statusFilter === 'UNREGISTERED'
+                        ? `Aksi IP Belum Terdaftar (${selectedImportIndices.length} Baris Dipilih)`
+                        : statusFilter === 'CONFLICT'
+                        ? `Aksi Resolusi Data Berbeda (${selectedImportIndices.length} Baris Dipilih)`
+                        : statusFilter === 'MATCH'
+                        ? `Aksi Data Cocok (${selectedImportIndices.length} Baris Dipilih)`
+                        : `Aksi Massal Baris Terpilih (${selectedImportIndices.length} Baris Dipilih)`}
                     </span>
                   </span>
-                  <p
-                    className={`text-[11px] font-sans ${
-                      hasSelectedDuplicates || hasSelectedErrors ? 'text-amber-800' : 'text-emerald-800'
-                    }`}
-                  >
-                    {hasSelectedDuplicates
-                      ? 'Gunakan tombol di sebelah kanan untuk memberikan ID unik baru secara otomatis atau lewati data duplikat.'
-                      : 'Seluruh baris terpilih dalam kondisi valid dan siap diimpor ke database.'}
+                  <p className="text-[11px] font-sans text-slate-600">
+                    {statusFilter === 'UNREGISTERED'
+                      ? 'Pilih apakah ingin mendaftarkan IP ini sebagai pelanggan baru offline atau melewatinya.'
+                      : statusFilter === 'CONFLICT'
+                      ? 'Pilih versi data yang akan digunakan untuk baris yang memiliki perbedaan.'
+                      : statusFilter === 'MATCH'
+                      ? 'Seluruh baris terpilih cocok dengan database dan siap diperbarui.'
+                      : 'Terapkan tindakan serentak untuk baris yang dicentang.'}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-1.5 shrink-0 font-sans">
-                  {/* Jika ada yang teridentifikasi duplikat: tombol generate id unik dan abikan baris */}
-                  {hasSelectedDuplicates && (
+                  {/* Kasus 1: Tab IP Belum Terdaftar (Gambar 1) */}
+                  {statusFilter === 'UNREGISTERED' && (
                     <>
                       <button
                         type="button"
-                        onClick={autoMakeAllDuplicatesUnique}
-                        className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1 cursor-pointer"
-                        title="Ubah seluruh ID baris terpilih menjadi ID unik baru"
+                        onClick={() => {
+                          const updated = [...importPreviewData]
+                          selectedImportIndices.forEach((idx) => {
+                            if (updated[idx] && updated[idx]._status === 'unregistered') {
+                              updated[idx]._action = 'insert'
+                            }
+                          })
+                          setImportPreviewData(updated)
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1 cursor-pointer"
+                        title="Daftarkan seluruh baris terpilih ke database sebagai pelanggan baru (status offline)"
                       >
-                        <Wand2 className="w-3.5 h-3.5" />
-                        <span>Generate ID Unik Otomatis</span>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>+ Daftarkan Offline Terpilih</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setAllDuplicatesAction('skip')}
-                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs transition cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs transition cursor-pointer"
                       >
-                        Abaikan Baris Terpilih
+                        Lewati (Skip)
                       </button>
                     </>
                   )}
 
-                  {/* Jika SELURUH yang tercentang aman (valid): hanya muncul tombol Simpan Baris Terpilih */}
-                  {allSelectedAreValid && (
-                    <button
-                      type="button"
-                      onClick={() => setAllDuplicatesAction('insert')}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1 cursor-pointer"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Simpan Baris Terpilih</span>
-                    </button>
+                  {/* Kasus 2: Tab Data Berbeda (Gambar 2) */}
+                  {statusFilter === 'CONFLICT' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [...importPreviewData]
+                          selectedImportIndices.forEach((idx) => {
+                            if (updated[idx]) {
+                              updated[idx].selected_version = 'new'
+                              updated[idx]._action = 'update'
+                            }
+                          })
+                          setImportPreviewData(updated)
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1 cursor-pointer"
+                        title="Gunakan data dari berkas Excel untuk semua baris tercentang"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Gunakan Data Baru</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [...importPreviewData]
+                          selectedImportIndices.forEach((idx) => {
+                            if (updated[idx]) {
+                              updated[idx].selected_version = 'old'
+                              updated[idx]._action = 'update'
+                            }
+                          })
+                          setImportPreviewData(updated)
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer"
+                        title="Pertahankan data lama database untuk semua baris tercentang"
+                      >
+                        Pertahankan Data Database
+                      </button>
+                    </>
+                  )}
+
+                  {/* Kasus 3: Tab Cocok (Gambar 3) */}
+                  {statusFilter === 'MATCH' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [...importPreviewData]
+                          selectedImportIndices.forEach((idx) => {
+                            if (updated[idx]) {
+                              updated[idx]._action = 'update'
+                            }
+                          })
+                          setImportPreviewData(updated)
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1 cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Sertakan untuk Update</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAllDuplicatesAction('skip')}
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs transition cursor-pointer"
+                      >
+                        Lewati (Skip)
+                      </button>
+                    </>
+                  )}
+
+                  {/* Kasus 4: Tab Total Baris (Semua) atau Error (Gambar 4) */}
+                  {(statusFilter === 'ALL' || statusFilter === 'ERROR') && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [...importPreviewData]
+                          // Skip baris yang error/IP kosong
+                          updated.forEach((row) => {
+                            if (row._status === 'error' || !row.data?.ip_router) {
+                              row._action = 'skip'
+                            }
+                          })
+                          setImportPreviewData(updated)
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs transition cursor-pointer"
+                        title="Otomatis lewati seluruh baris yang tidak memuat IP router valid"
+                      >
+                        Lewati Baris Error/Kosong
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [...importPreviewData]
+                          selectedImportIndices.forEach((idx) => {
+                            if (updated[idx] && updated[idx]._status !== 'error') {
+                              if (updated[idx]._status === 'unregistered') {
+                                updated[idx]._action = 'insert'
+                              } else {
+                                updated[idx]._action = 'update'
+                                updated[idx].selected_version = 'new'
+                              }
+                            }
+                          })
+                          setImportPreviewData(updated)
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-2xs transition flex items-center gap-1 cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Sertakan Semua Valid</span>
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
             )}
 
             {/* Preview Table */}
-            <div className="max-h-[340px] overflow-y-auto border border-sky-200 rounded-2xl shadow-2xs bg-white">
+            <div className="max-h-[380px] overflow-y-auto border border-sky-200 rounded-2xl shadow-2xs bg-white">
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 bg-cyan-50 border-b border-sky-200 text-slate-700 text-[10px] uppercase font-bold z-10">
                   <tr>
@@ -874,21 +1057,25 @@ export function WizardImportPelanggan({
                       />
                     </th>
                     <th className="py-2.5 px-3">No</th>
-                    <th className="py-2.5 px-3">ID Pelanggan</th>
-                    <th className="py-2.5 px-3">Nama Pelanggan</th>
-                    <th className="py-2.5 px-3">No WA</th>
                     <th className="py-2.5 px-3">IP Router ONT</th>
-                    <th className="py-2.5 px-3">POP / Wilayah</th>
-                    <th className="py-2.5 px-3">Status &amp; Keterangan</th>
+                    <th className="py-2.5 px-3">Pelanggan</th>
+                    <th className="py-2.5 px-3">No. WhatsApp (Baru vs Database)</th>
+                    <th className="py-2.5 px-3">Alamat Pemasangan</th>
+                    <th className="py-2.5 px-3">Kredensial WiFi</th>
+                    <th className="py-2.5 px-3">Status &amp; Tindakan</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-sky-100 text-[11px]">
                   {filteredIndices.map((idx) => {
                     const row = importPreviewData[idx]
                     const d = row.data || {}
-                    const isDup = row._status === 'duplicate'
+                    const old = row.old_data || {}
+                    const isConflict = row._status === 'conflict'
+                    const isUnreg = row._status === 'unregistered'
+                    const isMatch = row._status === 'match'
                     const isErr = row._status === 'error'
                     const isSkip = row._action === 'skip'
+                    const isNewVersion = row.selected_version === 'new'
 
                     return (
                       <tr
@@ -900,8 +1087,10 @@ export function WizardImportPelanggan({
                             ? 'opacity-40 bg-slate-50'
                             : isErr
                             ? 'bg-rose-50/40'
-                            : isDup
+                            : isConflict
                             ? 'bg-amber-50/40'
+                            : isUnreg
+                            ? 'bg-slate-50/60'
                             : 'hover:bg-cyan-50/30'
                         }`}
                       >
@@ -914,54 +1103,150 @@ export function WizardImportPelanggan({
                           />
                         </td>
                         <td className="py-2 px-3 text-slate-400 font-mono">{idx + 1}</td>
-                        <td className="py-2 px-3 font-bold font-mono">
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="text"
-                              value={d.id_pelanggan || ''}
-                              onChange={(e) => updatePreviewRow(idx, 'id_pelanggan', e.target.value)}
-                              className="w-28 px-2 py-1 rounded-lg border border-slate-300 text-xs font-bold font-mono focus:outline-none focus:border-cyan-500 bg-white"
-                            />
-                            {isDup && (
-                              <button
-                                type="button"
-                                onClick={() => makeRowUnique(idx)}
-                                className="px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-[10px] font-bold shrink-0 transition cursor-pointer"
-                                title="Buat ID Unik Otomatis"
-                              >
-                                Buat Unik
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-2 px-3 font-bold text-slate-800">{d.nama || '-'}</td>
-                        <td className="py-2 px-3 font-mono text-slate-700">{d.no_wa || d.no_hp || '-'}</td>
-                        <td className="py-2 px-3 font-mono text-cyan-900">{d.ip_router || '-'}</td>
-                        <td className="py-2 px-3 text-slate-600">
-                          <span className="font-bold text-slate-700">{d.pop || 'POP-01'}</span>
-                          <span className="text-[10px] text-slate-400 block uppercase">
-                            {d.kantor || activeOffice || 'cabang'}
+                        <td className="py-2 px-3 font-mono">
+                          <span className="font-bold text-cyan-900 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-200">
+                            {d.ip_router || '-'}
                           </span>
                         </td>
+                        <td className="py-2 px-3 font-sans">
+                          <div className="font-bold text-slate-800">{d.nama || old.nama || '-'}</div>
+                          <span className="text-[10px] text-slate-400 font-mono block">
+                            {d.id_pelanggan || old.id_pelanggan || '-'}
+                          </span>
+                        </td>
+                        
+                        {/* No WA (Perbandingan Baru vs Lama jika ada konflik) */}
+                        <td className="py-2 px-3">
+                          {isConflict && old.no_wa && (d.no_wa || d.no_hp) && old.no_wa !== (d.no_wa || d.no_hp) ? (
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 text-[10px]">
+                                <span className="text-slate-400">Database:</span>
+                                <span className={`font-mono ${!isNewVersion ? 'font-bold text-emerald-700 bg-emerald-50 px-1 rounded' : 'line-through text-slate-400'}`}>
+                                  {old.no_wa}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[10px]">
+                                <span className="text-cyan-700 font-bold">Berkas:</span>
+                                <span className={`font-mono ${isNewVersion ? 'font-bold text-cyan-900 bg-cyan-100/70 px-1 rounded' : 'line-through text-slate-400'}`}>
+                                  {d.no_wa || d.no_hp}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="font-mono text-slate-700">
+                              {d.no_wa || d.no_hp || old.no_wa || '-'}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Alamat Pemasangan */}
+                        <td className="py-2 px-3 max-w-[180px]">
+                          {isConflict && old.alamat && d.alamat && old.alamat !== d.alamat ? (
+                            <div className="space-y-1 text-[10px]">
+                              <div className="truncate text-slate-400" title={old.alamat}>
+                                DB: <span className={!isNewVersion ? 'font-bold text-emerald-700' : 'line-through'}>{old.alamat}</span>
+                              </div>
+                              <div className="truncate text-cyan-900" title={d.alamat}>
+                                Baru: <span className={isNewVersion ? 'font-bold text-cyan-900 bg-cyan-50 px-1 rounded' : 'line-through'}>{d.alamat}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="truncate text-slate-700" title={d.alamat || old.alamat || ''}>
+                              {d.alamat || old.alamat || '-'}
+                            </p>
+                          )}
+                        </td>
+
+                        {/* WiFi */}
+                        <td className="py-2 px-3 text-[10px]">
+                          {d.nama_wifi || old.nama_wifi ? (
+                            <div>
+                              <span className="font-bold text-slate-800">{d.nama_wifi || old.nama_wifi}</span>
+                              <span className="text-slate-400 block font-mono">
+                                Pass: {d.password_wifi || old.password_wifi || '***'}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-300 italic">-</span>
+                          )}
+                        </td>
+
+                        {/* Kolom Status & Aksi Interaktif */}
                         <td className="py-2 px-3">
                           {isErr ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold text-[10px]">
                               <AlertCircle className="w-3 h-3" />
                               <span>{row._message}</span>
                             </span>
-                          ) : isDup ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">
-                              <AlertTriangle className="w-3 h-3" />
-                              <span>{row._message}</span>
-                            </span>
-                          ) : isSkip ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-bold text-[10px]">
-                              <span>Dilewati (Skip)</span>
-                            </span>
+                          ) : isConflict ? (
+                            <div className="space-y-1">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-[10px]">
+                                <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                <span>Data Berbeda</span>
+                              </span>
+                              <div className="flex items-center gap-1 text-[10px]">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...importPreviewData]
+                                    updated[idx].selected_version = 'new'
+                                    updated[idx]._action = 'update'
+                                    setImportPreviewData(updated)
+                                  }}
+                                  className={`px-1.5 py-0.5 rounded border transition cursor-pointer ${
+                                    isNewVersion
+                                      ? 'bg-cyan-700 text-white border-cyan-800 font-bold'
+                                      : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  Pakai Baru
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...importPreviewData]
+                                    updated[idx].selected_version = 'old'
+                                    updated[idx]._action = 'update'
+                                    setImportPreviewData(updated)
+                                  }}
+                                  className={`px-1.5 py-0.5 rounded border transition cursor-pointer ${
+                                    !isNewVersion
+                                      ? 'bg-slate-700 text-white border-slate-800 font-bold'
+                                      : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  Pakai Lama
+                                </button>
+                              </div>
+                            </div>
+                          ) : isUnreg ? (
+                            <div className="space-y-1">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200 text-slate-800 font-bold text-[10px]">
+                                <Info className="w-3 h-3 text-slate-600" />
+                                <span>IP Belum Ada di DB</span>
+                              </span>
+                              <div className="flex items-center gap-1 text-[10px]">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...importPreviewData]
+                                    updated[idx]._action = isSkip ? 'insert' : 'skip'
+                                    setImportPreviewData(updated)
+                                  }}
+                                  className={`px-2 py-0.5 rounded border transition cursor-pointer font-bold ${
+                                    isSkip
+                                      ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
+                                      : 'bg-emerald-600 text-white border-emerald-700'
+                                  }`}
+                                >
+                                  {isSkip ? '+ Simpan Offline' : 'Didaftarkan Offline'}
+                                </button>
+                              </div>
+                            </div>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px]">
                               <Check className="w-3 h-3" />
-                              <span>{row._message || 'Siap Diimpor'}</span>
+                              <span>Cocok (Update No WA &amp; Alamat)</span>
                             </span>
                           )}
                         </td>
@@ -1000,8 +1285,8 @@ export function WizardImportPelanggan({
                   <>
                     <Upload className="w-3.5 h-3.5" />
                     <span>
-                      Simpan ke Database (
-                      {importPreviewData.filter((r) => r._status !== 'error' && r._action !== 'skip').length} Baris)
+                      Simpan Perubahan (
+                      {importPreviewData.filter((r) => r._status !== 'error' && r._action !== 'skip').length} Pelanggan)
                     </span>
                   </>
                 )}

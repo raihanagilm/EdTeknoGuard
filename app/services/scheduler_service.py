@@ -236,6 +236,16 @@ class MonitoringScheduler:
 
             self._scheduler.add_job(**job_kwargs)
 
+            # Job background mandiri: Sinkronisasi MikroTik RouterOS per kantor (tiap 3 menit, independen)
+            self._scheduler.add_job(
+                self.mikrotik_sync_job_wrapper,
+                "interval",
+                minutes=3,
+                id="mikrotik_auto_sync_job",
+                replace_existing=True,
+                next_run_time=datetime.now() + timedelta(seconds=5)
+            )
+
             # Job cleanup alert_logs: hapus otomatis tiap 7 hari (jalan setiap hari pukul 02:00)
             self._scheduler.add_job(
                 self.cleanup_alert_logs,
@@ -448,30 +458,30 @@ class MonitoringScheduler:
             "scan_progress": scan_progress
         }
 
-    def scheduled_job_wrapper(self):
-        """Dijalankan tiap 5 menit oleh APScheduler background thread (Semua Kantor)"""
-        db = SessionLocal()
-        try:
-            current_status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
-            if current_status != "RUNNING":
-                logger.info("Scheduler dalam keadaan STOPPED, melewati siklus pengecekan.")
-                return
-        finally:
-            db.close()
-
-        # 1. Jalankan sinkronisasi otomatis pelanggan baru dari MikroTik jika auto-sync aktif
+    def mikrotik_sync_job_wrapper(self):
+        """Dijalankan tiap 3 menit secara mandiri oleh APScheduler untuk menyinkronkan data router MikroTik."""
         try:
             from app.services.mikrotik_service import MikroTikSyncService
             db_sync = SessionLocal()
             try:
-                # Sinkronkan seluruh router MikroTik per kantor yang terkonfigurasi
                 MikroTikSyncService.sync_all_configured_kantors(db_sync)
             finally:
                 db_sync.close()
         except Exception as e:
             logger.warning(f"[SCHEDULER] Gagal auto-sync MikroTik: {e}")
 
-        # 2. Eksekusi scanning untuk seluruh kantor
+    def scheduled_job_wrapper(self):
+        """Dijalankan tiap interval pemantauan oleh APScheduler untuk memindai redaman optik ONT."""
+        db = SessionLocal()
+        try:
+            current_status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
+            if current_status != "RUNNING":
+                logger.info("Scheduler pemantauan ONT dalam keadaan STOPPED, melewati siklus pengecekan redaman.")
+                return
+        finally:
+            db.close()
+
+        # Eksekusi pemindaian redaman ONT untuk seluruh kantor
         self.execute_scan_sync(kantor=None)
 
     def execute_scan_sync(self, kantor: Optional[str] = None) -> Dict[str, Any]:

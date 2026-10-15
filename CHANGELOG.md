@@ -26,6 +26,51 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Perbaikan Masalah Filter, Sorting, dan Pagination Tabel Pelanggan ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) & [service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+  - **Penyebab Bug Pencarian**: Sebelumnya pencarian menggunakan `Pelanggan.ip_router.ilike()`, padahal `ip_router` dan `ip_ont` adalah properti shortcut ke relasi `PerangkatONT`. Hal ini memicu error internal 500 (`AttributeError: 'property' object has no attribute 'ilike'`), sehingga pencarian data gagal dan mengosongkan tabel.
+  - **Solusi Query SQL Terpadu**: Dilakukan `outerjoin(PerangkatONT)` pada query SQLAlchemy dan pencarian `q` diperluas ke `Pelanggan.nama`, `Pelanggan.id_pelanggan`, `Pelanggan.alamat`, `PerangkatONT.ip_router`, `PerangkatONT.ip_ont`, `PerangkatONT.mac_address`, dan `PerangkatONT.nama_wifi`.
+  - **Dukungan Debounce Input Pencarian (350ms)**: Menambahkan state `debouncedSearch` di React agar pencarian tidak spamming API setiap karakter diketik dan otomatis mereset halaman ke `page: 1`.
+  - **Perbaikan Sorting Terpadu & Indikator Visual**:
+    - Memetakan field sorting tabel ke kolom SQL yang valid (`PerangkatONT.ip_router`, `LogPerformaONT.rx_power`, `LogPerformaONT.status_koneksi`, dll.).
+    - Menghapus klausa non-standar MySQL `NULLS LAST` yang sebelumnya menyebabkan SQL syntax error 1064.
+    - Menambahkan visual panah aktif (`▲` untuk asc dan `▼` untuk desc) serta sorotan warna background header kolom saat sedang aktif diurutkan.
+  - **Perbaikan Navigasi Pagination**:
+    - Memastikan `DataTableContainer` memicu perubahan halaman secara mulus dan mempertahankan filter yang sedang aktif.
+    - Server POP kini disajikan secara dinamis dari database, bukan hardcoded.
+
+- **Dukungan Dua IP Terpisah Pelanggan: IP ONT (10.10.x.x) & IP Router (192.168.x.x)**:
+  - **Arsitektur Basis Data Multi-IP**: Ditambahkan kolom `ip_ont` pada tabel `perangkat_ont` di database serta shortcut property di model `Pelanggan` ([app/db/models.py](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py)).
+  - **Pemetaan Otomatis MikroTik**: Pada [mikrotik_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/mikrotik_service.py), sistem memetakan perangkat dengan IP `10.10.x.x` (dari ARP Table/VLAN optik) ke `ip_ont` dan IP `192.168.x.x` (dari DHCP Lease) ke `ip_router`. Jika satu pelanggan (berdasarkan MAC atau Comment identik) memiliki kedua IP, sistem menyatukannya ke 1 data pelanggan yang sama.
+  - **Tampilan Tabel Pelanggan Bertingkat Bersih Tanpa Ikon**: Kolom *IP & Wilayah* di [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) menyajikan kedua data IP secara bertingkat bersih dengan badge teks monospaced (`ONT: 10.10.x.x` dan `Router: 192.168.x.x`) tanpa menggunakan emoji atau ikon grafis.
+  - **Penamaan Menu Sidebar**: Menu navigasi diubah menjadi **"Kantor"** (bukan *Kantor Cabang*) untuk menyelaraskan cakupan multi-kantor (Pusat, Cabang, Banyumas).
+
+- **Pemisahan Halaman Mandiri Pengguna NOC & Kantor Serta Tombol Sync WinBox On-Demand**:
+  - **Pemisahan Modul Navigasi**: Tab Pengguna dan Kantor pada Manajemen Pengguna kini dipecah menjadi dua file page mandiri:
+    - [ModulPenggunaNOC.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPenggunaNOC.jsx): Khusus akun petugas NOC, peran (super admin, admin, teknisi), dan izin multi-kantor.
+    - [ModulKantorCabang.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulKantorCabang.jsx): Khusus master data kantor operasional dan konfigurasi router MikroTik per wilayah.
+  - **Tombol "Sync WinBox Sekarang"**: Disediakan tombol aksi sinkronisasi langsung di setiap baris kantor pada tabel Kantor.
+  - **Pesan Status Jaringan Informatif & Dinamis**: Jika router tidak dapat dijangkau, sistem memberikan pesan: *"Router MikroTik (<IP>:<Port>) tidak dapat dijangkau. Pastikan jaringan server terhubung ke jaringan router."*
+  - **Auto-Sync Mandiri Latar Belakang (*Decoupled Daemon*)**: Auto-sync MikroTik dipisahkan menjadi job mandiri `mikrotik_auto_sync_job` di [scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py) yang berjalan setiap 3 menit terpisah dari siklus pemantauan redaman ONT, sehingga tetap aktif memindai walaupun data pelanggan sedang kosong (0) atau pemantauan redaman sedang dijeda.
+
+- **Perluasan Auto-Sync MikroTik: Pengambilan Otomatis IP 10.10.x.x (ARP Table & PPPoE Active)**:
+  - **Dukungan Multi-Source MikroTik**: Selain membaca `/ip/dhcp-server/lease`, service [mikrotik_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/mikrotik_service.py) kini otomatis memindai `/ip/arp` (ARP Table) dan `/ppp/active` (PPPoE Sessions).
+  - **Penangkapan IP Statis & VLAN ONT 10.10.x.x**: Modem pelanggan atau ONT yang dikonfigurasi dengan IP statis `10.10.x.x` (yang tidak muncul di DHCP lease dinamis) kini secara otomatis tertangkap dan tersinkronisasi ke database lengkap dengan MAC Address dan Comment.
+  - **Siklus Eksekusi**: Berjalan otomatis di latar belakang setiap 5 menit via APScheduler bersamaan dengan siklus sinkronisasi berkala per kantor.
+
+- **Pembaruan Alur Data Pelanggan: Penghapusan Tombol Tambah Manual & Penyempurnaan Fitur "Lengkapi Data" Berbasis IP Router**:
+  - **Penghapusan Tombol Tambah Manual**: Tombol "Tambah" pada toolbar [`ModulPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) dihapus bersih karena seluruh data pelanggan baru telah tersinkronisasi otomatis dari DHCP Leases router MikroTik.
+  - **Transformasi Wizard Import Menjadi "Lengkapi Data Pelanggan"**:
+    - Tombol "Import" diubah label dan ikonnya menjadi **"Lengkapi Data"** (ikon spreadsheet cyan) tanpa kata *Wizard*.
+    - Fokus utama import adalah pengayaan data (*enrichment*) untuk melengkapi kolom yang tidak ada di MikroTik: **Nomor WhatsApp**, **Alamat Pemasangan Fisik**, dan **Kredensial WiFi Rumah (SSID & Password)**.
+    - Pencocokan utama wajib menggunakan **`IP Router / ONT`** yang berformat `10.10.x.x (Standar ONT)` atau `192.168.x.x (IP Lokal)`.
+  - **Pencegahan Penimpaan & Tampilan Perbandingan Data Lama vs Data Baru (Conflict Resolution)**:
+    - Jika data pelanggan di database kolomnya masih kosong / null / placeholder, sistem langsung mengisinya secara aman (*non-destructive update*).
+    - Jika kolom di database sudah memiliki data dan berbeda dengan berkas Excel/CSV, sistem menampilkan tabel perbandingan visual (**Data Database vs Data Berkas**) dengan pilihan tombol: **"Pakai Baru"** atau **"Pakai Lama"**, serta bulk action di atas tabel.
+  - **Penanganan IP Belum Terdaftar**:
+    - Baris dengan IP yang belum tercatat di database diberi penanda khusus dengan tombol fleksibel: **Lewati (Skip)** atau **Daftarkan Offline (Status Waiting / Belum Dipantau)**.
+  - **Perbaikan Koneksi Vite HMR WebSocket**:
+    - Menambahkan konfigurasi `hmr: { clientPort: 7891 }` pada [`vite.config.js`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/vite.config.js) untuk mengatasi error koneksi WebSocket Hot Module Replacement.
+
 - **Penambahan Manajemen Kantor & Konfigurasi MikroTik per Wilayah di Modul Manajemen Pengguna (Tab Kantor Cabang)**:
   - **Sistem Multi-Tab di Manajemen Pengguna (`ModulManajemenPengguna.jsx`)**: Mengelompokkan antarmuka menjadi 2 sub-tab ergonomis:
     - **Tab 1: Pengguna NOC** — Mengelola akun petugas (Super Admin, Admin Cabang, Teknisi), izin multi-kantor, status aktif/nonaktif, dan hapus akun.
