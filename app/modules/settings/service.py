@@ -24,9 +24,13 @@ class SystemSettingsService:
             "default_modem_user",
             "default_modem_pass",
             "default_modem_credentials",
+            "notification_alert_interval_hours",
             "telegram_alert_interval_hours",
+            "night_mode_enabled",
             "telegram_night_mode_enabled",
+            "night_mode_start",
             "telegram_night_mode_start",
+            "night_mode_end",
             "telegram_night_mode_end",
             "app_vibration_enabled",
             "alert_waiting_interval_minutes",
@@ -129,9 +133,6 @@ class SystemSettingsService:
         mikrotik_kantor = db_settings.get("mikrotik_kantor", getattr(settings, "MIKROTIK_DEFAULT_KANTOR", "banyumas"))
         mikrotik_auto = db_settings.get("mikrotik_auto_sync", "true").lower() in ["true", "1", "yes"]
 
-        bot_token = settings.TELEGRAM_BOT_TOKEN or ""
-        masked_token = f"{bot_token[:6]}...{bot_token[-4:]}" if len(bot_token) > 10 else ("Terkonfigurasi" if bot_token else "Belum diisi di .env")
-
         return {
             "kantor": k or "all",
             "polling_interval_minutes": polling_interval,
@@ -141,15 +142,12 @@ class SystemSettingsService:
             "default_modem_user": credentials_list[0]["username"] if credentials_list else default_user,
             "default_modem_pass": credentials_list[0]["password"] if credentials_list else default_pass,
             "default_modem_credentials": credentials_list,
-            "telegram_alert_interval_hours": tg_interval_hours,
-            "telegram_night_mode_enabled": tg_night_enabled,
-            "telegram_night_mode_start": tg_night_start,
-            "telegram_night_mode_end": tg_night_end,
+            "notification_alert_interval_hours": tg_interval_hours,
+            "night_mode_enabled": tg_night_enabled,
+            "night_mode_start": tg_night_start,
+            "night_mode_end": tg_night_end,
             "app_vibration_enabled": app_vibration,
             "alert_waiting_interval_minutes": alert_waiting_minutes,
-            "telegram_token_configured": bool(settings.TELEGRAM_BOT_TOKEN),
-            "telegram_token_masked": masked_token,
-            "telegram_chat_ids_configured": settings.TELEGRAM_CHAT_IDS or "-",
             "mikrotik_host": mikrotik_host,
             "mikrotik_port": mikrotik_port,
             "mikrotik_user": mikrotik_user,
@@ -180,8 +178,8 @@ class SystemSettingsService:
         primary_user = creds_to_save[0]["username"] if creds_to_save else "admin"
         primary_pass = creds_to_save[0]["password"] if creds_to_save else "tekno2024"
 
-        tg_interval_hours = data.telegram_alert_interval_hours if data.telegram_alert_interval_hours is not None else 1.0
-        debounce_minutes = max(1, int(tg_interval_hours * 60))
+        notif_hours = data.notification_alert_interval_hours if data.notification_alert_interval_hours is not None else 1.0
+        debounce_minutes = max(1, int(notif_hours * 60))
 
         # 1. Simpan ke database MySQL lokal (spesifik kantor jika k terdefinisi)
         pairs = {}
@@ -205,11 +203,11 @@ class SystemSettingsService:
 
         # Setting global notifikasi & MikroTik
         pairs.update({
-            "telegram_alert_interval_hours": str(tg_interval_hours),
+            "notification_alert_interval_hours": str(notif_hours),
             "alert_debounce_minutes": str(debounce_minutes),
-            "telegram_night_mode_enabled": "true" if data.telegram_night_mode_enabled else "false",
-            "telegram_night_mode_start": (data.telegram_night_mode_start or "22:00").strip(),
-            "telegram_night_mode_end": (data.telegram_night_mode_end or "06:00").strip(),
+            "night_mode_enabled": "true" if data.night_mode_enabled else "false",
+            "night_mode_start": (data.night_mode_start or "22:00").strip(),
+            "night_mode_end": (data.night_mode_end or "06:00").strip(),
             "app_vibration_enabled": "true" if data.app_vibration_enabled else "false",
             "alert_waiting_interval_minutes": str(data.alert_waiting_interval_minutes or 5),
             "mikrotik_host": (data.mikrotik_host or "192.168.202.50").strip(),

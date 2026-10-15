@@ -14,7 +14,8 @@ class AuthService:
                 user.username, 
                 role=user.role, 
                 nama_karyawan=user.nama_karyawan,
-                allowed_kantor=user.allowed_kantor
+                allowed_kantor=user.allowed_kantor,
+                user_id=user.id
             )
             return token, user
         return None

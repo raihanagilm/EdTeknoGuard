@@ -171,6 +171,39 @@ def poll_realtime_notifications(request: Request, db: Session = Depends(get_db))
     kantor = get_active_kantor(request, user) if user else "all"
     return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor, user=user)
 
+@router.post("/api/notifications/read")
+async def mark_single_notification_read(request: Request, db: Session = Depends(get_db)):
+    from app.core.security import get_current_user_optional
+    from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
+    from fastapi import HTTPException
+    user = get_current_user_optional(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Belum login")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    n_type = body.get("type", "general")
+    ref_id = body.get("reference_id") or body.get("id")
+    if not ref_id:
+        raise HTTPException(status_code=400, detail="reference_id wajib diisi")
+    return AdminCustomerMgmtService.mark_notification_read(db=db, user=user, notification_type=n_type, reference_id=str(ref_id))
+
+@router.post("/api/notifications/read-all")
+async def mark_all_notifications_read(request: Request, db: Session = Depends(get_db)):
+    from app.core.security import get_current_user_optional
+    from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
+    from fastapi import HTTPException
+    user = get_current_user_optional(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Belum login")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    items = body.get("items", [])
+    return AdminCustomerMgmtService.mark_all_notifications_read(db=db, user=user, items=items)
+
 @router.post("/api/monitoring/snooze-pause-reminder")
 def snooze_pause_reminder(request: Request, db: Session = Depends(get_db)):
     from app.core.security import get_current_user_optional
@@ -181,3 +214,4 @@ def snooze_pause_reminder(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="Akses ditolak.")
     ont_scheduler.snooze_paused_reminder(db)
     return {"status": "success", "message": "Pengingat jeda ditunda 1 jam."}
+

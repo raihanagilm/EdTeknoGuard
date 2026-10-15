@@ -26,6 +26,23 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Pusat Notifikasi Mandiri, Agregasi Batching (>5), & Isolasi Status Baca Antar User ([ModulNotifikasi.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulNotifikasi.jsx), [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx), [service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/admin_customer_mgmt/service.py))**:
+  - **Pusat Notifikasi Popover Flyout Mandiri (`ModulNotifikasi.jsx`)**:
+    - Tombol lonceng di navbar kini membuka panel notifikasi mandiri yang modern, cepat, dan responsif tanpa memaksa navigasi langsung ke halaman tiket keluhan.
+    - Mengintegrasikan dua kategori informasi utama secara real-time: **Hasil Pemantauan Redaman ONT** (LOS, Critical, Warning) dan **Tiket Keluhan Pelanggan** (Menunggu, Diproses), serta pengingat status scheduler terjeda khusus Super Admin.
+  - **Agregasi Batching Otomatis (> 5 Item)**:
+    - Jika notifikasi LOS, Warning redaman, atau tiket keluhan berjumlah **lebih dari 5**, sistem otomatis menggabungkannya (*batch*) menjadi 1 kartu ringkasan pintar (misal: `"142 Modem ONT Terputus (LOS)"` atau `"7 Tiket Keluhan Masuk"`).
+    - Mencegah *notification flooding* agar performa browser dan aplikasi HP tetap ringan dan responsif.
+  - **Isolasi Status Baca Per Akun / Role di Database MySQL Local (`user_notification_reads`)**:
+    - Dibuat tabel baru `user_notification_reads` di MySQL Local (`user_id`, `notification_type`, `reference_id`, `read_at`).
+    - Setiap pengguna memiliki status baca masing-masing: jika teknisi membuka atau menandai notifikasi sudah dibaca, notifikasi tersebut hilang dari akun teknisi tersebut, tetapi **tetap ada** pada Admin dan Super Admin sampai mereka sendiri yang menandainya.
+    - Tiket keluhan warga yang belum selesai (`status != 'SELESAI'`) akan tetap dimunculkan sesuai interval pengulangan notifikasi di database.
+  - **Navigasi Cepat Sesuai Jenis Notifikasi**:
+    - Klik pada item notifikasi **Hasil Pemantauan ONT** langsung mengarahkan ke tab **Riwayat Redaman (`/logs`)** dan otomatis memfilter ID/Nama pelanggan atau status terkait.
+    - Klik pada item notifikasi **Tiket Keluhan** langsung mengarahkan ke tab **Tiket Keluhan (`/admin/tiket`)** dan otomatis memfilter ID tiket terkait.
+  - **Pembersihan Bersih Dependensi Telegram**:
+    - Menghapus berkas `app/services/telegram_service.py` serta seluruh atribut dan variabel konfigurasi Telegram dari `app/core/config.py`, `init_db.py`, dan schemas, sepenuhnya beralih ke Native Android Notification & Web Notification Center.
+
 - **Pengaturan Sistem Nyata dari Database MySQL Local & Terisolasi Per Kantor Aktif ([ModulPengaturan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx), [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx), [service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/service.py))**:
   - **Data Riil Langsung dari Database MySQL Local**: Seluruh form konfigurasi di Modul Pengaturan membaca dan menulis data nyata ke tabel `system_settings` pada database MySQL Local (`127.0.0.1:3306`, db `edteknoguard`), sepenuhnya meniadakan data dummy/palsu.
   - **Isolasi Pengaturan Mandiri Per Kantor Aktif (`activeOffice`)**:

@@ -99,7 +99,7 @@ class CustomerController:
             "nama": cust.nama,
             "is_monitored": cust.is_monitored,
             "stats": stats,
-            "message": f"Pemantauan {cust.nama} berhasil {'diaktifkan kembali' if cust.is_monitored else 'dinonaktifkan (tidak discan & tidak kirim notifikasi Telegram)'}"
+            "message": f"Pemantauan {cust.nama} berhasil {'diaktifkan kembali' if cust.is_monitored else 'dinonaktifkan (dilewati dari pemindaian)'}"
         }
 
     @staticmethod

@@ -16,10 +16,6 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = ""
     DB_NAME: str = "edteknoguard"
 
-    # Telegram Bot Alerting
-    TELEGRAM_BOT_TOKEN: str = ""
-    TELEGRAM_CHAT_IDS: str = ""  # dipisahkan koma misal: "12345,67890,-100123"
-
     # Threshold & Scheduler
     POLLING_INTERVAL_MINUTES: int = 5
     WARNING_THRESHOLD_DBM: float = -26.0
@@ -48,10 +44,5 @@ class Settings(BaseSettings):
         # MySQL Database URL Connection String
         return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}?charset=utf8mb4"
 
-    @property
-    def telegram_recipient_list(self) -> List[str]:
-        if not self.TELEGRAM_CHAT_IDS:
-            return []
-        return [cid.strip() for cid in self.TELEGRAM_CHAT_IDS.split(",") if cid.strip()]
-
 settings = Settings()
+

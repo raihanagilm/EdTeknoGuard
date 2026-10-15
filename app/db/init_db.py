@@ -30,8 +30,7 @@ def init_db():
             "polling_interval_minutes": str(settings.POLLING_INTERVAL_MINUTES),
             "warning_threshold_dbm": str(settings.WARNING_THRESHOLD_DBM),
             "critical_threshold_dbm": str(settings.CRITICAL_THRESHOLD_DBM),
-            "last_scan_time": get_now_wib().strftime("%Y-%m-%d %H:%M:%S"),
-            "telegram_chat_ids": settings.TELEGRAM_CHAT_IDS or ""
+            "last_scan_time": get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
         }
         for k, v in default_settings.items():
             item = db.query(SystemSetting).filter(SystemSetting.key_name == k).first()

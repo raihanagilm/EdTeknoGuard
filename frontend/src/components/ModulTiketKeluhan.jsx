@@ -24,11 +24,18 @@ import {
   DataTableContainer
 } from './CommonUI';
 
-export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer }) {
+export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer, initialSearch = '', onClearInitialSearch }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('SEMUA');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch || '');
+
+  useEffect(() => {
+    if (initialSearch) {
+      setSearch(initialSearch);
+      if (onClearInitialSearch) onClearInitialSearch();
+    }
+  }, [initialSearch]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [catatan, setCatatan] = useState('');

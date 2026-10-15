@@ -933,3 +933,4 @@ class MonitoringScheduler:
             db.close()
 
 scheduler = MonitoringScheduler()
+ont_scheduler = scheduler

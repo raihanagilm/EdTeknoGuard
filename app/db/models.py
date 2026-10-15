@@ -349,4 +349,21 @@ class KuotaPelanggan(Base):
     )
 
 
+class UserNotificationRead(Base):
+    __tablename__ = "user_notification_reads"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
+    notification_type = Column(String(50), nullable=False, index=True) # "alert_log", "tiket_batch", "alert_batch", dll
+    reference_id = Column(String(100), nullable=False, index=True) # id_alert, id_tiket, atau batch key
+    read_at = Column(DateTime, default=get_now_wib, nullable=False, index=True)
+
+    user = relationship("User")
+
+    __table_args__ = (
+        Index("idx_user_notif_lookup", "user_id", "notification_type", "reference_id"),
+    )
+
+
+
 

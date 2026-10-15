@@ -26,6 +26,7 @@ import { ModulPemantauanKuota } from './components/ModulPemantauanKuota'
 import { ModulLogAktivitas } from './components/ModulLogAktivitas'
 import { ModulPenggunaNOC } from './components/ModulPenggunaNOC'
 import { ModulKantorCabang } from './components/ModulKantorCabang'
+import { ModulNotifikasi } from './components/ModulNotifikasi'
 import { ErrorView } from './components/ErrorView'
 import { ConfirmSaveModal, OntDetailModal } from './components/Modals'
 import { HalamanLogin } from './components/HalamanLogin'
@@ -56,6 +57,11 @@ export default function App() {
     allowed_kantor: 'all'
   })
   const [unreadTickets, setUnreadTickets] = useState(0)
+  const [notificationList, setNotificationList] = useState([])
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+  const [notificationLoading, setNotificationLoading] = useState(false)
+  const [logsInitialSearch, setLogsInitialSearch] = useState('')
+  const [ticketInitialSearch, setTicketInitialSearch] = useState('')
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false)
   const headerMenuRef = useRef(null)
 
@@ -234,8 +240,15 @@ export default function App() {
         setCurrentUser(meRes.user)
       }
 
-      if (notifRes && typeof notifRes.unread_tickets_count === 'number') {
-        setUnreadTickets(notifRes.unread_tickets_count)
+      if (notifRes) {
+        if (typeof notifRes.total_unread === 'number') {
+          setUnreadTickets(notifRes.total_unread)
+        } else if (typeof notifRes.unread_tickets_count === 'number') {
+          setUnreadTickets(notifRes.unread_tickets_count)
+        }
+        if (Array.isArray(notifRes.notifications)) {
+          setNotificationList(notifRes.notifications)
+        }
       }
     } catch (e) {
       console.warn('Live monitoring poll failed:', e)
@@ -247,6 +260,81 @@ export default function App() {
     const interval = setInterval(fetchLiveDashboardData, 8000)
     return () => clearInterval(interval)
   }, [activeOffice])
+
+  // Notification Center Handlers
+  const handleNotificationItemClick = async (item) => {
+    setIsNotificationOpen(false)
+
+    // Mark this item as read immediately for the current user
+    try {
+      await fetch('/api/notifications/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: item.type,
+          reference_id: item.reference_id || item.id
+        })
+      })
+      // Update local state
+      setNotificationList(prev => prev.filter(n => n.id !== item.id))
+      setUnreadTickets(prev => Math.max(0, prev - 1))
+    } catch (e) {
+      console.warn('Failed to mark notification read:', e)
+    }
+
+    // Navigasi sesuai jenis notifikasi
+    if (item.target_tab === 'tiket') {
+      if (item.target_filter) {
+        setTicketInitialSearch(item.target_filter)
+      }
+      handleTabChange('tiket')
+    } else if (item.target_tab === 'logs') {
+      if (item.target_filter) {
+        setLogsInitialSearch(item.target_filter)
+      }
+      handleTabChange('riwayat')
+    } else if (item.target_tab === 'beranda') {
+      handleTabChange('beranda')
+    } else {
+      handleTabChange(item.target_tab || 'beranda')
+    }
+  }
+
+  const handleDismissNotificationItem = async (item) => {
+    try {
+      await fetch('/api/notifications/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: item.type,
+          reference_id: item.reference_id || item.id
+        })
+      })
+      setNotificationList(prev => prev.filter(n => n.id !== item.id))
+      setUnreadTickets(prev => Math.max(0, prev - 1))
+    } catch (e) {
+      console.warn('Failed to dismiss notification item:', e)
+    }
+  }
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await fetch('/api/notifications/read-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: notificationList.map(n => ({
+            type: n.type,
+            reference_id: n.reference_id || n.id
+          }))
+        })
+      })
+      setNotificationList([])
+      setUnreadTickets(0)
+    } catch (e) {
+      console.warn('Failed to mark all notifications read:', e)
+    }
+  }
 
   useEffect(() => {
     if (isAuthenticated && currentUser && currentUser.role !== 'teknisi') {
@@ -807,21 +895,42 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Ikon Lonceng Notifikasi Tiket (Dipindah ke Sebelah Kiri Kantor) */}
-            <button
-              type="button"
-              onClick={() => handleTabChange('tiket')}
-              className="relative p-2 rounded-xl bg-cyan-50/80 hover:bg-cyan-100 text-cyan-700 border border-sky-200/80 transition cursor-pointer flex items-center justify-center"
-              title="Tiket Keluhan Pelanggan"
-              aria-label="Tiket Keluhan Pelanggan"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadTickets > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border-2 border-white animate-pulse">
-                  {unreadTickets}
-                </span>
-              )}
-            </button>
+            {/* Ikon Lonceng Notifikasi Terpadu (Hasil Pemantauan & Tiket Keluhan) */}
+            <div className="relative">
+              <button
+                id="btn-bell-notification"
+                type="button"
+                onClick={() => setIsNotificationOpen(prev => !prev)}
+                className={`relative p-2 rounded-xl border transition cursor-pointer flex items-center justify-center ${
+                  isNotificationOpen
+                    ? 'bg-cyan-600 text-white border-cyan-700 shadow-md ring-2 ring-cyan-400/40'
+                    : 'bg-cyan-50/80 hover:bg-cyan-100 text-cyan-700 border-sky-200/80'
+                }`}
+                title="Pusat Notifikasi Pemantauan & Tiket"
+                aria-label="Pusat Notifikasi Pemantauan & Tiket"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadTickets > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border-2 border-white animate-pulse">
+                    {unreadTickets}
+                  </span>
+                )}
+              </button>
+
+              {/* Komponen Notifikasi Mandiri (Popover Flyout) */}
+              <ModulNotifikasi
+                isOpen={isNotificationOpen}
+                onClose={() => setIsNotificationOpen(false)}
+                notifications={notificationList}
+                unreadCount={unreadTickets}
+                activeOffice={activeOffice}
+                currentUser={currentUser}
+                onItemClick={handleNotificationItemClick}
+                onDismissItem={handleDismissNotificationItem}
+                onMarkAllRead={handleMarkAllNotificationsRead}
+                loading={notificationLoading}
+              />
+            </div>
 
             {/* Office Switcher Dropdown (Pusat, Cabang, Banyumas, dsb - Sesuai Hak Akses Role) */}
             {(() => {
@@ -935,6 +1044,8 @@ export default function App() {
               warnThreshold={warnThreshold}
               critThreshold={critThreshold}
               onNavigateCustomer={handleNavigateCustomer}
+              initialSearch={logsInitialSearch}
+              onClearInitialSearch={() => setLogsInitialSearch('')}
             />
           )}
           {activeTab === 'kuota' && (
@@ -956,6 +1067,8 @@ export default function App() {
             <ModulTiketKeluhan
               activeOffice={activeOffice}
               onNavigateCustomer={handleNavigateCustomer}
+              initialSearch={ticketInitialSearch}
+              onClearInitialSearch={() => setTicketInitialSearch('')}
             />
           )}
           {activeTab === 'log' && <ModulLogAktivitas />}

@@ -22,11 +22,18 @@ import {
   DataTableContainer
 } from './CommonUI';
 
-export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -26.0, critThreshold = -27.0, onNavigateCustomer }) {
+export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -26.0, critThreshold = -27.0, onNavigateCustomer, initialSearch = '', onClearInitialSearch }) {
   const [logs, setLogs] = useState([]);
   const [summary, setSummary] = useState({ total_records: 0, normal: 0, warning: 0, critical: 0, los: 0 });
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch || '');
+
+  useEffect(() => {
+    if (initialSearch) {
+      setSearch(initialSearch);
+      if (onClearInitialSearch) onClearInitialSearch();
+    }
+  }, [initialSearch]);
   const [filterStatus, setFilterStatus] = useState('');
   const [filterRange, setFilterRange] = useState('today');
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
