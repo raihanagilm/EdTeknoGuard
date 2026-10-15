@@ -1001,18 +1001,6 @@ export default function App() {
               currentUser={currentUser}
               setCurrentUser={setCurrentUser}
               onLogout={handleLogout}
-              mikrotikHost={mikrotikHost}
-              setMikrotikHost={setMikrotikHost}
-              mikrotikPort={mikrotikPort}
-              setMikrotikPort={setMikrotikPort}
-              mikrotikUser={mikrotikUser}
-              setMikrotikUser={setMikrotikUser}
-              mikrotikPassword={mikrotikPassword}
-              setMikrotikPassword={setMikrotikPassword}
-              mikrotikKantor={mikrotikKantor}
-              setMikrotikKantor={setMikrotikKantor}
-              mikrotikAutoSync={mikrotikAutoSync}
-              setMikrotikAutoSync={setMikrotikAutoSync}
             />
           )}
         </main>

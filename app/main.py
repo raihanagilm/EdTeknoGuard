@@ -297,6 +297,7 @@ def get_current_user_profile(request: Request):
                     "id": db_user.id,
                     "username": db_user.username,
                     "nama_lengkap": db_user.nama_karyawan or "Administrator NOC",
+                    "no_wa": db_user.no_wa or "",
                     "role": db_user.role,
                     "allowed_kantor": allowed
                 },

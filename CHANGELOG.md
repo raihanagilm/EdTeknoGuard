@@ -26,6 +26,11 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penyelarasan Pengaturan Sistem Real Database & Eliminasi Tab Redundan Router MikroTik**:
+  - **Sinkronisasi Otomatis Data Pengaturan Real Database**: [ModulPengaturan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) kini otomatis memanggil `fetchBackendSettings()` saat komponen pertama kali di-mount, memastikan nilai interval pemantauan, ambang batas redaman (-26 dBm / -27 dBm), kredensial ONT multi-fallback, dan preferensi notifikasi selalu terisi langsung dari database (tabel `system_settings`), bukan nilai template/placeholder bawaan.
+  - **Sertifikasi Data Profil Nyata**: Endpoint `GET /api/auth/me` pada [app/main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) diperbarui untuk menyertakan `no_wa` dari database, sehingga data pengguna yang tampil di tab Personal (Profil & Kata Sandi) memuat ID, Nama, No. WhatsApp, Kantor Layanan, dan Hak Akses riil.
+  - **Penghapusan Tab Redundan Router MikroTik**: Tab "Router MikroTik" dihilangkan dari navigasi mobile switcher (grid 3 tab) dan desktop tree menu [ModulPengaturan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) karena konfigurasi router MikroTik telah dikonsolidasikan secara penuh per kantor cabang di [ModulKantorCabang.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulKantorCabang.jsx).
+
 - **Fitur Ekstraksi & Pembaruan Kredensial WiFi ONT (Live Web GUI ZTE GM220-S)**:
   - **Ekstraksi SSID & WPA Password Otomatis**: Layanan [ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py) kini otomatis membuka path `/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch` dan `net_wlan_secrity_t.gch` untuk membaca SSID (`Transfer_meaning('ESSID')`) dan kata sandi WPA (`Transfer_meaning('KeyPassphrase'/'PreSharedKey')`).
   - **Sinkronisasi Otomatis ke Database**: Pada pemindaian berkala (`scheduled_job_wrapper`) maupun *Single Probe Check* (`single_ont_check`), SSID dan Password WiFi yang berhasil diekstrak otomatis disimpan ke entitas `PerangkatONT` / `Pelanggan` di database.
