@@ -26,6 +26,43 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Arsitektur Pemantauan Paralel Multi-Kantor & Jeda Jadwal Mandiri Per Kantor (Backend & Frontend)**:
+  - **Dukungan Multi-Threading Paralel Penuh Antar Kantor ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+    - Merestrukturisasi engine singleton `MonitoringScheduler` dari status tunggal global menjadi `OfficeScanState` yang thread-safe dengan `threading.Lock` per kantor.
+    - Setiap kantor kini dapat menjalankan pemindaian secara bersamaan (*true parallel multi-office scanning*) tanpa memblokir kantor lainnya: Banyumas, Cabang, Pusat, maupun kantor baru yang ditambahkan di masa mendatang dapat dipindai serentak.
+    - Pemindaian manual (`POST /api/monitoring/scan-all`) dieksekusi secara asinkron di latar belakang menggunakan thread terpisah per kantor dan langsung mengembalikan respons `status: "started"`.
+    - Latar belakang scheduler berkala (`scheduled_job_wrapper`) kini mengiterasi seluruh kantor aktif terdaftar dari tabel `kantors` dan meluncurkan thread pemindaian mandiri secara paralel untuk setiap kantor yang status scheduler-nya `RUNNING`.
+  - **Pembaruan Database MySQL Local untuk Status Jadwal Per Kantor (`system_settings`)**:
+    - Menyimpan status jadwal per kantor secara permanen dengan kunci dinamis: `scheduler_status_{kode_kantor}` (misal: `scheduler_status_cabang`, `scheduler_status_pusat`, `scheduler_status_banyumas`).
+    - Menjeda jadwal pemantauan pada kantor tertentu (misal Banyumas) hanya akan mengubah `scheduler_status_banyumas` menjadi `STOPPED`, sementara jadwal kantor lain (Cabang dan Pusat) tetap aktif `RUNNING`.
+    - Jika dijeda tanpa menentukan kantor (secara global), sistem secara otomatis menyinkronkan status ke seluruh kantor terdaftar di database.
+  - **Dukungan Kantor Baru Dinamis Tanpa Batasan Hardcode**:
+    - Seluruh logika pembacaan status kantor, scheduler wrapper, dan checkpoint JSON (`data/scan_state_{kantor}.json`) mendukung penambahan kantor baru secara dinamis dari tabel `kantors`.
+  - **Sinkronisasi Antarmuka Pengguna Frontend ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))**:
+    - Tombol "Jeda Jadwal" / "Aktifkan Jadwal" pada Beranda kini mengirimkan parameter `{ kantor: activeOffice }` sehingga aksi Super Admin hanya menjeda jadwal untuk kantor aktif yang sedang dibuka.
+    - Status mesin pemantau di Control Bar ("Pemantauan Otomatis: Aktif" vs "Dijeda") secara dinamis mencerminkan status jadwal spesifik kantor yang sedang dibuka (`activeOffice`).
+    - Aksi Jeda Pemindaian, Lanjutkan, dan Stop Pemindaian kini mengirimkan parameter `{ kantor: activeOffice }` secara akurat.
+
+- **Isolasi Pemindaian Multi-Kantor & Proteksi Hak Akses Kontrol (Beranda & Backend)**:
+  - **Perbaikan Independensi Tombol Pemindaian Antar Kantor**:
+    - Tombol pemindaian kantor aktif (misal *"Pindai Cabang"*) kini **bebas diklik** dan tidak lagi terkunci/disabled saat kantor lain (seperti Banyumas) sedang melakukan pemindaian.
+    - Kondisi disabled pada tombol pemindaian sekarang diperketat hanya jika kantor yang sedang aktif dibuka itu sendiri yang sedang memindai: `disabled={isToggling || (isScanning && isCurrentOfficeScan)}`.
+  - **Sinkronisasi Otomatis Status & Metrik KPI Berdasarkan Kantor Aktif**:
+    - `fetchStatus()` dan `fetchKpi()` kini otomatis meneruskan parameter `{ kantor: activeOffice }` ke backend, dan langsung dieksekusi secara instan saat pengguna berpindah kantor di dropdown navbar atas tanpa tertahan timer polling.
+    - Endpoint `/api/monitoring/status` di backend diperbarui untuk menghitung data `total_customers` dan status pemantauan secara terisolasi per kantor yang diminta.
+  - **Isolasi Visual Pemindaian Real-Time ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx))**:
+    - Progress bar pemindaian aktif dan status jeda kini terisolasi 100% per kantor aktif (`activeOffice`). Jika kantor yang sedang dipindai adalah `Banyumas`, tampilan kantor `Pusat` dan `Cabang` tetap bersih dalam kondisi standby tanpa menampilkan progress bar Banyumas yang membingungkan.
+    - **Opsi B Khusus Super Admin**: Super Admin saat membuka kantor lain disajikan banner informasi kompak latar belakang (*"Informasi: Pemindaian Kantor [BANYUMAS] sedang berjalan di latar belakang: X/Y ONT"*), memberikan visibilitas penuh tanpa merusak ruang kerja kantor aktif.
+    - Admin Cabang dan Teknisi hanya melihat proses pemindaian yang relevan dengan kantor yang ditugaskan kepada mereka.
+  - **Pengetatan Hak Akses Kontrol Pemindaian & Jadwal Scheduler**:
+    - **Jeda Jadwal Otomatis (Scheduler Toggle)**: Dibatasi eksklusif hanya untuk `super admin` baik di UI maupun di endpoint backend `POST /api/monitoring/toggle-scheduler`.
+    - **Jeda, Lanjutkan, & Batalkan Pemindaian Aktif**: Super Admin berhak mengontrol pemindaian di seluruh kantor, sedangkan Admin Cabang dibatasi ketat hanya untuk mengontrol pemindaian yang menargetkan kantor yang diizinkannya (`_validate_scan_control_permission`). Teknisi dilarang mengontrol pemindaian massal.
+  - **Form Login Bersih & Aman ([HalamanLogin.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/HalamanLogin.jsx))**:
+    - Menghapus nilai hardcoded username `admin` dan password `agiltampan` pada initial state form login.
+    - Input login kini selalu bersih/kosong dengan placeholder netral demi keamanan sistem.
+  - **Modul Pengguna NOC ([ModulPenggunaNOC.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPenggunaNOC.jsx))**: Tombol aksi langsung edit dan hapus pada setiap baris tabel kini dikemas ke dalam tombol menu titik tiga (`MoreVertical`), menyajikan opsi popover elegan *"Edit Akun"* dan *"Hapus"* (dengan proteksi terhadap akun master `admin`).
+  - **Modul Kantor Cabang ([ModulKantorCabang.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulKantorCabang.jsx))**: Tombol aksi langsung (*Sync MikroTik*, *Edit*, *Hapus*) kini diringkas ke dalam tombol menu titik tiga (`MoreVertical`), menyajikan pilihan popover *"Sync MikroTik"* (khusus router yang memiliki host), *"Edit Kantor"*, dan *"Hapus Kantor"* (terproteksi untuk kantor default sistem).
+
 - **Penyelarasan Pengaturan Sistem Real Database & Eliminasi Tab Redundan Router MikroTik**:
   - **Sinkronisasi Otomatis Data Pengaturan Real Database**: [ModulPengaturan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) kini otomatis memanggil `fetchBackendSettings()` saat komponen pertama kali di-mount, memastikan nilai interval pemantauan, ambang batas redaman (-26 dBm / -27 dBm), kredensial ONT multi-fallback, dan preferensi notifikasi selalu terisi langsung dari database (tabel `system_settings`), bukan nilai template/placeholder bawaan.
   - **Sertifikasi Data Profil Nyata**: Endpoint `GET /api/auth/me` pada [app/main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) diperbarui untuk menyertakan `no_wa` dari database, sehingga data pengguna yang tampil di tab Personal (Profil & Kata Sandi) memuat ID, Nama, No. WhatsApp, Kantor Layanan, dan Hak Akses riil.

@@ -133,7 +133,7 @@ export function ModulBeranda({
   // 1. Fetch Engine Status
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await MonitoringService.getStatus()
+      const res = await MonitoringService.getStatus({ kantor: activeOffice })
       if (res.ok && res.data) {
         const data = res.data
         const wasScanning = isScanning
@@ -167,12 +167,12 @@ export function ModulBeranda({
       console.error('Gagal mengambil status monitoring:', err)
       setIsNetworkError(true)
     }
-  }, [isScanning, chartRange])
+  }, [isScanning, chartRange, activeOffice])
 
   // 2. Fetch KPI Metrics
   const fetchKpi = useCallback(async () => {
     try {
-      const res = await MonitoringService.getKpi()
+      const res = await MonitoringService.getKpi({ kantor: activeOffice })
       if (res.ok && res.data) {
         setKpi(res.data)
         if (res.data.total_monitored > 0 && res.data.los === res.data.total_monitored) {
@@ -182,7 +182,7 @@ export function ModulBeranda({
     } catch (err) {
       console.error('Gagal mengambil metrik KPI:', err)
     }
-  }, [])
+  }, [activeOffice])
 
   // 3. Fetch Notifications / Unread Count
   const fetchNotifications = useCallback(async () => {
@@ -476,8 +476,10 @@ export function ModulBeranda({
 
   // Auto-reload data saat activeOffice berubah atau filter range berubah
   useEffect(() => {
+    fetchStatus()
+    fetchKpi()
     loadChartData()
-  }, [chartRange, selectedDate, activeOffice, loadChartData])
+  }, [chartRange, selectedDate, activeOffice, loadChartData, fetchStatus, fetchKpi])
 
   // Polling berkala
   useEffect(() => {
@@ -516,17 +518,16 @@ export function ModulBeranda({
         ? 'Cabang'
         : activeOffice === 'pusat'
         ? 'Pusat'
-        : 'Seluruh Kantor'
+        : activeOffice?.toUpperCase() || 'Seluruh Kantor'
     showToast(`Memulai pemindaian manual ONT ${targetLabel}...`, 'info')
     setIsScanning(true)
     try {
-      const res = await MonitoringService.triggerScanAll()
+      const res = await MonitoringService.triggerScanAll({ kantor: activeOffice })
       if (res.ok && res.data && res.data.status !== 'error') {
         setIsNetworkError(false)
-        showToast(`Pemindaian ONT ${targetLabel} berhasil selesai!`, 'success')
+        showToast(res.data?.message || `Pemindaian ONT ${targetLabel} berhasil dimulai!`, 'success')
         await fetchStatus()
         await fetchKpi()
-        await loadChartData()
       } else {
         showToast(res.data?.message || 'Pemindaian sedang berjalan di latar belakang', 'info')
       }
@@ -535,7 +536,6 @@ export function ModulBeranda({
       showToast('Koneksi Gagal: Tidak dapat menghubungi modem ONT (10.10.x.x)', 'error')
       setIsNetworkError(true)
     } finally {
-      setIsScanning(false)
       fetchStatus()
       fetchKpi()
     }
@@ -543,7 +543,7 @@ export function ModulBeranda({
 
   const handlePauseScan = async () => {
     try {
-      const res = await MonitoringService.pauseScan()
+      const res = await MonitoringService.pauseScan({ kantor: activeOffice })
       if (res.ok && res.data?.status !== 'error') {
         showToast('Pemindaian dijeda. Progres tersimpan ke sistem.', 'info')
         await fetchStatus()
@@ -557,7 +557,7 @@ export function ModulBeranda({
 
   const handleResumeScan = async () => {
     try {
-      const res = await MonitoringService.resumeScan()
+      const res = await MonitoringService.resumeScan({ kantor: activeOffice })
       if (res.ok && res.data?.status !== 'error') {
         showToast('Melanjutkan pemindaian ONT dari posisi jeda...', 'success')
         setIsScanning(true)
@@ -573,7 +573,7 @@ export function ModulBeranda({
   const handleStopScan = async () => {
     if (!window.confirm('Hentikan paksa pemindaian? Progres pemindaian saat ini akan direset ke awal.')) return
     try {
-      const res = await MonitoringService.stopScan()
+      const res = await MonitoringService.stopScan({ kantor: activeOffice })
       if (res.ok && res.data?.status !== 'error') {
         showToast('Pemindaian dihentikan paksa. Data progres dibersihkan.', 'info')
         setIsScanning(false)
@@ -592,14 +592,15 @@ export function ModulBeranda({
     setIsToggling(true)
     try {
       const wasRunning = engineStatus === 'RUNNING'
-      const res = await MonitoringService.toggleScheduler()
+      const res = await MonitoringService.toggleScheduler({ kantor: activeOffice })
       if (res.ok && res.data) {
         setEngineStatus(res.data.scheduler_status)
         if (res.data.interval_minutes) setIntervalMinutes(res.data.interval_minutes)
+        const officeLabel = activeOffice?.toUpperCase() || 'SELURUH KANTOR'
         if (wasRunning) {
-          showToast('Jadwal pemantauan otomatis dijeda (STOPPED)', 'info')
+          showToast(`Jadwal pemantauan otomatis ${officeLabel} dijeda (STOPPED)`, 'info')
         } else {
-          showToast('Jadwal pemantauan otomatis diaktifkan (RUNNING)', 'success')
+          showToast(`Jadwal pemantauan otomatis ${officeLabel} diaktifkan (RUNNING)`, 'success')
         }
       }
     } catch (err) {
@@ -633,6 +634,15 @@ export function ModulBeranda({
 
   const isSuperAdmin = currentUser?.role === 'super admin'
   const isAdminOrSuper = currentUser?.role === 'admin' || isSuperAdmin
+
+  // Logika Isolasi Multi-Kantor untuk Pemindaian
+  const scanTargetKantor = scanProgress?.target_kantor || ''
+  const isScanActive = isScanning || Boolean(scanProgress?.is_scanning || scanProgress?.is_paused)
+  const isCurrentOfficeScan = isScanActive
+    ? (scanTargetKantor === activeOffice || scanTargetKantor === 'all')
+    : true
+  const hasActiveScanInOtherOffice = isScanActive && scanTargetKantor && scanTargetKantor !== 'all' && scanTargetKantor !== activeOffice
+  const canControlCurrentScan = isSuperAdmin || (currentUser?.role === 'admin' && scanTargetKantor === activeOffice)
 
   return (
     <div className="space-y-4 font-sans">
@@ -719,13 +729,13 @@ export function ModulBeranda({
                 </div>
               )}
 
-              {/* Kondisi 1: Standby / Idle */}
-              {!isScanning && (!scanProgress || !scanProgress.is_paused) && (
+              {/* Kondisi 1: Standby / Idle untuk Kantor Aktif Ini */}
+              {(!isScanning || !isCurrentOfficeScan || !scanProgress || scanProgress.total === 0) && (!scanProgress || !scanProgress.is_paused || !isCurrentOfficeScan) && (
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={handleStartScan}
-                    disabled={isToggling}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px] cursor-pointer"
+                    disabled={isToggling || (isScanning && isCurrentOfficeScan)}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px] cursor-pointer disabled:opacity-50"
                   >
                     <Play className="w-4 h-4 fill-white" />
                     <span>
@@ -748,8 +758,8 @@ export function ModulBeranda({
                       className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-white hover:bg-cyan-50/60 text-slate-700 font-mono text-xs font-bold border border-sky-200 transition flex items-center justify-center gap-1.5 min-h-[38px]"
                       title={
                         engineStatus === 'RUNNING'
-                          ? 'Klik untuk menjeda jadwal pemindaian otomatis'
-                          : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis'
+                          ? 'Klik untuk menjeda jadwal pemindaian otomatis (Hanya Super Admin)'
+                          : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis (Hanya Super Admin)'
                       }
                     >
                       {engineStatus === 'RUNNING' ? (
@@ -768,8 +778,8 @@ export function ModulBeranda({
                 </div>
               )}
 
-              {/* Kondisi 2: Sedang Memindai */}
-              {isScanning && (
+              {/* Kondisi 2: Sedang Memindai di Kantor Aktif Ini */}
+              {isScanning && isCurrentOfficeScan && canControlCurrentScan && scanProgress?.total > 0 && (
                 <div className="flex items-center gap-2 w-full sm:w-auto font-mono">
                   <button
                     onClick={handlePauseScan}
@@ -789,8 +799,8 @@ export function ModulBeranda({
                 </div>
               )}
 
-              {/* Kondisi 3: Pemindaian Dijeda */}
-              {!isScanning && scanProgress && scanProgress.is_paused && (
+              {/* Kondisi 3: Pemindaian Dijeda di Kantor Aktif Ini */}
+              {!isScanning && scanProgress && scanProgress.is_paused && isCurrentOfficeScan && canControlCurrentScan && (
                 <div className="flex items-center gap-2 w-full sm:w-auto font-mono">
                   <button
                     onClick={handleResumeScan}
@@ -815,8 +825,8 @@ export function ModulBeranda({
 
         {/* Progress Bar Pemindaian Real-Time */}
         <div className="pt-3 border-t border-sky-100">
-          {/* Sedang Memindai */}
-          {(isScanning || (scanProgress && scanProgress.is_scanning)) && (
+          {/* Sedang Memindai - Hanya tampil jika kantor cocok dan ada target pemindaian yang aktif */}
+          {(isScanning || Boolean(scanProgress?.is_scanning)) && isCurrentOfficeScan && scanProgress?.total > 0 && (
             <div className="space-y-2.5 bg-cyan-50/40 border border-sky-200 p-3.5 sm:p-4 rounded-xl text-slate-800 shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
                 <div className="flex items-center gap-2">
@@ -859,8 +869,8 @@ export function ModulBeranda({
             </div>
           )}
 
-          {/* Pemindaian Terjeda */}
-          {!isScanning && scanProgress && scanProgress.is_paused && (
+          {/* Pemindaian Terjeda - Hanya tampil jika kantor cocok */}
+          {!isScanning && scanProgress && scanProgress.is_paused && isCurrentOfficeScan && (
             <div className="space-y-2.5 bg-amber-50 border border-amber-200 p-3.5 sm:p-4 rounded-xl shadow-2xs font-mono">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-2 text-amber-900 font-extrabold">
@@ -892,8 +902,25 @@ export function ModulBeranda({
             </div>
           )}
 
-          {/* Standby */}
-          {!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused)) && (
+          {/* OPSI B KHUSUS SUPER ADMIN: Tampilkan Notifikasi Informasi jika Kantor Lain Sedang Memindai */}
+          {isSuperAdmin && hasActiveScanInOtherOffice && (
+            <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-cyan-50/70 border border-sky-200 text-xs font-mono">
+              <div className="flex items-center gap-2 text-slate-700">
+                <span className="w-2 h-2 rounded-full bg-cyan-600 animate-ping"></span>
+                <span>
+                  Informasi: Pemindaian Kantor{' '}
+                  <strong className="uppercase text-cyan-800">[{scanTargetKantor}]</strong> sedang berjalan di latar belakang:{' '}
+                  <strong>{scanProgress.current || 0} / {scanProgress.total || 0} ONT ({scanProgress.percent || 0}%)</strong>
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-500 font-sans hidden sm:inline">
+                Pindah ke kantor {scanTargetKantor.toUpperCase()} untuk melihat progress lengkap &amp; kontrol.
+              </span>
+            </div>
+          )}
+
+          {/* Standby (Tampil jika idle atau sedang membuka kantor yang tidak sedang memindai) */}
+          {((!isScanning && (!scanProgress || (!scanProgress.is_scanning && !scanProgress.is_paused))) || !isCurrentOfficeScan) && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono text-slate-700 pt-1">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-800 shrink-0" />
@@ -905,7 +932,7 @@ export function ModulBeranda({
                 </strong>
               </div>
               <div className="text-[11px] text-slate-600 font-bold">
-                <span>Target: {scanProgress?.total || kpi.total_monitored || 0} ONT</span>
+                <span>Target: {kpi.total_monitored || 0} ONT ({activeOffice.toUpperCase()})</span>
               </div>
             </div>
           )}

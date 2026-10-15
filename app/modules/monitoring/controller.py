@@ -7,19 +7,25 @@ from app.modules.monitoring.service import MonitoringService
 class MonitoringController:
 
     @staticmethod
-    def get_status() -> Dict[str, Any]:
-        return MonitoringService.get_status()
+    def get_status(kantor: Optional[str] = None) -> Dict[str, Any]:
+        return MonitoringService.get_status(kantor=kantor)
 
     @staticmethod
-    def toggle_scheduler(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def toggle_scheduler(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None, kantor: Optional[str] = None) -> Dict[str, Any]:
         if not user or user.get("role") != "super admin":
-            raise HTTPException(status_code=403, detail="Akses ditolak: Hanya Super Admin yang berhak menjeda atau mengaktifkan jadwal pemantauan")
+            raise HTTPException(status_code=403, detail="Akses ditolak: Hanya Super Admin yang berhak menjeda atau mengaktifkan jadwal pemantauan berkala.")
         
-        new_status = MonitoringService.toggle_scheduler()
+        target_kantor = kantor
+        if not target_kantor and request:
+            from app.core.security import get_active_kantor
+            target_kantor = getattr(request.state, "active_kantor", None) or get_active_kantor(request, user)
+
+        new_status = MonitoringService.toggle_scheduler(kantor=target_kantor)
         if request and db:
             from app.modules.activity_logs.service import ActivityLogService
+            office_label = f"kantor {target_kantor.upper()}" if target_kantor and target_kantor != "all" else "SELURUH KANTOR"
             action = "START_MONITORING" if new_status == "RUNNING" else "PAUSE_MONITORING"
-            ket = "Memulai pemantauan otomatis (scheduler ONT diaktifkan)" if new_status == "RUNNING" else "Menjeda pemantauan otomatis (scheduler ONT dihentikan sementara)"
+            ket = f"Memulai pemantauan otomatis (scheduler ONT {office_label} diaktifkan)" if new_status == "RUNNING" else f"Menjeda pemantauan otomatis (scheduler ONT {office_label} dihentikan sementara)"
             ActivityLogService.log_from_request(
                 db=db,
                 request=request,
@@ -28,33 +34,38 @@ class MonitoringController:
                 keterangan=ket,
                 user=user
             )
-        return {"status": "success", "scheduler_status": new_status}
+        return {"status": "success", "scheduler_status": new_status, "kantor": target_kantor or "all"}
 
     @staticmethod
-    def trigger_scan_all(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def trigger_scan_all(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None, kantor: Optional[str] = None) -> Dict[str, Any]:
         if user and user.get("role") in ["operator", "teknisi", "karyawan"]:
             raise HTTPException(
                 status_code=403,
                 detail="Akses ditolak: Teknisi tidak diizinkan memulai pemindaian serentak. Gunakan fitur cek per pelanggan (Single Probe)."
             )
         
-        target_kantor = None
-        if request:
-            from app.core.security import get_active_kantor, get_user_allowed_kantor
-            user_allowed = get_user_allowed_kantor(user) if user else []
-            active = getattr(request.state, "active_kantor", None) or get_active_kantor(request, user)
-            
-            # Jika bukan super admin, batasi scan hanya ke kantor yang diizinkan
-            if user and user.get("role") != "super admin":
-                if active in user_allowed:
-                    target_kantor = active
-                else:
-                    target_kantor = user_allowed[0] if user_allowed else "cabang"
+        from app.core.security import get_active_kantor, get_user_allowed_kantor
+        user_allowed = get_user_allowed_kantor(user) if user else []
+        active = getattr(request.state, "active_kantor", None) or get_active_kantor(request, user) if request else None
+
+        target_kantor = kantor or active
+        
+        # Jika bukan super admin, batasi scan hanya ke kantor yang diizinkan
+        if user and user.get("role") != "super admin":
+            if target_kantor in user_allowed:
+                pass
             else:
-                # Super admin: scan kantor aktif yang sedang dipilih (tidak ada opsi "all")
+                target_kantor = user_allowed[0] if user_allowed else "cabang"
+        else:
+            # Super admin
+            if not target_kantor or target_kantor == "all":
                 target_kantor = active if (active and active in user_allowed and active != "all") else "cabang"
 
-        res = MonitoringService.scan_all(kantor=target_kantor)
+        # Jalankan pemindaian di background thread agar API merespons secara non-blocking dan independen
+        import threading
+        th = threading.Thread(target=MonitoringService.scan_all, kwargs={"kantor": target_kantor}, daemon=True)
+        th.start()
+
         if request and db:
             from app.modules.activity_logs.service import ActivityLogService
             office_desc = f"kantor {target_kantor.upper()}" if target_kantor else "kantor CABANG"
@@ -66,13 +77,35 @@ class MonitoringController:
                 keterangan=f"Memulai pemindaian manual ONT {office_desc}",
                 user=user
             )
-        return res
+        return {"status": "started", "kantor": target_kantor, "message": f"Pemindaian kantor {target_kantor.upper()} berhasil dimulai di latar belakang."}
 
     @staticmethod
-    def trigger_scan_pause(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") in ["operator", "teknisi", "karyawan"]:
-            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi/Operator tidak diizinkan menjeda pemindaian")
-        res = MonitoringService.pause_scan()
+    def _validate_scan_control_permission(user: Optional[Dict[str, Any]], kantor: Optional[str] = None):
+        if not user or user.get("role") in ["operator", "teknisi", "karyawan"]:
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi/Operator tidak diizinkan mengontrol proses pemindaian.")
+        
+        # Super admin selalu diizinkan
+        if user.get("role") == "super admin":
+            return
+            
+        from app.core.security import get_user_allowed_kantor
+        user_allowed = get_user_allowed_kantor(user)
+        
+        if kantor and kantor != "all" and kantor not in user_allowed:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Akses ditolak: Anda tidak memiliki wewenang mengontrol pemindaian untuk kantor '{kantor.upper()}'."
+            )
+
+    @staticmethod
+    def trigger_scan_pause(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None, kantor: Optional[str] = None) -> Dict[str, Any]:
+        target_kantor = kantor
+        if not target_kantor and request:
+            from app.core.security import get_active_kantor
+            target_kantor = getattr(request.state, "active_kantor", None) or get_active_kantor(request, user)
+        
+        MonitoringController._validate_scan_control_permission(user, target_kantor)
+        res = MonitoringService.pause_scan(kantor=target_kantor)
         if request and db and res.get("status") == "success":
             from app.modules.activity_logs.service import ActivityLogService
             ActivityLogService.log_from_request(
@@ -80,15 +113,19 @@ class MonitoringController:
                 request=request,
                 action="PAUSE_MONITORING",
                 status="SUCCESS",
-                keterangan="Menjeda proses pemindaian aktif ONT",
+                keterangan=f"Menjeda proses pemindaian aktif ONT kantor {(target_kantor or 'all').upper()}",
                 user=user
             )
         return res
 
     @staticmethod
-    def trigger_scan_resume(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") in ["operator", "teknisi", "karyawan"]:
-            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi/Operator tidak diizinkan melanjutkan pemindaian")
+    def trigger_scan_resume(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None, kantor: Optional[str] = None) -> Dict[str, Any]:
+        target_kantor = kantor
+        if not target_kantor and request:
+            from app.core.security import get_active_kantor
+            target_kantor = getattr(request.state, "active_kantor", None) or get_active_kantor(request, user)
+            
+        MonitoringController._validate_scan_control_permission(user, target_kantor)
         if request and db:
             from app.modules.activity_logs.service import ActivityLogService
             ActivityLogService.log_from_request(
@@ -96,16 +133,20 @@ class MonitoringController:
                 request=request,
                 action="START_MONITORING",
                 status="SUCCESS",
-                keterangan="Melanjutkan pemindaian ONT yang terjeda dari checkpoint JSON",
+                keterangan=f"Melanjutkan pemindaian ONT kantor {(target_kantor or 'all').upper()} dari checkpoint JSON",
                 user=user
             )
-        return MonitoringService.resume_scan()
+        return MonitoringService.resume_scan(kantor=target_kantor)
 
     @staticmethod
-    def trigger_scan_stop(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") in ["operator", "teknisi", "karyawan"]:
-            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi/Operator tidak diizinkan menghentikan pemindaian")
-        res = MonitoringService.stop_scan()
+    def trigger_scan_stop(request: Optional[Any] = None, db: Optional[Session] = None, user: Optional[Dict[str, Any]] = None, kantor: Optional[str] = None) -> Dict[str, Any]:
+        target_kantor = kantor
+        if not target_kantor and request:
+            from app.core.security import get_active_kantor
+            target_kantor = getattr(request.state, "active_kantor", None) or get_active_kantor(request, user)
+            
+        MonitoringController._validate_scan_control_permission(user, target_kantor)
+        res = MonitoringService.stop_scan(kantor=target_kantor)
         if request and db:
             from app.modules.activity_logs.service import ActivityLogService
             ActivityLogService.log_from_request(
@@ -113,7 +154,7 @@ class MonitoringController:
                 request=request,
                 action="STOP_MONITORING",
                 status="SUCCESS",
-                keterangan="Menghentikan paksa proses pemindaian ONT dan membersihkan antrean",
+                keterangan=f"Menghentikan paksa pemindaian aktif ONT kantor {(target_kantor or 'all').upper()}",
                 user=user
             )
         return res

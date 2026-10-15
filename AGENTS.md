@@ -21,7 +21,7 @@ Dokumen ini adalah acuan arsitektur dan pedoman sistem (*System Instruction / Ru
 | :--- | :--- |
 | **Backend Framework** | Python 3.10+ / FastAPI |
 | **Server ASGI** | Uvicorn |
-| **Database** | TiDB Cloud (MySQL-Compatible) via SQLAlchemy & PyMySQL |
+| **Database** | MySQL Local via SQLAlchemy & PyMySQL |
 | **Scheduler** | APScheduler (`BackgroundScheduler` daemon) |
 | **Frontend Rendering** | Jinja2 Templates (Server-Side Rendered) |
 | **Styling** | Tailwind CSS (Mobile-First responsive) |
@@ -54,7 +54,7 @@ Pengecekan redaman optik mengacu pada standar operasional berikut:
 Modem pelanggan di lapangan dapat memiliki kredensial yang bervariasi karena konfigurasi teknisi. Sistem menerapkan strategi autentikasi berlapis (*Fallback Chain*):
 
 1. **Penyimpanan**:
-   - Daftar kredensial disimpan pada tabel `system_settings` di TiDB Cloud dengan key `default_modem_credentials` berupa JSON Array:
+   - Daftar kredensial disimpan pada tabel `system_settings` di database MySQL Local dengan key `default_modem_credentials` berupa JSON Array:
      ```json
      [
        {"username": "admin", "password": "tekno2024"},
@@ -127,7 +127,7 @@ EdTeknoGuard/
    - Mekanisme *Sliding Expiration*: Selama pengguna aktif mengakses aplikasi, masa berlaku sesi otomatis diperpanjang 30 hari ke depan. Jika pengguna tidak mengakses aplikasi selama 30 hari berturut-turut, sesi otomatis kedaluwarsa dan pengguna dialihkan ke `/login`.
    - Sesi disimpan secara aman melalui session cookie terproteksi (`edteknoguard_session`).
 2. **Kerahasiaan Credential**:
-   - Secret key, bot token Telegram, dan kredensial TiDB Cloud **WAJIB** berada di file `.env`.
+   - Secret key, bot token Telegram, dan kredensial database MySQL **WAJIB** berada di file `.env`.
 3. **Pop-up Konfirmasi & Penghapusan Berjenjang (CASCADE Deletion) & Normalisasi Data**:
    - **Normalisasi Tunggal Master Pelanggan**: Entitas akun portal telah digabung langsung ke dalam tabel master `pelanggan` (`password_hash`, `lokasi_gps`, `status_verifikasi`, `last_login`), mengeliminasi tabel redundan `akun_pelanggan`.
    - **Database CASCADE Wajib**: Seluruh 4 tabel anakan pelanggan (`log_performa_ont`, `alert_logs`, `tiket_kendala`, `kuota_pelanggan`) **WAJIB** memiliki constraint ForeignKey dengan `ON DELETE CASCADE` di database dan `cascade="all, delete-orphan", passive_deletes=True` pada model SQLAlchemy.
@@ -167,7 +167,7 @@ EdTeknoGuard/
       - **Kebijakan SOP Jangan Ditimpa**: Data pelanggan yang sudah terdaftar di database dilarang keras ditimpa saat import. Seluruh opsi "Timpa" ditiadakan dari sistem.
       - **Resolusi Duplikasi Inline**: Penanganan duplikasi (Auto-ID unik, abaikan/skip, hapus baris, atau edit manual ID/IP/Nama) dilakukan secara langsung dan interaktif pada tabel Pratinjau Langkah 3 tanpa menggunakan pop-up modal koreksi sekunder yang terpisah. Baris dengan status diabaikan (*skip*) otomatis dilewati dan tidak memblokir proses simpan ke database.
     - **Auto-Recovery & Persistence Pemantauan**:
-      - Status scheduler (`RUNNING`/`STOPPED`) dan interval tersimpan permanen di tabel `system_settings` TiDB Cloud.
+      - Status scheduler (`RUNNING`/`STOPPED`) dan interval tersimpan permanen di tabel `system_settings` database MySQL.
       - Saat server reboot / restart / hidup kembali setelah mati listrik atau putus jaringan, sistem otomatis memulihkan status scheduler ke `RUNNING` tanpa intervensi manual.
       - Jika waktu mati server telah melampaui interval pemantauan reguler, sistem otomatis menjadwalkan *Catch-Up Scan* (5 detik setelah startup) dan mencatat entri audit log `STARTUP_RECOVERY`.
       - API `/api/monitoring/status` menyediakan parameter `next_run_time` untuk kepastian visibilitas jadwal pemindaian berikutnya di antarmuka web.
@@ -175,7 +175,7 @@ EdTeknoGuard/
 11. **Portal Pelanggan Mandiri (Self-Service Mobile Web App di `/portal`)**:
     - **Arsitektur Satu Proyek & Satu Server**:
       - Terintegrasi di dalam repositori pada folder `portal_pelanggan/` dan di-mount langsung pada aplikasi utama di endpoint `/portal` (dapat juga dijalankan mandiri di port terpisah jika diinginkan).
-      - Menggunakan basis data terpadu (TiDB Cloud) langsung pada tabel master `pelanggan` serta tabel anak `tiket_kendala` dan `kuota_pelanggan`.
+      - Menggunakan basis data terpadu (MySQL Local) langsung pada tabel master `pelanggan` serta tabel anak `tiket_kendala` dan `kuota_pelanggan`.
     - **Pemberian Akun & Kredensial Langsung oleh Petugas (Bebas Pendaftaran Mandiri)**:
       - Alur pendaftaran mandiri warga desa ditiadakan demi kemudahan warga dan kepastian otentikasi data ISP.
       - Akun pelanggan dibuat langsung oleh kantor ISP saat pemasangan modem dengan kata sandi awal `123456`.

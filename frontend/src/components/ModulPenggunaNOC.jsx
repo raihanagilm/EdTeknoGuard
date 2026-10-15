@@ -11,7 +11,9 @@ import {
   X,
   ArrowUpDown,
   Check,
-  Users
+  Users,
+  MoreVertical,
+  Shield
 } from 'lucide-react';
 import { UsersService } from '../services/api';
 import {
@@ -574,23 +576,38 @@ export function ModulPenggunaNOC() {
                       </button>
                     </td>
                     <td className="py-2.5 px-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="relative group inline-block text-left">
                         <button
-                          onClick={() => openEditModal(u)}
-                          className="p-1 rounded-lg hover:bg-cyan-50 text-cyan-700 border border-sky-200 transition cursor-pointer"
-                          title="Edit Akun"
+                          type="button"
+                          className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+                          title="Pilihan Aksi"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <MoreVertical className="w-3.5 h-3.5" />
                         </button>
-                        {u.username !== 'admin' && (
-                          <button
-                            onClick={() => handleDeleteUser(u)}
-                            className="p-1 rounded-lg hover:bg-rose-50 text-rose-600 border border-rose-200 transition cursor-pointer"
-                            title="Hapus Akun"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+
+                        <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[150px]">
+                          <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(u)}
+                              className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
+                            >
+                              <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                              <span>Edit Akun</span>
+                            </button>
+
+                            {u.username !== 'admin' && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteUser(u)}
+                                className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition border-t border-slate-100 cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                <span>Hapus</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </td>
                   </tr>

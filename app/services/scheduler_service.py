@@ -3,8 +3,9 @@ import os
 import json
 import time
 import logging
+import threading
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
@@ -12,85 +13,96 @@ from app.core.timezone import get_now_wib, get_today_wib
 
 from app.core.database import SessionLocal
 from app.core.config import settings
-from app.db.models import Pelanggan, LogPerformaONT, SystemSetting, AlertLog, UserActivityLog
+from app.db.models import Pelanggan, LogPerformaONT, SystemSetting, AlertLog, UserActivityLog, Kantor
 from app.services.snmp_service import SNMPService
 from app.services.ont_scraper_service import ONTScraperService
 
 logger = logging.getLogger("scheduler_service")
 
+class OfficeScanState:
+    def __init__(self, kantor: str):
+        self.kantor: str = kantor
+        self.is_scanning: bool = False
+        self.is_paused: bool = False
+        self.stop_requested: bool = False
+        self.is_network_error: bool = False
+        self.scan_current: int = 0
+        self.scan_total: int = 0
+        self.scan_start_time: float = 0.0
+        self.last_scan_duration: float = 0.0
+        self.resume_index: int = 0
+        self.thread: Optional[threading.Thread] = None
+        self.lock = threading.Lock()
+
 class MonitoringScheduler:
     _instance = None
     _scheduler: Optional[BackgroundScheduler] = None
-    _is_scanning: bool = False
-    _is_paused: bool = False
-    _stop_requested: bool = False
-    _is_network_error: bool = False
-    _scan_current: int = 0
-    _scan_total: int = 0
-    _scan_start_time: float = 0.0
-    _last_scan_duration: float = 0.0
-    _resume_index: int = 0
-    _scan_target_kantor: Optional[str] = None
+    _office_states: Dict[str, OfficeScanState] = {}
+    _state_lock = threading.Lock()
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(MonitoringScheduler, cls).__new__(cls)
             cls._instance._scheduler = BackgroundScheduler(daemon=True)
-            cls._instance._is_scanning = False
-            cls._instance._is_paused = False
-            cls._instance._stop_requested = False
-            cls._instance._is_network_error = False
-            cls._instance._scan_current = 0
-            cls._instance._scan_total = 0
-            cls._instance._scan_start_time = 0.0
-            cls._instance._last_scan_duration = 0.0
-            cls._instance._resume_index = 0
-            cls._instance._scan_target_kantor = None
+            cls._instance._office_states = {}
+            cls._instance._state_lock = threading.Lock()
         return cls._instance
 
     @classmethod
-    def get_state_file_path(cls) -> str:
+    def get_office_state(cls, kantor: Optional[str] = None) -> OfficeScanState:
+        k = (kantor or "all").lower().strip()
+        with cls._state_lock:
+            if k not in cls._office_states:
+                cls._office_states[k] = OfficeScanState(k)
+            return cls._office_states[k]
+
+    @classmethod
+    def get_state_file_path(cls, kantor: Optional[str] = None) -> str:
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         data_dir = os.path.join(base_dir, "data")
         os.makedirs(data_dir, exist_ok=True)
-        return os.path.join(data_dir, "scan_state.json")
+        k = (kantor or "all").lower().strip()
+        return os.path.join(data_dir, f"scan_state_{k}.json")
 
     @classmethod
     def save_scan_state(cls, current_index: int, total: int, kantor: Optional[str] = None):
         try:
-            filepath = cls.get_state_file_path()
+            k = (kantor or "all").lower().strip()
+            filepath = cls.get_state_file_path(k)
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump({
                     "status": "PAUSED",
                     "current_index": current_index,
                     "total": total,
-                    "kantor": kantor,
+                    "kantor": k,
                     "timestamp": get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
                 }, f, indent=2)
-            logger.info(f"[STATE] State pemindaian disimpan ke JSON: {current_index}/{total} (Kantor: {kantor or 'SEMUA'})")
+            logger.info(f"[STATE] State pemindaian disimpan ke JSON: {current_index}/{total} (Kantor: {k})")
         except Exception as e:
-            logger.error(f"[STATE] Gagal menyimpan scan_state.json: {e}")
+            logger.error(f"[STATE] Gagal menyimpan scan_state_{kantor}.json: {e}")
 
     @classmethod
-    def load_scan_state(cls) -> Optional[Dict[str, Any]]:
+    def load_scan_state(cls, kantor: Optional[str] = None) -> Optional[Dict[str, Any]]:
         try:
-            filepath = cls.get_state_file_path()
+            k = (kantor or "all").lower().strip()
+            filepath = cls.get_state_file_path(k)
             if os.path.exists(filepath):
                 with open(filepath, "r", encoding="utf-8") as f:
                     return json.load(f)
         except Exception as e:
-            logger.error(f"[STATE] Gagal membaca scan_state.json: {e}")
+            logger.error(f"[STATE] Gagal membaca scan_state_{kantor}.json: {e}")
         return None
 
     @classmethod
-    def delete_scan_state(cls):
+    def delete_scan_state(cls, kantor: Optional[str] = None):
         try:
-            filepath = cls.get_state_file_path()
+            k = (kantor or "all").lower().strip()
+            filepath = cls.get_state_file_path(k)
             if os.path.exists(filepath):
                 os.remove(filepath)
-                logger.info("[STATE] State file scan_state.json berhasil dihapus.")
+                logger.info(f"[STATE] State file scan_state_{k}.json berhasil dihapus.")
         except Exception as e:
-            logger.error(f"[STATE] Gagal menghapus scan_state.json: {e}")
+            logger.error(f"[STATE] Gagal menghapus scan_state_{kantor}.json: {e}")
 
     @classmethod
     def cleanup_old_logs(cls, db: Session, days: int = 30) -> int:
@@ -292,25 +304,44 @@ class MonitoringScheduler:
             except Exception as e:
                 logger.error(f"Gagal reschedule job: {e}")
 
-    def stop(self):
+    def stop(self, kantor: Optional[str] = None):
         db = SessionLocal()
         try:
             now_str = get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
-            self.set_setting_in_db(db, "scheduler_status", "STOPPED")
-            self.set_setting_in_db(db, "scheduler_paused_at", now_str)
-            self.set_setting_in_db(db, "last_paused_reminder_at", now_str)
+            if kantor and kantor != "all":
+                k = kantor.lower().strip()
+                self.set_setting_in_db(db, f"scheduler_status_{k}", "STOPPED")
+                self.set_setting_in_db(db, f"scheduler_paused_at_{k}", now_str)
+                logger.info(f"Pemantauan otomatis ONT kantor {k.upper()} dijeda (STOPPED) dan disimpan permanen.")
+            else:
+                self.set_setting_in_db(db, "scheduler_status", "STOPPED")
+                self.set_setting_in_db(db, "scheduler_paused_at", now_str)
+                self.set_setting_in_db(db, "last_paused_reminder_at", now_str)
+                # Sinkronkan juga ke semua kantor terdaftar
+                kantors = db.query(Kantor).all()
+                for kt in kantors:
+                    self.set_setting_in_db(db, f"scheduler_status_{kt.kode.lower()}", "STOPPED")
+                logger.info("Pemantauan otomatis ONT SELURUH KANTOR dijeda (STOPPED) dan disimpan permanen.")
         finally:
             db.close()
-        logger.info("Pemantauan otomatis ONT dijeda (STOPPED) dan disimpan permanen.")
 
-    def resume(self):
+    def resume(self, kantor: Optional[str] = None):
         db = SessionLocal()
         try:
-            self.set_setting_in_db(db, "scheduler_status", "RUNNING")
-            self.set_setting_in_db(db, "scheduler_paused_at", "")
+            if kantor and kantor != "all":
+                k = kantor.lower().strip()
+                self.set_setting_in_db(db, f"scheduler_status_{k}", "RUNNING")
+                self.set_setting_in_db(db, f"scheduler_paused_at_{k}", "")
+                logger.info(f"Pemantauan otomatis ONT kantor {k.upper()} dilanjutkan (RUNNING) dan disimpan permanen.")
+            else:
+                self.set_setting_in_db(db, "scheduler_status", "RUNNING")
+                self.set_setting_in_db(db, "scheduler_paused_at", "")
+                kantors = db.query(Kantor).all()
+                for kt in kantors:
+                    self.set_setting_in_db(db, f"scheduler_status_{kt.kode.lower()}", "RUNNING")
+                logger.info("Pemantauan otomatis ONT SELURUH KANTOR dilanjutkan (RUNNING) dan disimpan permanen.")
         finally:
             db.close()
-        logger.info("Pemantauan otomatis ONT dilanjutkan (RUNNING) dan disimpan permanen.")
 
     @classmethod
     def check_paused_reminder(cls, db: Session) -> Optional[Dict[str, Any]]:
@@ -355,84 +386,116 @@ class MonitoringScheduler:
         cls.set_setting_in_db(db, "last_paused_reminder_at", now_str)
         logger.info("[REMINDER] Pengingat pemantauan terjeda ditunda (snooze) selama 1 jam.")
 
-    def pause_scan(self) -> Dict[str, Any]:
-        """Menjeda pemindaian manual/berkala yang sedang aktif berjalan."""
-        if not self._is_scanning:
-            return {"status": "error", "message": "Tidak ada proses pemindaian yang sedang berjalan untuk dijeda."}
-        self._is_paused = True
-        logger.info("[SCAN] Sinyal jeda pemindaian diterima.")
-        return {"status": "success", "message": "Sinyal jeda dikirim, pemindaian akan dijeda setelah modem saat ini."}
+    def pause_scan(self, kantor: Optional[str] = None) -> Dict[str, Any]:
+        """Menjeda pemindaian manual/berkala yang sedang aktif berjalan pada kantor target."""
+        k = (kantor or "all").lower().strip()
+        state = self.get_office_state(k)
+        with state.lock:
+            if not state.is_scanning:
+                return {"status": "error", "message": f"Tidak ada pemindaian aktif di kantor '{k.upper()}' untuk dijeda."}
+            state.is_paused = True
+        logger.info(f"[SCAN] Sinyal jeda pemindaian diterima untuk kantor: {k.upper()}.")
+        return {"status": "success", "message": f"Sinyal jeda dikirim, pemindaian kantor {k.upper()} akan dijeda setelah modem saat ini."}
 
-    def stop_scan(self) -> Dict[str, Any]:
-        """Menghentikan paksa pemindaian yang sedang berjalan atau membatalkan yang dijeda."""
-        self._stop_requested = True
-        self._is_paused = False
-        self._scan_target_kantor = None
-        self.delete_scan_state()
-        if not self._is_scanning:
-            self._resume_index = 0
-            self._scan_current = 0
-            self._stop_requested = False
-        logger.info("[SCAN] Sinyal berhenti paksa pemindaian diterima.")
-        return {"status": "success", "message": "Pemindaian dihentikan paksa dan progres dibersihkan."}
+    def stop_scan(self, kantor: Optional[str] = None) -> Dict[str, Any]:
+        """Menghentikan paksa pemindaian yang sedang berjalan atau membatalkan yang dijeda pada kantor target."""
+        k = (kantor or "all").lower().strip()
+        state = self.get_office_state(k)
+        with state.lock:
+            state.stop_requested = True
+            state.is_paused = False
+            self.delete_scan_state(k)
+            if not state.is_scanning:
+                state.resume_index = 0
+                state.scan_current = 0
+                state.stop_requested = False
+        logger.info(f"[SCAN] Sinyal berhenti paksa pemindaian diterima untuk kantor: {k.upper()}.")
+        return {"status": "success", "message": f"Pemindaian kantor {k.upper()} dihentikan paksa dan progres dibersihkan."}
 
-    def resume_scan(self) -> Dict[str, Any]:
-        """Melanjutkan pemindaian yang dijeda dari checkpoint JSON."""
-        if self._is_scanning:
-            return {"status": "busy", "message": "Proses pemindaian sedang berjalan."}
-        state = self.load_scan_state()
-        kantor = None
-        if state and state.get("current_index") is not None:
-            self._resume_index = state.get("current_index", 0)
-            kantor = state.get("kantor")
-        self._is_paused = False
-        self._stop_requested = False
-        logger.info(f"[SCAN] Melanjutkan pemindaian dari indeks ke-{self._resume_index} (Kantor: {kantor or 'SEMUA'})...")
-        return self.execute_scan_sync(kantor=kantor)
+    def resume_scan(self, kantor: Optional[str] = None) -> Dict[str, Any]:
+        """Melanjutkan pemindaian yang dijeda dari checkpoint JSON untuk kantor target."""
+        k = (kantor or "all").lower().strip()
+        state = self.get_office_state(k)
+        if state.is_scanning:
+            return {"status": "busy", "message": f"Proses pemindaian kantor {k.upper()} sedang berjalan."}
+        saved = self.load_scan_state(k)
+        if saved and saved.get("current_index") is not None:
+            state.resume_index = saved.get("current_index", 0)
+        state.is_paused = False
+        state.stop_requested = False
+        logger.info(f"[SCAN] Melanjutkan pemindaian kantor {k.upper()} dari indeks ke-{state.resume_index}...")
+        
+        # Eksekusi secara asynchronous di background thread agar tidak memblokir request
+        th = threading.Thread(target=self.execute_scan_sync, kwargs={"kantor": k}, daemon=True)
+        th.start()
+        return {"status": "started", "kantor": k, "message": f"Pemindaian kantor {k.upper()} dilanjutkan dari indeks {state.resume_index}."}
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self, kantor: Optional[str] = None) -> Dict[str, Any]:
+        k = (kantor or "all").lower().strip()
         db = SessionLocal()
         try:
-            status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
+            # Baca status per kantor jika ada, jika tidak ada fallback ke global
+            if k != "all":
+                status = self.get_setting_from_db(db, f"scheduler_status_{k}", "")
+                if not status:
+                    status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
+            else:
+                status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
+
             interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
-            last_scan = self.get_setting_from_db(db, "last_scan_time", "-")
-            net_err_str = self.get_setting_from_db(db, "is_network_error", "false")
-            total_customers = db.query(Pelanggan).count()
+            last_scan_key = f"last_scan_time_{k}" if k != "all" else "last_scan_time"
+            last_scan = self.get_setting_from_db(db, last_scan_key, "")
+            if not last_scan:
+                last_scan = self.get_setting_from_db(db, "last_scan_time", "-")
+                
+            net_err_key = f"is_network_error_{k}" if k != "all" else "is_network_error"
+            net_err_str = self.get_setting_from_db(db, net_err_key, "")
+            if not net_err_str:
+                net_err_str = self.get_setting_from_db(db, "is_network_error", "false")
+            
+            cust_q = db.query(Pelanggan).filter(Pelanggan.is_active == True)
+            if k != "all":
+                cust_q = cust_q.filter(Pelanggan.kantor == k)
+            total_customers = cust_q.count()
+            
             interval = int(interval_str) if interval_str.isdigit() else settings.POLLING_INTERVAL_MINUTES
-            is_net_err = (net_err_str.lower() == "true") or self._is_network_error
-            last_duration_str = self.get_setting_from_db(db, "last_scan_duration", str(self._last_scan_duration or 0.0))
-            last_duration = float(last_duration_str) if last_duration_str.replace('.', '', 1).isdigit() else (self._last_scan_duration or 0.0)
+            
+            office_state = self.get_office_state(k)
+            is_net_err = (net_err_str.lower() == "true") or office_state.is_network_error
+            
+            last_duration_key = f"last_scan_duration_{k}" if k != "all" else "last_scan_duration"
+            last_duration_str = self.get_setting_from_db(db, last_duration_key, str(office_state.last_scan_duration or 0.0))
+            last_duration = float(last_duration_str) if last_duration_str.replace('.', '', 1).isdigit() else (office_state.last_scan_duration or 0.0)
         finally:
             db.close()
 
-        state = self.load_scan_state()
-        has_saved_state = state is not None and state.get("status") == "PAUSED"
-        is_paused = self._is_paused or (has_saved_state and not self._is_scanning)
+        saved_state = self.load_scan_state(k)
+        has_saved_state = saved_state is not None and saved_state.get("status") == "PAUSED"
+        is_paused = office_state.is_paused or (has_saved_state and not office_state.is_scanning)
 
-        # Hitung estimasi waktu pemindaian real-time
-        elapsed = round(time.time() - self._scan_start_time, 1) if (self._is_scanning and self._scan_start_time > 0) else 0.0
-        if self._is_scanning and self._scan_current > 0 and self._scan_total > 0:
-            avg_per_ont = (time.time() - self._scan_start_time) / self._scan_current
-            est_total = round(avg_per_ont * self._scan_total, 1)
+        # Hitung estimasi waktu pemindaian real-time untuk kantor ini
+        elapsed = round(time.time() - office_state.scan_start_time, 1) if (office_state.is_scanning and office_state.scan_start_time > 0) else 0.0
+        if office_state.is_scanning and office_state.scan_current > 0 and office_state.scan_total > 0:
+            avg_per_ont = (time.time() - office_state.scan_start_time) / office_state.scan_current
+            est_total = round(avg_per_ont * office_state.scan_total, 1)
         else:
             est_total = last_duration if last_duration > 0 else 0.0
 
-        scan_current_val = self._scan_current
-        if not self._is_scanning and has_saved_state:
-            scan_current_val = state.get("current_index", self._scan_current)
-            if self._scan_total == 0:
-                self._scan_total = state.get("total", total_customers)
+        scan_current_val = office_state.scan_current
+        if not office_state.is_scanning and has_saved_state:
+            scan_current_val = saved_state.get("current_index", office_state.scan_current)
+            if office_state.scan_total == 0:
+                office_state.scan_total = saved_state.get("total", total_customers)
 
-        target_kantor = self._scan_target_kantor or (state.get("kantor") if state else None) or "all"
         scan_progress = {
             "current": scan_current_val,
-            "total": self._scan_total,
-            "target_kantor": target_kantor,
-            "percent": int((scan_current_val / self._scan_total) * 100) if self._scan_total > 0 else 0,
-            "is_scanning": self._is_scanning,
+            "total": office_state.scan_total,
+            "target_kantor": k,
+            "percent": int((scan_current_val / office_state.scan_total) * 100) if office_state.scan_total > 0 else 0,
+            "is_scanning": office_state.is_scanning,
             "is_paused": is_paused,
-            "can_resume": is_paused and not self._is_scanning,
-            "can_stop": self._is_scanning or is_paused,
+            "can_resume": is_paused and not office_state.is_scanning,
+            "can_stop": office_state.is_scanning or is_paused,
             "elapsed_seconds": elapsed,
             "estimated_total_seconds": est_total,
             "last_scan_duration": last_duration
@@ -444,18 +507,26 @@ class MonitoringScheduler:
             if job and job.next_run_time:
                 next_run_time_str = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S")
 
+        # Cek apakah ada kantor lain yang saat ini sedang memindai
+        other_active_scans = []
+        with self._state_lock:
+            for other_k, ost in self._office_states.items():
+                if other_k != k and ost.is_scanning:
+                    other_active_scans.append(other_k)
+
         return {
             "status": status,
             "interval_minutes": interval,
             "last_scan_time": last_scan,
             "next_run_time": next_run_time_str,
-            "is_scanning": self._is_scanning,
+            "is_scanning": office_state.is_scanning,
             "is_paused": is_paused,
-            "can_resume": is_paused and not self._is_scanning,
-            "can_stop": self._is_scanning or is_paused,
+            "can_resume": is_paused and not office_state.is_scanning,
+            "can_stop": office_state.is_scanning or is_paused,
             "is_network_error": is_net_err,
             "total_customers": total_customers,
-            "scan_progress": scan_progress
+            "scan_progress": scan_progress,
+            "other_active_scans": other_active_scans
         }
 
     def mikrotik_sync_job_wrapper(self):
@@ -474,35 +545,56 @@ class MonitoringScheduler:
             logger.warning(f"[SCHEDULER] Gagal auto-sync MikroTik: {e}")
 
     def scheduled_job_wrapper(self):
-        """Dijalankan tiap interval pemantauan oleh APScheduler untuk memindai redaman optik ONT."""
+        """Dijalankan tiap interval pemantauan oleh APScheduler untuk memindai redaman optik ONT per kantor secara paralel."""
         db = SessionLocal()
         try:
-            current_status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
-            if current_status != "RUNNING":
-                logger.info("Scheduler pemantauan ONT dalam keadaan STOPPED, melewati siklus pengecekan redaman.")
-                return
+            kantors = db.query(Kantor).all()
+            kantor_kodes = [k.kode.lower() for k in kantors]
+        except Exception as e:
+            logger.error(f"[SCHEDULER] Gagal mengambil daftar kantor: {e}")
+            kantor_kodes = ["cabang", "pusat", "banyumas"]
         finally:
             db.close()
 
-        # Eksekusi pemindaian redaman ONT untuk seluruh kantor
-        self.execute_scan_sync(kantor=None)
+        # Eksekusi pemindaian mandiri untuk setiap kantor yang status scheduler-nya RUNNING
+        for k_kode in kantor_kodes:
+            db_k = SessionLocal()
+            try:
+                k_status = self.get_setting_from_db(db_k, f"scheduler_status_{k_kode}", "")
+                if not k_status:
+                    k_status = self.get_setting_from_db(db_k, "scheduler_status", "RUNNING")
+                
+                if k_status != "RUNNING":
+                    logger.info(f"[SCHEDULER] Kantor {k_kode.upper()} dalam status STOPPED, melewati siklus otomatis.")
+                    continue
+            finally:
+                db_k.close()
+
+            # Jalankan di background thread per kantor jika belum sedang memindai
+            state = self.get_office_state(k_kode)
+            if not state.is_scanning:
+                logger.info(f"[SCHEDULER] Memulai siklus pemindaian otomatis terjadwal untuk kantor: {k_kode.upper()}")
+                th = threading.Thread(target=self.execute_scan_sync, kwargs={"kantor": k_kode}, daemon=True)
+                th.start()
+            else:
+                logger.info(f"[SCHEDULER] Kantor {k_kode.upper()} masih sedang memindai siklus sebelumnya, dilewati.")
 
     def execute_scan_sync(self, kantor: Optional[str] = None) -> Dict[str, Any]:
-        if self._is_scanning:
-            return {"status": "busy", "message": "Proses pemindaian sedang berjalan."}
+        k = (kantor or "all").lower().strip()
+        state = self.get_office_state(k)
+        
+        with state.lock:
+            if state.is_scanning:
+                return {"status": "busy", "message": f"Proses pemindaian kantor '{k.upper()}' sedang berjalan."}
 
-        # Cek jika ada state tersimpan di JSON jika resume_index belum diset
-        state = self.load_scan_state()
-        if state and state.get("current_index") is not None and self._resume_index == 0:
-            self._resume_index = state.get("current_index", 0)
-            if not kantor and state.get("kantor"):
-                kantor = state.get("kantor")
+            saved_checkpoint = self.load_scan_state(k)
+            if saved_checkpoint and saved_checkpoint.get("current_index") is not None and state.resume_index == 0:
+                state.resume_index = saved_checkpoint.get("current_index", 0)
 
-        self._is_scanning = True
-        self._is_paused = False
-        self._stop_requested = False
-        self._scan_target_kantor = kantor if (kantor and kantor != "all") else None
-        self._scan_start_time = time.time()
+            state.is_scanning = True
+            state.is_paused = False
+            state.stop_requested = False
+            state.scan_start_time = time.time()
         
         db = SessionLocal()
         try:
@@ -510,17 +602,18 @@ class MonitoringScheduler:
                 Pelanggan.is_active == True,
                 Pelanggan.is_monitored == True
             )
-            if self._scan_target_kantor:
-                query = query.filter(Pelanggan.kantor == self._scan_target_kantor)
+            if k != "all":
+                query = query.filter(Pelanggan.kantor == k)
             pelanggan_list = query.all()
-            self._scan_total = len(pelanggan_list)
             
-            if self._resume_index >= self._scan_total:
-                self._resume_index = 0
-                self.delete_scan_state()
+            with state.lock:
+                state.scan_total = len(pelanggan_list)
+                if state.resume_index >= state.scan_total:
+                    state.resume_index = 0
+                    self.delete_scan_state(k)
+                state.scan_current = state.resume_index
                 
-            self._scan_current = self._resume_index
-            pelanggan_to_scan = pelanggan_list[self._resume_index:]
+            pelanggan_to_scan = pelanggan_list[state.resume_index:]
 
             now = get_now_wib()
             results = []
@@ -528,8 +621,7 @@ class MonitoringScheduler:
             critical_count = 0
             los_count = 0
             los_by_pop = {}
-            # Buffer LOS alerts — dikirim setelah scan selesai (batch jika >= 5)
-            los_pending_alerts = []  # list of (cust, log_entry)
+            los_pending_alerts = []
 
             default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
             default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
@@ -546,31 +638,33 @@ class MonitoringScheduler:
             unreachable_count = 0
             for cust in pelanggan_to_scan:
                 # 0. Cek interupsi STOP (Berhenti Paksa)
-                if self._stop_requested:
-                    logger.info("[SCAN] Pemindaian dihentikan paksa (STOP).")
-                    self.delete_scan_state()
-                    self._is_scanning = False
-                    self._is_paused = False
-                    self._stop_requested = False
-                    self._resume_index = 0
-                    self._scan_current = 0
-                    return {"status": "stopped", "message": "Pemindaian dihentikan paksa oleh Admin."}
+                with state.lock:
+                    if state.stop_requested:
+                        logger.info(f"[SCAN] Pemindaian kantor {k.upper()} dihentikan paksa (STOP).")
+                        self.delete_scan_state(k)
+                        state.is_scanning = False
+                        state.is_paused = False
+                        state.stop_requested = False
+                        state.resume_index = 0
+                        state.scan_current = 0
+                        return {"status": "stopped", "message": f"Pemindaian kantor {k.upper()} dihentikan paksa oleh Admin."}
 
-                # 0. Cek interupsi JEDA (Pause)
-                if self._is_paused:
-                    logger.info(f"[SCAN] Pemindaian dijeda pada pelanggan ke-{self._scan_current} dari {self._scan_total} (Kantor: {self._scan_target_kantor or 'SEMUA'}).")
-                    self._is_scanning = False
-                    self._resume_index = self._scan_current
-                    self.save_scan_state(current_index=self._resume_index, total=self._scan_total, kantor=self._scan_target_kantor)
-                    return {
-                        "status": "paused",
-                        "message": f"Pemindaian dijeda pada pelanggan ke-{self._resume_index} dari {self._scan_total}.",
-                        "current_index": self._resume_index,
-                        "total": self._scan_total,
-                        "target_kantor": self._scan_target_kantor or "all"
-                    }
+                    # 0. Cek interupsi JEDA (Pause)
+                    if state.is_paused:
+                        logger.info(f"[SCAN] Pemindaian kantor {k.upper()} dijeda pada pelanggan ke-{state.scan_current} dari {state.scan_total}.")
+                        state.is_scanning = False
+                        state.resume_index = state.scan_current
+                        self.save_scan_state(current_index=state.resume_index, total=state.scan_total, kantor=k)
+                        return {
+                            "status": "paused",
+                            "message": f"Pemindaian kantor {k.upper()} dijeda pada pelanggan ke-{state.resume_index} dari {state.scan_total}.",
+                            "current_index": state.resume_index,
+                            "total": state.scan_total,
+                            "target_kantor": k
+                        }
 
-                self._scan_current += 1
+                    state.scan_current += 1
+
                 # 1. Coba Scraping Live ONT GM220-S via HTTP
                 scrape_res = ONTScraperService.scrape_ont(
                     ip=cust.ip_router,
@@ -586,7 +680,6 @@ class MonitoringScheduler:
                 if scrape_res["success"] and scrape_res["rx_power"] is not None:
                     res = scrape_res
                     cust.status_kredensial = "VALID"
-                    # Jika berhasil via kredensial default, sinkronkan ke pelanggan
                     if scrape_res.get("updated_user") and scrape_res.get("updated_pass"):
                         cust.user_admin = scrape_res["updated_user"]
                         cust.pass_admin = scrape_res["updated_pass"]
@@ -623,7 +716,6 @@ class MonitoringScheduler:
                 )
                 db.add(log_entry)
 
-                # Cek apakah kegagalan ini disebabkan oleh kredensial / gagal login
                 is_auth_failure = (
                     res.get("error_type") == "AUTH_FAILED"
                     or cust.status_kredensial == "INVALID"
@@ -641,10 +733,9 @@ class MonitoringScheduler:
                     cust.los_count = 0
                 elif st == "LOS":
                     los_count += 1
-                    # Hanya kelompokkan ke deteksi pemadaman massal jika bukan gagal login
                     if not is_auth_failure:
                         cust.los_count += 1
-                        pop_name = cust.pop or "Server Cabang"
+                        pop_name = cust.pop or f"Server {k.upper()}"
                         if pop_name not in los_by_pop:
                             los_by_pop[pop_name] = []
                         los_by_pop[pop_name].append(cust.nama)
@@ -664,42 +755,49 @@ class MonitoringScheduler:
                     db.commit()
                 except Exception as inner_e:
                     db.rollback()
-                    self._resume_index = self._scan_current - 1
+                    with state.lock:
+                        state.resume_index = max(0, state.scan_current - 1)
                     raise inner_e
 
-
-            self.set_setting_in_db(db, "last_scan_time", now.strftime("%Y-%m-%d %H:%M:%S"))
-            # Pembersihan log > 30 hari berkala
+            scan_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+            self.set_setting_in_db(db, "last_scan_time", scan_time_str)
+            if k != "all":
+                self.set_setting_in_db(db, f"last_scan_time_{k}", scan_time_str)
             self.cleanup_old_logs(db, days=30)
             db.commit()
             
-            # Jika berhasil selesai semuanya, reset resume_index & hapus state file JSON
-            self.delete_scan_state()
-            self._resume_index = 0
-            self._is_paused = False
-            effective_kantor = self._scan_target_kantor or "all"
-            self._scan_target_kantor = None
+            # Reset checkpoint JSON untuk kantor ini
+            self.delete_scan_state(k)
+            with state.lock:
+                state.resume_index = 0
+                state.is_paused = False
 
             # Deteksi apakah server terputus dari jaringan lokal ISP / VLAN ONT
             if len(pelanggan_list) > 0 and unreachable_count == len(pelanggan_list):
-                self._is_network_error = True
+                with state.lock:
+                    state.is_network_error = True
                 self.set_setting_in_db(db, "is_network_error", "true")
+                if k != "all":
+                    self.set_setting_in_db(db, f"is_network_error_{k}", "true")
                 db.commit()
                 return {
                     "status": "error",
                     "error_type": "NETWORK_UNREACHABLE",
                     "is_network_error": True,
-                    "message": "Koneksi Gagal: Server tidak terhubung ke jaringan lokal / VLAN ISP ONT (10.10.x.x). Pemindaian dihentikan!",
+                    "message": f"Koneksi Gagal: Server tidak terhubung ke jaringan lokal / VLAN ISP ONT kantor {k.upper()} (10.10.x.x). Pemindaian dihentikan!",
                     "scanned_total": len(pelanggan_list),
                     "warning_count": warning_count,
                     "critical_count": critical_count,
                     "los_count": los_count,
-                    "target_kantor": effective_kantor,
-                    "scan_time": now.strftime("%Y-%m-%d %H:%M:%S")
+                    "target_kantor": k,
+                    "scan_time": scan_time_str
                 }
 
-            self._is_network_error = False
+            with state.lock:
+                state.is_network_error = False
             self.set_setting_in_db(db, "is_network_error", "false")
+            if k != "all":
+                self.set_setting_in_db(db, f"is_network_error_{k}", "false")
             db.commit()
             return {
                 "status": "success",
@@ -707,24 +805,28 @@ class MonitoringScheduler:
                 "warning_count": warning_count,
                 "critical_count": critical_count,
                 "los_count": los_count,
-                "target_kantor": effective_kantor,
-                "scan_time": now.strftime("%Y-%m-%d %H:%M:%S")
+                "target_kantor": k,
+                "scan_time": scan_time_str
             }
         except Exception as e:
-            logger.error(f"Error saat scan all: {e}")
-            if self._scan_current > 0 and self._scan_current <= self._scan_total:
-                self._resume_index = self._scan_current - 1
+            logger.error(f"Error saat scan kantor {k.upper()}: {e}")
+            with state.lock:
+                if state.scan_current > 0 and state.scan_current <= state.scan_total:
+                    state.resume_index = state.scan_current - 1
             return {"status": "error", "message": str(e)}
         finally:
-            if self._scan_start_time > 0:
-                self._last_scan_duration = round(time.time() - self._scan_start_time, 1)
-                try:
-                    s_db = SessionLocal()
-                    self.set_setting_in_db(s_db, "last_scan_duration", str(self._last_scan_duration))
-                    s_db.close()
-                except Exception:
-                    pass
-            self._is_scanning = False
+            with state.lock:
+                if state.scan_start_time > 0:
+                    state.last_scan_duration = round(time.time() - state.scan_start_time, 1)
+                    try:
+                        s_db = SessionLocal()
+                        self.set_setting_in_db(s_db, "last_scan_duration", str(state.last_scan_duration))
+                        if k != "all":
+                            self.set_setting_in_db(s_db, f"last_scan_duration_{k}", str(state.last_scan_duration))
+                        s_db.close()
+                    except Exception:
+                        pass
+                state.is_scanning = False
             db.close()
 
     def scan_single(self, id_pelanggan: str) -> Optional[Dict[str, Any]]:

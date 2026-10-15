@@ -11,17 +11,17 @@ from app.core.config import settings
 class MonitoringService:
 
     @staticmethod
-    def get_status() -> Dict[str, Any]:
-        return scheduler.get_status()
+    def get_status(kantor: Optional[str] = None) -> Dict[str, Any]:
+        return scheduler.get_status(kantor=kantor)
 
     @staticmethod
-    def toggle_scheduler() -> str:
-        curr = scheduler.get_status().get("status")
+    def toggle_scheduler(kantor: Optional[str] = None) -> str:
+        curr = scheduler.get_status(kantor=kantor).get("status")
         if curr == "RUNNING":
-            scheduler.stop()
+            scheduler.stop(kantor=kantor)
             return "STOPPED"
         else:
-            scheduler.resume()
+            scheduler.resume(kantor=kantor)
             return "RUNNING"
 
     @staticmethod
@@ -108,16 +108,16 @@ class MonitoringService:
         }
 
     @staticmethod
-    def pause_scan() -> Dict[str, Any]:
-        return scheduler.pause_scan()
+    def pause_scan(kantor: Optional[str] = None) -> Dict[str, Any]:
+        return scheduler.pause_scan(kantor=kantor)
 
     @staticmethod
-    def resume_scan() -> Dict[str, Any]:
-        return scheduler.resume_scan()
+    def resume_scan(kantor: Optional[str] = None) -> Dict[str, Any]:
+        return scheduler.resume_scan(kantor=kantor)
 
     @staticmethod
-    def stop_scan() -> Dict[str, Any]:
-        return scheduler.stop_scan()
+    def stop_scan(kantor: Optional[str] = None) -> Dict[str, Any]:
+        return scheduler.stop_scan(kantor=kantor)
 
     @staticmethod
     def get_chart_data(

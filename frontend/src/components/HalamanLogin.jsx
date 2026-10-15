@@ -14,8 +14,8 @@ import {
 export function HalamanLogin({
   onLoginSuccess
 }) {
-  const [username, setUsername] = useState('admin')
-  const [password, setPassword] = useState('agiltampan')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -97,7 +97,7 @@ export function HalamanLogin({
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin"
+                  placeholder="Masukkan username..."
                   autoComplete="username"
                   className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-700 focus:ring-2 focus:ring-cyan-100 transition min-h-[40px] font-mono"
                 />

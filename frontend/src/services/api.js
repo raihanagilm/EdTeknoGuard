@@ -78,40 +78,50 @@ class ApiService {
 
 // Specialized Service Classes for All 8 Modules
 export class MonitoringService {
-  static async getStatus() {
-    return new ApiService().get('/api/monitoring/status');
+  static async getStatus(params = {}) {
+    return new ApiService().get('/api/monitoring/status', params);
   }
 
-  static async getKpi() {
-    return new ApiService().get('/api/monitoring/kpi');
+  static async getKpi(params = {}) {
+    return new ApiService().get('/api/monitoring/kpi', params);
   }
 
   static async getChartData(params = {}) {
     return new ApiService().get('/api/monitoring/chart-data', params);
   }
 
-  static async triggerScanAll() {
-    return new ApiService().post('/api/monitoring/scan-all');
+  static async triggerScanAll(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const endpoint = `/api/monitoring/scan-all${query ? `?${query}` : ''}`;
+    return new ApiService().post(endpoint);
   }
 
-  static async pauseScan() {
-    return new ApiService().post('/api/monitoring/scan-pause');
+  static async pauseScan(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const endpoint = `/api/monitoring/scan-pause${query ? `?${query}` : ''}`;
+    return new ApiService().post(endpoint);
   }
 
-  static async resumeScan() {
-    return new ApiService().post('/api/monitoring/scan-resume');
+  static async resumeScan(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const endpoint = `/api/monitoring/scan-resume${query ? `?${query}` : ''}`;
+    return new ApiService().post(endpoint);
   }
 
-  static async stopScan() {
-    return new ApiService().post('/api/monitoring/scan-stop');
+  static async stopScan(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const endpoint = `/api/monitoring/scan-stop${query ? `?${query}` : ''}`;
+    return new ApiService().post(endpoint);
   }
 
   static async triggerSingleScan(idPelanggan) {
     return new ApiService().post(`/api/monitoring/scan/${idPelanggan}`);
   }
 
-  static async toggleScheduler() {
-    return new ApiService().post('/api/monitoring/toggle-scheduler');
+  static async toggleScheduler(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const endpoint = `/api/monitoring/toggle-scheduler${query ? `?${query}` : ''}`;
+    return new ApiService().post(endpoint);
   }
 
   static async pollNotifications() {

@@ -9,34 +9,34 @@ from app.modules.monitoring.controller import MonitoringController
 router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
 
 @router.get("/status")
-def get_monitoring_status():
+def get_monitoring_status(kantor: Optional[str] = Query(None)):
     """Route status engine monitoring dan interval"""
-    return MonitoringController.get_status()
+    return MonitoringController.get_status(kantor=kantor)
 
 @router.post("/toggle-scheduler")
-def toggle_scheduler(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
-    """Route toggle scheduler antara RUNNING dan STOPPED"""
-    return MonitoringController.toggle_scheduler(request=request, db=db, user=user)
+def toggle_scheduler(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    """Route toggle scheduler antara RUNNING dan STOPPED per kantor atau global"""
+    return MonitoringController.toggle_scheduler(request=request, db=db, user=user, kantor=kantor)
 
 @router.post("/scan-all")
-def trigger_scan_all(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
-    """Route trigger pemindaian manual seluruh ONT"""
-    return MonitoringController.trigger_scan_all(request=request, db=db, user=user)
+def trigger_scan_all(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    """Route trigger pemindaian manual ONT per kantor"""
+    return MonitoringController.trigger_scan_all(request=request, db=db, user=user, kantor=kantor)
 
 @router.post("/scan-pause")
-def trigger_scan_pause(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
-    """Route menjeda pemindaian aktif ONT dan menyimpan checkpoint ke JSON"""
-    return MonitoringController.trigger_scan_pause(request=request, db=db, user=user)
+def trigger_scan_pause(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    """Route menjeda pemindaian aktif ONT dan menyimpan checkpoint ke JSON per kantor"""
+    return MonitoringController.trigger_scan_pause(request=request, db=db, user=user, kantor=kantor)
 
 @router.post("/scan-resume")
-def trigger_scan_resume(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
-    """Route melanjutkan pemindaian ONT dari checkpoint JSON"""
-    return MonitoringController.trigger_scan_resume(request=request, db=db, user=user)
+def trigger_scan_resume(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    """Route melanjutkan pemindaian ONT dari checkpoint JSON per kantor"""
+    return MonitoringController.trigger_scan_resume(request=request, db=db, user=user, kantor=kantor)
 
 @router.post("/scan-stop")
-def trigger_scan_stop(request: Request, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
-    """Route berhenti paksa pemindaian ONT dan menghapus file JSON"""
-    return MonitoringController.trigger_scan_stop(request=request, db=db, user=user)
+def trigger_scan_stop(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    """Route berhenti paksa pemindaian ONT dan menghapus file JSON per kantor"""
+    return MonitoringController.trigger_scan_stop(request=request, db=db, user=user, kantor=kantor)
 
 @router.post("/scan/{id_pelanggan}")
 def trigger_scan_single(id_pelanggan: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):

@@ -10,7 +10,8 @@ import {
   KeyRound,
   MapPin,
   X,
-  Play
+  Play,
+  MoreVertical
 } from 'lucide-react';
 import { UsersService } from '../services/api';
 import { FilterContainer } from './CommonUI';
@@ -340,40 +341,55 @@ export function ModulKantorCabang() {
                         )}
                       </td>
                       <td className="py-3 px-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {/* Tombol Ambil Data WinBox Sekarang */}
-                          {k.mikrotik_host && (
-                            <button
-                              onClick={() => handleSyncMikrotik(k)}
-                              disabled={isSyncing}
-                              className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer ${
-                                isSyncing
-                                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                                  : 'bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200'
-                              }`}
-                              title="Tarik data lease/ARP langsung dari router ini sekarang"
-                            >
-                              <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
-                              <span>{isSyncing ? 'Sync...' : 'Sync'}</span>
-                            </button>
-                          )}
-
+                        <div className="relative group inline-block text-left">
                           <button
-                            onClick={() => openEditKantorModal(k)}
-                            className="p-1.5 rounded-lg hover:bg-cyan-50 text-cyan-700 hover:text-cyan-900 border border-sky-200 transition cursor-pointer"
-                            title="Edit Kantor & Router"
+                            type="button"
+                            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+                            title="Pilihan Aksi"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <MoreVertical className="w-3.5 h-3.5" />
                           </button>
-                          {!isDefault && (
-                            <button
-                              onClick={() => handleDeleteKantor(k)}
-                              className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-600 hover:text-rose-800 border border-rose-200 transition cursor-pointer"
-                              title="Hapus Kantor"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+
+                          <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[160px]">
+                            <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
+                              {/* Opsi Sync MikroTik */}
+                              {k.mikrotik_host && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleSyncMikrotik(k)}
+                                  disabled={isSyncing}
+                                  className="w-full px-3 py-1.5 text-left text-cyan-800 hover:bg-cyan-50 flex items-center gap-2 transition cursor-pointer disabled:opacity-50"
+                                >
+                                  <RefreshCw className={`w-3.5 h-3.5 text-cyan-600 ${isSyncing ? 'animate-spin' : ''}`} />
+                                  <span>{isSyncing ? 'Menarik...' : 'Sync MikroTik'}</span>
+                                </button>
+                              )}
+
+                              {/* Opsi Edit Kantor */}
+                              <button
+                                type="button"
+                                onClick={() => openEditKantorModal(k)}
+                                className={`w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer ${
+                                  k.mikrotik_host ? 'border-t border-slate-100' : ''
+                                }`}
+                              >
+                                <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                <span>Edit Kantor</span>
+                              </button>
+
+                              {/* Opsi Hapus Kantor */}
+                              {!isDefault && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteKantor(k)}
+                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition border-t border-slate-100 cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Hapus Kantor</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </td>
                     </tr>
