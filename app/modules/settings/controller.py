@@ -25,18 +25,37 @@ class SystemSettingsController:
         )
 
     @staticmethod
-    def get_settings(db: Session) -> Dict[str, Any]:
-        return SystemSettingsService.get_settings(db)
+    def get_settings(db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:
+        return SystemSettingsService.get_settings(db, kantor=kantor)
 
     @staticmethod
     def update_settings(db: Session, data: SystemSettingsSchema, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        if user and user.get("role") == "operator":
+        if user and user.get("role") in ["operator", "teknisi"]:
             from fastapi import HTTPException
-            raise HTTPException(status_code=403, detail="Akses ditolak: Operator hanya dapat melihat pengaturan")
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi/Operator hanya dapat melihat profil akun.")
             
+        target_kantor = data.kantor
+        if not target_kantor and request:
+            from app.core.security import get_active_kantor
+            target_kantor = getattr(request.state, "active_kantor", None) or get_active_kantor(request, user)
+        if target_kantor:
+            data.kantor = target_kantor
+
+        # Validasi hak akses kantor jika admin cabang
+        if user and user.get("role") != "super admin":
+            from app.core.security import get_user_allowed_kantor
+            from fastapi import HTTPException
+            user_allowed = get_user_allowed_kantor(user)
+            if data.kantor and data.kantor != "all" and data.kantor not in user_allowed:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"Akses ditolak: Anda tidak memiliki wewenang mengubah pengaturan kantor '{data.kantor.upper()}'."
+                )
+
         updated = SystemSettingsService.update_settings(db=db, data=data)
         if request:
             from app.modules.activity_logs.service import ActivityLogService
+            office_tag = f"[{data.kantor.upper()}] " if data.kantor and data.kantor != "all" else "[GLOBAL] "
             ket_parts = [
                 f"Interval: {data.polling_interval_minutes}m",
                 f"Warning: {data.warning_threshold_dbm} dBm",
@@ -52,12 +71,12 @@ class SystemSettingsController:
                 request=request,
                 action="UPDATE_SETTINGS",
                 status="SUCCESS",
-                keterangan="Ubah Pengaturan Sistem: " + ", ".join(ket_parts),
+                keterangan=f"Ubah Pengaturan Sistem {office_tag}: " + ", ".join(ket_parts),
                 user=user
             )
         return {
             "status": "success",
-            "message": "Pengaturan interval dan ambang batas redaman berhasil disimpan!",
+            "message": f"Pengaturan untuk kantor {(data.kantor or 'aktif').upper()} berhasil disimpan!",
             "data": updated
         }
 

@@ -24,6 +24,9 @@ class SystemSettingsSchema(BaseModel):
     app_vibration_enabled: Optional[bool] = Field(True, description="Aktifkan getaran notifikasi pada aplikasi Android")
     alert_waiting_interval_minutes: Optional[int] = Field(5, ge=1, le=60, description="Interval pengulangan notifikasi tiket menunggu (menit)")
     
+    # Target Kantor untuk Pengaturan Spesifik Kantor
+    kantor: Optional[str] = Field(None, description="Kode kantor target pengaturan (misal: cabang, pusat, banyumas)")
+
     # MikroTik RouterOS Sync Settings
     mikrotik_host: Optional[str] = Field("192.168.202.50", description="IP Host router MikroTik")
     mikrotik_port: Optional[int] = Field(8728, description="Port API RouterOS MikroTik (default 8728)")

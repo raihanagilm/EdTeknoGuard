@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request
+from typing import Optional
+from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -24,11 +25,12 @@ def render_settings_page(
 @router.get("/api/pengaturan")
 @router.get("/api/settings")
 def get_system_settings(
+    kantor: Optional[str] = None,
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
-    """Ambil parameter aktif interval monitoring dan threshold (Read-only untuk seluruh user NOC terotentikasi)"""
-    return SystemSettingsController.get_settings(db=db)
+    """Ambil parameter aktif interval monitoring dan threshold per kantor (Read-only untuk seluruh user NOC terotentikasi)"""
+    return SystemSettingsController.get_settings(db=db, kantor=kantor)
 
 @router.post("/api/pengaturan")
 @router.post("/api/settings")

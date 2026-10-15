@@ -623,9 +623,19 @@ class MonitoringScheduler:
             los_by_pop = {}
             los_pending_alerts = []
 
-            default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
-            default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
-            raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]")
+            # Ambil kredensial modem ONT dengan prioritas spesifik kantor
+            default_user = self.get_setting_from_db(db, f"default_modem_user_{k}", "") if k != "all" else ""
+            if not default_user:
+                default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
+
+            default_pass = self.get_setting_from_db(db, f"default_modem_pass_{k}", "") if k != "all" else ""
+            if not default_pass:
+                default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
+
+            raw_creds = self.get_setting_from_db(db, f"default_modem_credentials_{k}", "") if k != "all" else ""
+            if not raw_creds:
+                raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]")
+
             default_creds_list = []
             try:
                 import json

@@ -64,7 +64,8 @@ export function ModulPengaturan({
   onOpenConfirmModal,
   currentUser,
   setCurrentUser,
-  onLogout
+  onLogout,
+  activeOffice
 }) {
   // State Edit Profil Pengguna (Super Admin, Admin, & Teknisi)
   const [isEditProfile, setIsEditProfile] = useState(false)
@@ -180,12 +181,12 @@ export function ModulPengaturan({
     }
   }, [isTeknisi, settingsActiveSubTab, setSettingsActiveSubTab])
 
-  // Muat data pengaturan real dari database saat modul pengaturan dibuka
+  // Muat data pengaturan real dari database saat modul pengaturan dibuka atau kantor aktif berganti
   useEffect(() => {
     if (fetchBackendSettings && !isTeknisi) {
-      fetchBackendSettings()
+      fetchBackendSettings(activeOffice)
     }
-  }, [])
+  }, [activeOffice, isTeknisi])
 
   return (
     <div className="space-y-4">
@@ -411,9 +412,16 @@ export function ModulPengaturan({
               }}
               className="space-y-4"
             >
-              <div className="border-b border-sky-100 pb-3">
-                <h3 className="text-sm font-extrabold text-slate-900">Parameter Pemantauan &amp; Redaman</h3>
-                <p className="text-xs text-slate-500">Konfigurasi interval deteksi berkala dan batasan status redaman optik.</p>
+              <div className="border-b border-sky-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900">Parameter Pemantauan &amp; Redaman</h3>
+                  <p className="text-xs text-slate-500">Konfigurasi interval deteksi berkala dan batasan status redaman optik.</p>
+                </div>
+                {activeOffice && activeOffice !== 'all' && (
+                  <span className="self-start sm:self-auto px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 text-[11px] font-black font-mono uppercase tracking-wide">
+                    🏢 Kantor: {activeOffice}
+                  </span>
+                )}
               </div>
 
               {/* Input 1: Interval Scanning */}
@@ -544,14 +552,21 @@ export function ModulPengaturan({
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={addModemCredentialRow}
-                  className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs font-bold flex items-center gap-1.5 transition self-start sm:self-auto min-h-[36px] cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Tambah Baris</span>
-                </button>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  {activeOffice && activeOffice !== 'all' && (
+                    <span className="px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 text-[11px] font-black font-mono uppercase tracking-wide">
+                      🏢 Kantor: {activeOffice}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={addModemCredentialRow}
+                    className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs font-bold flex items-center gap-1.5 transition min-h-[36px] cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tambah Baris</span>
+                  </button>
+                </div>
               </div>
 
               {/* Tabel Repeater Kredensial */}

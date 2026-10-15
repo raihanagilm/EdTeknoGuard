@@ -162,12 +162,13 @@ export default function App() {
   const [mikrotikKantor, setMikrotikKantor] = useState('banyumas')
   const [mikrotikAutoSync, setMikrotikAutoSync] = useState(true)
 
-  // Fetch Settings From Backend FastAPI (Thresholds & Credentials)
-  const fetchBackendSettings = async () => {
+  // Fetch Settings From Backend FastAPI (Thresholds & Credentials per active office)
+  const fetchBackendSettings = async (targetKantor = activeOffice) => {
     if (!isAuthenticated) return
     setSettingsLoading(true)
     try {
-      const res = await fetch('/api/pengaturan')
+      const q = targetKantor && targetKantor !== 'all' ? `?kantor=${targetKantor}` : ''
+      const res = await fetch(`/api/pengaturan${q}`)
       if (res.ok) {
         const data = await res.json()
         if (data.polling_interval_minutes) setPollingInterval(data.polling_interval_minutes)
@@ -208,10 +209,11 @@ export default function App() {
 
   const fetchLiveDashboardData = async () => {
     try {
+      const q = activeOffice && activeOffice !== 'all' ? `?kantor=${activeOffice}` : ''
       const [statusRes, kpiRes, custRes, meRes, notifRes] = await Promise.all([
-        fetch('/api/monitoring/status').then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch('/api/monitoring/kpi').then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch('/api/customers?limit=10').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`/api/monitoring/status${q}`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`/api/monitoring/kpi${q}`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`/api/customers?limit=10${activeOffice && activeOffice !== 'all' ? `&kantor=${activeOffice}` : ''}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/auth/me').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/notifications/poll').then(r => r.ok ? r.json() : null).catch(() => null)
       ])
@@ -244,13 +246,13 @@ export default function App() {
     fetchLiveDashboardData()
     const interval = setInterval(fetchLiveDashboardData, 8000)
     return () => clearInterval(interval)
-  }, [])
+  }, [activeOffice])
 
   useEffect(() => {
     if (isAuthenticated && currentUser && currentUser.role !== 'teknisi') {
-      fetchBackendSettings()
+      fetchBackendSettings(activeOffice)
     }
-  }, [isAuthenticated, currentUser?.role])
+  }, [isAuthenticated, currentUser?.role, activeOffice])
 
   // Save Settings To Backend FastAPI
   const handleSaveSettings = async (e) => {
@@ -275,7 +277,8 @@ export default function App() {
       .map(c => ({ username: String(c.username).trim(), password: String(c.password).trim() }))
 
     const payload = {
-      polling_interval_minutes: isNaN(parseInt(pollingInterval, 10)) ? 5 : parseInt(pollingInterval, 10),
+      kantor: activeOffice,
+      polling_interval_minutes: isNaN(parseInt(pollingInterval, 10)) ? 20 : parseInt(pollingInterval, 10),
       warning_threshold_dbm: isNaN(parseFloat(warnThreshold)) ? -26.0 : parseFloat(warnThreshold),
       critical_threshold_dbm: isNaN(parseFloat(critThreshold)) ? -27.0 : parseFloat(critThreshold),
       scheduler_status: isScanningActive ? 'RUNNING' : 'STOPPED',
@@ -293,7 +296,7 @@ export default function App() {
       mikrotik_port: isNaN(parseInt(mikrotikPort, 10)) ? 8728 : parseInt(mikrotikPort, 10),
       mikrotik_user: mikrotikUser || 'tekno',
       mikrotik_password: mikrotikPassword || '',
-      mikrotik_kantor: mikrotikKantor || 'banyumas',
+      mikrotik_kantor: activeOffice || 'banyumas',
       mikrotik_auto_sync: Boolean(mikrotikAutoSync)
     }
 
@@ -1001,6 +1004,7 @@ export default function App() {
               currentUser={currentUser}
               setCurrentUser={setCurrentUser}
               onLogout={handleLogout}
+              activeOffice={activeOffice}
             />
           )}
         </main>

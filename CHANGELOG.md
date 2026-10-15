@@ -26,6 +26,19 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Pengaturan Sistem Nyata dari Database MySQL Local & Terisolasi Per Kantor Aktif ([ModulPengaturan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx), [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx), [service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/service.py))**:
+  - **Data Riil Langsung dari Database MySQL Local**: Seluruh form konfigurasi di Modul Pengaturan membaca dan menulis data nyata ke tabel `system_settings` pada database MySQL Local (`127.0.0.1:3306`, db `edteknoguard`), sepenuhnya meniadakan data dummy/palsu.
+  - **Isolasi Pengaturan Mandiri Per Kantor Aktif (`activeOffice`)**:
+    - Nilai default interval pemantauan yang aman adalah **20 menit**.
+    - Interval pemantauan, ambang batas redaman (*Warning -26.0 dBm* / *Kritis -27.0 dBm*), dan kredensial modem ONT (multi-fallback) kini disimpan dan dimuat secara mandiri per kantor menggunakan kunci spesifik: `polling_interval_minutes_{kantor}`, `warning_threshold_dbm_{kantor}`, `critical_threshold_dbm_{kantor}`, `default_modem_credentials_{kantor}`, dll.
+    - Tidak ada aturan global yang dipaksakan; masing-masing kantor (Cabang, Pusat, Banyumas, atau kantor baru) dapat memiliki pengaturan ambang batas, interval, dan kredensial modem yang berbeda sesuai karakteristik lapangannya.
+  - **Sinkronisasi Otomatis dengan Switcher Navbar**:
+    - Saat pengguna mengganti kantor aktif di switcher navbar, form Pengaturan otomatis me-refresh dan memuat data konfigurasi spesifik kantor tersebut dari API backend (`GET /api/pengaturan?kantor=${activeOffice}`).
+    - Saat Super Admin atau Admin menyimpan pengaturan, payload otomatis menyertakan `{ kantor: activeOffice }` (`POST /api/pengaturan`), mengunci perubahan hanya pada kantor aktif tersebut.
+    - Sinkronisasi kredensial modem massal ke pelanggan invalid dibatasi hanya untuk pelanggan di kantor aktif terkait.
+  - **Penyelarasan UI & Badge Visual**:
+    - Menampilkan badge kantor aktif `🏢 Kantor: {activeOffice}` di header Tab 1 (Parameter & Ambang Batas) dan Tab 2 (Kredensial Modem ONT).
+
 - **Arsitektur Pemantauan Paralel Multi-Kantor & Jeda Jadwal Mandiri Per Kantor (Backend & Frontend)**:
   - **Dukungan Multi-Threading Paralel Penuh Antar Kantor ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
     - Merestrukturisasi engine singleton `MonitoringScheduler` dari status tunggal global menjadi `OfficeScanState` yang thread-safe dengan `threading.Lock` per kantor.
