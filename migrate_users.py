@@ -131,17 +131,18 @@ def migrate_users():
             ).first()
 
             if existing_user:
-                # Update role dan akses kantor jika perlu
+                # Update role, akses kantor, dan pastikan password di-hash ulang dengan bcrypt
                 existing_user.role = u["role"]
+                existing_user.hashed_password = get_password_hash(u["password_plain"])
                 existing_user.allowed_kantor = u["allowed_kantor"]
                 existing_user.is_active = True
                 if not existing_user.nama_karyawan:
                     existing_user.nama_karyawan = u["nama_karyawan"]
                 if not existing_user.no_wa:
                     existing_user.no_wa = u["no_wa"]
-                print(f"[UPDATE] User `{existing_user.username}` diperbarui sebagai Role: '{u['role']}'.")
+                print(f"[UPDATE] User `{existing_user.username}` diperbarui -> Role: '{u['role']}', Password di-hash (Bcrypt) ke DB.")
             else:
-                # Buat user baru
+                # Buat user baru dengan password yang di-hash bcrypt
                 new_user = User(
                     username=u["username"],
                     hashed_password=get_password_hash(u["password_plain"]),
@@ -152,7 +153,7 @@ def migrate_users():
                     is_active=u["is_active"]
                 )
                 db.add(new_user)
-                print(f"[CREATE] User baru dibuat: `{u['username']}` (Role: '{u['role']}', Default Password: `{u['password_plain']}`).")
+                print(f"[CREATE] User baru dibuat: `{u['username']}` -> Role: '{u['role']}', Password di-hash (Bcrypt) ke DB.")
 
         db.commit()
 
