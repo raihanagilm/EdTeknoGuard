@@ -305,31 +305,70 @@ class MikroTikSyncService:
             except Exception as e:
                 logger.warning(f"Gagal mengambil ARP table: {e}")
 
-            # 3. Ambil PPPoE Active (/ppp/active) jika ada
+            # 3. Ambil PPPoE Secrets & Active Connections (/ppp/secret & /ppp/active)
             try:
-                ppp_resource = api.get_resource("/ppp/active")
-                raw_ppps = ppp_resource.get()
-                for p in raw_ppps:
-                    ip = p.get("address", "").strip()
-                    if not ip:
-                        continue
-                    caller_id = p.get("caller-id", "").strip().upper()
-                    name = p.get("name", "").strip()
-                    comment = p.get("comment", "").strip() or name
+                # 3a. Ambil Active PPPoE sessions
+                active_ppp_ips = set()
+                active_ppp_names = set()
+                try:
+                    ppp_active_resource = api.get_resource("/ppp/active")
+                    raw_ppps = ppp_active_resource.get()
+                    for p in raw_ppps:
+                        ip = p.get("address", "").strip()
+                        caller_id = p.get("caller-id", "").strip().upper()
+                        name = p.get("name", "").strip()
+                        comment = p.get("comment", "").strip() or name
+                        if ip:
+                            active_ppp_ips.add(ip)
+                        if name:
+                            active_ppp_names.add(name)
 
-                    if ip not in devices_by_ip:
-                        devices_by_ip[ip] = {
-                            "address": ip,
-                            "mac-address": caller_id if ":" in caller_id else "",
-                            "comment": comment,
-                            "status": "bound",
-                            "source": "pppoe"
-                        }
-                    else:
-                        if not devices_by_ip[ip].get("comment") and comment:
-                            devices_by_ip[ip]["comment"] = comment
+                        if ip and ip not in devices_by_ip:
+                            devices_by_ip[ip] = {
+                                "address": ip,
+                                "mac-address": caller_id if ":" in caller_id else "",
+                                "comment": comment,
+                                "status": "bound",  # Sedang terkoneksi aktif
+                                "source": "pppoe"
+                            }
+                        elif ip and ip in devices_by_ip:
+                            devices_by_ip[ip]["status"] = "bound"
+                            if not devices_by_ip[ip].get("comment") and comment:
+                                devices_by_ip[ip]["comment"] = comment
+                except Exception as e:
+                    logger.debug(f"Info: PPP active resource tidak tersedia: {e}")
+
+                # 3b. Ambil Master PPP Secrets (/ppp/secret) untuk mendeteksi user PPPoE yang OFFLINE
+                try:
+                    ppp_secret_resource = api.get_resource("/ppp/secret")
+                    raw_secrets = ppp_secret_resource.get()
+                    for s in raw_secrets:
+                        remote_ip = s.get("remote-address", "").strip()
+                        sec_name = s.get("name", "").strip()
+                        sec_comment = s.get("comment", "").strip() or sec_name
+                        sec_caller = s.get("caller-id", "").strip().upper()
+
+                        is_active_session = (remote_ip in active_ppp_ips) or (sec_name in active_ppp_names)
+                        status_str = "bound" if is_active_session else "waiting"
+
+                        if remote_ip:
+                            if remote_ip not in devices_by_ip:
+                                devices_by_ip[remote_ip] = {
+                                    "address": remote_ip,
+                                    "mac-address": sec_caller if ":" in sec_caller else "",
+                                    "comment": sec_comment,
+                                    "status": status_str,
+                                    "source": "pppoe"
+                                }
+                            else:
+                                # Update status sesuai keaktifan di ppp/active
+                                devices_by_ip[remote_ip]["status"] = status_str
+                                if not devices_by_ip[remote_ip].get("comment") and sec_comment:
+                                    devices_by_ip[remote_ip]["comment"] = sec_comment
+                except Exception as e:
+                    logger.debug(f"Info: PPP secret resource tidak dapat dibaca: {e}")
             except Exception as e:
-                logger.debug(f"Info: PPP active resource tidak tersedia atau kosong: {e}")
+                logger.debug(f"Info: Pemrosesan PPPoE router selesai: {e}")
 
             # 4. Ambil Simple Queues untuk pemetaan paket kecepatan
             ip_to_rate = {}
@@ -560,11 +599,18 @@ class MikroTikSyncService:
             else:
                 # Daftarkan pelanggan baru
                 clean_ip_suffix = ip.replace(".", "-")
-                id_pelanggan = f"CUST-{kantor[:3].upper()}-{clean_ip_suffix}"
+                base_id = f"CUST-{kantor[:3].upper()}-{clean_ip_suffix}"
+                id_pelanggan = base_id
 
-                chk = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
-                if chk:
-                    id_pelanggan = f"{id_pelanggan}-{mac[-4:].replace(':', '') if mac else 'NEW'}"
+                # Pastikan ID benar-benar unik baik di DB maupun objek yang baru di-add di sesi
+                counter = 1
+                while (
+                    db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+                    or db.query(PerangkatONT).filter(PerangkatONT.id_pelanggan == id_pelanggan).first()
+                ):
+                    suffix = mac[-4:].replace(':', '') if (mac and len(mac) >= 4) else f"{counter}"
+                    id_pelanggan = f"{base_id}-{suffix}"
+                    counter += 1
 
                 clean_name = comment
                 if clean_name:
@@ -585,8 +631,8 @@ class MikroTikSyncService:
                 db.add(new_cust)
                 db.flush()
 
-                # Buat entri PerangkatONT dengan slot IP tepat
-                new_ont = PerangkatONT(
+                # Buat entri PerangkatONT melalui relasi objek agar sinkron dengan cascade
+                new_cust.perangkat = PerangkatONT(
                     id_pelanggan=id_pelanggan,
                     ip_router=ip if not is_ont_ip else ip,
                     ip_ont=ip if is_ont_ip else None,
@@ -594,16 +640,16 @@ class MikroTikSyncService:
                     jenis_modem="GM220-S",
                     status_kredensial="UNTESTED"
                 )
-                db.add(new_ont)
+                db.flush()
                 
-                # Simpan ke cache lokal
+                # Simpan ke cache lokal agar iterasi berikutnya tidak menganggapnya hilang
                 if is_ont_ip:
                     existing_by_ip_ont[ip] = new_cust
                 existing_by_ip[ip] = new_cust
                 if mac:
                     existing_by_mac[mac] = new_cust
-                if comment:
-                    existing_by_name[comment.lower()] = new_cust
+                if clean_name:
+                    existing_by_name[clean_name.lower()] = new_cust
                 added_count += 1
 
         db.commit()

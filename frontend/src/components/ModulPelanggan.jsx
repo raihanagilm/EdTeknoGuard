@@ -260,9 +260,16 @@ export function ModulPelanggan({
       })
       if (res.ok) {
         const json = await res.json()
+        setMikrotikSyncing(false)
         await fetchCustomers()
-        alert(`Berhasil sinkronisasi ${json.total_synced || 0} kuota & traffic pelanggan dari MikroTik!`)
+        const addedText = json.added_customers ? `\n• ${json.added_customers} Pelanggan Baru ditambahkan` : ''
+        const updatedText = json.updated_customers ? `\n• ${json.updated_customers} Pelanggan diperbarui statusnya` : ''
+        const quotaText = `\n• ${json.total_synced || 0} Data Kuota & Traffic disinkronkan`
+        setTimeout(() => {
+          alert(`Sinkronisasi MikroTik Selesai!${addedText}${updatedText}${quotaText}`)
+        }, 100)
       } else {
+        setMikrotikSyncing(false)
         const errJson = await res.json().catch(() => ({}))
         alert(errJson.detail || 'Gagal sinkronisasi dengan router MikroTik.')
       }

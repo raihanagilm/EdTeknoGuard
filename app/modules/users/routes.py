@@ -176,19 +176,39 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
 
     db.commit()
 
+    # Jika konfigurasi host & user MikroTik diisi lengkap, langsung jalankan penarikan data secara otomatis
+    sync_msg = ""
+    if kantor.mikrotik_host and kantor.mikrotik_user:
+        try:
+            from app.services.mikrotik_service import MikroTikSyncService
+            params = {
+                "host": kantor.mikrotik_host,
+                "port": kantor.mikrotik_port or 8728,
+                "username": kantor.mikrotik_user,
+                "password": kantor.mikrotik_pass or "",
+                "kantor": kantor.kode
+            }
+            res_sync = MikroTikSyncService.sync_customers_from_mikrotik(db, params)
+            if res_sync.get("success"):
+                sync_msg = f" Sinkronisasi otomatis berhasil: {res_sync.get('added_count', 0)} pelanggan baru ditambahkan, {res_sync.get('updated_count', 0)} diperbarui."
+            else:
+                sync_msg = f" (Catatan: Router MikroTik belum dapat dijangkau: {res_sync.get('message')})"
+        except Exception as e:
+            sync_msg = f" (Catatan: Penarikan MikroTik gagal: {e})"
+
     ActivityLogService.log_activity(
         db=db,
         username=user_session.get("user"),
         action="EDIT_KANTOR",
         ip_address=request.client.host if request.client else "unknown",
         status="SUCCESS",
-        keterangan=f"Berhasil mengubah data kantor: {nama} ({kantor.kode})"
+        keterangan=f"Berhasil mengubah data kantor: {nama} ({kantor.kode}).{sync_msg}"
     )
 
     all_k = get_all_kantor_codes(db=db)
     return {
         "status": "success",
-        "message": f"Data kantor '{nama}' berhasil diperbarui.",
+        "message": f"Data kantor '{nama}' berhasil diperbarui.{sync_msg}",
         "kantor": {
             "id": kantor.id,
             "kode": kantor.kode,

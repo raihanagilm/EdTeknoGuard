@@ -52,20 +52,51 @@ def sync_mikrotik_quota(
     payload: dict = Body(default={}),
     db: Session = Depends(get_db)
 ):
-    """Memicu sinkronisasi counter bytes dari Simple Queues ke tabel kuota_pelanggan"""
+    """
+    Memicu sinkronisasi lengkap dari router MikroTik:
+    1. Tarik & perbarui daftar pelanggan (DHCP Leases / ARP / PPPoE).
+    2. Perbarui counter bytes / kuota internet dari Simple Queues.
+    """
     user_sess = require_admin(request)
     kantor = payload.get("kantor")
+
+    # 1. Tarik data pelanggan dari router MikroTik kantor yang bersangkutan
+    sync_cust_res = {"added_count": 0, "updated_count": 0}
+    try:
+        from app.db.models import Kantor
+        knt_obj = db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor and kantor != "all" else None
+        if knt_obj and knt_obj.mikrotik_host and knt_obj.mikrotik_user:
+            params = {
+                "host": knt_obj.mikrotik_host,
+                "port": knt_obj.mikrotik_port or 8728,
+                "username": knt_obj.mikrotik_user,
+                "password": knt_obj.mikrotik_pass or "",
+                "kantor": knt_obj.kode
+            }
+            sync_cust_res = MikroTikSyncService.sync_customers_from_mikrotik(db, params)
+        else:
+            # Fallback ke konfigurasi global/auto-sync semua kantor
+            res_all = MikroTikSyncService.sync_all_configured_kantors(db)
+            for r in res_all:
+                sync_cust_res["added_count"] = sync_cust_res.get("added_count", 0) + r.get("added_count", 0)
+                sync_cust_res["updated_count"] = sync_cust_res.get("updated_count", 0) + r.get("updated_count", 0)
+    except Exception as e:
+        pass
+
+    # 2. Tarik data kuota & Simple Queues
     res = MikroTikSyncService.sync_traffic_quota_to_db(db, kantor=kantor)
+    res["added_customers"] = sync_cust_res.get("added_count", 0)
+    res["updated_customers"] = sync_cust_res.get("updated_count", 0)
 
     # Catat audit log aktivitas
     try:
         ActivityLogService.log_activity(
             db=db,
             username=user_sess.get("user", "admin"),
-            action="SYNC_MIKROTIK_QUOTA",
+            action="SYNC_MIKROTIK_ALL",
             ip_address=request.client.host if request.client else "unknown",
             status="SUCCESS",
-            keterangan=f"Sinkronisasi kuota dari MikroTik kantor {kantor or 'semua'}: {res.get('total_synced', 0)} data diperbarui."
+            keterangan=f"Sinkronisasi MikroTik kantor {kantor or 'semua'}: {res.get('added_customers', 0)} pelanggan baru, {res.get('total_synced', 0)} kuota diperbarui."
         )
     except Exception:
         pass
