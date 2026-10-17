@@ -141,7 +141,7 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
         "customer": {
             "id_pelanggan": pel.id_pelanggan if pel else cust.get("id_pelanggan"),
             "nama": pel.nama if pel else cust.get("nama"),
-            "paket": pel.paket if pel else "20 Mbps Unlimited",
+            "paket": pel.paket if (pel and pel.paket) else "-",
             "ip_router": pel.ip_router if pel else "-",
             "nama_wifi": pel.nama_wifi if pel else "-",
             "kantor": pel.kantor if pel else "cabang",
@@ -151,17 +151,17 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
             "status_verifikasi": pel.status_verifikasi if pel else "TERVERIFIKASI"
         },
         "signal": {
-            "rx_power": float(last_log.rx_power) if last_log and last_log.rx_power is not None else -21.4,
+            "rx_power": float(last_log.rx_power) if last_log and last_log.rx_power is not None else None,
             "status_koneksi": last_log.status_koneksi if last_log else "NORMAL",
-            "suhu_ont": float(last_log.suhu_ont) if last_log and last_log.suhu_ont is not None else 41.0,
-            "latency_ms": last_log.latency_ms if last_log and last_log.latency_ms is not None else 18,
-            "waktu_cek": str(last_log.waktu_cek) if last_log and last_log.waktu_cek else "Baru Saja"
+            "suhu_ont": float(last_log.suhu_ont) if last_log and last_log.suhu_ont is not None else None,
+            "latency_ms": last_log.latency_ms if last_log and last_log.latency_ms is not None else None,
+            "waktu_cek": str(last_log.waktu_cek) if last_log and last_log.waktu_cek else "-"
         },
         "kuota": {
-            "kuota_terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota else 84.5,
-            "kuota_hari_ini_gb": float(data.get("kuota_hari_ini_gb", 3.2)),
-            "periode_bulan": kuota.periode_bulan if kuota else "2026-10",
-            "kecepatan_paket": kuota.kecepatan_paket if kuota else "20 Mbps Unlimited"
+            "kuota_terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota else 0.0,
+            "kuota_hari_ini_gb": float(data.get("kuota_hari_ini_gb", 0.0)),
+            "periode_bulan": kuota.periode_bulan if kuota else "-",
+            "kecepatan_paket": kuota.kecepatan_paket if (kuota and kuota.kecepatan_paket) else (pel.paket if (pel and pel.paket) else "-")
         },
         "active_tickets_count": data.get("active_tickets_count", 0),
         "latest_ticket": data.get("latest_ticket")
@@ -179,7 +179,7 @@ def portal_kuota_data(request: Request, db: Session = Depends(get_db)):
     return {
         "ok": True,
         "kuota_terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota else 0.0,
-        "kecepatan_paket": kuota.kecepatan_paket if kuota else "20 Mbps Unlimited",
+        "kecepatan_paket": kuota.kecepatan_paket if (kuota and kuota.kecepatan_paket) else "-",
         "periode_bulan": kuota.periode_bulan if kuota else "",
         "usage_history": data.get("usage_history", [])
     }

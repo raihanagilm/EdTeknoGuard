@@ -82,33 +82,39 @@ EdTeknoGuard/
 │   ├── core/                  # Konfigurasi aplikasi, env loader, security, db engine
 │   │   ├── config.py
 │   │   ├── database.py
-│   │   └── security.py        # Proteksi sesi admin NOC
+│   │   ├── timezone.py        # Zona waktu WIB terpusat
+│   │   └── security.py        # Proteksi sesi admin NOC (30 hari sliding expiration)
 │   ├── db/
-│   │   └── models.py          # SQLAlchemy models: Pelanggan, LogPerformaONT, SystemSetting, AlertLog
-│   ├── modules/               # Modular berdasarkan domain/fitur
-│   │   ├── auth/              # Halaman & endpoint autentikasi admin
-│   │   ├── dashboard/         # Dashboard KPI & visualisasi Chart.js
-│   │   ├── customers/         # CRUD pelanggan, live check, import CSV
-│   │   ├── monitoring/        # Trigger full scan & single scan
-│   │   ├── telegram_mgmt/     # Manajemen Bot Telegram & log notifikasi
-│   │   ├── settings/          # Pengaturan sistem (berbasis tab)
-│   │   └── logs_mgmt/         # Histori time-series pembacaan redaman
+│   │   └── models.py          # SQLAlchemy models: Pelanggan, LogPerformaONT, SystemSetting, AlertLog, TiketKendala, KuotaPelanggan, User, ActivityLog
+│   ├── modules/               # Modular berbasis domain (MVC Architecture)
+│   │   ├── auth/              # Halaman & REST endpoint autentikasi admin NOC
+│   │   ├── dashboard/         # Dashboard KPI & visualisasi
+│   │   ├── customers/         # CRUD master pelanggan, live check, import Excel/CSV
+│   │   ├── admin_customer_mgmt/ # Manajemen tiket kendala, monitoring kuota, & realtime notification polling
+│   │   ├── monitoring/        # Engine trigger full scan, single probe, status, & chart-data
+│   │   ├── logs_mgmt/         # Histori time-series pembacaan redaman optik
+│   │   ├── settings/          # Pengaturan sistem: parameter interval, threshold redaman, & kredensial ONT
+│   │   ├── mikrotik/          # Integrasi RouterOS MikroTik: test koneksi & sinkronisasi DHCP Leases
+│   │   ├── users/             # Manajemen pengguna NOC & kantor cabang (Super Admin)
+│   │   └── activity_logs/     # Audit trail histori aktivitas pengguna NOC
 │   ├── services/              # External service layer
-│   │   ├── ont_scraper_service.py   # Live HTTP Web Scraper ONT ZTE GM220-S
-│   │   ├── scheduler_service.py     # Background worker interval
-│   │   ├── telegram_service.py      # Pengiriman pesan Telegram + debounce
-│   │   └── snmp_service.py          # Simulasi / SNMP polling engine
-│   └── main.py                # FastAPI app bootstrap & router registry
-├── templates/                 # Jinja2 Layouts & Views
-│   ├── layouts/
-│   │   └── base.html          # Shell HTML utama, navigasi desktop & mobile
-│   ├── auth/
-│   ├── dashboard/
-│   ├── customers/
-│   ├── settings/              # Antarmuka pengaturan sistem berbasis Tab
-│   ├── telegram/              # Antarmuka bot Telegram
-│   └── logs/
-├── static/                    # Aset statis (CSS, JS, Gambar)
+│   │   ├── ont_scraper_service.py   # Live HTTP Web Scraper ONT ZTE GM220-S & XPON
+│   │   ├── scheduler_service.py     # Background worker interval (APScheduler)
+│   │   ├── mikrotik_service.py      # RouterOS API client & sinkronisasi otomatis
+│   │   └── snmp_service.py          # Engine SNMP polling
+│   └── main.py                # FastAPI app bootstrap, middleware sesi, & router registry
+├── frontend/                  # Single Page Application React (NOC & Manajemen)
+│   ├── src/
+│   │   ├── components/        # Komponen UI: ModulBeranda, ModulPelanggan, ModalDetailPelanggan, ModulPengaturan, ModulPenggunaNOC, ModulKantorCabang, dsb.
+│   │   ├── portal/            # Komponen sub-aplikasi TeknoCust untuk warga pelanggan mandiri
+│   │   ├── services/          # HTTP API client layer terpusat
+│   │   ├── App.jsx            # Shell aplikasi utama & navigasi tab
+│   │   └── main.jsx
+│   └── package.json
+├── portal_pelanggan/          # Backend endpoint mandiri Portal Pelanggan (/portal & /teknocust)
+│   ├── modules/               # Modul auth pelanggan, dashboard warga, kuota, kendala, wifi, profil
+│   └── api_router.py          # Sub-router FastAPI portal pelanggan
+├── static/                    # Aset statis (CSS, JS, Ikon SVG murni)
 ├── AGENTS.md                  # Pedoman arsitektur agen AI (dokumen ini)
 ├── CHANGELOG.md               # Catatan riwayat perubahan & perlindungan fitur sistem
 ├── README.md

@@ -251,11 +251,11 @@ export function TabProfilPelanggan({ customer, dashboardData, onLogout }) {
                   </div>
                   <div className="flex items-center justify-between py-1 border-b border-gray-50">
                     <span className="text-gray-600">Paket Internet</span>
-                    <span className="font-bold text-gray-900">{currentCustomer?.paket || '20 Mbps Unlimited'}</span>
+                    <span className="font-bold text-gray-900">{currentCustomer?.paket || '-'}</span>
                   </div>
                   <div className="flex items-center justify-between py-1">
                     <span className="text-gray-600">IP Modem Router</span>
-                    <span className="font-mono font-bold text-gray-900">{currentCustomer?.ip_router || '10.10.12.45'}</span>
+                    <span className="font-mono font-bold text-gray-900">{currentCustomer?.ip_router || '-'}</span>
                   </div>
                 </div>
               )}

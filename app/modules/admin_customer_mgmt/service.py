@@ -139,7 +139,7 @@ class AdminCustomerMgmtService:
                 "pelanggan": p,
                 "periode": current_period,
                 "terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota else 0.0,
-                "paket": p.paket or (kuota.kecepatan_paket if kuota else "20 Mbps Unlimited")
+                "paket": p.paket or (kuota.kecepatan_paket if kuota and kuota.kecepatan_paket else "-")
             })
         return result
 

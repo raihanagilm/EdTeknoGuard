@@ -26,6 +26,7 @@ class CustomerUpdate(BaseModel):
     nama: Optional[str] = Field(None, min_length=2, max_length=150)
     alamat: Optional[str] = None
     no_hp: Optional[str] = None
+    no_wa: Optional[str] = None
     pop: Optional[str] = None
     kantor: Optional[str] = None
     ip_router: Optional[str] = None

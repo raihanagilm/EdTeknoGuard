@@ -44,12 +44,11 @@ class DashboardService:
         ).first()
 
         if not kuota:
-            random_usage = round(random.uniform(50.0, 195.0), 1)
             kuota = KuotaPelanggan(
                 id_pelanggan=id_pelanggan,
                 periode_bulan=current_period,
-                kuota_terpakai_gb=random_usage,
-                kecepatan_paket=cust.paket or "20 Mbps Unlimited"
+                kuota_terpakai_gb=0.0,
+                kecepatan_paket=cust.paket or "-"
             )
             db.add(kuota)
             db.commit()

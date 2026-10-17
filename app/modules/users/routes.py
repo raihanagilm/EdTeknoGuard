@@ -11,7 +11,7 @@ from app.core.security import (
     require_admin, require_super_admin, get_password_hash, 
     get_all_kantor_codes, parse_allowed_kantor
 )
-from app.db.models import User, Kantor
+from app.db.models import User, Kantor, Pelanggan
 from app.modules.activity_logs.service import ActivityLogService
 from app.modules.users.controller import UsersController
 
@@ -230,9 +230,10 @@ async def delete_kantor_json(request: Request, kantor_id: int, db: Session = Dep
     if not kantor:
         return {"status": "error", "message": "Kantor tidak ditemukan."}
 
-    # Kantor default penting dilindungi
-    if kantor.kode in ["pusat", "cabang", "banyumas"]:
-        return {"status": "error", "message": f"Kantor default '{kantor.nama}' tidak dapat dihapus."}
+    # Cek apakah masih ada pelanggan terdaftar di kantor ini
+    pelanggan_count = db.query(Pelanggan).filter(Pelanggan.kantor == kantor.kode).count()
+    if pelanggan_count > 0:
+        return {"status": "error", "message": f"Kantor '{kantor.nama}' masih memiliki {pelanggan_count} pelanggan terdaftar. Pindahkan atau hapus pelanggan terlebih dahulu."}
 
     deleted_nama = kantor.nama
     deleted_kode = kantor.kode

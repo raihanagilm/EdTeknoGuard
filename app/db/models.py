@@ -213,6 +213,14 @@ class Pelanggan(Base):
     def los_count(self, val):
         self._get_or_create_perangkat().los_count = val
 
+    @property
+    def no_wa(self):
+        return self.no_hp
+
+    @no_wa.setter
+    def no_wa(self, val):
+        self.no_hp = val
+
 
 class LogPerformaONT(Base):
     __tablename__ = "log_performa_ont"

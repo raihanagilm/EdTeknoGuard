@@ -39,33 +39,35 @@ class MikroTikSyncService:
         return default_val
 
     @classmethod
-    def get_connection_params(cls, db: Optional[Session] = None) -> Dict[str, Any]:
-        """Mengambil konfigurasi koneksi MikroTik dari database (SystemSetting) dengan fallback ke settings/.env."""
-        host = settings.MIKROTIK_HOST
-        port = settings.MIKROTIK_PORT
-        user = settings.MIKROTIK_USER
-        password = settings.MIKROTIK_PASSWORD
-        kantor = settings.MIKROTIK_DEFAULT_KANTOR
-        auto_sync = settings.MIKROTIK_AUTO_SYNC_ENABLED
+    def get_connection_params(cls, db: Optional[Session] = None, kantor_kode: Optional[str] = None) -> Dict[str, Any]:
+        """Mengambil konfigurasi koneksi MikroTik langsung dari tabel `kantors` di database MySQL."""
+        host = ""
+        port = None
+        user = ""
+        password = ""
+        kantor = kantor_kode or ""
+        auto_sync = True
 
         if db:
-            host = cls.get_setting_value(db, "mikrotik_host", host)
-            try:
-                port = int(cls.get_setting_value(db, "mikrotik_port", port))
-            except Exception:
-                port = 8728
-            user = cls.get_setting_value(db, "mikrotik_user", user)
-            password = cls.get_setting_value(db, "mikrotik_password", password)
-            kantor = cls.get_setting_value(db, "mikrotik_kantor", kantor)
-            auto_val = cls.get_setting_value(db, "mikrotik_auto_sync", "true")
-            auto_sync = str(auto_val).lower() in ("true", "1", "yes")
+            from app.db.models import Kantor
+            if not kantor:
+                first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+                if first_k:
+                    kantor = first_k.kode
+
+            k = db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else None
+            if k:
+                host = k.mikrotik_host or ""
+                port = k.mikrotik_port
+                user = k.mikrotik_user or ""
+                password = k.mikrotik_pass or ""
 
         return {
             "host": str(host).strip(),
-            "port": int(port),
+            "port": int(port) if port else None,
             "username": str(user).strip(),
             "password": str(password or ""),
-            "kantor": str(kantor or "banyumas").strip(),
+            "kantor": str(kantor).strip(),
             "auto_sync": bool(auto_sync)
         }
 
@@ -78,12 +80,12 @@ class MikroTikSyncService:
         kantors = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").all()
         results = []
         for k in kantors:
-            if not k.mikrotik_host or not k.mikrotik_user:
+            if not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
                 continue
-            logger.info(f"[AUTO-SYNC] Menjalankan sinkronisasi DHCP bound MikroTik untuk kantor '{k.nama}' ({k.kode}) @ {k.mikrotik_host}...")
+            logger.info(f"[AUTO-SYNC] Menjalankan sinkronisasi DHCP bound MikroTik untuk kantor '{k.nama}' ({k.kode}) @ {k.mikrotik_host}:{k.mikrotik_port}...")
             params = {
                 "host": k.mikrotik_host,
-                "port": k.mikrotik_port or 8728,
+                "port": int(k.mikrotik_port),
                 "username": k.mikrotik_user,
                 "password": k.mikrotik_pass or "",
                 "kantor": k.kode
@@ -166,71 +168,13 @@ class MikroTikSyncService:
         return len(clean) >= 1
 
     @classmethod
-    def get_simulated_mikrotik_data(cls, kantor: str) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
-        """
-        Menyediakan data mock/simulasi MikroTik realistis (termasuk DHCP 192.168.x.x dan ARP 10.10.x.x)
-        ketika server sedang dalam mode simulasi atau tidak terhubung fisik ke router lab ISP.
-        """
-        import os
-        devices = []
-        ip_to_rate = {}
-
-        # 1. Coba baca dari sheet Excel yang sesuai kantor
-        excel_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "DAFTAR PELANGGAN TIJ.xlsx")
-        sheet_map = {
-            "banyumas": "PELANGGAN BMS",
-            "cabang": "PELANGGAN CABANG",
-            "pusat": "PELANGGAN PUSAT"
-        }
-        target_sheet = sheet_map.get(kantor.lower(), "PELANGGAN BMS")
-
-        if os.path.exists(excel_path):
-            try:
-                import pandas as pd
-                df = pd.read_excel(excel_path, sheet_name=target_sheet, header=2)
-                for _, r in df.iterrows():
-                    nama = str(r.get("NAMA", "")).strip()
-                    ip = str(r.get("IP", "")).strip()
-                    mac = str(r.get("MAC", "")).strip()
-                    if not ip or ip in ("", "nan", "None", ""):
-                        continue
-                    if not nama or nama in ("", "nan", "None", ""):
-                        nama = f"Pelanggan {ip}"
-                    devices.append({
-                        "address": ip,
-                        "mac-address": mac.upper() if mac and mac not in ("nan", "None", "") else "",
-                        "comment": f"{nama} {kantor.capitalize()}",
-                        "status": "bound",
-                        "source": "arp" if ip.startswith("10.10.") else "dhcp"
-                    })
-                    ip_to_rate[ip] = "7000000/10000000"
-            except Exception as e:
-                logger.warning(f"[SIMULASI] Gagal memuat Excel simulasi MikroTik: {e}")
-
-        # Fallback jika excel kosong atau gagal
-        if not devices:
-            for i in range(1, 21):
-                ip = f"10.10.12.{i}" if i % 2 == 0 else f"192.168.10.{i}"
-                devices.append({
-                    "address": ip,
-                    "mac-address": f"44:22:95:0B:BC:{i:02X}",
-                    "comment": f"Pelanggan Mock {i} {kantor.capitalize()}",
-                    "status": "bound",
-                    "source": "arp" if ip.startswith("10.10.") else "dhcp"
-                })
-                ip_to_rate[ip] = "10M/10M"
-
-        logger.info(f"[SIMULASI] Menggunakan {len(devices)} data perangkat simulasi MikroTik untuk kantor '{kantor}'.")
-        return devices, ip_to_rate
-
-    @classmethod
     def fetch_mikrotik_data(
         cls, 
         host: str, 
         port: int, 
         username: str, 
         password: str,
-        kantor: str = "banyumas"
+        kantor: Optional[str] = None
     ) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
         """
         Menarik daftar perangkat pelanggan dari:
@@ -273,13 +217,13 @@ class MikroTikSyncService:
             except Exception as e:
                 logger.warning(f"Gagal mengambil DHCP leases: {e}")
 
-            # 2. Ambil ARP Table (/ip/arp) untuk menangkap IP 10.10.x.x dan IP statis lainnya
+            # 2. Ambil ARP Table (/ip/arp) HANYA untuk melengkapi MAC/Comment perangkat yang sudah terdaftar (bukan sebagai sumber pelanggan baru)
             try:
                 arp_resource = api.get_resource("/ip/arp")
                 raw_arps = arp_resource.get()
                 for a in raw_arps:
                     ip = a.get("address", "").strip()
-                    if not ip:
+                    if not ip or ip not in devices_by_ip:
                         continue
                     mac = a.get("mac-address", "").strip().upper()
                     comment = a.get("comment", "").strip()
@@ -289,19 +233,10 @@ class MikroTikSyncService:
                     if disabled or not complete:
                         continue
 
-                    if ip not in devices_by_ip:
-                        devices_by_ip[ip] = {
-                            "address": ip,
-                            "mac-address": mac,
-                            "comment": comment,
-                            "status": "bound",
-                            "source": "arp"
-                        }
-                    else:
-                        if not devices_by_ip[ip].get("comment") and comment:
-                            devices_by_ip[ip]["comment"] = comment
-                        if not devices_by_ip[ip].get("mac-address") and mac:
-                            devices_by_ip[ip]["mac-address"] = mac
+                    if not devices_by_ip[ip].get("comment") and comment:
+                        devices_by_ip[ip]["comment"] = comment
+                    if not devices_by_ip[ip].get("mac-address") and mac:
+                        devices_by_ip[ip]["mac-address"] = mac
             except Exception as e:
                 logger.warning(f"Gagal mengambil ARP table: {e}")
 
@@ -387,9 +322,7 @@ class MikroTikSyncService:
             connection.disconnect()
             return list(devices_by_ip.values()), ip_to_rate
         except Exception as conn_err:
-            if settings.SNMP_SIMULATION_MODE:
-                logger.warning(f"[SIMULASI] Koneksi MikroTik {host}:{port} ({conn_err}). Mengaktifkan mode simulasi MikroTik untuk kantor '{kantor}'...")
-                return cls.get_simulated_mikrotik_data(kantor)
+            logger.error(f"[MIKROTIK] Gagal menghubungkan ke router {host}:{port}: {conn_err}")
             raise conn_err
 
     @classmethod
@@ -413,16 +346,24 @@ class MikroTikSyncService:
         return "Paket 10 Mbps"
 
     @classmethod
-    def extract_pop_from_comment(cls, comment: str) -> Optional[str]:
-        """Mengekstrak nama wilayah (POP) jika ada pada kata terakhir comment."""
-        parts = comment.strip().split()
+    def extract_pop_from_comment(cls, comment: str, existing_pops: Optional[Dict[str, str]] = None) -> Optional[str]:
+        """
+        Mengekstrak nama wilayah (POP) dari comment perangkat di MikroTik.
+        1. Mencari kecocokan langsung dengan POP yang terdaftar di database.
+        2. Jika ada pola spasi (misal 'Nama Pelanggan Kedunggede'), kata terakhir diperiksa atau didaftarkan dinamis.
+        """
+        if not comment:
+            return None
+        clean_comment = comment.strip()
+        parts = clean_comment.split()
         if len(parts) >= 2:
-            last_word = parts[-1].capitalize()
-            # Wilayah umum di area jaringan
-            known_pops = ["Pasinggangan", "Kedunggede", "Karangrau", "Kejawar", "Karangmangu", "Goras", "Banyumas", "Cabang", "Pusat"]
-            for kp in known_pops:
-                if kp.lower() == last_word.lower():
-                    return kp
+            last_word = parts[-1].strip()
+            # Jika kata terakhir cocok dengan database POP yang sudah ada
+            if existing_pops and last_word.lower() in existing_pops:
+                return existing_pops[last_word.lower()]
+            # Jika kata terakhir merupakan nama lokasi (huruf alfabet tanpa angka)
+            if re.match(r'^[a-zA-Z]{3,}$', last_word) and not last_word.upper().startswith(("ONT", "AP", "RT", "RW")):
+                return last_word.capitalize()
         return None
 
     @classmethod
@@ -517,8 +458,9 @@ class MikroTikSyncService:
                 except Exception:
                     db.rollback()
 
-            pop_candidate = cls.extract_pop_from_comment(comment)
-            final_pop = "Server Cabang"
+            pop_candidate = cls.extract_pop_from_comment(comment, existing_pops=existing_pops)
+            # Default POP disesuaikan dengan kantor aktif yang terdaftar di database
+            final_pop = existing_pops.get(kantor.lower()) or f"POP {kantor.capitalize()}" if kantor else "POP Utama"
             if pop_candidate:
                 if pop_candidate.lower() in existing_pops:
                     final_pop = existing_pops[pop_candidate.lower()]
@@ -566,10 +508,6 @@ class MikroTikSyncService:
                 if is_ont_ip:
                     if p_exist.ip_ont != ip:
                         p_exist.ip_ont = ip
-                        changed = True
-                    # Jika belum punya ip_router sama sekali, jadikan ip_router juga
-                    if not p_exist.ip_router:
-                        p_exist.ip_router = ip
                         changed = True
                 else:
                     if p_exist.ip_router != ip:
@@ -634,7 +572,7 @@ class MikroTikSyncService:
                 # Buat entri PerangkatONT melalui relasi objek agar sinkron dengan cascade
                 new_cust.perangkat = PerangkatONT(
                     id_pelanggan=id_pelanggan,
-                    ip_router=ip if not is_ont_ip else ip,
+                    ip_router=ip if not is_ont_ip else None,
                     ip_ont=ip if is_ont_ip else None,
                     mac_address=mac if mac else None,
                     jenis_modem="GM220-S",
@@ -667,21 +605,28 @@ class MikroTikSyncService:
         }
 
     @classmethod
-    def get_router_health(cls, db: Session, kantor: str = "banyumas") -> Dict[str, Any]:
+    def get_router_health(cls, db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:
         """Mengambil metrik kesehatan router (CPU Load, Free RAM, Total RAM, Uptime, Versi)."""
         from app.db.models import Kantor
+        if not kantor:
+            first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+            kantor = first_k.kode if first_k else "cabang"
+
         k = db.query(Kantor).filter(Kantor.kode == kantor).first()
-        host = k.mikrotik_host if k and k.mikrotik_host else settings.MIKROTIK_HOST
-        port = k.mikrotik_port if k and k.mikrotik_port else settings.MIKROTIK_PORT
-        user = k.mikrotik_user if k and k.mikrotik_user else settings.MIKROTIK_USER
-        password = k.mikrotik_pass if k and k.mikrotik_pass else settings.MIKROTIK_PASSWORD
+        if not k or not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
+            return {"success": False, "message": f"Kredensial MikroTik belum diatur lengkap di database untuk kantor '{kantor}'."}
+
+        host = k.mikrotik_host
+        port = int(k.mikrotik_port)
+        user = k.mikrotik_user
+        password = k.mikrotik_pass or ""
 
         try:
             connection = routeros_api.RouterOsApiPool(
                 host,
                 username=user,
-                password=password or "",
-                port=port or 8728,
+                password=password,
+                port=port,
                 use_ssl=False,
                 plaintext_login=True
             )
@@ -717,26 +662,16 @@ class MikroTikSyncService:
                     "host": host
                 }
         except Exception as e:
-            logger.debug(f"[ROUTER-HEALTH] Koneksi live gagal ({e}), mengembalikan data router profil: {board_name if 'board_name' in locals() else 'RB450Gx4'}")
-
-        # Realistis fallback / profil router kantor dari data WinBox aktual
-        return {
-            "success": True,
-            "is_simulated": True,
-            "router_name": f"TIJ-NET_{kantor.upper()}",
-            "board_name": "RB450Gx4",
-            "version": "7.24.2 (stable)",
-            "cpu_load": 55,
-            "uptime": "20d 10:48:52",
-            "total_memory_mb": 1024.0,
-            "free_memory_mb": 846.6,
-            "used_memory_mb": 177.4,
-            "memory_percent": 17.3,
-            "host": host or "192.168.202.50"
-        }
+            logger.error(f"[ROUTER-HEALTH] Koneksi live ke router MikroTik {host}:{port} gagal: {e}")
+            return {
+                "success": False,
+                "is_simulated": False,
+                "message": f"Gagal terhubung ke router {host}:{port}: {e}",
+                "host": host
+            }
 
     @classmethod
-    def get_live_queues_and_bandwidth(cls, db: Session, kantor: str = "banyumas") -> List[Dict[str, Any]]:
+    def get_live_queues_and_bandwidth(cls, db: Session, kantor: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Mengambil Simple Queues lengkap:
         - Target IP & Rule Name
@@ -746,11 +681,19 @@ class MikroTikSyncService:
         - Status Isolir
         """
         from app.db.models import Kantor
+        if not kantor:
+            first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+            kantor = first_k.kode if first_k else "cabang"
+
         k = db.query(Kantor).filter(Kantor.kode == kantor).first()
-        host = k.mikrotik_host if k and k.mikrotik_host else settings.MIKROTIK_HOST
-        port = k.mikrotik_port if k and k.mikrotik_port else settings.MIKROTIK_PORT
-        user = k.mikrotik_user if k and k.mikrotik_user else settings.MIKROTIK_USER
-        password = k.mikrotik_pass if k and k.mikrotik_pass else settings.MIKROTIK_PASSWORD
+        if not k or not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
+            logger.debug(f"[LIVE-QUEUES] Router MikroTik belum dikonfigurasi lengkap di database untuk kantor '{kantor}'.")
+            return []
+
+        host = k.mikrotik_host
+        port = int(k.mikrotik_port)
+        user = k.mikrotik_user
+        password = k.mikrotik_pass or ""
 
         # Peta pelanggan di kantor ini
         pelanggans = db.query(Pelanggan).filter(Pelanggan.kantor == kantor).all()
@@ -766,8 +709,8 @@ class MikroTikSyncService:
             connection = routeros_api.RouterOsApiPool(
                 host,
                 username=user,
-                password=password or "",
-                port=port or 8728,
+                password=password,
+                port=port,
                 use_ssl=False,
                 plaintext_login=True
             )
@@ -775,7 +718,8 @@ class MikroTikSyncService:
             raw_queues = api.get_resource("/queue/simple").get()
             connection.disconnect()
         except Exception as e:
-            logger.debug(f"[LIVE-QUEUES] Tidak dapat menarik langsung dari API ({e}), menggunakan snapshot real-world.")
+            logger.error(f"[LIVE-QUEUES] Gagal menarik queue dari router MikroTik ({e}).")
+            return []
 
         # Jika API kosong/gagal, generate dari pelanggan kantor + rule-rule Winbox bawaan
         results = []
@@ -811,6 +755,11 @@ class MikroTikSyncService:
 
                 cust = cust_by_ip.get(target_ip)
 
+                # Ambil log redaman terakhir jika ada
+                c_log = cust.logs[0] if (cust and cust.logs) else None
+                c_rx = float(c_log.rx_power) if (c_log and c_log.rx_power is not None) else (float(cust.redaman_baseline) if (cust and cust.redaman_baseline) else None)
+                c_status = c_log.status_koneksi if c_log else ("ONLINE" if not disabled else "OFFLINE")
+
                 results.append({
                     "name": name,
                     "target_ip": target_ip,
@@ -825,51 +774,8 @@ class MikroTikSyncService:
                     "id_pelanggan": cust.id_pelanggan if cust else None,
                     "nama_pelanggan": cust.nama if cust else name,
                     "status_isolir": cust.status_isolir if cust else False,
-                    "redaman": float(cust.redaman) if cust and cust.redaman else None,
-                    "status_koneksi": cust.status_koneksi if cust else ("ONLINE" if not disabled else "OFFLINE")
-                })
-        else:
-            # Bangun data Simple Queues murni untuk pelanggan TeknoGuard (tanpa perangkat internal kantor)
-            import random
-            from app.core.timezone import get_current_period
-            period = get_current_period()
-            for idx, p in enumerate(pelanggans):
-                ip = p.ip_router or p.ip_ont or f"192.168.10.{idx + 8}"
-                mac = p.mac_address or f"C8:5A:9F:4B:1F:{idx:02X}"
-                q_name = p.queue_name or f"Client-{mac} {p.nama.upper()}"
-
-                # Cek kuota terpakai
-                kuota_val = 0.0
-                if p.kuota_list:
-                    for k_item in p.kuota_list:
-                        if k_item.periode_bulan == period:
-                            kuota_val = float(k_item.kuota_terpakai_gb)
-                            break
-                if kuota_val <= 0:
-                    # Ambil estimasi acak deterministik berdasarkan id pelanggan
-                    kuota_val = round(15.0 + ((hash(p.id_pelanggan) % 1500) / 10.0), 2)
-
-                # Ambil log redaman terakhir jika ada
-                last_log = p.logs[0] if p.logs else None
-                redaman_val = float(last_log.rx_power) if last_log and last_log.rx_power is not None else None
-                status_kon = last_log.status_koneksi if last_log else ("ONLINE" if p.status_lease == "bound" else "OFFLINE")
-
-                results.append({
-                    "name": q_name,
-                    "target_ip": ip,
-                    "upload_limit": "7M" if "10" in (p.paket or "") else "15M",
-                    "download_limit": "10M" if "10" in (p.paket or "") else "20M",
-                    "upload_bytes": int(kuota_val * 0.25 * 1024 * 1024 * 1024),
-                    "download_bytes": int(kuota_val * 0.75 * 1024 * 1024 * 1024),
-                    "total_gb": kuota_val,
-                    "disabled": p.status_isolir,
-                    "is_office": False,
-                    "is_linked": True,
-                    "id_pelanggan": p.id_pelanggan,
-                    "nama_pelanggan": p.nama,
-                    "status_isolir": p.status_isolir,
-                    "redaman": redaman_val,
-                    "status_koneksi": status_kon
+                    "redaman": c_rx,
+                    "status_koneksi": c_status
                 })
 
         return results
@@ -904,16 +810,16 @@ class MikroTikSyncService:
         db.commit()
 
         # Eksekusi ke router jika terhubung
-        kantor = p.kantor or "banyumas"
+        kantor = p.kantor
         from app.db.models import Kantor
-        k = db.query(Kantor).filter(Kantor.kode == kantor).first()
-        if k and k.mikrotik_host and k.mikrotik_user:
+        k = db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+        if k and k.mikrotik_host and k.mikrotik_user and k.mikrotik_port:
             try:
                 connection = routeros_api.RouterOsApiPool(
                     k.mikrotik_host,
                     username=k.mikrotik_user,
                     password=k.mikrotik_pass or "",
-                    port=k.mikrotik_port or 8728,
+                    port=int(k.mikrotik_port),
                     use_ssl=False,
                     plaintext_login=True
                 )
@@ -947,12 +853,19 @@ class MikroTikSyncService:
         Membaca counter akumulasi bytes dari Simple Queues lalu
         menyinkronkan ke tabel `kuota_pelanggan` pada periode bulan berjalan (YYYY-MM).
         """
-        from app.db.models import KuotaPelanggan
+        from app.db.models import KuotaPelanggan, Kantor
         from app.core.timezone import get_current_period
         current_period = get_current_period()
 
-        target_kantors = [kantor] if kantor and kantor != "all" else ["banyumas", "cabang", "pusat"]
+        if kantor and kantor != "all":
+            target_kantors = [kantor]
+        else:
+            # Ambil seluruh kantor yang terdaftar di database MySQL
+            db_kantors = db.query(Kantor).all()
+            target_kantors = [k.kode for k in db_kantors if k.kode]
         total_synced = 0
+
+        synced_cids = {}
 
         for knt in target_kantors:
             queues = cls.get_live_queues_and_bandwidth(db, kantor=knt)
@@ -964,6 +877,16 @@ class MikroTikSyncService:
                 total_gb = q.get("total_gb", 0.0)
                 up_b = q.get("upload_bytes", 0)
                 dl_b = q.get("download_bytes", 0)
+
+                # Jika IP/pelanggan memiliki lebih dari 1 queue di WinBox, akumulasikan
+                if cid in synced_cids:
+                    kuota_rec = synced_cids[cid]
+                    kuota_rec.upload_bytes += up_b
+                    kuota_rec.download_bytes += dl_b
+                    kuota_rec.kuota_terpakai_gb = round(float(kuota_rec.kuota_terpakai_gb or 0) + total_gb, 2)
+                    kuota_rec.last_sync_mikrotik = get_now_wib()
+                    kuota_rec.updated_at = get_now_wib()
+                    continue
 
                 # Ambil atau buat record KuotaPelanggan
                 kuota_rec = db.query(KuotaPelanggan).filter(
@@ -987,6 +910,9 @@ class MikroTikSyncService:
                         last_sync_mikrotik=get_now_wib()
                     )
                     db.add(kuota_rec)
+                    db.flush()
+
+                synced_cids[cid] = kuota_rec
 
                 # Update queue_name jika belum tersimpan
                 p = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cid).first()

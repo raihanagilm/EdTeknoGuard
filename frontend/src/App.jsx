@@ -28,7 +28,7 @@ import { ModulPenggunaNOC } from './components/ModulPenggunaNOC'
 import { ModulKantorCabang } from './components/ModulKantorCabang'
 import { ModulNotifikasi } from './components/ModulNotifikasi'
 import { ErrorView } from './components/ErrorView'
-import { ConfirmSaveModal, OntDetailModal } from './components/Modals'
+import { ConfirmSaveModal } from './components/Modals'
 import { HalamanLogin } from './components/HalamanLogin'
 import { PortalPelangganApp } from './portal/PortalPelangganApp'
 
@@ -112,24 +112,6 @@ export default function App() {
   const [isScanningActive, setIsScanningActive] = useState(true)
   const [scanPercent, setScanPercent] = useState(78)
   const [filterStatus, setFilterStatus] = useState('ALL')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedOnt, setSelectedOnt] = useState(null)
-  const [currentTime, setCurrentTime] = useState('10:25:00 WIB')
-  const canvasRef = useRef(null)
-
-  // Master ONT Data
-  const ontData = [
-    { id: 'CUST-0891', name: 'Bpk. Hendro Prayogo', ip: '10.10.12.45', pop: 'POP-01 (Kecamatan)', rx: -19.4, tx: 2.1, temp: 42, status: 'NORMAL', phone: '0812-3456-7890', address: 'Jl. Merak No. 14, RT 02/03' },
-    { id: 'CUST-0412', name: 'Ibu Hj. Siti Aminah', ip: '10.10.14.88', pop: 'POP-02 (Perumahan)', rx: -26.3, tx: 1.8, temp: 45, status: 'WARNING', phone: '0857-9821-4321', address: 'Perum Griya Indah Blok C-9' },
-    { id: 'CUST-0103', name: 'CV Mitra Abadi Jaya', ip: '10.10.10.12', pop: 'POP-01 (Kecamatan)', rx: -27.8, tx: 1.2, temp: 49, status: 'CRITICAL', phone: '0813-9000-1122', address: 'Ruko Sentra Bisnis No. 03' },
-    { id: 'CUST-0554', name: 'Warkop Nusantara & WiFi', ip: '10.10.18.90', pop: 'POP-03 (Pasar)', rx: -21.1, tx: 2.3, temp: 40, status: 'NORMAL', phone: '0821-4567-8899', address: 'Kios Pasar No. 12 Sisi Barat' },
-    { id: 'CUST-0782', name: 'Klinik Sehat Medika 24 Jam', ip: '10.10.15.34', pop: 'POP-02 (Perumahan)', rx: null, tx: 0, temp: 0, status: 'CRITICAL', phone: '0811-2233-4455', address: 'Jl. Ahmad Yani No. 88' },
-    { id: 'CUST-0919', name: 'Bpk. Ahmad Fadillah', ip: '10.10.19.12', pop: 'POP-01 (Kecamatan)', rx: -20.2, tx: 2.2, temp: 41, status: 'NORMAL', phone: '0878-1122-3344', address: 'Dusun Krajan RT 01/01' }
-  ]
-
-  // Default selected ONT for split gauge view
-  const [activeGaugeOnt, setActiveGaugeOnt] = useState(ontData[0])
-
   // =========================================================================
   // STATE PENGATURAN SISTEM (3 TAB RESMI LENGKAP)
   // =========================================================================
@@ -497,161 +479,6 @@ export default function App() {
     }, 1200)
     return () => clearInterval(interval)
   }, [isScanningActive])
-
-  // Canvas Optical Waveform Drawing (Frost Cyan Theme)
-  useEffect(() => {
-    if (activeTab !== 'beranda' || !canvasRef.current) return
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const dpr = window.devicePixelRatio || 1
-    const rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width * dpr
-    canvas.height = rect.height * dpr
-    ctx.scale(dpr, dpr)
-
-    const w = rect.width
-    const h = rect.height
-    ctx.clearRect(0, 0, w, h)
-
-    const pL = 38, pR = 16, pT = 16, pB = 28
-    const plotW = w - pL - pR
-    const plotH = h - pT - pB
-
-    // Y thresholds: min -30, max -15
-    const valToY = (v) => pT + ((v - (-15)) / (-30 - (-15))) * plotH
-    const warnY = valToY(warnThreshold || -26.0)
-    const critY = valToY(critThreshold || -27.0)
-
-    // Grid lines & labels
-    ctx.strokeStyle = 'rgba(186, 230, 253, 0.4)'
-    ctx.lineWidth = 1
-    const ySteps = [-15, -20, -25, -30]
-    ctx.fillStyle = '#64748b'
-    ctx.font = '10px monospace'
-    ctx.textAlign = 'right'
-    ctx.textBaseline = 'middle'
-
-    ySteps.forEach((val) => {
-      const y = valToY(val)
-      ctx.beginPath()
-      ctx.moveTo(pL, y)
-      ctx.lineTo(w - pR, y)
-      ctx.stroke()
-      ctx.fillText(`${val}`, pL - 6, y)
-    })
-
-    // SOP Danger Zone Rect (-27 to -30)
-    ctx.fillStyle = 'rgba(244, 63, 94, 0.08)'
-    ctx.fillRect(pL, critY, plotW, valToY(-30) - critY)
-
-    // Warning Line
-    ctx.setLineDash([4, 4])
-    ctx.strokeStyle = '#f59e0b'
-    ctx.lineWidth = 1.5
-    ctx.beginPath()
-    ctx.moveTo(pL, warnY)
-    ctx.lineTo(w - pR, warnY)
-    ctx.stroke()
-
-    // Critical Line
-    ctx.strokeStyle = '#ef4444'
-    ctx.lineWidth = 1.5
-    ctx.beginPath()
-    ctx.moveTo(pL, critY)
-    ctx.lineTo(w - pR, critY)
-    ctx.stroke()
-    ctx.setLineDash([])
-
-    // Data points & Time X Axis
-    const points = [-20.1, -19.8, -21.4, -20.9, -22.1, -26.2, -27.4, -23.1, -21.0, -19.9, -20.4, -21.3]
-    const times = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00']
-    const stepX = plotW / (points.length - 1)
-
-    // Gradient Fill
-    const grad = ctx.createLinearGradient(0, pT, 0, h - pB)
-    grad.addColorStop(0, 'rgba(6, 182, 212, 0.45)')
-    grad.addColorStop(1, 'rgba(6, 182, 212, 0.0)')
-
-    // Draw Smooth Curve
-    ctx.beginPath()
-    points.forEach((val, i) => {
-      const x = pL + i * stepX
-      const y = valToY(val)
-      if (i === 0) ctx.moveTo(x, y)
-      else {
-        const prevX = pL + (i - 1) * stepX
-        const prevY = valToY(points[i - 1])
-        const cX = (prevX + x) / 2
-        ctx.bezierCurveTo(cX, prevY, cX, y, x, y)
-      }
-    })
-    ctx.lineTo(pL + (points.length - 1) * stepX, h - pB)
-    ctx.lineTo(pL, h - pB)
-    ctx.closePath()
-    ctx.fillStyle = grad
-    ctx.fill()
-
-    // Draw Stroke Line
-    ctx.beginPath()
-    points.forEach((val, i) => {
-      const x = pL + i * stepX
-      const y = valToY(val)
-      if (i === 0) ctx.moveTo(x, y)
-      else {
-        const prevX = pL + (i - 1) * stepX
-        const prevY = valToY(points[i - 1])
-        const cX = (prevX + x) / 2
-        ctx.bezierCurveTo(cX, prevY, cX, y, x, y)
-      }
-    })
-    ctx.strokeStyle = '#0891b2'
-    ctx.lineWidth = 2.5
-    ctx.stroke()
-
-    // Draw Point Dots
-    points.forEach((val, i) => {
-      const x = pL + i * stepX
-      const y = valToY(val)
-      ctx.beginPath()
-      ctx.arc(x, y, val <= critThreshold ? 4.5 : 3.5, 0, Math.PI * 2)
-      ctx.fillStyle = val <= critThreshold ? '#ef4444' : val <= warnThreshold ? '#f59e0b' : '#0891b2'
-      ctx.fill()
-      ctx.strokeStyle = '#ffffff'
-      ctx.lineWidth = 1.5
-      ctx.stroke()
-    })
-
-    // X Time labels
-    ctx.fillStyle = '#64748b'
-    ctx.textAlign = 'center'
-    const xLabelStep = plotW / (times.length - 1)
-    times.forEach((t, i) => {
-      ctx.fillText(t, pL + i * xLabelStep, h - 8)
-    })
-  }, [activeTab, warnThreshold, critThreshold])
-
-  // Filtered ONT List
-  const filteredOnt = ontData.filter((item) => {
-    const matchStatus = filterStatus === 'ALL' || item.status === filterStatus
-    const q = searchQuery.toLowerCase()
-    const matchSearch =
-      item.name.toLowerCase().includes(q) ||
-      item.id.toLowerCase().includes(q) ||
-      item.ip.includes(q) ||
-      item.pop.toLowerCase().includes(q)
-    return matchStatus && matchSearch
-  })
-
-  // Gauge Speedometer Angle Mapping (-15 to -30 dBm -> -90 to +90 deg)
-  const getGaugeRotation = (rx) => {
-    if (rx === null || rx === undefined) return 90
-    const clamped = Math.max(-30, Math.min(-15, rx))
-    const ratio = (clamped - (-15)) / (-30 - (-15))
-    return -90 + ratio * 180
-  }
-
 
   // Handle Real Backend Logout
   const handleLogout = async () => {
@@ -1126,7 +953,7 @@ export default function App() {
         <MobileNav activeTab={activeTab} setActiveTab={handleTabChange} unreadTickets={unreadTickets} />
       </div>
 
-      {/* 4. MODAL POP-UPS (Confirm Save & ONT Details) */}
+      {/* 4. MODAL POP-UP (Confirm Save) */}
       <ConfirmSaveModal
         isOpen={confirmModalOpen}
         onClose={() => setConfirmModalOpen(false)}
@@ -1140,13 +967,6 @@ export default function App() {
         nightModeEnd={nightModeEnd}
         modemCredentialsCount={modemCredentials.length}
         applyToInvalid={applyToInvalid}
-      />
-
-      <OntDetailModal
-        selectedOnt={selectedOnt}
-        onClose={() => setSelectedOnt(null)}
-        warnThreshold={warnThreshold}
-        critThreshold={critThreshold}
       />
     </div>
   )

@@ -21,17 +21,8 @@ class Settings(BaseSettings):
     WARNING_THRESHOLD_DBM: float = -26.0
     CRITICAL_THRESHOLD_DBM: float = -32.0
     ALERT_DEBOUNCE_MINUTES: int = 30
-    SNMP_SIMULATION_MODE: bool = True
-
-    # MikroTik RouterOS API Settings
-    MIKROTIK_HOST: str = "192.168.202.50"
-    MIKROTIK_PORT: int = 8728
-    MIKROTIK_USER: str = "tekno"
-    MIKROTIK_PASSWORD: str = ""
-    MIKROTIK_AUTO_SYNC_ENABLED: bool = True
-    MIKROTIK_DEFAULT_KANTOR: str = "banyumas"
-    MIKROTIK_TIMEOUT: int = 6
-    MIKROTIK_SIMULATION_MODE: bool = True
+    SNMP_SIMULATION_MODE: bool = False
+    MIKROTIK_SIMULATION_MODE: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",

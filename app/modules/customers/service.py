@@ -5,7 +5,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Optional, List, Tuple, Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, case
 
 import openpyxl
 import pandas as pd
@@ -660,30 +660,40 @@ class CustomerService:
         total_count = query.count()
 
         # Dynamic sorting yang aman dan sesuai kolom tabel
+        effective_ip = func.coalesce(PerangkatONT.ip_ont, PerangkatONT.ip_router)
+        effective_status = case(
+            (Pelanggan.status_lease == "waiting", "OFFLINE"),
+            (LogPerformaONT.status_koneksi.isnot(None), LogPerformaONT.status_koneksi),
+            else_="NORMAL"
+        )
         col_map = {
             "id": Pelanggan.id,
             "id_pelanggan": Pelanggan.id_pelanggan,
             "nama": Pelanggan.nama,
             "pop": Pelanggan.pop,
-            "ip_router": PerangkatONT.ip_router,
-            "ip_ont": PerangkatONT.ip_ont,
+            "ip_router": effective_ip,
+            "ip_ont": effective_ip,
+            "ip": effective_ip,
             "paket": Pelanggan.paket,
             "jenis_modem": PerangkatONT.jenis_modem,
             "redaman_baseline": PerangkatONT.redaman_baseline,
             "status_kredensial": PerangkatONT.status_kredensial,
             "redaman_current": LogPerformaONT.rx_power,
             "rx_power": LogPerformaONT.rx_power,
-            "status": LogPerformaONT.status_koneksi,
-            "status_koneksi": LogPerformaONT.status_koneksi,
+            "status": effective_status,
+            "status_koneksi": effective_status,
+            "kuota": KuotaPelanggan.kuota_terpakai_gb,
+            "kuota_terpakai_gb": KuotaPelanggan.kuota_terpakai_gb,
+            "terpakai_gb": KuotaPelanggan.kuota_terpakai_gb,
             "is_monitored": Pelanggan.is_monitored,
             "waktu_cek": LogPerformaONT.waktu_cek,
             "created_at": Pelanggan.created_at
         }
         target_col = col_map.get(sort_by, Pelanggan.id)
         if sort_dir.lower() == "desc":
-            query = query.order_by(target_col.desc())
+            query = query.order_by(target_col.is_(None), target_col.desc())
         else:
-            query = query.order_by(target_col.asc())
+            query = query.order_by(target_col.is_(None), target_col.asc())
 
         offset = (page - 1) * limit
         rows = query.offset(offset).limit(limit).all()
@@ -966,6 +976,9 @@ class CustomerService:
                 pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == existing_ip.id_pelanggan).first()
                 pel_name = pel.nama if pel else existing_ip.id_pelanggan
                 raise ValueError(f"IP Router '{new_ip}' sudah digunakan oleh pelanggan '{pel_name}' (ID: {existing_ip.id_pelanggan})")
+
+        if "no_wa" in update_dict and update_dict["no_wa"] is not None:
+            cust.no_hp = str(update_dict["no_wa"]).strip()
 
         for field, val in update_dict.items():
             if hasattr(cust, field) and val is not None:

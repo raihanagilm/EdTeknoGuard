@@ -35,8 +35,8 @@ class KuotaService:
             kuota = KuotaPelanggan(
                 id_pelanggan=id_pelanggan,
                 periode_bulan=current_period,
-                kuota_terpakai_gb=84.2,
-                kecepatan_paket=cust.paket if cust and cust.paket else "20 Mbps Unlimited"
+                kuota_terpakai_gb=0.0,
+                kecepatan_paket=cust.paket if cust and cust.paket else "-"
             )
             db.add(kuota)
             db.commit()

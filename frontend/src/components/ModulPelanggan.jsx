@@ -31,7 +31,9 @@ import {
   Info,
   Check,
   Activity,
-  ShieldAlert
+  ShieldAlert,
+  MoreVertical,
+  ExternalLink
 } from 'lucide-react'
 import {
   ModuleHeader,
@@ -41,6 +43,7 @@ import {
   DataTableContainer
 } from './CommonUI'
 import { WizardImportPelanggan } from './WizardImportPelanggan'
+import { ModalDetailPelanggan } from './ModalDetailPelanggan'
 
 export function ModulPelanggan({
   activeOffice = 'cabang',
@@ -78,20 +81,20 @@ export function ModulPelanggan({
   // Modal Detail State (Informasi Pribadi & Kontak WA)
   const [detailCustomer, setDetailCustomer] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [returnToDetailCustomer, setReturnToDetailCustomer] = useState(null)
 
-  // Modal Create / Edit State
+  // Modal Edit Pelanggan State
   const [modalOpen, setModalOpen] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const [activeMenuId, setActiveMenuId] = useState(null)
   const [formData, setFormData] = useState({
     id_pelanggan: '',
     nama: '',
     ip_router: '',
-    pop: 'POP-01',
-    kantor: activeOffice || 'cabang',
-    paket: '20 Mbps Unlimited',
-    jenis_modem: 'ZTE GM220-S',
-    user_admin: 'admin',
-    pass_admin: 'tekno2024',
+    kantor: '',
+    paket: '',
+    jenis_modem: '',
+    user_admin: '',
+    pass_admin: '',
     nama_wifi: '',
     password_wifi: '',
     no_wa: '',
@@ -318,65 +321,22 @@ export function ModulPelanggan({
     }
   }
 
-  // Helper generator ID pelanggan terstruktur sesuai standar aturan DB-05 (antislop-vibecoding): <prefix><YYYYMMDD><4 digit acak>
-  const generateStructuredCustomerId = (existingSet) => {
-    const now = new Date()
-    const yyyy = now.getFullYear()
-    const mm = String(now.getMonth() + 1).padStart(2, '0')
-    const dd = String(now.getDate()).padStart(2, '0')
-    const dateStr = `${yyyy}${mm}${dd}`
-    
-    let candidate = ''
-    do {
-      const randomDigits = Math.floor(1000 + Math.random() * 9000).toString()
-      candidate = `cust${dateStr}${randomDigits}`
-    } while (existingSet && existingSet.has(candidate))
-    
-    return candidate
-  }
-
-  // Open Modal Create
-  const handleOpenCreate = () => {
-    setIsEditing(false)
-    const existingSet = new Set(customers.map((c) => c.id_pelanggan))
+  // Open Modal Edit Pelanggan
+  const handleOpenEdit = (customer, fromDetail = null) => {
+    setReturnToDetailCustomer(fromDetail || customer)
     setFormData({
-      id_pelanggan: generateStructuredCustomerId(existingSet),
-      nama: '',
-      ip_router: '10.10.',
-      pop: 'POP-01',
-      kantor: activeOffice || 'cabang',
-      paket: '20 Mbps Unlimited',
-      jenis_modem: 'ZTE GM220-S',
-      user_admin: 'admin',
-      pass_admin: 'tekno2024',
-      nama_wifi: '',
-      password_wifi: '',
-      no_wa: '',
-      alamat: '',
-      is_monitored: true
-    })
-    setFormError('')
-    setFormSuccess('')
-    setModalOpen(true)
-  }
-
-  // Open Modal Edit
-  const handleOpenEdit = (customer) => {
-    setIsEditing(true)
-    setFormData({
-      id_pelanggan: customer.id_pelanggan || customer.id,
+      id_pelanggan: customer.id_pelanggan || customer.id || '',
       nama: customer.nama || customer.name || '',
       ip_router: customer.ip_router || customer.ip || '',
-      pop: customer.pop || 'POP-01',
-      kantor: customer.kantor || activeOffice || 'cabang',
-      paket: customer.paket || '20 Mbps Unlimited',
-      jenis_modem: customer.jenis_modem || 'ZTE GM220-S',
-      user_admin: customer.user_admin || 'admin',
-      pass_admin: customer.pass_admin || 'tekno2024',
-      nama_wifi: customer.nama_wifi || '',
-      password_wifi: customer.password_wifi || '',
-      no_wa: customer.no_wa || customer.no_hp || '',
-      alamat: customer.alamat || customer.address || '',
+      kantor: customer.kantor || activeOffice || '',
+      paket: customer.paket || '',
+      jenis_modem: customer.jenis_modem || '',
+      user_admin: customer.user_admin && customer.user_admin !== '-' ? customer.user_admin : '',
+      pass_admin: customer.pass_admin && customer.pass_admin !== '-' ? customer.pass_admin : '',
+      nama_wifi: customer.nama_wifi && customer.nama_wifi !== '-' ? customer.nama_wifi : '',
+      password_wifi: customer.password_wifi && customer.password_wifi !== '-' ? customer.password_wifi : '',
+      no_wa: customer.no_wa && customer.no_wa !== '-' ? customer.no_wa : (customer.no_hp && customer.no_hp !== '-' ? customer.no_hp : ''),
+      alamat: customer.alamat && customer.alamat !== '-' ? customer.alamat : (customer.address && customer.address !== '-' ? customer.address : ''),
       is_monitored: customer.is_monitored !== undefined ? customer.is_monitored : true
     })
     setFormError('')
@@ -384,7 +344,7 @@ export function ModulPelanggan({
     setModalOpen(true)
   }
 
-  // Save Customer (Create / Update)
+  // Save Customer Update
   const handleSaveCustomer = async (e) => {
     e.preventDefault()
     setFormSaving(true)
@@ -392,31 +352,30 @@ export function ModulPelanggan({
     setFormSuccess('')
 
     try {
-      const url = isEditing ? `/api/customers/${formData.id_pelanggan}` : '/api/customers'
-      const method = isEditing ? 'PUT' : 'POST'
+      const payload = {
+        ...formData,
+        no_hp: formData.no_wa
+      }
 
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(`/api/customers/${formData.id_pelanggan}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       })
 
       if (res.ok) {
-        setFormSuccess(isEditing ? 'Data pelanggan berhasil diperbarui!' : 'Pelanggan baru berhasil ditambahkan!')
+        setFormSuccess('Data pelanggan berhasil diperbarui!')
         setTimeout(() => {
           setModalOpen(false)
           fetchCustomers()
-        }, 1200)
+        }, 1000)
       } else {
         const errJson = await res.json().catch(() => ({}))
         setFormError(errJson.detail || 'Gagal menyimpan data pelanggan.')
       }
     } catch (err) {
-      setFormSuccess('Tersimpan di sistem.')
-      setTimeout(() => {
-        setModalOpen(false)
-        fetchCustomers()
-      }, 1200)
+      console.error('Update customer error:', err)
+      setFormError('Terjadi kesalahan koneksi saat memperbarui data pelanggan.')
     } finally {
       setFormSaving(false)
     }
@@ -503,60 +462,6 @@ export function ModulPelanggan({
                   placeholder="Cari ID, Nama, IP..."
                   className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px]"
                 />
-              </div>
-
-              {/* Tombol Ikon Filter Dropdown Popover */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
-                  className={`p-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1.5 min-h-[34px] sm:min-h-[36px] shrink-0 cursor-pointer ${
-                    filterPop !== 'ALL'
-                      ? 'bg-cyan-600 text-white border-cyan-600 shadow-xs'
-                      : 'bg-cyan-50/70 hover:bg-cyan-100 text-cyan-900 border-sky-200'
-                  }`}
-                  title="Filter Wilayah POP"
-                >
-                  <Filter className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{filterPop === 'ALL' ? 'Filter POP' : filterPop}</span>
-                  {filterPop !== 'ALL' && (
-                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  )}
-                </button>
-
-                {/* Popover Dropdown Menu */}
-                {filterDropdownOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setFilterDropdownOpen(false)}
-                    />
-                    <div className="absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-52 bg-white rounded-xl p-2.5 shadow-xl border border-slate-300 space-y-1 font-mono text-xs">
-                      <div className="px-2.5 py-1 text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                        Pilih Server POP:
-                      </div>
-                      {['ALL', ...(popOptions.length > 0 ? popOptions : ['POP-01', 'POP-02', 'POP-03'])].map((pop) => (
-                        <button
-                          key={pop}
-                          type="button"
-                          onClick={() => {
-                            setFilterPop(pop);
-                            setPage(1);
-                            setFilterDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-2.5 py-1.5 rounded-lg transition flex items-center justify-between cursor-pointer ${
-                            filterPop === pop
-                              ? 'bg-cyan-700 text-white font-bold'
-                              : 'hover:bg-slate-100 text-slate-800'
-                          }`}
-                        >
-                          <span className="font-medium">{pop === 'ALL' ? 'Semua Server POP' : pop}</span>
-                          {filterPop === pop && <Check className="w-3.5 h-3.5 text-white" />}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
               </div>
             </div>
 
@@ -648,7 +553,7 @@ export function ModulPelanggan({
         onNextPage={() => setPage(p => Math.min(Math.max(1, Math.ceil(totalRecords / limit)), p + 1))}
         loading={loading}
       >
-        <table className="w-full text-left border-collapse table-auto md:table-fixed">
+        <table className="w-full text-left border-collapse table-auto">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3 w-10 text-center">
@@ -703,12 +608,6 @@ export function ModulPelanggan({
                 </div>
               </th>
               <th className="py-2.5 px-3 w-40">WiFi &amp; Admin ONT</th>
-              <th className="py-2.5 px-3 text-right w-36">
-                <div className="flex items-center justify-end gap-1">
-                  <Activity className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Kuota (Bln Ini)</span>
-                </div>
-              </th>
               <th 
                 className={`py-2.5 px-3 text-right cursor-pointer select-none transition w-32 ${sortField === 'rx_power' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
                 onClick={() => handleSort('rx_power')}
@@ -814,19 +713,6 @@ export function ModulPelanggan({
                         Modem: <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
                       </div>
                     </td>
-                    <td className="py-2.5 px-3 text-right">
-                      <div className="font-sans font-bold text-slate-900 text-xs">
-                        {(c.kuota_terpakai_gb || 0).toFixed(2)} <span className="text-[10px] font-normal text-slate-500 font-mono">GB</span>
-                      </div>
-                      <div className="text-[10px] text-slate-500 font-mono">
-                        ▲{((c.upload_bytes || 0) / (1024**3)).toFixed(1)}GB • ▼{((c.download_bytes || 0) / (1024**3)).toFixed(1)}GB
-                      </div>
-                      {c.status_isolir ? (
-                        <span className="inline-block px-1.5 py-0.2 mt-0.5 rounded text-[9px] font-black uppercase bg-rose-100 text-rose-700 border border-rose-300">
-                          DIISOLIR
-                        </span>
-                      ) : null}
-                    </td>
                     <td className="py-2.5 px-3 text-right font-black">
                       {(() => {
                         const rxVal = c.rx_power ?? c.rx ?? c.redaman_current ?? c.redaman_baseline;
@@ -889,85 +775,125 @@ export function ModulPelanggan({
                       })()}
                     </td>
                     <td className="py-2.5 px-3 text-right">
-                      {/* Dropdown Aksi Titik Tiga */}
-                      <div className="relative inline-block text-left">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => handleSingleProbe(cId)}
-                            disabled={probingId === cId}
-                            className="px-2.5 py-1 bg-cyan-50 hover:bg-cyan-700 hover:text-white text-cyan-900 border border-cyan-300 rounded-lg text-[11px] font-bold transition mr-1"
-                            title="Uji Sinyal Langsung"
-                          >
-                            {probingId === cId ? 'Uji...' : 'Uji Sinyal'}
-                          </button>
-                          
-                          {/* Menu Titik Tiga */}
-                          <div className="relative group">
-                            <button
-                              type="button"
-                              className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
-                              title="Pilihan Aksi"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                            </button>
+                      <div className="flex items-center justify-end gap-1.5 relative">
+                        <button
+                          onClick={() => handleSingleProbe(cId)}
+                          disabled={probingId === cId}
+                          className="px-2.5 py-1 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 border border-cyan-200 rounded-lg text-[11px] font-bold transition shadow-2xs"
+                          title="Uji Sinyal Redaman Langsung"
+                        >
+                          {probingId === cId ? 'Uji...' : 'Uji Sinyal'}
+                        </button>
 
-                            <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[170px]">
-                              <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
-                                <button
-                                  onClick={() => handleOpenDetail(c)}
-                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition"
-                                >
-                                  <Info className="w-3.5 h-3.5 text-cyan-600" />
-                                  <span>Detail Pelanggan</span>
-                                </button>
-                                {(c.no_wa || c.no_hp) && (
-                                  <a
-                                    href={`https://wa.me/${(c.no_wa || c.no_hp).replace(/[^0-9]/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(
-                                      `Halo Bapak/Ibu ${c.nama || c.name}, kami dari Tim Teknis TeknoGuard NOC terkait layanan internet Anda.`
-                                    )}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition"
+                        {/* Menu Titik Tiga (Aksi Popover) */}
+                        <div className="relative inline-block text-left">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setActiveMenuId(activeMenuId === cId ? null : cId)
+                            }}
+                            className={`p-1.5 rounded-lg border transition ${
+                              activeMenuId === cId
+                                ? 'bg-cyan-600 text-white border-cyan-600 shadow-2xs'
+                                : 'bg-slate-50 hover:bg-slate-200 text-slate-700 border-slate-200'
+                            }`}
+                            title="Menu Aksi Pelanggan"
+                          >
+                            <MoreVertical className="w-3.5 h-3.5" />
+                          </button>
+
+                          {activeMenuId === cId && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-40"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setActiveMenuId(null)
+                                }}
+                              />
+                              <div
+                                className={`absolute right-0 z-50 w-44 bg-white rounded-xl shadow-xl border border-sky-200 py-1.5 font-sans text-xs divide-y divide-slate-100 ${
+                                  idx >= Math.max(0, customers.length - 3)
+                                    ? 'bottom-full mb-1.5'
+                                    : 'top-full mt-1.5'
+                                }`}
+                              >
+                                <div className="py-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setActiveMenuId(null)
+                                      handleOpenDetail(c)
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 font-bold flex items-center gap-2 transition"
                                   >
-                                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span>Hubungi WA</span>
-                                  </a>
-                                )}
-                                <button
-                                  onClick={() => handleToggleIsolir(c)}
-                                  disabled={isolirLoadingId === cId}
-                                  className={`w-full px-3 py-1.5 text-left flex items-center gap-2 transition border-t border-slate-100 ${
-                                    c.status_isolir
-                                      ? 'text-emerald-700 hover:bg-emerald-50'
-                                      : 'text-amber-700 hover:bg-amber-50'
-                                  }`}
-                                >
-                                  <ShieldAlert className={`w-3.5 h-3.5 ${c.status_isolir ? 'text-emerald-600' : 'text-amber-600'}`} />
-                                  <span>
-                                    {isolirLoadingId === cId
-                                      ? 'Memproses...'
-                                      : c.status_isolir
-                                      ? 'Buka Isolir'
-                                      : 'Isolir Akses'}
-                                  </span>
-                                </button>
-                                <button
-                                  onClick={() => handleOpenEdit(c)}
-                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition border-t border-slate-100"
-                                >
-                                  <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                                  <span>Edit Data</span>
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteCustomer(cId)}
-                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition border-t border-slate-100"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                                  <span>Hapus</span>
-                                </button>
+                                    <Info className="w-3.5 h-3.5 text-cyan-600" />
+                                    <span>Detail Pelanggan</span>
+                                  </button>
+
+                                  {c.no_wa && c.no_wa !== '-' && (
+                                    <a
+                                      href={`https://wa.me/${c.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62')}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={() => setActiveMenuId(null)}
+                                      className="w-full text-left px-3 py-1.5 text-emerald-700 hover:bg-emerald-50 font-bold flex items-center gap-2 transition"
+                                    >
+                                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span>Hubungi WA</span>
+                                    </a>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setActiveMenuId(null)
+                                      handleToggleIsolir(c)
+                                    }}
+                                    className={`w-full text-left px-3 py-1.5 font-bold flex items-center gap-2 transition ${
+                                      c.status_isolir
+                                        ? 'text-emerald-700 hover:bg-emerald-50'
+                                        : 'text-amber-700 hover:bg-amber-50'
+                                    }`}
+                                  >
+                                    <ShieldAlert className="w-3.5 h-3.5" />
+                                    <span>{c.status_isolir ? 'Buka Isolir' : 'Isolir Akses'}</span>
+                                  </button>
+                                </div>
+
+                                <div className="py-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setActiveMenuId(null)
+                                      handleOpenEdit(c, c)
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-slate-100 font-bold flex items-center gap-2 transition"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>Edit Data</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setActiveMenuId(null)
+                                      handleDeleteCustomer(cId)
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2 transition"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                                    <span>Hapus Data</span>
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -979,17 +905,40 @@ export function ModulPelanggan({
         </table>
       </DataTableContainer>
 
-      {/* Modal Tambah / Edit Pelanggan */}
+      {/* Modal Edit Pelanggan */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono">
             <div className="flex items-center justify-between border-b border-sky-100 pb-2.5">
-              <h3 className="text-sm font-black text-slate-900">
-                {isEditing ? `Edit Pelanggan: ${formData.nama}` : 'Tambah Pelanggan Baru'}
-              </h3>
+              <div className="flex items-center gap-2">
+                {returnToDetailCustomer && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalOpen(false)
+                      setDetailCustomer(returnToDetailCustomer)
+                    }}
+                    className="p-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 hover:text-cyan-700 text-slate-600 transition flex items-center gap-1 text-[11px] font-bold"
+                    title="Kembali ke Detail Pelanggan"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Detail</span>
+                  </button>
+                )}
+                <h3 className="text-sm font-black text-slate-900">
+                  Edit Pelanggan: {formData.nama}
+                </h3>
+              </div>
               <button
-                onClick={() => setModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                type="button"
+                onClick={() => {
+                  setModalOpen(false)
+                  if (returnToDetailCustomer) {
+                    setDetailCustomer(returnToDetailCustomer)
+                  }
+                }}
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+                title="Tutup Modal"
               >
                 ✕
               </button>
@@ -1007,20 +956,24 @@ export function ModulPelanggan({
             )}
 
             <form onSubmit={handleSaveCustomer} className="space-y-3">
+              {/* Baris 1: ID Pelanggan (Locked) & Nama Lengkap (Editable) */}
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">ID Pelanggan</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center justify-between">
+                    <span>ID Pelanggan</span>
+                    <span className="text-[9px] text-slate-400 font-normal">Terkunci (Auto)</span>
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.id_pelanggan}
-                    onChange={(e) => setFormData({ ...formData, id_pelanggan: e.target.value })}
-                    disabled={isEditing}
-                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                    readOnly
+                    disabled
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100/80 text-slate-500 text-xs font-bold cursor-not-allowed select-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nama Lengkap</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">Nama Lengkap</label>
                   <input
                     type="text"
                     required
@@ -1031,34 +984,40 @@ export function ModulPelanggan({
                 </div>
               </div>
 
+              {/* Baris 2: IP Perangkat (Locked) & Paket Internet (Locked) */}
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">IP Router ONT</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center justify-between">
+                    <span>IP Router / ONT</span>
+                    <span className="text-[9px] text-slate-400 font-normal">Sinkron MikroTik</span>
+                  </label>
                   <input
                     type="text"
-                    required
-                    value={formData.ip_router}
-                    onChange={(e) => setFormData({ ...formData, ip_router: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                    value={formData.ip_router || '-'}
+                    readOnly
+                    disabled
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100/80 text-slate-500 text-xs font-bold cursor-not-allowed select-none font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Lokasi POP</label>
-                  <select
-                    value={formData.pop}
-                    onChange={(e) => setFormData({ ...formData, pop: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                  >
-                    <option value="POP-01">POP-01 (Kecamatan)</option>
-                    <option value="POP-02">POP-02 (Perumahan)</option>
-                    <option value="POP-03">POP-03 (Pasar)</option>
-                  </select>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center justify-between">
+                    <span>Paket Internet</span>
+                    <span className="text-[9px] text-slate-400 font-normal">Simple Queue</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.paket || '-'}
+                    readOnly
+                    disabled
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100/80 text-slate-500 text-xs font-bold cursor-not-allowed select-none"
+                  />
                 </div>
               </div>
 
+              {/* Baris 3: Nomor WhatsApp (Editable) & Wilayah Kantor (Informasi) */}
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nomor WhatsApp</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-700 mb-1">Nomor WhatsApp</label>
                   <input
                     type="text"
                     value={formData.no_wa}
@@ -1068,13 +1027,10 @@ export function ModulPelanggan({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Paket Internet</label>
-                  <input
-                    type="text"
-                    value={formData.paket}
-                    onChange={(e) => setFormData({ ...formData, paket: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                  />
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Wilayah Kantor</label>
+                  <div className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100/80 text-slate-600 text-xs font-black uppercase tracking-wider select-none">
+                    {formData.kantor || '-'}
+                  </div>
                 </div>
               </div>
 
@@ -1101,6 +1057,29 @@ export function ModulPelanggan({
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">User Admin Modem (HTTP/S)</label>
+                  <input
+                    type="text"
+                    value={formData.user_admin}
+                    onChange={(e) => setFormData({ ...formData, user_admin: e.target.value })}
+                    placeholder="Contoh: admin"
+                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Password Admin Modem</label>
+                  <input
+                    type="text"
+                    value={formData.pass_admin}
+                    onChange={(e) => setFormData({ ...formData, pass_admin: e.target.value })}
+                    placeholder="Contoh: tekno2024"
+                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Alamat Pemasangan</label>
                 <textarea
@@ -1114,7 +1093,12 @@ export function ModulPelanggan({
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-sky-100">
                 <button
                   type="button"
-                  onClick={() => setModalOpen(false)}
+                  onClick={() => {
+                    setModalOpen(false)
+                    if (returnToDetailCustomer) {
+                      setDetailCustomer(returnToDetailCustomer)
+                    }
+                  }}
                   className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50"
                 >
                   Batal
@@ -1132,209 +1116,18 @@ export function ModulPelanggan({
         </div>
       )}
 
-      {/* Modal Detail Pelanggan (Informasi Pribadi & Kontak Pesan WA) */}
-      {detailCustomer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-sky-200 space-y-4 font-mono">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-sky-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 to-sky-600 flex items-center justify-center text-white shadow-md shadow-cyan-600/20">
-                  <UserPlus className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-900 font-sans">
-                    {detailCustomer.nama || detailCustomer.name}
-                  </h3>
-                  <p className="text-xs text-cyan-700 font-bold">
-                    ID: {detailCustomer.id_pelanggan || detailCustomer.id} • Wilayah: <span className="uppercase">{detailCustomer.kantor || activeOffice || 'cabang'}</span>
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setDetailCustomer(null)}
-                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Konten Rinci Pelanggan */}
-            <div className="space-y-3 text-xs">
-              {/* Box Kontak & WhatsApp */}
-              <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="space-y-0.5">
-                  <span className="text-[11px] font-bold text-emerald-950 flex items-center gap-1.5 font-sans">
-                    <Phone className="w-4 h-4 text-emerald-600" />
-                    <span>Kontak WhatsApp Pelanggan</span>
-                  </span>
-                  <div className="text-xs font-black text-emerald-800 font-mono">
-                    {detailCustomer.no_wa || detailCustomer.no_hp || 'Nomor WhatsApp belum terdaftar'}
-                  </div>
-                </div>
-
-                {(detailCustomer.no_wa || detailCustomer.no_hp) && (
-                  <a
-                    href={`https://wa.me/${(detailCustomer.no_wa || detailCustomer.no_hp).replace(/[^0-9]/g, '').replace(/^0/, '62')}?text=${encodeURIComponent(
-                      `Halo Bapak/Ibu ${detailCustomer.nama || detailCustomer.name}, kami dari Tim Teknis NOC TeknoGuard ingin mengonfirmasi terkait koneksi internet modem Anda (IP: ${detailCustomer.ip_router || '-'}).`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs font-mono flex items-center justify-center gap-1.5 transition shadow-xs"
-                  >
-                    <Phone className="w-4 h-4" />
-                    <span>Kirim Pesan WA</span>
-                  </a>
-                )}
-              </div>
-
-              {/* Grid Informasi Pribadi & Layanan */}
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">Paket Layanan</span>
-                  <div className="font-bold text-slate-800 font-sans truncate">{detailCustomer.paket || '20 Mbps Unlimited'}</div>
-                </div>
-
-                {/* Titik Lokasi GPS (Klik langsung buka Google Maps) */}
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-cyan-600 shrink-0" />
-                    <span>Titik Lokasi GPS</span>
-                  </span>
-                  {detailCustomer.lokasi_gps ? (
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detailCustomer.lokasi_gps)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold text-cyan-700 hover:text-cyan-900 hover:underline flex items-center gap-1 text-xs truncate transition"
-                      title="Buka lokasi di Google Maps"
-                    >
-                      <span className="truncate">{detailCustomer.lokasi_gps}</span>
-                      <ChevronRight className="w-3.5 h-3.5 shrink-0 text-cyan-600" />
-                    </a>
-                  ) : detailCustomer.alamat ? (
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detailCustomer.alamat)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold text-cyan-700 hover:text-cyan-900 hover:underline flex items-center gap-1 text-xs truncate transition"
-                      title="Cari alamat di Google Maps"
-                    >
-                      <span className="truncate">Cari di GMaps</span>
-                      <ChevronRight className="w-3.5 h-3.5 shrink-0 text-cyan-600" />
-                    </a>
-                  ) : (
-                    <span className="text-slate-400 italic text-[11px] block">-</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Alamat Pemasangan Fisik */}
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                <span className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-cyan-600" />
-                  <span>Alamat Lengkap Rumah / Lokasi Pemasangan</span>
-                </span>
-                <p className="text-xs text-slate-800 font-sans font-medium leading-relaxed">
-                  {detailCustomer.alamat || detailCustomer.address || 'Alamat fisik belum diisi'}
-                </p>
-              </div>
-
-              {/* Detail Kredensial WiFi & Router ONT */}
-              <div className="p-3 rounded-xl bg-cyan-50/60 border border-cyan-200 space-y-2">
-                <span className="text-[10px] text-cyan-900 font-bold uppercase flex items-center gap-1">
-                  <Wifi className="w-3.5 h-3.5 text-cyan-600" />
-                  <span>Kredensial WiFi Rumah &amp; Login Modem</span>
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Nama WiFi (SSID):</span>
-                    <span className="font-bold text-slate-900">{detailCustomer.nama_wifi || '-'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Password WiFi:</span>
-                    <span className="font-bold text-slate-900">{detailCustomer.password_wifi || '-'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">IP ONT (GPON/VLAN):</span>
-                    <span className="font-bold text-cyan-800">{detailCustomer.ip_ont || detailCustomer.ip_router || '-'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">IP Router (DHCP/LAN):</span>
-                    <span className="font-bold text-slate-800">{detailCustomer.ip_router || '-'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Jenis Modem:</span>
-                    <span className="font-bold text-slate-900">{detailCustomer.jenis_modem || 'ZTE GM220-S'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Detail MikroTik & Pemakaian Kuota Real-Time */}
-              <div className="p-3 rounded-xl bg-indigo-50/60 border border-indigo-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-indigo-950 font-bold uppercase flex items-center gap-1">
-                    <Activity className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Status Jaringan &amp; Kuota MikroTik</span>
-                  </span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                    detailCustomer.status_isolir
-                      ? 'bg-rose-100 text-rose-700 border border-rose-300'
-                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                  }`}>
-                    {detailCustomer.status_isolir ? 'TERISOLIR (SUSPENDED)' : 'AKTIF NORMAL'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Total Terpakai (Bln Ini):</span>
-                    <span className="font-black text-slate-900 font-sans text-xs">{(detailCustomer.kuota_terpakai_gb || 0).toFixed(2)} GB</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Upload Traffic:</span>
-                    <span className="font-bold text-slate-800 font-mono text-[11px]">▲ {((detailCustomer.upload_bytes || 0) / (1024**3)).toFixed(2)} GB</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Download Traffic:</span>
-                    <span className="font-bold text-slate-800 font-mono text-[11px]">▼ {((detailCustomer.download_bytes || 0) / (1024**3)).toFixed(2)} GB</span>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <span className="text-slate-400 block text-[10px]">Rule Simple Queue:</span>
-                    <span className="font-bold text-indigo-900 font-mono text-[11px] truncate block">{detailCustomer.queue_name || detailCustomer.nama || '-'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">Sync Terakhir:</span>
-                    <span className="font-mono text-slate-600 text-[11px]">{detailCustomer.last_sync_mikrotik || 'Otomatis'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-sky-100">
-              <button
-                type="button"
-                onClick={() => {
-                  const targetToEdit = detailCustomer
-                  setDetailCustomer(null)
-                  handleOpenEdit(targetToEdit)
-                }}
-                className="px-3.5 py-1.5 rounded-xl border border-sky-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100 text-xs font-bold font-mono transition flex items-center gap-1.5"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-                <span>Edit Informasi</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDetailCustomer(null)}
-                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold font-mono transition"
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal Detail Pelanggan (Komponen Terpisah 2-Tab: Profil & Jaringan) */}
+      <ModalDetailPelanggan
+        customer={detailCustomer}
+        onClose={() => setDetailCustomer(null)}
+        activeOffice={activeOffice}
+        onOpenEdit={(targetToEdit) => {
+          setDetailCustomer(null)
+          handleOpenEdit(targetToEdit, targetToEdit)
+        }}
+        onToggleIsolir={handleToggleIsolir}
+        isolirLoadingId={isolirLoadingId}
+      />
 
       {/* Component Wizard Import Pelanggan Terpisah */}
       <WizardImportPelanggan

@@ -140,7 +140,7 @@ class AdminCustomerMgmtController:
         paket_list = []
         for item in quota_items:
             p = item["pelanggan"]
-            paket_name = item["paket"] or "20 Mbps Unlimited"
+            paket_name = item["paket"] or "-"
             if paket_name not in paket_list:
                 paket_list.append(paket_name)
             serialized_quota.append({

@@ -37,9 +37,9 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
     ? Number(kuotaData.kuota_terpakai_gb).toFixed(1)
     : dashboardData?.kuota?.kuota_terpakai_gb !== undefined && dashboardData?.kuota?.kuota_terpakai_gb !== null
     ? Number(dashboardData.kuota.kuota_terpakai_gb).toFixed(1)
-    : '163.7';
+    : '0.0';
 
-  const paketNama = kuotaData?.kecepatan_paket || dashboardData?.kuota?.kecepatan_paket || customer?.paket || '20 Mbps Unlimited';
+  const paketNama = kuotaData?.kecepatan_paket || dashboardData?.kuota?.kecepatan_paket || customer?.paket || '-';
 
   // 7 Hari histori dari backend (atau fallback default 7 hari)
   const defaultHistory = [

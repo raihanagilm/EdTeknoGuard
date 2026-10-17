@@ -405,7 +405,7 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
                         {item.paket}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600">{item.ip_router}</td>
+                    <td className="py-2.5 px-3 text-slate-600 font-mono text-xs">{item.ip_ont || item.ip_router || '-'}</td>
                     <td className="py-2.5 px-3 text-center">
                       <div className="font-black text-slate-900">
                         {item.terpakai_gb != null ? item.terpakai_gb.toFixed(1) : '0.0'} <span className="text-xs text-slate-600 font-normal">GB</span>

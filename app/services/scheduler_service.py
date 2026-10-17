@@ -675,9 +675,10 @@ class MonitoringScheduler:
 
                     state.scan_current += 1
 
-                # 1. Coba Scraping Live ONT GM220-S via HTTP
+                # 1. Coba Scraping Live ONT GM220-S via HTTP (Prioritas IP ONT, fallback IP Router)
+                target_scrape_ip = cust.ip_ont or cust.ip_router
                 scrape_res = ONTScraperService.scrape_ont(
-                    ip=cust.ip_router,
+                    ip=target_scrape_ip,
                     customer_user=cust.user_admin,
                     customer_pass=cust.pass_admin,
                     default_user=default_user,
@@ -858,8 +859,9 @@ class MonitoringScheduler:
             except Exception:
                 default_creds_list = []
 
+            target_scrape_ip = cust.ip_ont or cust.ip_router
             scrape_res = ONTScraperService.scrape_ont(
-                ip=cust.ip_router,
+                ip=target_scrape_ip,
                 customer_user=cust.user_admin,
                 customer_pass=cust.pass_admin,
                 default_user=default_user,
@@ -883,7 +885,7 @@ class MonitoringScheduler:
                 res = SNMPService.query_ont_simulated(
                     baseline_rx=float(cust.redaman_baseline) if cust.redaman_baseline else None,
                     modem_type=cust.jenis_modem,
-                    ip=cust.ip_router,
+                    ip=target_scrape_ip,
                     customer_name=cust.nama
                 )
                 ket = "Simulasi Manual Check"

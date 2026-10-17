@@ -26,6 +26,17 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Pembersihan Data Statis & Redundansi Modul Arsitektur Frontend & Backend**:
+  - **Pembersihan File Duplikat [ModulManajemenPengguna.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulManajemenPengguna.jsx)**: Menghapus permanen berkas duplikat lama berukuran 61 KB yang tidak pernah dipakai dan memastikan sistem terpusat pada [ModulPenggunaNOC.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPenggunaNOC.jsx).
+  - **Pembersihan Komponen Usang [Modals.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/Modals.jsx)**: Menghapus komponen `OntDetailModal` yang sudah tidak terpakai sehingga [Modals.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/Modals.jsx) terfokus murni pada `ConfirmSaveModal`.
+  - **Pembersihan Data Mock di App.jsx**: Menghapus total array statis `ontData` (Bpk. Hendro, Siti Aminah, dll.) serta rendering canvas waveform manual di [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx).
+  - **Penyelarasan Seluruh Fallback Paket & Sinyal**: Menghapus seluruh asumsi hardcoded `'20 Mbps Unlimited'`, `'ZTE GM220-S'`, serta angka dummy signal/kuota (`-26.38 dBm`, `163.7 GB`, `random.uniform()`) di portal pelanggan dan backend admin, mengubahnya menjadi pembacaan database riil atau `-`/`0.0`.
+  - **Pembaruan Dokumen [AGENTS.md](file:///d:/databaru/Magang/EdTeknoGuard/AGENTS.md)**: Memutakhirkan bagan pohon struktur direktori agar mencerminkan seluruh modul baru (`admin_customer_mgmt`, `users`, `activity_logs`, `mikrotik`, dan `portal_pelanggan`).
+
+- **Navigasi Form Edit Pelanggan & Menu Aksi Titik Tiga ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx))**:
+  - **Kembali ke Detail Pelanggan dari Form Edit**: Menambahkan tombol panah navigasi `<ArrowLeft />` ("Detail") pada header modal Edit Pelanggan dan mengintegrasikan tombol "Batal" agar pengguna dapat langsung kembali ke Modal Detail Pelanggan tanpa harus mencari ulang baris pelanggan.
+  - **Aksi Baris Tabel Titik Tiga (...)**: Mengembalikan aksi baris tabel menjadi tombol popover titik tiga (`MoreVertical`) rapi yang memuat: Detail Pelanggan, Hubungi WA, Isolir/Buka Isolir Akses, Edit Data, dan Hapus Data, dengan penyesuaian posisi pintar (`bottom-full` pada baris bawah) dan backdrop transparan agar tidak terpotong.
+
 - **Pusat Notifikasi Mandiri, Agregasi Batching (>5), & Isolasi Status Baca Antar User ([ModulNotifikasi.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulNotifikasi.jsx), [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx), [service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/admin_customer_mgmt/service.py))**:
   - **Pusat Notifikasi Popover Flyout Mandiri (`ModulNotifikasi.jsx`)**:
     - Tombol lonceng di navbar kini membuka panel notifikasi mandiri yang modern, cepat, dan responsif tanpa memaksa navigasi langsung ke halaman tiket keluhan.

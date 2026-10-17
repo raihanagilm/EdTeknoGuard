@@ -56,9 +56,9 @@ export function WizardImportPelanggan({
   const ADVANCED_FIELDS = [
     { key: 'pop', label: 'Lokasi POP / ODP', required: false, hint: 'Default: POP-01' },
     { key: 'paket', label: 'Paket Layanan', required: false, hint: 'Default: Sesuai MikroTik' },
-    { key: 'jenis_modem', label: 'Tipe Modem ONT', required: false, hint: 'Default: ZTE GM220-S' },
-    { key: 'user_admin', label: 'Username ONT', required: false, hint: 'Default: admin' },
-    { key: 'pass_admin', label: 'Password ONT', required: false, hint: 'Default: tekno2024' },
+    { key: 'jenis_modem', label: 'Tipe Modem ONT', required: false, hint: 'Opsional (Sesuai perangkat)' },
+    { key: 'user_admin', label: 'Username ONT', required: false, hint: 'Sesuai kredensial ONT' },
+    { key: 'pass_admin', label: 'Password ONT', required: false, hint: 'Sesuai kredensial ONT' },
     { key: 'id_pelanggan', label: 'ID Pelanggan', required: false, hint: 'Opsional (otomatis sesuai database)' }
   ]
 

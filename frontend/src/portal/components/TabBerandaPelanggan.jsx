@@ -21,43 +21,43 @@ import { PortalHeader } from './PortalHeader';
 
 export function TabBerandaPelanggan({ data, onNavigate }) {
   const signal = data?.signal || {
-    rx_power: -26.38,
-    status_koneksi: 'WARNING',
-    latency_ms: 183,
-    suhu_ont: 62.0
+    rx_power: null,
+    status_koneksi: 'NORMAL',
+    latency_ms: null,
+    suhu_ont: null
   };
   const customer = data?.customer || {
-    nama: 'Aisyah / Tuti',
-    paket: '20 Mbps Unlimited',
-    ip_router: '10.10.12.45',
+    nama: '-',
+    paket: '-',
+    ip_router: '-',
     status_pembayaran: 'LUNAS'
   };
 
   const kuotaData = data?.kuota || {
-    kuota_terpakai_gb: 163.7,
-    periode_bulan: '2026-10'
+    kuota_terpakai_gb: 0,
+    periode_bulan: '-'
   };
 
   const kuotaTerpakai = kuotaData.kuota_terpakai_gb !== undefined && kuotaData.kuota_terpakai_gb !== null
     ? Number(kuotaData.kuota_terpakai_gb).toFixed(1)
-    : '163.7';
+    : '0.0';
 
   // Nilai pembacaan metrik real-time
   const rxPowerValue = signal.rx_power !== undefined && signal.rx_power !== null
     ? Number(signal.rx_power).toFixed(2)
-    : '-26.38';
+    : '-';
   const suhuOntValue = signal.suhu_ont !== undefined && signal.suhu_ont !== null
     ? Math.round(signal.suhu_ont)
-    : 62;
+    : '-';
   const latencyValue = signal.latency_ms !== undefined && signal.latency_ms !== null
     ? Math.round(signal.latency_ms)
-    : 183;
+    : '-';
 
-  // Inisial Nama Pelanggan (Contoh: "Aisyah / Tuti" -> "AT")
+  // Inisial Nama Pelanggan
   const getInitials = (namaStr) => {
-    if (!namaStr) return 'AT';
+    if (!namaStr || namaStr === '-') return 'US';
     const parts = namaStr.replace(/[^a-zA-Z\s]/g, ' ').trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return 'AT';
+    if (parts.length === 0) return 'US';
     if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
     return (parts[0][0] + parts[1][0]).toUpperCase();
   };
@@ -68,7 +68,7 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
       {/* ═══ HEADER BIRU TERPADU DENGAN GREETING & LONCENG NOTIFIKASI KONSISTEN ═══ */}
       <PortalHeader
         greeting="Selamat Datang,"
-        title={customer.nama || 'Aisyah / Tuti'}
+        title={customer.nama || '-'}
         avatarInitials={customerInitials}
         dashboardData={data}
         customer={customer}
@@ -294,7 +294,7 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
             </div>
             <div className="flex justify-between text-xs text-gray-600 font-medium">
               <span>Pemakaian Bulan Ini</span>
-              <span className="font-semibold text-gray-700">Paket {customer.paket || '20 Mbps Unlimited'}</span>
+              <span className="font-semibold text-gray-700">Paket {customer.paket || '-'}</span>
             </div>
           </section>
 

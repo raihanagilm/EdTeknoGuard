@@ -31,7 +31,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
       title: 'Layanan & Pelanggan',
       items: [
         { id: 'pelanggan', label: 'Data Pelanggan', icon: Users, visible: true },
-        { id: 'tiket', label: 'Tiket Keluhan', icon: Ticket, badge: unreadTickets > 0 ? unreadTickets : null, visible: true }
+        { id: 'tiket', label: 'Tiket Keluhan', icon: Ticket, visible: true }
       ]
     },
     {

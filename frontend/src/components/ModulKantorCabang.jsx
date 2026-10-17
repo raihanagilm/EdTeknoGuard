@@ -137,12 +137,7 @@ export function ModulKantorCabang() {
   };
 
   const handleDeleteKantor = async (k) => {
-    if (['pusat', 'cabang', 'banyumas'].includes(k.kode)) {
-      alert(`Kantor default "${k.nama}" (${k.kode}) dilindungi dan tidak dapat dihapus.`);
-      return;
-    }
-
-    if (!window.confirm(`Yakin ingin menghapus kantor "${k.nama}" (${k.kode}) secara permanen?`)) {
+    if (!window.confirm(`Yakin ingin menghapus kantor "${k.nama}" (${k.kode}) secara permanen? Seluruh relasi data akan dibersihkan.`)) {
       return;
     }
 
@@ -190,6 +185,18 @@ export function ModulKantorCabang() {
     }
   };
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [activeMenuId, setActiveMenuId] = useState(null);
+
+  // Tutup dropdown jika klik di luar
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const filteredKantors = kantorList.filter((k) => {
     if (!kantorSearch) return true;
     const q = kantorSearch.toLowerCase();
@@ -200,6 +207,9 @@ export function ModulKantorCabang() {
       (k.mikrotik_host && k.mikrotik_host.toLowerCase().includes(q))
     );
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredKantors.length / limit));
+  const paginatedKantors = filteredKantors.slice((page - 1) * limit, page * limit);
 
   return (
     <div className="space-y-4">
@@ -216,8 +226,8 @@ export function ModulKantorCabang() {
         </div>
       )}
 
-      {/* Filter Bar & Tombol Tambah Kantor */}
-      <div className="relative z-30">
+      {/* Filter Bar & Pagination DI ATAS TABEL */}
+      <div className="relative z-30 space-y-2.5">
         <FilterContainer>
           <div className="flex items-center justify-between gap-1.5 sm:gap-2">
             <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
@@ -226,7 +236,10 @@ export function ModulKantorCabang() {
                 <input
                   type="text"
                   value={kantorSearch}
-                  onChange={(e) => setKantorSearch(e.target.value)}
+                  onChange={(e) => {
+                    setKantorSearch(e.target.value);
+                    setPage(1);
+                  }}
                   placeholder="Cari nama kantor / kode / router IP..."
                   className="w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
                 />
@@ -253,10 +266,37 @@ export function ModulKantorCabang() {
             </div>
           </div>
         </FilterContainer>
+
+        {/* Baris Pagination DI ATAS TABEL */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 bg-white/80 backdrop-blur-md rounded-xl border border-sky-200/80 font-mono text-xs text-slate-600">
+          <div className="flex items-center gap-2">
+            <span>Menampilkan <strong>{filteredKantors.length === 0 ? 0 : (page - 1) * limit + 1}</strong> - <strong>{Math.min(page * limit, filteredKantors.length)}</strong> dari <strong>{filteredKantors.length}</strong> kantor</span>
+            <span className="text-slate-300">|</span>
+            <span>Halaman <strong>{page}</strong> / <strong>{totalPages}</strong></span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={page <= 1 || kantorLoading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="px-2.5 py-1 rounded-lg border border-sky-200 bg-white hover:bg-cyan-50 disabled:opacity-40 transition font-bold text-[11px] cursor-pointer disabled:cursor-not-allowed"
+            >
+              Sebelumnya
+            </button>
+            <button
+              type="button"
+              disabled={page >= totalPages || kantorLoading}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="px-2.5 py-1 rounded-lg border border-sky-200 bg-white hover:bg-cyan-50 disabled:opacity-40 transition font-bold text-[11px] cursor-pointer disabled:cursor-not-allowed"
+            >
+              Berikutnya
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Tabel Kantor Cabang */}
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl border border-sky-200/80 shadow-xs overflow-hidden">
+      <div className="bg-white/90 backdrop-blur-md rounded-2xl border border-sky-200/80 shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse table-auto md:table-fixed">
             <thead>
@@ -266,32 +306,32 @@ export function ModulKantorCabang() {
                 <th className="py-2.5 px-3 w-48">Nama Wilayah</th>
                 <th className="py-2.5 px-3 w-64">MikroTik RouterOS</th>
                 <th className="py-2.5 px-3">Alamat / Keterangan</th>
-                <th className="py-2.5 px-3 w-28 text-center">Tipe</th>
                 <th className="py-2.5 px-3 text-right w-36">Aksi & Sinkron</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sky-100 font-mono text-xs">
               {kantorLoading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
+                  <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
                     <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
                     <div>Memuat data kantor...</div>
                   </td>
                 </tr>
-              ) : filteredKantors.length === 0 ? (
+              ) : paginatedKantors.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
+                  <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
                     Tidak ada kantor ditemukan.
                   </td>
                 </tr>
               ) : (
-                filteredKantors.map((k, idx) => {
-                  const isDefault = ['pusat', 'cabang', 'banyumas'].includes(k.kode);
+                paginatedKantors.map((k, idx) => {
                   const isSyncing = syncingId === k.id;
+                  const isMenuOpen = activeMenuId === k.id;
+                  const isBottomRow = idx >= paginatedKantors.length - 2;
 
                   return (
                     <tr key={k.id || idx} className="hover:bg-cyan-50/40 transition">
-                      <td className="py-3 px-3 text-center text-slate-500 font-bold">{idx + 1}</td>
+                      <td className="py-3 px-3 text-center text-slate-500 font-bold">{(page - 1) * limit + idx + 1}</td>
                       <td className="py-3 px-3">
                         <span className="font-mono font-black text-cyan-900 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200 uppercase text-[11px]">
                           {k.kode}
@@ -308,7 +348,7 @@ export function ModulKantorCabang() {
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-1 font-bold text-slate-800">
                               <Router className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
-                              <span>{k.mikrotik_host}:{k.mikrotik_port || 8728}</span>
+                              <span>{k.mikrotik_host}{k.mikrotik_port ? `:${k.mikrotik_port}` : ''}</span>
                             </div>
                             <div className="text-[11px] text-slate-500 flex items-center gap-1">
                               <KeyRound className="w-3 h-3 text-slate-400 shrink-0" />
@@ -329,67 +369,74 @@ export function ModulKantorCabang() {
                           <span className="text-slate-400 italic text-xs">-</span>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-center">
-                        {isDefault ? (
-                          <span className="inline-block px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[10px] font-bold uppercase border border-purple-200">
-                            Sistem Default
-                          </span>
-                        ) : (
-                          <span className="inline-block px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold uppercase border border-emerald-200">
-                            Kustom
-                          </span>
-                        )}
-                      </td>
                       <td className="py-3 px-3 text-right">
-                        <div className="relative group inline-block text-left">
+                        <div className="relative inline-block text-left">
                           <button
                             type="button"
-                            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveMenuId(isMenuOpen ? null : k.id);
+                            }}
+                            className={`p-1.5 rounded-lg border transition cursor-pointer ${
+                              isMenuOpen ? 'bg-cyan-100 border-cyan-400 text-cyan-900' : 'hover:bg-slate-100 text-slate-600 border-slate-200'
+                            }`}
                             title="Pilihan Aksi"
                           >
                             <MoreVertical className="w-3.5 h-3.5" />
                           </button>
 
-                          <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[160px]">
-                            <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
-                              {/* Opsi Sync MikroTik */}
-                              {k.mikrotik_host && (
+                          {isMenuOpen && (
+                            <div 
+                              onClick={(e) => e.stopPropagation()}
+                              className={`absolute right-0 z-50 min-w-[160px] ${
+                                isBottomRow ? 'bottom-full pb-1' : 'top-full pt-1'
+                              }`}
+                            >
+                              <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs divide-y divide-slate-100">
+                                {/* Opsi Sync MikroTik */}
+                                {k.mikrotik_host && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      handleSyncMikrotik(k);
+                                    }}
+                                    disabled={isSyncing}
+                                    className="w-full px-3 py-1.5 text-left text-cyan-800 hover:bg-cyan-50 flex items-center gap-2 transition cursor-pointer disabled:opacity-50"
+                                  >
+                                    <RefreshCw className={`w-3.5 h-3.5 text-cyan-600 ${isSyncing ? 'animate-spin' : ''}`} />
+                                    <span>{isSyncing ? 'Menarik...' : 'Sync MikroTik'}</span>
+                                  </button>
+                                )}
+
+                                {/* Opsi Edit Kantor */}
                                 <button
                                   type="button"
-                                  onClick={() => handleSyncMikrotik(k)}
-                                  disabled={isSyncing}
-                                  className="w-full px-3 py-1.5 text-left text-cyan-800 hover:bg-cyan-50 flex items-center gap-2 transition cursor-pointer disabled:opacity-50"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    openEditKantorModal(k);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
                                 >
-                                  <RefreshCw className={`w-3.5 h-3.5 text-cyan-600 ${isSyncing ? 'animate-spin' : ''}`} />
-                                  <span>{isSyncing ? 'Menarik...' : 'Sync MikroTik'}</span>
+                                  <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                  <span>Edit Kantor</span>
                                 </button>
-                              )}
 
-                              {/* Opsi Edit Kantor */}
-                              <button
-                                type="button"
-                                onClick={() => openEditKantorModal(k)}
-                                className={`w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer ${
-                                  k.mikrotik_host ? 'border-t border-slate-100' : ''
-                                }`}
-                              >
-                                <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                                <span>Edit Kantor</span>
-                              </button>
-
-                              {/* Opsi Hapus Kantor */}
-                              {!isDefault && (
+                                {/* Opsi Hapus Kantor */}
                                 <button
                                   type="button"
-                                  onClick={() => handleDeleteKantor(k)}
-                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition border-t border-slate-100 cursor-pointer"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    handleDeleteKantor(k);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold"
                                 >
                                   <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                                   <span>Hapus Kantor</span>
                                 </button>
-                              )}
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -507,7 +554,7 @@ export function ModulKantorCabang() {
                       type="number"
                       value={kantorMikrotikPort}
                       onChange={(e) => setKantorMikrotikPort(e.target.value)}
-                      placeholder="8728"
+                      placeholder="Contoh: 8095"
                       className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
                     />
                   </div>

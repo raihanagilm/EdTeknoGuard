@@ -21,27 +21,25 @@ router = APIRouter(prefix="/api/mikrotik", tags=["MikroTik NOC Center"])
 @router.get("/health")
 def get_mikrotik_health(
     request: Request,
-    kantor: Optional[str] = "banyumas",
+    kantor: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """Mengambil status metrik hardware dan identitas router MikroTik"""
     require_admin(request)
-    knt = kantor or "banyumas"
-    return MikroTikSyncService.get_router_health(db, kantor=knt)
+    return MikroTikSyncService.get_router_health(db, kantor=kantor)
 
 @router.get("/queues")
 def get_mikrotik_queues(
     request: Request,
-    kantor: Optional[str] = "banyumas",
+    kantor: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """Mengambil daftar seluruh Simple Queues, limit paket, live data usage, dan status isolir"""
     require_admin(request)
-    knt = kantor or "banyumas"
-    data = MikroTikSyncService.get_live_queues_and_bandwidth(db, kantor=knt)
+    data = MikroTikSyncService.get_live_queues_and_bandwidth(db, kantor=kantor)
     return {
         "status": "success",
-        "kantor": knt,
+        "kantor": kantor or "all",
         "total_rules": len(data),
         "data": data
     }
