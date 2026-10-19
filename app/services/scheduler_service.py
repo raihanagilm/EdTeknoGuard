@@ -157,17 +157,30 @@ class MonitoringScheduler:
 
 
     @classmethod
-    def get_setting_from_db(cls, db: Session, key: str, default: str) -> str:
-        item = db.query(SystemSetting).filter(SystemSetting.key_name == key).first()
-        return item.value_text if item else default
+    def get_setting_from_db(cls, db: Session, key: str, default: str, kantor: Optional[str] = None) -> str:
+        k = kantor.lower().strip() if kantor and kantor != "all" else None
+        if k:
+            item = db.query(SystemSetting).filter(SystemSetting.key_name == key, SystemSetting.kantor_kode == k).first()
+            if item and item.value_text is not None:
+                return item.value_text
+        # Fallback ke setting global (kantor_kode IS NULL)
+        item_global = db.query(SystemSetting).filter(SystemSetting.key_name == key, SystemSetting.kantor_kode.is_(None)).first()
+        return item_global.value_text if (item_global and item_global.value_text is not None) else default
 
     @classmethod
-    def set_setting_in_db(cls, db: Session, key: str, value: str):
-        item = db.query(SystemSetting).filter(SystemSetting.key_name == key).first()
+    def set_setting_in_db(cls, db: Session, key: str, value: str, kantor: Optional[str] = None):
+        k = kantor.lower().strip() if kantor and kantor != "all" else None
+        q = db.query(SystemSetting).filter(SystemSetting.key_name == key)
+        if k:
+            q = q.filter(SystemSetting.kantor_kode == k)
+        else:
+            q = q.filter(SystemSetting.kantor_kode.is_(None))
+        item = q.first()
         if item:
             item.value_text = value
+            item.updated_at = get_now_wib()
         else:
-            db.add(SystemSetting(key_name=key, value_text=value))
+            db.add(SystemSetting(kantor_kode=k, key_name=key, value_text=value))
         db.commit()
 
     def start(self):
@@ -310,17 +323,17 @@ class MonitoringScheduler:
             now_str = get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
             if kantor and kantor != "all":
                 k = kantor.lower().strip()
-                self.set_setting_in_db(db, f"scheduler_status_{k}", "STOPPED")
-                self.set_setting_in_db(db, f"scheduler_paused_at_{k}", now_str)
+                self.set_setting_in_db(db, "scheduler_status", "STOPPED", kantor=k)
+                self.set_setting_in_db(db, "scheduler_paused_at", now_str, kantor=k)
                 logger.info(f"Pemantauan otomatis ONT kantor {k.upper()} dijeda (STOPPED) dan disimpan permanen.")
             else:
-                self.set_setting_in_db(db, "scheduler_status", "STOPPED")
-                self.set_setting_in_db(db, "scheduler_paused_at", now_str)
-                self.set_setting_in_db(db, "last_paused_reminder_at", now_str)
+                self.set_setting_in_db(db, "scheduler_status", "STOPPED", kantor=None)
+                self.set_setting_in_db(db, "scheduler_paused_at", now_str, kantor=None)
+                self.set_setting_in_db(db, "last_paused_reminder_at", now_str, kantor=None)
                 # Sinkronkan juga ke semua kantor terdaftar
                 kantors = db.query(Kantor).all()
                 for kt in kantors:
-                    self.set_setting_in_db(db, f"scheduler_status_{kt.kode.lower()}", "STOPPED")
+                    self.set_setting_in_db(db, "scheduler_status", "STOPPED", kantor=kt.kode.lower())
                 logger.info("Pemantauan otomatis ONT SELURUH KANTOR dijeda (STOPPED) dan disimpan permanen.")
         finally:
             db.close()
@@ -330,15 +343,15 @@ class MonitoringScheduler:
         try:
             if kantor and kantor != "all":
                 k = kantor.lower().strip()
-                self.set_setting_in_db(db, f"scheduler_status_{k}", "RUNNING")
-                self.set_setting_in_db(db, f"scheduler_paused_at_{k}", "")
+                self.set_setting_in_db(db, "scheduler_status", "RUNNING", kantor=k)
+                self.set_setting_in_db(db, "scheduler_paused_at", "", kantor=k)
                 logger.info(f"Pemantauan otomatis ONT kantor {k.upper()} dilanjutkan (RUNNING) dan disimpan permanen.")
             else:
-                self.set_setting_in_db(db, "scheduler_status", "RUNNING")
-                self.set_setting_in_db(db, "scheduler_paused_at", "")
+                self.set_setting_in_db(db, "scheduler_status", "RUNNING", kantor=None)
+                self.set_setting_in_db(db, "scheduler_paused_at", "", kantor=None)
                 kantors = db.query(Kantor).all()
                 for kt in kantors:
-                    self.set_setting_in_db(db, f"scheduler_status_{kt.kode.lower()}", "RUNNING")
+                    self.set_setting_in_db(db, "scheduler_status", "RUNNING", kantor=kt.kode.lower())
                 logger.info("Pemantauan otomatis ONT SELURUH KANTOR dilanjutkan (RUNNING) dan disimpan permanen.")
         finally:
             db.close()
@@ -435,23 +448,10 @@ class MonitoringScheduler:
         db = SessionLocal()
         try:
             # Baca status per kantor jika ada, jika tidak ada fallback ke global
-            if k != "all":
-                status = self.get_setting_from_db(db, f"scheduler_status_{k}", "")
-                if not status:
-                    status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
-            else:
-                status = self.get_setting_from_db(db, "scheduler_status", "RUNNING")
-
-            interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
-            last_scan_key = f"last_scan_time_{k}" if k != "all" else "last_scan_time"
-            last_scan = self.get_setting_from_db(db, last_scan_key, "")
-            if not last_scan:
-                last_scan = self.get_setting_from_db(db, "last_scan_time", "-")
-                
-            net_err_key = f"is_network_error_{k}" if k != "all" else "is_network_error"
-            net_err_str = self.get_setting_from_db(db, net_err_key, "")
-            if not net_err_str:
-                net_err_str = self.get_setting_from_db(db, "is_network_error", "false")
+            status = self.get_setting_from_db(db, "scheduler_status", "RUNNING", kantor=k if k != "all" else None)
+            interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES), kantor=k if k != "all" else None)
+            last_scan = self.get_setting_from_db(db, "last_scan_time", "-", kantor=k if k != "all" else None)
+            net_err_str = self.get_setting_from_db(db, "is_network_error", "false", kantor=k if k != "all" else None)
             
             cust_q = db.query(Pelanggan).filter(Pelanggan.is_active == True)
             if k != "all":
@@ -463,8 +463,7 @@ class MonitoringScheduler:
             office_state = self.get_office_state(k)
             is_net_err = (net_err_str.lower() == "true") or office_state.is_network_error
             
-            last_duration_key = f"last_scan_duration_{k}" if k != "all" else "last_scan_duration"
-            last_duration_str = self.get_setting_from_db(db, last_duration_key, str(office_state.last_scan_duration or 0.0))
+            last_duration_str = self.get_setting_from_db(db, "last_scan_duration", str(office_state.last_scan_duration or 0.0), kantor=k if k != "all" else None)
             last_duration = float(last_duration_str) if last_duration_str.replace('.', '', 1).isdigit() else (office_state.last_scan_duration or 0.0)
         finally:
             db.close()
@@ -560,9 +559,7 @@ class MonitoringScheduler:
         for k_kode in kantor_kodes:
             db_k = SessionLocal()
             try:
-                k_status = self.get_setting_from_db(db_k, f"scheduler_status_{k_kode}", "")
-                if not k_status:
-                    k_status = self.get_setting_from_db(db_k, "scheduler_status", "RUNNING")
+                k_status = self.get_setting_from_db(db_k, "scheduler_status", "RUNNING", kantor=k_kode)
                 
                 if k_status != "RUNNING":
                     logger.info(f"[SCHEDULER] Kantor {k_kode.upper()} dalam status STOPPED, melewati siklus otomatis.")
@@ -624,17 +621,9 @@ class MonitoringScheduler:
             los_pending_alerts = []
 
             # Ambil kredensial modem ONT dengan prioritas spesifik kantor
-            default_user = self.get_setting_from_db(db, f"default_modem_user_{k}", "") if k != "all" else ""
-            if not default_user:
-                default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
-
-            default_pass = self.get_setting_from_db(db, f"default_modem_pass_{k}", "") if k != "all" else ""
-            if not default_pass:
-                default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
-
-            raw_creds = self.get_setting_from_db(db, f"default_modem_credentials_{k}", "") if k != "all" else ""
-            if not raw_creds:
-                raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]")
+            default_user = self.get_setting_from_db(db, "default_modem_user", "admin", kantor=k if k != "all" else None)
+            default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024", kantor=k if k != "all" else None)
+            raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=k if k != "all" else None)
 
             default_creds_list = []
             try:
@@ -771,9 +760,9 @@ class MonitoringScheduler:
                     raise inner_e
 
             scan_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
-            self.set_setting_in_db(db, "last_scan_time", scan_time_str)
+            self.set_setting_in_db(db, "last_scan_time", scan_time_str, kantor=None)
             if k != "all":
-                self.set_setting_in_db(db, f"last_scan_time_{k}", scan_time_str)
+                self.set_setting_in_db(db, "last_scan_time", scan_time_str, kantor=k)
             self.cleanup_old_logs(db, days=30)
             db.commit()
             
@@ -787,9 +776,9 @@ class MonitoringScheduler:
             if len(pelanggan_list) > 0 and unreachable_count == len(pelanggan_list):
                 with state.lock:
                     state.is_network_error = True
-                self.set_setting_in_db(db, "is_network_error", "true")
+                self.set_setting_in_db(db, "is_network_error", "true", kantor=None)
                 if k != "all":
-                    self.set_setting_in_db(db, f"is_network_error_{k}", "true")
+                    self.set_setting_in_db(db, "is_network_error", "true", kantor=k)
                 db.commit()
                 return {
                     "status": "error",
@@ -806,9 +795,9 @@ class MonitoringScheduler:
 
             with state.lock:
                 state.is_network_error = False
-            self.set_setting_in_db(db, "is_network_error", "false")
+            self.set_setting_in_db(db, "is_network_error", "false", kantor=None)
             if k != "all":
-                self.set_setting_in_db(db, f"is_network_error_{k}", "false")
+                self.set_setting_in_db(db, "is_network_error", "false", kantor=k)
             db.commit()
             return {
                 "status": "success",
@@ -831,9 +820,9 @@ class MonitoringScheduler:
                     state.last_scan_duration = round(time.time() - state.scan_start_time, 1)
                     try:
                         s_db = SessionLocal()
-                        self.set_setting_in_db(s_db, "last_scan_duration", str(state.last_scan_duration))
+                        self.set_setting_in_db(s_db, "last_scan_duration", str(state.last_scan_duration), kantor=None)
                         if k != "all":
-                            self.set_setting_in_db(s_db, f"last_scan_duration_{k}", str(state.last_scan_duration))
+                            self.set_setting_in_db(s_db, "last_scan_duration", str(state.last_scan_duration), kantor=k)
                         s_db.close()
                     except Exception:
                         pass
@@ -847,9 +836,10 @@ class MonitoringScheduler:
             if not cust:
                 return None
 
-            default_user = self.get_setting_from_db(db, "default_modem_user", "admin")
-            default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024")
-            raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]")
+            cust_kantor = cust.kantor.lower().strip() if cust.kantor else None
+            default_user = self.get_setting_from_db(db, "default_modem_user", "admin", kantor=cust_kantor)
+            default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024", kantor=cust_kantor)
+            raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=cust_kantor)
             default_creds_list = []
             try:
                 import json

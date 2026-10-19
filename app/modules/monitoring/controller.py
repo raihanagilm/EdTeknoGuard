@@ -183,13 +183,14 @@ class MonitoringController:
         return res
 
     @staticmethod
-    def get_kpi(request: Optional[Any] = None, db: Optional[Session] = None) -> Dict[str, Any]:
-        kantor = None
+    def get_kpi(request: Optional[Any] = None, db: Optional[Session] = None, kantor: Optional[str] = None) -> Dict[str, Any]:
+        target_kantor = kantor
         allowed_kantor = None
         if request:
-            kantor = getattr(request.state, "active_kantor", None)
+            if not target_kantor:
+                target_kantor = getattr(request.state, "active_kantor", None)
             allowed_kantor = getattr(request.state, "allowed_kantor", None)
-        return MonitoringService.get_kpi_metrics(db=db, kantor=kantor, allowed_kantor=allowed_kantor)
+        return MonitoringService.get_kpi_metrics(db=db, kantor=target_kantor, allowed_kantor=allowed_kantor)
 
     @staticmethod
     def get_chart_data(
@@ -197,18 +198,20 @@ class MonitoringController:
         db: Optional[Session] = None,
         range_type: str = "today",
         date_filter: Optional[str] = None,
-        id_pelanggan: Optional[str] = None
+        id_pelanggan: Optional[str] = None,
+        kantor: Optional[str] = None
     ) -> Dict[str, Any]:
-        kantor = None
+        target_kantor = kantor
         allowed_kantor = None
         if request:
-            kantor = getattr(request.state, "active_kantor", None)
+            if not target_kantor:
+                target_kantor = getattr(request.state, "active_kantor", None)
             allowed_kantor = getattr(request.state, "allowed_kantor", None)
         return MonitoringService.get_chart_data(
             db=db,
             range_type=range_type,
             date_filter=date_filter,
             id_pelanggan=id_pelanggan,
-            kantor=kantor,
+            kantor=target_kantor,
             allowed_kantor=allowed_kantor
         )

@@ -93,6 +93,11 @@ class MonitoringService:
         if total_all > total_with_logs:
             normal_count += (total_all - total_with_logs)
 
+        from app.modules.settings.service import SystemSettingsService
+        office_settings = SystemSettingsService.get_settings(db, kantor=kantor)
+        warn_th = office_settings.get("warning_threshold_dbm", getattr(settings, "WARNING_THRESHOLD_DBM", -26.0))
+        crit_th = office_settings.get("critical_threshold_dbm", getattr(settings, "CRITICAL_THRESHOLD_DBM", -27.0))
+
         return {
             "total_monitored": total_all,
             "total_all": total_all,
@@ -103,8 +108,8 @@ class MonitoringService:
             "critical": critical_count,
             "los": los_count,
             "target_kantor": kantor or "all",
-            "warning_threshold": settings.WARNING_THRESHOLD_DBM,
-            "critical_threshold": settings.CRITICAL_THRESHOLD_DBM
+            "warning_threshold": warn_th,
+            "critical_threshold": crit_th
         }
 
     @staticmethod
@@ -129,11 +134,13 @@ class MonitoringService:
         allowed_kantor: Optional[list] = None
     ) -> Dict[str, Any]:
         from sqlalchemy import case
+        from app.modules.settings.service import SystemSettingsService
         now = get_now_wib()
         today = get_today_wib()
 
-        warning_th = getattr(settings, "WARNING_THRESHOLD_DBM", -26.0)
-        critical_th = getattr(settings, "CRITICAL_THRESHOLD_DBM", -27.0)
+        office_settings = SystemSettingsService.get_settings(db, kantor=kantor)
+        warning_th = office_settings.get("warning_threshold_dbm", getattr(settings, "WARNING_THRESHOLD_DBM", -26.0))
+        critical_th = office_settings.get("critical_threshold_dbm", getattr(settings, "CRITICAL_THRESHOLD_DBM", -27.0))
 
         # Helper query data hourly multi-hari dalam 1 roundtrip database
         def query_range_hourly(start_d, end_d):
@@ -258,10 +265,12 @@ class MonitoringService:
 
             valid_today = [v for v in today_values if v is not None]
             valid_yest = [v for v in yest_values if v is not None]
-            all_valid = valid_today + valid_yest
+            all_details = [d for d in (today_details + yest_details) if d]
+            all_min_rx = [d["min_rx"] for d in all_details if d.get("min_rx") is not None]
+            all_max_rx = [d["max_rx"] for d in all_details if d.get("max_rx") is not None]
             avg_dbm = round(sum(all_valid) / len(all_valid), 2) if all_valid else None
-            min_dbm = round(max(all_valid), 2) if all_valid else None
-            max_dbm = round(min(all_valid), 2) if all_valid else None
+            min_dbm = round(max(all_max_rx), 2) if all_max_rx else (round(max(all_valid), 2) if all_valid else None)
+            max_dbm = round(min(all_min_rx), 2) if all_min_rx else (round(min(all_valid), 2) if all_valid else None)
 
             return {
                 "range": "yesterday",
@@ -340,9 +349,12 @@ class MonitoringService:
                 all_valid.extend([v for v in d_values if v is not None])
 
             primary_ds = datasets[0]
+            all_week_details = [d for ds in datasets for d in ds.get("details", []) if d]
+            all_min_rx = [d["min_rx"] for d in all_week_details if d.get("min_rx") is not None]
+            all_max_rx = [d["max_rx"] for d in all_week_details if d.get("max_rx") is not None]
             avg_dbm = round(sum(all_valid) / len(all_valid), 2) if all_valid else None
-            min_dbm = round(max(all_valid), 2) if all_valid else None
-            max_dbm = round(min(all_valid), 2) if all_valid else None
+            min_dbm = round(max(all_max_rx), 2) if all_max_rx else (round(max(all_valid), 2) if all_valid else None)
+            max_dbm = round(min(all_min_rx), 2) if all_min_rx else (round(min(all_valid), 2) if all_valid else None)
 
             return {
                 "range": "week",
@@ -441,10 +453,12 @@ class MonitoringService:
                 for r in rows
             ]
 
+            all_min_rx = [d["min_rx"] for d in details if d and d.get("min_rx") is not None]
+            all_max_rx = [d["max_rx"] for d in details if d and d.get("max_rx") is not None]
             valid_vals = [v for v in values if v is not None]
             avg_dbm = round(sum(valid_vals) / len(valid_vals), 2) if valid_vals else None
-            min_dbm = round(max(valid_vals), 2) if valid_vals else None
-            max_dbm = round(min(valid_vals), 2) if valid_vals else None
+            min_dbm = round(max(all_max_rx), 2) if all_max_rx else (round(max(valid_vals), 2) if valid_vals else None)
+            max_dbm = round(min(all_min_rx), 2) if all_min_rx else (round(min(valid_vals), 2) if valid_vals else None)
 
             day_title = f"Hari Ini ({target_date.strftime('%d/%m')})" if target_date == today else f"Tanggal ({target_date.strftime('%d/%m')})"
             datasets = [

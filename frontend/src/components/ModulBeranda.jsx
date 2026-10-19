@@ -103,7 +103,9 @@ export function ModulBeranda({
     warning: 0,
     critical: 0,
     los: 0,
-    monitored_inactive: 0
+    monitored_inactive: 0,
+    warning_threshold: -26.0,
+    critical_threshold: -27.0
   })
 
   // State Grafik & Filter
@@ -114,7 +116,9 @@ export function ModulBeranda({
     avg_dbm: null,
     min_dbm: null,
     max_dbm: null,
-    total_points: 0
+    total_points: 0,
+    threshold: -26.0,
+    critical_threshold: -27.0
   })
   const [activeDatasets, setActiveDatasets] = useState([])
   const [zoomScale, setZoomScale] = useState(1.0)
@@ -203,6 +207,9 @@ export function ModulBeranda({
       const params = { range: chartRange }
       if (selectedDate) {
         params.date = selectedDate
+      }
+      if (activeOffice) {
+        params.kantor = activeOffice
       }
       const res = await MonitoringService.getChartData(params)
       if (res.ok && res.data) {
@@ -361,7 +368,9 @@ export function ModulBeranda({
           avg_dbm: json.avg_dbm,
           min_dbm: json.min_dbm,
           max_dbm: json.max_dbm,
-          total_points: json.total_points || 0
+          total_points: json.total_points || 0,
+          threshold: warnThreshold,
+          critical_threshold: critThreshold
         })
 
         chartInstanceRef.current.update('none')
@@ -369,7 +378,7 @@ export function ModulBeranda({
     } catch (err) {
       console.warn('Gagal memuat data grafik:', err)
     }
-  }, [chartRange, selectedDate])
+  }, [chartRange, selectedDate, activeOffice])
 
   // Inisialisasi Chart.js
   useEffect(() => {
@@ -1084,21 +1093,21 @@ export function ModulBeranda({
             value: kpi.normal,
             colorScheme: 'emerald',
             onClick: () => onNavigate('pelanggan'),
-            subLabel: '> -26 dBm'
+            subLabel: `> ${Number(kpi.warning_threshold ?? -26.0).toFixed(1)} dBm`
           },
           {
             label: 'Waspada',
             value: kpi.warning,
             colorScheme: 'amber',
             onClick: () => onNavigate('pelanggan'),
-            subLabel: '≤ -26 dBm'
+            subLabel: `≤ ${Number(kpi.warning_threshold ?? -26.0).toFixed(1)} dBm`
           },
           {
             label: 'Kritis',
             value: kpi.critical,
             colorScheme: 'rose',
             onClick: () => onNavigate('pelanggan'),
-            subLabel: '≤ -27 dBm'
+            subLabel: `≤ ${Number(kpi.critical_threshold ?? -27.0).toFixed(1)} dBm`
           },
           {
             label: 'LOS',
@@ -1120,7 +1129,7 @@ export function ModulBeranda({
                 <span>Tren Kualitas Redaman</span>
               </h3>
               <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300">
-                Batas: -26.0 dBm
+                Batas: {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5 font-medium line-clamp-1 sm:line-clamp-none">
@@ -1306,15 +1315,19 @@ export function ModulBeranda({
 
             <div className="flex items-center gap-1 ml-0.5 pl-1.5 border-l border-sky-200">
               <span className="h-0.5 w-2 sm:w-3 bg-amber-500 inline-block" />
-              <span className="text-amber-800 font-bold">Warning (-26dBm)</span>
+              <span className="text-amber-800 font-bold">
+                Warning ({Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)}dBm)
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <span className="h-0.5 w-2 sm:w-3 bg-rose-500 inline-block" />
-              <span className="text-rose-800 font-bold">Kritis (-27dBm)</span>
+              <span className="text-rose-800 font-bold">
+                Kritis ({Number(chartStats.critical_threshold ?? kpi.critical_threshold ?? -27.0).toFixed(1)}dBm)
+              </span>
             </div>
           </div>
           <div className="text-slate-600 text-[11px]">
-            Optimal: <span className="font-extrabold text-emerald-800">-12 ~ -25.9 dBm</span>
+            Optimal: <span className="font-extrabold text-emerald-800">&gt; {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm</span>
           </div>
         </div>
       </div>

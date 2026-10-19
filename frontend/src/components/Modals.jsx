@@ -1,6 +1,8 @@
 import React from 'react'
 import {
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react'
 
 export function ConfirmSaveModal({

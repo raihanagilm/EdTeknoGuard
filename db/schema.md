@@ -8,10 +8,9 @@ Dokumentasi arsitektur basis data relasional, kamus data (*data dictionary*), in
 
 ```mermaid
 erDiagram
-    KANTORS ||--o{ POPS : "menaungi (1 to N)"
     KANTORS ||--o{ PELANGGAN : "mengelola (1 to N)"
     KANTORS ||--o{ TIKET_KENDALA : "wilayah tiket (1 to N)"
-    POPS ||--o{ PELANGGAN : "melayani (1 to N)"
+    KANTORS ||--o{ SYSTEM_SETTINGS : "pengaturan kantor (1 to N CASCADE)"
     PAKETS ||--o{ PELANGGAN : "berlangganan (1 to N)"
 
     PELANGGAN ||--|| PERANGKAT_ONT : "memiliki modem (1 to 1 CASCADE)"
@@ -23,9 +22,10 @@ erDiagram
     USERS ||--o{ USER_ACTIVITY_LOGS : "mencatat aktivitas (1 to N SET NULL)"
     
     SYSTEM_SETTINGS {
-        int id PK "Key-Value Config Global"
-        varchar key_name UK
-        text value_text
+        int id PK
+        varchar kantor_kode FK "Relasi ke kantors.kode (CASCADE) / NULL untuk global"
+        varchar key_name "Nama Kunci Pengaturan (Composite UK)"
+        text value_text "Nilai Parameter"
         datetime updated_at
     }
 
@@ -34,14 +34,6 @@ erDiagram
         varchar kode UK "Kode Wilayah: cabang, pusat, banyumas"
         varchar nama "Nama Kantor Operasional"
         text alamat
-        datetime created_at
-    }
-
-    POPS {
-        int id PK
-        varchar nama UK "Nama Point of Presence"
-        varchar kantor_kode FK "Relasi ke kantors.kode (CASCADE/RESTRICT)"
-        text deskripsi
         datetime created_at
     }
 
@@ -60,7 +52,7 @@ erDiagram
         varchar nama "Nama Lengkap Warga / Pelanggan"
         text alamat
         varchar no_hp "No WA / Kontak Pelanggan"
-        varchar pop FK "Point of Presence (Relasi pops.nama)"
+        varchar pop "Point of Presence / Server Area"
         varchar kantor FK "Wilayah Kantor (Relasi kantors.kode)"
         varchar paket FK "Paket Layanan (Relasi pakets.nama)"
         boolean is_monitored "Status Pemantauan Berkala"
@@ -174,7 +166,6 @@ erDiagram
 
 ### 2.1 Master Wilayah & Referensi
 - **`kantors`**: Master entitas kantor operasional (`cabang`, `pusat`, `banyumas`).
-- **`pops`**: Master Point of Presence yang terhubung ke kode kantor (`fk_pops_kantor`).
 - **`pakets`**: Master paket layanan internet dan kecepatan bandwidth (Mbps).
 
 ### 2.2 Master Data Pelanggan (`pelanggan`) & Perangkat ONT (`perangkat_ont`) — 3NF Murni

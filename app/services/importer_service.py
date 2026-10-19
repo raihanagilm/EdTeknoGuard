@@ -71,18 +71,8 @@ class ImporterService:
                 paket = clean_string(row.get("Paket"))
                 redaman = clean_float(row.get("Redaman"))
 
-                # Pastikan POP terdaftar di tabel pops untuk mencegah IntegrityError (Foreign Key)
-                from app.db.models import Pop, Paket
-                if pop:
-                    pop_exist = db.query(Pop).filter(Pop.nama == pop).first()
-                    if not pop_exist:
-                        try:
-                            db.add(Pop(nama=pop, kantor_kode="cabang", deskripsi=f"POP Area {pop}"))
-                            db.flush()
-                        except Exception:
-                            db.rollback()
-
                 # Pastikan Paket terdaftar di tabel pakets untuk mencegah IntegrityError
+                from app.db.models import Paket
                 if paket:
                     paket_exist = db.query(Paket).filter(Paket.nama == paket).first()
                     if not paket_exist:

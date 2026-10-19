@@ -38,16 +38,16 @@ export default function App() {
     return localStorage.getItem('edtekno_auth_status') === 'logged_in' || document.cookie.includes('edteknoguard_session=')
   })
 
-  // Navigation & Office Scope State (SOP Multi-Kantor Cabang)
+  // Navigation & Office Scope State (SOP Multi-Kantor)
   const [activeTab, setActiveTab] = useState('beranda')
   const [customerSearchQuery, setCustomerSearchQuery] = useState('')
   const [activeOffice, setActiveOffice] = useState(() => {
-    return localStorage.getItem('edtekno_active_office') || 'cabang'
+    const saved = localStorage.getItem('edtekno_active_office')
+    return (saved && saved !== 'cabang') ? saved : 'banyumas'
   })
   const [kantorList, setKantorList] = useState([
-    { kode: 'pusat', nama: 'Pusat' },
-    { kode: 'cabang', nama: 'Cabang' },
-    { kode: 'banyumas', nama: 'Banyumas' }
+    { kode: 'banyumas', nama: 'Banyumas' },
+    { kode: 'pusat', nama: 'Pusat' }
   ])
   const [currentUser, setCurrentUser] = useState({
     id: 1,
@@ -164,9 +164,9 @@ export default function App() {
         if (data.critical_threshold_dbm !== undefined) setCritThreshold(data.critical_threshold_dbm)
         if (data.app_vibration_enabled !== undefined) setAppVibration(data.app_vibration_enabled)
         if (data.alert_waiting_interval_minutes) setAlertWaitingInterval(data.alert_waiting_interval_minutes)
-        if (data.telegram_night_mode_enabled !== undefined) setNightModeEnabled(data.telegram_night_mode_enabled)
-        if (data.telegram_night_mode_start) setNightModeStart(data.telegram_night_mode_start)
-        if (data.telegram_night_mode_end) setNightModeEnd(data.telegram_night_mode_end)
+        if (data.night_mode_enabled !== undefined) setNightModeEnabled(data.night_mode_enabled)
+        if (data.night_mode_start) setNightModeStart(data.night_mode_start)
+        if (data.night_mode_end) setNightModeEnd(data.night_mode_end)
         if (data.default_modem_credentials && Array.isArray(data.default_modem_credentials) && data.default_modem_credentials.length > 0) {
           setModemCredentials(data.default_modem_credentials)
         }
@@ -356,10 +356,10 @@ export default function App() {
       default_modem_pass: validCredentials[0]?.password || 'tekno2024',
       default_modem_credentials: validCredentials.length > 0 ? validCredentials : [{ username: 'admin', password: 'tekno2024' }],
       apply_to_invalid_customers: Boolean(applyToInvalid),
-      telegram_alert_interval_hours: 1.0,
-      telegram_night_mode_enabled: Boolean(nightModeEnabled),
-      telegram_night_mode_start: nightModeStart || '22:00',
-      telegram_night_mode_end: nightModeEnd || '06:00',
+      notification_alert_interval_hours: 1.0,
+      night_mode_enabled: Boolean(nightModeEnabled),
+      night_mode_start: nightModeStart || '22:00',
+      night_mode_end: nightModeEnd || '06:00',
       app_vibration_enabled: Boolean(appVibration),
       alert_waiting_interval_minutes: isNaN(parseInt(alertWaitingInterval, 10)) ? 5 : parseInt(alertWaitingInterval, 10),
       mikrotik_host: mikrotikHost || '192.168.202.50',
@@ -458,15 +458,6 @@ export default function App() {
     setDragOverCredIdx(null)
   }
 
-  // Realtime Clock simulation
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const d = new Date()
-      const timeStr = d.toTimeString().split(' ')[0] + ' WIB'
-      setCurrentTime(timeStr)
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
 
   // Scanner Progress Simulation
   useEffect(() => {

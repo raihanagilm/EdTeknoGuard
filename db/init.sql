@@ -29,22 +29,7 @@ CREATE TABLE IF NOT EXISTS `kantors` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
--- 2. Tabel POPS (Point of Presence)
--- ------------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pops` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `nama` VARCHAR(100) NOT NULL UNIQUE,
-  `kantor_kode` VARCHAR(50) NULL,
-  `deskripsi` VARCHAR(255) NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX `idx_pop_nama` (`nama`),
-  INDEX `idx_pop_kantor` (`kantor_kode`),
-  CONSTRAINT `fk_pops_kantors` FOREIGN KEY (`kantor_kode`)
-    REFERENCES `kantors` (`kode`) ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ------------------------------------------------------------------------------
--- 3. Tabel PAKETS (Paket Layanan Internet)
+-- 2. Tabel PAKETS (Paket Layanan Internet)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `pakets` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -74,14 +59,19 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
--- 5. Tabel SYSTEM_SETTINGS (Konfigurasi & Threshold Monitoring)
+-- 5. Tabel SYSTEM_SETTINGS (Konfigurasi & Threshold Monitoring per Kantor)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `system_settings` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `key_name` VARCHAR(50) NOT NULL UNIQUE,
+  `kantor_kode` VARCHAR(50) NULL,
+  `key_name` VARCHAR(50) NOT NULL,
   `value_text` TEXT NOT NULL,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX `idx_setting_key` (`key_name`)
+  INDEX `idx_setting_key` (`key_name`),
+  INDEX `idx_setting_kantor` (`kantor_kode`),
+  UNIQUE KEY `uq_setting_key_kantor` (`key_name`, `kantor_kode`),
+  CONSTRAINT `fk_system_settings_kantor` FOREIGN KEY (`kantor_kode`)
+    REFERENCES `kantors` (`kode`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
@@ -113,8 +103,6 @@ CREATE TABLE IF NOT EXISTS `pelanggan` (
   INDEX `idx_pelanggan_verifikasi` (`status_verifikasi`),
   CONSTRAINT `fk_pelanggan_kantor` FOREIGN KEY (`kantor`)
     REFERENCES `kantors` (`kode`) ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT `fk_pelanggan_pop` FOREIGN KEY (`pop`)
-    REFERENCES `pops` (`nama`) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT `fk_pelanggan_paket` FOREIGN KEY (`paket`)
     REFERENCES `pakets` (`nama`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -268,13 +256,6 @@ INSERT IGNORE INTO `kantors` (`id`, `kode`, `nama`, `alamat`) VALUES
 (1, 'pusat', 'Pusat', 'Kantor Pusat ISP TeknoIndonet'),
 (2, 'cabang', 'Cabang', 'Kantor Cabang Operasional Utama'),
 (3, 'banyumas', 'Banyumas', 'Kantor Wilayah Operasional Banyumas');
-
--- Master Data POP Awal
-INSERT IGNORE INTO `pops` (`nama`, `kantor_kode`, `deskripsi`) VALUES
-('Server Cabang', 'cabang', 'POP Wilayah Kantor Cabang'),
-('Mini Server Pabelan', 'cabang', 'POP Area Pabelan'),
-('POP Pusat', 'pusat', 'POP Utama Data Center Pusat'),
-('POP Banyumas', 'banyumas', 'POP Distribusi Wilayah Banyumas');
 
 -- Master Data Paket Layanan
 INSERT IGNORE INTO `pakets` (`nama`, `kecepatan_mbps`, `harga`, `deskripsi`) VALUES

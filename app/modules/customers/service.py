@@ -326,7 +326,7 @@ class CustomerService:
 
     @staticmethod
     def execute_json_import(db: Session, data_list: list, default_kantor: Optional[str] = "cabang") -> dict:
-        from app.db.models import Pelanggan, PerangkatONT, Pop, Paket
+        from app.db.models import Pelanggan, PerangkatONT, Paket
 
         # 1. Validasi Ketat: Tolak eksekusi jika terdapat duplikasi IP Router atau ID Pelanggan
         active_items = [item for item in data_list if item.get("_action") != "skip" and item.get("_status") != "error"]
@@ -343,7 +343,6 @@ class CustomerService:
         }
 
         # Cache master referensi untuk validasi FK
-        valid_pops = {p.nama for p in db.query(Pop).all()}
         valid_pakets = {pk.nama for pk in db.query(Paket).all()}
 
         for idx, item in enumerate(active_items, start=1):
@@ -484,17 +483,7 @@ class CustomerService:
                         except (ValueError, TypeError):
                             pass
 
-                    # Pastikan master referensi Pop ada
                     raw_pop = str(row_data.get("pop", "")).strip() or "Server Cabang"
-                    if raw_pop and raw_pop not in valid_pops:
-                        try:
-                            new_pop = Pop(nama=raw_pop, kantor_kode=row_kantor)
-                            db.add(new_pop)
-                            db.flush()
-                            valid_pops.add(raw_pop)
-                        except Exception:
-                            db.rollback()
-                            raw_pop = "Server Cabang" if "Server Cabang" in valid_pops else None
 
                     # Pastikan master referensi Paket ada
                     raw_paket = str(row_data.get("paket", "")).strip() or None

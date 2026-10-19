@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import (
     Column, BigInteger, Integer, String, Text, Numeric, 
-    Boolean, DateTime, ForeignKey, Index
+    Boolean, DateTime, ForeignKey, Index, UniqueConstraint
 )
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -20,22 +20,9 @@ class Kantor(Base):
     mikrotik_pass = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
 
-    pops = relationship("Pop", back_populates="kantor_ref")
     pelanggan_list = relationship("Pelanggan", back_populates="kantor_ref")
     tiket_list = relationship("TiketKendala", back_populates="kantor_ref")
-
-
-class Pop(Base):
-    __tablename__ = "pops"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    nama = Column(String(100), unique=True, nullable=False, index=True)
-    kantor_kode = Column(String(50), ForeignKey("kantors.kode", onupdate="CASCADE", ondelete="RESTRICT"), nullable=True, index=True)
-    deskripsi = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=get_now_wib, nullable=False)
-
-    kantor_ref = relationship("Kantor", back_populates="pops")
-    pelanggan_list = relationship("Pelanggan", back_populates="pop_ref")
+    settings_list = relationship("SystemSetting", back_populates="kantor_ref", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class Paket(Base):
@@ -82,7 +69,7 @@ class Pelanggan(Base):
     nama = Column(String(150), nullable=False, index=True)
     alamat = Column(Text, nullable=True)
     no_hp = Column(String(50), nullable=True)
-    pop = Column(String(100), ForeignKey("pops.nama", onupdate="CASCADE", ondelete="SET NULL"), nullable=True, default="Server Cabang", index=True)
+    pop = Column(String(100), nullable=True, default="Server Cabang", index=True)
     kantor = Column(String(50), ForeignKey("kantors.kode", onupdate="CASCADE", ondelete="RESTRICT"), nullable=False, default="cabang", index=True) # cabang, pusat, banyumas
     paket = Column(String(50), ForeignKey("pakets.nama", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
     is_monitored = Column(Boolean, default=True, nullable=False, index=True)
@@ -101,7 +88,6 @@ class Pelanggan(Base):
 
     # Relasi master referensi
     kantor_ref = relationship("Kantor", back_populates="pelanggan_list")
-    pop_ref = relationship("Pop", back_populates="pelanggan_list")
     paket_ref = relationship("Paket", back_populates="pelanggan_list")
 
     # Relasi ke seluruh data anakan (Cascading Deletion)
@@ -265,9 +251,16 @@ class SystemSetting(Base):
     __tablename__ = "system_settings"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    key_name = Column(String(50), unique=True, nullable=False, index=True)
+    kantor_kode = Column(String(50), ForeignKey("kantors.kode", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, index=True)
+    key_name = Column(String(50), nullable=False, index=True)
     value_text = Column(Text, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
+
+    kantor_ref = relationship("Kantor", back_populates="settings_list")
+
+    __table_args__ = (
+        UniqueConstraint("key_name", "kantor_kode", name="uq_setting_key_kantor"),
+    )
 
 
 class UserActivityLog(Base):

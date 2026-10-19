@@ -65,9 +65,9 @@ def check_single_alias(id_pelanggan: str, db: Session = Depends(get_db), user: d
     }
 
 @router.get("/kpi")
-def get_kpi_metrics(request: Request, db: Session = Depends(get_db)):
+def get_kpi_metrics(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """Route ringkasan metrik kesehatan jaringan ONT (Office-aware)"""
-    return MonitoringController.get_kpi(request=request, db=db)
+    return MonitoringController.get_kpi(request=request, db=db, kantor=kantor)
 
 @router.get("/chart-data")
 def get_chart_data(
@@ -75,9 +75,10 @@ def get_chart_data(
     range_type: str = Query("today", alias="range"),
     date_filter: Optional[str] = Query(None, alias="date"),
     id_pelanggan: Optional[str] = None,
+    kantor: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
     """Route data historis redaman optik untuk Chart.js dengan filter tanggal (date=YYYY-MM-DD) atau range (today, yesterday, week, month)"""
     return MonitoringController.get_chart_data(
-        request=request, db=db, range_type=range_type, date_filter=date_filter, id_pelanggan=id_pelanggan
+        request=request, db=db, range_type=range_type, date_filter=date_filter, id_pelanggan=id_pelanggan, kantor=kantor
     )

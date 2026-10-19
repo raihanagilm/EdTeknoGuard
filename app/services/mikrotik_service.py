@@ -15,7 +15,7 @@ from routeros_api.exceptions import RouterOsApiConnectionError, RouterOsApiCommu
 
 from app.core.config import settings
 from app.core.timezone import get_now_wib
-from app.db.models import Pelanggan, PerangkatONT, SystemSetting, Paket, Pop
+from app.db.models import Pelanggan, PerangkatONT, SystemSetting, Paket
 
 logger = logging.getLogger("mikrotik_service")
 
@@ -428,8 +428,12 @@ class MikroTikSyncService:
             if nm and len(nm) >= 3 and not nm.startswith("pelanggan 1"):
                 existing_by_name[nm] = p
 
-        # Cache POP dan Paket yang ada di DB
-        existing_pops = {pop.nama.lower(): pop.nama for pop in db.query(Pop).all()}
+        # Cache POP dari data pelanggan dan Paket yang ada di DB
+        existing_pops = {
+            p[0].lower(): p[0] 
+            for p in db.query(Pelanggan.pop).filter(Pelanggan.pop.isnot(None)).distinct().all() 
+            if p[0]
+        }
         existing_pakets = {pkt.nama.lower(): pkt.nama for pkt in db.query(Paket).all()}
 
         for lease in bound_leases:
@@ -465,14 +469,8 @@ class MikroTikSyncService:
                 if pop_candidate.lower() in existing_pops:
                     final_pop = existing_pops[pop_candidate.lower()]
                 else:
-                    try:
-                        new_pop = Pop(nama=pop_candidate, kantor_kode=kantor, deskripsi=f"Wilayah {pop_candidate}")
-                        db.add(new_pop)
-                        db.flush()
-                        existing_pops[pop_candidate.lower()] = pop_candidate
-                        final_pop = pop_candidate
-                    except Exception:
-                        db.rollback()
+                    existing_pops[pop_candidate.lower()] = pop_candidate
+                    final_pop = pop_candidate
 
             # Status Lease: bound (online) vs waiting (offline)
             lease_status = lease.get("status", "bound").lower()
