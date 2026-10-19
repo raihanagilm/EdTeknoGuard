@@ -11,6 +11,13 @@ def test_pelanggan_cascade_relationships_and_delete():
     test_id = "TEST_CASCADE_999"
 
     try:
+        # Ambil kode kantor riil dan paket riil yang ada di database saat ini
+        from app.db.models import Kantor, Paket
+        first_kantor = db.query(Kantor).first()
+        test_kantor_kode = first_kantor.kode if first_kantor else None
+        first_paket = db.query(Paket).first()
+        test_paket_nama = first_paket.nama if first_paket else None
+
         # 1. Bersihkan jika sudah ada sebelumnya
         existing = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == test_id).first()
         if existing:
@@ -23,9 +30,9 @@ def test_pelanggan_cascade_relationships_and_delete():
             alamat="Dusun Testing RT 01 RW 02",
             no_hp="081234567890",
             pop="Server Cabang",
-            kantor="cabang",
+            kantor=test_kantor_kode,
             ip_router="10.10.99.254",
-            paket="20MB CAB",
+            paket=test_paket_nama,
             jenis_modem="GM220-S",
             redaman_baseline=-21.5,
             password_hash="fakehash123",
@@ -59,7 +66,7 @@ def test_pelanggan_cascade_relationships_and_delete():
         tiket = TiketKendala(
             id_tiket="TIKET-CASCADE-01",
             id_pelanggan=test_id,
-            kantor="cabang",
+            kantor=test_kantor_kode,
             kategori="Internet Lambat",
             deskripsi="Sinyal drop mendadak",
             no_wa_pelapor="081234567890",
@@ -106,6 +113,10 @@ def test_bulk_delete_cascade():
     test_ids = ["BULK_CASCADE_A", "BULK_CASCADE_B"]
 
     try:
+        from app.db.models import Kantor
+        first_kantor = db.query(Kantor).first()
+        test_kantor_kode = first_kantor.kode if first_kantor else "pusat"
+
         # Bersihkan dulu
         for tid in test_ids:
             existing = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == tid).first()
@@ -118,7 +129,7 @@ def test_bulk_delete_cascade():
                 id_pelanggan=tid,
                 nama=f"Bulk {tid}",
                 pop="Server Cabang",
-                kantor="cabang",
+                kantor=test_kantor_kode,
                 ip_router=f"10.10.99.{i}",
                 is_monitored=True,
                 is_active=True

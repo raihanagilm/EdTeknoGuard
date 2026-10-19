@@ -130,7 +130,22 @@ export function ModulBeranda({
     }, 4500)
   }
 
-  // 1. Fetch Engine Status
+  // 1. Fetch KPI Metrics
+  const fetchKpi = useCallback(async () => {
+    try {
+      const res = await MonitoringService.getKpi({ kantor: activeOffice })
+      if (res.ok && res.data) {
+        setKpi(res.data)
+        if (res.data.total_monitored > 0 && res.data.los === res.data.total_monitored) {
+          setIsNetworkError(true)
+        }
+      }
+    } catch (err) {
+      console.error('Gagal mengambil metrik KPI:', err)
+    }
+  }, [activeOffice])
+
+  // 2. Fetch Engine Status
   const fetchStatus = useCallback(async () => {
     try {
       const res = await MonitoringService.getStatus({ kantor: activeOffice })
@@ -158,8 +173,8 @@ export function ModulBeranda({
 
         if (wasScanning && !data.is_scanning) {
           fetchKpi()
-          if (chartRange === 'today') {
-            loadChartData()
+          if (chartRange === 'today' && chartInstanceRef.current) {
+            MonitoringService.getChartData({ range: 'today' }).catch(() => {})
           }
         }
       }
@@ -167,22 +182,7 @@ export function ModulBeranda({
       console.error('Gagal mengambil status monitoring:', err)
       setIsNetworkError(true)
     }
-  }, [isScanning, chartRange, activeOffice])
-
-  // 2. Fetch KPI Metrics
-  const fetchKpi = useCallback(async () => {
-    try {
-      const res = await MonitoringService.getKpi({ kantor: activeOffice })
-      if (res.ok && res.data) {
-        setKpi(res.data)
-        if (res.data.total_monitored > 0 && res.data.los === res.data.total_monitored) {
-          setIsNetworkError(true)
-        }
-      }
-    } catch (err) {
-      console.error('Gagal mengambil metrik KPI:', err)
-    }
-  }, [activeOffice])
+  }, [isScanning, chartRange, activeOffice, fetchKpi])
 
   // 3. Fetch Notifications / Unread Count
   const fetchNotifications = useCallback(async () => {

@@ -16,15 +16,29 @@ class AuthController:
     @staticmethod
     def render_login_page(request: Request, error: Optional[str] = None):
         if request.query_params.get("logout") == "1":
-            response = templates.TemplateResponse(
-                request=request,
-                name="auth/login.html",
-                context={
-                    "app_name": settings.APP_NAME,
-                    "error": error,
-                    "success": "Anda telah berhasil keluar (logout) dari sistem."
-                }
-            )
+            from pathlib import Path
+            templates_dir = Path("templates")
+            if templates_dir.exists() and (templates_dir / "auth/login.html").exists():
+                response = templates.TemplateResponse(
+                    request=request,
+                    name="auth/login.html",
+                    context={
+                        "app_name": settings.APP_NAME,
+                        "error": error,
+                        "success": "Anda telah berhasil keluar (logout) dari sistem."
+                    }
+                )
+            else:
+                from fastapi.responses import HTMLResponse
+                response = HTMLResponse(
+                    f"<!doctype html><html><head><title>Login - {settings.APP_NAME}</title></head>"
+                    f"<body><h1>Masuk NOC TeknoGuard</h1><div class='success'>Anda telah berhasil keluar (logout) dari sistem.</div>"
+                    f"<form method='post' action='/login'>"
+                    f"<input name='username' placeholder='Username' />"
+                    f"<input name='password' type='password' placeholder='Password' />"
+                    f"<button type='submit'>Masuk</button>"
+                    f"</form><div id='root'></div></body></html>"
+                )
             response.delete_cookie(SESSION_COOKIE_NAME, path="/")
             response.delete_cookie(SESSION_COOKIE_NAME)
             response.set_cookie(
@@ -42,13 +56,34 @@ class AuthController:
         if get_current_user_optional(request):
             return RedirectResponse("/", status_code=303)
 
-        return templates.TemplateResponse(
-            request=request,
-            name="auth/login.html",
-            context={
-                "app_name": settings.APP_NAME,
-                "error": error
-            }
+        from pathlib import Path
+        templates_dir = Path("templates")
+        if templates_dir.exists() and (templates_dir / "auth/login.html").exists():
+            return templates.TemplateResponse(
+                request=request,
+                name="auth/login.html",
+                context={
+                    "app_name": settings.APP_NAME,
+                    "error": error
+                }
+            )
+
+        # Fallback ke frontend SPA atau HTML dasar
+        dist_index = Path("frontend/dist/index.html")
+        if dist_index.exists() and not error:
+            from fastapi.responses import FileResponse
+            return FileResponse(str(dist_index))
+
+        from fastapi.responses import HTMLResponse
+        err_html = f"<div class='error'>{error}</div>" if error else ""
+        return HTMLResponse(
+            f"<!doctype html><html><head><title>Login - {settings.APP_NAME}</title></head>"
+            f"<body><h1>Masuk NOC TeknoGuard</h1>{err_html}"
+            f"<form method='post' action='/login'>"
+            f"<input name='username' placeholder='Username' />"
+            f"<input name='password' type='password' placeholder='Password' />"
+            f"<button type='submit'>Masuk</button>"
+            f"</form><div id='root'></div></body></html>"
         )
 
     @staticmethod

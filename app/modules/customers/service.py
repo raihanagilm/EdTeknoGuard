@@ -1143,16 +1143,29 @@ class CustomerService:
 
             pop = get_val(idx_pop) or "Server Cabang"
             pop_upper = pop.upper()
-            if "PUSAT" in pop_upper:
+            from app.core.security import get_all_kantor_codes
+            valid_kantors = get_all_kantor_codes(db=db)
+            fallback_k = valid_kantors[0] if valid_kantors else "pusat"
+
+            if "PUSAT" in pop_upper and "pusat" in valid_kantors:
                 row_kantor = "pusat"
-            elif "BMS" in pop_upper or "BANYUMAS" in pop_upper:
+            elif ("BMS" in pop_upper or "BANYUMAS" in pop_upper) and "banyumas" in valid_kantors:
                 row_kantor = "banyumas"
-            else:
+            elif "cabang" in valid_kantors:
                 row_kantor = "cabang"
+            else:
+                row_kantor = fallback_k
 
             alamat = get_val(idx_alamat) or None
             no_hp = get_val(idx_hp) or None
-            paket = get_val(idx_paket) or None
+            raw_pkt = get_val(idx_paket) or None
+            # Validasi paket ke tabel pakets untuk mencegah Foreign Key violation
+            paket = None
+            if raw_pkt:
+                from app.db.models import Paket
+                matching_pkt = db.query(Paket).filter(Paket.nama == raw_pkt).first()
+                if matching_pkt:
+                    paket = matching_pkt.nama
             mac_address = get_val(idx_mac) or None
             nama_wifi = get_val(idx_wifi) or None
             password_wifi = get_val(idx_pass_wifi) or None

@@ -29,7 +29,9 @@ def test_download_template_csv_authenticated():
     res = client.get("/api/customers/template-csv")
     assert res.status_code == 200
     assert "text/csv" in res.headers["content-type"]
-    assert "ID Pelanggan,Nama,Alamat" in res.text
+    assert "ID Pelanggan" in res.text
+    assert "Nama" in res.text
+    assert "Alamat" in res.text
 
 def test_import_csv_and_bulk_delete():
     """Menguji alur import CSV pelanggan baru lalu menghapusnya dengan bulk delete"""

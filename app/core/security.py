@@ -66,16 +66,17 @@ def parse_allowed_kantor(allowed_kantor_val, valid_kantors: Optional[List[str]] 
             return items
     return [valid_list[0]] if valid_list else ["cabang"]
 
-def create_session_token(username: str, role: str = "teknisi", nama_karyawan: str = "User", allowed_kantor: Optional[List[str]] = None, user_id: Optional[int] = None) -> str:
+def create_session_token(username: str, role: Optional[str] = None, nama_karyawan: str = "User", allowed_kantor: Optional[List[str]] = None, user_id: Optional[int] = None) -> str:
+    actual_role = role or ("super admin" if username == "admin" else "teknisi")
     all_k = get_all_kantor_codes()
-    if role == "super admin" or username == "admin":
+    if actual_role == "super admin" or username == "admin":
         kantor_list = all_k
     else:
         kantor_list = parse_allowed_kantor(allowed_kantor, all_k) if allowed_kantor else [all_k[0] if all_k else "cabang"]
     return _serializer.dumps({
         "user_id": user_id,
         "user": username,
-        "role": role,
+        "role": actual_role,
         "nama_karyawan": nama_karyawan,
         "allowed_kantor": kantor_list
     })

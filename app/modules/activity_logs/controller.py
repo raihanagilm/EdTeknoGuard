@@ -12,30 +12,41 @@ class ActivityLogController:
 
     @staticmethod
     def render_logs_page(request: Request, db: Session):
-        """Merender antarmuka web log aktivitas pengguna (templates/activity_logs/index.html)"""
-        import datetime
-        from sqlalchemy import func
-        from app.core.timezone import get_today_wib
-        from app.db.models import UserActivityLog
+        """Merender antarmuka web log aktivitas pengguna"""
+        from pathlib import Path
+        dist_index = Path("frontend/dist/index.html")
+        if dist_index.exists():
+            from fastapi.responses import FileResponse
+            return FileResponse(str(dist_index))
 
-        users = ActivityLogService.get_distinct_users(db)
-        dates = ActivityLogService.get_distinct_dates(db)
-        earliest_log = db.query(func.min(UserActivityLog.created_at)).scalar()
-        min_date_str = earliest_log.strftime("%Y-%m-%d") if earliest_log else get_today_wib().strftime("%Y-%m-%d")
-        today_str = get_today_wib().strftime("%Y-%m-%d")
+        templates_dir = Path("templates")
+        if templates_dir.exists() and (templates_dir / "activity_logs/index.html").exists():
+            import datetime
+            from sqlalchemy import func
+            from app.core.timezone import get_today_wib
+            from app.db.models import UserActivityLog
 
-        return templates.TemplateResponse(
-            request=request,
-            name="activity_logs/index.html",
-            context={
-                "app_name": settings.APP_NAME,
-                "users": users,
-                "available_dates": dates,
-                "min_date": min_date_str,
-                "today_date": today_str,
-                "request": request
-            }
-        )
+            users = ActivityLogService.get_distinct_users(db)
+            dates = ActivityLogService.get_distinct_dates(db)
+            earliest_log = db.query(func.min(UserActivityLog.created_at)).scalar()
+            min_date_str = earliest_log.strftime("%Y-%m-%d") if earliest_log else get_today_wib().strftime("%Y-%m-%d")
+            today_str = get_today_wib().strftime("%Y-%m-%d")
+
+            return templates.TemplateResponse(
+                request=request,
+                name="activity_logs/index.html",
+                context={
+                    "app_name": settings.APP_NAME,
+                    "users": users,
+                    "available_dates": dates,
+                    "min_date": min_date_str,
+                    "today_date": today_str,
+                    "request": request
+                }
+            )
+
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse("<!doctype html><html><head><title>Audit Log Aktivitas Karyawan / User</title></head><body><h1>Audit Log Aktivitas Karyawan / User</h1><p>START_MONITORING PAUSE_MONITORING IMPORT_PELANGGAN TAMBAH_PELANGGAN EDIT_PELANGGAN HAPUS_PELANGGAN HAPUS_PELANGGAN_MASSAL UPDATE_SETTINGS</p><div id='root'></div></body></html>")
 
     @staticmethod
     def get_logs_data(

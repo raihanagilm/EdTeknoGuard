@@ -14,15 +14,26 @@ class SystemSettingsController:
     @staticmethod
     def render_settings_page(request: Request, db: Session):
         cfg = SystemSettingsService.get_settings(db)
-        return templates.TemplateResponse(
-            request=request,
-            name="settings/index.html",
-            context={
-                "app_name": settings.APP_NAME,
-                "config": cfg,
-                "request": request
-            }
-        )
+        from pathlib import Path
+        dist_index = Path("frontend/dist/index.html")
+        if dist_index.exists():
+            from fastapi.responses import FileResponse
+            return FileResponse(str(dist_index))
+
+        templates_dir = Path("templates")
+        if templates_dir.exists() and (templates_dir / "settings/index.html").exists():
+            return templates.TemplateResponse(
+                request=request,
+                name="settings/index.html",
+                context={
+                    "app_name": settings.APP_NAME,
+                    "config": cfg,
+                    "request": request
+                }
+            )
+
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse("<!doctype html><html><head><title>Pengaturan Monitoring</title></head><body><h1>Pengaturan Monitoring</h1><div id='root'></div></body></html>")
 
     @staticmethod
     def get_settings(db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:

@@ -18,16 +18,27 @@ class LogsMgmtController:
             db=db, page=1, limit=50, kantor=active_kantor, allowed_kantor=allowed_kantor
         )
         min_date = LogsMgmtService.get_min_date(db)
-        return templates.TemplateResponse(
-            request=request,
-            name="logs/index.html",
-            context={
-                "app_name": settings.APP_NAME,
-                "summary": summary,
-                "min_date": min_date,
-                "request": request
-            }
-        )
+        from pathlib import Path
+        dist_index = Path("frontend/dist/index.html")
+        if dist_index.exists():
+            from fastapi.responses import FileResponse
+            return FileResponse(str(dist_index))
+
+        templates_dir = Path("templates")
+        if templates_dir.exists() and (templates_dir / "logs/index.html").exists():
+            return templates.TemplateResponse(
+                request=request,
+                name="logs/index.html",
+                context={
+                    "app_name": settings.APP_NAME,
+                    "summary": summary,
+                    "min_date": min_date,
+                    "request": request
+                }
+            )
+
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse("<!doctype html><html><head><title>Riwayat Log Performa ONT</title></head><body><h1>Riwayat Log Performa ONT</h1><div id='root'></div></body></html>")
 
     @staticmethod
     def list_logs(

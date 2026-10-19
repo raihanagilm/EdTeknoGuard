@@ -58,6 +58,13 @@ def download_customers_template_excel(
     """Unduh format contoh berkas Excel data pelanggan"""
     return CustomerController.download_template_excel()
 
+@router.get("/api/customers/template-csv")
+def download_customers_template_csv(
+    user: dict = Depends(require_admin)
+):
+    """Unduh format contoh berkas CSV data pelanggan"""
+    return CustomerController.download_template_csv()
+
 @router.get("/api/customers/export-excel")
 def export_customers_excel(
     request: Request,

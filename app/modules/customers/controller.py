@@ -19,18 +19,29 @@ class CustomerController:
         pops = CustomerService.get_pop_list(db, kantor=active_kantor, allowed_kantor=allowed_kantor)
         stats = CustomerService.get_customer_stats(db, kantor=active_kantor, allowed_kantor=allowed_kantor)
         min_date = CustomerService.get_min_date(db)
-        return templates.TemplateResponse(
-            request=request,
-            name="customers/index.html",
-            context={
-                "app_name": settings.APP_NAME,
-                "pops": pops,
-                "stats": stats,
-                "min_date": min_date,
-                "warning_threshold": settings.WARNING_THRESHOLD_DBM,
-                "request": request
-            }
-        )
+        from pathlib import Path
+        dist_index = Path("frontend/dist/index.html")
+        if dist_index.exists():
+            from fastapi.responses import FileResponse
+            return FileResponse(str(dist_index))
+
+        templates_dir = Path("templates")
+        if templates_dir.exists() and (templates_dir / "customers/index.html").exists():
+            return templates.TemplateResponse(
+                request=request,
+                name="customers/index.html",
+                context={
+                    "app_name": settings.APP_NAME,
+                    "pops": pops,
+                    "stats": stats,
+                    "min_date": min_date,
+                    "warning_threshold": settings.WARNING_THRESHOLD_DBM,
+                    "request": request
+                }
+            )
+
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse("<!doctype html><html><head><title>Manajemen Pelanggan</title></head><body><h1>Manajemen Pelanggan</h1><div id='root'></div></body></html>")
 
     @staticmethod
     def list_customers(
@@ -397,6 +408,15 @@ class CustomerController:
             content=content,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers={"Content-Disposition": "attachment; filename=template_import_pelanggan.xlsx"}
+        )
+
+    @staticmethod
+    def download_template_csv() -> Response:
+        content = CustomerService.generate_csv_template()
+        return Response(
+            content=content,
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": "attachment; filename=template_import_pelanggan.csv"}
         )
 
     @staticmethod

@@ -11,7 +11,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, FileResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import settings
@@ -151,8 +151,12 @@ async def switch_kantor(request: Request, kantor: str = "cabang"):
         
     return response
 
-# Mount folder static
+# Mount folder static dan frontend dist (jika telah dibuild)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+frontend_dist = Path("frontend/dist")
+if frontend_dist.exists() and (frontend_dist / "assets").exists():
+    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="frontend_assets")
 
 # Registrasi Router
 app.include_router(auth_router)
