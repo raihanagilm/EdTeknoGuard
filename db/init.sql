@@ -255,29 +255,56 @@ CREATE TABLE IF NOT EXISTS `kuota_pelanggan` (
 -- ------------------------------------------------------------------------------
 
 -- Master Data Kantor
-INSERT IGNORE INTO `kantors` (`id`, `kode`, `nama`, `alamat`) VALUES
-(1, 'pusat', 'Pusat', 'Kantor Pusat ISP TeknoIndonet'),
-(2, 'cabang', 'Cabang', 'Kantor Cabang Operasional Utama'),
-(3, 'banyumas', 'Banyumas', 'Kantor Wilayah Operasional Banyumas');
+INSERT IGNORE INTO `kantors` (`id`, `kode`, `nama`, `is_active`, `alamat`, `mikrotik_host`, `mikrotik_port`, `mikrotik_user`, `mikrotik_pass`, `mikrotik_sync_interval`) VALUES
+(1, 'pusat', 'Kantor Pusat', 1, 'Kantor Pusat ISP TeknoIndonet', NULL, NULL, NULL, NULL, 3),
+(2, 'banyumas', 'Kantor Banyumas', 1, 'Kantor Wilayah Operasional Banyumas', '192.168.202.50', 8095, 'tekno', 'tekno2025', 3);
 
 -- Master Data Paket Layanan
 INSERT IGNORE INTO `pakets` (`nama`, `kecepatan_mbps`, `harga`, `deskripsi`) VALUES
-('10MB CAB', 10, 150000.00, 'Paket Hemat 10 Mbps Cabang'),
-('20MB CAB', 20, 200000.00, 'Paket Reguler 20 Mbps Cabang'),
-('30MB CAB', 30, 250000.00, 'Paket Bisnis 30 Mbps Cabang'),
-('50MB VIP', 50, 400000.00, 'Paket Dedicated Super Cepat 50 Mbps');
+('Paket 10 Mbps', 10, 150000.00, 'Paket Hemat 10 Mbps'),
+('Paket 20 Mbps', 20, 200000.00, 'Paket Reguler 20 Mbps'),
+('Paket 30 Mbps', 30, 250000.00, 'Paket Bisnis 30 Mbps'),
+('Paket 50 Mbps', 50, 400000.00, 'Paket Super 50 Mbps');
 
--- Konfigurasi Parameter Sistem Default
-INSERT IGNORE INTO `system_settings` (`key_name`, `value_text`) VALUES
-('scheduler_status', 'RUNNING'),
-('polling_interval_minutes', '5'),
-('warning_threshold_dbm', '-26.0'),
-('critical_threshold_dbm', '-27.0'),
-('telegram_chat_ids', '1320037657'),
-('default_modem_credentials', '[{"username":"admin","password":"admin"},{"username":"tekno","password":"tekno2025"},{"username":"admin","password":"tekno2024"},{"username":"user","password":"user123"}]');
+-- Konfigurasi Parameter Sistem Default (Global & Per-Kantor)
+INSERT IGNORE INTO `system_settings` (`kantor_kode`, `key_name`, `value_text`) VALUES
+-- Pengaturan Global
+(NULL, 'polling_interval_minutes', '20'),
+(NULL, 'warning_threshold_dbm', '-26.0'),
+(NULL, 'critical_threshold_dbm', '-27.0'),
+(NULL, 'scheduler_status', 'RUNNING'),
+(NULL, 'app_vibration_enabled', 'true'),
+(NULL, 'alert_waiting_interval_minutes', '5'),
+(NULL, 'notification_alert_interval_hours', '1.0'),
+(NULL, 'alert_debounce_minutes', '60'),
+(NULL, 'night_mode_enabled', 'false'),
+(NULL, 'night_mode_start', '22:00'),
+(NULL, 'night_mode_end', '06:00'),
+(NULL, 'mikrotik_host', '192.168.202.50'),
+(NULL, 'mikrotik_port', '8728'),
+(NULL, 'mikrotik_user', 'tekno'),
+(NULL, 'mikrotik_password', ''),
+(NULL, 'mikrotik_kantor', 'banyumas'),
+(NULL, 'mikrotik_auto_sync', 'true'),
+-- Pengaturan Kantor Pusat
+('pusat', 'scheduler_status', 'RUNNING'),
+('pusat', 'polling_interval_minutes', '20'),
+('pusat', 'warning_threshold_dbm', '-26.0'),
+('pusat', 'critical_threshold_dbm', '-27.0'),
+('pusat', 'default_modem_user', 'admin'),
+('pusat', 'default_modem_pass', 'tekno2024'),
+('pusat', 'default_modem_credentials', '[{"username":"admin","password":"tekno2024"},{"username":"admin","password":"admin"},{"username":"tekno","password":"tekno2025"}]'),
+-- Pengaturan Kantor Banyumas
+('banyumas', 'scheduler_status', 'RUNNING'),
+('banyumas', 'polling_interval_minutes', '30'),
+('banyumas', 'warning_threshold_dbm', '-26.0'),
+('banyumas', 'critical_threshold_dbm', '-27.0'),
+('banyumas', 'default_modem_user', 'admin'),
+('banyumas', 'default_modem_pass', 'tekno2024'),
+('banyumas', 'default_modem_credentials', '[{"username":"admin","password":"tekno2024"},{"username":"admin","password":"admin"},{"username":"admin","password":"tekno2025"}]');
 
--- Akun Super Admin Awal (Password: agiltampan -> bcrypt)
+-- Akun Super Admin Awal (Password: agiltampan -> valid bcrypt)
 INSERT IGNORE INTO `users` (`id`, `username`, `hashed_password`, `nama_karyawan`, `no_wa`, `role`, `allowed_kantor`, `is_active`) VALUES
-(1, 'admin', '$2b$12$K89eUvV8Q.v7oN0z2xG5vO0e9E3.bM8lY90R9c8C/kM1G.Oa8M8e6', 'Super Administrator NOC', '081234567890', 'super admin', '["cabang","pusat","banyumas"]', 1);
+(1, 'admin', '$2b$12$sq7W/LRpeRXV/W/.1qrlZu3G3DSekP1eo6rSE5Qhp.OZ3OaYuEjPe', 'Administrator NOC', '081234567890', 'super admin', '["banyumas","pusat"]', 1);
 
 SET FOREIGN_KEY_CHECKS = 1;
