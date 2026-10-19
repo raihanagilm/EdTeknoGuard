@@ -132,7 +132,7 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
             colorScheme: 'emerald',
             isActive: filterStatus === 'NORMAL',
             onClick: () => { setFilterStatus('NORMAL'); setPage(1); },
-            subLabel: '> -26 dBm'
+            subLabel: `> ${warnThreshold !== undefined ? Number(warnThreshold).toFixed(1) : '-26.0'} dBm`
           },
           {
             label: 'Waspada',
@@ -140,7 +140,7 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
             colorScheme: 'amber',
             isActive: filterStatus === 'WARNING',
             onClick: () => { setFilterStatus('WARNING'); setPage(1); },
-            subLabel: '-26~-27 dBm'
+            subLabel: `≤ ${warnThreshold !== undefined ? Number(warnThreshold).toFixed(1) : '-26.0'} dBm`
           },
           {
             label: 'Kritis',
@@ -148,7 +148,7 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
             colorScheme: 'rose',
             isActive: filterStatus === 'CRITICAL',
             onClick: () => { setFilterStatus('CRITICAL'); setPage(1); },
-            subLabel: '≤ -27 dBm'
+            subLabel: `≤ ${critThreshold !== undefined ? Number(critThreshold).toFixed(1) : '-27.0'} dBm`
           },
           {
             label: 'LOS',

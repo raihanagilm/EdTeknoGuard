@@ -261,11 +261,11 @@ class MonitoringScheduler:
 
             self._scheduler.add_job(**job_kwargs)
 
-            # Job background mandiri: Sinkronisasi MikroTik RouterOS per kantor (tiap 3 menit, independen)
+            # Job background mandiri: Evaluasi sinkronisasi MikroTik RouterOS per kantor (evaluasi tiap 1 menit sesuai setting interval kantor)
             self._scheduler.add_job(
                 self.mikrotik_sync_job_wrapper,
                 "interval",
-                minutes=3,
+                minutes=1,
                 id="mikrotik_auto_sync_job",
                 replace_existing=True,
                 next_run_time=datetime.now() + timedelta(seconds=5)
@@ -445,8 +445,17 @@ class MonitoringScheduler:
 
     def get_status(self, kantor: Optional[str] = None) -> Dict[str, Any]:
         k = (kantor or "all").lower().strip()
+        is_office_active = True
         db = SessionLocal()
         try:
+            # Cek status aktif/nonaktif kantor dari tabel kantors
+            if k != "all":
+                from sqlalchemy import func
+                from app.db.models import Kantor
+                k_obj = db.query(Kantor).filter(func.lower(Kantor.kode) == k).first()
+                if k_obj is not None:
+                    is_office_active = bool(k_obj.is_active)
+
             # Baca status per kantor jika ada, jika tidak ada fallback ke global
             status = self.get_setting_from_db(db, "scheduler_status", "RUNNING", kantor=k if k != "all" else None)
             interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES), kantor=k if k != "all" else None)
@@ -515,6 +524,7 @@ class MonitoringScheduler:
 
         return {
             "status": status,
+            "is_office_active": is_office_active,
             "interval_minutes": interval,
             "last_scan_time": last_scan,
             "next_run_time": next_run_time_str,
@@ -547,7 +557,7 @@ class MonitoringScheduler:
         """Dijalankan tiap interval pemantauan oleh APScheduler untuk memindai redaman optik ONT per kantor secara paralel."""
         db = SessionLocal()
         try:
-            kantors = db.query(Kantor).all()
+            kantors = db.query(Kantor).filter(Kantor.is_active == True).all()
             kantor_kodes = [k.kode.lower() for k in kantors]
         except Exception as e:
             logger.error(f"[SCHEDULER] Gagal mengambil daftar kantor: {e}")
@@ -595,6 +605,19 @@ class MonitoringScheduler:
         
         db = SessionLocal()
         try:
+            # Cegah pemindaian jika kantor dalam status nonaktif
+            if k != "all":
+                from sqlalchemy import func
+                from app.db.models import Kantor
+                k_obj = db.query(Kantor).filter(func.lower(Kantor.kode) == k).first()
+                if k_obj is not None and not k_obj.is_active:
+                    logger.warning(f"[SCAN] Pemindaian dibatalkan: Kantor '{k.upper()}' dalam status NONAKTIF.")
+                    return {
+                        "status": "error",
+                        "message": f"Pemindaian dibatalkan: Kantor '{k_obj.nama}' dalam status Nonaktif.",
+                        "is_office_active": False
+                    }
+
             query = db.query(Pelanggan).filter(
                 Pelanggan.is_active == True,
                 Pelanggan.is_monitored == True
@@ -620,9 +643,11 @@ class MonitoringScheduler:
             los_by_pop = {}
             los_pending_alerts = []
 
-            # Ambil kredensial modem ONT dengan prioritas spesifik kantor
-            default_user = self.get_setting_from_db(db, "default_modem_user", "admin", kantor=k if k != "all" else None)
-            default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024", kantor=k if k != "all" else None)
+            # Ambil threshold dan kredensial modem ONT dengan prioritas spesifik kantor
+            eff_warn_th = float(self.get_setting_from_db(db, "warning_threshold_dbm", str(settings.WARNING_THRESHOLD_DBM), kantor=k if k != "all" else None))
+            eff_crit_th = float(self.get_setting_from_db(db, "critical_threshold_dbm", str(settings.CRITICAL_THRESHOLD_DBM), kantor=k if k != "all" else None))
+            default_user = self.get_setting_from_db(db, "default_modem_user", None, kantor=k if k != "all" else None)
+            default_pass = self.get_setting_from_db(db, "default_modem_pass", None, kantor=k if k != "all" else None)
             raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=k if k != "all" else None)
 
             default_creds_list = []
@@ -673,7 +698,9 @@ class MonitoringScheduler:
                     default_user=default_user,
                     default_pass=default_pass,
                     customer_name=cust.nama,
-                    default_credentials=default_creds_list
+                    default_credentials=default_creds_list,
+                    warn_threshold=eff_warn_th,
+                    crit_threshold=eff_crit_th
                 )
 
                 # Evaluasi hasil scraping
@@ -837,8 +864,29 @@ class MonitoringScheduler:
                 return None
 
             cust_kantor = cust.kantor.lower().strip() if cust.kantor else None
-            default_user = self.get_setting_from_db(db, "default_modem_user", "admin", kantor=cust_kantor)
-            default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024", kantor=cust_kantor)
+
+            # Cek apakah kantor pelanggan sedang nonaktif
+            if cust_kantor:
+                from sqlalchemy import func
+                from app.db.models import Kantor
+                k_obj = db.query(Kantor).filter(func.lower(Kantor.kode) == cust_kantor).first()
+                if k_obj is not None and not k_obj.is_active:
+                    return {
+                        "id_pelanggan": cust.id_pelanggan,
+                        "nama": cust.nama,
+                        "status_koneksi": "NONAKTIF",
+                        "status": "NONAKTIF",
+                        "rx_power": None,
+                        "suhu_ont": None,
+                        "mac_address": cust.mac_address,
+                        "status_kredensial": cust.status_kredensial,
+                        "waktu_cek": get_now_wib().strftime("%Y-%m-%d %H:%M:%S"),
+                        "message": f"Uji sinyal ditolak: Kantor '{k_obj.nama}' sedang Nonaktif.",
+                        "is_office_active": False
+                    }
+
+            default_user = self.get_setting_from_db(db, "default_modem_user", None, kantor=cust_kantor)
+            default_pass = self.get_setting_from_db(db, "default_modem_pass", None, kantor=cust_kantor)
             raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=cust_kantor)
             default_creds_list = []
             try:
@@ -849,6 +897,8 @@ class MonitoringScheduler:
             except Exception:
                 default_creds_list = []
 
+            eff_warn_th = float(self.get_setting_from_db(db, "warning_threshold_dbm", str(settings.WARNING_THRESHOLD_DBM), kantor=cust_kantor))
+            eff_crit_th = float(self.get_setting_from_db(db, "critical_threshold_dbm", str(settings.CRITICAL_THRESHOLD_DBM), kantor=cust_kantor))
             target_scrape_ip = cust.ip_ont or cust.ip_router
             scrape_res = ONTScraperService.scrape_ont(
                 ip=target_scrape_ip,
@@ -857,7 +907,9 @@ class MonitoringScheduler:
                 default_user=default_user,
                 default_pass=default_pass,
                 customer_name=cust.nama,
-                default_credentials=default_creds_list
+                default_credentials=default_creds_list,
+                warn_threshold=eff_warn_th,
+                crit_threshold=eff_crit_th
             )
 
             if scrape_res["success"] and scrape_res["rx_power"] is not None:

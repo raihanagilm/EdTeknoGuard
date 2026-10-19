@@ -50,11 +50,14 @@ async def get_kantors_json(request: Request, db: Session = Depends(get_db)):
             "id": k.id,
             "kode": k.kode,
             "nama": k.nama,
+            "is_active": k.is_active if k.is_active is not None else True,
             "alamat": k.alamat or "",
             "mikrotik_host": k.mikrotik_host or "",
             "mikrotik_port": k.mikrotik_port or "",
             "mikrotik_user": k.mikrotik_user or "",
-            "mikrotik_pass": k.mikrotik_pass or ""
+            "mikrotik_pass": k.mikrotik_pass or "",
+            "mikrotik_sync_interval": k.mikrotik_sync_interval if k.mikrotik_sync_interval is not None else 3,
+            "last_mikrotik_sync": k.last_mikrotik_sync.strftime("%Y-%m-%d %H:%M:%S") if k.last_mikrotik_sync else None
         } for k in kantors]
     }
 
@@ -66,11 +69,13 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
         data = await request.json()
         nama = data.get("nama", "").strip()
         kode = data.get("kode", "").lower().strip()
+        is_active = data.get("is_active", True)
         alamat = data.get("alamat", "").strip()
         mikrotik_host = data.get("mikrotik_host", "").strip()
         mikrotik_port = data.get("mikrotik_port")
         mikrotik_user = data.get("mikrotik_user", "").strip()
         mikrotik_pass = data.get("mikrotik_pass", "").strip()
+        sync_interval = data.get("mikrotik_sync_interval", 3)
     except Exception:
         return {"status": "error", "message": "Payload JSON tidak valid."}
 
@@ -96,14 +101,21 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
         except ValueError:
             parsed_port = None
 
+    try:
+        parsed_interval = max(1, int(sync_interval))
+    except (ValueError, TypeError):
+        parsed_interval = 3
+
     new_kantor = Kantor(
         kode=kode,
         nama=nama,
+        is_active=bool(is_active),
         alamat=alamat if alamat else None,
         mikrotik_host=mikrotik_host if mikrotik_host else None,
         mikrotik_port=parsed_port,
         mikrotik_user=mikrotik_user if mikrotik_user else None,
-        mikrotik_pass=mikrotik_pass if mikrotik_pass else None
+        mikrotik_pass=mikrotik_pass if mikrotik_pass else None,
+        mikrotik_sync_interval=parsed_interval
     )
     db.add(new_kantor)
     db.commit()
@@ -115,7 +127,7 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
         action="ADD_KANTOR",
         ip_address=request.client.host if request.client else "unknown",
         status="SUCCESS",
-        keterangan=f"Berhasil menambahkan kantor baru: {nama} ({kode}) dengan setting MikroTik {mikrotik_host or '-'}"
+        keterangan=f"Berhasil menambahkan kantor baru: {nama} ({kode}) dengan setting MikroTik {mikrotik_host or '-'} (Interval {parsed_interval}m)"
     )
 
     all_k = get_all_kantor_codes(db=db)
@@ -126,11 +138,14 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
             "id": new_kantor.id,
             "kode": new_kantor.kode,
             "nama": new_kantor.nama,
+            "is_active": new_kantor.is_active,
             "alamat": new_kantor.alamat or "",
             "mikrotik_host": new_kantor.mikrotik_host or "",
             "mikrotik_port": new_kantor.mikrotik_port or "",
             "mikrotik_user": new_kantor.mikrotik_user or "",
-            "mikrotik_pass": new_kantor.mikrotik_pass or ""
+            "mikrotik_pass": new_kantor.mikrotik_pass or "",
+            "mikrotik_sync_interval": new_kantor.mikrotik_sync_interval,
+            "last_mikrotik_sync": new_kantor.last_mikrotik_sync.strftime("%Y-%m-%d %H:%M:%S") if new_kantor.last_mikrotik_sync else None
         },
         "all_kantor": all_k
     }
@@ -146,11 +161,13 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
     try:
         data = await request.json()
         nama = data.get("nama", "").strip()
+        is_active = data.get("is_active")
         alamat = data.get("alamat", "").strip()
         mikrotik_host = data.get("mikrotik_host", "").strip()
         mikrotik_port = data.get("mikrotik_port")
         mikrotik_user = data.get("mikrotik_user", "").strip()
         mikrotik_pass = data.get("mikrotik_pass", "").strip()
+        sync_interval = data.get("mikrotik_sync_interval")
     except Exception:
         return {"status": "error", "message": "Payload JSON tidak valid."}
 
@@ -158,6 +175,8 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
         return {"status": "error", "message": "Nama kantor wajib diisi."}
 
     kantor.nama = nama
+    if is_active is not None:
+        kantor.is_active = bool(is_active)
     kantor.alamat = alamat if alamat else None
 
     # Update mikrotik settings
@@ -174,11 +193,17 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
     if mikrotik_pass:
         kantor.mikrotik_pass = mikrotik_pass
 
+    if sync_interval is not None:
+        try:
+            kantor.mikrotik_sync_interval = max(1, int(sync_interval))
+        except (ValueError, TypeError):
+            pass
+
     db.commit()
 
-    # Jika konfigurasi host & user MikroTik diisi lengkap, langsung jalankan penarikan data secara otomatis
+    # Jika konfigurasi host & user MikroTik diisi lengkap dan kantor AKTIF, langsung jalankan penarikan data secara otomatis
     sync_msg = ""
-    if kantor.mikrotik_host and kantor.mikrotik_user:
+    if kantor.is_active and kantor.mikrotik_host and kantor.mikrotik_user:
         try:
             from app.services.mikrotik_service import MikroTikSyncService
             params = {
@@ -213,11 +238,14 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
             "id": kantor.id,
             "kode": kantor.kode,
             "nama": kantor.nama,
+            "is_active": kantor.is_active,
             "alamat": kantor.alamat or "",
             "mikrotik_host": kantor.mikrotik_host or "",
             "mikrotik_port": kantor.mikrotik_port or "",
             "mikrotik_user": kantor.mikrotik_user or "",
-            "mikrotik_pass": kantor.mikrotik_pass or ""
+            "mikrotik_pass": kantor.mikrotik_pass or "",
+            "mikrotik_sync_interval": kantor.mikrotik_sync_interval,
+            "last_mikrotik_sync": kantor.last_mikrotik_sync.strftime("%Y-%m-%d %H:%M:%S") if kantor.last_mikrotik_sync else None
         },
         "all_kantor": all_k
     }
@@ -264,6 +292,12 @@ async def sync_kantor_mikrotik_json(request: Request, kantor_id: int, db: Sessio
     if not kantor:
         return {"status": "error", "message": "Kantor tidak ditemukan."}
 
+    if not kantor.is_active:
+        return {
+            "status": "error",
+            "message": f"Kantor '{kantor.nama}' dalam status Nonaktif. Aktifkan kantor terlebih dahulu sebelum menyinkronkan router MikroTik."
+        }
+
     if not kantor.mikrotik_host or not kantor.mikrotik_user:
         return {
             "status": "error",
@@ -282,6 +316,9 @@ async def sync_kantor_mikrotik_json(request: Request, kantor_id: int, db: Sessio
     try:
         res = MikroTikSyncService.sync_customers_from_mikrotik(db, params)
         if res.get("success"):
+            from app.core.timezone import get_now_wib
+            kantor.last_mikrotik_sync = get_now_wib()
+            db.commit()
             ActivityLogService.log_activity(
                 db=db,
                 username=user_session.get("user"),

@@ -19,11 +19,14 @@ CREATE TABLE IF NOT EXISTS `kantors` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `kode` VARCHAR(50) NOT NULL UNIQUE,
   `nama` VARCHAR(100) NOT NULL,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   `alamat` TEXT NULL,
   `mikrotik_host` VARCHAR(100) NULL,
   `mikrotik_port` INT NULL,
   `mikrotik_user` VARCHAR(100) NULL,
   `mikrotik_pass` VARCHAR(255) NULL,
+  `mikrotik_sync_interval` INT NOT NULL DEFAULT 3,
+  `last_mikrotik_sync` DATETIME NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_kantor_kode` (`kode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

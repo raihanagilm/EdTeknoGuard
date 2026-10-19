@@ -76,6 +76,7 @@ export function ModulBeranda({
 }) {
   // State Engine & Kontrol
   const [engineStatus, setEngineStatus] = useState('RUNNING')
+  const [isOfficeActive, setIsOfficeActive] = useState(true)
   const [lastScanTime, setLastScanTime] = useState('-')
   const [intervalMinutes, setIntervalMinutes] = useState(10)
   const [isScanning, setIsScanning] = useState(false)
@@ -157,6 +158,9 @@ export function ModulBeranda({
         const data = res.data
         const wasScanning = isScanning
         setEngineStatus(data.status || 'RUNNING')
+        if (data.is_office_active !== undefined) {
+          setIsOfficeActive(Boolean(data.is_office_active))
+        }
         setLastScanTime(data.last_scan_time || '-')
         setIsScanning(Boolean(data.is_scanning))
 
@@ -682,7 +686,13 @@ export function ModulBeranda({
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <span className="text-xs sm:text-sm font-black text-slate-900 font-mono leading-tight">
                   {isNetworkError ? (
-                    <span className="text-rose-600">Gagal Jaringan Modem ONT</span>
+                    <span className="text-rose-600">
+                      Pemantauan: Gagal Terhubung
+                    </span>
+                  ) : !isOfficeActive ? (
+                    <span className="text-slate-500">
+                      Kantor Nonaktif: Pemantauan Mati
+                    </span>
                   ) : engineStatus === 'RUNNING' ? (
                     <span>
                       Pemantauan Otomatis: Aktif ({intervalMinutes}m)
@@ -696,12 +706,14 @@ export function ModulBeranda({
                   className={`px-1.5 py-0.5 rounded text-[11px] font-black font-mono uppercase tracking-wide border ${
                     isNetworkError
                       ? 'bg-rose-50 text-rose-800 border-rose-200'
+                      : !isOfficeActive
+                      ? 'bg-slate-100 text-slate-600 border-slate-300'
                       : engineStatus === 'RUNNING'
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                       : 'bg-amber-50 text-amber-800 border-amber-200'
                   }`}
                 >
-                  {isNetworkError ? 'GAGAL JARINGAN' : engineStatus === 'RUNNING' ? 'BERJALAN' : 'DIJEDA'}
+                  {isNetworkError ? 'GAGAL JARINGAN' : !isOfficeActive ? 'NONAKTIF' : engineStatus === 'RUNNING' ? 'BERJALAN' : 'DIJEDA'}
                 </span>
               </div>
 
@@ -713,6 +725,8 @@ export function ModulBeranda({
                   className={`text-[11px] font-bold ${
                     isNetworkError
                       ? 'text-rose-600'
+                      : !isOfficeActive
+                      ? 'text-slate-500'
                       : engineStatus === 'RUNNING'
                       ? 'text-emerald-800'
                       : 'text-amber-800'
@@ -720,6 +734,8 @@ export function ModulBeranda({
                 >
                   {isNetworkError
                     ? 'Gateway tidak merespons'
+                    : !isOfficeActive
+                    ? 'Kantor dinonaktifkan (pemantauan mati)'
                     : engineStatus === 'RUNNING'
                     ? `Otomatis tiap ${intervalMinutes}m`
                     : 'Jadwal dihentikan'}
@@ -743,12 +759,19 @@ export function ModulBeranda({
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={handleStartScan}
-                    disabled={isToggling || (isScanning && isCurrentOfficeScan)}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px] cursor-pointer disabled:opacity-50"
+                    disabled={isToggling || (isScanning && isCurrentOfficeScan) || !isOfficeActive}
+                    title={!isOfficeActive ? 'Kantor dalam status nonaktif. Aktifkan kantor di menu Kantor Cabang untuk memindai.' : 'Mulai pemindaian sinyal redaman'}
+                    className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px] ${
+                      !isOfficeActive
+                        ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed opacity-60'
+                        : 'bg-cyan-700 hover:bg-cyan-800 text-white cursor-pointer disabled:opacity-50'
+                    }`}
                   >
-                    <Play className="w-4 h-4 fill-white" />
+                    <Play className={`w-4 h-4 ${!isOfficeActive ? 'fill-slate-400 text-slate-400' : 'fill-white'}`} />
                     <span>
-                      {activeOffice && activeOffice !== 'all'
+                      {!isOfficeActive
+                        ? 'Kantor Nonaktif'
+                        : activeOffice && activeOffice !== 'all'
                         ? `Pindai ${
                             activeOffice === 'banyumas'
                               ? 'Banyumas'
@@ -763,10 +786,16 @@ export function ModulBeranda({
                   {isSuperAdmin && (
                     <button
                       onClick={handleToggleScheduler}
-                      disabled={isToggling}
-                      className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-white hover:bg-cyan-50/60 text-slate-700 font-mono text-xs font-bold border border-sky-200 transition flex items-center justify-center gap-1.5 min-h-[38px]"
+                      disabled={isToggling || !isOfficeActive}
+                      className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl font-mono text-xs font-bold border transition flex items-center justify-center gap-1.5 min-h-[38px] ${
+                        !isOfficeActive
+                          ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+                          : 'bg-white hover:bg-cyan-50/60 text-slate-700 border-sky-200 cursor-pointer'
+                      }`}
                       title={
-                        engineStatus === 'RUNNING'
+                        !isOfficeActive
+                          ? 'Kantor nonaktif. Aktifkan kantor terlebih dahulu.'
+                          : engineStatus === 'RUNNING'
                           ? 'Klik untuk menjeda jadwal pemindaian otomatis (Hanya Super Admin)'
                           : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis (Hanya Super Admin)'
                       }

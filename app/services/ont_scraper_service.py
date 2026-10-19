@@ -366,12 +366,14 @@ class ONTScraperService:
     def scrape_ont(
         cls,
         ip: str,
-        customer_user: Optional[str],
-        customer_pass: Optional[str],
-        default_user: str = "admin",
-        default_pass: str = "tekno2024",
-        customer_name: str = "Pelanggan",
-        default_credentials: Optional[List[Tuple[str, str]]] = None
+        customer_user: Optional[str] = None,
+        customer_pass: Optional[str] = None,
+        default_user: Optional[str] = None,
+        default_pass: Optional[str] = None,
+        customer_name: Optional[str] = None,
+        default_credentials: Optional[List[Tuple[str, str]]] = None,
+        warn_threshold: Optional[float] = None,
+        crit_threshold: Optional[float] = None
     ) -> Dict[str, Any]:
         """
         Melakukan scraping lengkap ke satu perangkat modem ONT.
@@ -436,18 +438,32 @@ class ONTScraperService:
         if c_u and c_p:
             credentials_to_try.append((c_u, c_p, "CUSTOMER"))
 
-        # Tambahkan multi default kredensial jika ada
+        # Tambahkan multi default kredensial jika ada dari database
         if default_credentials:
             for d_u, d_p in default_credentials:
                 d_u = (d_u or "").strip()
                 d_p = (d_p or "").strip()
                 if d_u and (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
                     credentials_to_try.append((d_u, d_p, "DEFAULT"))
-        else:
-            d_u = default_user.strip() if default_user else "admin"
-            d_p = default_pass.strip() if default_pass else "tekno2024"
-            if (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
+        elif default_user and default_pass:
+            d_u = default_user.strip()
+            d_p = default_pass.strip()
+            if d_u and (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
                 credentials_to_try.append((d_u, d_p, "DEFAULT"))
+
+        if not credentials_to_try:
+            print(f"[-] [NO_CREDENTIALS] ONT {host} ({customer_name or 'Pelanggan'}): Kredensial modem pelanggan belum ada dan kredensial default di database kosong.")
+            return {
+                "success": False,
+                "error_type": "NO_CREDENTIALS",
+                "message": "Kredensial modem belum ada. Silakan input kredensial pada data pelanggan atau atur kredensial default di Pengaturan Sistem.",
+                "status_kredensial": "INVALID",
+                "status_koneksi": "WARNING",
+                "rx_power": None,
+                "suhu_ont": None,
+                "uptime": None,
+                "latency_ms": None
+            }
 
         # Coba seluruh kredensial (kredensial pelanggan diikuti semua kredensial default dari pengaturan)
         authenticated = False
@@ -536,11 +552,13 @@ class ONTScraperService:
         suhu = opt_data.get("suhu_ont")
 
         # Tentukan status koneksi berdasarkan ambang batas
+        eff_crit = crit_threshold if crit_threshold is not None else settings.CRITICAL_THRESHOLD_DBM
+        eff_warn = warn_threshold if warn_threshold is not None else settings.WARNING_THRESHOLD_DBM
         if opt_data.get("is_los"):
             status_koneksi = "LOS"
-        elif rx <= settings.CRITICAL_THRESHOLD_DBM:
+        elif rx <= eff_crit:
             status_koneksi = "CRITICAL"
-        elif rx <= settings.WARNING_THRESHOLD_DBM:
+        elif rx <= eff_warn:
             status_koneksi = "WARNING"
         else:
             status_koneksi = "NORMAL"

@@ -47,6 +47,7 @@ import { ModalDetailPelanggan } from './ModalDetailPelanggan'
 
 export function ModulPelanggan({
   activeOffice = 'cabang',
+  isOfficeActive = true,
   warnThreshold,
   critThreshold,
   initialSearch = '',
@@ -415,7 +416,7 @@ export function ModulPelanggan({
             colorScheme: 'emerald',
             isActive: filterStatus === 'NORMAL',
             onClick: () => setFilterStatus('NORMAL'),
-            subLabel: '> -26 dBm'
+            subLabel: `> ${warnThreshold !== undefined ? Number(warnThreshold).toFixed(1) : '-26.0'} dBm`
           },
           {
             label: 'Waspada',
@@ -423,7 +424,7 @@ export function ModulPelanggan({
             colorScheme: 'amber',
             isActive: filterStatus === 'WARNING',
             onClick: () => setFilterStatus('WARNING'),
-            subLabel: '-26~-27 dBm'
+            subLabel: `≤ ${warnThreshold !== undefined ? Number(warnThreshold).toFixed(1) : '-26.0'} dBm`
           },
           {
             label: 'Kritis',
@@ -431,7 +432,7 @@ export function ModulPelanggan({
             colorScheme: 'rose',
             isActive: filterStatus === 'CRITICAL',
             onClick: () => setFilterStatus('CRITICAL'),
-            subLabel: '≤ -27 dBm'
+            subLabel: `≤ ${critThreshold !== undefined ? Number(critThreshold).toFixed(1) : '-27.0'} dBm`
           },
           {
             label: 'LOS',
@@ -469,12 +470,16 @@ export function ModulPelanggan({
             <div className="flex items-center gap-1.5 justify-end shrink-0">
               <button
                 onClick={handleSyncMikrotik}
-                disabled={mikrotikSyncing}
-                className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
-                title="Sinkronisasi Kuota & Traffic Real-Time dari Router MikroTik"
+                disabled={mikrotikSyncing || !isOfficeActive}
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] ${
+                  !isOfficeActive
+                    ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+                    : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-indigo-200 cursor-pointer'
+                }`}
+                title={!isOfficeActive ? 'Kantor dalam status nonaktif. Sinkronisasi MikroTik dimatikan.' : 'Sinkronisasi Kuota & Traffic Real-Time dari Router MikroTik'}
               >
-                <Activity className={`w-3.5 h-3.5 text-indigo-600 ${mikrotikSyncing ? 'animate-spin' : ''}`} />
-                <span>{mikrotikSyncing ? 'Syncing...' : 'Sync MikroTik'}</span>
+                <Activity className={`w-3.5 h-3.5 ${!isOfficeActive ? 'text-slate-400' : 'text-indigo-600'} ${mikrotikSyncing ? 'animate-spin' : ''}`} />
+                <span>{mikrotikSyncing ? 'Syncing...' : !isOfficeActive ? 'Sync Mati' : 'Sync MikroTik'}</span>
               </button>
 
               <button
@@ -778,11 +783,15 @@ export function ModulPelanggan({
                       <div className="flex items-center justify-end gap-1.5 relative">
                         <button
                           onClick={() => handleSingleProbe(cId)}
-                          disabled={probingId === cId}
-                          className="px-2.5 py-1 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 border border-cyan-200 rounded-lg text-[11px] font-bold transition shadow-2xs"
-                          title="Uji Sinyal Redaman Langsung"
+                          disabled={probingId === cId || !isOfficeActive}
+                          className={`px-2.5 py-1 border rounded-lg text-[11px] font-bold transition shadow-2xs ${
+                            !isOfficeActive
+                              ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+                              : 'bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 border-cyan-200 cursor-pointer'
+                          }`}
+                          title={!isOfficeActive ? 'Kantor nonaktif. Aktifkan kantor untuk menguji sinyal ONT.' : 'Uji Sinyal Redaman Langsung'}
                         >
-                          {probingId === cId ? 'Uji...' : 'Uji Sinyal'}
+                          {probingId === cId ? 'Uji...' : !isOfficeActive ? 'Nonaktif' : 'Uji Sinyal'}
                         </button>
 
                         {/* Menu Titik Tiga (Aksi Popover) */}

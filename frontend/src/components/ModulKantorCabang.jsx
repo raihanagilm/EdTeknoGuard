@@ -11,7 +11,10 @@ import {
   MapPin,
   X,
   Play,
-  MoreVertical
+  MoreVertical,
+  CheckCircle2,
+  XCircle,
+  Clock
 } from 'lucide-react';
 import { UsersService } from '../services/api';
 import { FilterContainer } from './CommonUI';
@@ -30,11 +33,14 @@ export function ModulKantorCabang() {
   const [currentKantorId, setCurrentKantorId] = useState(null);
   const [kantorNama, setKantorNama] = useState('');
   const [kantorKode, setKantorKode] = useState('');
+  const [kantorIsActive, setKantorIsActive] = useState(true);
   const [kantorAlamat, setKantorAlamat] = useState('');
   const [kantorMikrotikHost, setKantorMikrotikHost] = useState('');
   const [kantorMikrotikPort, setKantorMikrotikPort] = useState('');
   const [kantorMikrotikUser, setKantorMikrotikUser] = useState('');
   const [kantorMikrotikPass, setKantorMikrotikPass] = useState('');
+  const [kantorMikrotikSyncInterval, setKantorMikrotikSyncInterval] = useState('3');
+  const [kantorActiveTab, setKantorActiveTab] = useState('identitas'); // 'identitas' | 'mikrotik'
   const [kantorError, setKantorError] = useState('');
   const [kantorSubmitting, setKantorSubmitting] = useState(false);
 
@@ -70,11 +76,14 @@ export function ModulKantorCabang() {
     setCurrentKantorId(null);
     setKantorNama('');
     setKantorKode('');
+    setKantorIsActive(true);
     setKantorAlamat('');
     setKantorMikrotikHost('');
     setKantorMikrotikPort('');
     setKantorMikrotikUser('');
     setKantorMikrotikPass('');
+    setKantorMikrotikSyncInterval('3');
+    setKantorActiveTab('identitas');
     setKantorError('');
     setModalKantorOpen(true);
   };
@@ -84,11 +93,14 @@ export function ModulKantorCabang() {
     setCurrentKantorId(k.id);
     setKantorNama(k.nama || '');
     setKantorKode(k.kode || '');
+    setKantorIsActive(k.is_active !== undefined ? Boolean(k.is_active) : true);
     setKantorAlamat(k.alamat || '');
     setKantorMikrotikHost(k.mikrotik_host || '');
     setKantorMikrotikPort(k.mikrotik_port ? String(k.mikrotik_port) : '');
     setKantorMikrotikUser(k.mikrotik_user || '');
     setKantorMikrotikPass(k.mikrotik_pass || '');
+    setKantorMikrotikSyncInterval(k.mikrotik_sync_interval ? String(k.mikrotik_sync_interval) : '3');
+    setKantorActiveTab('identitas');
     setKantorError('');
     setModalKantorOpen(true);
   };
@@ -105,11 +117,13 @@ export function ModulKantorCabang() {
     try {
       const payload = {
         nama: kantorNama.trim(),
+        is_active: kantorIsActive,
         alamat: kantorAlamat.trim() || undefined,
         mikrotik_host: kantorMikrotikHost.trim() || undefined,
         mikrotik_port: kantorMikrotikPort.trim() ? parseInt(kantorMikrotikPort.trim(), 10) : undefined,
         mikrotik_user: kantorMikrotikUser.trim() || undefined,
-        mikrotik_pass: kantorMikrotikPass.trim() || undefined
+        mikrotik_pass: kantorMikrotikPass.trim() || undefined,
+        mikrotik_sync_interval: kantorMikrotikSyncInterval.trim() ? Math.max(1, parseInt(kantorMikrotikSyncInterval.trim(), 10)) : 3
       };
 
       if (kantorModalMode === 'add') {
@@ -304,6 +318,7 @@ export function ModulKantorCabang() {
                 <th className="py-2.5 px-3 w-12 text-center">No</th>
                 <th className="py-2.5 px-3 w-36">Kode Kantor</th>
                 <th className="py-2.5 px-3 w-48">Nama Wilayah</th>
+                <th className="py-2.5 px-3 w-28 text-center">Status</th>
                 <th className="py-2.5 px-3 w-64">MikroTik RouterOS</th>
                 <th className="py-2.5 px-3">Alamat / Keterangan</th>
                 <th className="py-2.5 px-3 text-right w-36">Aksi & Sinkron</th>
@@ -312,14 +327,14 @@ export function ModulKantorCabang() {
             <tbody className="divide-y divide-sky-100 font-mono text-xs">
               {kantorLoading ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
+                  <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
                     <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
                     <div>Memuat data kantor...</div>
                   </td>
                 </tr>
               ) : paginatedKantors.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
+                  <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
                     Tidak ada kantor ditemukan.
                   </td>
                 </tr>
@@ -328,6 +343,7 @@ export function ModulKantorCabang() {
                   const isSyncing = syncingId === k.id;
                   const isMenuOpen = activeMenuId === k.id;
                   const isBottomRow = idx >= paginatedKantors.length - 2;
+                  const isActive = k.is_active !== undefined ? Boolean(k.is_active) : true;
 
                   return (
                     <tr key={k.id || idx} className="hover:bg-cyan-50/40 transition">
@@ -343,6 +359,27 @@ export function ModulKantorCabang() {
                           <span>{k.nama}</span>
                         </div>
                       </td>
+                      <td className="py-3 px-3 text-center">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase tracking-wider border ${
+                            isActive
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : 'bg-slate-100 text-slate-600 border-slate-300'
+                          }`}
+                        >
+                          {isActive ? (
+                            <>
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              <span>Aktif</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-3 h-3 text-slate-400" />
+                              <span>Nonaktif</span>
+                            </>
+                          )}
+                        </span>
+                      </td>
                       <td className="py-3 px-3">
                         {k.mikrotik_host ? (
                           <div className="space-y-0.5">
@@ -353,6 +390,16 @@ export function ModulKantorCabang() {
                             <div className="text-[11px] text-slate-500 flex items-center gap-1">
                               <KeyRound className="w-3 h-3 text-slate-400 shrink-0" />
                               <span>user: <strong>{k.mikrotik_user || '-'}</strong></span>
+                            </div>
+                            <div className="flex items-center gap-1.5 pt-0.5">
+                              <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
+                                Sync {k.mikrotik_sync_interval || 3}m
+                              </span>
+                              {k.last_mikrotik_sync && (
+                                <span className="text-[10px] font-mono text-slate-400 truncate" title={`Terakhir sync: ${k.last_mikrotik_sync}`}>
+                                  {k.last_mikrotik_sync.split(' ')[1] || k.last_mikrotik_sync}
+                                </span>
+                              )}
                             </div>
                           </div>
                         ) : (
@@ -399,13 +446,24 @@ export function ModulKantorCabang() {
                                     type="button"
                                     onClick={() => {
                                       setActiveMenuId(null);
+                                      if (k.is_active === false) {
+                                        showToast(`Kantor '${k.nama}' dalam status Nonaktif. Aktifkan kantor terlebih dahulu sebelum menyinkronkan router MikroTik.`, 'error');
+                                        return;
+                                      }
                                       handleSyncMikrotik(k);
                                     }}
-                                    disabled={isSyncing}
-                                    className="w-full px-3 py-1.5 text-left text-cyan-800 hover:bg-cyan-50 flex items-center gap-2 transition cursor-pointer disabled:opacity-50"
+                                    disabled={isSyncing || k.is_active === false}
+                                    title={k.is_active === false ? 'Kantor nonaktif (sync dimatikan)' : 'Tarik data lease & kuota sekarang'}
+                                    className={`w-full px-3 py-1.5 text-left flex items-center gap-2 transition ${
+                                      k.is_active === false
+                                        ? 'text-slate-400 hover:bg-slate-50 cursor-not-allowed opacity-60'
+                                        : 'text-cyan-800 hover:bg-cyan-50 cursor-pointer disabled:opacity-50'
+                                    }`}
                                   >
-                                    <RefreshCw className={`w-3.5 h-3.5 text-cyan-600 ${isSyncing ? 'animate-spin' : ''}`} />
-                                    <span>{isSyncing ? 'Menarik...' : 'Sync MikroTik'}</span>
+                                    <RefreshCw className={`w-3.5 h-3.5 ${k.is_active === false ? 'text-slate-400' : 'text-cyan-600'} ${isSyncing ? 'animate-spin' : ''}`} />
+                                    <span>
+                                      {isSyncing ? 'Menarik...' : (k.is_active === false ? 'Sync Mati (Nonaktif)' : 'Sync MikroTik')}
+                                    </span>
                                   </button>
                                 )}
 
@@ -471,138 +529,240 @@ export function ModulKantorCabang() {
               </div>
             )}
 
-            <form onSubmit={handleKantorFormSubmit} className="space-y-3 font-mono text-xs">
-              {/* Seksi 1: Data Identitas Kantor */}
-              <div className="space-y-3">
-                <div className="text-[11px] font-black uppercase tracking-wider text-cyan-900 pb-1 border-b border-sky-100 flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-cyan-700" />
-                  <span>1. Identitas Kantor</span>
-                </div>
+            {/* Tab Navigation Modal (2 Tab) */}
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl border border-sky-100 text-xs font-mono font-bold">
+              <button
+                type="button"
+                onClick={() => setKantorActiveTab('identitas')}
+                className={`flex-1 py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  kantorActiveTab === 'identitas'
+                    ? 'bg-white text-cyan-900 shadow-xs border border-sky-200'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
+                }`}
+              >
+                <Building2 className={`w-3.5 h-3.5 ${kantorActiveTab === 'identitas' ? 'text-cyan-700' : 'text-slate-400'}`} />
+                <span>1. Identitas Kantor</span>
+              </button>
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                    Nama Kantor <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={kantorNama}
-                    onChange={(e) => {
-                      setKantorNama(e.target.value);
-                      if (kantorModalMode === 'add' && !kantorKode) {
-                        setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''));
-                      }
-                    }}
-                    placeholder="Contoh: Kantor Banyumas, Kantor Cabang..."
-                    className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                  />
-                </div>
+              <button
+                type="button"
+                onClick={() => setKantorActiveTab('mikrotik')}
+                className={`flex-1 py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  kantorActiveTab === 'mikrotik'
+                    ? 'bg-white text-cyan-900 shadow-xs border border-sky-200'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
+                }`}
+              >
+                <Router className={`w-3.5 h-3.5 ${kantorActiveTab === 'mikrotik' ? 'text-cyan-700' : 'text-slate-400'}`} />
+                <span>2. Router MikroTik</span>
+              </button>
+            </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                    Kode Kantor {kantorModalMode === 'add' ? '(Opsional - dibuat otomatis jika kosong)' : '(Permanen)'}
-                  </label>
-                  <input
-                    type="text"
-                    disabled={kantorModalMode === 'edit'}
-                    value={kantorKode}
-                    onChange={(e) => setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                    placeholder="contoh: banyumas"
-                    className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none lowercase disabled:bg-slate-100 disabled:text-slate-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                    Deskripsi / Alamat Kantor
-                  </label>
-                  <textarea
-                    value={kantorAlamat}
-                    onChange={(e) => setKantorAlamat(e.target.value)}
-                    placeholder="Alamat atau keterangan operasional kantor cabang..."
-                    rows={2}
-                    className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Seksi 2: Konfigurasi Router MikroTik Kantor */}
-              <div className="space-y-3 pt-2">
-                <div className="text-[11px] font-black uppercase tracking-wider text-cyan-900 pb-1 border-b border-sky-100 flex items-center gap-1.5">
-                  <Router className="w-3.5 h-3.5 text-cyan-700" />
-                  <span>2. Konfigurasi Router MikroTik (Auto-Sync DHCP & ARP 10.10.x.x)</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <div className="sm:col-span-2">
+            <form onSubmit={handleKantorFormSubmit} className="space-y-4 font-mono text-xs">
+              {/* TAB 1: IDENTITAS KANTOR */}
+              {kantorActiveTab === 'identitas' && (
+                <div className="space-y-3">
+                  <div>
                     <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                      IP Router / Host
+                      Nama Kantor <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
-                      value={kantorMikrotikHost}
-                      onChange={(e) => setKantorMikrotikHost(e.target.value)}
-                      placeholder="Contoh: 192.168.202.50"
+                      required
+                      value={kantorNama}
+                      onChange={(e) => {
+                        setKantorNama(e.target.value);
+                        if (kantorModalMode === 'add' && !kantorKode) {
+                          setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''));
+                        }
+                      }}
+                      placeholder="Contoh: Kantor Banyumas, Kantor Cabang..."
                       className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
+
+                  {kantorModalMode === 'add' && (
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                        Kode Kantor (Opsional - dibuat otomatis jika kosong)
+                      </label>
+                      <input
+                        type="text"
+                        value={kantorKode}
+                        onChange={(e) => setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+                        placeholder="contoh: banyumas"
+                        className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none lowercase"
+                      />
+                    </div>
+                  )}
+
+                  {/* Status Kantor (Aktif / Tidak Aktif) */}
+                  <div className="p-3 bg-slate-50/80 rounded-2xl border border-sky-100 flex items-center justify-between gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase text-slate-700">
+                        Status Kantor
+                      </label>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        {kantorIsActive 
+                          ? 'Kantor aktif dan terpantau dalam sistem.' 
+                          : 'Kantor dinonaktifkan (dilewati pemindaian & sinkronisasi).'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setKantorIsActive(!kantorIsActive)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        kantorIsActive ? 'bg-cyan-600' : 'bg-slate-300'
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                          kantorIsActive ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
                   <div>
                     <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                      Port API
+                      Deskripsi / Alamat Kantor
                     </label>
-                    <input
-                      type="number"
-                      value={kantorMikrotikPort}
-                      onChange={(e) => setKantorMikrotikPort(e.target.value)}
-                      placeholder="Contoh: 8095"
+                    <textarea
+                      value={kantorAlamat}
+                      onChange={(e) => setKantorAlamat(e.target.value)}
+                      placeholder="Alamat atau keterangan operasional kantor cabang..."
+                      rows={3}
                       className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
                 </div>
+              )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                      Username Router
-                    </label>
-                    <input
-                      type="text"
-                      value={kantorMikrotikUser}
-                      onChange={(e) => setKantorMikrotikUser(e.target.value)}
-                      placeholder="Contoh: tekno"
-                      className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                    />
+              {/* TAB 2: KONFIGURASI ROUTER MIKROTIK */}
+              {kantorActiveTab === 'mikrotik' && (
+                <div className="space-y-3">
+                  <div className="p-2.5 bg-sky-50 rounded-xl border border-sky-200 text-sky-900 text-[11px] leading-relaxed">
+                    Digunakan untuk penarikan otomatis DHCP Leases pelanggan bound dan penghitungan akumulasi kuota bulanan Simple Queues.
                   </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                        IP Router / Host
+                      </label>
+                      <input
+                        type="text"
+                        value={kantorMikrotikHost}
+                        onChange={(e) => setKantorMikrotikHost(e.target.value)}
+                        placeholder="Contoh: 192.168.202.50"
+                        className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                        Port API
+                      </label>
+                      <input
+                        type="number"
+                        value={kantorMikrotikPort}
+                        onChange={(e) => setKantorMikrotikPort(e.target.value)}
+                        placeholder="Contoh: 8095"
+                        className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                        Username Router
+                      </label>
+                      <input
+                        type="text"
+                        value={kantorMikrotikUser}
+                        onChange={(e) => setKantorMikrotikUser(e.target.value)}
+                        placeholder="Contoh: tekno"
+                        className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                        Password Router
+                      </label>
+                      <input
+                        type="password"
+                        value={kantorMikrotikPass}
+                        onChange={(e) => setKantorMikrotikPass(e.target.value)}
+                        placeholder="Contoh: tekno2025"
+                        className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                      Password Router
+                    <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1 flex items-center justify-between">
+                      <span>Interval Auto-Sync (Menit)</span>
+                      <span className="text-[10px] text-cyan-700 font-normal normal-case">Tarik berkala lease & kuota</span>
                     </label>
-                    <input
-                      type="password"
-                      value={kantorMikrotikPass}
-                      onChange={(e) => setKantorMikrotikPass(e.target.value)}
-                      placeholder="Contoh: tekno2025"
-                      className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                    />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="1"
+                        max="1440"
+                        value={kantorMikrotikSyncInterval}
+                        onChange={(e) => setKantorMikrotikSyncInterval(e.target.value)}
+                        placeholder="3"
+                        className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                      />
+                      <div className="absolute right-3 top-2.5 text-[11px] font-bold text-slate-400 pointer-events-none">
+                        Menit
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                      Sinkronisasi otomatis RouterOS akan berjalan setiap <strong>{kantorMikrotikSyncInterval || 3} menit</strong>. Jika kantor dinonaktifkan, proses sinkronisasi otomatis maupun manual pada router ini otomatis dihentikan.
+                    </p>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-sky-100">
-                <button
-                  type="button"
-                  onClick={() => setModalKantorOpen(false)}
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={kantorSubmitting}
-                  className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
-                >
-                  {kantorSubmitting ? 'Menyimpan...' : (kantorModalMode === 'add' ? 'Simpan Kantor' : 'Simpan Perubahan')}
-                </button>
+              <div className="flex items-center justify-between pt-3 border-t border-sky-100">
+                <div className="text-[11px] text-slate-400">
+                  {kantorActiveTab === 'identitas' ? (
+                    <button
+                      type="button"
+                      onClick={() => setKantorActiveTab('mikrotik')}
+                      className="text-cyan-700 hover:text-cyan-800 font-bold hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <span>Lanjut ke Router MikroTik &rarr;</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setKantorActiveTab('identitas')}
+                      className="text-slate-500 hover:text-slate-800 font-bold hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <span>&larr; Kembali ke Identitas</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalKantorOpen(false)}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={kantorSubmitting}
+                    className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+                  >
+                    {kantorSubmitting ? 'Menyimpan...' : (kantorModalMode === 'add' ? 'Simpan Kantor' : 'Simpan Perubahan')}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

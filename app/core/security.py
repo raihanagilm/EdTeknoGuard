@@ -14,12 +14,15 @@ ALL_KANTOR = DEFAULT_KANTORS
 
 _serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
 
-def get_all_kantor_codes(db=None) -> List[str]:
+def get_all_kantor_codes(db=None, active_only: bool = True) -> List[str]:
     """Mengambil seluruh kode kantor aktif dari database, fallback ke DEFAULT_KANTORS"""
     if db is not None:
         try:
             from app.db.models import Kantor
-            codes = [k[0].lower().strip() for k in db.query(Kantor.kode).all() if k[0]]
+            q = db.query(Kantor.kode)
+            if active_only:
+                q = q.filter(Kantor.is_active == True)
+            codes = [k[0].lower().strip() for k in q.all() if k[0]]
             if codes:
                 return codes
         except Exception:
@@ -30,7 +33,10 @@ def get_all_kantor_codes(db=None) -> List[str]:
             from app.db.models import Kantor
             session = SessionLocal()
             try:
-                codes = [k[0].lower().strip() for k in session.query(Kantor.kode).all() if k[0]]
+                q = session.query(Kantor.kode)
+                if active_only:
+                    q = q.filter(Kantor.is_active == True)
+                codes = [k[0].lower().strip() for k in q.all() if k[0]]
                 if codes:
                     return codes
             finally:

@@ -72,17 +72,34 @@ class MikroTikSyncService:
         }
 
     @classmethod
-    def sync_all_configured_kantors(cls, db: Session) -> List[Dict[str, Any]]:
+    def sync_all_configured_kantors(cls, db: Session, force: bool = False) -> List[Dict[str, Any]]:
         """
-        Melakukan sinkronisasi otomatis untuk seluruh kantor yang telah memiliki konfigurasi mikrotik_host.
+        Melakukan sinkronisasi otomatis untuk seluruh kantor aktif yang telah memiliki konfigurasi mikrotik_host
+        dan telah mencapai interval waktu mikrotik_sync_interval (dalam menit).
         """
         from app.db.models import Kantor
-        kantors = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").all()
+        from app.core.timezone import get_now_wib
+        now = get_now_wib()
+
+        kantors = db.query(Kantor).filter(
+            Kantor.is_active == True,
+            Kantor.mikrotik_host.isnot(None),
+            Kantor.mikrotik_host != ""
+        ).all()
         results = []
         for k in kantors:
             if not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
                 continue
-            logger.info(f"[AUTO-SYNC] Menjalankan sinkronisasi DHCP bound MikroTik untuk kantor '{k.nama}' ({k.kode}) @ {k.mikrotik_host}:{k.mikrotik_port}...")
+
+            # Cek interval sinkronisasi per kantor jika bukan force
+            interval_mins = max(1, k.mikrotik_sync_interval or 3)
+            if not force and k.last_mikrotik_sync:
+                time_diff = (now - k.last_mikrotik_sync).total_seconds() / 60.0
+                if time_diff < interval_mins:
+                    # Belum mencapai jadwal interval kantor ini
+                    continue
+
+            logger.info(f"[AUTO-SYNC] Menjalankan sinkronisasi DHCP bound MikroTik untuk kantor '{k.nama}' ({k.kode}) @ {k.mikrotik_host}:{k.mikrotik_port} (Interval {interval_mins}m)...")
             params = {
                 "host": k.mikrotik_host,
                 "port": int(k.mikrotik_port),
@@ -93,6 +110,8 @@ class MikroTikSyncService:
             try:
                 res = cls.sync_customers_from_mikrotik(db, params)
                 res["kantor"] = k.kode
+                k.last_mikrotik_sync = get_now_wib()
+                db.commit()
                 results.append(res)
             except Exception as e:
                 logger.error(f"[AUTO-SYNC] Gagal sinkronisasi kantor '{k.kode}': {e}")
@@ -858,8 +877,8 @@ class MikroTikSyncService:
         if kantor and kantor != "all":
             target_kantors = [kantor]
         else:
-            # Ambil seluruh kantor yang terdaftar di database MySQL
-            db_kantors = db.query(Kantor).all()
+            # Ambil seluruh kantor aktif yang terdaftar di database MySQL
+            db_kantors = db.query(Kantor).filter(Kantor.is_active == True).all()
             target_kantors = [k.kode for k in db_kantors if k.kode]
         total_synced = 0
 

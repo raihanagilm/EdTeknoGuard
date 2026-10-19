@@ -30,8 +30,11 @@ class LogsMgmtService:
         kantor: Optional[str] = None,
         allowed_kantor: Optional[List[str]] = None
     ) -> Tuple[int, List[Dict[str, Any]], Dict[str, Any]]:
+        from app.db.models import PerangkatONT
         query = db.query(LogPerformaONT, Pelanggan).join(
             Pelanggan, LogPerformaONT.id_pelanggan == Pelanggan.id_pelanggan
+        ).outerjoin(
+            PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan
         )
 
         if kantor and kantor != "all":
@@ -69,8 +72,10 @@ class LogsMgmtService:
                 or_(
                     Pelanggan.nama.ilike(search_pattern),
                     Pelanggan.id_pelanggan.ilike(search_pattern),
-                    Pelanggan.ip_router.ilike(search_pattern),
-                    Pelanggan.pop.ilike(search_pattern)
+                    Pelanggan.pop.ilike(search_pattern),
+                    PerangkatONT.ip_router.ilike(search_pattern),
+                    PerangkatONT.ip_ont.ilike(search_pattern),
+                    LogPerformaONT.status_koneksi.ilike(search_pattern)
                 )
             )
 
@@ -96,8 +101,8 @@ class LogsMgmtService:
             "waktu_cek": LogPerformaONT.waktu_cek,
             "nama": Pelanggan.nama,
             "pop": Pelanggan.pop,
-            "ip_router": Pelanggan.ip_router,
-            "jenis_modem": Pelanggan.jenis_modem,
+            "ip_router": PerangkatONT.ip_router,
+            "jenis_modem": PerangkatONT.jenis_modem,
             "rx_power": LogPerformaONT.rx_power,
             "suhu_ont": LogPerformaONT.suhu_ont,
             "latency_ms": LogPerformaONT.latency_ms,

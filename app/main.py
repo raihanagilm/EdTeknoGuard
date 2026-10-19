@@ -187,6 +187,26 @@ def poll_notifications_alias(request: Request):
     finally:
         db.close()
 
+@app.post("/api/notifications/read")
+async def read_notification_alias(request: Request):
+    from app.core.database import SessionLocal
+    from app.modules.admin_customer_mgmt.routes import mark_single_notification_read
+    db = SessionLocal()
+    try:
+        return await mark_single_notification_read(request=request, db=db)
+    finally:
+        db.close()
+
+@app.post("/api/notifications/read-all")
+async def read_all_notifications_alias(request: Request):
+    from app.core.database import SessionLocal
+    from app.modules.admin_customer_mgmt.routes import mark_all_notifications_read
+    db = SessionLocal()
+    try:
+        return await mark_all_notifications_read(request=request, db=db)
+    finally:
+        db.close()
+
 @app.get("/api/tiket")
 def get_tickets_alias(request: Request, status: str = "SEMUA"):
     from app.core.database import SessionLocal
@@ -241,11 +261,14 @@ async def get_kantor_list_alias(request: Request):
                 "id": k.id,
                 "kode": k.kode,
                 "nama": k.nama,
+                "is_active": k.is_active if k.is_active is not None else True,
                 "alamat": k.alamat or "",
                 "mikrotik_host": k.mikrotik_host or "",
                 "mikrotik_port": k.mikrotik_port or "",
                 "mikrotik_user": k.mikrotik_user or "",
-                "mikrotik_pass": k.mikrotik_pass or ""
+                "mikrotik_pass": k.mikrotik_pass or "",
+                "mikrotik_sync_interval": k.mikrotik_sync_interval if k.mikrotik_sync_interval is not None else 3,
+                "last_mikrotik_sync": k.last_mikrotik_sync.strftime("%Y-%m-%d %H:%M:%S") if k.last_mikrotik_sync else None
             } for k in kantors]
         }
     finally:

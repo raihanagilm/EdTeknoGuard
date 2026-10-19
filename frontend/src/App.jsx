@@ -875,6 +875,11 @@ export default function App() {
           {activeTab === 'pelanggan' && (
             <ModulPelanggan
               activeOffice={activeOffice}
+              isOfficeActive={
+                activeOffice === 'all'
+                  ? true
+                  : (kantorList.find(k => k.kode === activeOffice)?.is_active ?? true)
+              }
               warnThreshold={warnThreshold}
               critThreshold={critThreshold}
               initialSearch={customerSearchQuery}
