@@ -248,11 +248,11 @@ class MonitoringScheduler:
                         need_immediate_scan = True
                         first_run_time = datetime.now() + timedelta(seconds=5)
 
-            # Daftarkan job interval utama
+            # Daftarkan job interval pemantauan utama (evaluasi loop tiap 1 menit per kantor sesuai setting DB masing-masing)
             job_kwargs = {
                 "func": self.scheduled_job_wrapper,
                 "trigger": "interval",
-                "minutes": interval,
+                "minutes": 1,
                 "id": "ont_monitoring_job",
                 "replace_existing": True
             }
@@ -298,24 +298,16 @@ class MonitoringScheduler:
 
             logger.info("[CLEANUP] Job cleanup alert_logs (setiap hari, >7 hari) & activity_logs (setiap hari, >60 hari) aktif.")
 
-    def update_interval(self, minutes: int):
+    def update_interval(self, minutes: int, kantor: Optional[str] = None):
         db = SessionLocal()
         try:
-            self.set_setting_in_db(db, "polling_interval_minutes", str(minutes))
+            self.set_setting_in_db(db, "polling_interval_minutes", str(minutes), kantor=kantor)
         finally:
             db.close()
 
-        settings.POLLING_INTERVAL_MINUTES = minutes
-        if self._scheduler and self._scheduler.running:
-            try:
-                self._scheduler.reschedule_job(
-                    "ont_monitoring_job",
-                    trigger="interval",
-                    minutes=minutes
-                )
-                logger.info(f"Interval scheduler berhasil diubah menjadi {minutes} menit.")
-            except Exception as e:
-                logger.error(f"Gagal reschedule job: {e}")
+        if not kantor or kantor == "all":
+            settings.POLLING_INTERVAL_MINUTES = minutes
+        logger.info(f"Interval pemantauan kantor '{kantor or 'global'}' diperbarui menjadi {minutes} menit di DB.")
 
     def stop(self, kantor: Optional[str] = None):
         db = SessionLocal()
@@ -510,10 +502,16 @@ class MonitoringScheduler:
         }
 
         next_run_time_str = "-"
-        if self._scheduler and self._scheduler.running:
-            job = self._scheduler.get_job("ont_monitoring_job")
-            if job and job.next_run_time:
-                next_run_time_str = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S")
+        if status == "RUNNING" and is_office_active:
+            if last_scan and last_scan != "-":
+                try:
+                    last_dt = datetime.strptime(last_scan, "%Y-%m-%d %H:%M:%S")
+                    next_dt = last_dt + timedelta(minutes=interval)
+                    next_run_time_str = next_dt.strftime("%Y-%m-%d %H:%M:%S")
+                except Exception:
+                    next_run_time_str = "-"
+            else:
+                next_run_time_str = "Segera"
 
         # Cek apakah ada kantor lain yang saat ini sedang memindai
         other_active_scans = []
@@ -565,14 +563,35 @@ class MonitoringScheduler:
         finally:
             db.close()
 
-        # Eksekusi pemindaian mandiri untuk setiap kantor yang status scheduler-nya RUNNING
+        # Eksekusi pemindaian mandiri untuk setiap kantor yang status scheduler-nya RUNNING dan intervalnya sudah tercapai
+        now_dt = get_now_wib()
         for k_kode in kantor_kodes:
             db_k = SessionLocal()
             try:
                 k_status = self.get_setting_from_db(db_k, "scheduler_status", "RUNNING", kantor=k_kode)
                 
                 if k_status != "RUNNING":
-                    logger.info(f"[SCHEDULER] Kantor {k_kode.upper()} dalam status STOPPED, melewati siklus otomatis.")
+                    continue
+
+                interval_str = self.get_setting_from_db(db_k, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES), kantor=k_kode)
+                interval_minutes = int(interval_str) if interval_str.isdigit() else settings.POLLING_INTERVAL_MINUTES
+                last_scan_str = self.get_setting_from_db(db_k, "last_scan_time", "-", kantor=k_kode)
+                
+                # Cek apakah sudah waktunya scan berdasarkan interval kantor di DB
+                is_due = False
+                if not last_scan_str or last_scan_str == "-":
+                    is_due = True
+                else:
+                    try:
+                        last_scan_dt = datetime.strptime(last_scan_str, "%Y-%m-%d %H:%M:%S")
+                        elapsed_seconds = (now_dt - last_scan_dt).total_seconds()
+                        if elapsed_seconds >= (interval_minutes * 60):
+                            is_due = True
+                    except Exception as e:
+                        logger.warning(f"[SCHEDULER] Gagal parse last_scan_time '{last_scan_str}' kantor {k_kode}: {e}")
+                        is_due = True
+
+                if not is_due:
                     continue
             finally:
                 db_k.close()
@@ -580,7 +599,7 @@ class MonitoringScheduler:
             # Jalankan di background thread per kantor jika belum sedang memindai
             state = self.get_office_state(k_kode)
             if not state.is_scanning:
-                logger.info(f"[SCHEDULER] Memulai siklus pemindaian otomatis terjadwal untuk kantor: {k_kode.upper()}")
+                logger.info(f"[SCHEDULER] Memulai siklus pemindaian otomatis terjadwal (interval: {interval_minutes}m) untuk kantor: {k_kode.upper()}")
                 th = threading.Thread(target=self.execute_scan_sync, kwargs={"kantor": k_kode}, daemon=True)
                 th.start()
             else:
@@ -643,12 +662,20 @@ class MonitoringScheduler:
             los_by_pop = {}
             los_pending_alerts = []
 
-            # Ambil threshold dan kredensial modem ONT dengan prioritas spesifik kantor
+            # Ambil threshold dan kredensial modem ONT dengan prioritas spesifik kantor, fallback ke global
             eff_warn_th = float(self.get_setting_from_db(db, "warning_threshold_dbm", str(settings.WARNING_THRESHOLD_DBM), kantor=k if k != "all" else None))
             eff_crit_th = float(self.get_setting_from_db(db, "critical_threshold_dbm", str(settings.CRITICAL_THRESHOLD_DBM), kantor=k if k != "all" else None))
             default_user = self.get_setting_from_db(db, "default_modem_user", None, kantor=k if k != "all" else None)
             default_pass = self.get_setting_from_db(db, "default_modem_pass", None, kantor=k if k != "all" else None)
             raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=k if k != "all" else None)
+
+            # Jika kredensial spesifik kantor kosong, fallback ke kredensial global
+            if not default_user:
+                default_user = self.get_setting_from_db(db, "default_modem_user", "admin", kantor=None)
+            if not default_pass:
+                default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024", kantor=None)
+            if not raw_creds or raw_creds == "[]":
+                raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=None)
 
             default_creds_list = []
             try:
@@ -658,6 +685,10 @@ class MonitoringScheduler:
                     default_creds_list = [(c.get("username", ""), c.get("password", "")) for c in p_creds if c.get("username")]
             except Exception:
                 default_creds_list = []
+
+            # Tambahkan default_user & default_pass ke daftar jika belum ada
+            if default_user and default_pass and (default_user, default_pass) not in default_creds_list:
+                default_creds_list.insert(0, (default_user, default_pass))
 
             unreachable_count = 0
             for cust in pelanggan_to_scan:
@@ -888,6 +919,15 @@ class MonitoringScheduler:
             default_user = self.get_setting_from_db(db, "default_modem_user", None, kantor=cust_kantor)
             default_pass = self.get_setting_from_db(db, "default_modem_pass", None, kantor=cust_kantor)
             raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=cust_kantor)
+
+            # Jika kredensial spesifik kantor kosong, fallback ke kredensial global
+            if not default_user:
+                default_user = self.get_setting_from_db(db, "default_modem_user", "admin", kantor=None)
+            if not default_pass:
+                default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024", kantor=None)
+            if not raw_creds or raw_creds == "[]":
+                raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=None)
+
             default_creds_list = []
             try:
                 import json
@@ -896,6 +936,9 @@ class MonitoringScheduler:
                     default_creds_list = [(c.get("username", ""), c.get("password", "")) for c in p_creds if c.get("username")]
             except Exception:
                 default_creds_list = []
+
+            if default_user and default_pass and (default_user, default_pass) not in default_creds_list:
+                default_creds_list.insert(0, (default_user, default_pass))
 
             eff_warn_th = float(self.get_setting_from_db(db, "warning_threshold_dbm", str(settings.WARNING_THRESHOLD_DBM), kantor=cust_kantor))
             eff_crit_th = float(self.get_setting_from_db(db, "critical_threshold_dbm", str(settings.CRITICAL_THRESHOLD_DBM), kantor=cust_kantor))

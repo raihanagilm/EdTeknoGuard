@@ -714,8 +714,30 @@ export function ModulPelanggan({
                         <Wifi className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
                         <span className="font-bold truncate">{c.nama_wifi || '-'}</span>
                       </div>
-                      <div className="text-xs text-slate-600 font-mono">
-                        Modem: <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-600 font-mono mt-0.5">
+                        <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
+                        {(() => {
+                          const kStatus = (c.status_kredensial || 'UNTESTED').toUpperCase();
+                          if (kStatus === 'VALID') {
+                            return (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-emerald-100 text-emerald-800 border border-emerald-300" title="Kredensial modem terverifikasi cocok">
+                                VALID
+                              </span>
+                            );
+                          }
+                          if (kStatus === 'INVALID') {
+                            return (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-rose-100 text-rose-800 border border-rose-300" title="Kredensial modem ditolak / salah password">
+                                INVALID
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-slate-100 text-slate-600 border border-slate-200" title="Belum diuji coba">
+                              BELUM UJI
+                            </span>
+                          );
+                        })()}
                       </div>
                     </td>
                     <td className="py-2.5 px-3 text-right font-black">

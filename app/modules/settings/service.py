@@ -226,24 +226,31 @@ class SystemSettingsService:
 
         # 3. Jika opsi sinkronisasi diaktifkan:
         if data.apply_to_invalid_customers:
-            from app.db.models import Pelanggan
-            target_q = db.query(Pelanggan).filter(Pelanggan.status_kredensial != "VALID")
+            from app.db.models import Pelanggan, PerangkatONT
+            target_q = (
+                db.query(Pelanggan)
+                .join(PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)
+                .filter(PerangkatONT.status_kredensial != "VALID")
+            )
             if k:
                 target_q = target_q.filter(Pelanggan.kantor == k)
             target_customers = target_q.all()
             for c in target_customers:
                 c.user_admin = primary_user
                 c.pass_admin = primary_pass
+                # Reset status kredensial ke UNTESTED agar siap diverifikasi ulang saat pemantauan/single probe
+                c.status_kredensial = "UNTESTED"
                 c.updated_at = get_now_wib()
 
         db.commit()
 
-        # 4. Perbarui in-memory settings runtime jika global atau kantor aktif
+        # 4. Perbarui in-memory settings runtime & scheduler interval
         if not k:
             settings.POLLING_INTERVAL_MINUTES = data.polling_interval_minutes
             settings.WARNING_THRESHOLD_DBM = data.warning_threshold_dbm
             settings.CRITICAL_THRESHOLD_DBM = data.critical_threshold_dbm
-            scheduler.update_interval(data.polling_interval_minutes)
+        
+        scheduler.update_interval(data.polling_interval_minutes, kantor=k)
 
         if data.scheduler_status == "STOPPED":
             scheduler.stop(kantor=k)

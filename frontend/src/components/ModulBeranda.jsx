@@ -78,6 +78,7 @@ export function ModulBeranda({
   const [engineStatus, setEngineStatus] = useState('RUNNING')
   const [isOfficeActive, setIsOfficeActive] = useState(true)
   const [lastScanTime, setLastScanTime] = useState('-')
+  const [nextRunTime, setNextRunTime] = useState('-')
   const [intervalMinutes, setIntervalMinutes] = useState(10)
   const [isScanning, setIsScanning] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
@@ -162,6 +163,7 @@ export function ModulBeranda({
           setIsOfficeActive(Boolean(data.is_office_active))
         }
         setLastScanTime(data.last_scan_time || '-')
+        setNextRunTime(data.next_run_time || '-')
         setIsScanning(Boolean(data.is_scanning))
 
         if (data.scan_progress) {
@@ -717,9 +719,16 @@ export function ModulBeranda({
                 </span>
               </div>
 
-              <div className="text-[11px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-1 mt-0.5 font-mono">
+              <div className="text-[11px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-1.5 mt-0.5 font-mono">
                 <span>Cek Terakhir:</span>
                 <strong className="text-slate-800 font-bold">{lastScanTime}</strong>
+                {engineStatus === 'RUNNING' && isOfficeActive && nextRunTime && nextRunTime !== '-' && (
+                  <>
+                    <span className="text-slate-300 hidden sm:inline">•</span>
+                    <span className="text-slate-500">Berikutnya:</span>
+                    <strong className="text-cyan-800 font-bold">{nextRunTime}</strong>
+                  </>
+                )}
                 <span className="text-slate-300 hidden sm:inline">|</span>
                 <span
                   className={`text-[11px] font-bold ${
