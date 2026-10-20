@@ -92,6 +92,8 @@ CREATE TABLE IF NOT EXISTS `pelanggan` (
   `is_monitored` BOOLEAN NOT NULL DEFAULT TRUE,
   `is_active` BOOLEAN NOT NULL DEFAULT TRUE,
   `status_lease` VARCHAR(20) NOT NULL DEFAULT 'bound',
+  `status_isolir` TINYINT(1) NOT NULL DEFAULT 0,
+  `queue_name` VARCHAR(150) NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `password_hash` VARCHAR(255) NULL,
@@ -104,6 +106,8 @@ CREATE TABLE IF NOT EXISTS `pelanggan` (
   INDEX `idx_pelanggan_kantor` (`kantor`),
   INDEX `idx_pelanggan_monitored` (`is_monitored`),
   INDEX `idx_pelanggan_verifikasi` (`status_verifikasi`),
+  INDEX `idx_pelanggan_isolir` (`status_isolir`),
+  INDEX `idx_pelanggan_queue` (`queue_name`),
   CONSTRAINT `fk_pelanggan_kantor` FOREIGN KEY (`kantor`)
     REFERENCES `kantors` (`kode`) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT `fk_pelanggan_paket` FOREIGN KEY (`paket`)
@@ -240,6 +244,9 @@ CREATE TABLE IF NOT EXISTS `kuota_pelanggan` (
   `id_pelanggan` VARCHAR(64) NOT NULL,
   `periode_bulan` VARCHAR(10) NOT NULL,
   `kuota_terpakai_gb` DECIMAL(8, 2) NOT NULL DEFAULT 0.00,
+  `upload_bytes` BIGINT NOT NULL DEFAULT 0,
+  `download_bytes` BIGINT NOT NULL DEFAULT 0,
+  `last_sync_mikrotik` DATETIME NULL,
   `kecepatan_paket` VARCHAR(50) NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -248,6 +255,20 @@ CREATE TABLE IF NOT EXISTS `kuota_pelanggan` (
   INDEX `idx_kuota_pelanggan_periode` (`id_pelanggan`, `periode_bulan`),
   CONSTRAINT `fk_kuota_pelanggan` FOREIGN KEY (`id_pelanggan`)
     REFERENCES `pelanggan` (`id_pelanggan`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------------------------
+-- 13. Tabel USER_NOTIFICATION_READS (Status Baca Notifikasi Real-time per User)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `user_notification_reads` (
+  `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `notification_type` VARCHAR(50) NOT NULL,
+  `reference_id` VARCHAR(100) NOT NULL,
+  `read_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_user_notif_lookup` (`user_id`, `notification_type`, `reference_id`),
+  CONSTRAINT `fk_user_notification_reads_user` FOREIGN KEY (`user_id`)
+    REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
