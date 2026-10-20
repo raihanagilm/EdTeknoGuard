@@ -184,7 +184,7 @@ def poll_notifications_alias(request: Request):
     try:
         user = get_current_user_optional(request)
         kantor = get_active_kantor(request, user) if user else "all"
-        return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor)
+        return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor, user=user)
     finally:
         db.close()
 

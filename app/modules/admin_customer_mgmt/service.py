@@ -226,12 +226,11 @@ class AdminCustomerMgmtService:
         # -------------------------------------------------------------
         # 2. HASIL PEMANTAUAN REDAMAN ONT (LOS, CRITICAL, WARNING, GAGAL JARINGAN)
         # -------------------------------------------------------------
-        # Ambil log pembacaan terakhir masing-masing pelanggan (dalam 2 jam terakhir)
-        two_hours_ago = get_now_wib() - timedelta(hours=2)
+        # Ambil log pembacaan terakhir masing-masing pelanggan (persisten sesuai hasil scan terakhir)
         sub_latest = db.query(
             LogPerformaONT.id_pelanggan,
             func.max(LogPerformaONT.waktu_cek).label("max_waktu")
-        ).filter(LogPerformaONT.waktu_cek >= two_hours_ago).group_by(LogPerformaONT.id_pelanggan).subquery()
+        ).group_by(LogPerformaONT.id_pelanggan).subquery()
 
         ont_logs_query = db.query(LogPerformaONT, Pelanggan).join(
             sub_latest,
@@ -240,10 +239,14 @@ class AdminCustomerMgmtService:
             Pelanggan,
             LogPerformaONT.id_pelanggan == Pelanggan.id_pelanggan
         ).filter(
-            LogPerformaONT.status_koneksi.in_(["LOS", "CRITICAL", "WARNING"])
+            LogPerformaONT.status_koneksi.in_(["LOS", "CRITICAL", "WARNING"]),
+            Pelanggan.is_active == True,
+            Pelanggan.is_monitored == True
         )
 
         if user_role != "super admin" and kantor and kantor != "all":
+            ont_logs_query = ont_logs_query.filter(Pelanggan.kantor == kantor)
+        elif kantor and kantor != "all":
             ont_logs_query = ont_logs_query.filter(Pelanggan.kantor == kantor)
 
         problem_logs = ont_logs_query.order_by(LogPerformaONT.waktu_cek.desc()).all()
