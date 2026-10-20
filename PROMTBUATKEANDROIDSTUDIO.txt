@@ -39,26 +39,46 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
    - DILARANG KERAS menyuruh user menonaktifkan optimasi baterai (HAPUS dialog `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` atau peringatan baterai lainnya agar user tidak merasa terganggu).
    - CUKUP minta izin standar notifikasi `POST_NOTIFICATIONS` (Android 13+) secara otomatis saat pertama kali app dibuka.
 
-2. NOTIFIKASI NATIVE MURNI OS (BUKAN WEB NOTIFICATION):
-   A. BACKGROUND ENGINE (Saat Aplikasi Ditutup / HP Terkunci):
-      - Di `EdTeknoBackgroundService.kt`, implementasikan Heads-Up Banner (Notifikasi Melayang Langsung di Layar HP):
-        * Channel Peringatan Darurat (`CHANNEL_EMERGENCY_ID`): Suara Sirine Alarm (`TYPE_ALARM`), getaran pola panjang `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`, lampu merah menyala, gunakan `NotificationManager.IMPORTANCE_HIGH` agar notifikasi langsung melayang di atas layar HP (heads-up banner).
-        * Channel Pelanggan (`CHANNEL_CUSTOMER_ID`): Suara Notifikasi (`TYPE_NOTIFICATION`), gunakan `NotificationManager.IMPORTANCE_HIGH` (langsung muncul pop-up di layar atas).
-      - WAJIB MUNCUL LANGSUNG DI LAYAR (HEADS-UP POP-UP):
-        Setiap notifikasi baru WAJIB langsung muncul melayang dari atas layar HP pengguna (banner heads-up), bersuara, dan bergetar, sehingga user langsung melihatnya tanpa harus menggeser panel notifikasi.
-      - Endpoint Polling Server Baru:
+2. SISTEM NOTIFIKASI LENGKAP: HEADS-UP, IN-APP POP-UP CARD, & DIALOG BOX KONFIRMASI:
+   A. HEADS-UP NOTIFICATION (Notifikasi Melayang di Atas Layar Ponsel):
+      - Di `EdTeknoBackgroundService.kt`:
+        * Channel Peringatan Darurat (`CHANNEL_EMERGENCY_ID`): `importance = NotificationManager.IMPORTANCE_HIGH` atau `IMPORTANCE_MAX`. Suara Sirine Alarm (`TYPE_ALARM`), getaran pola `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`, lampu merah menyala.
+        * Channel Pelanggan (`CHANNEL_CUSTOMER_ID`): `importance = NotificationManager.IMPORTANCE_HIGH`. Suara notifikasi standar, getaran aktif.
+      - AGAR POP-UP HEADS-UP PASTI MUNCUL MELAYANG DI ATAS LAYAR:
+        Saat mem-build notifikasi, WAJIB sertakan:
+        ```kotlin
+        val fullScreenIntent = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setFullScreenIntent(fullScreenIntent, isEmergency) // Kunci agar Heads-up pop-up banner melayang dari atas layar
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .build()
+        ```
+      - Endpoint Polling Server VPS:
         * Notifikasi Tiket (TeknoGuard): `http://172.21.20.62:7890/api/notifications/poll`
         * Status Redaman (TeknoGuard) : `http://172.21.20.62:7890/api/monitoring/status`
         * Status Tiket Pelanggan (TeknoCust): `http://172.21.20.62:7890/api/portal/ticket-status`
-   
-   B. JAVASCRIPT BRIDGE NATIVE (Saat Aplikasi Sedang Dibuka):
-      - Di `MainActivity.kt`, buat kelas `WebAppInterface`:
+
+   B. JAVASCRIPT BRIDGE NATIVE (Pop-up Notifikasi & Kotak Dialog Konfirmasi):
+      - Di `MainActivity.kt`, implementasikan `WebAppInterface` dengan 3 fungsi interaktif:
+        1. `showNativeNotification`: Memunculkan Heads-up banner melayang dari sistem OS.
+        2. `showInAppPopup`: Memunculkan kotak/jendela pop-up mengambang (floating card/banner) di dalam layar aplikasi untuk memberi tahu pesan/pembaruan masuk.
+        3. `showConfirmDialog`: Memunculkan Dialog Box (Kotak Konfirmasi sistem) dengan tombol Yes/No atau Lanjutkan/Batal yang mengembalikan callback hasil pilihan user ke JavaScript WebView (`window.onDialogResult(confirmed)`).
+
         ```kotlin
-        class WebAppInterface(private val context: Context) {
+        class WebAppInterface(private val activity: Activity, private val webView: WebView) {
+            
+            // 1. Heads-Up Notification (Melayang di atas layar HP)
             @JavascriptInterface
             fun showNativeNotification(title: String, message: String, isEmergency: Boolean) {
                 val channelId = if (isEmergency) EdTeknoBackgroundService.CHANNEL_EMERGENCY_ID else EdTeknoBackgroundService.CHANNEL_CUSTOMER_ID
-                val notification = NotificationCompat.Builder(context, channelId)
+                val notification = NotificationCompat.Builder(activity, channelId)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -66,16 +86,49 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
                     .setAutoCancel(true)
                     .setPriority(NotificationCompat.PRIORITY_MAX)
                     .setDefaults(NotificationCompat.DEFAULT_ALL)
-                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .build()
-                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val manager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 manager.notify(System.currentTimeMillis().toInt(), notification)
+            }
+
+            // 2. Pop-up Notifikasi In-App (Jendela/Kotak Pop-up di dalam layar HP)
+            @JavascriptInterface
+            fun showInAppPopup(title: String, message: String) {
+                activity.runOnUiThread {
+                    AlertDialog.Builder(activity)
+                        .setTitle(title)
+                        .setMessage(message)
+                        .setIcon(R.mipmap.ic_launcher)
+                        .setPositiveButton("Tutup", null)
+                        .show()
+                }
+            }
+
+            // 3. Dialog Box / Kotak Konfirmasi (Pilihan Aksi Yes / No atau Batal / Lanjut)
+            @JavascriptInterface
+            fun showConfirmDialog(title: String, message: String, callbackId: String) {
+                activity.runOnUiThread {
+                    AlertDialog.Builder(activity)
+                        .setTitle(title)
+                        .setMessage(message)
+                        .setIcon(R.mipmap.ic_launcher)
+                        .setPositiveButton("Ya / Lanjutkan") { _, _ ->
+                            webView.evaluateJavascript("window.onDialogResult('$callbackId', true)", null)
+                        }
+                        .setNegativeButton("Batal") { _, _ ->
+                            webView.evaluateJavascript("window.onDialogResult('$callbackId', false)", null)
+                        }
+                        .setCancelable(false)
+                        .show()
+                }
             }
         }
         ```
       - Sambungkan ke WebView:
-        `binding.webView.addJavascriptInterface(WebAppInterface(this), "AndroidBridge")`
-      - Dengan ini, event web otomatis memunculkan bar notifikasi native Android!
+        `binding.webView.addJavascriptInterface(WebAppInterface(this, binding.webView), "AndroidBridge")`
+      - Aktifkan juga WebChromeClient agar alert, confirm, dan prompt HTML standar otomatis menjadi Dialog Box Material native:
+        `binding.webView.webChromeClient = WebChromeClient()`
 
 3. PEMBARUAN IP SERVER VPS & PENGHAPUSAN NGROK:
    - Bersihkan seluruh sisa domain ngrok (`duty-astride-outright.ngrok-free.dev`) dan header `ngrok-skip-browser-warning`.
