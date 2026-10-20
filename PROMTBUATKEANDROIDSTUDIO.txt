@@ -40,30 +40,91 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
    - CUKUP minta izin standar notifikasi `POST_NOTIFICATIONS` (Android 13+) secara otomatis saat pertama kali app dibuka.
 
 2. SISTEM NOTIFIKASI LENGKAP: HEADS-UP, IN-APP POP-UP CARD, & DIALOG BOX KONFIRMASI:
-   A. HEADS-UP NOTIFICATION (Notifikasi Melayang di Atas Layar Ponsel):
-      - Di `EdTeknoBackgroundService.kt`:
-        * Channel Peringatan Darurat (`CHANNEL_EMERGENCY_ID`): `importance = NotificationManager.IMPORTANCE_HIGH` atau `IMPORTANCE_MAX`. Suara Sirine Alarm (`TYPE_ALARM`), getaran pola `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`, lampu merah menyala.
-        * Channel Pelanggan (`CHANNEL_CUSTOMER_ID`): `importance = NotificationManager.IMPORTANCE_HIGH`. Suara notifikasi standar, getaran aktif.
-      - AGAR POP-UP HEADS-UP PASTI MUNCUL MELAYANG DI ATAS LAYAR:
-        Saat mem-build notifikasi, WAJIB sertakan:
-        ```kotlin
-        val fullScreenIntent = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setFullScreenIntent(fullScreenIntent, isEmergency) // Kunci agar Heads-up pop-up banner melayang dari atas layar
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .build()
-        ```
-      - Endpoint Polling Server VPS:
-        * Notifikasi Tiket (TeknoGuard): `http://172.21.20.62:7890/api/notifications/poll`
-        * Status Redaman (TeknoGuard) : `http://172.21.20.62:7890/api/monitoring/status`
-        * Status Tiket Pelanggan (TeknoCust): `http://172.21.20.62:7890/api/portal/ticket-status`
+   A. SINKRONISASI NOTIFIKASI WEB KE HP (DENGAN BUNYI, GETAR, HEADS-UP & DEEP LINK):
+      Masalah Sebelumnya:
+      HP hanya menampilkan notifikasi pasif "TeknoGuard Siaga Pemantauan Aktif di Latar Belakang", sedangkan notifikasi nyata dari web (seperti 15 LOS, 84 Redaman Menurun, atau Tiket Keluhan Baru) TIDAK MUNCUL di HP!
+
+      Solusi Mutlak di `EdTeknoBackgroundService.kt`:
+      1. Notifikasi Foreground Service Status ("TeknoGuard Siaga"):
+         - Gunakan notification ID tetap = `1` (misal: `FOREGROUND_SERVICE_ID = 1`).
+         - Cukup tampil sebagai indikator latar belakang tanpa memblokir notifikasi gangguan.
+
+      2. PENGAMBILAN DATA REAL-TIME DARI ARRAY `notifications` WEB:
+         - Background loop melakukan HTTP GET ke:
+           `http://172.21.20.62:7890/api/notifications/poll`
+         - Parse respon JSON:
+           Ambil array `notifications` dari JSON:
+           `val notifArray = jsonObject.optJSONArray("notifications")`
+         - Lakukan perulangan (loop) pada setiap objek di dalam `notifications`:
+           * `id`: String unik notifikasi (misal: `batch_los_15_...`, `batch_warning_...`, atau `tiket_...`).
+           * `title`: Judul notifikasi (misal: "15 Modem ONT Terputus (LOS)", "84 Modem Redaman Menurun (WARNING)", atau "Tiket: Bpk Ahmad").
+           * `message`: Isi rincian pesan notifikasi.
+           * `level`: "critical", "warning", atau "info".
+           * `target_tab`: "logs", "tiket", atau "beranda".
+           * `target_filter`: Keyword filter pencarian.
+
+      3. MEKANISME DEDUP (Anti-Spam Suara Berulang):
+         - Simpan daftar ID notifikasi yang sudah pernah dibunyikan ke `HashSet<String>` di memory service atau SharedPreferences (`alertedNotificationIds`).
+         - Jika item `id` BELUM PERNAH dibunyikan:
+           * Bunyikan alarm darurat / suara notifikasi.
+           * Picu getaran kuat (`longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`).
+           * Munculkan Heads-Up Banner melayang dari atas layar HP!
+           * Masukkan `id` tersebut ke `alertedNotificationIds`.
+
+      4. IMPLEMENTASI NOTIFIKASI HEADS-UP & DEEP LINKING KE HALAMAN TEPAT:
+         ```kotlin
+         // Channel Notifikasi Gangguan (IMPORTANCE_HIGH agar pasti Pop-Up Banner melayang, Bunyi & Getar)
+         val channelId = if (level == "critical") CHANNEL_EMERGENCY_ID else CHANNEL_CUSTOMER_ID
+         
+         // Intent saat notifikasi diklik teknisi -> Buka tab yang sesuai di Web!
+         val clickIntent = Intent(context, MainActivity::class.java).apply {
+             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+             putExtra("target_tab", targetTab)       // "logs" atau "tiket"
+             putExtra("target_filter", targetFilter) // misal "LOS" atau "TIKET-123"
+         }
+         val pendingIntent = PendingIntent.getActivity(
+             context,
+             id.hashCode(),
+             clickIntent,
+             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+         )
+
+         val builder = NotificationCompat.Builder(context, channelId)
+             .setContentTitle(title)
+             .setContentText(message)
+             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+             .setSmallIcon(R.mipmap.ic_launcher)
+             .setAutoCancel(true)
+             .setPriority(NotificationCompat.PRIORITY_MAX)
+             .setDefaults(NotificationCompat.DEFAULT_ALL)
+             .setContentIntent(pendingIntent) // Klik langsung buka tab logs / tiket!
+             .setFullScreenIntent(pendingIntent, level == "critical") // Melayang di layar saat ada gangguan!
+             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+         manager.notify(id.hashCode(), builder.build())
+         ```
+
+      5. PENANGANAN DI `MainActivity.kt` (Saat Notifikasi HP Diklik):
+         - Baca intent extra `target_tab`:
+         ```kotlin
+         override fun onNewIntent(intent: Intent) {
+             super.onNewIntent(intent)
+             handleNotificationIntent(intent)
+         }
+
+         private fun handleNotificationIntent(intent: Intent?) {
+             val targetTab = intent?.getStringExtra("target_tab")
+             val targetFilter = intent?.getStringExtra("target_filter") ?: ""
+             if (!targetTab.isNullOrEmpty()) {
+                 // Kirim event navigasi ke Webview React
+                 binding.webView.evaluateJavascript(
+                     "window.navigateToTab && window.navigateToTab('$targetTab', '$targetFilter')",
+                     null
+                 )
+             }
+         }
+         ```
 
    B. JAVASCRIPT BRIDGE NATIVE (Pop-up Notifikasi & Kotak Dialog Konfirmasi):
       - Di `MainActivity.kt`, implementasikan `WebAppInterface` dengan 3 fungsi interaktif:
