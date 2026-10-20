@@ -82,3 +82,12 @@ def get_chart_data(
     return MonitoringController.get_chart_data(
         request=request, db=db, range_type=range_type, date_filter=date_filter, id_pelanggan=id_pelanggan, kantor=kantor
     )
+
+@router.get("/available-dates")
+def get_available_dates(
+    request: Request,
+    kantor: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    """Route untuk mengambil daftar tanggal yang memiliki data riil di database"""
+    return MonitoringController.get_available_dates(request=request, db=db, kantor=kantor)

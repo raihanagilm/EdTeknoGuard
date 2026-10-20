@@ -22,6 +22,8 @@ import {
   ZoomOut,
   RotateCcw,
   ChevronRight,
+  ChevronLeft,
+  Calendar,
   ShieldCheck,
   TrendingUp,
   ArrowUpCircle,
@@ -110,10 +112,47 @@ export function ModulBeranda({
     critical_threshold: -27.0
   })
 
+  // Helper tanggal lokal YYYY-MM-DD (WIB/Lokal)
+  const getLocalDateStr = (d = new Date()) => {
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const todayStr = getLocalDateStr(new Date())
+  const getYesterdayStr = () => {
+    const d = new Date()
+    d.setDate(d.getDate() - 1)
+    return getLocalDateStr(d)
+  }
+  const yesterdayStr = getYesterdayStr()
+
   // State Grafik & Filter
   const [chartRange, setChartRange] = useState('today')
-  const todayStr = new Date().toISOString().split('T')[0]
   const [selectedDate, setSelectedDate] = useState(todayStr)
+  const [availableDates, setAvailableDates] = useState([])
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [calendarViewMonth, setCalendarViewMonth] = useState(() => new Date())
+  const calendarRef = useRef(null)
+
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return 'Pilih Tanggal'
+    const parts = dateStr.split('-')
+    if (parts.length !== 3) return dateStr
+    const [y, m, d] = parts
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+    const monthIdx = parseInt(m, 10) - 1
+    return `${parseInt(d, 10)} ${months[monthIdx] || m} ${y}`
+  }
+
+  const formatMonthYear = (d) => {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ]
+    return `${months[d.getMonth()]} ${d.getFullYear()}`
+  }
   const [chartStats, setChartStats] = useState({
     avg_dbm: null,
     min_dbm: null,
@@ -205,6 +244,104 @@ export function ModulBeranda({
       // Silent error
     }
   }, [])
+
+  // 3b. Fetch Tanggal Tersedia di Database
+  const fetchAvailableDates = useCallback(async () => {
+    try {
+      const res = await MonitoringService.getAvailableDates({ kantor: activeOffice })
+      if (res.ok && res.data && Array.isArray(res.data.available_dates)) {
+        setAvailableDates(res.data.available_dates)
+      }
+    } catch (err) {
+      console.warn('Gagal memuat tanggal database:', err)
+    }
+  }, [activeOffice])
+
+  useEffect(() => {
+    fetchAvailableDates()
+  }, [fetchAvailableDates])
+
+  // Listener Klik di Luar Kalender untuk Menutup Popover
+  useEffect(() => {
+    if (!isCalendarOpen) return
+    const handleClickOutside = (e) => {
+      if (calendarRef.current && !calendarRef.current.contains(e.target)) {
+        setIsCalendarOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isCalendarOpen])
+
+  // Generator Grid Kalender
+  const renderCalendarDays = () => {
+    const year = calendarViewMonth.getFullYear()
+    const month = calendarViewMonth.getMonth()
+
+    // 0 = Senin, 6 = Minggu
+    const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+    const cells = []
+
+    // Padding hari kosong sebelum tanggal 1
+    for (let i = 0; i < firstDayIndex; i++) {
+      cells.push(<div key={`empty-${i}`} className="h-7 w-7" />)
+    }
+
+    const availableSet = new Set(availableDates)
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayStr = String(d).padStart(2, '0')
+      const monthStr = String(month + 1).padStart(2, '0')
+      const dateKey = `${year}-${monthStr}-${dayStr}`
+
+      const hasData = availableSet.has(dateKey)
+      const isSelected = selectedDate === dateKey && chartRange === 'custom'
+      const isToday = dateKey === todayStr
+
+      if (hasData) {
+        cells.push(
+          <button
+            key={dateKey}
+            type="button"
+            onClick={() => {
+              setSelectedDate(dateKey)
+              setChartRange('custom')
+              setIsCalendarOpen(false)
+            }}
+            className={`h-7 w-7 rounded-lg text-[11px] font-bold flex flex-col items-center justify-center relative transition select-none cursor-pointer ${
+              isSelected
+                ? 'bg-cyan-700 text-white font-extrabold shadow-xs'
+                : 'text-slate-800 hover:bg-sky-100 hover:text-cyan-900'
+            } ${isToday && !isSelected ? 'ring-1 ring-cyan-500' : ''}`}
+            title={`Pilih tanggal ${dateKey} (Tersedia di database)`}
+          >
+            <span className="leading-none">{d}</span>
+            <span
+              className={`w-1 h-1 rounded-full mt-0.5 ${
+                isSelected ? 'bg-white' : 'bg-cyan-600'
+              }`}
+            />
+          </button>
+        )
+      } else {
+        cells.push(
+          <div
+            key={dateKey}
+            className="h-7 w-7 rounded-lg text-[11px] text-slate-300 flex items-center justify-center cursor-not-allowed select-none opacity-30"
+            title="Tidak ada data log pada tanggal ini"
+          >
+            <span className="leading-none">{d}</span>
+          </div>
+        )
+      }
+    }
+
+    return cells
+  }
 
   // 4. Load Chart Data
   const loadChartData = useCallback(async () => {
@@ -1175,26 +1312,104 @@ export function ModulBeranda({
             </p>
           </div>
 
-          {/* Filter Tanggal & Segmented Control (Flatter inline controls) */}
-          <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto font-mono">
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => {
-                setSelectedDate(e.target.value)
-                setChartRange('custom')
-              }}
-              title="Pilih tanggal spesifik"
-              className="flex-1 sm:flex-none px-2.5 py-1 text-[11px] sm:text-xs bg-sky-50/70 hover:bg-sky-100/70 focus:bg-white text-slate-800 border border-sky-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-600 min-h-[34px] sm:min-h-[36px] font-bold transition cursor-pointer"
-            />
+          {/* Filter Tanggal & Segmented Control */}
+          <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto font-mono relative" ref={calendarRef}>
+            {/* Tombol Pemilih Kalender Popover */}
+            <div className="relative flex-1 sm:flex-none">
+              <button
+                type="button"
+                onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                title="Pilih tanggal dari riwayat rekaman database"
+                className={`w-full sm:w-auto px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs rounded-lg border min-h-[34px] sm:min-h-[36px] font-bold transition flex items-center justify-between sm:justify-start gap-1.5 cursor-pointer select-none ${
+                  chartRange === 'custom'
+                    ? 'bg-cyan-700 text-white border-cyan-800 shadow-xs'
+                    : 'bg-sky-50/70 hover:bg-sky-100/70 text-slate-800 border-sky-200'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Calendar className={`w-3.5 h-3.5 ${chartRange === 'custom' ? 'text-white' : 'text-cyan-700'}`} />
+                  <span>{formatDisplayDate(selectedDate)}</span>
+                </div>
+              </button>
 
+              {/* Popover Kalender Interaktif */}
+              {isCalendarOpen && (
+                <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 z-50 bg-white rounded-xl shadow-xl border border-sky-200 p-3 w-[275px] sm:w-[290px] animate-in fade-in zoom-in-95 duration-150">
+                  {/* Header Bulan & Navigasi */}
+                  <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-sky-100 font-sans">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const prev = new Date(calendarViewMonth)
+                        prev.setMonth(prev.getMonth() - 1)
+                        setCalendarViewMonth(prev)
+                      }}
+                      className="p-1 rounded hover:bg-sky-100 text-slate-600 transition cursor-pointer"
+                      title="Bulan Sebelumnya"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs font-extrabold text-slate-800">
+                      {formatMonthYear(calendarViewMonth)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = new Date(calendarViewMonth)
+                        next.setMonth(next.getMonth() + 1)
+                        setCalendarViewMonth(next)
+                      }}
+                      className="p-1 rounded hover:bg-sky-100 text-slate-600 transition cursor-pointer"
+                      title="Bulan Berikutnya"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Header Nama Hari */}
+                  <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-slate-500 font-sans">
+                    <span>Sen</span>
+                    <span>Sel</span>
+                    <span>Rab</span>
+                    <span>Kam</span>
+                    <span>Jum</span>
+                    <span>Sab</span>
+                    <span>Min</span>
+                  </div>
+
+                  {/* Grid Tanggal */}
+                  <div className="grid grid-cols-7 gap-1 text-center">
+                    {renderCalendarDays()}
+                  </div>
+
+                  {/* Footer Keterangan */}
+                  <div className="mt-2.5 pt-2 border-t border-sky-100 flex items-center justify-between text-[10px] text-slate-500 font-sans">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 inline-block" />
+                      <span>Data tersedia</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsCalendarOpen(false)}
+                      className="text-cyan-700 font-bold hover:underline cursor-pointer"
+                    >
+                      Tutup
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Tombol Filter Cepat */}
             <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold shrink-0">
               <button
+                type="button"
                 onClick={() => {
                   setChartRange('today')
                   setSelectedDate(todayStr)
+                  setIsCalendarOpen(false)
                 }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono cursor-pointer ${
                   chartRange === 'today'
                     ? 'bg-cyan-700 text-white'
                     : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
@@ -1203,11 +1418,13 @@ export function ModulBeranda({
                 Hari Ini
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setChartRange('yesterday')
                   setSelectedDate(todayStr)
+                  setIsCalendarOpen(false)
                 }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono cursor-pointer ${
                   chartRange === 'yesterday'
                     ? 'bg-cyan-700 text-white'
                     : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
@@ -1216,11 +1433,13 @@ export function ModulBeranda({
                 Kemarin
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setChartRange('week')
                   setSelectedDate(todayStr)
+                  setIsCalendarOpen(false)
                 }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono cursor-pointer ${
                   chartRange === 'week'
                     ? 'bg-cyan-700 text-white'
                     : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'

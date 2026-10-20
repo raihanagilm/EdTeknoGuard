@@ -215,3 +215,21 @@ class MonitoringController:
             kantor=target_kantor,
             allowed_kantor=allowed_kantor
         )
+
+    @staticmethod
+    def get_available_dates(
+        request: Optional[Any] = None,
+        db: Optional[Session] = None,
+        kantor: Optional[str] = None
+    ) -> Dict[str, Any]:
+        target_kantor = kantor
+        allowed_kantor = None
+        if request:
+            if not target_kantor:
+                target_kantor = getattr(request.state, "active_kantor", None)
+            allowed_kantor = getattr(request.state, "allowed_kantor", None)
+        return MonitoringService.get_available_dates(
+            db=db,
+            kantor=target_kantor,
+            allowed_kantor=allowed_kantor
+        )

@@ -201,7 +201,7 @@ class MonitoringService:
 
         # Skenario 1: Kemarin (2 Garis: Hari Ini & Kemarin diplot pada sumbu jam riil)
         if range_type == "yesterday" and not id_pelanggan:
-            day_target = anchor_date
+            day_target = today
             yesterday = day_target - timedelta(days=1)
             range_data = query_range_hourly(yesterday, day_target)
             data_today = range_data.get(day_target.strftime("%Y-%m-%d"), {})
@@ -246,17 +246,21 @@ class MonitoringService:
                     yest_values.append(None)
                     yest_details.append(None)
 
+            NAMA_HARI = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+            hari_target = NAMA_HARI[day_target.weekday()]
+            hari_yest = NAMA_HARI[yesterday.weekday()]
+
             datasets = [
                 {
                     "id": "today",
-                    "label": f"Hari Ini ({day_target.strftime('%d/%m')})",
+                    "label": f"Hari Ini ({hari_target}, {day_target.strftime('%d/%m')})",
                     "color": "#4F46E5",
                     "values": today_values,
                     "details": today_details
                 },
                 {
                     "id": "yesterday",
-                    "label": f"Kemarin ({yesterday.strftime('%d/%m')})",
+                    "label": f"Kemarin ({hari_yest}, {yesterday.strftime('%d/%m')})",
                     "color": "#F59E0B",
                     "values": yest_values,
                     "details": yest_details
@@ -265,6 +269,7 @@ class MonitoringService:
 
             valid_today = [v for v in today_values if v is not None]
             valid_yest = [v for v in yest_values if v is not None]
+            all_valid = valid_today + valid_yest
             all_details = [d for d in (today_details + yest_details) if d]
             all_min_rx = [d["min_rx"] for d in all_details if d.get("min_rx") is not None]
             all_max_rx = [d["max_rx"] for d in all_details if d.get("max_rx") is not None]
@@ -288,16 +293,16 @@ class MonitoringService:
                 "date": day_target.strftime("%Y-%m-%d")
             }
 
-        # Skenario 2: 7 Hari (7 Garis: H-6 s/d H diplot pada rentang jam riil terukur)
+        # Skenario 2: 7 Hari (7 Garis: diplot pada rentang jam riil terukur, kronologis tertua ke terbaru)
         elif range_type == "week" and not id_pelanggan:
             colors = [
-                "#4F46E5", # Hari Ini (Indigo)
-                "#F59E0B", # H-1 (Amber)
-                "#10B981", # H-2 (Emerald)
-                "#06B6D4", # H-3 (Cyan)
-                "#8B5CF6", # H-4 (Violet)
-                "#EC4899", # H-5 (Pink)
-                "#64748B"  # H-6 (Slate)
+                "#64748B", # Day 0 (Oldest / H-6) - Slate
+                "#EC4899", # Day 1 (H-5) - Pink
+                "#8B5CF6", # Day 2 (H-4) - Violet
+                "#06B6D4", # Day 3 (H-3) - Cyan
+                "#10B981", # Day 4 (H-2) - Emerald
+                "#F59E0B", # Day 5 (H-1 / Kemarin) - Amber
+                "#4F46E5"  # Day 6 (Today / Hari Ini) - Indigo
             ]
             start_7d = anchor_date - timedelta(days=6)
             range_data = query_range_hourly(start_7d, anchor_date)
@@ -321,9 +326,11 @@ class MonitoringService:
 
             datasets = []
             all_valid = []
+            NAMA_HARI = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
 
-            for i in range(7):
-                d_target = anchor_date - timedelta(days=i)
+            # Kronologis maju dari 6 hari lalu (H-6) menuju hari ini (H-0)
+            for idx, offset in enumerate(reversed(range(7))):
+                d_target = anchor_date - timedelta(days=offset)
                 d_key = d_target.strftime("%Y-%m-%d")
                 d_data = range_data.get(d_key, {})
                 d_values = []
@@ -338,17 +345,18 @@ class MonitoringService:
                         d_values.append(None)
                         d_details.append(None)
 
-                label_title = f"Hari Ini ({d_target.strftime('%d/%m')})" if i == 0 else (f"Kemarin ({d_target.strftime('%d/%m')})" if i == 1 else f"H-{i} ({d_target.strftime('%d/%m')})")
+                nama_hari = NAMA_HARI[d_target.weekday()]
+                label_title = f"{nama_hari} ({d_target.strftime('%d/%m')})"
                 datasets.append({
-                    "id": f"day_{i}",
+                    "id": f"day_{idx}",
                     "label": label_title,
-                    "color": colors[i % len(colors)],
+                    "color": colors[idx % len(colors)],
                     "values": d_values,
                     "details": d_details
                 })
                 all_valid.extend([v for v in d_values if v is not None])
 
-            primary_ds = datasets[0]
+            primary_ds = datasets[-1] if datasets else {"values": [], "details": []}
             all_week_details = [d for ds in datasets for d in ds.get("details", []) if d]
             all_min_rx = [d["min_rx"] for d in all_week_details if d.get("min_rx") is not None]
             all_max_rx = [d["max_rx"] for d in all_week_details if d.get("max_rx") is not None]
@@ -460,7 +468,9 @@ class MonitoringService:
             min_dbm = round(max(all_max_rx), 2) if all_max_rx else (round(max(valid_vals), 2) if valid_vals else None)
             max_dbm = round(min(all_min_rx), 2) if all_min_rx else (round(min(valid_vals), 2) if valid_vals else None)
 
-            day_title = f"Hari Ini ({target_date.strftime('%d/%m')})" if target_date == today else f"Tanggal ({target_date.strftime('%d/%m')})"
+            NAMA_HARI = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+            hari_single = NAMA_HARI[target_date.weekday()]
+            day_title = f"Hari Ini ({hari_single}, {target_date.strftime('%d/%m')})" if target_date == today else f"{hari_single} ({target_date.strftime('%d/%m')})"
             datasets = [
                 {
                     "id": "single",
@@ -487,4 +497,32 @@ class MonitoringService:
                 "total_points": len(valid_vals),
                 "date": target_date.strftime("%Y-%m-%d")
             }
+
+    @staticmethod
+    def get_available_dates(
+        db: Session,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[list] = None
+    ) -> Dict[str, Any]:
+        """
+        Mengembalikan daftar tanggal unik (format YYYY-MM-DD) yang memiliki rekaman
+        log performa ONT di database, diurutkan descending (terbaru ke terlama).
+        """
+        q = db.query(func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d').label('tgl'))
+        if kantor and kantor != "all":
+            q = q.join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan).filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            q = q.join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan).filter(Pelanggan.kantor.in_(allowed_kantor))
+        
+        rows = q.group_by(func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d')).order_by(
+            func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d').desc()
+        ).limit(120).all()
+
+        dates = [r[0] for r in rows if r[0]]
+        return {
+            "status": "success",
+            "kantor": kantor or "all",
+            "available_dates": dates,
+            "total_dates": len(dates)
+        }
 

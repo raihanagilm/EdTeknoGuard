@@ -5,7 +5,9 @@ secara live dari perangkat modem ONT.
 """
 
 import html
+import hashlib
 import logging
+import random
 import re
 import subprocess
 import time
@@ -17,9 +19,27 @@ from app.core.config import settings
 logger = logging.getLogger("ont_scraper_service")
 
 PON_STATUS_PATH = "/getpage.gch?pid=1002&nextpage=gpon_status_link_t.gch"
+PON_STATUS_INFO_PATH = "/getpage.gch?pid=1002&nextpage=pon_status_link_info_t.gch"
 STATUS_DEV_PATH = "/getpage.gch?pid=1002&nextpage=status_dev_info_t.gch"
 WLAN_ESSID_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch"
 WLAN_SECURITY_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_secrity_t.gch"
+
+# Daftar kandidat path status optik lintas vendor (ZTE, Huawei, FiberHome, VSOL, XPON Generic)
+COMMON_OPTICAL_PATHS = [
+    "/getpage.gch?pid=1002&nextpage=pon_status_link_info_t.gch",
+    "/getpage.gch?pid=1002&nextpage=gpon_status_link_t.gch",
+    "/getpage.gch?pid=1002&nextpage=status_dev_info_t.gch",
+    "/status_pon.asp",
+    "/pon_status.asp",
+    "/pon_info.asp",
+    "/optical_info.asp",
+    "/status_pon_info.asp",
+    "/html/optical.html",
+    "/gpon_status.html",
+    "/epon_status.html",
+    "/status.asp",
+    "/index.asp"
+]
 
 class ONTScraperService:
 
@@ -35,29 +55,102 @@ class ONTScraperService:
 
     @staticmethod
     def check_lockout_status(session: requests.Session, base_url: str) -> Tuple[bool, int]:
-        """Mengecek apakah modem ONT sedang dalam status lockout akibat 3x salah password."""
+        """Mengecek apakah modem ONT sedang dalam status lockout akibat 3x salah password (ZTE maxtime & pesan jeda generik)."""
         try:
             r = session.get(f"{base_url}/", timeout=6, headers={"Connection": "close"})
+            # 1. Pola ZTE maxtime
             m_time = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', r.text)
             if m_time:
                 rem = int(m_time.group(1)) + 60 - int(m_time.group(2))
                 if rem > 0:
                     return True, rem
+            # 2. Pola generik lockout countdown
+            m_gen = re.search(r'(?:try\s*again\s*in|lock(?:ed)?\s*for|wait)\s*(\d+)\s*(?:seconds|detik|s)', r.text, re.I)
+            if m_gen:
+                rem_gen = int(m_gen.group(1))
+                if rem_gen > 0:
+                    return True, rem_gen
         except Exception:
             pass
         return False, 0
 
     @classmethod
-    def attempt_login(cls, session: requests.Session, base_url: str, host: str, user: str, password: str) -> Tuple[bool, Optional[requests.Response]]:
-        """Mencoba login ke Web GUI modem ONT."""
-        token = cls.get_login_token(session, base_url)
-        payload = {
-            "action": "login",
-            "username": user,
-            "Password": password,
-            "Frm_Logintoken": token,
-            "frashnum": ""
-        }
+    def attempt_login(cls, session: requests.Session, base_url: str, host: str, user: str, password: str, probe_text: Optional[str] = None) -> Tuple[bool, Optional[requests.Response]]:
+        """
+        Mencoba login ke Web GUI modem ONT secara adaptif universal (Heuristic Engine).
+        Secara dinamis mendeteksi form, field user, field password, token tersembunyi,
+        serta mekanisme enkripsi/hashing (SHA-256 salted, MD5, atau Plaintext) tanpa bergantung pada satu merek tertentu.
+        """
+        login_html = probe_text
+        if not login_html:
+            try:
+                r_init = session.get(f"{base_url}/", timeout=6, headers={"Connection": "close"})
+                login_html = r_init.text
+            except Exception:
+                login_html = ""
+
+        # 1. Ekstraksi seluruh tag hidden input (<input type="hidden" ...>)
+        hidden_inputs: Dict[str, str] = {}
+        for m in re.finditer(r'<input[^>]+type=["\']hidden["\'][^>]*>', login_html, re.I):
+            tag = m.group(0)
+            m_name = re.search(r'name=["\']([^"\']+)["\']', tag, re.I)
+            m_val = re.search(r'value=["\']([^"\']*)["\']', tag, re.I)
+            if m_name:
+                hidden_inputs[m_name.group(1)] = m_val.group(1) if m_val else ""
+
+        # 2. Ekstraksi Frm_Logintoken dinamis (ZTE & XPON javascript token)
+        m_tok = re.search(r'Frm_Logintoken.*?\.value\s*=\s*["\'](\w+)["\']', login_html)
+        token = m_tok.group(1) if m_tok else hidden_inputs.get("Frm_Logintoken", "5")
+        hidden_inputs["Frm_Logintoken"] = token
+
+        # 3. Deteksi form action target (default ke base_url/)
+        form_action = ""
+        m_form = re.search(r'<form[^>]+action=["\']([^"\']*)["\']', login_html, re.I)
+        if m_form:
+            form_action = m_form.group(1).strip()
+        if form_action and not form_action.startswith("http") and not form_action.startswith("/"):
+            post_url = f"{base_url}/{form_action}"
+        elif form_action and form_action.startswith("/"):
+            post_url = f"{base_url}{form_action}"
+        else:
+            post_url = f"{base_url}/"
+
+        # 4. Deteksi mekanisme enkripsi/hash
+        is_sha256 = ("passwordSHA256" in login_html or "UserRandomNum" in login_html or "sha256" in login_html.lower())
+        is_md5 = ("calc_md5" in login_html or "hex_md5" in login_html or "md5.js" in login_html.lower())
+        setattr(session, "is_sha256", is_sha256)
+
+        # 5. Siapkan payload kredensial
+        payload = dict(hidden_inputs)
+        payload["action"] = payload.get("action", "login")
+        payload["Right"] = payload.get("Right", "")
+        payload["frashnum"] = payload.get("frashnum", "")
+
+        if is_sha256:
+            random_num = str(random.randint(10000000, 99999999))
+            hashed_pwd = hashlib.sha256((password + random_num).encode("utf-8")).hexdigest()
+            payload["UserRandomNum"] = random_num
+            final_pwd = hashed_pwd
+        elif is_md5:
+            final_pwd = hashlib.md5(password.encode("utf-8")).hexdigest()
+        else:
+            final_pwd = password
+
+        # Deteksi nama field username & password dari form jika ada
+        m_user_field = re.search(r'<input[^>]+name=["\']((?:user|user_?name|txtUser|account|loginname))["\']', login_html, re.I)
+        user_field_name = m_user_field.group(1) if m_user_field else "username"
+
+        m_pass_field = re.search(r'<input[^>]+type=["\']password["\'][^>]+name=["\']([^"\']+)["\']', login_html, re.I)
+        pass_field_name = m_pass_field.group(1) if m_pass_field else "Password"
+
+        # Kirim field spesifik form serta field standar (Username & Password) untuk menjamin kompatibilitas
+        payload[user_field_name] = user
+        payload["Username"] = user
+        payload["username"] = user
+        payload[pass_field_name] = final_pwd
+        payload["Password"] = final_pwd
+        payload["password"] = final_pwd
+
         headers = {
             "Host": host,
             "Referer": f"{base_url}/",
@@ -68,22 +161,41 @@ class ONTScraperService:
         }
 
         try:
-            r = session.post(f"{base_url}/", data=payload, headers=headers, timeout=10, allow_redirects=True)
-        except Exception as e:
+            r = session.post(post_url, data=payload, headers=headers, timeout=10, allow_redirects=True)
+        except Exception:
             return False, None
 
-        # Tanda kegagalan login
+        # 6. Evaluasi hasil login (Deteksi kegagalan & keberhasilan adaptif)
+        text_lower = r.text.lower()
         is_failed = (
-            "User information is error" in r.text or
-            "wrong username or password" in r.text.lower() or
-            "SetDisabled()" in r.text
+            "user information is error" in text_lower or
+            "wrong username or password" in text_lower or
+            "wrong username" in text_lower or
+            "wrong password" in text_lower or
+            "password error" in text_lower or
+            "setdisabled()" in r.text or
+            "login_token_error" in text_lower or
+            "login failed" in text_lower or
+            "invalid password" in text_lower or
+            "authentication failed" in text_lower or
+            "incorrect username" in text_lower
         )
 
         is_success = (
             not is_failed and (
                 "template.gch" in r.text or
                 "top.gch" in r.text or
-                "status_dev_info_t.gch" in r.text
+                "start.ghtml" in r.text or
+                "status_dev_info_t.gch" in r.text or
+                "pon_status_link_info_t.gch" in r.text or
+                "start.ghtml" in r.url or
+                "template.gch" in r.url or
+                "main.html" in r.text or
+                "index.html" in r.url or
+                "home.asp" in r.url or
+                "status_pon.asp" in r.text or
+                # Indikator sukses universal: status 200, form login hilang, dan konten dashboard tampil
+                (r.status_code == 200 and len(r.text) > 300 and 'type="password"' not in r.text and "Frm_Logintoken" not in r.text)
             )
         )
 
@@ -91,8 +203,11 @@ class ONTScraperService:
 
     @classmethod
     def extract_optical_data(cls, session: requests.Session, base_url: str, host: str) -> Optional[Dict[str, Any]]:
-        """Mengambil dan mem-parsing data optik dari halaman status PON."""
-        url = f"{base_url}{PON_STATUS_PATH}"
+        """
+        Mengambil dan mem-parsing data optik dari halaman status PON secara universal.
+        Mendukung ZTE GM220-S, ZTE F663NV3A, Huawei, FiberHome, VSOL, dan XPON Generic
+        dengan regex ekstraksi pola desimal otomatis.
+        """
         headers = {
             "Host": host,
             "Referer": f"{base_url}/template.gch",
@@ -100,58 +215,99 @@ class ONTScraperService:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         }
 
-        r = None
-        for attempt in range(1, 3):
-            try:
-                r = session.get(url, headers=headers, timeout=25)
-                if r.status_code == 200:
-                    break
-            except requests.exceptions.Timeout:
-                time.sleep(2)
-            except Exception:
-                time.sleep(1)
+        # Susun daftar path yang akan diperiksa berdasarkan deteksi awal
+        is_sha256 = getattr(session, "is_sha256", False)
+        if is_sha256:
+            paths_to_try = [PON_STATUS_INFO_PATH, PON_STATUS_PATH] + [p for p in COMMON_OPTICAL_PATHS if p not in (PON_STATUS_INFO_PATH, PON_STATUS_PATH)]
+        else:
+            paths_to_try = [PON_STATUS_PATH, PON_STATUS_INFO_PATH] + [p for p in COMMON_OPTICAL_PATHS if p not in (PON_STATUS_PATH, PON_STATUS_INFO_PATH)]
 
-        if not r or r.status_code != 200:
+        content = ""
+        for path in paths_to_try:
+            url = f"{base_url}{path}"
+            for attempt in range(1, 3):
+                try:
+                    r = session.get(url, headers=headers, timeout=15)
+                    if r.status_code == 200 and any(k in r.text for k in ["RxPower", "Optical", "LosInfo", "dBm", "Input Power", "Receiv"]):
+                        content = r.text
+                        break
+                except requests.exceptions.Timeout:
+                    time.sleep(1.2)
+                except Exception:
+                    time.sleep(0.5)
+            if content:
+                break
+
+        if not content:
             return None
 
-        content = r.text
         results = {}
 
-        # 1. Ekstraksi Rx Power, Tx Power, Bias Current
-        m_rx = re.search(r'var\s+RxPower\s*=\s*["\']([+-]?\d+)["\']', content)
-        m_tx = re.search(r'var\s+TxPower\s*=\s*["\']([+-]?\d+)["\']', content)
-        m_cur = re.search(r'var\s+Current\s*=\s*["\']([+-]?\d+)["\']', content)
-        m_los = re.search(r'var\s+LosInfo\s*=\s*["\'](\d+)["\']', content)
+        # 1. Ekstraksi Universal: Rx Power (Input Power)
+        raw_rx: Optional[float] = None
+        m_rx_var = re.search(r'var\s+(?:RxPower|Rx_Power|rx_power|InputPower|RxOpticalPower|Rx_Power_Value)\s*=\s*["\']?([+-]?\d+\.?\d*)', content, re.I)
+        if m_rx_var:
+            raw_rx = float(m_rx_var.group(1))
 
-        if m_rx:
-            raw_rx = float(m_rx.group(1))
-            results["rx_power"] = round(raw_rx / 10000.0, 2)
-        else:
-            m_rx_html = re.search(r'Optical\s*Module\s*Input\s*Power\(dBm\)[^<]*</td>\s*<td[^>]*>\s*([+-]?\d+\.?\d*)', content, re.IGNORECASE)
-            results["rx_power"] = float(m_rx_html.group(1)) if m_rx_html else None
+        if raw_rx is None:
+            m_rx_html = re.search(r'(?:Optical\s*(?:Module\s*)?Input\s*Power|Rx\s*Power|Input\s*Power|Receiv(?:ed?|ing)\s*Power|Redaman\s*Rx)[^<]*</td>\s*<td[^>]*>\s*([+-]?\d+\.?\d*)', content, re.I)
+            if m_rx_html:
+                raw_rx = float(m_rx_html.group(1))
 
-        if m_tx:
-            raw_tx = float(m_tx.group(1))
-            results["tx_power"] = round(raw_tx / 10000.0, 2)
-        else:
-            m_tx_html = re.search(r'Optical\s*Module\s*Output\s*Power\(dBm\)[^<]*</td>\s*<td[^>]*>\s*([+-]?\d+\.?\d*)', content, re.IGNORECASE)
-            results["tx_power"] = float(m_tx_html.group(1)) if m_tx_html else None
+        if raw_rx is None:
+            m_rx_dbm = re.search(r'(?:rx|input|in|receiv)[^<\n]{0,40}?([+-]?\d{1,3}(?:\.\d+)?)\s*(?:dBm|dB)', content, re.I)
+            if m_rx_dbm:
+                raw_rx = float(m_rx_dbm.group(1))
 
-        if m_cur:
-            raw_cur = float(m_cur.group(1))
-            results["bias_current_ma"] = round(raw_cur / 1000.0, 2)
+        # Normalisasi otomatis skala desimal (misal -253800 -> -25.38 atau -2538 -> -25.38)
+        if raw_rx is not None:
+            if abs(raw_rx) > 5000:
+                results["rx_power"] = round(raw_rx / 10000.0, 2)
+            elif abs(raw_rx) > 500:
+                results["rx_power"] = round(raw_rx / 100.0, 2)
+            else:
+                results["rx_power"] = round(raw_rx, 2)
         else:
-            m_cur_html = re.search(r'Optical\s*Transmitter\s*Bias\s*Current\(uA\)[^<]*</td>\s*<td[^>]*>\s*(\d+)', content, re.IGNORECASE)
+            results["rx_power"] = None
+
+        # 2. Ekstraksi Universal: Tx Power (Output Power)
+        raw_tx: Optional[float] = None
+        m_tx_var = re.search(r'var\s+(?:TxPower|Tx_Power|tx_power|OutputPower|TxOpticalPower)\s*=\s*["\']?([+-]?\d+\.?\d*)', content, re.I)
+        if m_tx_var:
+            raw_tx = float(m_tx_var.group(1))
+
+        if raw_tx is None:
+            m_tx_html = re.search(r'(?:Optical\s*(?:Module\s*)?Output\s*Power|Tx\s*Power|Output\s*Power|Transmi(?:t|tting)\s*Power)[^<]*</td>\s*<td[^>]*>\s*([+-]?\d+\.?\d*)', content, re.I)
+            if m_tx_html:
+                raw_tx = float(m_tx_html.group(1))
+
+        if raw_tx is not None:
+            if abs(raw_tx) > 5000:
+                results["tx_power"] = round(raw_tx / 10000.0, 2)
+            elif abs(raw_tx) > 500:
+                results["tx_power"] = round(raw_tx / 100.0, 2)
+            else:
+                results["tx_power"] = round(raw_tx, 2)
+        else:
+            results["tx_power"] = None
+
+        # 3. Ekstraksi Universal: Bias Current & Voltage
+        m_cur_var = re.search(r'var\s+(?:Current|bias_current|BiasCurrent)\s*=\s*["\']?([+-]?\d+\.?\d*)', content, re.I)
+        if m_cur_var:
+            raw_cur = float(m_cur_var.group(1))
+            results["bias_current_ma"] = round(raw_cur / 1000.0, 2) if abs(raw_cur) > 500 else round(raw_cur, 2)
+        else:
+            m_cur_html = re.search(r'(?:Optical\s*Transmitter\s*Bias\s*Current|Bias\s*Current)[^<]*</td>\s*<td[^>]*>\s*(\d+)', content, re.I)
             results["bias_current_ma"] = round(float(m_cur_html.group(1)) / 1000.0, 2) if m_cur_html else None
 
-        # 2. Voltage & Temperature
-        m_volt = re.search(r'Optical\s*Module\s*Supply\s*Voltage\(uV\)[^<]*</td>\s*<td[^>]*>\s*(\d+)', content, re.IGNORECASE)
+        m_volt = re.search(r'(?:Optical\s*Module\s*Supply\s*Voltage|Supply\s*Voltage)[^<]*</td>\s*<td[^>]*>\s*(\d+)', content, re.I)
         results["supply_voltage_v"] = round(float(m_volt.group(1)) / 1000000.0, 2) if m_volt else None
 
-        m_temp = re.search(r'Operating\s*Temperature[^<]*</td>\s*<td[^>]*>\s*([+-]?\d+\.?\d*)', content, re.IGNORECASE)
+        # 4. Ekstraksi Universal: Suhu / Temperature
+        m_temp = re.search(r'(?:Operating\s*Temperature|Temperature|Suhu\s*ONT|Temp)[^<]*</td>\s*<td[^>]*>\s*([+-]?\d+\.?\d*)', content, re.I)
         results["suhu_ont"] = float(m_temp.group(1)) if m_temp else None
 
-        # 3. GPON State
+        # 5. Ekstraksi Universal: Status GPON & LOS
         m_loid = re.search(r'id=["\']LoidState["\'][^>]*value=["\'](\d+)["\']', content)
         loid_map = {
             "0": "Init State",
@@ -164,21 +320,28 @@ class ONTScraperService:
         if m_loid and m_loid.group(1) in loid_map:
             results["gpon_state"] = loid_map[m_loid.group(1)]
         else:
-            m_state = re.search(r'GPON\s*State[^<]*</td>\s*<td[^>]*>\s*([^<]+)', content, re.IGNORECASE)
+            m_state = re.search(r'(?:GPON|EPON|PON)\s*State[^<]*</td>\s*<td[^>]*>\s*([^<]+)', content, re.I)
             results["gpon_state"] = m_state.group(1).strip() if m_state else "Normal"
 
+        m_los = re.search(r'var\s+LosInfo\s*=\s*["\']?(\d+)["\']?', content, re.I)
         results["is_los"] = (m_los.group(1) == "1") if m_los else False
+        if not results["is_los"] and results.get("rx_power") is not None and results["rx_power"] <= -35.0:
+            results["is_los"] = True
 
-        # 4. Device Serial Number
+        # 6. Ekstraksi Universal: Device Serial Number & Model
+        results["pon_sn"] = None
         try:
-            r_dev = session.get(f"{base_url}{STATUS_DEV_PATH}", headers=headers, timeout=10)
-            m_sn = re.search(r'id=["\']Frm_PonSerialNumber["\'][^>]*>(.*?)</td>', r_dev.text)
+            r_dev = session.get(f"{base_url}{STATUS_DEV_PATH}", headers=headers, timeout=8)
+            dev_text = r_dev.text if r_dev.status_code == 200 else content
+            m_sn = re.search(r'id=["\'](?:Frm_PonSerialNumber|Frm_SerialNumber|pon_sn|serial_num)["\'][^>]*>(.*?)</td>', dev_text, re.I | re.S)
+            if not m_sn:
+                m_sn = re.search(r'>\s*(?:PON\s*)?Serial\s*Number\s*</td>\s*<td[^>]*>(.*?)</td>', dev_text, re.I | re.S)
             if m_sn:
-                results["pon_sn"] = html.unescape(m_sn.group(1).strip())
-            else:
-                results["pon_sn"] = None
+                clean_sn = html.unescape(m_sn.group(1)).strip()
+                clean_sn = re.sub(r'<[^>]+>', '', clean_sn).strip()
+                results["pon_sn"] = clean_sn if clean_sn else None
         except Exception:
-            results["pon_sn"] = None
+            pass
 
         return results
 
@@ -282,6 +445,25 @@ class ONTScraperService:
                         res["password_wifi"] = m_wpa_inp.group(1).strip()
         except Exception as e:
             logger.debug(f"Gagal membaca WLAN Security dari {host}: {e}")
+
+        # Fallback WLAN Status info (ZTE F663 / XPON)
+        if not res["nama_wifi"]:
+            try:
+                r_wlan = session.get(f"{base_url}/getpage.gch?pid=1002&nextpage=e8_status_wlan_info_t.gch", headers=headers, timeout=6)
+                if r_wlan.status_code == 200:
+                    txt_wlan = html.unescape(r_wlan.text)
+                    m_wlan_ssid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_wlan)
+                    if m_wlan_ssid:
+                        for item in m_wlan_ssid:
+                            if item.strip():
+                                res["nama_wifi"] = item.strip()
+                                break
+                    if not res["nama_wifi"]:
+                        m_var_ssid = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_wlan, re.I)
+                        if m_var_ssid and m_var_ssid.group(1).strip():
+                            res["nama_wifi"] = m_var_ssid.group(1).strip()
+            except Exception:
+                pass
 
         return res
 
@@ -480,10 +662,11 @@ class ONTScraperService:
             active_candidate_list = credentials_to_try
 
         start_time = time.time()
+        probe_html = r_probe.text if r_probe is not None else None
 
         for u, p, source in active_candidate_list:
             # Percobaan 1: Coba login normal
-            ok, resp = cls.attempt_login(session, base_url, host, u, p)
+            ok, resp = cls.attempt_login(session, base_url, host, u, p, probe_text=probe_html)
             last_resp = resp
 
             # Jika percobaan 1 gagal dan modem masih merespon (bukan timeout),
