@@ -38,6 +38,11 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
    - Ubah `compileSdk = 35` dan `targetSdk = 35`.
    - DILARANG KERAS menyuruh user menonaktifkan optimasi baterai (HAPUS dialog `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` atau peringatan baterai lainnya agar user tidak merasa terganggu).
    - CUKUP minta izin standar notifikasi `POST_NOTIFICATIONS` (Android 13+) secara otomatis saat pertama kali app dibuka.
+   - STATUS BAR WARNA PUTIH (SESUAI HEADER):
+     * Di `res/values/themes.xml`:
+       Ubah `android:statusBarColor` menjadi `@color/white` dan `android:windowLightStatusBar` menjadi `true`.
+     * Di `MainActivity.kt` (`onCreate`):
+       Pastikan status bar disetel ke warna putih dengan ikon status bar gelap (`View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR`) agar status bar di bagian atas layar HP serasi dengan warna putih header dashboard TeknoGuard/TeknoCust (TIDAK HITAM).
 
 2. SISTEM NOTIFIKASI LENGKAP: HEADS-UP, IN-APP POP-UP CARD, & DIALOG BOX KONFIRMASI:
    A. SINKRONISASI NOTIFIKASI WEB KE HP (DENGAN BUNYI, GETAR, HEADS-UP & DEEP LINK):
