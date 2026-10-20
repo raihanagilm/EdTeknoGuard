@@ -33,21 +33,23 @@ Halo! Tolong lakukan pembaruan menyeluruh pada proyek Android Studio di `D:\data
 
 Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
 
-1. TARGET SDK & KOMPATIBILITAS OS (Android 7.0 s/d Android 16/17):
-   - Ubah `minSdk = 24` (Mendukung Android 7.0 Nougat ke atas agar HP teknisi/warga lama tetap dapat menginstall).
-   - Ubah `compileSdk = 35` (Mendukung API level terbaru Android 15, 16, hingga pratinjau 17).
-   - Ubah `targetSdk = 35`.
-   - Pastikan runtime permission `POST_NOTIFICATIONS` otomatis diminta saat pertama kali app dibuka di Android 13+.
+1. TARGET SDK & IZIN OTOMATIS (BEBAS POP-UP OPTIMASI BATERAI):
+   - Ubah `minSdk = 24` (Mendukung Android 7.0 Nougat ke atas).
+   - Ubah `compileSdk = 35` dan `targetSdk = 35`.
+   - DILARANG KERAS menyuruh user menonaktifkan optimasi baterai (HAPUS dialog `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` atau peringatan baterai lainnya agar user tidak merasa terganggu).
+   - CUKUP minta izin standar notifikasi `POST_NOTIFICATIONS` (Android 13+) secara otomatis saat pertama kali app dibuka.
 
 2. NOTIFIKASI NATIVE MURNI OS (BUKAN WEB NOTIFICATION):
    A. BACKGROUND ENGINE (Saat Aplikasi Ditutup / HP Terkunci):
-      - Di `EdTeknoBackgroundService.kt`, pertahankan implementasi `NotificationCompat.Builder` dengan Notification Channel:
-        * Channel Peringatan Darurat (`CHANNEL_EMERGENCY_ID`): Suara Sirine Alarm (`TYPE_ALARM`), getaran pola panjang `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`, lampu merah menyala, prioritas `PRIORITY_MAX`.
-        * Channel Pelanggan (`CHANNEL_CUSTOMER_ID`): Suara Notifikasi (`TYPE_NOTIFICATION`), prioritas `PRIORITY_HIGH`.
-      - Endpoint Polling Lokal Baru:
-        * Notifikasi Tiket (TeknoGuard): `http://172.21.20.44:7891/api/notifications/poll`
-        * Status Redaman (TeknoGuard) : `http://172.21.20.44:7891/api/monitoring/status`
-        * Status Tiket Pelanggan (TeknoCust): `http://172.21.20.44:7891/api/portal/ticket-status`
+      - Di `EdTeknoBackgroundService.kt`, implementasikan Heads-Up Banner (Notifikasi Melayang Langsung di Layar HP):
+        * Channel Peringatan Darurat (`CHANNEL_EMERGENCY_ID`): Suara Sirine Alarm (`TYPE_ALARM`), getaran pola panjang `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`, lampu merah menyala, gunakan `NotificationManager.IMPORTANCE_HIGH` agar notifikasi langsung melayang di atas layar HP (heads-up banner).
+        * Channel Pelanggan (`CHANNEL_CUSTOMER_ID`): Suara Notifikasi (`TYPE_NOTIFICATION`), gunakan `NotificationManager.IMPORTANCE_HIGH` (langsung muncul pop-up di layar atas).
+      - WAJIB MUNCUL LANGSUNG DI LAYAR (HEADS-UP POP-UP):
+        Setiap notifikasi baru WAJIB langsung muncul melayang dari atas layar HP pengguna (banner heads-up), bersuara, dan bergetar, sehingga user langsung melihatnya tanpa harus menggeser panel notifikasi.
+      - Endpoint Polling Server Baru:
+        * Notifikasi Tiket (TeknoGuard): `http://172.21.20.62:7890/api/notifications/poll`
+        * Status Redaman (TeknoGuard) : `http://172.21.20.62:7890/api/monitoring/status`
+        * Status Tiket Pelanggan (TeknoCust): `http://172.21.20.62:7890/api/portal/ticket-status`
    
    B. JAVASCRIPT BRIDGE NATIVE (Saat Aplikasi Sedang Dibuka):
       - Di `MainActivity.kt`, buat kelas `WebAppInterface`:
@@ -62,7 +64,9 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
                     .setStyle(NotificationCompat.BigTextStyle().bigText(message))
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setAutoCancel(true)
-                    .setPriority(if (isEmergency) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setDefaults(NotificationCompat.DEFAULT_ALL)
+                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                     .build()
                 val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 manager.notify(System.currentTimeMillis().toInt(), notification)
@@ -73,10 +77,10 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
         `binding.webView.addJavascriptInterface(WebAppInterface(this), "AndroidBridge")`
       - Dengan ini, event web otomatis memunculkan bar notifikasi native Android!
 
-3. PEMBARUAN IP SERVER LOKAL & PENGHAPUSAN NGROK:
+3. PEMBARUAN IP SERVER VPS & PENGHAPUSAN NGROK:
    - Bersihkan seluruh sisa domain ngrok (`duty-astride-outright.ngrok-free.dev`) dan header `ngrok-skip-browser-warning`.
-   - Base URL TeknoGuard: `http://172.21.20.44:7891/login`
-   - Base URL TeknoCust : `http://172.21.20.44:7891/portal`
+   - Base URL TeknoGuard: `http://172.21.20.62:7890/login`
+   - Base URL TeknoCust : `http://172.21.20.62:7890/portal`
    - Pastikan `android:usesCleartextTraffic="true"` pada AndroidManifest.xml.
 
 4. IKON APLIKASI KHUSUS PER VARIANT (PRODUCT FLAVOR):
@@ -120,12 +124,12 @@ Pada sistem operasi iOS (iPhone/iPad), notifikasi native ditangani melalui frame
         * Bundle Identifier: `com.edtekno.guard`
         * Display Name: `TeknoGuard`
         * App Icon: Gunakan gambar `Group197.png` di Assets.xcassets -> AppIcon.
-        * URL Start: `http://172.21.20.44:7891/login`
+        * URL Start: `http://172.21.20.62:7890/login`
       - Target 2: `TeknoCust`
         * Bundle Identifier: `com.edtekno.cust`
         * Display Name: `TeknoCust`
         * App Icon: Gunakan gambar `Frame36.png` di Assets.xcassets -> AppIcon.
-        * URL Start: `http://172.21.20.44:7891/portal`
+        * URL Start: `http://172.21.20.62:7890/portal`
 
 3. KONFIGURASI `Info.plist` (IZIN HTTP LOKAL, NOTIFIKASI & HARDWARE):
    ```xml
@@ -136,7 +140,7 @@ Pada sistem operasi iOS (iPhone/iPad), notifikasi native ditangani melalui frame
        <true/>
        <key>NSExceptionDomains</key>
        <dict>
-           <key>172.21.20.44</key>
+           <key>172.21.20.62</key>
            <dict>
                <key>NSExceptionAllowsInsecureHTTPLoads</key>
                <true/>
@@ -195,9 +199,9 @@ Pada sistem operasi iOS (iPhone/iPad), notifikasi native ditangani melalui frame
            
            // 3. Tentukan URL berdasarkan Target / Scheme
            #if TARGET_GUARD
-           let initialUrl = "http://172.21.20.44:7891/login"
+           let initialUrl = "http://172.21.20.62:7890/login"
            #else
-           let initialUrl = "http://172.21.20.44:7891/portal"
+           let initialUrl = "http://172.21.20.62:7890/portal"
            #endif
            
            if let url = URL(string: initialUrl) {
@@ -241,7 +245,7 @@ Pada sistem operasi iOS (iPhone/iPad), notifikasi native ditangani melalui frame
 
        // MARK: - Polling Status Latar Belakang ke Backend Lokal
        func pollServerNotification() {
-           guard let url = URL(string: "http://172.21.20.44:7891/api/notifications/poll") else { return }
+           guard let url = URL(string: "http://172.21.20.62:7890/api/notifications/poll") else { return }
            
            URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
                guard let data = data, error == nil else { return }

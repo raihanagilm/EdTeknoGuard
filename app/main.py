@@ -152,6 +152,7 @@ async def switch_kantor(request: Request, kantor: str = "cabang"):
     return response
 
 # Mount folder static dan frontend dist (jika telah dibuild)
+Path("static").mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 frontend_dist = Path("frontend/dist")
