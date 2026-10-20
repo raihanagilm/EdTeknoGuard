@@ -20,6 +20,7 @@ class SystemSettingsService:
         "default_modem_user",
         "default_modem_pass",
         "default_modem_credentials",
+        "apply_to_invalid_customers",
         "last_scan_time",
         "is_network_error",
         "last_scan_duration"
@@ -122,6 +123,7 @@ class SystemSettingsService:
         mikrotik_pass = db_settings.get("mikrotik_password", getattr(settings, "MIKROTIK_PASSWORD", ""))
         mikrotik_kantor = db_settings.get("mikrotik_kantor", getattr(settings, "MIKROTIK_DEFAULT_KANTOR", "banyumas"))
         mikrotik_auto = db_settings.get("mikrotik_auto_sync", "true").lower() in ["true", "1", "yes"]
+        apply_invalid = db_settings.get("apply_to_invalid_customers", "false").lower() in ["true", "1", "yes"]
 
         return {
             "kantor": k or "all",
@@ -132,6 +134,7 @@ class SystemSettingsService:
             "default_modem_user": credentials_list[0]["username"] if credentials_list else default_user,
             "default_modem_pass": credentials_list[0]["password"] if credentials_list else default_pass,
             "default_modem_credentials": credentials_list,
+            "apply_to_invalid_customers": apply_invalid,
             "notification_alert_interval_hours": notif_interval_hours,
             "night_mode_enabled": night_enabled,
             "night_mode_start": night_start,
@@ -192,7 +195,8 @@ class SystemSettingsService:
             "critical_threshold_dbm": str(data.critical_threshold_dbm),
             "default_modem_user": primary_user,
             "default_modem_pass": primary_pass,
-            "default_modem_credentials": json.dumps(creds_to_save)
+            "default_modem_credentials": json.dumps(creds_to_save),
+            "apply_to_invalid_customers": "true" if data.apply_to_invalid_customers else "false"
         }
         if data.scheduler_status:
             office_pairs["scheduler_status"] = data.scheduler_status

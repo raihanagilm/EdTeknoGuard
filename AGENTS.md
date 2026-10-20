@@ -69,7 +69,7 @@ Modem pelanggan di lapangan dapat memiliki kredensial yang bervariasi karena kon
 3. **Halaman Pengaturan (`/pengaturan` atau `/settings`)**:
    - Menggunakan layout **2 TAB**:
      - **Tab 1 (Parameter & Ambang Batas)**: Input manual menit interval, ambang batas -26.0 dBm (warning) dan -27.0 dBm (kritis). *Tanpa tombol preset opsi dan tanpa radio button status scheduler*.
-     - **Tab 2 (Kredensial Modem ONT)**: Tabel repeater dinamis untuk menambah/menghapus pasangan username & password modem lebih dari 1 + opsi sinkronisasi massal ke pelanggan invalid.
+     - **Tab 2 (Kredensial Modem ONT)**: Tabel repeater dinamis untuk menambah/menghapus pasangan username & password modem lebih dari 1 + opsi checkbox sinkronisasi massal ke pelanggan invalid yang tersimpan permanen di database (`system_settings`) per kantor cabang aktif.
      - *(Fitur Telegram telah dihapus bersih karena notifikasi darurat ditangani secara native melalui web wrapper APK Android Studio)*.
 
 ---

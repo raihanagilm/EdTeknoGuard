@@ -68,20 +68,65 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
            * `target_tab`: "logs", "tiket", atau "beranda".
            * `target_filter`: Keyword filter pencarian.
 
-      3. MEKANISME DEDUP (Anti-Spam Suara Berulang):
+      3. INTEGRASI PENGATURAN DATABASE (GETARAN, JAM TENANG & INTERVAL PENGINGAT):
+         Endpoint `/api/notifications/poll` menyertakan objek `notification_config` yang langsung bersumber dari tabel `system_settings`:
+         ```json
+         "notification_config": {
+             "vibration_enabled": true,
+             "alert_waiting_interval_minutes": 10,
+             "night_mode_enabled": true,
+             "night_mode_start": "22:00",
+             "night_mode_end": "06:00"
+         }
+         ```
+         Aturan Logika di `EdTeknoBackgroundService.kt`:
+         - Getaran Dinamis (`vibration_enabled`):
+           Jika di database dimatikan (`false`), jangan getarkan perangkat (`builder.setVibrate(null)`).
+           Jika aktif (`true`), jalankan pola getar darurat.
+         - Jam Tenang Malam / Quiet Hours (`night_mode_enabled`, `night_mode_start`, `night_mode_end`):
+           Jika jam saat ini masuk rentang senyap (misal 22:00 - 06:00), bungkam notifikasi non-kritis (level 'warning' dan 'info') agar teknisi tidak terganggu saat tidur. Level 'critical' (seperti kabel putus / LOS) TETAP dibunyikan.
+         - Interval Pengingat Terjeda (`alert_waiting_interval_minutes`):
+           Pengingat pemantauan terjeda (paused reminder) menyesuaikan interval database (misal tiap 5 menit), bukan statis 1 jam.
+
+      4. SUARA NOTIFIKASI KHUSUS NATIVE (DENTING BEL DARI RES/RAW):
+         - Letakkan file audio bel di: `app/src/main/res/raw/tekno_alarm.mp3`.
+         - Daftarkan suara bel tersebut ke Channel Darurat Karyawan:
+           ```kotlin
+           val customAlarmSound = Uri.parse("android.resource://" + packageName + "/" + R.raw.tekno_alarm)
+           val alarmAudioAttr = AudioAttributes.Builder()
+               .setUsage(AudioAttributes.USAGE_ALARM)
+               .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+               .build()
+
+           val emergencyChannel = NotificationChannel(
+               "tekno_emergency_v2_channel",
+               "Notifikasi Darurat NOC",
+               NotificationManager.IMPORTANCE_HIGH
+           ).apply {
+               description = "Peringatan Darurat Redaman Kabel Fiber / Tiket Baru"
+               setSound(customAlarmSound, alarmAudioAttr)
+               enableVibration(true)
+               vibrationPattern = longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)
+               enableLights(true)
+               lightColor = Color.RED
+               lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+           }
+           manager.createNotificationChannel(emergencyChannel)
+           ```
+
+      5. MEKANISME DEDUP (Anti-Spam Suara Berulang):
          - Simpan daftar ID notifikasi yang sudah pernah dibunyikan ke `HashSet<String>` di memory service atau SharedPreferences (`alertedNotificationIds`).
          - Jika item `id` BELUM PERNAH dibunyikan:
-           * Bunyikan alarm darurat / suara notifikasi.
-           * Picu getaran kuat (`longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`).
+           * Bunyikan alarm suara bel (`tekno_alarm.mp3`) / nada notifikasi.
+           * Picu getaran jika `vibration_enabled == true`.
            * Munculkan Heads-Up Banner melayang dari atas layar HP!
            * Masukkan `id` tersebut ke `alertedNotificationIds`.
 
-      4. IMPLEMENTASI NOTIFIKASI HEADS-UP & DEEP LINKING KE HALAMAN TEPAT:
+      6. IMPLEMENTASI NOTIFIKASI HEADS-UP & DEEP LINKING KE HALAMAN TEPAT:
          ```kotlin
-         // Channel Notifikasi Gangguan (IMPORTANCE_HIGH agar pasti Pop-Up Banner melayang, Bunyi & Getar)
-         val channelId = if (level == "critical") CHANNEL_EMERGENCY_ID else CHANNEL_CUSTOMER_ID
+         val isCritical = level == "critical"
+         val channelId = if (isCritical) "tekno_emergency_v2_channel" else CHANNEL_CUSTOMER_ID
          
-         // Intent saat notifikasi diklik teknisi -> Buka tab yang sesuai di Web!
          val clickIntent = Intent(context, MainActivity::class.java).apply {
              flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
              putExtra("target_tab", targetTab)       // "logs" atau "tiket"
@@ -101,16 +146,35 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
              .setSmallIcon(R.mipmap.ic_launcher)
              .setAutoCancel(true)
              .setPriority(NotificationCompat.PRIORITY_MAX)
-             .setDefaults(NotificationCompat.DEFAULT_ALL)
              .setContentIntent(pendingIntent) // Klik langsung buka tab logs / tiket!
-             .setFullScreenIntent(pendingIntent, level == "critical") // Melayang di layar saat ada gangguan!
+             .setFullScreenIntent(pendingIntent, isCritical) // Melayang di layar saat ada gangguan!
              .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+         val alarmSound = Uri.parse("android.resource://" + packageName + "/" + R.raw.tekno_alarm)
+         if (isCritical) {
+             builder.setSound(alarmSound)
+                 .setLights(Color.RED, 500, 500)
+                 .setCategory(NotificationCompat.CATEGORY_ALARM)
+             if (vibrationEnabled) {
+                 builder.setVibrate(longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000))
+             } else {
+                 builder.setVibrate(null)
+             }
+         } else {
+             builder.setSound(notifSound)
+                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+             if (vibrationEnabled) {
+                 builder.setVibrate(longArrayOf(0, 300, 200, 300))
+             } else {
+                 builder.setVibrate(null)
+             }
+         }
 
          val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
          manager.notify(id.hashCode(), builder.build())
          ```
 
-      5. PENANGANAN DI `MainActivity.kt` (Saat Notifikasi HP Diklik):
+      7. PENANGANAN DI `MainActivity.kt` (Saat Notifikasi HP Diklik):
          - Baca intent extra `target_tab`:
          ```kotlin
          override fun onNewIntent(intent: Intent) {

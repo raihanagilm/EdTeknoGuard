@@ -626,17 +626,24 @@ export function ModulPengaturan({
 
               {/* Checkbox Sinkronisasi Pelanggan Invalid */}
               <div className="pt-2">
-                <label className="flex items-start gap-2.5 p-3 rounded-xl bg-cyan-50/50 border border-sky-200 cursor-pointer">
+                <label className="flex items-start gap-2.5 p-3 rounded-xl bg-cyan-50/50 border border-sky-200 cursor-pointer transition hover:bg-cyan-50">
                   <input
                     type="checkbox"
                     checked={applyToInvalid}
                     onChange={(e) => setApplyToInvalid(e.target.checked)}
-                    className="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500"
+                    className="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
                   />
-                  <div className="text-xs">
-                    <span className="font-bold text-slate-800">Sinkronkan ke seluruh pelanggan berstatus INVALID</span>
+                  <div className="text-xs flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-800">Sinkronkan ke seluruh pelanggan berstatus INVALID</span>
+                      {applyToInvalid && (
+                        <span className="px-2 py-0.5 text-[10px] font-bold bg-cyan-100 text-cyan-800 rounded-full border border-cyan-200">
+                          Aktif Tersimpan
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Otomatis menguji urutan kredensial baru ini ke semua pelanggan yang sebelumnya gagal login saat disimpan.
+                      Otomatis menguji urutan kredensial baru ini ke semua pelanggan yang sebelumnya gagal login saat disimpan dan selama pemantauan.
                     </p>
                   </div>
                 </label>

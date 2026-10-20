@@ -369,16 +369,19 @@ class MonitoringScheduler:
             except Exception:
                 return None
 
+            # Ambil interval pengingat dari DB (default 5 menit jika tidak diatur)
+            alert_interval_minutes = int(cls.get_setting_from_db(db, "alert_waiting_interval_minutes", "5"))
+            required_seconds = max(60, alert_interval_minutes * 60)
+
             seconds_since_last_reminder = (now_dt - last_reminder_dt).total_seconds()
-            # Picu notifikasi tiap 1 jam (3600 detik)
-            if seconds_since_last_reminder >= 3600:
-                total_paused_hours = max(1, int(round((now_dt - paused_dt).total_seconds() / 3600)))
+            if seconds_since_last_reminder >= required_seconds:
+                total_paused_minutes = max(1, int(round((now_dt - paused_dt).total_seconds() / 60)))
                 return {
                     "show": True,
-                    "paused_hours": total_paused_hours,
+                    "paused_minutes": total_paused_minutes,
                     "paused_at": paused_at_str,
                     "title": "PENGINGAT: Pemantauan Otomatis Sedang Dijeda!",
-                    "message": f"Pemantauan otomatis ONT telah dijeda selama {total_paused_hours} jam. Apakah ingin melanjutkan jeda atau mengaktifkan jadwal sekarang?"
+                    "message": f"Pemantauan otomatis ONT telah dijeda selama {total_paused_minutes} menit. Segera aktifkan kembali pemantauan untuk menjaga kestabilan jaringan."
                 }
         except Exception as e:
             logger.error(f"Error check_paused_reminder: {e}")
@@ -734,6 +737,8 @@ class MonitoringScheduler:
                     crit_threshold=eff_crit_th
                 )
 
+                was_previously_valid = (getattr(cust, "status_kredensial", "UNTESTED") == "VALID")
+
                 # Evaluasi hasil scraping
                 if scrape_res["success"] and scrape_res["rx_power"] is not None:
                     res = scrape_res
@@ -743,14 +748,25 @@ class MonitoringScheduler:
                         cust.pass_admin = scrape_res["updated_pass"]
                     ket = f"Live Scraping OK ({res.get('gpon_state', 'Normal')})"
                 elif scrape_res.get("error_type") == "AUTH_FAILED":
-                    cust.status_kredensial = "INVALID"
-                    res = scrape_res
-                    ket = "Login Gagal (User/Pass Salah)"
+                    if was_previously_valid:
+                        # Kredensial pelanggan sudah benar/valid sebelumnya, modem mungkin sibuk atau menolak session. Pertahankan VALID!
+                        cust.status_kredensial = "VALID"
+                        res = scrape_res
+                        res["status_koneksi"] = "WARNING"
+                        ket = "Login Tertunda (Modem Sibuk / Session Semaphore, Kredensial Tetap Valid)"
+                    else:
+                        cust.status_kredensial = "INVALID"
+                        res = scrape_res
+                        ket = "Login Gagal (User/Pass Salah)"
                 elif scrape_res.get("error_type") == "UNREACHABLE":
+                    if was_previously_valid:
+                        cust.status_kredensial = "VALID"
                     unreachable_count += 1
                     res = scrape_res
                     ket = "Gagal Terhubung (Unreachable - Cek Jaringan Lokal)"
                 else:
+                    if was_previously_valid:
+                        cust.status_kredensial = "VALID"
                     res = scrape_res
                     ket = f"Error: {scrape_res.get('message', 'Gagal')}"
 
@@ -816,6 +832,59 @@ class MonitoringScheduler:
                     with state.lock:
                         state.resume_index = max(0, state.scan_current - 1)
                     raise inner_e
+
+            # -------------------------------------------------------------
+            # SECOND PASS: Coba ulang khusus pelanggan yang berstatus INVALID
+            # Mencoba seluruh daftar kredensial secara lengkap setelah putaran pertama
+            # -------------------------------------------------------------
+            invalid_to_retry = [c for c in pelanggan_to_scan if c.status_kredensial == "INVALID"]
+            if invalid_to_retry:
+                logger.info(f"[SECOND_PASS] Menemukan {len(invalid_to_retry)} pelanggan INVALID di kantor {k.upper()}. Memulai putaran ulang...")
+                for inv_cust in invalid_to_retry:
+                    target_ip = inv_cust.ip_ont or inv_cust.ip_router
+                    # Uji seluruh kredensial default tanpa limit
+                    retry_res = ONTScraperService.scrape_ont(
+                        ip=target_ip,
+                        customer_user=inv_cust.user_admin,
+                        customer_pass=inv_cust.pass_admin,
+                        default_user=default_user,
+                        default_pass=default_pass,
+                        customer_name=inv_cust.nama,
+                        default_credentials=default_creds_list,
+                        warn_threshold=eff_warn_th,
+                        crit_threshold=eff_crit_th
+                    )
+                    retry_now = get_now_wib()
+                    if retry_res["success"] and retry_res["rx_power"] is not None:
+                        inv_cust.status_kredensial = "VALID"
+                        if retry_res.get("updated_user") and retry_res.get("updated_pass"):
+                            inv_cust.user_admin = retry_res["updated_user"]
+                            inv_cust.pass_admin = retry_res["updated_pass"]
+                        ket_retry = f"Live Retry OK ({retry_res.get('gpon_state', 'Normal')})"
+                    elif retry_res.get("error_type") == "AUTH_FAILED":
+                        inv_cust.status_kredensial = "INVALID"
+                        ket_retry = "Login Gagal: Seluruh kredensial di Pengaturan telah dicoba dan tidak ada yang cocok"
+                    else:
+                        ket_retry = f"Retry: {retry_res.get('message', 'Unreachable')}"
+
+                    if retry_res.get("mac_address"):
+                        inv_cust.mac_address = retry_res["mac_address"]
+                    if retry_res.get("nama_wifi"):
+                        inv_cust.nama_wifi = retry_res["nama_wifi"]
+                    if retry_res.get("password_wifi"):
+                        inv_cust.password_wifi = retry_res["password_wifi"]
+
+                    db.add(LogPerformaONT(
+                        id_pelanggan=inv_cust.id_pelanggan,
+                        waktu_cek=retry_now,
+                        rx_power=retry_res.get("rx_power"),
+                        suhu_ont=retry_res.get("suhu_ont"),
+                        uptime=retry_res.get("uptime"),
+                        status_koneksi=retry_res.get("status_koneksi") or "LOS",
+                        latency_ms=retry_res.get("latency_ms"),
+                        keterangan=ket_retry
+                    ))
+                    db.commit()
 
             scan_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
             self.set_setting_in_db(db, "last_scan_time", scan_time_str, kantor=None)
@@ -955,6 +1024,8 @@ class MonitoringScheduler:
                 crit_threshold=eff_crit_th
             )
 
+            was_previously_valid = (getattr(cust, "status_kredensial", "UNTESTED") == "VALID")
+
             if scrape_res["success"] and scrape_res["rx_power"] is not None:
                 res = scrape_res
                 cust.status_kredensial = "VALID"
@@ -963,9 +1034,21 @@ class MonitoringScheduler:
                     cust.pass_admin = scrape_res["updated_pass"]
                 ket = f"Live Single Check OK ({res.get('gpon_state', 'Normal')})"
             elif scrape_res.get("error_type") == "AUTH_FAILED":
-                cust.status_kredensial = "INVALID"
+                if was_previously_valid:
+                    # Kredensial sudah benar/valid sebelumnya, modem mungkin sibuk atau menolak session. Pertahankan VALID!
+                    cust.status_kredensial = "VALID"
+                    res = scrape_res
+                    res["status_koneksi"] = "WARNING"
+                    ket = "Login Tertunda (Modem Sibuk / Session Semaphore, Kredensial Tetap Valid)"
+                else:
+                    cust.status_kredensial = "INVALID"
+                    res = scrape_res
+                    ket = "Login Gagal (User/Pass Salah)"
+            elif scrape_res.get("error_type") == "UNREACHABLE":
+                if was_previously_valid:
+                    cust.status_kredensial = "VALID"
                 res = scrape_res
-                ket = "Login Gagal (User/Pass Salah)"
+                ket = "Gagal Terhubung (Unreachable - Cek Jaringan Lokal)"
             elif settings.SNMP_SIMULATION_MODE and scrape_res.get("error_type") == "UNREACHABLE":
                 res = SNMPService.query_ont_simulated(
                     baseline_rx=float(cust.redaman_baseline) if cust.redaman_baseline else None,
@@ -975,8 +1058,10 @@ class MonitoringScheduler:
                 )
                 ket = "Simulasi Manual Check"
             else:
+                if was_previously_valid:
+                    cust.status_kredensial = "VALID"
                 res = scrape_res
-                ket = f"Single Check Error: {scrape_res.get('message', 'Unreachable')}"
+                ket = f"Single Check: {scrape_res.get('message', 'Unreachable')}"
 
             # Auto-deteksi: Update MAC Address & Kredensial WiFi jika terdeteksi dari Web GUI ONT
             if res.get("mac_address"):

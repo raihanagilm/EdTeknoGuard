@@ -373,7 +373,8 @@ class ONTScraperService:
         customer_name: Optional[str] = None,
         default_credentials: Optional[List[Tuple[str, str]]] = None,
         warn_threshold: Optional[float] = None,
-        crit_threshold: Optional[float] = None
+        crit_threshold: Optional[float] = None,
+        max_attempts_per_call: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Melakukan scraping lengkap ke satu perangkat modem ONT.
@@ -472,9 +473,15 @@ class ONTScraperService:
         auth_source = None
         last_resp = None
 
+        total_available = len(credentials_to_try)
+        if max_attempts_per_call and max_attempts_per_call > 0:
+            active_candidate_list = credentials_to_try[:max_attempts_per_call]
+        else:
+            active_candidate_list = credentials_to_try
+
         start_time = time.time()
 
-        for u, p, source in credentials_to_try:
+        for u, p, source in active_candidate_list:
             # Percobaan 1: Coba login normal
             ok, resp = cls.attempt_login(session, base_url, host, u, p)
             last_resp = resp
@@ -500,6 +507,7 @@ class ONTScraperService:
 
         # Kasus A: Autentikasi Gagal
         if not authenticated:
+            all_exhausted = len(active_candidate_list) >= total_available
             if last_resp is None:
                 # Modem tidak dapat dihubungi sama sekali (Host unreachable / timeout)
                 print(f"[-] [TIMEOUT/LOS] ONT {host} ({customer_name}): Gagal terhubung (Host unreachable / Timeout).")
@@ -512,11 +520,12 @@ class ONTScraperService:
                     "rx_power": None,
                     "suhu_ont": None,
                     "uptime": None,
-                    "latency_ms": None
+                    "latency_ms": None,
+                    "all_exhausted": all_exhausted
                 }
             else:
                 # Modem merespon tetapi kredensial ditolak
-                print(f"[-] [AUTH_FAILED] ONT {host} ({customer_name}): Kredensial modem ditolak (User/Pass salah).")
+                print(f"[-] [AUTH_FAILED] ONT {host} ({customer_name}): Kredensial modem ditolak (User/Pass salah). Dicoba: {len(active_candidate_list)}/{total_available}")
                 return {
                     "success": False,
                     "error_type": "AUTH_FAILED",
@@ -526,7 +535,10 @@ class ONTScraperService:
                     "rx_power": None,
                     "suhu_ont": None,
                     "uptime": None,
-                    "latency_ms": latency
+                    "latency_ms": latency,
+                    "all_exhausted": all_exhausted,
+                    "attempted_count": len(active_candidate_list),
+                    "total_creds": total_available
                 }
 
         # Kasus B: Autentikasi Berhasil -> Ambil Data Optik

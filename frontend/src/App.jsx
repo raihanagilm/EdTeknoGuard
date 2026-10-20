@@ -170,6 +170,9 @@ export default function App() {
         if (data.default_modem_credentials && Array.isArray(data.default_modem_credentials) && data.default_modem_credentials.length > 0) {
           setModemCredentials(data.default_modem_credentials)
         }
+        if (data.apply_to_invalid_customers !== undefined) {
+          setApplyToInvalid(Boolean(data.apply_to_invalid_customers))
+        }
         if (data.mikrotik_host) setMikrotikHost(data.mikrotik_host)
         if (data.mikrotik_port) setMikrotikPort(data.mikrotik_port)
         if (data.mikrotik_user) setMikrotikUser(data.mikrotik_user)

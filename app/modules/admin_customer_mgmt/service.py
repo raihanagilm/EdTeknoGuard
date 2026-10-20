@@ -325,7 +325,69 @@ class AdminCustomerMgmtService:
             items_list.extend(warning_items)
 
         # -------------------------------------------------------------
-        # 3. PENGINGAT PEMANTAUAN TERJEDA (Khusus Super Admin)
+        # 3. NOTIFIKASI KREDENSIAL TIDAK COCOK (Khusus Super Admin & Admin)
+        # -------------------------------------------------------------
+        if user_role in ["super admin", "admin"]:
+            from app.db.models import PerangkatONT
+            inv_query = db.query(Pelanggan).join(
+                PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan
+            ).filter(
+                PerangkatONT.status_kredensial == "INVALID",
+                Pelanggan.is_active == True,
+                Pelanggan.is_monitored == True
+            )
+            if user_role != "super admin" and kantor and kantor != "all":
+                inv_query = inv_query.filter(Pelanggan.kantor == kantor)
+            elif kantor and kantor != "all":
+                inv_query = inv_query.filter(Pelanggan.kantor == kantor)
+
+            invalid_customers = inv_query.all()
+            if invalid_customers:
+                invalid_items = []
+                for inv_c in invalid_customers:
+                    inv_key = f"invalid_cred_{inv_c.id_pelanggan}"
+                    if inv_key in read_ref_ids:
+                        continue
+                    invalid_items.append({
+                        "id": inv_key,
+                        "reference_id": inv_key,
+                        "type": "monitoring",
+                        "title": f"Kredensial Modem Tidak Cocok: {inv_c.nama}",
+                        "message": f"Seluruh daftar kredensial di Pengaturan telah dicoba dan ditolak oleh modem IP {inv_c.ip_router or '-'}. Perlu verifikasi fisik ke pelanggan.",
+                        "target_tab": "pelanggan",
+                        "target_filter": inv_c.id_pelanggan,
+                        "level": "warning",
+                        "badge": "KREDENSIAL INVALID",
+                        "time": get_now_wib().strftime("%H:%M"),
+                        "kantor": inv_c.kantor,
+                        "id_pelanggan": inv_c.id_pelanggan,
+                        "nama_pelanggan": inv_c.nama
+                    })
+
+                # Jika lebih dari 5, gabungkan menjadi 1 notifikasi batch
+                if len(invalid_items) > 5:
+                    first_inv = invalid_items[0]
+                    target_k_label = (kantor or first_inv.get("kantor") or "SEMUA").upper()
+                    batch_inv_key = f"batch_invalid_{len(invalid_items)}_{first_inv['id']}"
+                    if batch_inv_key not in read_ref_ids:
+                        items_list.append({
+                            "id": batch_inv_key,
+                            "type": "monitoring_batch",
+                            "title": f"{len(invalid_items)} Modem Gagal Login (Kredensial Tidak Cocok)",
+                            "message": f"Terdeteksi {len(invalid_items)} pelanggan dengan kredensial tidak cocok pada kantor {target_k_label}. Klik untuk melihat data pelanggan.",
+                            "target_tab": "pelanggan",
+                            "target_filter": "INVALID",
+                            "level": "warning",
+                            "badge": f"{len(invalid_items)} INVALID",
+                            "time": first_inv.get("time") or get_now_wib().strftime("%H:%M"),
+                            "count": len(invalid_items),
+                            "kantor": first_inv.get("kantor")
+                        })
+                else:
+                    items_list.extend(invalid_items)
+
+        # -------------------------------------------------------------
+        # 4. PENGINGAT PEMANTAUAN TERJEDA (Khusus Super Admin)
         # -------------------------------------------------------------
         paused_reminder = None
         if user and user.get("role") == "super admin":
