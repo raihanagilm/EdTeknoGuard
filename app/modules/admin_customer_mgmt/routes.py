@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request, Form
+from typing import Optional
+from fastapi import APIRouter, Depends, Request, Form, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.modules.admin_customer_mgmt.controller import AdminCustomerMgmtController
@@ -164,12 +165,12 @@ def get_quota_json(request: Request, db: Session = Depends(get_db)):
     }
 
 @router.get("/api/notifications/poll")
-def poll_realtime_notifications(request: Request, db: Session = Depends(get_db)):
+def poll_realtime_notifications(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db)):
     from app.core.security import get_current_user_optional, get_active_kantor
     from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
     user = get_current_user_optional(request)
-    kantor = get_active_kantor(request, user) if user else "all"
-    return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor, user=user)
+    target_kantor = kantor or (get_active_kantor(request, user) if user else "all")
+    return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=target_kantor, user=user)
 
 @router.post("/api/notifications/read")
 async def mark_single_notification_read(request: Request, db: Session = Depends(get_db)):

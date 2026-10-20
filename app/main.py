@@ -6,6 +6,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from typing import Optional
 from contextlib import asynccontextmanager
 import logging
 from fastapi import FastAPI, Request
@@ -176,15 +177,15 @@ from portal_pelanggan.main import app as portal_app
 app.mount("/portal", portal_app)
 
 @app.get("/api/notifications/poll")
-def poll_notifications_alias(request: Request):
+def poll_notifications_alias(request: Request, kantor: Optional[str] = None):
     from app.core.database import SessionLocal
     from app.core.security import get_current_user_optional, get_active_kantor
     from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
     db = SessionLocal()
     try:
         user = get_current_user_optional(request)
-        kantor = get_active_kantor(request, user) if user else "all"
-        return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=kantor, user=user)
+        target_kantor = kantor or (get_active_kantor(request, user) if user else "all")
+        return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=target_kantor, user=user)
     finally:
         db.close()
 
