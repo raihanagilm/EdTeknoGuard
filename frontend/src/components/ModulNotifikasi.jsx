@@ -117,7 +117,9 @@ export function ModulNotifikasi({
               )}
             </div>
             <p className="text-[11px] font-medium text-slate-500">
-              {currentUser?.role === 'super admin' ? 'Semua Kantor' : `Kantor: ${activeOffice?.toUpperCase() || '-'}`}
+              {currentUser?.role === 'super admin'
+                ? `Kantor Aktif: ${activeOffice?.toUpperCase() || 'SEMUA'}`
+                : `Kantor: ${activeOffice?.toUpperCase() || '-'}`}
             </p>
           </div>
         </div>

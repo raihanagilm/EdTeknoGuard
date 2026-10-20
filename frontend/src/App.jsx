@@ -203,7 +203,7 @@ export default function App() {
         fetch(`/api/monitoring/kpi${q}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/customers?limit=10${activeOffice && activeOffice !== 'all' ? `&kantor=${activeOffice}` : ''}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/auth/me').then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch('/api/notifications/poll').then(r => r.ok ? r.json() : null).catch(() => null)
+        fetch(`/api/notifications/poll${q}`).then(r => r.ok ? r.json() : null).catch(() => null)
       ])
 
       if (statusRes) {
