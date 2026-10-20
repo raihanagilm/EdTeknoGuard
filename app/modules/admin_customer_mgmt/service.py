@@ -256,7 +256,11 @@ class AdminCustomerMgmtService:
 
         for log_entry, cust in problem_logs:
             ref_key = f"log_{log_entry.id}"
-            if ref_key in read_ref_ids:
+            is_critical = log_entry.status_koneksi in ["LOS", "CRITICAL"]
+
+            # NOTIFIKASI KRITIS (LOS / CRITICAL) DILARANG DI-READ / DI-DISMISS:
+            # Tetap tampil persisten sampai status modem kembali NORMAL di scan berikutnya!
+            if not is_critical and ref_key in read_ref_ids:
                 continue
 
             item_data = {
@@ -267,39 +271,41 @@ class AdminCustomerMgmtService:
                 "message": f"IP: {cust.ip_router or '-'} | Redaman: {log_entry.rx_power if log_entry.rx_power is not None else 'N/A'} dBm ({log_entry.keterangan or log_entry.status_koneksi})",
                 "target_tab": "logs",
                 "target_filter": cust.id_pelanggan,
-                "level": "critical" if log_entry.status_koneksi in ["LOS", "CRITICAL"] else "warning",
+                "level": "critical" if is_critical else "warning",
                 "badge": log_entry.status_koneksi,
                 "time": log_entry.waktu_cek.strftime("%H:%M") if log_entry.waktu_cek else "",
                 "kantor": cust.kantor,
                 "id_pelanggan": cust.id_pelanggan,
                 "nama_pelanggan": cust.nama,
                 "rx_power": float(log_entry.rx_power) if log_entry.rx_power is not None else None,
-                "status_koneksi": log_entry.status_koneksi
+                "status_koneksi": log_entry.status_koneksi,
+                "is_critical": is_critical
             }
 
-            if log_entry.status_koneksi in ["LOS", "CRITICAL"]:
+            if is_critical:
                 los_items.append(item_data)
             else:
                 warning_items.append(item_data)
 
-        # Cek grouping LOS (> 5 items)
+        # Cek grouping LOS (> 5 items) - Batch LOS juga bersifat KRITIS dan persisten
         if len(los_items) > 5:
             first_los = los_items[0]
-            batch_key = f"batch_los_{len(los_items)}_{first_los['id']}"
-            if batch_key not in read_ref_ids:
-                items_list.append({
-                    "id": batch_key,
-                    "type": "monitoring_batch",
-                    "title": f"{len(los_items)} Modem ONT Terputus (LOS)",
-                    "message": f"Terdeteksi {len(los_items)} pelanggan mengalami LOS/Kritis pada kantor {first_los['kantor'].upper()}. Klik untuk cek riwayat redaman.",
-                    "target_tab": "logs",
-                    "target_filter": "LOS",
-                    "level": "critical",
-                    "badge": f"{len(los_items)} LOS",
-                    "time": first_los["time"],
-                    "count": len(los_items),
-                    "kantor": first_los["kantor"]
-                })
+            batch_key = f"batch_los_{len(los_items)}_{first_los['kantor']}"
+            # Notifikasi batch kritis juga tidak boleh dihilangkan oleh read_ref_ids
+            items_list.append({
+                "id": batch_key,
+                "type": "monitoring_batch",
+                "title": f"{len(los_items)} Modem ONT Terputus (LOS)",
+                "message": f"Terdeteksi {len(los_items)} pelanggan mengalami LOS/Kritis pada kantor {first_los['kantor'].upper()}. Wajib segera ditindaklanjuti!",
+                "target_tab": "logs",
+                "target_filter": "LOS",
+                "level": "critical",
+                "badge": f"{len(los_items)} LOS",
+                "time": first_los["time"],
+                "count": len(los_items),
+                "kantor": first_los["kantor"],
+                "is_critical": True
+            })
         else:
             items_list.extend(los_items)
 
@@ -445,6 +451,11 @@ class AdminCustomerMgmtService:
         if not user_id:
             return {"status": "error", "message": "User ID tidak valid"}
 
+        # Proteksi: Notifikasi kritis / LOS dilarang ditandai read secara permanen
+        ref_str = str(reference_id)
+        if "batch_los" in ref_str or notification_type == "monitoring_critical":
+            return {"status": "ignored", "message": "Notifikasi kritis tidak dapat dihapus sebelum status normal"}
+
         # Cek apakah sudah pernah ditandai
         existing = db.query(UserNotificationRead).filter(
             UserNotificationRead.user_id == user_id,
@@ -466,7 +477,7 @@ class AdminCustomerMgmtService:
 
     @staticmethod
     def mark_all_notifications_read(db: Session, user: Dict[str, Any], items: List[Dict[str, str]]) -> Dict[str, Any]:
-        """Menandai seluruh notifikasi yang saat ini tampil sebagai sudah dibaca untuk user ini."""
+        """Menandai seluruh notifikasi (kecuali yang kritis) sebagai sudah dibaca untuk user ini."""
         from app.db.models import UserNotificationRead, User
         from app.core.timezone import get_now_wib
 
@@ -482,9 +493,13 @@ class AdminCustomerMgmtService:
         now = get_now_wib()
         added_count = 0
         for item in items:
+            # Kecualikan item kritis dari mark all read
+            if item.get("level") == "critical" or item.get("is_critical"):
+                continue
+
             n_type = item.get("type", "general")
             ref_id = item.get("reference_id") or item.get("id")
-            if not ref_id:
+            if not ref_id or "batch_los" in str(ref_id):
                 continue
 
             existing = db.query(UserNotificationRead).filter(

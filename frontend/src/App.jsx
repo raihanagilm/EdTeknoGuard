@@ -250,21 +250,24 @@ export default function App() {
   const handleNotificationItemClick = async (item) => {
     setIsNotificationOpen(false)
 
-    // Mark this item as read immediately for the current user
-    try {
-      await fetch('/api/notifications/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: item.type,
-          reference_id: item.reference_id || item.id
+    // Notifikasi KRITIS (LOS / CRITICAL) DILARANG DIHAPUS / DI-READ:
+    // Hanya boleh hilang otomatis jika status modem kembali normal di hasil pemantauan
+    if (item.level !== 'critical' && !item.is_critical) {
+      try {
+        await fetch('/api/notifications/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: item.type,
+            reference_id: item.reference_id || item.id
+          })
         })
-      })
-      // Update local state
-      setNotificationList(prev => prev.filter(n => n.id !== item.id))
-      setUnreadTickets(prev => Math.max(0, prev - 1))
-    } catch (e) {
-      console.warn('Failed to mark notification read:', e)
+        // Update local state hanya untuk notifikasi non-kritis
+        setNotificationList(prev => prev.filter(n => n.id !== item.id))
+        setUnreadTickets(prev => Math.max(0, prev - 1))
+      } catch (e) {
+        console.warn('Failed to mark notification read:', e)
+      }
     }
 
     // Navigasi sesuai jenis notifikasi
@@ -278,6 +281,11 @@ export default function App() {
         setLogsInitialSearch(item.target_filter)
       }
       handleTabChange('riwayat')
+    } else if (item.target_tab === 'pelanggan') {
+      if (item.target_filter) {
+        setCustomerInitialSearch(item.target_filter)
+      }
+      handleTabChange('pelanggan')
     } else if (item.target_tab === 'beranda') {
       handleTabChange('beranda')
     } else {
@@ -286,6 +294,9 @@ export default function App() {
   }
 
   const handleDismissNotificationItem = async (item) => {
+    // Notifikasi KRITIS dilarang di-dismiss secara manual
+    if (item.level === 'critical' || item.is_critical) return
+
     try {
       await fetch('/api/notifications/read', {
         method: 'POST',
@@ -304,18 +315,23 @@ export default function App() {
 
   const handleMarkAllNotificationsRead = async () => {
     try {
+      const nonCriticalItems = notificationList.filter(n => n.level !== 'critical' && !n.is_critical)
+      if (nonCriticalItems.length === 0) return
+
       await fetch('/api/notifications/read-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: notificationList.map(n => ({
+          items: nonCriticalItems.map(n => ({
             type: n.type,
             reference_id: n.reference_id || n.id
           }))
         })
       })
-      setNotificationList([])
-      setUnreadTickets(0)
+      // Hanya bersihkan yang non-kritis, item kritis tetap dipertahankan
+      const criticalOnly = notificationList.filter(n => n.level === 'critical' || n.is_critical)
+      setNotificationList(criticalOnly)
+      setUnreadTickets(criticalOnly.length)
     } catch (e) {
       console.warn('Failed to mark all notifications read:', e)
     }

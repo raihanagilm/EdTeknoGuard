@@ -207,18 +207,24 @@ export function ModulNotifikasi({
                     <ChevronRight className="w-3 h-3" />
                   </span>
 
-                  {onDismissItem && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDismissItem(item);
-                      }}
-                      className="text-slate-400 hover:text-rose-600 p-1 hover:bg-white rounded transition"
-                      title="Tandai sudah dibaca"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                  {item.level === 'critical' || item.is_critical ? (
+                    <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
+                      Perlu Tindakan
+                    </span>
+                  ) : (
+                    onDismissItem && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDismissItem(item);
+                        }}
+                        className="text-slate-400 hover:text-rose-600 p-1 hover:bg-white rounded transition cursor-pointer"
+                        title="Tandai sudah dibaca"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )
                   )}
                 </div>
               </div>
