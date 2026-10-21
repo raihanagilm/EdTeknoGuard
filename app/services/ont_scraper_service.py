@@ -58,9 +58,10 @@ class ONTScraperService:
         """Mengecek apakah modem ONT sedang dalam status lockout akibat 3x salah password (ZTE maxtime & pesan jeda generik)."""
         try:
             r = session.get(f"{base_url}/", timeout=6, headers={"Connection": "close"})
-            # 1. Pola ZTE maxtime
+            # 1. Pola ZTE maxtime: hanya aktif jika fungsi SetDisabled() benar-benar dipanggil di HTML
+            has_zte_disabled = bool(re.search(r'(?<!function\s)SetDisabled\s*\(', r.text))
             m_time = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', r.text)
-            if m_time:
+            if has_zte_disabled and m_time:
                 rem = int(m_time.group(1)) + 60 - int(m_time.group(2))
                 if rem > 0:
                     return True, rem
@@ -632,12 +633,21 @@ class ONTScraperService:
         is_locked = False
         rem_secs = 0
         if r_probe is not None:
+            has_zte_disabled = bool(re.search(r'(?<!function\s)SetDisabled\s*\(', r_probe.text))
             m_time = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', r_probe.text)
-            if m_time:
+            if has_zte_disabled and m_time:
                 rem = int(m_time.group(1)) + 60 - int(m_time.group(2))
                 if rem > 0:
                     is_locked = True
                     rem_secs = rem
+            elif not has_zte_disabled:
+                # Pola generik lockout countdown
+                m_gen = re.search(r'(?:try\s*again\s*in|lock(?:ed)?\s*for|wait)\s*(\d+)\s*(?:seconds|detik|s)', r_probe.text, re.I)
+                if m_gen:
+                    rem_gen = int(m_gen.group(1))
+                    if rem_gen > 0:
+                        is_locked = True
+                        rem_secs = rem_gen
 
         if is_locked and rem_secs > 10:
             print(f"[-] [LOCKOUT] ONT {host} ({customer_name}): Modem sedang lockout ({rem_secs}s).")
@@ -714,9 +724,10 @@ class ONTScraperService:
             last_resp = resp
 
             # Jika percobaan 1 gagal dan modem masih merespon (bukan timeout),
-            # lakukan Clean Session Reset & Refresh Token lalu coba sekali lagi.
-            # Ini menyelesaikan masalah firmware ZTE GM220-S yang sering me-reject login pertama karena session semaphore / stale token.
-            if not ok and resp is not None and "SetDisabled()" not in resp.text:
+            # lakukan retry hanya jika bukan explicit credential error (misal token stale / session semaphore).
+            # Jika respon eksplisit "User information is error" atau "SetDisabled()", jangan coba ulang kredensial yang sama agar tidak menghabiskan limit percobaan ONT.
+            is_explicit_wrong_pwd = (resp is not None and ("user information is error" in resp.text.lower() or "SetDisabled()" in resp.text))
+            if not ok and resp is not None and not is_explicit_wrong_pwd:
                 time.sleep(0.8) # Jeda pendinginan modem
                 session.cookies.clear() # Bersihkan sesi lama
                 ok, resp = cls.attempt_login(session, base_url, host, u, p)

@@ -336,6 +336,23 @@ export function ModulPelanggan({
             } catch (e) {}
             return next
           })
+          // Perbarui langsung baris pelanggan di tabel (termasuk kredensial baru jika otomatis diganti)
+          setCustomers(prev => prev.map(c => {
+            if (c.id_pelanggan === id_pelanggan) {
+              return {
+                ...c,
+                user_admin: data.user_admin || c.user_admin,
+                pass_admin: data.pass_admin || c.pass_admin,
+                status_kredensial: data.status_kredensial || 'VALID',
+                rx_power: data.rx_power,
+                status_koneksi: data.status_koneksi,
+                jenis_modem: data.jenis_modem || c.jenis_modem,
+                nama_wifi: data.nama_wifi || c.nama_wifi,
+                password_wifi: data.password_wifi || c.password_wifi
+              }
+            }
+            return c
+          }))
         } else if (isLockout) {
           const waitSecs = Number(data.lockout_remaining_seconds) || 60
           showToast(`Modem ${custName} terkunci keamanan ONT (${waitSecs}s). Harap tunggu jeda sebelum mencoba lagi.`, 'warning')
@@ -350,15 +367,17 @@ export function ModulPelanggan({
           } catch (e) {}
         } else if (isAuthFailed) {
           showToast(`Login Gagal ke modem ${custName}. Seluruh kredensial default telah dicoba dan tidak ada yang cocok.`, 'error')
-          
-          // Beri jeda 60s cooldown agar tidak membuat modem terblokir
-          const expiry = Date.now() + (60 * 1000)
-          setProbeCooldowns(prev => ({ ...prev, [id_pelanggan]: 60 }))
-          try {
-            const raw = JSON.parse(localStorage.getItem('tekno_probe_cooldowns') || '{}')
-            raw[id_pelanggan] = expiry
-            localStorage.setItem('tekno_probe_cooldowns', JSON.stringify(raw))
-          } catch (e) {}
+          // Hapus cooldown paksa agar tombol tetap bertuliskan 'Cek Redaman' dan siap dicoba lagi
+          setProbeCooldowns(prev => {
+            const next = { ...prev }
+            delete next[id_pelanggan]
+            try {
+              const raw = JSON.parse(localStorage.getItem('tekno_probe_cooldowns') || '{}')
+              delete raw[id_pelanggan]
+              localStorage.setItem('tekno_probe_cooldowns', JSON.stringify(raw))
+            } catch (e) {}
+            return next
+          })
         } else {
           showToast(`Pemeriksaan selesai: ${data.keterangan || data.message || 'Data diperbarui'}`, 'info')
         }
