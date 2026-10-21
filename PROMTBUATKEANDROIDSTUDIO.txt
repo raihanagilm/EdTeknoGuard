@@ -45,14 +45,25 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
        Pastikan status bar disetel ke warna putih dengan ikon status bar gelap (`View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR`) agar status bar di bagian atas layar HP serasi dengan warna putih header dashboard TeknoGuard/TeknoCust (TIDAK HITAM).
 
 2. SISTEM NOTIFIKASI LENGKAP: HEADS-UP, IN-APP POP-UP CARD, & DIALOG BOX KONFIRMASI:
-   A. SINKRONISASI NOTIFIKASI WEB KE HP (DENGAN BUNYI, GETAR, HEADS-UP & DEEP LINK):
+   A. SINKRONISASI NOTIFIKASI WEB KE HP (DENGAN BUNYI RINGTONE, GETAR, HEADS-UP & DEEP LINK):
       Masalah Sebelumnya:
-      HP hanya menampilkan notifikasi pasif "TeknoGuard Siaga Pemantauan Aktif di Latar Belakang", sedangkan notifikasi nyata dari web (seperti 15 LOS, 84 Redaman Menurun, atau Tiket Keluhan Baru) TIDAK MUNCUL di HP!
+      1. Notifikasi persisten foreground "TeknoGuard Siaga" muncul mengambang di status bar dan sangat mengganggu pengguna.
+      2. Notifikasi peringatan redaman (WARNING / LOS) berulang-ulang muncul setiap 1 menit tanpa mematuhi interval database (contoh: 5 menit atau 10 menit).
+      3. Bunyi notifikasi masuk ke volume Jam Weker / Alarm (USAGE_ALARM), seharusnya masuk ke aliran volume Nada Dering / Notifikasi HP (USAGE_NOTIFICATION_RINGTONE).
 
       Solusi Mutlak di `EdTeknoBackgroundService.kt`:
-      1. Notifikasi Foreground Service Status ("TeknoGuard Siaga"):
-         - Gunakan notification ID tetap = `1` (misal: `FOREGROUND_SERVICE_ID = 1`).
-         - Cukup tampil sebagai indikator latar belakang tanpa memblokir notifikasi gangguan.
+      1. Notifikasi Foreground Service Status (SENYAP TOTAL / BEBAS GANGGUAN STATUS BAR):
+         - Gunakan notification ID tetap = `1` (`FOREGROUND_NOTIFICATION_ID = 1`).
+         - Daftarkan Channel Silent:
+           `val persistentChannel = NotificationChannel("tekno_silent_background_channel", "Layanan Latar Belakang TeknoGuard", NotificationManager.IMPORTANCE_MIN)`
+         - Set atribut:
+           `setShowBadge(false)`, `enableLights(false)`, `enableVibration(false)`, `setSound(null, null)`, `lockscreenVisibility = Notification.VISIBILITY_SECRET`.
+         - Builder Notification:
+           `.setPriority(NotificationCompat.PRIORITY_MIN)`
+           `.setCategory(NotificationCompat.CATEGORY_SERVICE)`
+           `.setVisibility(NotificationCompat.VISIBILITY_SECRET)`
+           `.setShowWhen(false)`
+         - Hasil: Background service polling & wakelock tetap berjalan di latar belakang tanpa memunculkan icon melayang di layar status bar HP!
 
       2. PENGAMBILAN DATA REAL-TIME DARI ARRAY `notifications` WEB:
          - Background loop melakukan HTTP GET ke:
@@ -62,49 +73,53 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
            `val notifArray = jsonObject.optJSONArray("notifications")`
          - Lakukan perulangan (loop) pada setiap objek di dalam `notifications`:
            * `id`: String unik notifikasi (misal: `batch_los_15_...`, `batch_warning_...`, atau `tiket_...`).
-           * `title`: Judul notifikasi (misal: "15 Modem ONT Terputus (LOS)", "84 Modem Redaman Menurun (WARNING)", atau "Tiket: Bpk Ahmad").
+           * `title`: Judul notifikasi.
            * `message`: Isi rincian pesan notifikasi.
            * `level`: "critical", "warning", atau "info".
+           * `type`: "monitoring", "monitoring_batch", "tiket", dll.
            * `target_tab`: "logs", "tiket", atau "beranda".
            * `target_filter`: Keyword filter pencarian.
 
-      3. INTEGRASI PENGATURAN DATABASE (GETARAN, JAM TENANG & INTERVAL PENGINGAT):
+      3. INTEGRASI PENGATURAN DATABASE (INTERVAL REDAMAN, GETARAN, JAM TENANG & INTERVAL TIKET):
          Endpoint `/api/notifications/poll` menyertakan objek `notification_config` yang langsung bersumber dari tabel `system_settings`:
          ```json
          "notification_config": {
              "vibration_enabled": true,
-             "alert_waiting_interval_minutes": 10,
+             "polling_interval_minutes": 5,
+             "alert_waiting_interval_minutes": 5,
              "night_mode_enabled": true,
              "night_mode_start": "22:00",
              "night_mode_end": "06:00"
          }
          ```
-         Aturan Logika di `EdTeknoBackgroundService.kt`:
+         Aturan Logika Debounce di `EdTeknoBackgroundService.kt`:
+         - Interval Pemantauan Redaman Drop (`polling_interval_minutes`):
+           Bukan statis 1 menit! Notifikasi redaman (LOS / WARNING) hanya diulang jika selisih waktu dari alert sebelumnya sudah melampaui `polling_interval_minutes * 60 * 1000L` (misal 5 menit atau 10 menit sesuai pengaturan DB).
          - Getaran Dinamis (`vibration_enabled`):
            Jika di database dimatikan (`false`), jangan getarkan perangkat (`builder.setVibrate(null)`).
            Jika aktif (`true`), jalankan pola getar darurat.
          - Jam Tenang Malam / Quiet Hours (`night_mode_enabled`, `night_mode_start`, `night_mode_end`):
-           Jika jam saat ini masuk rentang senyap (misal 22:00 - 06:00), bungkam notifikasi non-kritis (level 'warning' dan 'info') agar teknisi tidak terganggu saat tidur. Level 'critical' (seperti kabel putus / LOS) TETAP dibunyikan.
-         - Interval Pengingat Terjeda (`alert_waiting_interval_minutes`):
-           Pengingat pemantauan terjeda (paused reminder) menyesuaikan interval database (misal tiap 5 menit), bukan statis 1 jam.
+           Jika jam saat ini masuk rentang senyap (misal 22:00 - 06:00), bungkam notifikasi non-kritis (level 'warning' dan 'info'). Level 'critical' (seperti kabel putus / LOS) TETAP dibunyikan.
+         - Interval Pengingat Tiket Menunggu (`alert_waiting_interval_minutes`):
+           Pengingat tiket menunggu mengikuti nilai menit dari database (default 5 menit).
 
-      4. SUARA NOTIFIKASI KHUSUS NATIVE (DENTING BEL DARI RES/RAW):
+      4. SUARA NOTIFIKASI KHUSUS NATIVE (STREAM NADA DERING / NOTIFICATION, BUKAN ALARM):
          - Letakkan file audio bel di: `app/src/main/res/raw/tekno_alarm.mp3`.
-         - Daftarkan suara bel tersebut ke Channel Darurat Karyawan:
+         - Daftarkan suara tersebut ke Channel Darurat Karyawan dengan STREAM NOTIFICATION:
            ```kotlin
-           val customAlarmSound = Uri.parse("android.resource://" + packageName + "/" + R.raw.tekno_alarm)
-           val alarmAudioAttr = AudioAttributes.Builder()
-               .setUsage(AudioAttributes.USAGE_ALARM)
+           val customSound = Uri.parse("android.resource://" + packageName + "/" + R.raw.tekno_alarm)
+           val notifAudioAttr = AudioAttributes.Builder()
+               .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                .build()
 
            val emergencyChannel = NotificationChannel(
-               "tekno_emergency_v2_channel",
-               "Notifikasi Darurat NOC",
+               "tekno_emergency_v3_channel",
+               "Peringatan Redaman & Tiket TeknoGuard",
                NotificationManager.IMPORTANCE_HIGH
            ).apply {
-               description = "Peringatan Darurat Redaman Kabel Fiber / Tiket Baru"
-               setSound(customAlarmSound, alarmAudioAttr)
+               description = "Peringatan Redaman Kabel Optik & Tiket Baru Masuk"
+               setSound(customSound, notifAudioAttr)
                enableVibration(true)
                vibrationPattern = longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)
                enableLights(true)
@@ -114,18 +129,15 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
            manager.createNotificationChannel(emergencyChannel)
            ```
 
-      5. MEKANISME DEDUP (Anti-Spam Suara Berulang):
-         - Simpan daftar ID notifikasi yang sudah pernah dibunyikan ke `HashSet<String>` di memory service atau SharedPreferences (`alertedNotificationIds`).
-         - Jika item `id` BELUM PERNAH dibunyikan:
-           * Bunyikan alarm suara bel (`tekno_alarm.mp3`) / nada notifikasi.
-           * Picu getaran jika `vibration_enabled == true`.
-           * Munculkan Heads-Up Banner melayang dari atas layar HP!
-           * Masukkan `id` tersebut ke `alertedNotificationIds`.
+      5. MEKANISME DEDUP & DEBOUNCING INTERVAL (Anti-Spam Suara Berulang Tiap Menit):
+         - Simpan waktu alert terakhir ke SharedPreferences: `last_monitoring_alert_time` dan `last_ticket_alert_time`.
+         - Jika item notifikasi terdeteksi, cek apakah selisih waktu sudah melebihi interval menit database (`polling_interval_minutes` / `alert_waiting_interval_minutes`).
+         - Jika belum lewat interval, skip bunyi notifikasi sehingga status bar tidak dipenuhi spam per menit!
 
       6. IMPLEMENTASI NOTIFIKASI HEADS-UP & DEEP LINKING KE HALAMAN TEPAT:
          ```kotlin
          val isCritical = level == "critical"
-         val channelId = if (isCritical) "tekno_emergency_v2_channel" else CHANNEL_CUSTOMER_ID
+         val channelId = if (isCritical) "tekno_emergency_v3_channel" else CHANNEL_CUSTOMER_ID
          
          val clickIntent = Intent(context, MainActivity::class.java).apply {
              flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -146,22 +158,24 @@ Berikut spesifikasi dan requirement mutlak yang harus diterapkan:
              .setSmallIcon(R.mipmap.ic_launcher)
              .setAutoCancel(true)
              .setPriority(NotificationCompat.PRIORITY_MAX)
-             .setContentIntent(pendingIntent) // Klik langsung buka tab logs / tiket!
-             .setFullScreenIntent(pendingIntent, isCritical) // Melayang di layar saat ada gangguan!
+             .setContentIntent(pendingIntent)
+             .setFullScreenIntent(pendingIntent, isCritical)
              .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
-         val alarmSound = Uri.parse("android.resource://" + packageName + "/" + R.raw.tekno_alarm)
+         val customSound = Uri.parse("android.resource://" + packageName + "/" + R.raw.tekno_alarm)
+         val defaultNotifSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
          if (isCritical) {
-             builder.setSound(alarmSound)
+             builder.setSound(customSound)
                  .setLights(Color.RED, 500, 500)
-                 .setCategory(NotificationCompat.CATEGORY_ALARM)
+                 .setCategory(NotificationCompat.CATEGORY_EVENT)
              if (vibrationEnabled) {
                  builder.setVibrate(longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000))
              } else {
                  builder.setVibrate(null)
              }
          } else {
-             builder.setSound(notifSound)
+             builder.setSound(defaultNotifSound)
                  .setCategory(NotificationCompat.CATEGORY_MESSAGE)
              if (vibrationEnabled) {
                  builder.setVibrate(longArrayOf(0, 300, 200, 300))

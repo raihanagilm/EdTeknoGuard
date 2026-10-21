@@ -113,6 +113,80 @@ export function ModulPelanggan({
   const [probingId, setProbingId] = useState(null)
   const [probeResult, setProbeResult] = useState(null)
 
+  // Floating Toast Notification (Pojok Kanan Bawah)
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type })
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }))
+    }, 5000)
+  }
+
+  // Persistent Cooldown via localStorage: { [id_pelanggan]: expiryTimestampMillis }
+  const [probeCooldowns, setProbeCooldowns] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tekno_probe_cooldowns')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        const now = Date.now()
+        const active = {}
+        Object.keys(parsed).forEach(id => {
+          const remainingSecs = Math.ceil((parsed[id] - now) / 1000)
+          if (remainingSecs > 0) {
+            active[id] = remainingSecs
+          }
+        })
+        return active
+      }
+    } catch (e) {
+      // Ignore parse error
+    }
+    return {}
+  })
+
+  // Cooldown countdown timer ticker (Real-time & Persisten)
+  useEffect(() => {
+    const hasActiveCooldown = Object.values(probeCooldowns).some(secs => secs > 0)
+    if (!hasActiveCooldown) return
+
+    const timer = setInterval(() => {
+      const now = Date.now()
+      let rawObj = {}
+      try {
+        rawObj = JSON.parse(localStorage.getItem('tekno_probe_cooldowns') || '{}')
+      } catch (e) {}
+
+      setProbeCooldowns(prev => {
+        const next = {}
+        let changed = false
+        const nextStorage = { ...rawObj }
+
+        Object.keys(prev).forEach(id => {
+          const expiry = nextStorage[id] || (now + prev[id] * 1000)
+          const remaining = Math.ceil((expiry - now) / 1000)
+          if (remaining > 0) {
+            next[id] = remaining
+            nextStorage[id] = expiry
+            if (remaining !== prev[id]) changed = true
+          } else {
+            delete nextStorage[id]
+            changed = true
+          }
+        })
+
+        if (changed) {
+          try {
+            localStorage.setItem('tekno_probe_cooldowns', JSON.stringify(nextStorage))
+          } catch (e) {}
+        }
+
+        return changed ? next : prev
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [probeCooldowns])
+
   const [popOptions, setPopOptions] = useState([])
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch || '')
 
@@ -234,16 +308,69 @@ export function ModulPelanggan({
 
   // Single on-demand ONT probe
   const handleSingleProbe = async (id_pelanggan) => {
+    if (probeCooldowns[id_pelanggan] > 0) return
     setProbingId(id_pelanggan)
     try {
       const res = await fetch(`/api/monitoring/scan/${id_pelanggan}`, { method: 'POST' })
       if (res.ok) {
         const data = await res.json()
         setProbeResult(data)
+
+        const custName = data.nama || id_pelanggan
+        const rxVal = data.rx_power
+        const rxStr = (rxVal !== null && rxVal !== undefined) ? `${Number(rxVal).toFixed(1)} dBm` : (data.status_koneksi || 'LOS')
+        const isSuccess = Boolean(data.success && data.rx_power !== null)
+        const isLockout = data.error_type === 'LOCKOUT'
+        const isAuthFailed = data.error_type === 'AUTH_FAILED' || data.status_kredensial === 'INVALID'
+
+        if (isSuccess) {
+          showToast(`Cek Redaman Berhasil! ${custName}: ${rxStr} (Status: ${data.status_koneksi || 'NORMAL'})`, 'success')
+          // Jika sukses dan kredensial valid, TIDAK DIKUNCI COOLDOWN
+          setProbeCooldowns(prev => {
+            const next = { ...prev }
+            delete next[id_pelanggan]
+            try {
+              const raw = JSON.parse(localStorage.getItem('tekno_probe_cooldowns') || '{}')
+              delete raw[id_pelanggan]
+              localStorage.setItem('tekno_probe_cooldowns', JSON.stringify(raw))
+            } catch (e) {}
+            return next
+          })
+        } else if (isLockout) {
+          const waitSecs = Number(data.lockout_remaining_seconds) || 60
+          showToast(`Modem ${custName} terkunci keamanan ONT (${waitSecs}s). Harap tunggu jeda sebelum mencoba lagi.`, 'warning')
+          
+          // Simpan cooldown ke state & localStorage
+          const expiry = Date.now() + (waitSecs * 1000)
+          setProbeCooldowns(prev => ({ ...prev, [id_pelanggan]: waitSecs }))
+          try {
+            const raw = JSON.parse(localStorage.getItem('tekno_probe_cooldowns') || '{}')
+            raw[id_pelanggan] = expiry
+            localStorage.setItem('tekno_probe_cooldowns', JSON.stringify(raw))
+          } catch (e) {}
+        } else if (isAuthFailed) {
+          showToast(`Login Gagal ke modem ${custName}. Seluruh kredensial default telah dicoba dan tidak ada yang cocok.`, 'error')
+          
+          // Beri jeda 60s cooldown agar tidak membuat modem terblokir
+          const expiry = Date.now() + (60 * 1000)
+          setProbeCooldowns(prev => ({ ...prev, [id_pelanggan]: 60 }))
+          try {
+            const raw = JSON.parse(localStorage.getItem('tekno_probe_cooldowns') || '{}')
+            raw[id_pelanggan] = expiry
+            localStorage.setItem('tekno_probe_cooldowns', JSON.stringify(raw))
+          } catch (e) {}
+        } else {
+          showToast(`Pemeriksaan selesai: ${data.keterangan || data.message || 'Data diperbarui'}`, 'info')
+        }
+
         fetchCustomers()
+      } else {
+        const errJson = await res.json().catch(() => ({}))
+        showToast(errJson.detail || 'Gagal menghubungi server untuk cek redaman', 'error')
       }
     } catch (err) {
       console.error('Probe failed:', err)
+      showToast('Koneksi terputus saat memeriksa modem ONT', 'error')
     } finally {
       setProbingId(null)
     }
@@ -605,7 +732,7 @@ export function ModulPelanggan({
                 onClick={() => handleSort('ip_router')}
               >
                 <div className="flex items-center gap-1">
-                  <span>IP &amp; Wilayah</span>
+                  <span>IP &amp; Router</span>
                   <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'ip_router' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
                   {sortField === 'ip_router' && (
                     <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
@@ -688,7 +815,7 @@ export function ModulPelanggan({
                       <div className="text-xs text-slate-600 font-sans truncate max-w-xs">{c.alamat || c.address || '-'}</div>
                     </td>
                     <td className="py-2.5 px-3">
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         {c.ip_ont && (
                           <div className="text-slate-900 font-bold font-mono text-[11px] flex items-center gap-1.5">
                             <span className="text-[9px] text-cyan-800 bg-cyan-100/80 px-1 py-0.2 rounded font-black tracking-tight uppercase">ONT</span>
@@ -704,8 +831,10 @@ export function ModulPelanggan({
                         {(!c.ip_ont && !c.ip_router) && (
                           <div className="text-slate-400 font-mono text-[11px] italic">-</div>
                         )}
-                        <div className="text-[10px] text-slate-500 font-mono font-medium pt-0.5">
-                          {c.pop || 'POP-01'} • <span className="uppercase">{c.kantor || 'cabang'}</span>
+                        <div className="flex items-center gap-1 pt-0.5">
+                          <span className="text-[9px] font-black uppercase tracking-tight bg-sky-50 text-sky-800 border border-sky-200 px-1.5 py-0.2 rounded font-mono">
+                            {c.jenis_modem || 'GM220-S'}
+                          </span>
                         </div>
                       </div>
                     </td>
@@ -740,81 +869,103 @@ export function ModulPelanggan({
                         })()}
                       </div>
                     </td>
-                    <td className="py-2.5 px-3 text-right font-black">
+                    <td className="py-2.5 px-3 text-right">
                       {(() => {
                         const rxVal = c.rx_power ?? c.rx ?? c.redaman_current ?? c.redaman_baseline;
                         const isNumeric = rxVal !== null && rxVal !== undefined && !isNaN(Number(rxVal));
-                        const statusVal = c.status_koneksi || c.status || 'NORMAL';
+                        const rawStatus = (c.status_koneksi || c.status || 'NORMAL').toUpperCase();
                         
-                        if (isNumeric) {
-                          const num = Number(rxVal);
-                          return (
-                            <span
-                              className={
-                                num <= critThreshold
-                                  ? 'text-rose-600'
-                                  : num <= warnThreshold
-                                  ? 'text-amber-600'
-                                  : 'text-emerald-600'
-                              }
-                            >
-                              {num.toFixed(1)} dBm
-                            </span>
-                          );
+                        let statusBadge = 'NORMAL';
+                        let badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+
+                        if (rawStatus === 'LOS' || !isNumeric) {
+                          statusBadge = 'LOS';
+                          badgeClass = 'bg-purple-50 text-purple-800 border-purple-300';
                         } else {
-                          return (
-                            <span className="text-slate-500 font-bold">
-                              {statusVal === 'LOS' ? 'LOS' : '-'}
-                            </span>
-                          );
+                          const num = Number(rxVal);
+                          if (num <= critThreshold || rawStatus === 'CRITICAL') {
+                            statusBadge = 'CRITICAL';
+                            badgeClass = 'bg-rose-50 text-rose-800 border-rose-300';
+                          } else if (num <= warnThreshold || rawStatus === 'WARNING') {
+                            statusBadge = 'WARNING';
+                            badgeClass = 'bg-amber-50 text-amber-800 border-amber-300';
+                          } else {
+                            statusBadge = 'NORMAL';
+                            badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+                          }
                         }
-                      })()}
-                    </td>
-                    <td className="py-2.5 px-3 text-center">
-                      {(() => {
-                        const isWaiting = (c.status_lease === 'waiting') || (!c.is_monitored && !c.rx_power);
-                        if (isWaiting) {
-                          return (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-slate-100 text-slate-600 border border-slate-300">
-                              OFFLINE (WAITING)
-                            </span>
-                          );
-                        }
-                        const statusVal = (c.status_koneksi || c.status || 'NORMAL').toUpperCase();
-                        let badgeClass = 'bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold';
-                        if (statusVal === 'WARNING') {
-                          badgeClass = 'bg-amber-50 text-amber-800 border border-amber-300 font-bold';
-                        } else if (statusVal === 'CRITICAL') {
-                          badgeClass = 'bg-rose-50 text-rose-800 border border-rose-300 font-bold';
-                        } else if (statusVal === 'LOS') {
-                          badgeClass = 'bg-purple-50 text-purple-800 border border-purple-300 font-bold';
-                        }
+
                         return (
-                          <div className="flex flex-col items-center gap-0.5">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${badgeClass}`}>
-                              {statusVal}
+                          <div className="flex flex-col items-end gap-1">
+                            <span
+                              className={`font-black font-mono ${
+                                statusBadge === 'CRITICAL'
+                                  ? 'text-rose-600'
+                                  : statusBadge === 'WARNING'
+                                  ? 'text-amber-600'
+                                  : statusBadge === 'LOS'
+                                  ? 'text-purple-700'
+                                  : 'text-emerald-600'
+                              }`}
+                            >
+                              {isNumeric ? `${Number(rxVal).toFixed(1)} dBm` : 'LOS'}
                             </span>
-                            <span className="text-[9px] font-mono font-bold text-emerald-600 uppercase">
-                              ONLINE
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${badgeClass}`}>
+                              {statusBadge}
                             </span>
                           </div>
                         );
                       })()}
                     </td>
+                    <td className="py-2.5 px-3 text-center">
+                      {(() => {
+                        const isOnline = (c.status_lease === 'bound') || (Boolean(c.rx_power) && c.status_lease !== 'waiting');
+                        if (isOnline) {
+                          return (
+                            <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-300 tracking-wider">
+                              ONLINE
+                            </span>
+                          );
+                        }
+                        return (
+                          <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase bg-slate-100 text-slate-600 border border-slate-300 tracking-wider">
+                            OFFLINE
+                          </span>
+                        );
+                      })()}
+                    </td>
                     <td className="py-2.5 px-3 text-right">
                       <div className="flex items-center justify-end gap-1.5 relative">
-                        <button
-                          onClick={() => handleSingleProbe(cId)}
-                          disabled={probingId === cId || !isOfficeActive}
-                          className={`px-2.5 py-1 border rounded-lg text-[11px] font-bold transition shadow-2xs ${
-                            !isOfficeActive
-                              ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
-                              : 'bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 border-cyan-200 cursor-pointer'
-                          }`}
-                          title={!isOfficeActive ? 'Kantor nonaktif. Aktifkan kantor untuk menguji sinyal ONT.' : 'Uji Sinyal Redaman Langsung'}
-                        >
-                          {probingId === cId ? 'Uji...' : !isOfficeActive ? 'Nonaktif' : 'Uji Sinyal'}
-                        </button>
+                        {(() => {
+                          const cooldown = probeCooldowns[cId] || 0
+                          const isProbing = probingId === cId
+                          const isDisabled = isProbing || cooldown > 0 || !isOfficeActive
+
+                          return (
+                            <button
+                              onClick={() => handleSingleProbe(cId)}
+                              disabled={isDisabled}
+                              className={`px-2.5 py-1 border rounded-lg text-[11px] font-bold transition shadow-2xs ${
+                                !isOfficeActive
+                                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+                                  : cooldown > 0
+                                  ? 'bg-slate-100 text-slate-500 border-slate-300 cursor-not-allowed font-mono'
+                                  : isProbing
+                                  ? 'bg-cyan-100 text-cyan-800 border-cyan-300 cursor-wait'
+                                  : 'bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 border-cyan-200 cursor-pointer'
+                              }`}
+                              title={
+                                !isOfficeActive
+                                  ? 'Kantor nonaktif. Aktifkan kantor untuk menguji sinyal ONT.'
+                                  : cooldown > 0
+                                  ? `Tunggu jeda cooldown (${cooldown} detik) sebelum memeriksa ulang redaman ONT`
+                                  : 'Cek Sinyal Redaman ONT Langsung'
+                              }
+                            >
+                              {isProbing ? 'Mengecek...' : !isOfficeActive ? 'Nonaktif' : cooldown > 0 ? `Tunggu (${cooldown}s)` : 'Cek Redaman'}
+                            </button>
+                          )
+                        })()}
 
                         {/* Menu Titik Tiga (Aksi Popover) */}
                         <div className="relative inline-block text-left">
@@ -1167,6 +1318,41 @@ export function ModulPelanggan({
         activeOffice={activeOffice}
         onSuccess={fetchCustomers}
       />
+      {/* Floating Toast Notification (Pojok Kanan Bawah) */}
+      {toast.show && (
+        <div className="fixed bottom-5 right-5 z-50 max-w-sm transition-all duration-300 animate-in fade-in slide-in-from-bottom-3">
+          <div
+            className={`p-3.5 rounded-2xl shadow-xl border flex items-start gap-2.5 backdrop-blur-md ${
+              toast.type === 'success'
+                ? 'bg-emerald-900/95 text-emerald-100 border-emerald-500/50'
+                : toast.type === 'warning'
+                ? 'bg-amber-900/95 text-amber-100 border-amber-500/50'
+                : toast.type === 'info'
+                ? 'bg-cyan-900/95 text-cyan-100 border-cyan-500/50'
+                : 'bg-rose-900/95 text-rose-100 border-rose-500/50'
+            }`}
+          >
+            <div className="flex-1 text-xs font-sans leading-relaxed">
+              <div className="font-bold mb-0.5">
+                {toast.type === 'success'
+                  ? 'Pemeriksaan Berhasil'
+                  : toast.type === 'warning'
+                  ? 'Perhatian / Terkunci'
+                  : toast.type === 'info'
+                  ? 'Informasi'
+                  : 'Gagal / Kesalahan'}
+              </div>
+              <div>{toast.message}</div>
+            </div>
+            <button
+              onClick={() => setToast(prev => ({ ...prev, show: false }))}
+              className="text-white/60 hover:text-white text-xs font-bold px-1.5 py-0.5 rounded transition cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

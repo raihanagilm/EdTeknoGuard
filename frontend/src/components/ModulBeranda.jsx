@@ -181,9 +181,6 @@ export function ModulBeranda({
       const res = await MonitoringService.getKpi({ kantor: activeOffice })
       if (res.ok && res.data) {
         setKpi(res.data)
-        if (res.data.total_monitored > 0 && res.data.los === res.data.total_monitored) {
-          setIsNetworkError(true)
-        }
       }
     } catch (err) {
       console.error('Gagal mengambil metrik KPI:', err)

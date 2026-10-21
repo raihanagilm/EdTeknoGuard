@@ -565,9 +565,9 @@ export function ModulPengaturan({
                   <div
                     key={idx}
                     draggable
-                    onDragStart={() => handleCredDragStart(idx)}
+                    onDragStart={(e) => handleCredDragStart(e, idx)}
                     onDragOver={(e) => handleCredDragOver(e, idx)}
-                    onDrop={() => handleCredDrop(idx)}
+                    onDrop={(e) => handleCredDrop(e, idx)}
                     onDragEnd={handleCredDragEnd}
                     className={`p-3 rounded-xl border bg-white/90 transition flex flex-col sm:flex-row sm:items-center gap-2.5 ${dragOverCredIdx === idx
                       ? 'border-cyan-500 ring-2 ring-cyan-200 bg-cyan-50/40'

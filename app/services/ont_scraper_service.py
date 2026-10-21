@@ -602,6 +602,7 @@ class ONTScraperService:
             return {
                 "success": False,
                 "error_type": "LOCKOUT",
+                "lockout_remaining_seconds": rem_secs,
                 "message": f"Modem terkunci sementara ({rem_secs}s tersisa)",
                 "status_kredensial": "UNTESTED",
                 "status_koneksi": "LOS",

@@ -438,6 +438,68 @@ class MonitoringScheduler:
         th.start()
         return {"status": "started", "kantor": k, "message": f"Pemindaian kantor {k.upper()} dilanjutkan dari indeks {state.resume_index}."}
 
+    @classmethod
+    def check_office_connectivity(cls, db: Session, kantor: Optional[str] = None) -> bool:
+        """
+        Melakukan pre-flight connectivity check cepat (socket/ping) ke sampel IP ONT kantor.
+        Jika minimal satu perangkat ONT/gateway kantor merespons, berarti jaringan terhubung prima.
+        Otomatis memulihkan (auto-heal) flag 'is_network_error' menjadi False di database dan memory.
+        """
+        import socket
+        import subprocess
+        import platform
+
+        k = (kantor or "all").lower().strip()
+        q = db.query(Pelanggan).filter(Pelanggan.is_active == True, Pelanggan.is_monitored == True)
+        if k != "all":
+            q = q.filter(Pelanggan.kantor == k)
+        
+        # Ambil maksimal 4 sampel pelanggan untuk diuji
+        samples = q.limit(4).all()
+        if not samples:
+            return True
+
+        for cust in samples:
+            target_ip = (cust.ip_ont or cust.ip_router or "").strip()
+            if not target_ip:
+                continue
+
+            # 1. Coba probe port 80 / 443 / 23 via socket cepat (< 800ms)
+            is_alive = False
+            for port in (80, 443, 8080):
+                try:
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    s.settimeout(0.7)
+                    if s.connect_ex((target_ip, port)) == 0:
+                        is_alive = True
+                        s.close()
+                        break
+                    s.close()
+                except Exception:
+                    pass
+
+            # 2. Fallback ICMP Ping 1 paket cepat (< 700ms) jika socket tertutup
+            if not is_alive:
+                try:
+                    param = "-n" if platform.system().lower() == "windows" else "-c"
+                    timeout_param = "-w" if platform.system().lower() == "windows" else "-W"
+                    cmd = ["ping", param, "1", timeout_param, "700", target_ip]
+                    if subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                        is_alive = True
+                except Exception:
+                    pass
+
+            if is_alive:
+                # Terbukti terhubung ke jaringan lokal! Auto-heal jika sebelumnya tercatat error
+                office_state = cls.get_office_state(k)
+                with office_state.lock:
+                    office_state.is_network_error = False
+                cls.set_setting_in_db(db, "is_network_error", "false", kantor=k if k != "all" else None)
+                db.commit()
+                return True
+
+        return False
+
     def get_status(self, kantor: Optional[str] = None) -> Dict[str, Any]:
         k = (kantor or "all").lower().strip()
         is_office_active = True
@@ -466,6 +528,12 @@ class MonitoringScheduler:
             
             office_state = self.get_office_state(k)
             is_net_err = (net_err_str.lower() == "true") or office_state.is_network_error
+
+            # Pre-check koneksi otomatis jika sebelumnya berstatus error
+            # Jika saat ini perangkat ONT/Gateway kantor sudah terhubung, sembuhkan (auto-heal) langsung!
+            if is_net_err and not office_state.is_scanning:
+                if self.check_office_connectivity(db, kantor=k):
+                    is_net_err = False
             
             last_duration_str = self.get_setting_from_db(db, "last_scan_duration", str(office_state.last_scan_duration or 0.0), kantor=k if k != "all" else None)
             last_duration = float(last_duration_str) if last_duration_str.replace('.', '', 1).isdigit() else (office_state.last_scan_duration or 0.0)
@@ -648,7 +716,28 @@ class MonitoringScheduler:
                 query = query.filter(Pelanggan.kantor == k)
             pelanggan_list = query.all()
             
+            # Pre-flight check koneksi: pastikan server terhubung ke segmen jaringan kantor ini
+            is_connected = self.check_office_connectivity(db, kantor=k)
+            if not is_connected and len(pelanggan_list) > 0:
+                with state.lock:
+                    state.is_scanning = False
+                    state.is_network_error = True
+                    state.scan_current = 0
+                self.set_setting_in_db(db, "is_network_error", "true", kantor=None)
+                if k != "all":
+                    self.set_setting_in_db(db, "is_network_error", "true", kantor=k)
+                db.commit()
+                logger.warning(f"[SCAN] Pre-flight check gagal: Server tidak terhubung ke jaringan kantor '{k.upper()}'.")
+                return {
+                    "status": "error",
+                    "error_type": "NETWORK_UNREACHABLE",
+                    "is_network_error": True,
+                    "message": f"Koneksi Gagal: Server tidak terhubung ke jaringan kantor {k.upper()}. Pastikan server berada di segmen/VLAN yang sama.",
+                    "target_kantor": k
+                }
+
             with state.lock:
+                state.is_network_error = False
                 state.scan_total = len(pelanggan_list)
                 if state.resume_index >= state.scan_total:
                     state.resume_index = 0
@@ -1094,11 +1183,16 @@ class MonitoringScheduler:
                 "uptime": res.get("uptime"),
                 "status_koneksi": res.get("status_koneksi") or "LOS",
                 "status_kredensial": cust.status_kredensial,
+                "user_admin": cust.user_admin,
+                "pass_admin": cust.pass_admin,
                 "mac_address": cust.mac_address,
                 "nama_wifi": cust.nama_wifi,
                 "password_wifi": cust.password_wifi,
                 "latency_ms": res.get("latency_ms"),
                 "keterangan": ket,
+                "success": bool(res.get("success")),
+                "error_type": res.get("error_type"),
+                "lockout_remaining_seconds": res.get("lockout_remaining_seconds", 0),
                 "waktu_cek": now.strftime("%Y-%m-%d %H:%M:%S")
             }
         finally:

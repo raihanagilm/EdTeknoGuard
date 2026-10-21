@@ -412,12 +412,13 @@ class AdminCustomerMgmtService:
                     "time": get_now_wib().strftime("%H:%M")
                 })
 
-        # Ambil konfigurasi notifikasi (Getaran, Interval, Mode Malam)
+        # Ambil konfigurasi notifikasi (Getaran, Interval, Mode Malam, Interval Pemantauan)
         from app.modules.settings.service import SystemSettingsService
-        current_cfg = SystemSettingsService.get_settings(db)
+        current_cfg = SystemSettingsService.get_settings(db, kantor=kantor)
         notif_config = {
             "vibration_enabled": current_cfg.get("app_vibration_enabled", True),
             "alert_waiting_interval_minutes": current_cfg.get("alert_waiting_interval_minutes", 5),
+            "polling_interval_minutes": current_cfg.get("polling_interval_minutes", 5),
             "night_mode_enabled": current_cfg.get("night_mode_enabled", False),
             "night_mode_start": current_cfg.get("night_mode_start", "22:00"),
             "night_mode_end": current_cfg.get("night_mode_end", "06:00")
