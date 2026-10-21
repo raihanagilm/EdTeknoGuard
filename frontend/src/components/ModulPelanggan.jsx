@@ -955,7 +955,7 @@ export function ModulPelanggan({
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       {(() => {
-                        const isOnline = (c.status_lease === 'bound') || (Boolean(c.rx_power) && c.status_lease !== 'waiting');
+                        const isOnline = (c.status_lease === 'bound') && (c.status_koneksi !== 'OFFLINE') && (c.status !== 'OFFLINE') && Boolean(c.is_monitored !== false);
                         if (isOnline) {
                           return (
                             <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-300 tracking-wider">
@@ -973,9 +973,10 @@ export function ModulPelanggan({
                     <td className="py-2.5 px-3 text-right">
                       <div className="flex items-center justify-end gap-1.5 relative">
                         {(() => {
+                          const isOnline = (c.status_lease === 'bound') && (c.status_koneksi !== 'OFFLINE') && (c.status !== 'OFFLINE') && Boolean(c.is_monitored !== false);
                           const cooldown = probeCooldowns[cId] || 0
                           const isProbing = probingId === cId
-                          const isDisabled = isProbing || cooldown > 0 || !isOfficeActive
+                          const isDisabled = isProbing || cooldown > 0 || !isOfficeActive || !isOnline
 
                           return (
                             <button
@@ -984,6 +985,8 @@ export function ModulPelanggan({
                               className={`px-2.5 py-1 border rounded-lg text-[11px] font-bold transition shadow-2xs ${
                                 !isOfficeActive
                                   ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+                                  : !isOnline
+                                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-50'
                                   : cooldown > 0
                                   ? 'bg-slate-100 text-slate-500 border-slate-300 cursor-not-allowed font-mono'
                                   : isProbing
@@ -993,12 +996,14 @@ export function ModulPelanggan({
                               title={
                                 !isOfficeActive
                                   ? 'Kantor nonaktif. Aktifkan kantor untuk menguji sinyal ONT.'
+                                  : !isOnline
+                                  ? 'Perangkat sedang Offline (DHCP/PPPoE tidak aktif). Cek redaman tidak tersedia.'
                                   : cooldown > 0
                                   ? `Tunggu jeda cooldown (${cooldown} detik) sebelum memeriksa ulang redaman ONT`
                                   : 'Cek Sinyal Redaman ONT Langsung'
                               }
                             >
-                              {isProbing ? 'Mengecek...' : !isOfficeActive ? 'Nonaktif' : cooldown > 0 ? `Tunggu (${cooldown}s)` : 'Cek Redaman'}
+                              {isProbing ? 'Mengecek...' : !isOfficeActive ? 'Nonaktif' : !isOnline ? 'Offline' : cooldown > 0 ? `Tunggu (${cooldown}s)` : 'Cek Redaman'}
                             </button>
                           )
                         })()}

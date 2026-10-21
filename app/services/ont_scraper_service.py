@@ -726,12 +726,14 @@ class ONTScraperService:
             # Jika percobaan 1 gagal dan modem masih merespon (bukan timeout),
             # lakukan retry hanya jika bukan explicit credential error (misal token stale / session semaphore).
             # Jika respon eksplisit "User information is error" atau "SetDisabled()", jangan coba ulang kredensial yang sama agar tidak menghabiskan limit percobaan ONT.
-            is_explicit_wrong_pwd = (resp is not None and ("user information is error" in resp.text.lower() or "SetDisabled()" in resp.text))
+            is_disabled_lockout = (resp is not None and bool(re.search(r'(?<!function\s)SetDisabled\s*\(', resp.text)))
+            is_explicit_wrong_pwd = (resp is not None and ("user information is error" in resp.text.lower() or is_disabled_lockout))
             if not ok and resp is not None and not is_explicit_wrong_pwd:
                 time.sleep(0.8) # Jeda pendinginan modem
                 session.cookies.clear() # Bersihkan sesi lama
                 ok, resp = cls.attempt_login(session, base_url, host, u, p)
                 last_resp = resp
+                is_disabled_lockout = (resp is not None and bool(re.search(r'(?<!function\s)SetDisabled\s*\(', resp.text)))
 
             if ok:
                 authenticated = True
@@ -739,7 +741,21 @@ class ONTScraperService:
                 active_pass = p
                 auth_source = source
                 break
-            time.sleep(0.8)
+
+            # Jika ONT memicu lockout keamanan (SetDisabled), hitung sisa detik dan tunggu jeda di latar belakang agar kandidat berikutnya berhasil
+            if is_disabled_lockout and resp is not None:
+                m_wait = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', resp.text)
+                wait_sec = 60
+                if m_wait:
+                    computed = int(m_wait.group(1)) + 60 - int(m_wait.group(2))
+                    if 0 < computed <= 65:
+                        wait_sec = computed
+                print(f"[!] [LOCKOUT_AUTO_WAIT] ONT {host} ({customer_name or 'Pelanggan'}): ONT lockout dipicu setelah mencoba {u}. Menunggu {wait_sec}s sebelum melanjutkan kandidat kredensial berikutnya...")
+                time.sleep(wait_sec + 2) # Tunggu sampai lockout bersih
+                session.cookies.clear()
+                probe_html = "" # Reset probe agar form login baru di-fetch segar
+            else:
+                time.sleep(0.8)
 
         latency = int((time.time() - start_time) * 1000)
 

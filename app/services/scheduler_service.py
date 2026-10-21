@@ -1076,6 +1076,24 @@ class MonitoringScheduler:
                         "is_office_active": False
                     }
 
+            # Cek apakah perangkat pelanggan sedang offline (status lease waiting atau tidak terpantau)
+            is_offline = (getattr(cust, "status_lease", "bound") == "waiting") or (not cust.is_monitored)
+            if is_offline:
+                return {
+                    "id_pelanggan": cust.id_pelanggan,
+                    "nama": cust.nama,
+                    "status_koneksi": "OFFLINE",
+                    "status": "OFFLINE",
+                    "rx_power": None,
+                    "suhu_ont": None,
+                    "mac_address": cust.mac_address,
+                    "status_kredensial": cust.status_kredensial,
+                    "waktu_cek": get_now_wib().strftime("%Y-%m-%d %H:%M:%S"),
+                    "message": "Perangkat sedang Offline (DHCP/PPPoE tidak aktif). Tidak dapat memeriksa redaman.",
+                    "success": False,
+                    "is_offline": True
+                }
+
             default_user = self.get_setting_from_db(db, "default_modem_user", None, kantor=cust_kantor)
             default_pass = self.get_setting_from_db(db, "default_modem_pass", None, kantor=cust_kantor)
             raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=cust_kantor)

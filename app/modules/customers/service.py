@@ -607,14 +607,19 @@ class CustomerService:
             query = query.filter(Pelanggan.kantor.in_(allowed_kantor))
 
         if status and status != "Semua Status" and status != "ALL":
-            if status == "NORMAL":
-                query = query.filter(or_(LogPerformaONT.status_koneksi == "NORMAL", LogPerformaONT.status_koneksi == None))
+            if status == "OFFLINE":
+                query = query.filter(or_(Pelanggan.status_lease == "waiting", Pelanggan.is_monitored == False))
+            elif status == "NORMAL":
+                query = query.filter(
+                    Pelanggan.status_lease != "waiting",
+                    or_(LogPerformaONT.status_koneksi == "NORMAL", LogPerformaONT.status_koneksi == None)
+                )
             elif status == "WARNING":
-                query = query.filter(LogPerformaONT.status_koneksi == "WARNING")
+                query = query.filter(LogPerformaONT.status_koneksi == "WARNING", Pelanggan.status_lease != "waiting")
             elif status == "CRITICAL":
-                query = query.filter(LogPerformaONT.status_koneksi == "CRITICAL")
+                query = query.filter(LogPerformaONT.status_koneksi == "CRITICAL", Pelanggan.status_lease != "waiting")
             elif status == "LOS":
-                query = query.filter(LogPerformaONT.status_koneksi == "LOS")
+                query = query.filter(LogPerformaONT.status_koneksi == "LOS", Pelanggan.status_lease != "waiting")
             elif status in ("NONAKTIF", "OFF"):
                 query = query.filter(Pelanggan.is_monitored == False)
             else:
@@ -689,7 +694,11 @@ class CustomerService:
 
         result = []
         for c, latest_log, kuota_rec in rows:
-            current_status = latest_log.status_koneksi if latest_log else "NORMAL"
+            lease_status = getattr(c, "status_lease", "bound") or "bound"
+            if lease_status == "waiting":
+                current_status = "OFFLINE"
+            else:
+                current_status = latest_log.status_koneksi if latest_log else "NORMAL"
             current_rx = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else (float(c.redaman_baseline) if c.redaman_baseline else None)
             last_check = latest_log.waktu_cek.strftime("%d/%m %H:%M") if (latest_log and latest_log.waktu_cek) else "-"
             waktu_terakhir_iso = latest_log.waktu_cek.isoformat() if (latest_log and latest_log.waktu_cek) else None
