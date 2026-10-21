@@ -48,7 +48,7 @@ class PerangkatONT(Base):
     id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), unique=True, nullable=False, index=True)
     ip_router = Column(String(45), nullable=True, index=True)
     ip_ont = Column(String(45), nullable=True, index=True)
-    jenis_modem = Column(String(50), nullable=False, default="GM220-S", index=True)
+    jenis_modem = Column(String(50), nullable=True, default=None, index=True)
     mac_address = Column(String(30), nullable=True)
     redaman_baseline = Column(Numeric(5, 2), nullable=True)
     nama_wifi = Column(String(100), nullable=True)
@@ -124,7 +124,7 @@ class Pelanggan(Base):
 
     @property
     def jenis_modem(self):
-        return self.perangkat.jenis_modem if self.perangkat else "GM220-S"
+        return self.perangkat.jenis_modem if self.perangkat else None
 
     @jenis_modem.setter
     def jenis_modem(self, val):

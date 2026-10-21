@@ -210,7 +210,7 @@ class CustomerService:
                     "kantor": row[7] or "",
                     "nama_wifi": row[8] or "",
                     "password_wifi": row[9] or "",
-                    "jenis_modem": row[10] or "GM220-S"
+                    "jenis_modem": row[10] or None
                 }
                 for row in existing_customers if row[1]
             }
@@ -516,7 +516,7 @@ class CustomerService:
                     new_ont = PerangkatONT(
                         id_pelanggan=id_pel,
                         ip_router=ip_router,
-                        jenis_modem=str(row_data.get("jenis_modem", "GM220-S")).strip() or "GM220-S",
+                        jenis_modem=str(row_data.get("jenis_modem", "")).strip() or None,
                         mac_address=str(row_data.get("mac_address", "")).strip() or None,
                         redaman_baseline=redaman_baseline,
                         nama_wifi=new_wifi_ssid or None,
@@ -923,7 +923,7 @@ class CustomerService:
         new_ont = PerangkatONT(
             id_pelanggan=data.id_pelanggan,
             ip_router=data.ip_router,
-            jenis_modem=data.jenis_modem or "GM220-S",
+            jenis_modem=data.jenis_modem or None,
             mac_address=data.mac_address,
             redaman_baseline=data.redaman_baseline,
             nama_wifi=data.nama_wifi,
@@ -1158,7 +1158,7 @@ class CustomerService:
             mac_address = get_val(idx_mac) or None
             nama_wifi = get_val(idx_wifi) or None
             password_wifi = get_val(idx_pass_wifi) or None
-            jenis_modem = get_val(idx_modem) or "GM220-S"
+            jenis_modem = get_val(idx_modem) or None
             user_admin = get_val(idx_user_admin) or "admin"
             pass_admin = get_val(idx_pass_admin) or None
 

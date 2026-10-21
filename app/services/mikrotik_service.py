@@ -592,7 +592,7 @@ class MikroTikSyncService:
                     ip_router=ip if not is_ont_ip else None,
                     ip_ont=ip if is_ont_ip else None,
                     mac_address=mac if mac else None,
-                    jenis_modem="GM220-S",
+                    jenis_modem=None,
                     status_kredensial="UNTESTED"
                 )
                 db.flush()

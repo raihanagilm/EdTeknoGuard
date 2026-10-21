@@ -366,13 +366,15 @@ class ONTScraperService:
             "Connection": "keep-alive",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         }
-        res = {"mac_address": None, "nama_wifi": None, "password_wifi": None}
+        res = {"mac_address": None, "nama_wifi": None, "password_wifi": None, "jenis_modem": None}
+        dev_content = ""
         
-        # 1. MAC Address dari Status Device Info
+        # 1. MAC Address & Model Modem dari Status Device Info
         try:
             r_dev = session.get(f"{base_url}{STATUS_DEV_PATH}", headers=headers, timeout=8)
             if r_dev.status_code == 200:
-                content = html.unescape(r_dev.text)
+                dev_content = html.unescape(r_dev.text)
+                content = dev_content
 
                 # Format tabel MAC ZTE GM220: <td class="tdleft">MAC</td> <td class="tdright">&#56;&#67;...</td>
                 m_mac_cell = re.search(r'>\s*MAC\s*</td>\s*<td[^>]*>(.*?)</td>', content, re.I | re.S)
@@ -392,6 +394,18 @@ class ONTScraperService:
                         m_found = re.search(r'([0-9A-F]{2}(?::[0-9A-F]{2}){5})', clean_mac)
                         if m_found:
                             res["mac_address"] = m_found.group(1)
+
+                # Ekstraksi Model / Jenis Modem dari status_dev_info_t.gch
+                # Pola 1: Frm_ModelName atau cell Model Name / Product Name / Device Model
+                m_model = re.search(r'id=["\'](?:Frm_ModelName|Frm_ProductName|Frm_DeviceType|Frm_DevType|model_name)["\'][^>]*>(.*?)</td>', content, re.I | re.S)
+                if not m_model:
+                    m_model = re.search(r'>\s*(?:Model\s*(?:Name)?|Product\s*Name|Device\s*Type|Tipe\s*Perangkat)\s*</td>\s*<td[^>]*>(.*?)</td>', content, re.I | re.S)
+                if m_model:
+                    raw_model = html.unescape(m_model.group(1))
+                    clean_model = re.sub(r'<[^>]+>', '', raw_model).strip()
+                    if clean_model and len(clean_model) <= 40:
+                        res["jenis_modem"] = clean_model
+
         except Exception:
             pass
 
@@ -464,6 +478,34 @@ class ONTScraperService:
                             res["nama_wifi"] = m_var_ssid.group(1).strip()
             except Exception:
                 pass
+
+        # 4. Fallback Heuristik Model / Vendor jika belum terbaca dari tabel spesifik
+        if not res["jenis_modem"]:
+            combined_probe = (dev_content + " " + getattr(session, "probe_html", "")).lower()
+            if "gm220-s" in combined_probe or "gm220" in combined_probe:
+                res["jenis_modem"] = "GM220-S"
+            elif "f663" in combined_probe:
+                res["jenis_modem"] = "ZTE F663"
+            elif "f609" in combined_probe:
+                res["jenis_modem"] = "ZTE F609"
+            elif "f670" in combined_probe:
+                res["jenis_modem"] = "ZTE F670L"
+            elif "hg8245" in combined_probe:
+                res["jenis_modem"] = "Huawei HG8245"
+            elif "hg8546" in combined_probe:
+                res["jenis_modem"] = "Huawei HG8546"
+            elif "eg8145" in combined_probe:
+                res["jenis_modem"] = "Huawei EG8145"
+            elif "hg6243" in combined_probe:
+                res["jenis_modem"] = "FiberHome HG6243"
+            elif "vsol" in combined_probe:
+                res["jenis_modem"] = "VSOL XPON"
+            elif "zte" in combined_probe or "zte.com" in combined_probe or "template.gch" in combined_probe:
+                res["jenis_modem"] = "ZTE XPON"
+            elif "huawei" in combined_probe:
+                res["jenis_modem"] = "Huawei ONT"
+            elif "fiberhome" in combined_probe:
+                res["jenis_modem"] = "FiberHome ONT"
 
         return res
 
@@ -663,7 +705,8 @@ class ONTScraperService:
             active_candidate_list = credentials_to_try
 
         start_time = time.time()
-        probe_html = r_probe.text if r_probe is not None else None
+        probe_html = r_probe.text if r_probe is not None else ""
+        setattr(session, "probe_html", probe_html)
 
         for u, p, source in active_candidate_list:
             # Percobaan 1: Coba login normal
@@ -780,6 +823,7 @@ class ONTScraperService:
             "mac_address": device_wifi.get("mac_address"),
             "nama_wifi": device_wifi.get("nama_wifi"),
             "password_wifi": device_wifi.get("password_wifi"),
+            "jenis_modem": device_wifi.get("jenis_modem"),
             "uptime": 86400,
             "latency_ms": latency,
             "message": "Pengecekan live optik berhasil"

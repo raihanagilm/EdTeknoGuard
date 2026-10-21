@@ -66,7 +66,7 @@ class ImporterService:
                     id_pel = f"{raw_id}_{idx}"
                 seen_ids.add(id_pel)
 
-                modem = clean_string(row.get("Jenis Modem")) or "GM220-S"
+                modem = clean_string(row.get("Jenis Modem")) or None
                 pop = clean_string(row.get("POP")) or "Server Cabang"
                 paket = clean_string(row.get("Paket"))
                 redaman = clean_float(row.get("Redaman"))
@@ -141,7 +141,7 @@ class ImporterService:
 
                 id_pel = clean_id_pelanggan(get_val("id pelanggan"), global_idx)
                 global_idx += 1
-                modem = clean_string(get_val("jenis modem") or get_val("modem")) or "GM220-S"
+                modem = clean_string(get_val("jenis modem") or get_val("modem")) or None
                 pop = clean_string(get_val("pop")) or sname.replace("PELANGGAN ", "Server ")
                 redaman = clean_float(get_val("redaman"))
 

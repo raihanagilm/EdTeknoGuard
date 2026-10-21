@@ -843,9 +843,15 @@ export function ModulPelanggan({
                           <div className="text-slate-400 font-mono text-[11px] italic">-</div>
                         )}
                         <div className="flex items-center gap-1 pt-0.5">
-                          <span className="text-[9px] font-black uppercase tracking-tight bg-sky-50 text-sky-800 border border-sky-200 px-1.5 py-0.2 rounded font-mono">
-                            {c.jenis_modem || 'GM220-S'}
-                          </span>
+                          {c.jenis_modem ? (
+                            <span className="text-[9px] font-black uppercase tracking-tight bg-sky-50 text-sky-800 border border-sky-200 px-1.5 py-0.2 rounded font-mono">
+                              {c.jenis_modem}
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-bold text-slate-400 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded font-mono">
+                              -
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>

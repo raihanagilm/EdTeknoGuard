@@ -859,13 +859,15 @@ class MonitoringScheduler:
                     res = scrape_res
                     ket = f"Error: {scrape_res.get('message', 'Gagal')}"
 
-                # Auto-deteksi: Simpan MAC Address & Kredensial WiFi jika berhasil terbaca dari ONT
+                # Auto-deteksi: Simpan MAC Address, Kredensial WiFi, & Jenis Modem jika berhasil terbaca dari ONT
                 if res.get("mac_address"):
                     cust.mac_address = res["mac_address"]
                 if res.get("nama_wifi"):
                     cust.nama_wifi = res["nama_wifi"]
                 if res.get("password_wifi"):
                     cust.password_wifi = res["password_wifi"]
+                if res.get("jenis_modem"):
+                    cust.jenis_modem = res["jenis_modem"]
 
                 log_entry = LogPerformaONT(
                     id_pelanggan=cust.id_pelanggan,
@@ -1152,13 +1154,15 @@ class MonitoringScheduler:
                 res = scrape_res
                 ket = f"Single Check: {scrape_res.get('message', 'Unreachable')}"
 
-            # Auto-deteksi: Update MAC Address & Kredensial WiFi jika terdeteksi dari Web GUI ONT
+            # Auto-deteksi: Update MAC Address, Kredensial WiFi, & Jenis Modem jika terdeteksi dari Web GUI ONT
             if res.get("mac_address"):
                 cust.mac_address = res["mac_address"]
             if res.get("nama_wifi"):
                 cust.nama_wifi = res["nama_wifi"]
             if res.get("password_wifi"):
                 cust.password_wifi = res["password_wifi"]
+            if res.get("jenis_modem"):
+                cust.jenis_modem = res["jenis_modem"]
 
             now = get_now_wib()
             log_entry = LogPerformaONT(
