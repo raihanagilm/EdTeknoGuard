@@ -739,7 +739,18 @@ export function ModulPelanggan({
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3 w-40">WiFi &amp; Admin ONT</th>
+              <th 
+                className={`py-2.5 px-3 cursor-pointer select-none transition w-44 ${sortField === 'status_kredensial' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
+                onClick={() => handleSort('status_kredensial')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>WiFi &amp; Admin ONT</span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'status_kredensial' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
+                  {sortField === 'status_kredensial' && (
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </div>
+              </th>
               <th 
                 className={`py-2.5 px-3 text-right cursor-pointer select-none transition w-32 ${sortField === 'rx_power' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
                 onClick={() => handleSort('rx_power')}
