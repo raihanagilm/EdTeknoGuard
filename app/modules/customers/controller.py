@@ -68,13 +68,27 @@ class CustomerController:
         )
         stats = CustomerService.get_customer_stats(db, kantor=kantor, allowed_kantor=allowed_kantor)
         pops = CustomerService.get_pop_list(db, kantor=kantor, allowed_kantor=allowed_kantor)
+
+        # Ambil seluruh daftar kredensial modem yang tersimpan di database settings untuk kantor aktif
+        from app.modules.settings.service import SystemSettingsService
+        office_settings = SystemSettingsService.get_settings(db, kantor=kantor)
+        raw_db_creds = office_settings.get("default_modem_credentials", [])
+        available_creds = []
+        if isinstance(raw_db_creds, list):
+            for item in raw_db_creds:
+                u = (item.get("username") or "").strip()
+                p = (item.get("password") or "").strip()
+                if u and (u, p) not in [(x["username"], x["password"]) for x in available_creds]:
+                    available_creds.append({"username": u, "password": p})
+
         return {
             "total": total,
             "page": page,
             "limit": limit,
             "data": data,
             "stats": stats,
-            "pops": pops
+            "pops": pops,
+            "available_credentials": available_creds
         }
 
     @staticmethod

@@ -26,16 +26,33 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
-- **Responsivitas Segmented Status Ticker Bar & Kontrol Cepat Sorting Pelanggan**:
-  - **Sembunyikan Segment Lockout & Belum Cek di Mobile ([CommonUI.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/CommonUI.jsx), [ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx), [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx))**:
-    - Tombol segmen status `Lockout` dan `Belum Cek` kini hanya ditampilkan pada layar desktop atau laptop (`hidden md:flex`).
-    - Pada layar mobile (ponsel), kedua segmen tersebut disembunyikan agar tampilan status ticker tetap ringkas, tidak padat, dan pas 1 baris penuh tanpa horizontal scrolling.
-  - **Kontrol Cepat Sorting Pelanggan ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx))**:
-    - Menambahkan dropdown selector `Urutkan` langsung di samping kotak pencarian untuk memudahkan pengurutan berdasarkan: ID Pelanggan, Nama, Status Koneksi, Redaman (dBm), IP Router, dan Waktu Cek.
-    - Dilengkapi tombol toggle `ASC / DESC` dengan ikon `ArrowUpDown` untuk membalik arah urutan seketika.
-  - **Penyelarasan Backend Sorting & Filter Status UNTESTED ([customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+- **Penyelarasan Segmented Status Ticker Bar, Status Kredensial INVALID & Kontrol Cepat Sorting Pelanggan**:
+  - **Penghapusan Kartu "Lockout" & "Belum Cek" dari Ticker Bar ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx), [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx), [monitoring/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/monitoring/service.py), [customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+    - Kartu `Lockout` dan `Belum Cek` dihapus sepenuhnya dari Ticker Bar Atas di Beranda dan Pelanggan.
+    - Ticker Bar kembali bersih & konsisten menampilkan 5 kartu metrik sinyal optik utama: **`TOTAL`**, **`OPTIMAL`**, **`WASPADA`**, **`KRITIS`**, dan **`LOS`** baik di desktop maupun mobile.
+  - **Penyederhanaan Status Kredensial Menjadi Murni 2 Status: "VALID" & "INVALID" ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py), [ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py), [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx))**:
+    - Menghapus badge abu-abu `BELUM UJI` dari antarmuka. Status kredensial modem di kolom *WIFI & ADMIN ONT* kini murni hanya memiliki 2 status pasti:
+      1. **`VALID`** (hijau): Username & password terverifikasi cocok dan login modem berhasil.
+      2. **`INVALID`** (merah): Segala bentuk kegagalan autentikasi (salah password, akun ditolak, atau modem sedang lock countdown).
+    - Kolom Redaman untuk modem yang gagal login/belum terbaca tetap konsisten menampilkan tanda `-` dengan badge netral `BELUM CEK`.
+  - **Dropdown Kredensial Interaktif dari Database & Auto Live Check (Opsi A) ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx), [customers/controller.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/controller.py))**:
+    - Kolom *WIFI & ADMIN ONT* kini menyajikan dropdown interaktif berisi daftar seluruh kredensial modem yang tersimpan di database (`system_settings`) kantor terkait.
+    - Admin/Super Admin dapat langsung memilih pasangan `username:password` modem secara manual. Pemilihan ini otomatis menyimpan perubahan ke database pelanggan dan seketika memicu pengujian live (*single probe*) ke modem fisik.
+    - Mekanisme fallback otomatis scraper tetap aktif jika kredensial yang dipilih belum cocok.
+  - **Peningkatan Second Pass Pemindaian Massal ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+    - Pada putaran kedua pemindaian massal untuk modem berstatus `INVALID`, scraper kini dijalankan dalam mode adaptif (`is_mass_scan=False`) sehingga jika modem mengalami lockout, sistem menahan sesi (*stay connection*) dan otomatis melanjutkan percobaan ke kredensial ke-2, ke-3, dst dari database settings hingga berhasil divalidasi.
+  - **Penyelarasan Backend Sorting Kolom Redaman (dBm) ([customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
     - Nilai `effective_status` pada sorting database MySQL menggunakan `case` sekarang mengembalikan `"UNTESTED"` untuk modem tanpa log (bukan lagi fallback `"NORMAL"`).
     - Menambahkan filter query eksplisit untuk status `UNTESTED` agar mencakup modem yang belum memiliki entri di `log_performa_ont`.
+    - **Prioritas Tampilan BELUM CEK pada Sorting Redaman**: Saat pengguna mengklik header tabel **Redaman (dBm)** (`sort_by=rx_power`, urutan `asc`), modem dengan status `BELUM CEK` (`rx_power IS NULL`) kini secara otomatis diurutkan di baris paling atas/awal tabel, mempermudah identifikasi modem yang belum teruji tanpa mengganggu pengurutan numerik dBm.
+  - **Siklus Sorting Bertahap Kolom IP & Router ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) & [customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+    - Header kolom gabungan **IP & Router** menerapkan sistem siklus 4 status berurutan per klik:
+      1. **Klik 1**: Mengurutkan berdasarkan **IP Router** (`ip_router asc`). Label header berubah menjadi *IP Router*.
+      2. **Klik 2**: Mengurutkan berdasarkan **IP ONT** (`ip_ont asc`). Label header berubah menjadi *IP ONT*.
+      3. **Klik 3**: Mengurutkan berdasarkan **Jenis Modem** (`jenis_modem asc`). Label header berubah menjadi *Modem*.
+  - **Penambahan Card Shortcut & Sorting Kredensial INVALID ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx), [ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx), [customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py), [monitoring/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/monitoring/service.py))**:
+    - **Card Shortcut `Invalid`**: Menambahkan segmen kartu `Invalid` (warna oranye kontras) pada Segmented Status Ticker Bar di halaman Data Pelanggan dan Beranda untuk menampilkan jumlah riil modem dengan kredensial gagal/invalid. Mengklik kartu ini langsung menyaring tabel menampilkan seluruh pelanggan berstatus kredensial `INVALID`.
+    - **Sorting Header `WiFi & Admin ONT`**: Mengklik header tabel `WiFi & Admin ONT` (`sort_by=status_kredensial`) pada arah `asc` kini memprioritaskan dan mengumpulkan seluruh modem `INVALID` di posisi paling atas tabel, memudahkan teknisi/admin langsung mengevaluasi dan mengganti pasangan kredensial modem yang bermasalah.
 
 - **Peningkatan Scraper ONT: Adaptasi Karakteristik Vendor, 1-3 Percobaan per Kredensial, Stay-Connection Lockout & Status LOCKOUT**:
   - **Deteksi Karakteristik Vendor Modem ([ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py))**:

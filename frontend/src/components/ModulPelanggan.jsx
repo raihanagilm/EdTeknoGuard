@@ -64,6 +64,8 @@ export function ModulPelanggan({
   const [limit, setLimit] = useState(15)
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState('asc')
+  const [availableCredentials, setAvailableCredentials] = useState([])
+  const [updatingCredId, setUpdatingCredId] = useState(null)
 
   // Quick stats
   const [stats, setStats] = useState({
@@ -72,6 +74,7 @@ export function ModulPelanggan({
     warning: 0,
     critical: 0,
     los: 0,
+    invalid: 0,
     monitored_inactive: 0
   })
 
@@ -228,8 +231,30 @@ export function ModulPelanggan({
     }
   }
 
-  // Toggle sorting
+  // Toggle sorting khusus kolom IP & Router (Siklus: Router -> ONT -> Modem -> Reset ID -> Router)
+  const handleSortIpRouter = () => {
+    if (sortField === 'ip_router') {
+      setSortField('ip_ont')
+      setSortDir('asc')
+    } else if (sortField === 'ip_ont') {
+      setSortField('jenis_modem')
+      setSortDir('asc')
+    } else if (sortField === 'jenis_modem') {
+      setSortField('id')
+      setSortDir('asc')
+    } else {
+      setSortField('ip_router')
+      setSortDir('asc')
+    }
+    setPage(1)
+  }
+
+  // Toggle sorting standar untuk kolom lain
   const handleSort = (field) => {
+    if (field === 'ip_router' || field === 'ip_ont' || field === 'jenis_modem') {
+      handleSortIpRouter()
+      return
+    }
     if (sortField === field) {
       setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))
     } else {
@@ -258,6 +283,9 @@ export function ModulPelanggan({
           if (json.stats) setStats(json.stats)
           if (json.pops && Array.isArray(json.pops) && json.pops.length > 0) {
             setPopOptions(json.pops)
+          }
+          if (json.available_credentials && Array.isArray(json.available_credentials)) {
+            setAvailableCredentials(json.available_credentials)
           }
         } else if (Array.isArray(json)) {
           setCustomers(json)
@@ -403,6 +431,48 @@ export function ModulPelanggan({
       showToast('Koneksi terputus saat memeriksa modem ONT', 'error')
     } finally {
       setProbingId(null)
+    }
+  }
+
+  // Ubah kredensial modem manual dari dropdown (Ambil dari DB Settings) & langsung pemicu uji coba (Opsi A)
+  const handleChangeCredential = async (c, selectedCombo) => {
+    if (!selectedCombo) return
+    const [u, p] = selectedCombo.split(':::')
+    const cId = c.id_pelanggan || c.id
+    if (!u || !p) return
+    if (c.user_admin === u && c.pass_admin === p) return
+
+    setUpdatingCredId(cId)
+    try {
+      // 1. Simpan perubahan kredensial ke database pelanggan via PUT /api/customers/{id}
+      const res = await fetch(`/api/customers/${encodeURIComponent(cId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_admin: u,
+          pass_admin: p
+        })
+      })
+
+      if (res.ok) {
+        showToast(`Kredensial ${c.nama} diubah ke ${u}:${p}. Memulai uji coba live...`, 'info')
+        // Optimistic update di tabel lokal
+        setCustomers(prev => prev.map(item => {
+          if ((item.id_pelanggan || item.id) === cId) {
+            return { ...item, user_admin: u, pass_admin: p }
+          }
+          return item
+        }))
+        // 2. Langsung picu live test probe (Opsi A)
+        await handleProbeCustomer(cId)
+      } else {
+        const err = await res.json().catch(() => ({}))
+        showToast(err.detail || 'Gagal menyimpan kredensial ke database', 'error')
+      }
+    } catch (err) {
+      showToast('Terjadi kesalahan jaringan saat memperbarui kredensial', 'error')
+    } finally {
+      setUpdatingCredId(null)
     }
   }
 
@@ -567,15 +637,6 @@ export function ModulPelanggan({
             onClick: () => setFilterStatus('ALL'),
             subLabel: 'Semua ONT'
           },
-          ...(stats.untested > 0 ? [{
-            label: 'Belum Cek',
-            value: stats.untested || 0,
-            colorScheme: 'slate',
-            className: 'hidden md:flex',
-            isActive: filterStatus === 'UNTESTED',
-            onClick: () => setFilterStatus('UNTESTED'),
-            subLabel: 'Menunggu Scan'
-          }] : []),
           {
             label: 'Optimal',
             value: stats.normal || 0,
@@ -608,15 +669,14 @@ export function ModulPelanggan({
             onClick: () => setFilterStatus('LOS'),
             subLabel: 'Putus'
           },
-          ...(stats.lockout > 0 ? [{
-            label: 'Lockout',
-            value: stats.lockout || 0,
+          {
+            label: 'Invalid',
+            value: stats.invalid || 0,
             colorScheme: 'orange',
-            className: 'hidden md:flex',
-            isActive: filterStatus === 'LOCKOUT',
-            onClick: () => setFilterStatus('LOCKOUT'),
-            subLabel: 'Terkunci ONT'
-          }] : [])
+            isActive: filterStatus === 'INVALID',
+            onClick: () => setFilterStatus('INVALID'),
+            subLabel: 'Kredensial'
+          }
         ]}
       />
 
@@ -624,9 +684,9 @@ export function ModulPelanggan({
       <div className="relative z-30">
         <FilterContainer>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-            {/* Kotak Pencarian & Tombol Popover Filter */}
+            {/* Kotak Pencarian */}
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <div className="relative flex-1 min-w-[140px]">
+              <div className="relative flex-1 min-w-[150px]">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
@@ -638,35 +698,6 @@ export function ModulPelanggan({
                   placeholder="Cari ID, Nama, IP..."
                   className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px]"
                 />
-              </div>
-
-              {/* Kontrol Cepat Urutkan (Sorting Selector) */}
-              <div className="relative shrink-0 flex items-center gap-1">
-                <select
-                  value={sortField}
-                  onChange={(e) => {
-                    setSortField(e.target.value);
-                    setPage(1);
-                  }}
-                  className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-slate-700 text-[11px] sm:text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px] cursor-pointer"
-                  title="Urutkan data berdasarkan kolom"
-                >
-                  <option value="id">Urut: ID</option>
-                  <option value="nama">Urut: Nama</option>
-                  <option value="status_koneksi">Urut: Status</option>
-                  <option value="rx_power">Urut: Redaman</option>
-                  <option value="ip_router">Urut: IP Router</option>
-                  <option value="waktu_cek">Urut: Waktu Cek</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={() => setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))}
-                  className="p-1.5 sm:px-2 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-sky-200 text-[11px] font-mono font-bold flex items-center justify-center min-h-[34px] sm:min-h-[36px] transition cursor-pointer"
-                  title={sortDir === 'asc' ? 'Urutan Naik (A-Z / Rendah ke Tinggi). Klik untuk membalik' : 'Urutan Turun (Z-A / Tinggi ke Rendah). Klik untuk membalik'}
-                >
-                  <ArrowUpDown className="w-3.5 h-3.5 text-cyan-700 mr-0.5" />
-                  <span className="text-[10px] text-cyan-900 font-black">{sortDir === 'asc' ? 'ASC' : 'DESC'}</span>
-                </button>
               </div>
             </div>
 
@@ -805,14 +836,17 @@ export function ModulPelanggan({
                 </div>
               </th>
               <th 
-                className={`py-2.5 px-3 cursor-pointer select-none transition w-36 ${sortField === 'ip_router' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
-                onClick={() => handleSort('ip_router')}
+                className={`py-2.5 px-3 cursor-pointer select-none transition w-36 ${['ip_router', 'ip_ont', 'jenis_modem'].includes(sortField) ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'}`}
+                onClick={handleSortIpRouter}
+                title="Klik untuk ganti urutan: 1. Router -> 2. ONT -> 3. Modem -> Normal (-)"
               >
                 <div className="flex items-center gap-1">
-                  <span>IP &amp; Router</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'ip_router' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
-                  {sortField === 'ip_router' && (
-                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  <span>
+                    {sortField === 'ip_router' ? 'IP Router' : sortField === 'ip_ont' ? 'IP ONT' : sortField === 'jenis_modem' ? 'Modem' : 'IP & Router'}
+                  </span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${['ip_router', 'ip_ont', 'jenis_modem'].includes(sortField) ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
+                  {['ip_router', 'ip_ont', 'jenis_modem'].includes(sortField) && (
+                    <span className="text-[10px] text-cyan-800 font-black">▲</span>
                   )}
                 </div>
               </th>
@@ -938,26 +972,63 @@ export function ModulPelanggan({
                         <span className="font-bold truncate">{c.nama_wifi || '-'}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-slate-600 font-mono mt-0.5">
-                        <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
+                        {/* Dropdown Kredensial Interaktif dari Database Settings */}
                         {(() => {
-                          const kStatus = (c.status_kredensial || 'UNTESTED').toUpperCase();
+                          const currentCombo = `${c.user_admin || 'admin'}:::${c.pass_admin || ''}`;
+                          // Gabungkan kredensial aktif pelanggan dengan semua kredensial default dari DB Settings
+                          const allOptions = [];
+                          if (c.user_admin && c.pass_admin) {
+                            allOptions.push({ username: c.user_admin, password: c.pass_admin });
+                          }
+                          (availableCredentials || []).forEach(opt => {
+                            if (opt.username && !allOptions.some(x => x.username === opt.username && x.password === opt.password)) {
+                              allOptions.push(opt);
+                            }
+                          });
+
+                          const isUpdating = updatingCredId === (c.id_pelanggan || c.id) || probingId === (c.id_pelanggan || c.id);
+
+                          return (
+                            <div className="relative inline-flex items-center">
+                              <select
+                                value={currentCombo}
+                                disabled={isUpdating}
+                                onChange={(e) => handleChangeCredential(c, e.target.value)}
+                                className={`text-[11px] font-mono font-bold py-0.5 pl-1.5 pr-5 rounded-lg border transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan-500 max-w-[155px] truncate appearance-none ${
+                                  isUpdating
+                                    ? 'bg-slate-100 text-slate-400 border-slate-300 animate-pulse'
+                                    : 'bg-white hover:bg-cyan-50/60 text-slate-800 border-sky-200'
+                                }`}
+                                title="Pilih kredensial dari Database Settings untuk langsung diuji coba"
+                              >
+                                {allOptions.map((opt, oIdx) => {
+                                  const valKey = `${opt.username}:::${opt.password}`;
+                                  return (
+                                    <option key={oIdx} value={valKey} className="font-mono text-xs">
+                                      {opt.username}:{opt.password}
+                                    </option>
+                                  );
+                                })}
+                              </select>
+                              <div className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400">
+                                <ArrowUpDown className="w-2.5 h-2.5" />
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {(() => {
+                          const kStatus = (c.status_kredensial || '').toUpperCase();
                           if (kStatus === 'VALID') {
                             return (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-emerald-100 text-emerald-800 border border-emerald-300" title="Kredensial modem terverifikasi cocok">
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0" title="Kredensial modem terverifikasi cocok">
                                 VALID
                               </span>
                             );
                           }
-                          if (kStatus === 'INVALID') {
-                            return (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-rose-100 text-rose-800 border border-rose-300" title="Kredensial modem ditolak / salah password">
-                                INVALID
-                              </span>
-                            );
-                          }
                           return (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-slate-100 text-slate-600 border border-slate-200" title="Belum diuji coba">
-                              BELUM UJI
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-rose-100 text-rose-800 border border-rose-300 shrink-0" title="Kredensial modem ditolak / salah password">
+                              INVALID
                             </span>
                           );
                         })()}
@@ -972,12 +1043,9 @@ export function ModulPelanggan({
                         let statusBadge = 'NORMAL';
                         let badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
 
-                        if (rawStatus === 'UNTESTED' || (!isNumeric && rawStatus !== 'LOS' && rawStatus !== 'LOCKOUT')) {
+                        if (rawStatus === 'UNTESTED' || rawStatus === 'LOCKOUT' || (!isNumeric && rawStatus !== 'LOS')) {
                           statusBadge = 'UNTESTED';
                           badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
-                        } else if (rawStatus === 'LOCKOUT') {
-                          statusBadge = 'LOCKOUT';
-                          badgeClass = 'bg-orange-100 text-orange-900 border-orange-400';
                         } else if (rawStatus === 'LOS' || !isNumeric) {
                           statusBadge = 'LOS';
                           badgeClass = 'bg-purple-50 text-purple-800 border-purple-300';
@@ -1001,8 +1069,6 @@ export function ModulPelanggan({
                               className={`font-black font-mono ${
                                 statusBadge === 'UNTESTED'
                                   ? 'text-slate-400'
-                                  : statusBadge === 'LOCKOUT'
-                                  ? 'text-orange-600'
                                   : statusBadge === 'CRITICAL'
                                   ? 'text-rose-600'
                                   : statusBadge === 'WARNING'
@@ -1012,7 +1078,7 @@ export function ModulPelanggan({
                                   : 'text-emerald-600'
                               }`}
                             >
-                              {statusBadge === 'UNTESTED' ? '-' : statusBadge === 'LOCKOUT' ? 'LOCKOUT' : isNumeric ? `${Number(rxVal).toFixed(1)} dBm` : 'LOS'}
+                              {statusBadge === 'UNTESTED' ? '-' : isNumeric ? `${Number(rxVal).toFixed(1)} dBm` : 'LOS'}
                             </span>
                             <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${badgeClass}`}>
                               {statusBadge === 'UNTESTED' ? 'BELUM CEK' : statusBadge}

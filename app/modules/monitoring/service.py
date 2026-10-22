@@ -78,7 +78,6 @@ class MonitoringService:
         warning_count = 0
         critical_count = 0
         los_count = 0
-        lockout_count = 0
 
         for l in latest_logs:
             if l.status_koneksi == "NORMAL":
@@ -89,11 +88,20 @@ class MonitoringService:
                 critical_count += 1
             elif l.status_koneksi == "LOS":
                 los_count += 1
-            elif l.status_koneksi == "LOCKOUT":
-                lockout_count += 1
-
-        total_with_logs = normal_count + warning_count + critical_count + los_count + lockout_count
-        untested_count = max(0, total_all - total_with_logs)
+        from app.db.models import PerangkatONT
+        invalid_q = (
+            db.query(func.count(Pelanggan.id))
+            .join(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
+            .filter(
+                Pelanggan.is_active == True,
+                PerangkatONT.status_kredensial == "INVALID"
+            )
+        )
+        if kantor and kantor != "all":
+            invalid_q = invalid_q.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            invalid_q = invalid_q.filter(Pelanggan.kantor.in_(allowed_kantor))
+        invalid_count = invalid_q.scalar() or 0
 
         from app.modules.settings.service import SystemSettingsService
         office_settings = SystemSettingsService.get_settings(db, kantor=kantor)
@@ -109,8 +117,7 @@ class MonitoringService:
             "warning": warning_count,
             "critical": critical_count,
             "los": los_count,
-            "lockout": lockout_count,
-            "untested": untested_count,
+            "invalid": invalid_count,
             "target_kantor": kantor or "all",
             "warning_threshold": warn_th,
             "critical_threshold": crit_th

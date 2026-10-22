@@ -840,8 +840,10 @@ class MonitoringScheduler:
                 elif scrape_res.get("error_type") == "LOCKOUT":
                     if was_previously_valid:
                         cust.status_kredensial = "VALID"
+                    else:
+                        cust.status_kredensial = "INVALID"
                     res = scrape_res
-                    res["status_koneksi"] = "LOCKOUT"
+                    res["status_koneksi"] = "WARNING"
                     rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
                     ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Dilewati pada scan massal."
                 elif scrape_res.get("error_type") == "AUTH_FAILED":
@@ -941,7 +943,8 @@ class MonitoringScheduler:
                 logger.info(f"[SECOND_PASS] Menemukan {len(invalid_to_retry)} pelanggan INVALID di kantor {k.upper()}. Memulai putaran ulang...")
                 for inv_cust in invalid_to_retry:
                     target_ip = inv_cust.ip_ont or inv_cust.ip_router
-                    # Uji seluruh kredensial default tanpa limit
+                    # Pada SECOND PASS: Jalankan dengan is_mass_scan=False agar jika terkena lockout,
+                    # scraper menunggu jeda countdown (stay connection) lalu mencoba kredensial ke-2, ke-3, dst dari database settings!
                     retry_res = ONTScraperService.scrape_ont(
                         ip=target_ip,
                         customer_user=inv_cust.user_admin,
@@ -952,7 +955,7 @@ class MonitoringScheduler:
                         default_credentials=default_creds_list,
                         warn_threshold=eff_warn_th,
                         crit_threshold=eff_crit_th,
-                        is_mass_scan=True
+                        is_mass_scan=False
                     )
                     retry_now = get_now_wib()
                     if retry_res["success"] and retry_res["rx_power"] is not None:
@@ -1155,8 +1158,10 @@ class MonitoringScheduler:
             elif scrape_res.get("error_type") == "LOCKOUT":
                 if was_previously_valid:
                     cust.status_kredensial = "VALID"
+                else:
+                    cust.status_kredensial = "INVALID"
                 res = scrape_res
-                res["status_koneksi"] = "LOCKOUT"
+                res["status_koneksi"] = "WARNING"
                 rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
                 ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Harap tunggu jeda keamanan."
             elif scrape_res.get("error_type") == "AUTH_FAILED":

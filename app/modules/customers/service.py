@@ -630,6 +630,8 @@ class CustomerService:
                         LogPerformaONT.status_koneksi.is_(None)
                     )
                 )
+            elif status == "INVALID":
+                query = query.filter(PerangkatONT.status_kredensial == "INVALID")
             else:
                 query = query.filter(LogPerformaONT.status_koneksi == status)
 
@@ -673,11 +675,12 @@ class CustomerService:
             "id_pelanggan": Pelanggan.id_pelanggan,
             "nama": Pelanggan.nama,
             "pop": Pelanggan.pop,
-            "ip_router": effective_ip,
-            "ip_ont": effective_ip,
+            "ip_router": PerangkatONT.ip_router,
+            "ip_ont": PerangkatONT.ip_ont,
             "ip": effective_ip,
             "paket": Pelanggan.paket,
             "jenis_modem": PerangkatONT.jenis_modem,
+            "modem": PerangkatONT.jenis_modem,
             "redaman_baseline": PerangkatONT.redaman_baseline,
             "status_kredensial": PerangkatONT.status_kredensial,
             "redaman_current": LogPerformaONT.rx_power,
@@ -692,7 +695,28 @@ class CustomerService:
             "created_at": Pelanggan.created_at
         }
         target_col = col_map.get(sort_by, Pelanggan.id)
-        if sort_dir.lower() == "desc":
+        if sort_by in ("rx_power", "redaman_current"):
+            # Jika user klik sort Redaman (dBm), arah 'asc' (default pertama klik) memprioritaskan BELUM CEK (null) di puncak tabel
+            if sort_dir.lower() == "desc":
+                # Pengurutan tertinggi ke terendah, nilai terukur di atas, null di akhir
+                query = query.order_by(target_col.is_(None), target_col.desc())
+            else:
+                # BELUM CEK (target_col is None) tampil paling atas/pertama, disusul nilai redaman terendah ke tertinggi
+                query = query.order_by(target_col.isnot(None), target_col.asc())
+        elif sort_by == "status_kredensial":
+            # Jika user klik sort status_kredensial (WiFi & Admin ONT):
+            # asc: Prioritaskan INVALID di baris paling atas/awal agar admin langsung tahu mana yang perlu diperbaiki kredensialnya
+            if sort_dir.lower() == "asc":
+                query = query.order_by(
+                    case((PerangkatONT.status_kredensial == "INVALID", 0), else_=1),
+                    PerangkatONT.status_kredensial.asc()
+                )
+            else:
+                query = query.order_by(
+                    case((PerangkatONT.status_kredensial == "VALID", 0), else_=1),
+                    PerangkatONT.status_kredensial.desc()
+                )
+        elif sort_dir.lower() == "desc":
             query = query.order_by(target_col.is_(None), target_col.desc())
         else:
             query = query.order_by(target_col.is_(None), target_col.asc())
@@ -875,10 +899,21 @@ class CustomerService:
         warning_count = status_dict.get("WARNING", 0)
         critical_count = status_dict.get("CRITICAL", 0)
         los_count = status_dict.get("LOS", 0)
-        lockout_count = status_dict.get("LOCKOUT", 0)
 
-        total_with_logs = sum(status_dict.values())
-        untested_count = max(0, total_pelanggan - total_with_logs)
+        # Hitung jumlah modem dengan kredensial INVALID
+        invalid_q = (
+            db.query(func.count(Pelanggan.id))
+            .join(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
+            .filter(
+                Pelanggan.is_active == True,
+                PerangkatONT.status_kredensial == "INVALID"
+            )
+        )
+        if kantor and kantor != "all":
+            invalid_q = invalid_q.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            invalid_q = invalid_q.filter(Pelanggan.kantor.in_(allowed_kantor))
+        invalid_count = invalid_q.scalar() or 0
 
         return {
             "total": total_pelanggan,
@@ -887,8 +922,7 @@ class CustomerService:
             "warning": warning_count,
             "critical": critical_count,
             "los": los_count,
-            "lockout": lockout_count,
-            "untested": untested_count,
+            "invalid": invalid_count,
             "critical_los": critical_count + los_count,
             "monitored_active": monitored_active,
             "monitored_inactive": monitored_inactive,
