@@ -252,14 +252,18 @@ class AdminCustomerMgmtService:
         problem_logs = ont_logs_query.order_by(LogPerformaONT.waktu_cek.desc()).all()
 
         los_items = []
+        critical_items = []
         warning_items = []
 
         for log_entry, cust in problem_logs:
             ref_key = f"log_{log_entry.id}"
-            is_critical = log_entry.status_koneksi in ["LOS", "CRITICAL"]
+            status_conn = log_entry.status_koneksi
+            is_critical = (status_conn == "CRITICAL")
+            is_los = (status_conn == "LOS")
 
-            # NOTIFIKASI KRITIS (LOS / CRITICAL) DILARANG DI-READ / DI-DISMISS:
-            # Tetap tampil persisten sampai status modem kembali NORMAL di scan berikutnya!
+            # NOTIFIKASI KRITIS (<= -27.0 dBm) DILARANG DI-READ / DI-DISMISS:
+            # Wajib ditangani segera dan tetap tampil persisten sampai status modem kembali NORMAL di scan berikutnya!
+            # Sedangkan LOS dan WARNING bersifat non-permanen (dapat ditandai baca / di-dismiss oleh pengguna)
             if not is_critical and ref_key in read_ref_ids:
                 continue
 
@@ -267,71 +271,102 @@ class AdminCustomerMgmtService:
                 "id": ref_key,
                 "reference_id": ref_key,
                 "type": "monitoring",
-                "title": f"ONT {log_entry.status_koneksi}: {cust.nama}",
-                "message": f"IP: {cust.ip_router or '-'} | Redaman: {log_entry.rx_power if log_entry.rx_power is not None else 'N/A'} dBm ({log_entry.keterangan or log_entry.status_koneksi})",
-                "target_tab": "logs",
+                "title": f"ONT {status_conn}: {cust.nama}",
+                "message": f"IP: {cust.ip_router or '-'} | Redaman: {log_entry.rx_power if log_entry.rx_power is not None else 'N/A'} dBm ({log_entry.keterangan or status_conn})",
+                "target_tab": "pelanggan",
                 "target_filter": cust.id_pelanggan,
-                "level": "critical" if is_critical else "warning",
-                "badge": log_entry.status_koneksi,
+                "target_status": status_conn,
+                "level": "los" if is_los else ("critical" if is_critical else "warning"),
+                "badge": status_conn,
                 "time": log_entry.waktu_cek.strftime("%H:%M") if log_entry.waktu_cek else "",
                 "kantor": cust.kantor,
                 "id_pelanggan": cust.id_pelanggan,
                 "nama_pelanggan": cust.nama,
                 "rx_power": float(log_entry.rx_power) if log_entry.rx_power is not None else None,
-                "status_koneksi": log_entry.status_koneksi,
+                "status_koneksi": status_conn,
                 "is_critical": is_critical
             }
 
-            if is_critical:
+            if is_los:
                 los_items.append(item_data)
+            elif is_critical:
+                critical_items.append(item_data)
             else:
                 warning_items.append(item_data)
 
-        # Cek grouping LOS (> 5 items) - Batch LOS juga bersifat KRITIS dan persisten
-        if len(los_items) > 5:
+        # 1. Grouping LOS (Ungu, non-permanen seperti Warning, >= 5 items digabung jadi 1)
+        if len(los_items) >= 5:
             first_los = los_items[0]
-            batch_key = f"batch_los_{len(los_items)}_{first_los['kantor']}"
-            # Notifikasi batch kritis juga tidak boleh dihilangkan oleh read_ref_ids
-            items_list.append({
-                "id": batch_key,
-                "type": "monitoring_batch",
-                "title": f"{len(los_items)} Modem ONT Terputus (LOS)",
-                "message": f"Terdeteksi {len(los_items)} pelanggan mengalami LOS/Kritis pada kantor {first_los['kantor'].upper()}. Wajib segera ditindaklanjuti!",
-                "target_tab": "logs",
-                "target_filter": "LOS",
-                "level": "critical",
-                "badge": f"{len(los_items)} LOS",
-                "time": first_los["time"],
-                "count": len(los_items),
-                "kantor": first_los["kantor"],
-                "is_critical": True
-            })
+            batch_key = f"batch_los_{len(los_items)}_{first_los['id']}"
+            if batch_key not in read_ref_ids:
+                items_list.append({
+                    "id": batch_key,
+                    "reference_id": batch_key,
+                    "type": "monitoring_batch",
+                    "title": f"{len(los_items)} Modem ONT Terputus (LOS)",
+                    "message": f"Terdeteksi {len(los_items)} pelanggan mengalami LOS (Kabel Putus / No Signal) pada kantor {first_los['kantor'].upper()}.",
+                    "target_tab": "pelanggan",
+                    "target_filter": "",
+                    "target_status": "LOS",
+                    "level": "los",
+                    "badge": f"{len(los_items)} LOS",
+                    "time": first_los["time"],
+                    "count": len(los_items),
+                    "kantor": first_los["kantor"],
+                    "is_critical": False
+                })
         else:
             items_list.extend(los_items)
 
-        # Cek grouping Warning (> 5 items)
-        if len(warning_items) > 5:
+        # 2. Grouping KRITIS (Merah, Persisten Wajib Ditangani, >= 5 items digabung jadi 1)
+        if len(critical_items) >= 5:
+            first_crit = critical_items[0]
+            batch_key = f"batch_critical_{len(critical_items)}_{first_crit['kantor']}"
+            items_list.append({
+                "id": batch_key,
+                "reference_id": batch_key,
+                "type": "monitoring_batch",
+                "title": f"{len(critical_items)} Modem Sinyal Kritis (<= -27 dBm)",
+                "message": f"Terdeteksi {len(critical_items)} pelanggan mendekati/melebihi batas kritis redaman pada kantor {first_crit['kantor'].upper()}. Wajib segera ditindaklanjuti!",
+                "target_tab": "pelanggan",
+                "target_filter": "",
+                "target_status": "CRITICAL",
+                "level": "critical",
+                "badge": f"{len(critical_items)} KRITIS",
+                "time": first_crit["time"],
+                "count": len(critical_items),
+                "kantor": first_crit["kantor"],
+                "is_critical": True
+            })
+        else:
+            items_list.extend(critical_items)
+
+        # 3. Grouping WARNING (Kuning/Amber, Waspada, >= 5 items digabung jadi 1)
+        if len(warning_items) >= 5:
             first_warn = warning_items[0]
             batch_key = f"batch_warning_{len(warning_items)}_{first_warn['id']}"
             if batch_key not in read_ref_ids:
                 items_list.append({
                     "id": batch_key,
+                    "reference_id": batch_key,
                     "type": "monitoring_batch",
                     "title": f"{len(warning_items)} Modem Redaman Menurun (WARNING)",
-                    "message": f"Terdeteksi {len(warning_items)} pelanggan mendekati batas kritis redaman (<= -26.0 dBm). Klik untuk cek riwayat redaman.",
-                    "target_tab": "logs",
-                    "target_filter": "WARNING",
+                    "message": f"Terdeteksi {len(warning_items)} pelanggan dalam rentang redaman waspada (-26.0 s/d -27.0 dBm). Klik untuk cek data pelanggan.",
+                    "target_tab": "pelanggan",
+                    "target_filter": "",
+                    "target_status": "WARNING",
                     "level": "warning",
                     "badge": f"{len(warning_items)} Warning",
                     "time": first_warn["time"],
                     "count": len(warning_items),
-                    "kantor": first_warn["kantor"]
+                    "kantor": first_warn["kantor"],
+                    "is_critical": False
                 })
         else:
             items_list.extend(warning_items)
 
         # -------------------------------------------------------------
-        # 3. NOTIFIKASI KREDENSIAL TIDAK COCOK (Khusus Super Admin & Admin)
+        # 3. NOTIFIKASI KREDENSIAL TIDAK COCOK / INVALID (Oranye, Khusus Super Admin & Admin)
         # -------------------------------------------------------------
         if user_role in ["super admin", "admin"]:
             from app.db.models import PerangkatONT
@@ -362,32 +397,37 @@ class AdminCustomerMgmtService:
                         "message": f"Seluruh daftar kredensial di Pengaturan telah dicoba dan ditolak oleh modem IP {inv_c.ip_router or '-'}. Perlu verifikasi fisik ke pelanggan.",
                         "target_tab": "pelanggan",
                         "target_filter": inv_c.id_pelanggan,
-                        "level": "warning",
-                        "badge": "KREDENSIAL INVALID",
+                        "target_status": "INVALID",
+                        "level": "invalid",
+                        "badge": "INVALID",
                         "time": get_now_wib().strftime("%H:%M"),
                         "kantor": inv_c.kantor,
                         "id_pelanggan": inv_c.id_pelanggan,
-                        "nama_pelanggan": inv_c.nama
+                        "nama_pelanggan": inv_c.nama,
+                        "is_critical": False
                     })
 
-                # Jika lebih dari 5, gabungkan menjadi 1 notifikasi batch
-                if len(invalid_items) > 5:
+                # Jika 5 atau lebih, gabungkan menjadi 1 notifikasi batch
+                if len(invalid_items) >= 5:
                     first_inv = invalid_items[0]
                     target_k_label = (kantor or first_inv.get("kantor") or "SEMUA").upper()
                     batch_inv_key = f"batch_invalid_{len(invalid_items)}_{first_inv['id']}"
                     if batch_inv_key not in read_ref_ids:
                         items_list.append({
                             "id": batch_inv_key,
+                            "reference_id": batch_inv_key,
                             "type": "monitoring_batch",
                             "title": f"{len(invalid_items)} Modem Gagal Login (Kredensial Tidak Cocok)",
                             "message": f"Terdeteksi {len(invalid_items)} pelanggan dengan kredensial tidak cocok pada kantor {target_k_label}. Klik untuk melihat data pelanggan.",
                             "target_tab": "pelanggan",
-                            "target_filter": "INVALID",
-                            "level": "warning",
+                            "target_filter": "",
+                            "target_status": "INVALID",
+                            "level": "invalid",
                             "badge": f"{len(invalid_items)} INVALID",
                             "time": first_inv.get("time") or get_now_wib().strftime("%H:%M"),
                             "count": len(invalid_items),
-                            "kantor": first_inv.get("kantor")
+                            "kantor": first_inv.get("kantor"),
+                            "is_critical": False
                         })
                 else:
                     items_list.extend(invalid_items)
@@ -452,9 +492,9 @@ class AdminCustomerMgmtService:
         if not user_id:
             return {"status": "error", "message": "User ID tidak valid"}
 
-        # Proteksi: Notifikasi kritis / LOS dilarang ditandai read secara permanen
+        # Proteksi: Hanya notifikasi kritis (<= -27.0 dBm) yang dilarang ditandai read secara manual
         ref_str = str(reference_id)
-        if "batch_los" in ref_str or notification_type == "monitoring_critical":
+        if "batch_critical" in ref_str or notification_type == "monitoring_critical":
             return {"status": "ignored", "message": "Notifikasi kritis tidak dapat dihapus sebelum status normal"}
 
         # Cek apakah sudah pernah ditandai
@@ -500,7 +540,7 @@ class AdminCustomerMgmtService:
 
             n_type = item.get("type", "general")
             ref_id = item.get("reference_id") or item.get("id")
-            if not ref_id or "batch_los" in str(ref_id):
+            if not ref_id or "batch_critical" in str(ref_id):
                 continue
 
             existing = db.query(UserNotificationRead).filter(

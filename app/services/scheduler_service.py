@@ -843,7 +843,7 @@ class MonitoringScheduler:
                     else:
                         cust.status_kredensial = "INVALID"
                     res = scrape_res
-                    res["status_koneksi"] = "WARNING"
+                    res["status_koneksi"] = "INVALID"
                     rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
                     ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Dilewati pada scan massal."
                 elif scrape_res.get("error_type") == "AUTH_FAILED":
@@ -851,11 +851,12 @@ class MonitoringScheduler:
                         # Kredensial pelanggan sudah benar/valid sebelumnya, modem mungkin sibuk atau menolak session. Pertahankan VALID!
                         cust.status_kredensial = "VALID"
                         res = scrape_res
-                        res["status_koneksi"] = "WARNING"
+                        res["status_koneksi"] = "INVALID"
                         ket = "Login Tertunda (Modem Sibuk / Session Semaphore, Kredensial Tetap Valid)"
                     else:
                         cust.status_kredensial = "INVALID"
                         res = scrape_res
+                        res["status_koneksi"] = "INVALID"
                         ket = "Login Gagal (User/Pass Salah)"
                 elif scrape_res.get("error_type") == "UNREACHABLE":
                     if was_previously_valid:
@@ -1161,7 +1162,7 @@ class MonitoringScheduler:
                 else:
                     cust.status_kredensial = "INVALID"
                 res = scrape_res
-                res["status_koneksi"] = "WARNING"
+                res["status_koneksi"] = "INVALID"
                 rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
                 ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Harap tunggu jeda keamanan."
             elif scrape_res.get("error_type") == "AUTH_FAILED":
@@ -1169,11 +1170,12 @@ class MonitoringScheduler:
                     # Kredensial sudah benar/valid sebelumnya, modem mungkin sibuk atau menolak session. Pertahankan VALID!
                     cust.status_kredensial = "VALID"
                     res = scrape_res
-                    res["status_koneksi"] = "WARNING"
+                    res["status_koneksi"] = "INVALID"
                     ket = "Login Tertunda (Modem Sibuk / Session Semaphore, Kredensial Tetap Valid)"
                 else:
                     cust.status_kredensial = "INVALID"
                     res = scrape_res
+                    res["status_koneksi"] = "INVALID"
                     ket = "Login Gagal (User/Pass Salah)"
             elif scrape_res.get("error_type") == "UNREACHABLE":
                 if was_previously_valid:

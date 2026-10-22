@@ -41,6 +41,7 @@ export default function App() {
   // Navigation & Office Scope State (SOP Multi-Kantor)
   const [activeTab, setActiveTab] = useState('beranda')
   const [customerSearchQuery, setCustomerSearchQuery] = useState('')
+  const [customerStatusFilter, setCustomerStatusFilter] = useState('ALL')
   const [activeOffice, setActiveOffice] = useState(() => {
     const saved = localStorage.getItem('edtekno_active_office')
     return (saved && saved !== 'cabang') ? saved : 'banyumas'
@@ -282,8 +283,15 @@ export default function App() {
       }
       handleTabChange('riwayat')
     } else if (item.target_tab === 'pelanggan') {
+      if (item.target_status) {
+        setCustomerStatusFilter(item.target_status)
+      } else {
+        setCustomerStatusFilter('ALL')
+      }
       if (item.target_filter) {
-        setCustomerInitialSearch(item.target_filter)
+        setCustomerSearchQuery(item.target_filter)
+      } else {
+        setCustomerSearchQuery('')
       }
       handleTabChange('pelanggan')
     } else if (item.target_tab === 'beranda') {
@@ -903,6 +911,8 @@ export default function App() {
               critThreshold={critThreshold}
               initialSearch={customerSearchQuery}
               onClearInitialSearch={() => setCustomerSearchQuery('')}
+              initialStatus={customerStatusFilter}
+              onClearInitialStatus={() => setCustomerStatusFilter('ALL')}
             />
           )}
           {activeTab === 'tiket' && (

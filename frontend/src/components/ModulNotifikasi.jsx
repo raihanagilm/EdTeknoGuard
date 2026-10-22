@@ -50,14 +50,28 @@ export function ModulNotifikasi({
   if (!isOpen) return null;
 
   const getIconForType = (item) => {
-    if (item.level === 'critical' || item.type.includes('los')) {
+    if (item.level === 'los' || item.badge?.includes('LOS')) {
+      return (
+        <div className="w-8 h-8 rounded-xl bg-purple-100 border border-purple-200 text-purple-700 flex items-center justify-center shrink-0">
+          <ZapOff className="w-4 h-4" />
+        </div>
+      );
+    }
+    if (item.level === 'critical' || item.is_critical) {
       return (
         <div className="w-8 h-8 rounded-xl bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
           <ZapOff className="w-4 h-4" />
         </div>
       );
     }
-    if (item.type.includes('tiket')) {
+    if (item.level === 'invalid' || item.badge?.includes('INVALID')) {
+      return (
+        <div className="w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 text-orange-700 flex items-center justify-center shrink-0">
+          <AlertTriangle className="w-4 h-4" />
+        </div>
+      );
+    }
+    if (item.type?.includes('tiket')) {
       return (
         <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
           <HelpCircle className="w-4 h-4" />
@@ -79,8 +93,14 @@ export function ModulNotifikasi({
   };
 
   const getBadgeClass = (item) => {
-    if (item.level === 'critical') {
+    if (item.level === 'los' || item.badge?.includes('LOS')) {
+      return 'bg-purple-50 border-purple-200 text-purple-800';
+    }
+    if (item.level === 'critical' || item.is_critical) {
       return 'bg-rose-50 border-rose-200 text-rose-800';
+    }
+    if (item.level === 'invalid' || item.badge?.includes('INVALID')) {
+      return 'bg-orange-50 border-orange-200 text-orange-800';
     }
     if (item.level === 'warning') {
       return 'bg-amber-50 border-amber-200 text-amber-800';
@@ -202,7 +222,13 @@ export function ModulNotifikasi({
                 <div className="mt-2 flex items-center justify-between text-[10px] font-bold">
                   <span className="text-cyan-700 flex items-center gap-0.5 group-hover:translate-x-0.5 transition">
                     <span>
-                      {item.target_tab === 'tiket' ? 'Buka Tiket' : item.target_tab === 'logs' ? 'Cek Riwayat Redaman' : 'Lihat Detail'}
+                      {item.target_tab === 'tiket' 
+                        ? 'Buka Tiket' 
+                        : item.target_tab === 'pelanggan' 
+                        ? 'Buka Data Pelanggan' 
+                        : item.target_tab === 'logs' 
+                        ? 'Cek Riwayat Redaman' 
+                        : 'Lihat Detail'}
                     </span>
                     <ChevronRight className="w-3 h-3" />
                   </span>

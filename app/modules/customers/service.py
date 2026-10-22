@@ -612,12 +612,20 @@ class CustomerService:
             elif status == "NORMAL":
                 query = query.filter(
                     Pelanggan.status_lease != "waiting",
-                    LogPerformaONT.status_koneksi == "NORMAL"
+                    LogPerformaONT.status_koneksi == "NORMAL",
+                    LogPerformaONT.rx_power.isnot(None)
                 )
             elif status == "WARNING":
-                query = query.filter(LogPerformaONT.status_koneksi == "WARNING", Pelanggan.status_lease != "waiting")
+                query = query.filter(
+                    LogPerformaONT.status_koneksi == "WARNING",
+                    LogPerformaONT.rx_power.isnot(None),
+                    Pelanggan.status_lease != "waiting"
+                )
             elif status == "CRITICAL":
-                query = query.filter(LogPerformaONT.status_koneksi == "CRITICAL", Pelanggan.status_lease != "waiting")
+                query = query.filter(
+                    LogPerformaONT.status_koneksi == "CRITICAL",
+                    Pelanggan.status_lease != "waiting"
+                )
             elif status == "LOS":
                 query = query.filter(LogPerformaONT.status_koneksi == "LOS", Pelanggan.status_lease != "waiting")
             elif status in ("NONAKTIF", "OFF"):
@@ -631,7 +639,12 @@ class CustomerService:
                     )
                 )
             elif status == "INVALID":
-                query = query.filter(PerangkatONT.status_kredensial == "INVALID")
+                query = query.filter(
+                    or_(
+                        PerangkatONT.status_kredensial == "INVALID",
+                        LogPerformaONT.status_koneksi == "INVALID"
+                    )
+                )
             else:
                 query = query.filter(LogPerformaONT.status_koneksi == status)
 
@@ -889,7 +902,11 @@ class CustomerService:
             .join(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
             .join(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
             .filter(
-                Pelanggan.is_active == True
+                Pelanggan.is_active == True,
+                case(
+                    (LogPerformaONT.status_koneksi == "WARNING", LogPerformaONT.rx_power.isnot(None)),
+                    else_=True
+                )
             )
             .group_by(LogPerformaONT.status_koneksi)
             .all()
@@ -900,13 +917,18 @@ class CustomerService:
         critical_count = status_dict.get("CRITICAL", 0)
         los_count = status_dict.get("LOS", 0)
 
-        # Hitung jumlah modem dengan kredensial INVALID
+        # Hitung jumlah modem dengan kredensial INVALID atau status_koneksi INVALID
         invalid_q = (
             db.query(func.count(Pelanggan.id))
             .join(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
             .filter(
                 Pelanggan.is_active == True,
-                PerangkatONT.status_kredensial == "INVALID"
+                or_(
+                    PerangkatONT.status_kredensial == "INVALID",
+                    LogPerformaONT.status_koneksi == "INVALID"
+                )
             )
         )
         if kantor and kantor != "all":

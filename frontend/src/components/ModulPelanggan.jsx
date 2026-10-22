@@ -51,13 +51,15 @@ export function ModulPelanggan({
   warnThreshold,
   critThreshold,
   initialSearch = '',
-  onClearInitialSearch
+  onClearInitialSearch,
+  initialStatus = 'ALL',
+  onClearInitialStatus
 }) {
   const [customers, setCustomers] = useState([])
   const [totalRecords, setTotalRecords] = useState(0)
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState(initialSearch || '')
-  const [filterStatus, setFilterStatus] = useState('ALL')
+  const [filterStatus, setFilterStatus] = useState(initialStatus || 'ALL')
   const [filterPop, setFilterPop] = useState('ALL')
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false)
   const [page, setPage] = useState(1)
@@ -210,6 +212,14 @@ export function ModulPelanggan({
       setPage(1)
     }
   }, [initialSearch])
+
+  // Sync initialStatus if prop changes
+  useEffect(() => {
+    if (initialStatus !== undefined && initialStatus !== null) {
+      setFilterStatus(initialStatus)
+      setPage(1)
+    }
+  }, [initialStatus])
 
   // Open Detail Modal (Fetches full customer info if needed)
   const handleOpenDetail = async (c) => {
