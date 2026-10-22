@@ -54,26 +54,100 @@ class ONTScraperService:
             return "5"
 
     @staticmethod
-    def check_lockout_status(session: requests.Session, base_url: str) -> Tuple[bool, int]:
-        """Mengecek apakah modem ONT sedang dalam status lockout akibat 3x salah password (ZTE maxtime & pesan jeda generik)."""
-        try:
-            r = session.get(f"{base_url}/", timeout=6, headers={"Connection": "close"})
-            # 1. Pola ZTE maxtime: hanya aktif jika fungsi SetDisabled() benar-benar dipanggil di HTML
-            has_zte_disabled = bool(re.search(r'(?<!function\s)SetDisabled\s*\(', r.text))
-            m_time = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', r.text)
-            if has_zte_disabled and m_time:
-                rem = int(m_time.group(1)) + 60 - int(m_time.group(2))
-                if rem > 0:
-                    return True, rem
-            # 2. Pola generik lockout countdown
-            m_gen = re.search(r'(?:try\s*again\s*in|lock(?:ed)?\s*for|wait)\s*(\d+)\s*(?:seconds|detik|s)', r.text, re.I)
+    def detect_ont_vendor_behavior(probe_html: str) -> Dict[str, Any]:
+        """
+        Mendeteksi karakteristik vendor modem ONT dari respon awal (probe).
+        Mengidentifikasi apakah modem berbasis ZTE GM220/XPON, Huawei, atau vendor lain
+        serta menentukan perilaku lockout dan kebutuhan sesi HTTP keep-alive.
+        """
+        text_lower = (probe_html or "").lower()
+        is_zte = any(k in text_lower for k in [
+            "gpon_status", "frm_logintoken", "template.gch", "passwordsha256", "gm220", "f663", "f670", "f609", "zte"
+        ])
+        is_huawei = any(k in text_lower for k in [
+            "huawei", "hg8245", "eg8145", "hg8546", "asp/login.asp"
+        ])
+        is_fiberhome = any(k in text_lower for k in [
+            "fiberhome", "hg6243", "fh_login"
+        ])
+
+        if is_zte:
+            return {
+                "vendor": "ZTE",
+                "default_lock_seconds": 60,
+                "require_stay_connection": True,  # Sesi HTTP & TCP socket tidak boleh putus agar countdown tidak reset
+                "supports_sha256": True
+            }
+        elif is_huawei:
+            return {
+                "vendor": "HUAWEI",
+                "default_lock_seconds": 60,
+                "require_stay_connection": False,
+                "supports_sha256": False
+            }
+        elif is_fiberhome:
+            return {
+                "vendor": "FIBERHOME",
+                "default_lock_seconds": 30,
+                "require_stay_connection": False,
+                "supports_sha256": False
+            }
+        return {
+            "vendor": "GENERIC_XPON",
+            "default_lock_seconds": 30,
+            "require_stay_connection": False,
+            "supports_sha256": False
+        }
+
+    @classmethod
+    def parse_lockout_info(cls, html_content: str, default_wait: int = 60) -> Tuple[bool, int]:
+        """
+        Memeriksa apakah konten HTML atau respon login mengandung penanda lockout/countdown.
+        Mengembalikan tuple (is_locked, remaining_seconds).
+        """
+        if not html_content:
+            return False, 0
+
+        # 1. Pola ZTE maxtime (SetDisabled dengan kalkulasi waktu Math.min(60, X + 60 - Y))
+        has_zte_disabled = bool(re.search(r'(?<!function\s)SetDisabled\s*\(', html_content))
+        m_time = re.search(r'maxtime\s*=\s*Math\.min\(\s*(\d+)\s*,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', html_content)
+        if has_zte_disabled and m_time:
+            cap = int(m_time.group(1))
+            rem = int(m_time.group(2)) + 60 - int(m_time.group(3))
+            rem_clamped = min(cap, max(0, rem))
+            if rem_clamped > 0:
+                return True, rem_clamped
+        elif has_zte_disabled:
+            # Jika SetDisabled() dipanggil namun regex maxtime tidak terbaca utuh, fallback ke default_wait
+            return True, default_wait
+
+        # 2. Pola generik teks countdown / lockout
+        patterns = [
+            r'(?:try\s*again\s*in|lock(?:ed)?\s*for|wait)\s*(\d+)\s*(?:seconds|detik|s)',
+            r'(?:countdown|remain(?:ing)?)\s*[:=]\s*(\d+)',
+            r'wait(?:ing)?\s*time\s*[:=]\s*(\d+)'
+        ]
+        for pat in patterns:
+            m_gen = re.search(pat, html_content, re.I)
             if m_gen:
                 rem_gen = int(m_gen.group(1))
                 if rem_gen > 0:
                     return True, rem_gen
-        except Exception:
-            pass
+
+        # 3. Kata kunci indikator terkunci
+        if "login locked" in html_content.lower() or "too many attempts" in html_content.lower():
+            return True, default_wait
+
         return False, 0
+
+    @classmethod
+    def check_lockout_status(cls, session: requests.Session, base_url: str) -> Tuple[bool, int]:
+        """Mengecek apakah modem ONT sedang dalam status lockout akibat salah password berkali-kali."""
+        try:
+            r = session.get(f"{base_url}/", timeout=6, headers={"Connection": "keep-alive"})
+            return cls.parse_lockout_info(r.text)
+        except Exception:
+            return False, 0
 
     @classmethod
     def attempt_login(cls, session: requests.Session, base_url: str, host: str, user: str, password: str, probe_text: Optional[str] = None) -> Tuple[bool, Optional[requests.Response]]:
@@ -156,7 +230,7 @@ class ONTScraperService:
             "Host": host,
             "Referer": f"{base_url}/",
             "Origin": base_url,
-            "Connection": "close",
+            "Connection": "keep-alive",
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         }
@@ -599,20 +673,25 @@ class ONTScraperService:
         default_credentials: Optional[List[Tuple[str, str]]] = None,
         warn_threshold: Optional[float] = None,
         crit_threshold: Optional[float] = None,
-        max_attempts_per_call: Optional[int] = None
+        max_attempts_per_call: Optional[int] = None,
+        is_mass_scan: bool = False
     ) -> Dict[str, Any]:
         """
         Melakukan scraping lengkap ke satu perangkat modem ONT.
         Menguji kredensial pelanggan terlebih dahulu. Jika gagal, mencoba kredensial default (multi-list).
+        Tiap kredensial dicoba 2-3 kali secara adaptif.
+        Jika terkena lockout countdown (misal 30s / 60s):
+        - Pada pemantauan massal (is_mass_scan=True): fail-fast dengan status_koneksi='LOCKOUT' agar scan antrian lancar.
+        - Pada cek mandiri (is_mass_scan=False): menahan sesi HTTP (stay-connection) hingga countdown selesai lalu mencoba lagi.
         """
         host = ip.strip()
         base_url = f"http://{host}"
         session = requests.Session()
+
         # 1. Quick probe jangkauan host (Connect timeout 2.5 detik, Read 4.0 detik)
-        # Jika server tidak terhubung ke jaringan lokal/VLAN ONT, langsung fail-fast tanpa menunggu lama
         r_probe = None
         try:
-            r_probe = session.get(f"{base_url}/", timeout=(2.5, 4.0), headers={"Connection": "close"})
+            r_probe = session.get(f"{base_url}/", timeout=(2.5, 4.0), headers={"Connection": "keep-alive"})
         except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             print(f"[-] [UNREACHABLE] ONT {host} ({customer_name}): Tidak dapat dijangkau ({e.__class__.__name__}). Periksa koneksi LAN/VLAN.")
             return {
@@ -629,42 +708,44 @@ class ONTScraperService:
         except Exception:
             pass
 
-        # 2. Cek status lockout dari probe text
+        probe_html = r_probe.text if r_probe is not None else ""
+        setattr(session, "probe_html", probe_html)
+
+        # Deteksi profil vendor modem
+        vendor_info = cls.detect_ont_vendor_behavior(probe_html)
+        default_lock_sec = vendor_info.get("default_lock_seconds", 60)
+        require_stay = vendor_info.get("require_stay_connection", True)
+
+        # 2. Cek status lockout dari probe text awal
         is_locked = False
         rem_secs = 0
         if r_probe is not None:
-            has_zte_disabled = bool(re.search(r'(?<!function\s)SetDisabled\s*\(', r_probe.text))
-            m_time = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', r_probe.text)
-            if has_zte_disabled and m_time:
-                rem = int(m_time.group(1)) + 60 - int(m_time.group(2))
-                if rem > 0:
-                    is_locked = True
-                    rem_secs = rem
-            elif not has_zte_disabled:
-                # Pola generik lockout countdown
-                m_gen = re.search(r'(?:try\s*again\s*in|lock(?:ed)?\s*for|wait)\s*(\d+)\s*(?:seconds|detik|s)', r_probe.text, re.I)
-                if m_gen:
-                    rem_gen = int(m_gen.group(1))
-                    if rem_gen > 0:
-                        is_locked = True
-                        rem_secs = rem_gen
+            is_locked, rem_secs = cls.parse_lockout_info(probe_html, default_wait=default_lock_sec)
 
-        if is_locked and rem_secs > 10:
-            print(f"[-] [LOCKOUT] ONT {host} ({customer_name}): Modem sedang lockout ({rem_secs}s).")
-            return {
-                "success": False,
-                "error_type": "LOCKOUT",
-                "lockout_remaining_seconds": rem_secs,
-                "message": f"Modem terkunci sementara ({rem_secs}s tersisa)",
-                "status_kredensial": "UNTESTED",
-                "status_koneksi": "LOS",
-                "rx_power": None,
-                "suhu_ont": None,
-                "uptime": None,
-                "latency_ms": None
-            }
-        elif is_locked and rem_secs <= 10:
-            time.sleep(rem_secs + 1)
+        if is_locked and rem_secs > 0:
+            if is_mass_scan:
+                print(f"[-] [LOCKOUT_MASS_SKIP] ONT {host} ({customer_name}): Modem lockout ({rem_secs}s). Dilewati agar scan massal lancar.")
+                return {
+                    "success": False,
+                    "error_type": "LOCKOUT",
+                    "lockout_remaining_seconds": rem_secs,
+                    "message": f"Modem terkunci lockout ONT ({rem_secs}s). Tunggu jeda countdown.",
+                    "status_kredensial": "UNTESTED",
+                    "status_koneksi": "LOCKOUT",
+                    "rx_power": None,
+                    "suhu_ont": None,
+                    "uptime": None,
+                    "latency_ms": None
+                }
+            elif rem_secs > 3:
+                print(f"[-] [LOCKOUT_WAIT_INITIAL] ONT {host} ({customer_name}): Menunggu countdown awal {rem_secs}s (stay session={require_stay})...")
+                time.sleep(rem_secs + 1)
+                try:
+                    r_ref = session.get(f"{base_url}/", timeout=6, headers={"Connection": "keep-alive"})
+                    probe_html = r_ref.text
+                    setattr(session, "probe_html", probe_html)
+                except Exception:
+                    pass
 
         # Kredensial yang akan dicoba berurutan
         credentials_to_try = []
@@ -701,12 +782,13 @@ class ONTScraperService:
                 "latency_ms": None
             }
 
-        # Coba seluruh kredensial (kredensial pelanggan diikuti semua kredensial default dari pengaturan)
         authenticated = False
         active_user = None
         active_pass = None
         auth_source = None
         last_resp = None
+        encountered_lockout = False
+        last_lockout_seconds = 0
 
         total_available = len(credentials_to_try)
         if max_attempts_per_call and max_attempts_per_call > 0:
@@ -715,47 +797,66 @@ class ONTScraperService:
             active_candidate_list = credentials_to_try
 
         start_time = time.time()
-        probe_html = r_probe.text if r_probe is not None else ""
-        setattr(session, "probe_html", probe_html)
 
         for u, p, source in active_candidate_list:
-            # Percobaan 1: Coba login normal
-            ok, resp = cls.attempt_login(session, base_url, host, u, p, probe_text=probe_html)
-            last_resp = resp
-
-            # Jika percobaan 1 gagal dan modem masih merespon (bukan timeout),
-            # lakukan retry hanya jika bukan explicit credential error (misal token stale / session semaphore).
-            # Jika respon eksplisit "User information is error" atau "SetDisabled()", jangan coba ulang kredensial yang sama agar tidak menghabiskan limit percobaan ONT.
-            is_disabled_lockout = (resp is not None and bool(re.search(r'(?<!function\s)SetDisabled\s*\(', resp.text)))
-            is_explicit_wrong_pwd = (resp is not None and ("user information is error" in resp.text.lower() or is_disabled_lockout))
-            if not ok and resp is not None and not is_explicit_wrong_pwd:
-                time.sleep(0.8) # Jeda pendinginan modem
-                session.cookies.clear() # Bersihkan sesi lama
-                ok, resp = cls.attempt_login(session, base_url, host, u, p)
+            # Setiap kredensial dicoba maksimal 3 kali (attempt 1, 2, 3)
+            for attempt_num in range(1, 4):
+                ok, resp = cls.attempt_login(session, base_url, host, u, p, probe_text=probe_html)
                 last_resp = resp
-                is_disabled_lockout = (resp is not None and bool(re.search(r'(?<!function\s)SetDisabled\s*\(', resp.text)))
+                probe_html = ""  # Reset probe_text agar attempt berikutnya me-refresh form token terbaru jika diperlukan
 
-            if ok:
-                authenticated = True
-                active_user = u
-                active_pass = p
-                auth_source = source
+                if ok:
+                    authenticated = True
+                    active_user = u
+                    active_pass = p
+                    auth_source = source
+                    break
+
+                # Periksa apakah respon memicu countdown lockout (misal ZTE SetDisabled / generic countdown)
+                resp_text = resp.text if resp is not None else ""
+                is_lock, lock_secs = cls.parse_lockout_info(resp_text, default_wait=default_lock_sec)
+
+                if is_lock:
+                    encountered_lockout = True
+                    last_lockout_seconds = lock_secs or default_lock_sec
+
+                    if is_mass_scan:
+                        print(f"[!] [LOCKOUT_MASS] ONT {host} ({customer_name}): Kena lockout {last_lockout_seconds}s di attempt {attempt_num} untuk user '{u}'. Pemantauan massal lanjut ke pelanggan berikutnya.")
+                        return {
+                            "success": False,
+                            "error_type": "LOCKOUT",
+                            "lockout_remaining_seconds": last_lockout_seconds,
+                            "message": f"Modem terkunci lockout ONT ({last_lockout_seconds}s). Percobaan berikutnya otomatis dijadwalkan.",
+                            "status_kredensial": "UNTESTED",
+                            "status_koneksi": "LOCKOUT",
+                            "rx_power": None,
+                            "suhu_ont": None,
+                            "uptime": None,
+                            "latency_ms": int((time.time() - start_time) * 1000)
+                        }
+
+                    # Mode Cek Mandiri (Single Probe): Tahan sesi HTTP (stay connection) hingga countdown selesai!
+                    print(f"[!] [LOCKOUT_WAIT_STAY] ONT {host} ({customer_name}): Lockout {last_lockout_seconds}s (Attempt {attempt_num}/3). Menahan sesi HTTP stay connection...")
+                    time.sleep(last_lockout_seconds + 1)
+
+                    # Jika vendor tidak mewajibkan koneksi persisten atau token hang, bersihkan token tapi pertahankan sesi
+                    try:
+                        r_refresh = session.get(f"{base_url}/", timeout=6, headers={"Connection": "keep-alive"})
+                        probe_html = r_refresh.text
+                    except Exception:
+                        pass
+                    # Lanjut ke attempt berikutnya untuk kredensial yang sama (hingga max 3)
+                    continue
+
+                # Jika gagal normal (tanpa lock), beri jeda napas 1.0s di sesi yang sama sebelum mencoba attempt berikutnya
+                if attempt_num < 3:
+                    time.sleep(1.0)
+
+            if authenticated:
                 break
 
-            # Jika ONT memicu lockout keamanan (SetDisabled), hitung sisa detik dan tunggu jeda di latar belakang agar kandidat berikutnya berhasil
-            if is_disabled_lockout and resp is not None:
-                m_wait = re.search(r'maxtime\s*=\s*Math\.min\(60,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', resp.text)
-                wait_sec = 60
-                if m_wait:
-                    computed = int(m_wait.group(1)) + 60 - int(m_wait.group(2))
-                    if 0 < computed <= 65:
-                        wait_sec = computed
-                print(f"[!] [LOCKOUT_AUTO_WAIT] ONT {host} ({customer_name or 'Pelanggan'}): ONT lockout dipicu setelah mencoba {u}. Menunggu {wait_sec}s sebelum melanjutkan kandidat kredensial berikutnya...")
-                time.sleep(wait_sec + 2) # Tunggu sampai lockout bersih
-                session.cookies.clear()
-                probe_html = "" # Reset probe agar form login baru di-fetch segar
-            else:
-                time.sleep(0.8)
+            # Jika kredensial ini sudah dicoba 3 kali dan masih gagal, beri jeda sebelum lanjut ke kandidat berikutnya
+            time.sleep(1.0)
 
         latency = int((time.time() - start_time) * 1000)
 
@@ -777,6 +878,21 @@ class ONTScraperService:
                     "latency_ms": None,
                     "all_exhausted": all_exhausted
                 }
+            elif encountered_lockout:
+                print(f"[-] [LOCKOUT_EXHAUSTED] ONT {host} ({customer_name}): Modem lockout setelah 3 percobaan ({last_lockout_seconds}s).")
+                return {
+                    "success": False,
+                    "error_type": "LOCKOUT",
+                    "lockout_remaining_seconds": last_lockout_seconds,
+                    "message": f"Modem terkunci lockout ONT ({last_lockout_seconds}s). Harap tunggu jeda keamanan.",
+                    "status_kredensial": "UNTESTED",
+                    "status_koneksi": "LOCKOUT",
+                    "rx_power": None,
+                    "suhu_ont": None,
+                    "uptime": None,
+                    "latency_ms": latency,
+                    "all_exhausted": all_exhausted
+                }
             else:
                 # Modem merespon tetapi kredensial ditolak
                 print(f"[-] [AUTH_FAILED] ONT {host} ({customer_name}): Kredensial modem ditolak (User/Pass salah). Dicoba: {len(active_candidate_list)}/{total_available}")
@@ -794,6 +910,7 @@ class ONTScraperService:
                     "attempted_count": len(active_candidate_list),
                     "total_creds": total_available
                 }
+
 
         # Kasus B: Autentikasi Berhasil -> Ambil Data Optik
         opt_data = cls.extract_optical_data(session, base_url, host)

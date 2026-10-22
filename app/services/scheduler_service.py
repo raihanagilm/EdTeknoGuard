@@ -823,7 +823,8 @@ class MonitoringScheduler:
                     customer_name=cust.nama,
                     default_credentials=default_creds_list,
                     warn_threshold=eff_warn_th,
-                    crit_threshold=eff_crit_th
+                    crit_threshold=eff_crit_th,
+                    is_mass_scan=True
                 )
 
                 was_previously_valid = (getattr(cust, "status_kredensial", "UNTESTED") == "VALID")
@@ -836,6 +837,13 @@ class MonitoringScheduler:
                         cust.user_admin = scrape_res["updated_user"]
                         cust.pass_admin = scrape_res["updated_pass"]
                     ket = f"Live Scraping OK ({res.get('gpon_state', 'Normal')})"
+                elif scrape_res.get("error_type") == "LOCKOUT":
+                    if was_previously_valid:
+                        cust.status_kredensial = "VALID"
+                    res = scrape_res
+                    res["status_koneksi"] = "LOCKOUT"
+                    rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
+                    ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Dilewati pada scan massal."
                 elif scrape_res.get("error_type") == "AUTH_FAILED":
                     if was_previously_valid:
                         # Kredensial pelanggan sudah benar/valid sebelumnya, modem mungkin sibuk atau menolak session. Pertahankan VALID!
@@ -943,7 +951,8 @@ class MonitoringScheduler:
                         customer_name=inv_cust.nama,
                         default_credentials=default_creds_list,
                         warn_threshold=eff_warn_th,
-                        crit_threshold=eff_crit_th
+                        crit_threshold=eff_crit_th,
+                        is_mass_scan=True
                     )
                     retry_now = get_now_wib()
                     if retry_res["success"] and retry_res["rx_power"] is not None:
@@ -1130,7 +1139,8 @@ class MonitoringScheduler:
                 customer_name=cust.nama,
                 default_credentials=default_creds_list,
                 warn_threshold=eff_warn_th,
-                crit_threshold=eff_crit_th
+                crit_threshold=eff_crit_th,
+                is_mass_scan=False
             )
 
             was_previously_valid = (getattr(cust, "status_kredensial", "UNTESTED") == "VALID")
@@ -1142,6 +1152,13 @@ class MonitoringScheduler:
                     cust.user_admin = scrape_res["updated_user"]
                     cust.pass_admin = scrape_res["updated_pass"]
                 ket = f"Live Single Check OK ({res.get('gpon_state', 'Normal')})"
+            elif scrape_res.get("error_type") == "LOCKOUT":
+                if was_previously_valid:
+                    cust.status_kredensial = "VALID"
+                res = scrape_res
+                res["status_koneksi"] = "LOCKOUT"
+                rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
+                ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Harap tunggu jeda keamanan."
             elif scrape_res.get("error_type") == "AUTH_FAILED":
                 if was_previously_valid:
                     # Kredensial sudah benar/valid sebelumnya, modem mungkin sibuk atau menolak session. Pertahankan VALID!

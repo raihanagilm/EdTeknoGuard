@@ -1260,6 +1260,14 @@ export function ModulBeranda({
             onClick: () => onNavigate('pelanggan'),
             subLabel: kpi.monitored_inactive > 0 ? `(${kpi.monitored_inactive} OFF)` : 'Modem'
           },
+          ...(kpi.untested > 0 ? [{
+            label: 'Belum Cek',
+            value: kpi.untested,
+            colorScheme: 'slate',
+            className: 'hidden md:flex',
+            onClick: () => onNavigate('pelanggan'),
+            subLabel: 'Menunggu Scan'
+          }] : []),
           {
             label: 'Optimal',
             value: kpi.normal,
@@ -1287,7 +1295,15 @@ export function ModulBeranda({
             colorScheme: 'purple',
             onClick: () => onNavigate('pelanggan'),
             subLabel: 'Putus'
-          }
+          },
+          ...(kpi.lockout > 0 ? [{
+            label: 'Lockout',
+            value: kpi.lockout,
+            colorScheme: 'orange',
+            className: 'hidden md:flex',
+            onClick: () => onNavigate('pelanggan'),
+            subLabel: 'Terkunci ONT'
+          }] : [])
         ]}
       />
 

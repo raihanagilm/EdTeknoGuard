@@ -26,6 +26,30 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Responsivitas Segmented Status Ticker Bar & Kontrol Cepat Sorting Pelanggan**:
+  - **Sembunyikan Segment Lockout & Belum Cek di Mobile ([CommonUI.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/CommonUI.jsx), [ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx), [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx))**:
+    - Tombol segmen status `Lockout` dan `Belum Cek` kini hanya ditampilkan pada layar desktop atau laptop (`hidden md:flex`).
+    - Pada layar mobile (ponsel), kedua segmen tersebut disembunyikan agar tampilan status ticker tetap ringkas, tidak padat, dan pas 1 baris penuh tanpa horizontal scrolling.
+  - **Kontrol Cepat Sorting Pelanggan ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx))**:
+    - Menambahkan dropdown selector `Urutkan` langsung di samping kotak pencarian untuk memudahkan pengurutan berdasarkan: ID Pelanggan, Nama, Status Koneksi, Redaman (dBm), IP Router, dan Waktu Cek.
+    - Dilengkapi tombol toggle `ASC / DESC` dengan ikon `ArrowUpDown` untuk membalik arah urutan seketika.
+  - **Penyelarasan Backend Sorting & Filter Status UNTESTED ([customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+    - Nilai `effective_status` pada sorting database MySQL menggunakan `case` sekarang mengembalikan `"UNTESTED"` untuk modem tanpa log (bukan lagi fallback `"NORMAL"`).
+    - Menambahkan filter query eksplisit untuk status `UNTESTED` agar mencakup modem yang belum memiliki entri di `log_performa_ont`.
+
+- **Peningkatan Scraper ONT: Adaptasi Karakteristik Vendor, 1-3 Percobaan per Kredensial, Stay-Connection Lockout & Status LOCKOUT**:
+  - **Deteksi Karakteristik Vendor Modem ([ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py))**:
+    - Menambahkan `detect_ont_vendor_behavior` dan `parse_lockout_info` untuk mengenali karakteristik modem (ZTE GM220/XPON, Huawei, FiberHome, dan Generic XPON) secara heuristik.
+    - Menetapkan kebutuhan sesi HTTP dan durasi lockout spesifik vendor (ZTE: 60 detik dengan `require_stay_connection=True`, vendor lain: 30–60 detik).
+  - **Mekanisme 1-3 Percobaan per Kredensial & Stay-Connection Lockout**:
+    - Setiap pasangan username & password dicoba secara adaptif maksimal 3 kali berturut-turut pada sesi HTTP aktif (`keep-alive`).
+    - Jika memicu countdown lockout:
+      - **Cek Redaman Mandiri (Single Probe di Data Pelanggan)**: Scraper **mempertahankan koneksi HTTP (stay connection)** tanpa menutup socket TCP/sesi, menunggu sisa countdown selesai (`time.sleep(lock_secs + 1)`), menyegarkan form token, lalu melanjutkan percobaan kredensial berikutnya.
+      - **Pemantauan Massal (Background Scheduler)**: Mengaktifkan parameter `is_mass_scan=True` sehingga jika mendeteksi lockout, sistem langsung menandai status `LOCKOUT` dan segera memindai pelanggan berikutnya agar antrian scan massal tidak terhenti.
+  - **Penyelarasan Status `LOCKOUT` di Database & Frontend**:
+    - Status `LOCKOUT` disimpan secara resmi di tabel [log_performa_ont](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py) database MySQL Local.
+    - Tabel [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) menampilkan badge status **`LOCKOUT`** berwarna oranye kontras yang jelas dan otomatis mengaktifkan countdown timer cooldown di UI.
+
 - **Pembersihan Data Statis & Redundansi Modul Arsitektur Frontend & Backend**:
   - **Pembersihan File Duplikat [ModulManajemenPengguna.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulManajemenPengguna.jsx)**: Menghapus permanen berkas duplikat lama berukuran 61 KB yang tidak pernah dipakai dan memastikan sistem terpusat pada [ModulPenggunaNOC.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPenggunaNOC.jsx).
   - **Pembersihan Komponen Usang [Modals.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/Modals.jsx)**: Menghapus komponen `OntDetailModal` yang sudah tidak terpakai sehingga [Modals.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/Modals.jsx) terfokus murni pada `ConfirmSaveModal`.

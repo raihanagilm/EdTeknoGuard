@@ -220,7 +220,7 @@ class LogPerformaONT(Base):
     rx_power = Column(Numeric(5, 2), nullable=True)
     suhu_ont = Column(Numeric(4, 1), nullable=True)
     uptime = Column(BigInteger, nullable=True)
-    status_koneksi = Column(String(20), nullable=False, index=True)  # NORMAL, WARNING, CRITICAL, LOS
+    status_koneksi = Column(String(20), nullable=False, index=True)  # NORMAL, WARNING, CRITICAL, LOS, LOCKOUT
     latency_ms = Column(Integer, nullable=True)
     keterangan = Column(String(255), nullable=True)
 

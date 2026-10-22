@@ -142,6 +142,8 @@ export function SegmentedStatusBar({ items = [] }) {
     amber: { active: 'bg-amber-500 text-white shadow-xs', textNum: 'text-amber-900', label: 'text-amber-800' },
     rose: { active: 'bg-rose-600 text-white shadow-xs', textNum: 'text-rose-900', label: 'text-rose-800' },
     purple: { active: 'bg-purple-600 text-white shadow-xs', textNum: 'text-purple-900', label: 'text-purple-800' },
+    orange: { active: 'bg-orange-600 text-white shadow-xs', textNum: 'text-orange-950', label: 'text-orange-900' },
+    slate: { active: 'bg-slate-600 text-white shadow-xs', textNum: 'text-slate-700', label: 'text-slate-600' },
   };
 
   return (
@@ -155,7 +157,7 @@ export function SegmentedStatusBar({ items = [] }) {
             key={idx}
             type="button"
             onClick={it.onClick}
-            className={`flex-1 py-1.5 px-1 sm:py-2.5 sm:px-2 rounded-xl transition-all flex flex-col items-center justify-center text-center cursor-pointer select-none ${
+            className={`flex-1 py-1.5 px-1 sm:py-2.5 sm:px-2 rounded-xl transition-all flex flex-col items-center justify-center text-center cursor-pointer select-none ${it.className || ''} ${
               isActive
                 ? `${sc.active} ring-1 ring-black/5`
                 : 'hover:bg-cyan-50/50 text-slate-700'

@@ -612,7 +612,7 @@ class CustomerService:
             elif status == "NORMAL":
                 query = query.filter(
                     Pelanggan.status_lease != "waiting",
-                    or_(LogPerformaONT.status_koneksi == "NORMAL", LogPerformaONT.status_koneksi == None)
+                    LogPerformaONT.status_koneksi == "NORMAL"
                 )
             elif status == "WARNING":
                 query = query.filter(LogPerformaONT.status_koneksi == "WARNING", Pelanggan.status_lease != "waiting")
@@ -622,6 +622,14 @@ class CustomerService:
                 query = query.filter(LogPerformaONT.status_koneksi == "LOS", Pelanggan.status_lease != "waiting")
             elif status in ("NONAKTIF", "OFF"):
                 query = query.filter(Pelanggan.is_monitored == False)
+            elif status == "UNTESTED":
+                query = query.filter(
+                    or_(
+                        LogPerformaONT.id.is_(None),
+                        LogPerformaONT.status_koneksi == "UNTESTED",
+                        LogPerformaONT.status_koneksi.is_(None)
+                    )
+                )
             else:
                 query = query.filter(LogPerformaONT.status_koneksi == status)
 
@@ -658,7 +666,7 @@ class CustomerService:
         effective_status = case(
             (Pelanggan.status_lease == "waiting", "OFFLINE"),
             (LogPerformaONT.status_koneksi.isnot(None), LogPerformaONT.status_koneksi),
-            else_="NORMAL"
+            else_="UNTESTED"
         )
         col_map = {
             "id": Pelanggan.id,
@@ -698,8 +706,8 @@ class CustomerService:
             if lease_status == "waiting":
                 current_status = "OFFLINE"
             else:
-                current_status = latest_log.status_koneksi if latest_log else "NORMAL"
-            current_rx = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else (float(c.redaman_baseline) if c.redaman_baseline else None)
+                current_status = latest_log.status_koneksi if (latest_log and latest_log.status_koneksi) else "UNTESTED"
+            current_rx = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else None
             last_check = latest_log.waktu_cek.strftime("%d/%m %H:%M") if (latest_log and latest_log.waktu_cek) else "-"
             waktu_terakhir_iso = latest_log.waktu_cek.isoformat() if (latest_log and latest_log.waktu_cek) else None
 
@@ -867,10 +875,10 @@ class CustomerService:
         warning_count = status_dict.get("WARNING", 0)
         critical_count = status_dict.get("CRITICAL", 0)
         los_count = status_dict.get("LOS", 0)
+        lockout_count = status_dict.get("LOCKOUT", 0)
 
         total_with_logs = sum(status_dict.values())
-        if total_pelanggan > total_with_logs:
-            normal_count += (total_pelanggan - total_with_logs)
+        untested_count = max(0, total_pelanggan - total_with_logs)
 
         return {
             "total": total_pelanggan,
@@ -879,6 +887,8 @@ class CustomerService:
             "warning": warning_count,
             "critical": critical_count,
             "los": los_count,
+            "lockout": lockout_count,
+            "untested": untested_count,
             "critical_los": critical_count + los_count,
             "monitored_active": monitored_active,
             "monitored_inactive": monitored_inactive,

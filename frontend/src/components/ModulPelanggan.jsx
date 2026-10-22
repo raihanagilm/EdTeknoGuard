@@ -357,6 +357,17 @@ export function ModulPelanggan({
           const waitSecs = Number(data.lockout_remaining_seconds) || 60
           showToast(`Modem ${custName} terkunci keamanan ONT (${waitSecs}s). Harap tunggu jeda sebelum mencoba lagi.`, 'warning')
           
+          // Perbarui status koneksi pelanggan di tabel menjadi LOCKOUT
+          setCustomers(prev => prev.map(c => {
+            if (c.id_pelanggan === id_pelanggan) {
+              return {
+                ...c,
+                status_koneksi: 'LOCKOUT'
+              }
+            }
+            return c
+          }))
+
           // Simpan cooldown ke state & localStorage
           const expiry = Date.now() + (waitSecs * 1000)
           setProbeCooldowns(prev => ({ ...prev, [id_pelanggan]: waitSecs }))
@@ -556,6 +567,15 @@ export function ModulPelanggan({
             onClick: () => setFilterStatus('ALL'),
             subLabel: 'Semua ONT'
           },
+          ...(stats.untested > 0 ? [{
+            label: 'Belum Cek',
+            value: stats.untested || 0,
+            colorScheme: 'slate',
+            className: 'hidden md:flex',
+            isActive: filterStatus === 'UNTESTED',
+            onClick: () => setFilterStatus('UNTESTED'),
+            subLabel: 'Menunggu Scan'
+          }] : []),
           {
             label: 'Optimal',
             value: stats.normal || 0,
@@ -587,7 +607,16 @@ export function ModulPelanggan({
             isActive: filterStatus === 'LOS',
             onClick: () => setFilterStatus('LOS'),
             subLabel: 'Putus'
-          }
+          },
+          ...(stats.lockout > 0 ? [{
+            label: 'Lockout',
+            value: stats.lockout || 0,
+            colorScheme: 'orange',
+            className: 'hidden md:flex',
+            isActive: filterStatus === 'LOCKOUT',
+            onClick: () => setFilterStatus('LOCKOUT'),
+            subLabel: 'Terkunci ONT'
+          }] : [])
         ]}
       />
 
@@ -597,7 +626,7 @@ export function ModulPelanggan({
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
             {/* Kotak Pencarian & Tombol Popover Filter */}
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <div className="relative flex-1 min-w-[150px]">
+              <div className="relative flex-1 min-w-[140px]">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
@@ -609,6 +638,35 @@ export function ModulPelanggan({
                   placeholder="Cari ID, Nama, IP..."
                   className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px]"
                 />
+              </div>
+
+              {/* Kontrol Cepat Urutkan (Sorting Selector) */}
+              <div className="relative shrink-0 flex items-center gap-1">
+                <select
+                  value={sortField}
+                  onChange={(e) => {
+                    setSortField(e.target.value);
+                    setPage(1);
+                  }}
+                  className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-slate-700 text-[11px] sm:text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px] cursor-pointer"
+                  title="Urutkan data berdasarkan kolom"
+                >
+                  <option value="id">Urut: ID</option>
+                  <option value="nama">Urut: Nama</option>
+                  <option value="status_koneksi">Urut: Status</option>
+                  <option value="rx_power">Urut: Redaman</option>
+                  <option value="ip_router">Urut: IP Router</option>
+                  <option value="waktu_cek">Urut: Waktu Cek</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))}
+                  className="p-1.5 sm:px-2 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-sky-200 text-[11px] font-mono font-bold flex items-center justify-center min-h-[34px] sm:min-h-[36px] transition cursor-pointer"
+                  title={sortDir === 'asc' ? 'Urutan Naik (A-Z / Rendah ke Tinggi). Klik untuk membalik' : 'Urutan Turun (Z-A / Tinggi ke Rendah). Klik untuk membalik'}
+                >
+                  <ArrowUpDown className="w-3.5 h-3.5 text-cyan-700 mr-0.5" />
+                  <span className="text-[10px] text-cyan-900 font-black">{sortDir === 'asc' ? 'ASC' : 'DESC'}</span>
+                </button>
               </div>
             </div>
 
@@ -914,7 +972,13 @@ export function ModulPelanggan({
                         let statusBadge = 'NORMAL';
                         let badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
 
-                        if (rawStatus === 'LOS' || !isNumeric) {
+                        if (rawStatus === 'UNTESTED' || (!isNumeric && rawStatus !== 'LOS' && rawStatus !== 'LOCKOUT')) {
+                          statusBadge = 'UNTESTED';
+                          badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
+                        } else if (rawStatus === 'LOCKOUT') {
+                          statusBadge = 'LOCKOUT';
+                          badgeClass = 'bg-orange-100 text-orange-900 border-orange-400';
+                        } else if (rawStatus === 'LOS' || !isNumeric) {
                           statusBadge = 'LOS';
                           badgeClass = 'bg-purple-50 text-purple-800 border-purple-300';
                         } else {
@@ -935,7 +999,11 @@ export function ModulPelanggan({
                           <div className="flex flex-col items-end gap-1">
                             <span
                               className={`font-black font-mono ${
-                                statusBadge === 'CRITICAL'
+                                statusBadge === 'UNTESTED'
+                                  ? 'text-slate-400'
+                                  : statusBadge === 'LOCKOUT'
+                                  ? 'text-orange-600'
+                                  : statusBadge === 'CRITICAL'
                                   ? 'text-rose-600'
                                   : statusBadge === 'WARNING'
                                   ? 'text-amber-600'
@@ -944,10 +1012,10 @@ export function ModulPelanggan({
                                   : 'text-emerald-600'
                               }`}
                             >
-                              {isNumeric ? `${Number(rxVal).toFixed(1)} dBm` : 'LOS'}
+                              {statusBadge === 'UNTESTED' ? '-' : statusBadge === 'LOCKOUT' ? 'LOCKOUT' : isNumeric ? `${Number(rxVal).toFixed(1)} dBm` : 'LOS'}
                             </span>
                             <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${badgeClass}`}>
-                              {statusBadge}
+                              {statusBadge === 'UNTESTED' ? 'BELUM CEK' : statusBadge}
                             </span>
                           </div>
                         );
