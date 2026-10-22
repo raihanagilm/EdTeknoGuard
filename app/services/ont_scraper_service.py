@@ -821,7 +821,7 @@ class ONTScraperService:
                     last_lockout_seconds = lock_secs or default_lock_sec
 
                     if is_mass_scan:
-                        print(f"[!] [LOCKOUT_MASS] ONT {host} ({customer_name}): Kena lockout {last_lockout_seconds}s di attempt {attempt_num} untuk user '{u}'. Pemantauan massal lanjut ke pelanggan berikutnya.")
+                        print(f"[!] [LOCKOUT_MASS] ONT {host} ({customer_name}): Kena lockout {last_lockout_seconds}s di user '{u}'. Pemantauan massal lanjut ke pelanggan berikutnya.")
                         return {
                             "success": False,
                             "error_type": "LOCKOUT",
@@ -835,22 +835,21 @@ class ONTScraperService:
                             "latency_ms": int((time.time() - start_time) * 1000)
                         }
 
-                    # Mode Cek Mandiri (Single Probe): Tahan sesi HTTP (stay connection) hingga countdown selesai!
-                    print(f"[!] [LOCKOUT_WAIT_STAY] ONT {host} ({customer_name}): Lockout {last_lockout_seconds}s (Attempt {attempt_num}/3). Menahan sesi HTTP stay connection...")
+                    # Mode Cek Mandiri / Second Pass: Tahan sesi HTTP (stay connection) hingga countdown selesai, lalu langsung lanjut ke kredensial database berikutnya!
+                    print(f"[!] [LOCKOUT_WAIT_STAY] ONT {host} ({customer_name}): Lockout {last_lockout_seconds}s pada user '{u}'. Menahan sesi HTTP stay connection hingga countdown selesai...")
                     time.sleep(last_lockout_seconds + 1)
 
-                    # Jika vendor tidak mewajibkan koneksi persisten atau token hang, bersihkan token tapi pertahankan sesi
+                    # Segarkan form token setelah masa lockout selesai
                     try:
                         r_refresh = session.get(f"{base_url}/", timeout=6, headers={"Connection": "keep-alive"})
                         probe_html = r_refresh.text
                     except Exception:
                         pass
-                    # Lanjut ke attempt berikutnya untuk kredensial yang sama (hingga max 3)
-                    continue
+                    # Kredensial ini ditolak modem dan memicu lockout, langsung lanjut coba kredensial berikutnya di database!
+                    break
 
-                # Jika gagal normal (tanpa lock), beri jeda napas 1.0s di sesi yang sama sebelum mencoba attempt berikutnya
-                if attempt_num < 3:
-                    time.sleep(1.0)
+                # Jika ditolak normal (salah password / wrong user), tidak perlu mengulang user yang sama, langsung lanjut ke kandidat berikutnya
+                break
 
             if authenticated:
                 break
@@ -878,28 +877,13 @@ class ONTScraperService:
                     "latency_ms": None,
                     "all_exhausted": all_exhausted
                 }
-            elif encountered_lockout:
-                print(f"[-] [LOCKOUT_EXHAUSTED] ONT {host} ({customer_name}): Modem lockout setelah 3 percobaan ({last_lockout_seconds}s).")
-                return {
-                    "success": False,
-                    "error_type": "LOCKOUT",
-                    "lockout_remaining_seconds": last_lockout_seconds,
-                    "message": f"Modem terkunci lockout ONT ({last_lockout_seconds}s). Harap tunggu jeda keamanan.",
-                    "status_kredensial": "INVALID",
-                    "status_koneksi": "INVALID",
-                    "rx_power": None,
-                    "suhu_ont": None,
-                    "uptime": None,
-                    "latency_ms": latency,
-                    "all_exhausted": all_exhausted
-                }
             else:
-                # Modem merespon tetapi kredensial ditolak
-                print(f"[-] [AUTH_FAILED] ONT {host} ({customer_name}): Kredensial modem ditolak (User/Pass salah). Dicoba: {len(active_candidate_list)}/{total_available}")
+                # Seluruh kredensial dalam daftar telah dicoba dan semuanya ditolak / gagal
+                print(f"[-] [AUTH_FAILED_EXHAUSTED] ONT {host} ({customer_name}): Seluruh kredensial ({len(active_candidate_list)}/{total_available}) telah dicoba dan tidak ada yang cocok.")
                 return {
                     "success": False,
                     "error_type": "AUTH_FAILED",
-                    "message": "Kredensial modem salah / ditolak",
+                    "message": "Kredensial modem tidak cocok: Seluruh pasangan username/password di database telah dicoba dan ditolak.",
                     "status_kredensial": "INVALID",
                     "status_koneksi": "INVALID",
                     "rx_power": None,

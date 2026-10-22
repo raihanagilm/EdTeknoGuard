@@ -4,6 +4,7 @@ import json
 import time
 import logging
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -13,7 +14,7 @@ from app.core.timezone import get_now_wib, get_today_wib
 
 from app.core.database import SessionLocal
 from app.core.config import settings
-from app.db.models import Pelanggan, LogPerformaONT, SystemSetting, AlertLog, UserActivityLog, Kantor
+from app.db.models import Pelanggan, PerangkatONT, LogPerformaONT, SystemSetting, AlertLog, UserActivityLog, Kantor
 from app.services.snmp_service import SNMPService
 from app.services.ont_scraper_service import ONTScraperService
 
@@ -783,212 +784,324 @@ class MonitoringScheduler:
                 default_creds_list.insert(0, (default_user, default_pass))
 
             unreachable_count = 0
-            for cust in pelanggan_to_scan:
-                # 0. Cek interupsi STOP (Berhenti Paksa)
-                with state.lock:
-                    if state.stop_requested:
-                        logger.info(f"[SCAN] Pemindaian kantor {k.upper()} dihentikan paksa (STOP).")
-                        self.delete_scan_state(k)
-                        state.is_scanning = False
-                        state.is_paused = False
-                        state.stop_requested = False
-                        state.resume_index = 0
-                        state.scan_current = 0
-                        return {"status": "stopped", "message": f"Pemindaian kantor {k.upper()} dihentikan paksa oleh Admin."}
+            stats_lock = threading.Lock()
+            interrupted = False
+            interrupted_response = None
 
-                    # 0. Cek interupsi JEDA (Pause)
-                    if state.is_paused:
-                        logger.info(f"[SCAN] Pemindaian kantor {k.upper()} dijeda pada pelanggan ke-{state.scan_current} dari {state.scan_total}.")
-                        state.is_scanning = False
-                        state.resume_index = state.scan_current
-                        self.save_scan_state(current_index=state.resume_index, total=state.scan_total, kantor=k)
-                        return {
-                            "status": "paused",
-                            "message": f"Pemindaian kantor {k.upper()} dijeda pada pelanggan ke-{state.resume_index} dari {state.scan_total}.",
-                            "current_index": state.resume_index,
-                            "total": state.scan_total,
-                            "target_kantor": k
-                        }
-
-                    state.scan_current += 1
-
-                # 1. Coba Scraping Live ONT GM220-S via HTTP (Prioritas IP ONT, fallback IP Router)
-                target_scrape_ip = cust.ip_ont or cust.ip_router
-                scrape_res = ONTScraperService.scrape_ont(
-                    ip=target_scrape_ip,
-                    customer_user=cust.user_admin,
-                    customer_pass=cust.pass_admin,
-                    default_user=default_user,
-                    default_pass=default_pass,
-                    customer_name=cust.nama,
-                    default_credentials=default_creds_list,
-                    warn_threshold=eff_warn_th,
-                    crit_threshold=eff_crit_th,
-                    is_mass_scan=True
-                )
-
-                was_previously_valid = (getattr(cust, "status_kredensial", "UNTESTED") == "VALID")
-
-                # Evaluasi hasil scraping
-                if scrape_res["success"] and scrape_res["rx_power"] is not None:
-                    res = scrape_res
-                    cust.status_kredensial = "VALID"
-                    if scrape_res.get("updated_user") and scrape_res.get("updated_pass"):
-                        cust.user_admin = scrape_res["updated_user"]
-                        cust.pass_admin = scrape_res["updated_pass"]
-                    ket = f"Live Scraping OK ({res.get('gpon_state', 'Normal')})"
-                elif scrape_res.get("error_type") == "LOCKOUT":
-                    if was_previously_valid:
-                        cust.status_kredensial = "VALID"
-                    else:
-                        cust.status_kredensial = "INVALID"
-                    res = scrape_res
-                    res["status_koneksi"] = "INVALID"
-                    rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
-                    ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Dilewati pada scan massal."
-                elif scrape_res.get("error_type") == "AUTH_FAILED":
-                    if was_previously_valid:
-                        # Kredensial pelanggan sudah benar/valid sebelumnya, modem mungkin sibuk atau menolak session. Pertahankan VALID!
-                        cust.status_kredensial = "VALID"
-                        res = scrape_res
-                        res["status_koneksi"] = "INVALID"
-                        ket = "Login Tertunda (Modem Sibuk / Session Semaphore, Kredensial Tetap Valid)"
-                    else:
-                        cust.status_kredensial = "INVALID"
-                        res = scrape_res
-                        res["status_koneksi"] = "INVALID"
-                        ket = "Login Gagal (User/Pass Salah)"
-                elif scrape_res.get("error_type") == "UNREACHABLE":
-                    if was_previously_valid:
-                        cust.status_kredensial = "VALID"
-                    unreachable_count += 1
-                    res = scrape_res
-                    ket = "Gagal Terhubung (Unreachable - Cek Jaringan Lokal)"
-                else:
-                    if was_previously_valid:
-                        cust.status_kredensial = "VALID"
-                    res = scrape_res
-                    ket = f"Error: {scrape_res.get('message', 'Gagal')}"
-
-                # Auto-deteksi: Simpan MAC Address, Kredensial WiFi, & Jenis Modem jika berhasil terbaca dari ONT
-                if res.get("mac_address"):
-                    cust.mac_address = res["mac_address"]
-                if res.get("nama_wifi"):
-                    cust.nama_wifi = res["nama_wifi"]
-                if res.get("password_wifi"):
-                    cust.password_wifi = res["password_wifi"]
-                if res.get("jenis_modem"):
-                    cust.jenis_modem = res["jenis_modem"]
-
-                log_entry = LogPerformaONT(
-                    id_pelanggan=cust.id_pelanggan,
-                    waktu_cek=now,
-                    rx_power=res.get("rx_power"),
-                    suhu_ont=res.get("suhu_ont"),
-                    uptime=res.get("uptime"),
-                    status_koneksi=res.get("status_koneksi") or "LOS",
-                    latency_ms=res.get("latency_ms"),
-                    keterangan=ket
-                )
-                db.add(log_entry)
-
-                is_auth_failure = (
-                    res.get("error_type") == "AUTH_FAILED"
-                    or cust.status_kredensial == "INVALID"
-                    or "login gagal" in ket.lower()
-                    or "kredensial" in ket.lower()
-                    or "ditolak" in ket.lower()
-                )
-
-                st = res.get("status_koneksi") or "LOS"
-                if st == "WARNING":
-                    warning_count += 1
-                    cust.los_count = 0
-                elif st == "CRITICAL":
-                    critical_count += 1
-                    cust.los_count = 0
-                elif st == "LOS":
-                    los_count += 1
-                    if not is_auth_failure:
-                        cust.los_count += 1
-                        pop_name = cust.pop or f"Server {k.upper()}"
-                        if pop_name not in los_by_pop:
-                            los_by_pop[pop_name] = []
-                        los_by_pop[pop_name].append(cust.nama)
-                else:
-                    cust.los_count = 0
-
-                results.append({
-                    "id_pelanggan": cust.id_pelanggan,
-                    "nama": cust.nama,
-                    "rx_power": res.get("rx_power"),
-                    "status": st,
-                    "kredensial": cust.status_kredensial,
-                    "keterangan": ket
-                })
-                
+            # Helper function untuk scraping 1 pelanggan secara thread-safe
+            def _scan_customer_worker(cust_id: int):
+                worker_db = SessionLocal()
                 try:
-                    db.commit()
-                except Exception as inner_e:
-                    db.rollback()
+                    c = worker_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_id).first()
+                    if not c:
+                        return None
+
+                    target_scrape_ip = c.ip_ont or c.ip_router
+                    scrape_res = ONTScraperService.scrape_ont(
+                        ip=target_scrape_ip,
+                        customer_user=c.user_admin,
+                        customer_pass=c.pass_admin,
+                        default_user=default_user,
+                        default_pass=default_pass,
+                        customer_name=c.nama,
+                        default_credentials=default_creds_list,
+                        warn_threshold=eff_warn_th,
+                        crit_threshold=eff_crit_th,
+                        is_mass_scan=True
+                    )
+
+                    was_previously_valid = (getattr(c, "status_kredensial", "UNTESTED") == "VALID")
+
+                    # Evaluasi hasil scraping
+                    if scrape_res["success"] and scrape_res["rx_power"] is not None:
+                        res = scrape_res
+                        c.status_kredensial = "VALID"
+                        if scrape_res.get("updated_user") and scrape_res.get("updated_pass"):
+                            c.user_admin = scrape_res["updated_user"]
+                            c.pass_admin = scrape_res["updated_pass"]
+                        ket = f"Live Scraping OK ({res.get('gpon_state', 'Normal')})"
+                    elif scrape_res.get("error_type") == "LOCKOUT":
+                        if was_previously_valid:
+                            c.status_kredensial = "VALID"
+                        else:
+                            c.status_kredensial = "INVALID"
+                        res = scrape_res
+                        res["status_koneksi"] = "INVALID"
+                        rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
+                        ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Dilewati pada scan massal."
+                    elif scrape_res.get("error_type") == "AUTH_FAILED":
+                        if was_previously_valid:
+                            c.status_kredensial = "VALID"
+                            res = scrape_res
+                            res["status_koneksi"] = "INVALID"
+                            ket = "Login Tertunda (Modem Sibuk / Session Semaphore, Kredensial Tetap Valid)"
+                        else:
+                            c.status_kredensial = "INVALID"
+                            res = scrape_res
+                            res["status_koneksi"] = "INVALID"
+                            ket = "Login Gagal (User/Pass Salah)"
+                    elif scrape_res.get("error_type") == "UNREACHABLE":
+                        if was_previously_valid:
+                            c.status_kredensial = "VALID"
+                        res = scrape_res
+                        ket = "Gagal Terhubung (Unreachable - Cek Jaringan Lokal)"
+                    else:
+                        if was_previously_valid:
+                            c.status_kredensial = "VALID"
+                        res = scrape_res
+                        ket = f"Error: {scrape_res.get('message', 'Gagal')}"
+
+                    if res.get("mac_address"):
+                        c.mac_address = res["mac_address"]
+                    if res.get("nama_wifi"):
+                        c.nama_wifi = res["nama_wifi"]
+                    if res.get("password_wifi"):
+                        c.password_wifi = res["password_wifi"]
+                    if res.get("jenis_modem"):
+                        c.jenis_modem = res["jenis_modem"]
+
+                    log_entry = LogPerformaONT(
+                        id_pelanggan=c.id_pelanggan,
+                        waktu_cek=now,
+                        rx_power=res.get("rx_power"),
+                        suhu_ont=res.get("suhu_ont"),
+                        uptime=res.get("uptime"),
+                        status_koneksi=res.get("status_koneksi") or "LOS",
+                        latency_ms=res.get("latency_ms"),
+                        keterangan=ket
+                    )
+                    worker_db.add(log_entry)
+
+                    is_auth_failure = (
+                        res.get("error_type") == "AUTH_FAILED"
+                        or c.status_kredensial == "INVALID"
+                        or "login gagal" in ket.lower()
+                        or "kredensial" in ket.lower()
+                        or "ditolak" in ket.lower()
+                    )
+
+                    st = res.get("status_koneksi") or "LOS"
+                    if st in ("WARNING", "CRITICAL"):
+                        c.los_count = 0
+                    elif st == "LOS":
+                        if not is_auth_failure:
+                            c.los_count = (c.los_count or 0) + 1
+                    else:
+                        c.los_count = 0
+
+                    worker_db.commit()
+
+                    return {
+                        "id_pelanggan": c.id_pelanggan,
+                        "nama": c.nama,
+                        "rx_power": res.get("rx_power"),
+                        "status": st,
+                        "kredensial": c.status_kredensial,
+                        "keterangan": ket,
+                        "error_type": res.get("error_type"),
+                        "pop": c.pop or f"Server {k.upper()}",
+                        "is_auth_failure": is_auth_failure
+                    }
+                except Exception as worker_e:
+                    worker_db.rollback()
+                    logger.error(f"[WORKER] Error scanning pelanggan {cust_id}: {worker_e}")
+                    return None
+                finally:
+                    worker_db.close()
+
+            # Eksekusi Pemindaian Pertama (Paralel 5 worker per kantor aktif)
+            max_workers = min(5, len(pelanggan_to_scan)) if pelanggan_to_scan else 1
+            logger.info(f"[SCAN] Memulai pemindaian paralel {max_workers} worker untuk kantor {k.upper()} ({len(pelanggan_to_scan)} pelanggan)...")
+
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                future_map = {
+                    executor.submit(_scan_customer_worker, cust.id_pelanggan): cust.id_pelanggan
+                    for cust in pelanggan_to_scan
+                }
+
+                for future in as_completed(future_map):
+                    # Cek interupsi STOP (Berhenti Paksa)
                     with state.lock:
-                        state.resume_index = max(0, state.scan_current - 1)
-                    raise inner_e
+                        if state.stop_requested:
+                            logger.info(f"[SCAN] Pemindaian kantor {k.upper()} dihentikan paksa (STOP).")
+                            self.delete_scan_state(k)
+                            state.is_scanning = False
+                            state.is_paused = False
+                            state.stop_requested = False
+                            state.resume_index = 0
+                            state.scan_current = 0
+                            interrupted = True
+                            interrupted_response = {"status": "stopped", "message": f"Pemindaian kantor {k.upper()} dihentikan paksa oleh Admin."}
+                            break
+
+                        # Cek interupsi JEDA (Pause)
+                        if state.is_paused:
+                            logger.info(f"[SCAN] Pemindaian kantor {k.upper()} dijeda pada pelanggan ke-{state.scan_current} dari {state.scan_total}.")
+                            state.is_scanning = False
+                            state.resume_index = state.scan_current
+                            self.save_scan_state(current_index=state.resume_index, total=state.scan_total, kantor=k)
+                            interrupted = True
+                            interrupted_response = {
+                                "status": "paused",
+                                "message": f"Pemindaian kantor {k.upper()} dijeda pada pelanggan ke-{state.resume_index} dari {state.scan_total}.",
+                                "current_index": state.resume_index,
+                                "total": state.scan_total,
+                                "target_kantor": k
+                            }
+                            break
+
+                        state.scan_current += 1
+
+                    try:
+                        worker_result = future.result()
+                    except Exception as fe:
+                        logger.error(f"[SCAN] Future exception: {fe}")
+                        worker_result = None
+
+                    if worker_result:
+                        with stats_lock:
+                            st = worker_result["status"]
+                            if st == "WARNING":
+                                warning_count += 1
+                            elif st == "CRITICAL":
+                                critical_count += 1
+                            elif st == "LOS":
+                                los_count += 1
+                                if not worker_result.get("is_auth_failure"):
+                                    pop_name = worker_result.get("pop") or f"Server {k.upper()}"
+                                    if pop_name not in los_by_pop:
+                                        los_by_pop[pop_name] = []
+                                    los_by_pop[pop_name].append(worker_result["nama"])
+
+                            if worker_result.get("error_type") == "UNREACHABLE":
+                                unreachable_count += 1
+
+                            results.append({
+                                "id_pelanggan": worker_result["id_pelanggan"],
+                                "nama": worker_result["nama"],
+                                "rx_power": worker_result["rx_power"],
+                                "status": st,
+                                "kredensial": worker_result["kredensial"],
+                                "keterangan": worker_result["keterangan"]
+                            })
+
+            if interrupted and interrupted_response:
+                return interrupted_response
+
+            # Refresh data pelanggan dari DB agar objek di sesi utama sinkron setelah pembaruan worker
+            db.expire_all()
 
             # -------------------------------------------------------------
             # SECOND PASS: Coba ulang khusus pelanggan yang berstatus INVALID
             # Mencoba seluruh daftar kredensial secara lengkap setelah putaran pertama
+            # Eksekusi paralel (3-5 worker) agar lockout delay tidak saling memblokir
             # -------------------------------------------------------------
-            invalid_to_retry = [c for c in pelanggan_to_scan if c.status_kredensial == "INVALID"]
-            if invalid_to_retry:
-                logger.info(f"[SECOND_PASS] Menemukan {len(invalid_to_retry)} pelanggan INVALID di kantor {k.upper()}. Memulai putaran ulang...")
-                for inv_cust in invalid_to_retry:
-                    target_ip = inv_cust.ip_ont or inv_cust.ip_router
-                    # Pada SECOND PASS: Jalankan dengan is_mass_scan=False agar jika terkena lockout,
-                    # scraper menunggu jeda countdown (stay connection) lalu mencoba kredensial ke-2, ke-3, dst dari database settings!
-                    retry_res = ONTScraperService.scrape_ont(
-                        ip=target_ip,
-                        customer_user=inv_cust.user_admin,
-                        customer_pass=inv_cust.pass_admin,
-                        default_user=default_user,
-                        default_pass=default_pass,
-                        customer_name=inv_cust.nama,
-                        default_credentials=default_creds_list,
-                        warn_threshold=eff_warn_th,
-                        crit_threshold=eff_crit_th,
-                        is_mass_scan=False
-                    )
-                    retry_now = get_now_wib()
-                    if retry_res["success"] and retry_res["rx_power"] is not None:
-                        inv_cust.status_kredensial = "VALID"
-                        if retry_res.get("updated_user") and retry_res.get("updated_pass"):
-                            inv_cust.user_admin = retry_res["updated_user"]
-                            inv_cust.pass_admin = retry_res["updated_pass"]
-                        ket_retry = f"Live Retry OK ({retry_res.get('gpon_state', 'Normal')})"
-                    elif retry_res.get("error_type") == "AUTH_FAILED":
-                        inv_cust.status_kredensial = "INVALID"
-                        ket_retry = "Login Gagal: Seluruh kredensial di Pengaturan telah dicoba dan tidak ada yang cocok"
-                    else:
-                        ket_retry = f"Retry: {retry_res.get('message', 'Unreachable')}"
+            pelanggan_ids_to_scan = [c.id_pelanggan for c in pelanggan_to_scan]
+            invalid_cust_ids = [
+                row[0] for row in db.query(Pelanggan.id_pelanggan)
+                .join(Pelanggan.perangkat)
+                .filter(Pelanggan.id_pelanggan.in_(pelanggan_ids_to_scan), PerangkatONT.status_kredensial == "INVALID")
+                .all()
+            ]
 
-                    if retry_res.get("mac_address"):
-                        inv_cust.mac_address = retry_res["mac_address"]
-                    if retry_res.get("nama_wifi"):
-                        inv_cust.nama_wifi = retry_res["nama_wifi"]
-                    if retry_res.get("password_wifi"):
-                        inv_cust.password_wifi = retry_res["password_wifi"]
+            if invalid_cust_ids:
+                logger.info(f"[SECOND_PASS] Menemukan {len(invalid_cust_ids)} pelanggan INVALID di kantor {k.upper()}. Memulai putaran ulang paralel...")
 
-                    db.add(LogPerformaONT(
-                        id_pelanggan=inv_cust.id_pelanggan,
-                        waktu_cek=retry_now,
-                        rx_power=retry_res.get("rx_power"),
-                        suhu_ont=retry_res.get("suhu_ont"),
-                        uptime=retry_res.get("uptime"),
-                        status_koneksi=retry_res.get("status_koneksi") or "LOS",
-                        latency_ms=retry_res.get("latency_ms"),
-                        keterangan=ket_retry
-                    ))
-                    db.commit()
+                def _retry_customer_worker(cust_id: int):
+                    worker_db = SessionLocal()
+                    try:
+                        inv_cust = worker_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_id).first()
+                        if not inv_cust:
+                            return None
+
+                        target_ip = inv_cust.ip_ont or inv_cust.ip_router
+                        retry_res = ONTScraperService.scrape_ont(
+                            ip=target_ip,
+                            customer_user=inv_cust.user_admin,
+                            customer_pass=inv_cust.pass_admin,
+                            default_user=default_user,
+                            default_pass=default_pass,
+                            customer_name=inv_cust.nama,
+                            default_credentials=default_creds_list,
+                            warn_threshold=eff_warn_th,
+                            crit_threshold=eff_crit_th,
+                            is_mass_scan=False
+                        )
+                        retry_now = get_now_wib()
+                        if retry_res["success"] and retry_res["rx_power"] is not None:
+                            inv_cust.status_kredensial = "VALID"
+                            if retry_res.get("updated_user") and retry_res.get("updated_pass"):
+                                inv_cust.user_admin = retry_res["updated_user"]
+                                inv_cust.pass_admin = retry_res["updated_pass"]
+                            retry_status_koneksi = retry_res.get("status_koneksi") or "NORMAL"
+                            ket_retry = f"Live Retry OK ({retry_res.get('gpon_state', 'Normal')})"
+                        elif retry_res.get("error_type") == "AUTH_FAILED":
+                            inv_cust.status_kredensial = "INVALID"
+                            retry_status_koneksi = "INVALID"
+                            ket_retry = "Kredensial Tidak Cocok: Seluruh pasangan kredensial di Pengaturan Sistem telah dicoba dan ditolak modem."
+                        else:
+                            retry_status_koneksi = retry_res.get("status_koneksi") or "INVALID"
+                            ket_retry = f"Retry: {retry_res.get('message', 'Unreachable')}"
+
+                        if retry_res.get("mac_address"):
+                            inv_cust.mac_address = retry_res["mac_address"]
+                        if retry_res.get("nama_wifi"):
+                            inv_cust.nama_wifi = retry_res["nama_wifi"]
+                        if retry_res.get("password_wifi"):
+                            inv_cust.password_wifi = retry_res["password_wifi"]
+                        if retry_res.get("jenis_modem"):
+                            inv_cust.jenis_modem = retry_res["jenis_modem"]
+
+                        worker_db.add(LogPerformaONT(
+                            id_pelanggan=inv_cust.id_pelanggan,
+                            waktu_cek=retry_now,
+                            rx_power=retry_res.get("rx_power"),
+                            suhu_ont=retry_res.get("suhu_ont"),
+                            uptime=retry_res.get("uptime"),
+                            status_koneksi=retry_status_koneksi,
+                            latency_ms=retry_res.get("latency_ms"),
+                            keterangan=ket_retry
+                        ))
+                        worker_db.commit()
+                        return {
+                            "id_pelanggan": inv_cust.id_pelanggan,
+                            "nama": inv_cust.nama,
+                            "rx_power": retry_res.get("rx_power"),
+                            "status": retry_status_koneksi,
+                            "kredensial": inv_cust.status_kredensial,
+                            "keterangan": ket_retry
+                        }
+                    except Exception as re_e:
+                        worker_db.rollback()
+                        logger.error(f"[SECOND_PASS] Error retrying pelanggan {cust_id}: {re_e}")
+                        return None
+                    finally:
+                        worker_db.close()
+
+                second_pass_workers = min(8, len(invalid_cust_ids))
+                with ThreadPoolExecutor(max_workers=second_pass_workers) as retry_executor:
+                    retry_futures = [retry_executor.submit(_retry_customer_worker, cid) for cid in invalid_cust_ids]
+                    for rf in as_completed(retry_futures):
+                        try:
+                            ret_res = rf.result()
+                            if ret_res and ret_res.get("kredensial") == "VALID":
+                                with stats_lock:
+                                    st = ret_res.get("status")
+                                    if st == "WARNING":
+                                        warning_count += 1
+                                    elif st == "CRITICAL":
+                                        critical_count += 1
+                                    for r_item in results:
+                                        if r_item["id_pelanggan"] == ret_res["id_pelanggan"]:
+                                            r_item["rx_power"] = ret_res["rx_power"]
+                                            r_item["status"] = ret_res["status"]
+                                            r_item["kredensial"] = ret_res["kredensial"]
+                                            r_item["keterangan"] = ret_res["keterangan"]
+                                            break
+                        except Exception as rfe:
+                            logger.error(f"[SECOND_PASS] Future exception: {rfe}")
+
+                db.expire_all()
 
             scan_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
             self.set_setting_in_db(db, "last_scan_time", scan_time_str, kantor=None)
