@@ -798,14 +798,15 @@ export function ModulBeranda({
   const isSuperAdmin = currentUser?.role === 'super admin'
   const isAdminOrSuper = currentUser?.role === 'admin' || isSuperAdmin
 
-  // Logika Isolasi Multi-Kantor untuk Pemindaian
-  const scanTargetKantor = scanProgress?.target_kantor || ''
+  // Logika Isolasi Multi-Kantor untuk Pemindaian (Gunakan case-insensitive agar kode kantor 'Slawi' vs 'slawi' selalu cocok)
+  const scanTargetKantor = (scanProgress?.target_kantor || '').toLowerCase()
+  const currentOfficeLower = (activeOffice || '').toLowerCase()
   const isScanActive = isScanning || Boolean(scanProgress?.is_scanning || scanProgress?.is_paused)
   const isCurrentOfficeScan = isScanActive
-    ? (scanTargetKantor === activeOffice || scanTargetKantor === 'all')
+    ? (scanTargetKantor === currentOfficeLower || scanTargetKantor === 'all')
     : true
-  const hasActiveScanInOtherOffice = isScanActive && scanTargetKantor && scanTargetKantor !== 'all' && scanTargetKantor !== activeOffice
-  const canControlCurrentScan = isSuperAdmin || (currentUser?.role === 'admin' && scanTargetKantor === activeOffice)
+  const hasActiveScanInOtherOffice = isScanActive && scanTargetKantor && scanTargetKantor !== 'all' && scanTargetKantor !== currentOfficeLower
+  const canControlCurrentScan = isSuperAdmin || (currentUser?.role === 'admin' && scanTargetKantor === currentOfficeLower)
 
   return (
     <div className="space-y-4 font-sans">

@@ -947,15 +947,39 @@ class MonitoringScheduler:
                 finally:
                     worker_db.close()
 
-            # Eksekusi Pemindaian Pertama (Paralel 5 worker per kantor aktif)
-            max_workers = min(5, len(pelanggan_to_scan)) if pelanggan_to_scan else 1
-            logger.info(f"[SCAN] Memulai pemindaian paralel {max_workers} worker untuk kantor {k.upper()} ({len(pelanggan_to_scan)} pelanggan)...")
+            # Pisahkan antrean pelanggan: VALID vs INVALID/UNTESTED
+            valid_cust_ids = []
+            invalid_cust_ids = []
+            for cust in pelanggan_to_scan:
+                if getattr(cust, "status_kredensial", None) == "VALID" or (cust.perangkat and cust.perangkat.status_kredensial == "VALID"):
+                    valid_cust_ids.append(cust.id_pelanggan)
+                else:
+                    invalid_cust_ids.append(cust.id_pelanggan)
 
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                future_map = {
-                    executor.submit(_scan_customer_worker, cust.id_pelanggan): cust.id_pelanggan
-                    for cust in pelanggan_to_scan
-                }
+            # Kalkulasi Autoscaling Worker Dinamis:
+            # - Base 25 worker untuk data pertama (< 100 data)
+            # - Tambah +10 worker untuk setiap kelipatan 100 pelanggan (cth: 100-199: 35w, 200-299: 45w, 300-399: 55w, >=400: 65w)
+            # - Dibatasi batas aman maksimal (Hard Cap) 65 worker per kantor agar database & bridge router tetap stabil
+            total_valid = len(valid_cust_ids)
+            extra_per_hundred = (total_valid // 100) * 10
+            calculated_valid_workers = min(65, 25 + extra_per_hundred)
+            valid_workers = min(calculated_valid_workers, total_valid) if total_valid > 0 else 1
+
+            # Pool INVALID tetap terjaga 10 worker agar tidak memicu badai request saat lockout delay
+            invalid_workers = min(10, len(invalid_cust_ids)) if invalid_cust_ids else 1
+
+            logger.info(f"[SCAN] Memulai pemindaian serentak kantor {k.upper()}: {total_valid} VALID (Autoscale {valid_workers}w, cap 65w), {len(invalid_cust_ids)} INVALID/UNTESTED (Pool {invalid_workers}w)...")
+
+            valid_los_to_retry = []  # Menampung pelanggan VALID yang gagal/LOS untuk di-retry di Pass Kedua
+
+            with ThreadPoolExecutor(max_workers=valid_workers) as valid_executor, \
+                 ThreadPoolExecutor(max_workers=invalid_workers) as invalid_executor:
+
+                future_map = {}
+                for cid in valid_cust_ids:
+                    future_map[valid_executor.submit(_scan_customer_worker, cid)] = cid
+                for cid in invalid_cust_ids:
+                    future_map[invalid_executor.submit(_scan_customer_worker, cid)] = cid
 
                 for future in as_completed(future_map):
                     # Cek interupsi STOP (Berhenti Paksa)
@@ -999,6 +1023,12 @@ class MonitoringScheduler:
                     if worker_result:
                         with stats_lock:
                             st = worker_result["status"]
+                            cid = worker_result["id_pelanggan"]
+                            
+                            # Jika pelanggan berkredensial VALID tapi terdeteksi LOS / Rx None, tampung ke pass kedua
+                            if cid in valid_cust_ids and (st == "LOS" or worker_result.get("rx_power") is None):
+                                valid_los_to_retry.append(cid)
+
                             if st == "WARNING":
                                 warning_count += 1
                             elif st == "CRITICAL":
@@ -1030,20 +1060,117 @@ class MonitoringScheduler:
             db.expire_all()
 
             # -------------------------------------------------------------
-            # SECOND PASS: Coba ulang khusus pelanggan yang berstatus INVALID
+            # PASS KEDUA (BAGIAN A): Retry Khusus VALID yang Terkena LOS / Glitch
+            # Coba ulang 3x dengan jeda bertahap (exponential backoff 1s, 2s, 3s)
+            # -------------------------------------------------------------
+            if valid_los_to_retry and not state.stop_requested and not state.is_paused:
+                logger.info(f"[RETRY_PASS_VALID] Menemukan {len(valid_los_to_retry)} modem VALID berstatus LOS. Menjalankan retry bertahap paralel...")
+
+                def _retry_valid_los_worker(cust_id: int):
+                    worker_db = SessionLocal()
+                    try:
+                        c_retry = worker_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_id).first()
+                        if not c_retry:
+                            return None
+
+                        target_ip = c_retry.ip_ont or c_retry.ip_router
+                        final_res = None
+                        
+                        # 3x percobaan dengan backoff bertahap (1s, 2s, 3s)
+                        for attempt, wait_sec in enumerate([1.0, 2.0, 3.0], start=1):
+                            time.sleep(wait_sec)
+                            r_res = ONTScraperService.scrape_ont(
+                                ip=target_ip,
+                                customer_user=c_retry.user_admin,
+                                customer_pass=c_retry.pass_admin,
+                                default_user=default_user,
+                                default_pass=default_pass,
+                                customer_name=c_retry.nama,
+                                default_credentials=default_creds_list,
+                                warn_threshold=eff_warn_th,
+                                crit_threshold=eff_crit_th,
+                                is_mass_scan=True,
+                                failed_credentials_history=[],
+                                exhaustive_first_scan=False
+                            )
+                            if r_res.get("success") and r_res.get("rx_power") is not None:
+                                final_res = r_res
+                                logger.info(f"[RETRY_VALID_RECOVERED] Pelanggan {c_retry.nama} ({c_retry.id_pelanggan}) pulih dari LOS pada retry ke-{attempt} (Rx: {r_res.get('rx_power')} dBm)!")
+                                break
+
+                        if final_res and final_res.get("rx_power") is not None:
+                            st_recovered = final_res.get("status_koneksi") or "NORMAL"
+                            c_retry.status_kredensial = "VALID"
+                            c_retry.los_count = 0
+                            ket_rec = f"Pulih dari LOS (Percobaan ke-{attempt}) - {final_res.get('gpon_state', 'Normal')}"
+                            
+                            worker_db.add(LogPerformaONT(
+                                id_pelanggan=c_retry.id_pelanggan,
+                                waktu_cek=get_now_wib(),
+                                rx_power=final_res.get("rx_power"),
+                                suhu_ont=final_res.get("suhu_ont"),
+                                uptime=final_res.get("uptime"),
+                                status_koneksi=st_recovered,
+                                latency_ms=final_res.get("latency_ms"),
+                                keterangan=ket_rec
+                            ))
+                            worker_db.commit()
+                            return {
+                                "id_pelanggan": c_retry.id_pelanggan,
+                                "rx_power": final_res.get("rx_power"),
+                                "status": st_recovered,
+                                "kredensial": "VALID",
+                                "keterangan": ket_rec,
+                                "recovered": True
+                            }
+                        return None
+                    except Exception as ve_err:
+                        worker_db.rollback()
+                        logger.error(f"[RETRY_VALID_ERROR] Error retry pelanggan {cust_id}: {ve_err}")
+                        return None
+                    finally:
+                        worker_db.close()
+
+                retry_valid_workers = min(15, len(valid_los_to_retry))
+                with ThreadPoolExecutor(max_workers=retry_valid_workers) as retry_v_executor:
+                    v_futures = [retry_v_executor.submit(_retry_valid_los_worker, cid) for cid in valid_los_to_retry]
+                    for vf in as_completed(v_futures):
+                        try:
+                            v_res = vf.result()
+                            if v_res and v_res.get("recovered"):
+                                with stats_lock:
+                                    los_count = max(0, los_count - 1)
+                                    st_rec = v_res.get("status")
+                                    if st_rec == "WARNING":
+                                        warning_count += 1
+                                    elif st_rec == "CRITICAL":
+                                        critical_count += 1
+                                    
+                                    for r_item in results:
+                                        if r_item["id_pelanggan"] == v_res["id_pelanggan"]:
+                                            r_item["rx_power"] = v_res["rx_power"]
+                                            r_item["status"] = v_res["status"]
+                                            r_item["keterangan"] = v_res["keterangan"]
+                                            break
+                        except Exception as vf_err:
+                            logger.error(f"[RETRY_VALID_PASS] Exception: {vf_err}")
+
+                db.expire_all()
+
+            # -------------------------------------------------------------
+            # PASS KEDUA (BAGIAN B): Coba ulang khusus pelanggan yang masih INVALID
             # Mencoba seluruh daftar kredensial secara lengkap setelah putaran pertama
-            # Eksekusi paralel (3-5 worker) agar lockout delay tidak saling memblokir
             # -------------------------------------------------------------
             pelanggan_ids_to_scan = [c.id_pelanggan for c in pelanggan_to_scan]
-            invalid_cust_ids = [
+            invalid_cust_ids_second_pass = [
                 row[0] for row in db.query(Pelanggan.id_pelanggan)
                 .join(Pelanggan.perangkat)
                 .filter(Pelanggan.id_pelanggan.in_(pelanggan_ids_to_scan), PerangkatONT.status_kredensial == "INVALID")
                 .all()
             ]
 
-            if invalid_cust_ids:
-                logger.info(f"[SECOND_PASS] Menemukan {len(invalid_cust_ids)} pelanggan INVALID di kantor {k.upper()}. Memulai putaran ulang paralel...")
+            if invalid_cust_ids_second_pass and not state.stop_requested and not state.is_paused:
+                logger.info(f"[SECOND_PASS_INVALID] Menemukan {len(invalid_cust_ids_second_pass)} pelanggan INVALID di kantor {k.upper()}. Memulai putaran ulang paralel...")
 
                 def _retry_customer_worker(cust_id: int):
                     worker_db = SessionLocal()
@@ -1138,9 +1265,9 @@ class MonitoringScheduler:
                     finally:
                         worker_db.close()
 
-                second_pass_workers = min(8, len(invalid_cust_ids))
+                second_pass_workers = min(15, len(invalid_cust_ids_second_pass)) if invalid_cust_ids_second_pass else 1
                 with ThreadPoolExecutor(max_workers=second_pass_workers) as retry_executor:
-                    retry_futures = [retry_executor.submit(_retry_customer_worker, cid) for cid in invalid_cust_ids]
+                    retry_futures = [retry_executor.submit(_retry_customer_worker, cid) for cid in invalid_cust_ids_second_pass]
                     for rf in as_completed(retry_futures):
                         try:
                             ret_res = rf.result()

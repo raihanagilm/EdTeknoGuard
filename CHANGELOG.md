@@ -26,6 +26,19 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Optimasi Pemindaian Serentak Multi-Pool (VALID & INVALID) & Pass Kedua Retry LOS Bertahap ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+  - **Dual Concurrent ThreadPool Executors dengan Autoscaling Dinamis**:
+    - **Pool VALID (Autoscale Dinamis per 100 data, Cap 65 Worker)**:
+      - Formula: Base 25 worker + 10 worker untuk setiap penambahan kelipatan 100 pelanggan (contoh: `<100`: 25w, `100-199`: 35w, `200-299`: 45w, `300-399`: 55w, `>=400`: 65w).
+      - Dilengkapi batas maksimal aman (*Hard Cap*) 65 worker per kantor agar database connection pool (80) dan throughput router tidak terbebani secara berlebihan.
+    - **Pool INVALID / UNTESTED (10 Worker Terjaga)**: Berjalan serentak di pool terpisah dengan konkurensi terkontrol untuk mencegah pemborosan resource saat memproses modem yang belum valid / perlu fallback exhaustive scan.
+    - **Unified Real-Time Progress Tracking**: Counter progres (`scan_current` / `scan_total`) diperbarui secara serentak dan thread-safe menggunakan lock agar progress bar di dashboard/navbar bergerak mulus secara real-time.
+  - **Pass Kedua Terstruktur untuk Modem VALID yang Terkena LOS / Glitch**:
+    - Modem `VALID` yang pada putaran pertama mengalami `LOS` atau respon `None` ditampung secara otomatis ke antrean Pass Kedua.
+    - Menjalankan retry bertahap paralel sebanyak 3 kali berturut-turut dengan jeda bertingkat (*exponential backoff* 1s, 2s, 3s).
+    - Jika sinyal/redaman berhasil terbaca pada salah satu percobaan, status modem seketika dipulihkan dari LOS ke status aslinya (`NORMAL`, `WARNING`, `CRITICAL`), mengurangi false-positive LOS akibat handshake sementara.
+  - **Pass Kedua untuk Pelanggan INVALID**: Tetap dijalankan secara paralel (15 worker) untuk memastikan seluruh kredensial dicoba tuntas.
+
 - **Penyelarasan Segmented Status Ticker Bar, Status Kredensial INVALID & Kontrol Cepat Sorting Pelanggan**:
   - **Penghapusan Kartu "Lockout" & "Belum Cek" dari Ticker Bar ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx), [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx), [monitoring/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/monitoring/service.py), [customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
     - Kartu `Lockout` dan `Belum Cek` dihapus sepenuhnya dari Ticker Bar Atas di Beranda dan Pelanggan.

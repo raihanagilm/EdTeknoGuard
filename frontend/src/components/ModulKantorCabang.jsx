@@ -127,7 +127,7 @@ export function ModulKantorCabang() {
       };
 
       if (kantorModalMode === 'add') {
-        payload.kode = kantorKode.trim() || undefined;
+        payload.kode = kantorKode.trim() ? kantorKode.trim().toLowerCase() : undefined;
       }
 
       const res = kantorModalMode === 'add'

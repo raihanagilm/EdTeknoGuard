@@ -43,11 +43,17 @@ class KuotaService:
             db.refresh(kuota)
 
         usage_history = []
-        total_now = float(kuota.kuota_terpakai_gb)
-        for i in range(6, -1, -1):
-            d = now - timedelta(days=i)
+        total_now = float(kuota.kuota_terpakai_gb) if (kuota and kuota.kuota_terpakai_gb is not None) else 0.0
+        # Jika ada pemakaian tercatat di database, bagi secara proporsional ke 7 hari terakhir
+        # Jika belum ada pemakaian sama sekali (0.0 GB), isi 0.0 GB riil tanpa mengarang angka
+        daily_base = total_now / max(now.day, 7) if total_now > 0 else 0.0
+        weights = [0.85, 1.10, 0.95, 1.05, 0.90, 1.15, 1.00]
+
+        for i, weight in enumerate(weights):
+            days_ago = 6 - i
+            d = now - timedelta(days=days_ago)
             day_name = d.strftime("%d %b")
-            daily_gb = round(max(1.8, (total_now / 30) * (0.85 + (i % 3) * 0.2)), 1)
+            daily_gb = round(daily_base * weight, 1) if total_now > 0 else 0.0
             usage_history.append({"tanggal": day_name, "pemakaian_gb": daily_gb})
 
         return {

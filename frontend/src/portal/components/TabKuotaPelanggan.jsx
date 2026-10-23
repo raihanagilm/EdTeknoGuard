@@ -41,20 +41,23 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
 
   const paketNama = kuotaData?.kecepatan_paket || dashboardData?.kuota?.kecepatan_paket || customer?.paket || '-';
 
-  // 7 Hari histori dari backend (atau fallback default 7 hari)
-  const defaultHistory = [
-    { tanggal: '07 Oct', pemakaian_gb: 4.6 },
-    { tanggal: '08 Oct', pemakaian_gb: 6.8 },
-    { tanggal: '09 Oct', pemakaian_gb: 5.7 },
-    { tanggal: '10 Oct', pemakaian_gb: 4.6 },
-    { tanggal: '11 Oct', pemakaian_gb: 6.8 },
-    { tanggal: '12 Oct', pemakaian_gb: 5.7 },
-    { tanggal: '13 Oct', pemakaian_gb: 4.6 }
-  ];
+  // 7 Hari histori dari backend (atau fallback dinamis 7 hari terakhir jika belum ada data)
+  const getDynamicEmptyHistory = () => {
+    const list = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const day = d.getDate().toString().padStart(2, '0');
+      const month = d.toLocaleString('id-ID', { month: 'short' });
+      list.push({ tanggal: `${day} ${month}`, pemakaian_gb: 0.0 });
+    }
+    return list;
+  };
 
   const rawHistory = kuotaData?.usage_history && kuotaData.usage_history.length > 0
     ? kuotaData.usage_history
-    : defaultHistory;
+    : getDynamicEmptyHistory();
 
   // Normalisasi data 7 hari terakhir
   const history = rawHistory.slice(-7);

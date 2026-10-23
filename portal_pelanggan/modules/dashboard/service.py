@@ -54,8 +54,9 @@ class DashboardService:
             db.commit()
             db.refresh(kuota)
 
-        total_now = float(kuota.kuota_terpakai_gb) if kuota and kuota.kuota_terpakai_gb is not None else 84.5
-        kuota_hari_ini = round(max(1.8, (total_now / 30) * 1.15), 1)
+        total_now = float(kuota.kuota_terpakai_gb) if (kuota and kuota.kuota_terpakai_gb is not None) else 0.0
+        # Kuota hari ini dihitung proporsional dari pemakaian riil bulan ini, atau 0.0 jika belum ada pemakaian
+        kuota_hari_ini = round((total_now / max(now.day, 1)), 1) if total_now > 0 else 0.0
 
         # 3. Tiket aktif pelanggan & tiket terakhir
         active_tickets = db.query(TiketKendala).filter(

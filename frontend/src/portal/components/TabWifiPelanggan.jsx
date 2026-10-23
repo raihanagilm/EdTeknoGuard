@@ -16,12 +16,20 @@ import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
 
 export function TabWifiPelanggan({ customer, dashboardData }) {
-  const [namaWifi, setNamaWifi] = useState(customer?.nama_wifi || 'AISYAH');
+  const [namaWifi, setNamaWifi] = useState(customer?.nama_wifi || (customer?.nama ? `WiFi-${customer.nama.replace(/\s+/g, '')}` : ''));
   const [passwordWifi, setPasswordWifi] = useState('');
   const [konfirmasiPassword, setKonfirmasiPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  React.useEffect(() => {
+    if (customer?.nama_wifi) {
+      setNamaWifi(customer.nama_wifi);
+    } else if (customer?.nama) {
+      setNamaWifi(`WiFi-${customer.nama.replace(/\s+/g, '')}`);
+    }
+  }, [customer]);
 
   const handleChangeWifi = async (e) => {
     e.preventDefault();

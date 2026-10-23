@@ -136,18 +136,34 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
     last_log = data.get("last_log")
     kuota = data.get("kuota")
     
+    # Status pembayaran riil dari DB: jika status_isolir == True maka BELUM_BAYAR (terisolir), jika False maka LUNAS
+    status_bayar = "BELUM_BAYAR" if (pel and getattr(pel, "status_isolir", False)) else "LUNAS"
+    harga_paket = float(pel.paket_ref.harga) if (pel and pel.paket_ref and pel.paket_ref.harga is not None) else None
+    
+    # Format nama bulan Indonesia (misal: "Oktober 2026")
+    from app.core.timezone import get_now_wib
+    now_wib = get_now_wib()
+    bulan_indo = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ]
+    periode_teks = f"{bulan_indo[now_wib.month - 1]} {now_wib.year}"
+
     return {
         "ok": True,
         "customer": {
             "id_pelanggan": pel.id_pelanggan if pel else cust.get("id_pelanggan"),
             "nama": pel.nama if pel else cust.get("nama"),
             "paket": pel.paket if (pel and pel.paket) else "-",
+            "harga_paket": harga_paket,
             "ip_router": pel.ip_router if pel else "-",
-            "nama_wifi": pel.nama_wifi if pel else "-",
+            "nama_wifi": pel.nama_wifi if (pel and pel.nama_wifi) else "",
             "kantor": pel.kantor if pel else "cabang",
             "pop": pel.pop if pel else "Server Cabang",
             "is_active": pel.is_active if pel else True,
-            "status_pembayaran": getattr(pel, "status_pembayaran", "LUNAS"),
+            "status_pembayaran": status_bayar,
+            "status_isolir": bool(getattr(pel, "status_isolir", False)),
+            "periode_tagihan": periode_teks,
             "status_verifikasi": pel.status_verifikasi if pel else "TERVERIFIKASI"
         },
         "signal": {
@@ -160,7 +176,8 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
         "kuota": {
             "kuota_terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota else 0.0,
             "kuota_hari_ini_gb": float(data.get("kuota_hari_ini_gb", 0.0)),
-            "periode_bulan": kuota.periode_bulan if kuota else "-",
+            "periode_bulan": kuota.periode_bulan if kuota else now_wib.strftime("%Y-%m"),
+            "periode_label": periode_teks,
             "kecepatan_paket": kuota.kecepatan_paket if (kuota and kuota.kecepatan_paket) else (pel.paket if (pel and pel.paket) else "-")
         },
         "active_tickets_count": data.get("active_tickets_count", 0),

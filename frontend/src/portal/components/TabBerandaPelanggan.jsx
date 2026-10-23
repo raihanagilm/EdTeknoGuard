@@ -322,8 +322,16 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
 
             <div className="flex items-baseline justify-between mt-1">
               <div>
-                <div className="text-xs text-gray-700 font-medium">Periode: Oktober 2026</div>
-                <div className="text-xs text-gray-600 mt-0.5 font-medium">Jatuh tempo tgl 20 setiap bulan</div>
+                <div className="text-xs text-gray-700 font-bold">
+                  Periode: {customer.periode_tagihan || kuotaData.periode_label || 'Bulan Ini'}
+                </div>
+                {customer.harga_paket ? (
+                  <div className="text-xs font-mono font-black text-blue-700 mt-0.5">
+                    Rp {Number(customer.harga_paket).toLocaleString('id-ID')}
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-600 mt-0.5 font-medium">Jatuh tempo tgl 20 setiap bulan</div>
+                )}
               </div>
               <button
                 type="button"
