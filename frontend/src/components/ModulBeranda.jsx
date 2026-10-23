@@ -136,6 +136,16 @@ export function ModulBeranda({
   const [calendarViewMonth, setCalendarViewMonth] = useState(() => new Date())
   const calendarRef = useRef(null)
 
+  // Cek ketersediaan data historis untuk kemarin dan rentang 7 hari
+  const hasYesterdayData = availableDates.includes(yesterdayStr)
+  const hasWeekData = availableDates.some((d) => {
+    if (d === todayStr) return false
+    const dObj = new Date(d)
+    const tObj = new Date(todayStr)
+    const diffDays = Math.round((tObj - dObj) / (1000 * 60 * 60 * 24))
+    return diffDays >= 1 && diffDays <= 7
+  })
+
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return 'Pilih Tanggal'
     const parts = dateStr.split('-')
@@ -1415,7 +1425,7 @@ export function ModulBeranda({
                 }}
                 className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono cursor-pointer ${
                   chartRange === 'today'
-                    ? 'bg-cyan-700 text-white'
+                    ? 'bg-cyan-700 text-white shadow-xs'
                     : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
                 }`}
               >
@@ -1423,30 +1433,40 @@ export function ModulBeranda({
               </button>
               <button
                 type="button"
+                disabled={!hasYesterdayData}
                 onClick={() => {
+                  if (!hasYesterdayData) return
                   setChartRange('yesterday')
                   setSelectedDate(todayStr)
                   setIsCalendarOpen(false)
                 }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono cursor-pointer ${
-                  chartRange === 'yesterday'
-                    ? 'bg-cyan-700 text-white'
-                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
+                title={hasYesterdayData ? 'Bandingkan dengan hari kemarin' : 'Data kemarin belum ada di database'}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                  !hasYesterdayData
+                    ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
+                    : chartRange === 'yesterday'
+                    ? 'bg-cyan-700 text-white shadow-xs cursor-pointer'
+                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70 cursor-pointer'
                 }`}
               >
                 Kemarin
               </button>
               <button
                 type="button"
+                disabled={!hasWeekData}
                 onClick={() => {
+                  if (!hasWeekData) return
                   setChartRange('week')
                   setSelectedDate(todayStr)
                   setIsCalendarOpen(false)
                 }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono cursor-pointer ${
-                  chartRange === 'week'
-                    ? 'bg-cyan-700 text-white'
-                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
+                title={hasWeekData ? 'Bandingkan tren 7 hari terakhir' : 'Riwayat 7 hari sebelumnya belum ada di database'}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                  !hasWeekData
+                    ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
+                    : chartRange === 'week'
+                    ? 'bg-cyan-700 text-white shadow-xs cursor-pointer'
+                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70 cursor-pointer'
                 }`}
               >
                 7 Hari
@@ -1512,8 +1532,23 @@ export function ModulBeranda({
           </div>
         </div>
 
-        {/* Chart Canvas Container dengan Zoom Controls */}
+        {/* Chart Canvas Container dengan Zoom Controls & Empty State Proteksi */}
         <div className="relative w-full h-[220px] sm:h-[290px] overflow-hidden rounded-xl bg-white border border-sky-100">
+          {/* Empty State Overlay jika tidak ada data riil sama sekali */}
+          {chartStats.total_points === 0 && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-50/90 backdrop-blur-xs p-4 text-center">
+              <div className="w-10 h-10 rounded-full bg-sky-100 text-cyan-700 flex items-center justify-center mb-2 shadow-xs">
+                <Activity className="w-5 h-5 opacity-70" />
+              </div>
+              <p className="text-xs sm:text-sm font-extrabold text-slate-800 font-mono">
+                Belum Ada Riwayat Log Redaman
+              </p>
+              <p className="text-[11px] text-slate-500 max-w-sm mt-0.5">
+                Data rekaman untuk rentang atau tanggal ini belum tersimpan di database. Sistem akan memetakan grafik otomatis setelah monitoring berjalan.
+              </p>
+            </div>
+          )}
+
           {/* Zoom Buttons Mobile */}
           <div className="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-0.5 rounded-lg border border-sky-200 shadow-xs">
             <button

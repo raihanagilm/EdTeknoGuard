@@ -56,6 +56,7 @@ class PerangkatONT(Base):
     user_admin = Column(String(50), nullable=True)
     pass_admin = Column(String(100), nullable=True)
     status_kredensial = Column(String(20), default="UNTESTED", nullable=False, index=True)
+    failed_credentials = Column(Text, nullable=True) # JSON list string berisi kredensial yang sudah pernah dicoba dan gagal
     snmp_community = Column(String(50), default="public")
     los_count = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
@@ -153,6 +154,14 @@ class Pelanggan(Base):
     @status_kredensial.setter
     def status_kredensial(self, val):
         self._get_or_create_perangkat().status_kredensial = val
+
+    @property
+    def failed_credentials(self):
+        return self.perangkat.failed_credentials if self.perangkat else None
+
+    @failed_credentials.setter
+    def failed_credentials(self, val):
+        self._get_or_create_perangkat().failed_credentials = val
 
     @property
     def redaman_baseline(self):

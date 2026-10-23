@@ -108,7 +108,17 @@ class ONTScraperService:
         if not html_content:
             return False, 0
 
-        # 1. Pola ZTE maxtime (SetDisabled dengan kalkulasi waktu Math.min(60, X + 60 - Y))
+        # 1. Pola ZTE F477V2 / Unicom cu.html:
+        # Modem menuliskan kondisi: `if(X == 3||X==3) { SetDisable(); }`
+        # Jika X == 3, maka sedang terkunci (locked). Jika X == 0, 1, 2, maka BELUM terkunci!
+        m_cu_fail = re.search(r'if\s*\(\s*(\d+)\s*==\s*3', html_content)
+        if m_cu_fail:
+            fail_count = int(m_cu_fail.group(1))
+            if fail_count >= 3:
+                return True, default_wait
+            # Jika fail_count < 3, fungsi SetDisable() cuma deklarasi dan TIDAK dipanggil!
+
+        # 2. Pola ZTE maxtime (SetDisabled dengan kalkulasi waktu Math.min(60, X + 60 - Y))
         has_zte_disabled = bool(re.search(r'(?<!function\s)SetDisabled\s*\(', html_content))
         m_time = re.search(r'maxtime\s*=\s*Math\.min\(\s*(\d+)\s*,\s*(\d+)\s*\+\s*60\s*-\s*(\d+)\)', html_content)
         if has_zte_disabled and m_time:
@@ -118,12 +128,15 @@ class ONTScraperService:
             if rem_clamped > 0:
                 return True, rem_clamped
         elif has_zte_disabled:
-            # Jika SetDisabled() dipanggil namun regex maxtime tidak terbaca utuh, fallback ke default_wait
+            m_sec = re.search(r'setTimeout\s*\(\s*["\']setEnable\(\)["\']\s*,\s*(\d+)\s*\)', html_content)
+            if m_sec:
+                sec_val = int(int(m_sec.group(1)) / 1000)
+                return True, sec_val if sec_val > 0 else default_wait
             return True, default_wait
 
-        # 2. Pola generik teks countdown / lockout
+        # 3. Pola generik teks countdown / lockout
         patterns = [
-            r'(?:try\s*again\s*in|lock(?:ed)?\s*for|wait)\s*(\d+)\s*(?:seconds|detik|s)',
+            r'(?:try\s*again\s*in|lock(?:ed)?\s*for|wait)\s*(\d+)\s*(?:seconds|second|detik|s)',
             r'(?:countdown|remain(?:ing)?)\s*[:=]\s*(\d+)',
             r'wait(?:ing)?\s*time\s*[:=]\s*(\d+)'
         ]
@@ -134,7 +147,7 @@ class ONTScraperService:
                 if rem_gen > 0:
                     return True, rem_gen
 
-        # 3. Kata kunci indikator terkunci
+        # 4. Kata kunci indikator terkunci eksplisit
         if "login locked" in html_content.lower() or "too many attempts" in html_content.lower():
             return True, default_wait
 
@@ -211,6 +224,17 @@ class ONTScraperService:
         else:
             final_pwd = password
 
+        # Deteksi form spesifik model Unicom / F477V2 (cu.html)
+        is_unicom_cu = ("_cu_url" in login_html or "welcome-imgadm" in login_html or "menu_cu.css" in login_html or "admShow" in login_html)
+        if is_unicom_cu:
+            payload["_cu_url"] = "1"
+            # Right = 1 untuk Administrator, Right = 2 untuk User biasa
+            if "user" in user.lower() and "admin" not in user.lower():
+                payload["Right"] = "2"
+            else:
+                payload["Right"] = "1"
+            setattr(session, "is_unicom_cu", True)
+
         # Deteksi nama field username & password dari form jika ada
         m_user_field = re.search(r'<input[^>]+name=["\']((?:user|user_?name|txtUser|account|loginname))["\']', login_html, re.I)
         user_field_name = m_user_field.group(1) if m_user_field else "username"
@@ -249,6 +273,8 @@ class ONTScraperService:
             "wrong password" in text_lower or
             "password error" in text_lower or
             "setdisabled()" in r.text or
+            "setdisable()" in r.text.lower() or
+            "three consecutive login failures" in text_lower or
             "login_token_error" in text_lower or
             "login failed" in text_lower or
             "invalid password" in text_lower or
@@ -269,6 +295,9 @@ class ONTScraperService:
                 "index.html" in r.url or
                 "home.asp" in r.url or
                 "status_pon.asp" in r.text or
+                "menu_cu.css" in r.text or
+                "unicom.html" in r.text or
+                "unicom.html" in r.url or
                 # Indikator sukses universal: status 200, form login hilang, dan konten dashboard tampil
                 (r.status_code == 200 and len(r.text) > 300 and 'type="password"' not in r.text and "Frm_Logintoken" not in r.text)
             )
@@ -292,7 +321,8 @@ class ONTScraperService:
 
         # Susun daftar path yang akan diperiksa berdasarkan deteksi awal
         is_sha256 = getattr(session, "is_sha256", False)
-        if is_sha256:
+        is_unicom_cu = getattr(session, "is_unicom_cu", False)
+        if is_sha256 or is_unicom_cu:
             paths_to_try = [PON_STATUS_INFO_PATH, PON_STATUS_PATH] + [p for p in COMMON_OPTICAL_PATHS if p not in (PON_STATUS_INFO_PATH, PON_STATUS_PATH)]
         else:
             paths_to_try = [PON_STATUS_PATH, PON_STATUS_INFO_PATH] + [p for p in COMMON_OPTICAL_PATHS if p not in (PON_STATUS_PATH, PON_STATUS_INFO_PATH)]
@@ -373,13 +403,19 @@ class ONTScraperService:
             results["bias_current_ma"] = round(raw_cur / 1000.0, 2) if abs(raw_cur) > 500 else round(raw_cur, 2)
         else:
             m_cur_html = re.search(r'(?:Optical\s*Transmitter\s*Bias\s*Current|Bias\s*Current)[^<]*</td>\s*<td[^>]*>\s*(\d+)', content, re.I)
+            if not m_cur_html:
+                m_cur_html = re.search(r'id=["\']Frm_Current["\'][^>]*>\s*(\d+)', content, re.I)
             results["bias_current_ma"] = round(float(m_cur_html.group(1)) / 1000.0, 2) if m_cur_html else None
 
         m_volt = re.search(r'(?:Optical\s*Module\s*Supply\s*Voltage|Supply\s*Voltage)[^<]*</td>\s*<td[^>]*>\s*(\d+)', content, re.I)
+        if not m_volt:
+            m_volt = re.search(r'id=["\']Frm_Volt["\'][^>]*>\s*(\d+)', content, re.I)
         results["supply_voltage_v"] = round(float(m_volt.group(1)) / 1000000.0, 2) if m_volt else None
 
         # 4. Ekstraksi Universal: Suhu / Temperature
         m_temp = re.search(r'(?:Operating\s*Temperature|Temperature|Suhu\s*ONT|Temp)[^<]*</td>\s*<td[^>]*>\s*([+-]?\d+\.?\d*)', content, re.I)
+        if not m_temp:
+            m_temp = re.search(r'id=["\']Frm_Temp["\'][^>]*>\s*([+-]?\d+\.?\d*)', content, re.I)
         results["suhu_ont"] = float(m_temp.group(1)) if m_temp else None
 
         # 5. Ekstraksi Universal: Status GPON & LOS
@@ -674,15 +710,18 @@ class ONTScraperService:
         warn_threshold: Optional[float] = None,
         crit_threshold: Optional[float] = None,
         max_attempts_per_call: Optional[int] = None,
-        is_mass_scan: bool = False
+        is_mass_scan: bool = False,
+        failed_credentials_history: Optional[List[Tuple[str, str]]] = None,
+        exhaustive_first_scan: bool = False
     ) -> Dict[str, Any]:
         """
         Melakukan scraping lengkap ke satu perangkat modem ONT.
         Menguji kredensial pelanggan terlebih dahulu. Jika gagal, mencoba kredensial default (multi-list).
         Tiap kredensial dicoba 2-3 kali secara adaptif.
-        Jika terkena lockout countdown (misal 30s / 60s):
-        - Pada pemantauan massal (is_mass_scan=True): fail-fast dengan status_koneksi='LOCKOUT' agar scan antrian lancar.
-        - Pada cek mandiri (is_mass_scan=False): menahan sesi HTTP (stay-connection) hingga countdown selesai lalu mencoba lagi.
+        Jika exhaustive_first_scan=True (atau scan mandiri):
+        - Tetap menahan sesi HTTP (stay-connection) dan menguji SEMUA kredensial kandidat yang belum pernah gagal.
+        Jika is_mass_scan=True dan exhaustive_first_scan=False:
+        - fail-fast dengan status_koneksi='LOCKOUT' agar scan antrian berkala lancar.
         """
         host = ip.strip()
         base_url = f"http://{host}"
@@ -768,7 +807,22 @@ class ONTScraperService:
             if d_u and (d_u, d_p) not in [(u, p) for u, p, _ in credentials_to_try]:
                 credentials_to_try.append((d_u, d_p, "DEFAULT"))
 
-        if not credentials_to_try:
+        # Saring kredensial yang sudah pernah dicoba dan gagal sebelumnya jika diberikan failed_credentials_history
+        failed_set = set()
+        if failed_credentials_history:
+            for fu, fp in failed_credentials_history:
+                failed_set.add((fu.strip(), fp.strip()))
+
+        # Jika ada kredensial baru yang belum pernah dicoba, utamakan yang belum pernah gagal
+        untested_candidates = [c for c in credentials_to_try if (c[0], c[1]) not in failed_set]
+        
+        # Jika semua kandidat sudah ada di riwayat gagal, tapi ini exhaustive_first_scan atau tes ulang, gunakan semua
+        if untested_candidates:
+            active_candidate_list = untested_candidates
+        else:
+            active_candidate_list = credentials_to_try
+
+        if not active_candidate_list:
             print(f"[-] [NO_CREDENTIALS] ONT {host} ({customer_name or 'Pelanggan'}): Kredensial modem pelanggan belum ada dan kredensial default di database kosong.")
             return {
                 "success": False,
@@ -789,16 +843,16 @@ class ONTScraperService:
         last_resp = None
         encountered_lockout = False
         last_lockout_seconds = 0
+        newly_failed_credentials = []
 
         total_available = len(credentials_to_try)
         if max_attempts_per_call and max_attempts_per_call > 0:
-            active_candidate_list = credentials_to_try[:max_attempts_per_call]
-        else:
-            active_candidate_list = credentials_to_try
+            active_candidate_list = active_candidate_list[:max_attempts_per_call]
 
         start_time = time.time()
 
         for u, p, source in active_candidate_list:
+            cred_ok = False
             # Setiap kredensial dicoba maksimal 3 kali (attempt 1, 2, 3)
             for attempt_num in range(1, 4):
                 ok, resp = cls.attempt_login(session, base_url, host, u, p, probe_text=probe_html)
@@ -807,6 +861,7 @@ class ONTScraperService:
 
                 if ok:
                     authenticated = True
+                    cred_ok = True
                     active_user = u
                     active_pass = p
                     auth_source = source
@@ -820,7 +875,8 @@ class ONTScraperService:
                     encountered_lockout = True
                     last_lockout_seconds = lock_secs or default_lock_sec
 
-                    if is_mass_scan:
+                    # Jika pemantauan massal reguler DAN BUKAN exhaustive_first_scan, fail-fast
+                    if is_mass_scan and not exhaustive_first_scan:
                         print(f"[!] [LOCKOUT_MASS] ONT {host} ({customer_name}): Kena lockout {last_lockout_seconds}s di user '{u}'. Pemantauan massal lanjut ke pelanggan berikutnya.")
                         return {
                             "success": False,
@@ -832,10 +888,11 @@ class ONTScraperService:
                             "rx_power": None,
                             "suhu_ont": None,
                             "uptime": None,
-                            "latency_ms": int((time.time() - start_time) * 1000)
+                            "latency_ms": int((time.time() - start_time) * 1000),
+                            "failed_credentials": newly_failed_credentials
                         }
 
-                    # Mode Cek Mandiri / Second Pass: Tahan sesi HTTP (stay connection) hingga countdown selesai, lalu langsung lanjut ke kredensial database berikutnya!
+                    # Mode Exhaustive First Scan / Cek Mandiri: Tahan sesi HTTP (stay connection) hingga countdown selesai, lalu lanjutkan coba kredensial berikutnya!
                     print(f"[!] [LOCKOUT_WAIT_STAY] ONT {host} ({customer_name}): Lockout {last_lockout_seconds}s pada user '{u}'. Menahan sesi HTTP stay connection hingga countdown selesai...")
                     time.sleep(last_lockout_seconds + 1)
 
@@ -851,10 +908,13 @@ class ONTScraperService:
                 # Jika ditolak normal (salah password / wrong user), tidak perlu mengulang user yang sama, langsung lanjut ke kandidat berikutnya
                 break
 
+            if not cred_ok:
+                newly_failed_credentials.append((u, p))
+
             if authenticated:
                 break
 
-            # Jika kredensial ini sudah dicoba 3 kali dan masih gagal, beri jeda sebelum lanjut ke kandidat berikutnya
+            # Beri jeda sebelum lanjut ke kandidat berikutnya
             time.sleep(1.0)
 
         latency = int((time.time() - start_time) * 1000)
@@ -875,7 +935,8 @@ class ONTScraperService:
                     "suhu_ont": None,
                     "uptime": None,
                     "latency_ms": None,
-                    "all_exhausted": all_exhausted
+                    "all_exhausted": all_exhausted,
+                    "failed_credentials": newly_failed_credentials
                 }
             else:
                 # Seluruh kredensial dalam daftar telah dicoba dan semuanya ditolak / gagal
@@ -892,7 +953,8 @@ class ONTScraperService:
                     "latency_ms": latency,
                     "all_exhausted": all_exhausted,
                     "attempted_count": len(active_candidate_list),
-                    "total_creds": total_available
+                    "total_creds": total_available,
+                    "failed_credentials": newly_failed_credentials
                 }
 
 

@@ -261,25 +261,27 @@ class MonitoringService:
             hari_target = NAMA_HARI[day_target.weekday()]
             hari_yest = NAMA_HARI[yesterday.weekday()]
 
-            datasets = [
-                {
+            valid_today = [v for v in today_values if v is not None]
+            valid_yest = [v for v in yest_values if v is not None]
+
+            datasets = []
+            if valid_today:
+                datasets.append({
                     "id": "today",
                     "label": f"Hari Ini ({hari_target}, {day_target.strftime('%d/%m')})",
                     "color": "#4F46E5",
                     "values": today_values,
                     "details": today_details
-                },
-                {
+                })
+            if valid_yest:
+                datasets.append({
                     "id": "yesterday",
                     "label": f"Kemarin ({hari_yest}, {yesterday.strftime('%d/%m')})",
                     "color": "#F59E0B",
                     "values": yest_values,
                     "details": yest_details
-                }
-            ]
+                })
 
-            valid_today = [v for v in today_values if v is not None]
-            valid_yest = [v for v in yest_values if v is not None]
             all_valid = valid_today + valid_yest
             all_details = [d for d in (today_details + yest_details) if d]
             all_min_rx = [d["min_rx"] for d in all_details if d.get("min_rx") is not None]
@@ -291,16 +293,16 @@ class MonitoringService:
             return {
                 "range": "yesterday",
                 "is_multi_series": True,
-                "labels": hours_labels,
+                "labels": hours_labels if all_valid else ["Belum ada riwayat data"],
                 "datasets": datasets,
-                "values": today_values,
+                "values": today_values if valid_today else (yest_values if valid_yest else []),
                 "counts": [d["total"] if d else 0 for d in today_details],
                 "threshold": warning_th,
                 "critical_threshold": critical_th,
                 "avg_dbm": avg_dbm,
                 "min_dbm": min_dbm,
                 "max_dbm": max_dbm,
-                "total_points": len(valid_today) + len(valid_yest),
+                "total_points": len(all_valid),
                 "date": day_target.strftime("%Y-%m-%d")
             }
 
@@ -356,16 +358,19 @@ class MonitoringService:
                         d_values.append(None)
                         d_details.append(None)
 
-                nama_hari = NAMA_HARI[d_target.weekday()]
-                label_title = f"{nama_hari} ({d_target.strftime('%d/%m')})"
-                datasets.append({
-                    "id": f"day_{idx}",
-                    "label": label_title,
-                    "color": colors[idx % len(colors)],
-                    "values": d_values,
-                    "details": d_details
-                })
-                all_valid.extend([v for v in d_values if v is not None])
+                # Hanya sertakan dataset jika tanggal tersebut memiliki setidaknya 1 titik data riil di DB
+                day_valid_vals = [v for v in d_values if v is not None]
+                if day_valid_vals:
+                    nama_hari = NAMA_HARI[d_target.weekday()]
+                    label_title = f"{nama_hari} ({d_target.strftime('%d/%m')})"
+                    datasets.append({
+                        "id": f"day_{idx}",
+                        "label": label_title,
+                        "color": colors[idx % len(colors)],
+                        "values": d_values,
+                        "details": d_details
+                    })
+                    all_valid.extend(day_valid_vals)
 
             primary_ds = datasets[-1] if datasets else {"values": [], "details": []}
             all_week_details = [d for ds in datasets for d in ds.get("details", []) if d]
@@ -378,7 +383,7 @@ class MonitoringService:
             return {
                 "range": "week",
                 "is_multi_series": True,
-                "labels": hours_labels,
+                "labels": hours_labels if all_valid else ["Belum ada riwayat data"],
                 "datasets": datasets,
                 "values": primary_ds["values"],
                 "counts": [d["total"] if d else 0 for d in primary_ds["details"]],

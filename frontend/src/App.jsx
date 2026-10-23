@@ -571,9 +571,19 @@ export default function App() {
       window.location.pathname.startsWith('/portal') ||
       window.location.pathname.startsWith('/teknocust')
 
-    const syncFromLocation = () => {
+    const syncFromLocation = (authOverride = null) => {
+      const auth = authOverride !== null ? authOverride : isAuthenticated
+      const currentPath = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase()
+
+      // Jika user sudah login dan mengakses /login, alihkan otomatis ke beranda
+      if (auth && currentPath === 'login') {
+        window.history.replaceState({}, '', '/')
+        setActiveTab('beranda')
+        return
+      }
+
       const initialTab = getTabFromPath(window.location.pathname)
-      setActiveTab(initialTab)
+      setActiveTab(initialTab === 'login' && auth ? 'beranda' : initialTab)
     }
 
     // Jika sedang di rute /portal atau /teknocust, jangan redirect ke /login admin NOC
@@ -617,7 +627,7 @@ export default function App() {
           localStorage.setItem('edtekno_auth_status', 'logged_in')
           // Perbarui waktu aktif terakhir (Sliding Inactivity Window)
           localStorage.setItem('edtekno_last_active_time', String(Date.now()))
-          syncFromLocation()
+          syncFromLocation(true)
         } else {
           setIsAuthenticated(false)
           localStorage.removeItem('edtekno_auth_status')
@@ -675,6 +685,14 @@ export default function App() {
   // =========================================================================
   // VIEW C: HALAMAN 404 / MODUL TIDAK DITEMUKAN (FULL PAGE BERSIH TANPA SIDEBAR/HEADER)
   // =========================================================================
+  if (activeTab === 'login') {
+    if (window.location.pathname !== '/') {
+      window.history.replaceState({}, '', '/')
+    }
+    setActiveTab('beranda')
+    return null
+  }
+
   const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'pengguna', 'kantor', 'mikrotik', 'pengaturan']
   if (!validModules.includes(activeTab)) {
     return (

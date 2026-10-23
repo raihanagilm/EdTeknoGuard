@@ -63,9 +63,9 @@ Modem pelanggan di lapangan dapat memiliki kredensial yang bervariasi karena kon
      ]
      ```
 2. **Alur Pengecekan Scraper (`ONTScraperService.scrape_ont`)**:
-   - **Langkah 1**: Mencoba kredensial tersimpan pada data pelanggan (`user_admin` & `pass_admin`).
-   - **Langkah 2**: Jika gagal (`AUTH_FAILED`), scraper mencoba seluruh daftar kredensial default dari pengaturan satu per satu secara berurutan.
-   - **Langkah 3**: Jika salah satu kredensial default berhasil login, kredensial pelanggan yang tadinya `INVALID` otomatis diperbarui menjadi `VALID` di database.
+   - **Langkah 1 (Pelanggan Baru / Belum VALID / UNTESTED)**: Menjalankan mode *Exhaustive First Scan*. Sistem menguji kredensial tersimpan pelanggan terlebih dahulu, jika gagal atau terkena lockout delay (stay-connection), thread worker akan menunggu countdown selesai dan **wajib mencoba seluruh pasangan kredensial default dari Pengaturan Sistem sampai tuntas** dalam 1 siklus pemindaian pertama.
+   - **Langkah 2 (Memori Kredensial Gagal `failed_credentials`)**: Setiap kredensial yang ditolak modem dicatat pada field `failed_credentials` (tabel `perangkat_ont`). Pada pemantauan berkala berikutnya, modem yang sudah VALID hanya mencoba 1 kredensial validnya (super cepat). Jika modem masih INVALID, scraper hanya akan menguji kredensial baru yang belum pernah dicoba sebelumnya.
+   - **Langkah 3 (Sinkronisasi & Kredensial Baru)**: Jika salah satu kredensial berhasil login, status pelanggan otomatis menjadi `VALID`, `user_admin` & `pass_admin` diperbarui, dan `failed_credentials` di-reset bersih. Jika di menu Pengaturan admin menambahkan kredensial baru atau mencentang opsi sinkronisasi massal, riwayat failed otomatis di-reset agar modem menguji kredensial baru tersebut.
 3. **Halaman Pengaturan (`/pengaturan` atau `/settings`)**:
    - Menggunakan layout **2 TAB**:
      - **Tab 1 (Parameter & Ambang Batas)**: Input manual menit interval, ambang batas -26.0 dBm (warning) dan -27.0 dBm (kritis). *Tanpa tombol preset opsi dan tanpa radio button status scheduler*.

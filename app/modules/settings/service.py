@@ -242,8 +242,9 @@ class SystemSettingsService:
             for c in target_customers:
                 c.user_admin = primary_user
                 c.pass_admin = primary_pass
-                # Reset status kredensial ke UNTESTED agar siap diverifikasi ulang saat pemantauan/single probe
+                # Reset status kredensial ke UNTESTED dan reset failed_credentials agar siap diverifikasi penuh ulang
                 c.status_kredensial = "UNTESTED"
+                c.failed_credentials = None
                 c.updated_at = get_now_wib()
 
         db.commit()

@@ -66,8 +66,6 @@ export function ModulPelanggan({
   const [limit, setLimit] = useState(15)
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState('asc')
-  const [availableCredentials, setAvailableCredentials] = useState([])
-  const [updatingCredId, setUpdatingCredId] = useState(null)
 
   // Quick stats
   const [stats, setStats] = useState({
@@ -294,9 +292,6 @@ export function ModulPelanggan({
           if (json.pops && Array.isArray(json.pops) && json.pops.length > 0) {
             setPopOptions(json.pops)
           }
-          if (json.available_credentials && Array.isArray(json.available_credentials)) {
-            setAvailableCredentials(json.available_credentials)
-          }
         } else if (Array.isArray(json)) {
           setCustomers(json)
           setTotalRecords(json.length)
@@ -444,47 +439,7 @@ export function ModulPelanggan({
     }
   }
 
-  // Ubah kredensial modem manual dari dropdown (Ambil dari DB Settings) & langsung pemicu uji coba (Opsi A)
-  const handleChangeCredential = async (c, selectedCombo) => {
-    if (!selectedCombo) return
-    const [u, p] = selectedCombo.split(':::')
-    const cId = c.id_pelanggan || c.id
-    if (!u || !p) return
-    if (c.user_admin === u && c.pass_admin === p) return
 
-    setUpdatingCredId(cId)
-    try {
-      // 1. Simpan perubahan kredensial ke database pelanggan via PUT /api/customers/{id}
-      const res = await fetch(`/api/customers/${encodeURIComponent(cId)}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_admin: u,
-          pass_admin: p
-        })
-      })
-
-      if (res.ok) {
-        showToast(`Kredensial ${c.nama} diubah ke ${u}:${p}. Memulai uji coba live...`, 'info')
-        // Optimistic update di tabel lokal
-        setCustomers(prev => prev.map(item => {
-          if ((item.id_pelanggan || item.id) === cId) {
-            return { ...item, user_admin: u, pass_admin: p }
-          }
-          return item
-        }))
-        // 2. Langsung picu live test probe (Opsi A)
-        await handleProbeCustomer(cId)
-      } else {
-        const err = await res.json().catch(() => ({}))
-        showToast(err.detail || 'Gagal menyimpan kredensial ke database', 'error')
-      }
-    } catch (err) {
-      showToast('Terjadi kesalahan jaringan saat memperbarui kredensial', 'error')
-    } finally {
-      setUpdatingCredId(null)
-    }
-  }
 
   // MikroTik sync & isolir action states
   const [mikrotikSyncing, setMikrotikSyncing] = useState(false)
@@ -982,53 +937,9 @@ export function ModulPelanggan({
                         <span className="font-bold truncate">{c.nama_wifi || '-'}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-slate-600 font-mono mt-0.5">
-                        {/* Dropdown Kredensial Interaktif dari Database Settings */}
+                        <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
                         {(() => {
-                          const currentCombo = `${c.user_admin || 'admin'}:::${c.pass_admin || ''}`;
-                          // Gabungkan kredensial aktif pelanggan dengan semua kredensial default dari DB Settings
-                          const allOptions = [];
-                          if (c.user_admin && c.pass_admin) {
-                            allOptions.push({ username: c.user_admin, password: c.pass_admin });
-                          }
-                          (availableCredentials || []).forEach(opt => {
-                            if (opt.username && !allOptions.some(x => x.username === opt.username && x.password === opt.password)) {
-                              allOptions.push(opt);
-                            }
-                          });
-
-                          const isUpdating = updatingCredId === (c.id_pelanggan || c.id) || probingId === (c.id_pelanggan || c.id);
-
-                          return (
-                            <div className="relative inline-flex items-center">
-                              <select
-                                value={currentCombo}
-                                disabled={isUpdating}
-                                onChange={(e) => handleChangeCredential(c, e.target.value)}
-                                className={`text-[11px] font-mono font-bold py-0.5 pl-1.5 pr-5 rounded-lg border transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan-500 max-w-[155px] truncate appearance-none ${
-                                  isUpdating
-                                    ? 'bg-slate-100 text-slate-400 border-slate-300 animate-pulse'
-                                    : 'bg-white hover:bg-cyan-50/60 text-slate-800 border-sky-200'
-                                }`}
-                                title="Pilih kredensial dari Database Settings untuk langsung diuji coba"
-                              >
-                                {allOptions.map((opt, oIdx) => {
-                                  const valKey = `${opt.username}:::${opt.password}`;
-                                  return (
-                                    <option key={oIdx} value={valKey} className="font-mono text-xs">
-                                      {opt.username}:{opt.password}
-                                    </option>
-                                  );
-                                })}
-                              </select>
-                              <div className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400">
-                                <ArrowUpDown className="w-2.5 h-2.5" />
-                              </div>
-                            </div>
-                          );
-                        })()}
-
-                        {(() => {
-                          const kStatus = (c.status_kredensial || '').toUpperCase();
+                          const kStatus = (c.status_kredensial || 'UNTESTED').toUpperCase();
                           if (kStatus === 'VALID') {
                             return (
                               <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0" title="Kredensial modem terverifikasi cocok">
@@ -1036,9 +947,16 @@ export function ModulPelanggan({
                               </span>
                             );
                           }
+                          if (kStatus === 'INVALID') {
+                            return (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-rose-100 text-rose-800 border border-rose-300 shrink-0" title="Kredensial modem ditolak / salah password">
+                                INVALID
+                              </span>
+                            );
+                          }
                           return (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-rose-100 text-rose-800 border border-rose-300 shrink-0" title="Kredensial modem ditolak / salah password">
-                              INVALID
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-slate-100 text-slate-600 border border-slate-200 shrink-0" title="Belum diuji coba">
+                              BELUM UJI
                             </span>
                           );
                         })()}

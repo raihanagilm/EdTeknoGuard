@@ -797,6 +797,19 @@ class MonitoringScheduler:
                         return None
 
                     target_scrape_ip = c.ip_ont or c.ip_router
+                    is_untested_or_invalid = (getattr(c, "status_kredensial", "UNTESTED") in ("UNTESTED", "INVALID"))
+
+                    # Parse riwayat kredensial yang pernah gagal
+                    existing_failed = []
+                    if getattr(c, "failed_credentials", None):
+                        try:
+                            import json
+                            raw_f = json.loads(c.failed_credentials)
+                            if isinstance(raw_f, list):
+                                existing_failed = [(item.get("user", ""), item.get("pass", "")) for item in raw_f if isinstance(item, dict)]
+                        except Exception:
+                            existing_failed = []
+
                     scrape_res = ONTScraperService.scrape_ont(
                         ip=target_scrape_ip,
                         customer_user=c.user_admin,
@@ -807,15 +820,27 @@ class MonitoringScheduler:
                         default_credentials=default_creds_list,
                         warn_threshold=eff_warn_th,
                         crit_threshold=eff_crit_th,
-                        is_mass_scan=True
+                        is_mass_scan=True,
+                        failed_credentials_history=existing_failed,
+                        exhaustive_first_scan=is_untested_or_invalid
                     )
 
                     was_previously_valid = (getattr(c, "status_kredensial", "UNTESTED") == "VALID")
+
+                    # Perbarui riwayat kredensial yang gagal jika ada
+                    newly_failed = scrape_res.get("failed_credentials", [])
+                    if newly_failed:
+                        import json
+                        combined_dict = {f"{u}::{p}": {"user": u, "pass": p} for u, p in existing_failed}
+                        for u, p in newly_failed:
+                            combined_dict[f"{u}::{p}"] = {"user": u, "pass": p}
+                        c.failed_credentials = json.dumps(list(combined_dict.values()))
 
                     # Evaluasi hasil scraping
                     if scrape_res["success"] and scrape_res["rx_power"] is not None:
                         res = scrape_res
                         c.status_kredensial = "VALID"
+                        c.failed_credentials = None  # Reset riwayat gagal karena sudah ketemu yang valid
                         if scrape_res.get("updated_user") and scrape_res.get("updated_pass"):
                             c.user_admin = scrape_res["updated_user"]
                             c.pass_admin = scrape_res["updated_pass"]
@@ -839,7 +864,7 @@ class MonitoringScheduler:
                             c.status_kredensial = "INVALID"
                             res = scrape_res
                             res["status_koneksi"] = "INVALID"
-                            ket = "Login Gagal (User/Pass Salah)"
+                            ket = "Login Gagal (Seluruh Kredensial Database Ditolak Modem)"
                     elif scrape_res.get("error_type") == "UNREACHABLE":
                         if was_previously_valid:
                             c.status_kredensial = "VALID"
@@ -1015,6 +1040,16 @@ class MonitoringScheduler:
                             return None
 
                         target_ip = inv_cust.ip_ont or inv_cust.ip_router
+                        existing_failed_retry = []
+                        if getattr(inv_cust, "failed_credentials", None):
+                            try:
+                                import json
+                                raw_fr = json.loads(inv_cust.failed_credentials)
+                                if isinstance(raw_fr, list):
+                                    existing_failed_retry = [(item.get("user", ""), item.get("pass", "")) for item in raw_fr if isinstance(item, dict)]
+                            except Exception:
+                                existing_failed_retry = []
+
                         retry_res = ONTScraperService.scrape_ont(
                             ip=target_ip,
                             customer_user=inv_cust.user_admin,
@@ -1025,11 +1060,23 @@ class MonitoringScheduler:
                             default_credentials=default_creds_list,
                             warn_threshold=eff_warn_th,
                             crit_threshold=eff_crit_th,
-                            is_mass_scan=False
+                            is_mass_scan=False,
+                            failed_credentials_history=existing_failed_retry,
+                            exhaustive_first_scan=True
                         )
                         retry_now = get_now_wib()
+
+                        newly_failed_r = retry_res.get("failed_credentials", [])
+                        if newly_failed_r:
+                            import json
+                            combined_dict_r = {f"{u}::{p}": {"user": u, "pass": p} for u, p in existing_failed_retry}
+                            for u, p in newly_failed_r:
+                                combined_dict_r[f"{u}::{p}"] = {"user": u, "pass": p}
+                            inv_cust.failed_credentials = json.dumps(list(combined_dict_r.values()))
+
                         if retry_res["success"] and retry_res["rx_power"] is not None:
                             inv_cust.status_kredensial = "VALID"
+                            inv_cust.failed_credentials = None
                             if retry_res.get("updated_user") and retry_res.get("updated_pass"):
                                 inv_cust.user_admin = retry_res["updated_user"]
                                 inv_cust.pass_admin = retry_res["updated_pass"]
@@ -1054,7 +1101,7 @@ class MonitoringScheduler:
 
                         worker_db.add(LogPerformaONT(
                             id_pelanggan=inv_cust.id_pelanggan,
-                            waktu_cek=retry_now,
+                            waktu_cek=now,
                             rx_power=retry_res.get("rx_power"),
                             suhu_ont=retry_res.get("suhu_ont"),
                             uptime=retry_res.get("uptime"),
