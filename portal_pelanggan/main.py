@@ -68,15 +68,24 @@ static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="portal_static")
 
-# Registrasi Router
+from pathlib import Path
+from fastapi.responses import FileResponse
+
+DIST_INDEX = Path("frontend/dist/index.html")
+
+# Registrasi Router API REST Khusus Portal Pelanggan
 from portal_pelanggan.api_router import api_router as portal_api_router
 app.include_router(portal_api_router)
-app.include_router(auth_router)
-app.include_router(dashboard_router)
-app.include_router(kendala_router)
-app.include_router(kuota_router)
-app.include_router(profil_router)
-app.include_router(wifi_router)
+
+# Rute UI SPA Portal Pelanggan (Disajikan via React frontend/dist/index.html)
+@app.get("/{full_path:path}")
+def serve_portal_spa(request: Request, full_path: str = ""):
+    if DIST_INDEX.exists():
+        return FileResponse(str(DIST_INDEX))
+    return JSONResponse(
+        status_code=404,
+        content={"error": "Frontend dist belum dibuild. Jalankan 'npm run build' di folder frontend."}
+    )
 
 if __name__ == "__main__":
     import uvicorn
