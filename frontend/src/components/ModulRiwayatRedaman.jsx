@@ -96,7 +96,7 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
 
   useEffect(() => {
     fetchLogs();
-  }, [page, limit, filterStatus, filterRange, activeOffice]);
+  }, [page, limit, filterStatus, filterRange, activeOffice, sortField, sortDir]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

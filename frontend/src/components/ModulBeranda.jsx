@@ -224,7 +224,17 @@ export function ModulBeranda({
         setIsScanning(Boolean(data.is_scanning))
 
         if (data.scan_progress) {
-          setScanProgress(data.scan_progress)
+          setScanProgress((prev) => {
+            const serverElapsed = data.scan_progress.elapsed_seconds || 0
+            // Pertahankan detik berjalan mulus, jangan biarkan waktu mundur karena delay response HTTP
+            const smoothedElapsed = prev && prev.is_scanning
+              ? Math.max(serverElapsed, prev.elapsed_seconds || 0)
+              : serverElapsed
+            return {
+              ...data.scan_progress,
+              elapsed_seconds: smoothedElapsed
+            }
+          })
           if (data.scan_progress.is_scanning) {
             setIsScanning(true)
           }
@@ -651,8 +661,9 @@ export function ModulBeranda({
     loadChartData()
   }, [chartRange, selectedDate, activeOffice, loadChartData, fetchStatus, fetchKpi])
 
-  // Polling berkala
+  // Polling berkala & Real-Time Stopwatch Ticker
   useEffect(() => {
+    // 1. Polling reguler saat santai (tidak scanning)
     const regularInterval = setInterval(() => {
       if (document.hidden) return
       if (!isScanning) {
@@ -665,18 +676,33 @@ export function ModulBeranda({
       }
     }, 8000)
 
+    // 2. Fast polling ke backend saat pemindaian aktif (dipercepat ke 800ms agar update data cepat)
     const fastInterval = setInterval(() => {
       if (document.hidden) return
       if (isScanning || (scanProgress && scanProgress.is_scanning)) {
         fetchStatus()
       }
-    }, 1500)
+    }, 800)
+
+    // 3. Local stopwatch ticker 1 detik: berjalan mulus di client sehingga angka detik tidak pernah loncat
+    const secondTicker = setInterval(() => {
+      if (isScanning || (scanProgress && scanProgress.is_scanning)) {
+        setScanProgress((prev) => {
+          if (!prev || (!prev.is_scanning && !isScanning)) return prev
+          return {
+            ...prev,
+            elapsed_seconds: (prev.elapsed_seconds || 0) + 1
+          }
+        })
+      }
+    }, 1000)
 
     return () => {
       clearInterval(regularInterval)
       clearInterval(fastInterval)
+      clearInterval(secondTicker)
     }
-  }, [isScanning, scanProgress, chartRange, fetchStatus, fetchKpi, fetchNotifications, loadChartData])
+  }, [isScanning, scanProgress?.is_scanning, chartRange, fetchStatus, fetchKpi, fetchNotifications, loadChartData])
 
   // Handler Kontrol Pemindaian
   const handleStartScan = async () => {

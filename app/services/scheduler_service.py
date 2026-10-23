@@ -1104,16 +1104,34 @@ class MonitoringScheduler:
                             c_retry.los_count = 0
                             ket_rec = f"Pulih dari LOS (Percobaan ke-{attempt}) - {final_res.get('gpon_state', 'Normal')}"
                             
-                            worker_db.add(LogPerformaONT(
-                                id_pelanggan=c_retry.id_pelanggan,
-                                waktu_cek=get_now_wib(),
-                                rx_power=final_res.get("rx_power"),
-                                suhu_ont=final_res.get("suhu_ont"),
-                                uptime=final_res.get("uptime"),
-                                status_koneksi=st_recovered,
-                                latency_ms=final_res.get("latency_ms"),
-                                keterangan=ket_rec
-                            ))
+                            # Update log performa LOS sebelumnya yang dibuat di siklus pemindaian saat ini agar tidak duplikat baris
+                            existing_log = (
+                                worker_db.query(LogPerformaONT)
+                                .filter(
+                                    LogPerformaONT.id_pelanggan == c_retry.id_pelanggan,
+                                    LogPerformaONT.waktu_cek == now
+                                )
+                                .order_by(LogPerformaONT.id.desc())
+                                .first()
+                            )
+                            if existing_log:
+                                existing_log.rx_power = final_res.get("rx_power")
+                                existing_log.suhu_ont = final_res.get("suhu_ont")
+                                existing_log.uptime = final_res.get("uptime")
+                                existing_log.status_koneksi = st_recovered
+                                existing_log.latency_ms = final_res.get("latency_ms")
+                                existing_log.keterangan = ket_rec
+                            else:
+                                worker_db.add(LogPerformaONT(
+                                    id_pelanggan=c_retry.id_pelanggan,
+                                    waktu_cek=now,
+                                    rx_power=final_res.get("rx_power"),
+                                    suhu_ont=final_res.get("suhu_ont"),
+                                    uptime=final_res.get("uptime"),
+                                    status_koneksi=st_recovered,
+                                    latency_ms=final_res.get("latency_ms"),
+                                    keterangan=ket_rec
+                                ))
                             worker_db.commit()
                             return {
                                 "id_pelanggan": c_retry.id_pelanggan,
@@ -1290,7 +1308,10 @@ class MonitoringScheduler:
 
                 db.expire_all()
 
-            scan_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+            # Catat waktu pemindaian terakhir menggunakan waktu SELESAI pemindaian
+            # agar penjadwalan interval pemindaian berikutnya dihitung murni setelah seluruh proses tuntas
+            finish_time = get_now_wib()
+            scan_time_str = finish_time.strftime("%Y-%m-%d %H:%M:%S")
             self.set_setting_in_db(db, "last_scan_time", scan_time_str, kantor=None)
             if k != "all":
                 self.set_setting_in_db(db, "last_scan_time", scan_time_str, kantor=k)

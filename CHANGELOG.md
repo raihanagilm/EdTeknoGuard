@@ -26,6 +26,22 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Perbaikan Reaktivitas Sorting Tabel Riwayat Redaman ([ModulRiwayatRedaman.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulRiwayatRedaman.jsx), [logs_mgmt/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/logs_mgmt/service.py))**:
+  - **Dependency Array useEffect**: Menambahkan `sortField` dan `sortDir` ke daftar dependensi `useEffect` sehingga setiap klik header kolom tabel (Waktu Cek, ID Pelanggan, Nama, IP, Sinyal, Suhu, Status) seketika memicu pemanggilan data yang terurut secara realtime.
+  - **Backend Sort Mapping**: Menambahkan pemetaan kolom `id_pelanggan` pada `sort_column_map` di [LogsMgmtService](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/logs_mgmt/service.py).
+
+- **Grafik Pemantauan Khusus Pemindaian Massal & Timestamp Seragam ([monitoring/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/monitoring/service.py), [scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+  - **Timestamp Seragam per Siklus Scan**: Seluruh log hasil pemindaian massal (termasuk hasil perbaikan dari Pass Kedua retry) menggunakan satu waktu timestamp `waktu_cek` yang sama persis (saat pemindaian dimulai), mencegah titik-titik data terpecah ke menit berbeda.
+  - **Eksklusi Single Check Mandiri**: Query data grafik (harian, 7 hari, 30 hari) secara otomatis menyaring dan mengecualikan pengujian mandiri (*Single Probe*) per pelanggan, sehingga grafik dashboard murni menampilkan riwayat tren pemindaian massal berkala.
+
+- **Penjadwalan Interval Murni Pasca Pemindaian Tuntas ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+  - Memperbarui pencatatan `last_scan_time` di database dengan waktu saat pemindaian selesai total (`finish_time`), memastikan hitung mundur interval pemindaian berikutnya dihitung murni setelah seluruh proses pemindaian tuntas.
+
+- **Stopwatch Real-Time Ticker & Akselerasi Polling Progres Pemindaian ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx))**:
+  - **Local Stopwatch Ticker 1-Detik**: Menambahkan interval ticker lokal di client React yang berdetak mulus setiap 1.000 ms selama proses pemindaian aktif, mengeliminasi masalah angka detik yang meloncat atau membeku akibat jeda request HTTP.
+  - **Akselerasi Polling Fast Interval**: Interval polling status pemindaian ke backend dipercepat dari 1.500 ms menjadi 800 ms saat scan aktif untuk pembaruan data yang responsif.
+  - **Anti-Jitter Monotonic Timer**: Menerapkan fungsi `Math.max()` saat menerima respon backend sehingga waktu berjalan tidak pernah mengalami glitch mundur (*time rollback*) akibat latency jaringan.
+
 - **Optimasi Pemindaian Serentak Multi-Pool (VALID & INVALID) & Pass Kedua Retry LOS Bertahap ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
   - **Dual Concurrent ThreadPool Executors dengan Autoscaling Dinamis**:
     - **Pool VALID (Autoscale Dinamis per 100 data, Cap 65 Worker)**:

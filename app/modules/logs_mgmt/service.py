@@ -99,6 +99,7 @@ class LogsMgmtService:
         # Sorting logic
         sort_column_map = {
             "waktu_cek": LogPerformaONT.waktu_cek,
+            "id_pelanggan": Pelanggan.id_pelanggan,
             "nama": Pelanggan.nama,
             "pop": Pelanggan.pop,
             "ip_router": PerangkatONT.ip_router,

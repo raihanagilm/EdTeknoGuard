@@ -51,7 +51,7 @@ class MonitoringService:
         subq_query = (
             db.query(
                 LogPerformaONT.id_pelanggan,
-                func.max(LogPerformaONT.waktu_cek).label("max_waktu")
+                func.max(LogPerformaONT.id).label("max_id")
             )
             .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
             .filter(
@@ -68,8 +68,7 @@ class MonitoringService:
             db.query(LogPerformaONT)
             .join(
                 subq,
-                (LogPerformaONT.id_pelanggan == subq.c.id_pelanggan) &
-                (LogPerformaONT.waktu_cek == subq.c.max_waktu)
+                LogPerformaONT.id == subq.c.max_id
             )
             .all()
         )
@@ -179,6 +178,14 @@ class MonitoringService:
                 q = q.filter(Pelanggan.kantor.in_(allowed_kantor))
             if id_pelanggan:
                 q = q.filter(LogPerformaONT.id_pelanggan == id_pelanggan)
+            else:
+                from sqlalchemy import or_
+                q = q.filter(
+                    or_(
+                        LogPerformaONT.keterangan == None,
+                        ~LogPerformaONT.keterangan.ilike('%Single Check%')
+                    )
+                )
             rows = q.group_by(
                 func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d'),
                 func.date_format(LogPerformaONT.waktu_cek, '%H:00')
@@ -433,6 +440,15 @@ class MonitoringService:
 
             if id_pelanggan:
                 q = q.filter(LogPerformaONT.id_pelanggan == id_pelanggan)
+            else:
+                # Grafik umum kantor khusus menampilkan pemindaian massal (mengecualikan Single Check mandiri 1 pelanggan)
+                from sqlalchemy import or_
+                q = q.filter(
+                    or_(
+                        LogPerformaONT.keterangan == None,
+                        ~LogPerformaONT.keterangan.ilike('%Single Check%')
+                    )
+                )
 
             rows = q.group_by(func.date_format(LogPerformaONT.waktu_cek, '%H:%i')).order_by('min_waktu').all()
 
