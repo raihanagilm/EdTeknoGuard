@@ -160,6 +160,18 @@ frontend_dist = Path("frontend/dist")
 if frontend_dist.exists() and (frontend_dist / "assets").exists():
     app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="frontend_assets")
 
+# Sajikan file root frontend/dist (seperti frame-36.png, favicon.svg, icons.svg)
+@app.get("/frame-36.png")
+@app.get("/favicon.svg")
+@app.get("/icons.svg")
+@app.get("/teknocust-mascot.png")
+def serve_frontend_dist_root_files(request: Request):
+    filename = request.url.path.lstrip("/")
+    target = frontend_dist / filename
+    if target.exists() and target.is_file():
+        return FileResponse(str(target))
+    return JSONResponse(status_code=404, content={"detail": f"{filename} not found"})
+
 # Registrasi Router
 app.include_router(auth_router)
 app.include_router(dashboard_router)
