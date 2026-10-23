@@ -636,7 +636,7 @@ class CustomerService:
                     Pelanggan.status_lease != "waiting"
                 )
             elif status == "LOS":
-                query = query.filter(LogPerformaONT.status_koneksi == "LOS", Pelanggan.status_lease != "waiting")
+                query = query.filter(LogPerformaONT.status_koneksi == "LOS")
             elif status in ("NONAKTIF", "OFF"):
                 query = query.filter(Pelanggan.is_monitored == False)
             elif status == "UNTESTED":
@@ -685,6 +685,7 @@ class CustomerService:
         # Dynamic sorting yang aman dan sesuai kolom tabel
         effective_ip = func.coalesce(PerangkatONT.ip_ont, PerangkatONT.ip_router)
         effective_status = case(
+            (LogPerformaONT.status_koneksi == "LOS", "LOS"),
             (Pelanggan.status_lease == "waiting", "OFFLINE"),
             (LogPerformaONT.status_koneksi.isnot(None), LogPerformaONT.status_koneksi),
             else_="UNTESTED"
@@ -746,7 +747,9 @@ class CustomerService:
         result = []
         for c, latest_log, kuota_rec in rows:
             lease_status = getattr(c, "status_lease", "bound") or "bound"
-            if lease_status == "waiting":
+            if latest_log and latest_log.status_koneksi == "LOS":
+                current_status = "LOS"
+            elif lease_status == "waiting":
                 current_status = "OFFLINE"
             else:
                 current_status = latest_log.status_koneksi if (latest_log and latest_log.status_koneksi) else "UNTESTED"
