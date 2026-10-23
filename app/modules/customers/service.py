@@ -343,7 +343,9 @@ class CustomerService:
         }
 
         # Cache master referensi untuk validasi FK
+        from app.db.models import Kantor
         valid_pakets = {pk.nama for pk in db.query(Paket).all()}
+        valid_kantors = {k.kode.lower() for k in db.query(Kantor).all()}
 
         for idx, item in enumerate(active_items, start=1):
             row_data = item.get("data", item)
@@ -395,16 +397,21 @@ class CustomerService:
 
                 # Tentukan kantor untuk baris ini
                 raw_kantor = str(row_data.get("kantor", "")).strip().lower()
-                if raw_kantor in ["cabang", "pusat", "banyumas"]:
+                if raw_kantor in valid_kantors:
                     row_kantor = raw_kantor
                 else:
                     pop_val = str(row_data.get("pop", "")).upper()
-                    if "PUSAT" in pop_val:
-                        row_kantor = "pusat"
-                    elif "BMS" in pop_val or "BANYUMAS" in pop_val:
-                        row_kantor = "banyumas"
-                    elif default_kantor and default_kantor.lower().strip() in ["cabang", "pusat", "banyumas"]:
+                    matched_kantor = None
+                    for k_code in valid_kantors:
+                        if k_code.upper() in pop_val:
+                            matched_kantor = k_code
+                            break
+                    if matched_kantor:
+                        row_kantor = matched_kantor
+                    elif default_kantor and default_kantor.lower().strip() in valid_kantors:
                         row_kantor = default_kantor.lower().strip()
+                    elif valid_kantors:
+                        row_kantor = next(iter(valid_kantors))
                     else:
                         row_kantor = "cabang"
 
@@ -497,6 +504,7 @@ class CustomerService:
                             db.rollback()
                             raw_paket = None
                             
+                    from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
                     # Simpan sebagai pelanggan baru offline (tidak aktif dipantau dulu sampai bound di MikroTik)
                     new_pelanggan = Pelanggan(
                         id_pelanggan=id_pel,
@@ -508,7 +516,8 @@ class CustomerService:
                         paket=raw_paket,
                         is_monitored=False, # Sesuai Q5: jadikan offline
                         is_active=True,
-                        status_lease="waiting"
+                        status_lease="waiting",
+                        password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
                     )
                     db.add(new_pelanggan)
                     db.flush()
@@ -523,7 +532,7 @@ class CustomerService:
                         password_wifi=new_wifi_pass or None,
                         user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
                         pass_admin=str(row_data.get("pass_admin", "tekno2024")).strip() or "tekno2024",
-                        status_kredensial="UNTESTED"
+                        status_kredensial="INVALID"
                     )
                     db.add(new_ont)
                     imported_count += 1
@@ -640,10 +649,7 @@ class CustomerService:
                 )
             elif status == "INVALID":
                 query = query.filter(
-                    or_(
-                        PerangkatONT.status_kredensial == "INVALID",
-                        LogPerformaONT.status_koneksi == "INVALID"
-                    )
+                    PerangkatONT.status_kredensial == "INVALID"
                 )
             else:
                 query = query.filter(LogPerformaONT.status_koneksi == status)
@@ -917,18 +923,13 @@ class CustomerService:
         critical_count = status_dict.get("CRITICAL", 0)
         los_count = status_dict.get("LOS", 0)
 
-        # Hitung jumlah modem dengan kredensial INVALID atau status_koneksi INVALID
+        # Hitung jumlah modem dengan kredensial INVALID murni
         invalid_q = (
             db.query(func.count(Pelanggan.id))
             .join(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
-            .outerjoin(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
-            .outerjoin(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
             .filter(
                 Pelanggan.is_active == True,
-                or_(
-                    PerangkatONT.status_kredensial == "INVALID",
-                    LogPerformaONT.status_koneksi == "INVALID"
-                )
+                PerangkatONT.status_kredensial == "INVALID"
             )
         )
         if kantor and kantor != "all":
@@ -981,6 +982,8 @@ class CustomerService:
             pel_name = pel.nama if pel else existing_ip.id_pelanggan
             raise ValueError(f"IP Router '{data.ip_router}' sudah digunakan oleh pelanggan '{pel_name}'")
 
+        from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+
         new_cust = Pelanggan(
             id_pelanggan=data.id_pelanggan,
             nama=data.nama,
@@ -990,7 +993,8 @@ class CustomerService:
             kantor=getattr(data, "kantor", "cabang") or "cabang",
             paket=data.paket,
             is_monitored=getattr(data, "is_monitored", True) if getattr(data, "is_monitored", None) is not None else True,
-            is_active=True
+            is_active=True,
+            password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
         )
         db.add(new_cust)
         db.flush()
@@ -1006,7 +1010,7 @@ class CustomerService:
             user_admin=data.user_admin or "admin",
             pass_admin=data.pass_admin or "tekno2024",
             snmp_community=data.snmp_community or "public",
-            status_kredensial="UNTESTED"
+            status_kredensial="INVALID"
         )
         db.add(new_ont)
         db.commit()
@@ -1048,6 +1052,18 @@ class CustomerService:
             if hasattr(cust, field) and val is not None:
                 setattr(cust, field, val)
 
+        db.commit()
+        db.refresh(cust)
+        return cust
+
+    @staticmethod
+    def reset_customer_portal_password(db: Session, id_pelanggan: str) -> Optional[Pelanggan]:
+        """Reset kata sandi aplikasi TeknoCust pelanggan kembali ke default '123456'."""
+        from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+        if not cust:
+            return None
+        cust.password_hash = get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
         db.commit()
         db.refresh(cust)
         return cust

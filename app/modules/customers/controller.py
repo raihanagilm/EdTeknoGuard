@@ -270,6 +270,27 @@ class CustomerController:
             raise HTTPException(status_code=500, detail=f"Gagal memperbarui pelanggan: {e}")
 
     @staticmethod
+    def reset_portal_password(db: Session, id_pelanggan: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.modules.activity_logs.service import ActivityLogService
+        cust = CustomerService.reset_customer_portal_password(db=db, id_pelanggan=id_pelanggan)
+        if not cust:
+            raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+        if request:
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="RESET_PASSWORD_PORTAL",
+                status="SUCCESS",
+                keterangan=f"Reset kata sandi aplikasi TeknoCust pelanggan '{cust.nama}' (ID: {cust.id_pelanggan}) ke default '123456'",
+                user=user
+            )
+        return {
+            "status": "success",
+            "message": f"Kata sandi aplikasi TeknoCust pelanggan '{cust.nama}' berhasil di-reset ke '123456'",
+            "id_pelanggan": cust.id_pelanggan
+        }
+
+    @staticmethod
     def delete_customer(db: Session, id_pelanggan: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if user and user.get("role") in ("operator", "teknisi", "karyawan"):
             raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan menghapus data pelanggan")
@@ -483,24 +504,31 @@ class CustomerController:
             
         from app.modules.activity_logs.service import ActivityLogService
         try:
+            from app.db.models import Kantor
+            # Ambil semua kode kantor valid dari database
+            db_kantor_codes = [k.kode for k in db.query(Kantor.kode).all()]
+            
             # Tentukan default kantor berdasarkan hak akses user dan target_kantor
-            user_allowed = user.get("allowed_kantor", ["cabang"]) if user else ["cabang"]
+            user_allowed = user.get("allowed_kantor", []) if user else []
             is_super_admin = user and user.get("role") == "super admin"
             
-            effective_kantor = "cabang"
-            if target_kantor and target_kantor.lower().strip() in ["cabang", "pusat", "banyumas"]:
-                if is_super_admin or target_kantor.lower().strip() in user_allowed:
-                    effective_kantor = target_kantor.lower().strip()
+            fallback_kantor = user_allowed[0] if (user_allowed and user_allowed[0] != "all") else (db_kantor_codes[0] if db_kantor_codes else "cabang")
+            effective_kantor = fallback_kantor
+
+            if target_kantor and target_kantor.lower().strip() in db_kantor_codes:
+                target_clean = target_kantor.lower().strip()
+                if is_super_admin or target_clean in user_allowed or "all" in user_allowed:
+                    effective_kantor = target_clean
                 else:
-                    effective_kantor = user_allowed[0] if user_allowed else "cabang"
+                    effective_kantor = fallback_kantor
             else:
-                active_kantor = getattr(request.state, "active_kantor", "cabang") if request else "cabang"
-                if active_kantor in ["cabang", "pusat", "banyumas"]:
+                active_kantor = getattr(request.state, "active_kantor", None) if request else None
+                if active_kantor and active_kantor in db_kantor_codes:
                     effective_kantor = active_kantor
-                elif user_allowed:
+                elif user_allowed and user_allowed[0] != "all":
                     effective_kantor = user_allowed[0]
                 else:
-                    effective_kantor = "cabang"
+                    effective_kantor = fallback_kantor
 
             res = CustomerService.execute_json_import(db=db, data_list=data_list, default_kantor=effective_kantor)
             if request:

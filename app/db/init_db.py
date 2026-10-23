@@ -66,9 +66,21 @@ def init_db():
             db.commit()
             print("[OK] Akun Super Admin default berhasil dibuat.")
 
-        print("[3/4] Memeriksa data master pelanggan...")
+        print("[3/4] Memeriksa data master pelanggan & kredensial portal...")
         customer_count = db.query(Pelanggan).count()
         print(f"[INFO] Database memiliki {customer_count} pelanggan terdaftar (Data tersinkronisasi otomatis via MikroTik DHCP Leases).")
+        
+        # Inisialisasi/Migrasi Password Default TeknoCust (123456) bagi pelanggan yang belum memiliki hash
+        from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+        default_pwd_hash = get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
+        null_pwd_custs = db.query(Pelanggan).filter((Pelanggan.password_hash == None) | (Pelanggan.password_hash == "")).all()
+        if null_pwd_custs:
+            for c in null_pwd_custs:
+                c.password_hash = default_pwd_hash
+            db.commit()
+            print(f"[OK] {len(null_pwd_custs)} pelanggan berhasil diperbarui dengan password portal default ({DEFAULT_CUSTOMER_PASSWORD}).")
+        else:
+            print("[INFO] Seluruh kredensial portal pelanggan sudah terverifikasi.")
 
         print("[4/4] Memeriksa data historis log performa...")
         log_count = db.query(LogPerformaONT).count()

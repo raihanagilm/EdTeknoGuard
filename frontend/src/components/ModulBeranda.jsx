@@ -74,8 +74,19 @@ function formatDuration(seconds) {
 export function ModulBeranda({
   activeOffice = 'all',
   currentUser = { role: 'super admin', name: 'Admin NOC' },
+  kantorList = [],
   onNavigate = () => {}
 }) {
+  // Helper mendapatkan label nama kantor dinamis dari kantorList
+  const getOfficeDisplayName = (code) => {
+    if (!code || code === 'all') return 'Seluruh Kantor'
+    const found = kantorList.find((k) => k.kode === code)
+    if (found && found.nama) {
+      return found.nama.replace(/^Kantor\s+/i, '').trim()
+    }
+    return code.charAt(0).toUpperCase() + code.slice(1)
+  }
+
   // State Engine & Kontrol
   const [engineStatus, setEngineStatus] = useState('RUNNING')
   const [isOfficeActive, setIsOfficeActive] = useState(true)
@@ -670,14 +681,7 @@ export function ModulBeranda({
   // Handler Kontrol Pemindaian
   const handleStartScan = async () => {
     if (isScanning) return
-    const targetLabel =
-      activeOffice === 'banyumas'
-        ? 'Banyumas'
-        : activeOffice === 'cabang'
-        ? 'Cabang'
-        : activeOffice === 'pusat'
-        ? 'Pusat'
-        : activeOffice?.toUpperCase() || 'Seluruh Kantor'
+    const targetLabel = getOfficeDisplayName(activeOffice)
     showToast(`Memulai pemindaian manual ONT ${targetLabel}...`, 'info')
     setIsScanning(true)
     try {
@@ -925,13 +929,7 @@ export function ModulBeranda({
                       {!isOfficeActive
                         ? 'Kantor Nonaktif'
                         : activeOffice && activeOffice !== 'all'
-                        ? `Pindai ${
-                            activeOffice === 'banyumas'
-                              ? 'Banyumas'
-                              : activeOffice === 'cabang'
-                              ? 'Cabang'
-                              : 'Pusat'
-                          }`
+                        ? `Pindai ${getOfficeDisplayName(activeOffice)}`
                         : 'Mulai Pemantauan (Semua)'}
                     </span>
                   </button>

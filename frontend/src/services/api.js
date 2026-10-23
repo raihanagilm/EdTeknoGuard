@@ -153,6 +153,10 @@ export class CustomerService {
   static async bulkDelete(ids) {
     return new ApiService().post('/api/customers/bulk-delete', { ids });
   }
+
+  static async resetPortalPassword(idPelanggan) {
+    return new ApiService().post(`/api/customers/${idPelanggan}/reset-portal-password`);
+  }
 }
 
 export class SettingsService {

@@ -514,6 +514,36 @@ export function ModulPelanggan({
     }
   }
 
+  // Reset kata sandi aplikasi TeknoCust pelanggan ke default '123456'
+  const [resetPasswordLoadingId, setResetPasswordLoadingId] = useState(null)
+  const handleResetPortalPassword = async (c) => {
+    const cId = c.id_pelanggan || c.id
+    const custName = c.nama || c.name || cId
+    const confirmed = window.confirm(
+      `Konfirmasi Reset Sandi TeknoCust:\nApakah Anda yakin ingin mengembalikan kata sandi aplikasi TeknoCust pelanggan:\n"${custName}" (ID: ${cId})\nkembali ke default: 123456?`
+    )
+    if (!confirmed) return
+
+    setResetPasswordLoadingId(cId)
+    try {
+      const res = await fetch(`/api/customers/${cId}/reset-portal-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        showToast(data.message || `Kata sandi aplikasi TeknoCust ${custName} berhasil di-reset ke 123456.`, 'success')
+      } else {
+        showToast(data.detail || 'Gagal me-reset kata sandi portal pelanggan.', 'error')
+      }
+    } catch (err) {
+      console.error('Reset portal password error:', err)
+      showToast('Koneksi terputus saat me-reset kata sandi portal pelanggan.', 'error')
+    } finally {
+      setResetPasswordLoadingId(null)
+    }
+  }
+
   // Open Modal Edit Pelanggan
   const handleOpenEdit = (customer, fromDetail = null) => {
     setReturnToDetailCustomer(fromDetail || customer)
@@ -939,7 +969,7 @@ export function ModulPelanggan({
                       <div className="flex items-center gap-1.5 text-xs text-slate-600 font-mono mt-0.5">
                         <span className="font-semibold text-slate-700">{c.user_admin || 'admin'}:{c.pass_admin || '***'}</span>
                         {(() => {
-                          const kStatus = (c.status_kredensial || 'UNTESTED').toUpperCase();
+                          const kStatus = (c.status_kredensial || '').toUpperCase();
                           if (kStatus === 'VALID') {
                             return (
                               <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0" title="Kredensial modem terverifikasi cocok">
@@ -947,16 +977,9 @@ export function ModulPelanggan({
                               </span>
                             );
                           }
-                          if (kStatus === 'INVALID') {
-                            return (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-rose-100 text-rose-800 border border-rose-300 shrink-0" title="Kredensial modem ditolak / salah password">
-                                INVALID
-                              </span>
-                            );
-                          }
                           return (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-slate-100 text-slate-600 border border-slate-200 shrink-0" title="Belum diuji coba">
-                              BELUM UJI
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-rose-100 text-rose-800 border border-rose-300 shrink-0" title="Kredensial modem belum valid / ditolak">
+                              INVALID
                             </span>
                           );
                         })()}
@@ -1412,6 +1435,8 @@ export function ModulPelanggan({
         }}
         onToggleIsolir={handleToggleIsolir}
         isolirLoadingId={isolirLoadingId}
+        onResetPassword={handleResetPortalPassword}
+        resetPasswordLoadingId={resetPasswordLoadingId}
       />
 
       {/* Component Wizard Import Pelanggan Terpisah */}

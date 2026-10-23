@@ -135,6 +135,16 @@ def change_customer_wifi(
         user=user
     )
 
+@router.post("/api/customers/{id_pelanggan}/reset-portal-password")
+def reset_customer_portal_password(
+    request: Request,
+    id_pelanggan: str,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Route untuk me-reset kata sandi aplikasi TeknoCust pelanggan ke default '123456'"""
+    return CustomerController.reset_portal_password(db=db, id_pelanggan=id_pelanggan, request=request, user=user)
+
 @router.post("/api/customers/{id_pelanggan}/toggle-monitoring")
 @router.patch("/api/customers/{id_pelanggan}/toggle-monitoring")
 def toggle_customer_monitoring(

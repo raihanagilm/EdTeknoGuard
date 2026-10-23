@@ -709,12 +709,23 @@ class MonitoringScheduler:
                         "is_office_active": False
                     }
 
-            query = db.query(Pelanggan).filter(
+            from sqlalchemy import case
+            from app.db.models import PerangkatONT
+
+            query = db.query(Pelanggan).outerjoin(
+                PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan
+            ).filter(
                 Pelanggan.is_active == True,
                 Pelanggan.is_monitored == True
             )
             if k != "all":
                 query = query.filter(Pelanggan.kantor == k)
+            
+            # Prioritaskan modem dengan kredensial VALID terlebih dahulu agar monitoring reguler cepat selesai
+            query = query.order_by(
+                case((PerangkatONT.status_kredensial == 'VALID', 0), else_=1),
+                Pelanggan.id.asc()
+            )
             pelanggan_list = query.all()
             
             # Pre-flight check koneksi: pastikan server terhubung ke segmen jaringan kantor ini
@@ -848,17 +859,19 @@ class MonitoringScheduler:
                     elif scrape_res.get("error_type") == "LOCKOUT":
                         if was_previously_valid:
                             c.status_kredensial = "VALID"
+                            res = scrape_res
+                            res["status_koneksi"] = "LOS"
                         else:
                             c.status_kredensial = "INVALID"
-                        res = scrape_res
-                        res["status_koneksi"] = "INVALID"
+                            res = scrape_res
+                            res["status_koneksi"] = "INVALID"
                         rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
                         ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Dilewati pada scan massal."
                     elif scrape_res.get("error_type") == "AUTH_FAILED":
                         if was_previously_valid:
                             c.status_kredensial = "VALID"
                             res = scrape_res
-                            res["status_koneksi"] = "INVALID"
+                            res["status_koneksi"] = "LOS"
                             ket = "Login Tertunda (Modem Sibuk / Session Semaphore, Kredensial Tetap Valid)"
                         else:
                             c.status_kredensial = "INVALID"
@@ -1319,10 +1332,12 @@ class MonitoringScheduler:
             elif scrape_res.get("error_type") == "LOCKOUT":
                 if was_previously_valid:
                     cust.status_kredensial = "VALID"
+                    res = scrape_res
+                    res["status_koneksi"] = "LOS"
                 else:
                     cust.status_kredensial = "INVALID"
-                res = scrape_res
-                res["status_koneksi"] = "INVALID"
+                    res = scrape_res
+                    res["status_koneksi"] = "INVALID"
                 rem_lock = scrape_res.get("lockout_remaining_seconds", 60)
                 ket = f"Modem Lockout ONT ({rem_lock}s tersisa). Harap tunggu jeda keamanan."
             elif scrape_res.get("error_type") == "AUTH_FAILED":
@@ -1330,7 +1345,7 @@ class MonitoringScheduler:
                     # Kredensial sudah benar/valid sebelumnya, modem mungkin sibuk atau menolak session. Pertahankan VALID!
                     cust.status_kredensial = "VALID"
                     res = scrape_res
-                    res["status_koneksi"] = "INVALID"
+                    res["status_koneksi"] = "LOS"
                     ket = "Login Tertunda (Modem Sibuk / Session Semaphore, Kredensial Tetap Valid)"
                 else:
                     cust.status_kredensial = "INVALID"

@@ -82,6 +82,8 @@ class ImporterService:
                         except Exception:
                             db.rollback()
 
+                from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+
                 new_pelanggan = Pelanggan(
                     id_pelanggan=id_pel,
                     nama=nama,
@@ -98,7 +100,8 @@ class ImporterService:
                     user_admin=clean_string(row.get("USER ADMIN")),
                     pass_admin=clean_string(row.get("PASS ADMIN")),
                     snmp_community="public",
-                    is_active=True
+                    is_active=True,
+                    password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
                 )
                 db.add(new_pelanggan)
                 imported_count += 1
@@ -170,6 +173,7 @@ class ImporterService:
                     existing.user_admin = clean_string(get_val("user admin"))
                     existing.pass_admin = clean_string(get_val("pass admin") or get_val("passwrod admin"))
                 else:
+                    from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
                     new_pelanggan = Pelanggan(
                         id_pelanggan=id_pel,
                         nama=nama,
@@ -187,7 +191,8 @@ class ImporterService:
                         user_admin=clean_string(get_val("user admin")),
                         pass_admin=clean_string(get_val("pass admin") or get_val("passwrod admin")),
                         snmp_community="public",
-                        is_active=True
+                        is_active=True,
+                        password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
                     )
                     db.add(new_pelanggan)
                 imported_count += 1

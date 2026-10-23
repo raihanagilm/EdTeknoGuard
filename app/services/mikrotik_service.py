@@ -571,6 +571,7 @@ class MikroTikSyncService:
                 if clean_name:
                     clean_name = re.sub(rf'\s+{kantor}$', '', clean_name, flags=re.I).strip()
 
+                from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
                 new_cust = Pelanggan(
                     id_pelanggan=id_pelanggan,
                     nama=clean_name or f"Pelanggan {ip}",
@@ -581,7 +582,8 @@ class MikroTikSyncService:
                     is_monitored=is_online,
                     is_active=True,
                     status_lease=lease_status,
-                    status_verifikasi="TERVERIFIKASI"
+                    status_verifikasi="TERVERIFIKASI",
+                    password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
                 )
                 db.add(new_cust)
                 db.flush()
@@ -593,7 +595,7 @@ class MikroTikSyncService:
                     ip_ont=ip if is_ont_ip else None,
                     mac_address=mac if mac else None,
                     jenis_modem=None,
-                    status_kredensial="UNTESTED"
+                    status_kredensial="INVALID"
                 )
                 db.flush()
                 

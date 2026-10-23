@@ -9,6 +9,7 @@ import bcrypt
 
 SESSION_COOKIE_NAME = "edteknoguard_session"
 MAX_SESSION_AGE = 86400 * 30  # 30 hari inaktivitas (2.592.000 detik)
+DEFAULT_CUSTOMER_PASSWORD = "123456"
 DEFAULT_KANTORS = ["banyumas", "pusat"]
 ALL_KANTOR = DEFAULT_KANTORS
 

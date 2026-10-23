@@ -55,7 +55,7 @@ class PerangkatONT(Base):
     password_wifi = Column(String(100), nullable=True)
     user_admin = Column(String(50), nullable=True)
     pass_admin = Column(String(100), nullable=True)
-    status_kredensial = Column(String(20), default="UNTESTED", nullable=False, index=True)
+    status_kredensial = Column(String(20), default="INVALID", nullable=False, index=True)
     failed_credentials = Column(Text, nullable=True) # JSON list string berisi kredensial yang sudah pernah dicoba dan gagal
     snmp_community = Column(String(50), default="public")
     los_count = Column(Integer, default=0, nullable=False)

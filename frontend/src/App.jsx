@@ -897,6 +897,7 @@ export default function App() {
             <ModulBeranda
               activeOffice={activeOffice}
               currentUser={currentUser}
+              kantorList={kantorList}
               onNavigate={(tab) => handleTabChange(tab)}
             />
           )}
