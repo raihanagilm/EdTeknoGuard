@@ -722,8 +722,8 @@ export function ModulPelanggan({
               </button>
 
               <a
-                href="/api/customers/export-excel"
-                download="data_pelanggan_edteknoguard.xlsx"
+                href={`/api/customers/export-excel?kantor=${encodeURIComponent(activeOffice || 'cabang')}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
+                download={`data_pelanggan_${activeOffice || 'edteknoguard'}.xlsx`}
                 className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
                 title="Ekspor Seluruh Data ke Excel"
               >

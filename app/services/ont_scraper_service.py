@@ -44,6 +44,18 @@ COMMON_OPTICAL_PATHS = [
 class ONTScraperService:
 
     @staticmethod
+    def decode_hex_string(val: Optional[str]) -> Optional[str]:
+        """Mendekode karakter hex escape ZTE seperti \\x20 (spasi), \\x2d (-), \\x2e (.), dll."""
+        if not val:
+            return val
+        def replace_hex(m):
+            try:
+                return chr(int(m.group(1), 16))
+            except Exception:
+                return m.group(0)
+        return re.sub(r'\\x([0-9a-fA-F]{2})', replace_hex, str(val)).strip()
+
+    @staticmethod
     def get_login_token(session: requests.Session, base_url: str) -> str:
         """Mengekstrak Frm_Logintoken dinamis yang diatur oleh fungsi dosubmit() di javascript."""
         try:
@@ -524,54 +536,72 @@ class ONTScraperService:
         if not res["mac_address"]:
             res["mac_address"] = cls.get_mac_from_arp(host)
 
-        # 2. SSID (Nama WiFi) dari WLAN_ESSID_PATH
+        # 2. SSID & Password WiFi dari pon_net_wlan_conf1_t.gch (ZTE F663, F670, XPON)
         try:
-            r_essid = session.get(f"{base_url}{WLAN_ESSID_PATH}", headers=headers, timeout=8)
-            if r_essid.status_code == 200:
-                txt_essid = html.unescape(r_essid.text)
-                m_tm_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_essid)
-                if m_tm_essid:
-                    for item in m_tm_essid:
-                        if item.strip():
-                            res["nama_wifi"] = item.strip()
-                            break
+            r_f663 = session.get(f"{base_url}/getpage.gch?pid=1002&nextpage=pon_net_wlan_conf1_t.gch", headers=headers, timeout=8)
+            if r_f663.status_code == 200:
+                txt_f663 = html.unescape(r_f663.text)
                 if not res["nama_wifi"]:
-                    m_var = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_essid, re.I)
-                    if m_var and m_var.group(1).strip():
-                        res["nama_wifi"] = m_var.group(1).strip()
+                    m_f663_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]*)['\"]\s*\)", txt_f663)
+                    non_empty_essid = [x.strip() for x in m_f663_essid if x.strip()]
+                    if non_empty_essid:
+                        res["nama_wifi"] = non_empty_essid[-1]
+
+                if not res["password_wifi"]:
+                    m_f663_pass = re.findall(r"Transfer_meaning\s*\(\s*['\"](?:KeyPassphrase|PreSharedKey)['\"]\s*,\s*['\"]([^'\"]*)['\"]\s*\)", txt_f663)
+                    non_empty_pass = [x.strip() for x in m_f663_pass if x.strip()]
+                    if non_empty_pass:
+                        res["password_wifi"] = non_empty_pass[-1]
         except Exception as e:
-            logger.debug(f"Gagal membaca WLAN ESSID dari {host}: {e}")
+            logger.debug(f"Gagal membaca pon_net_wlan_conf1 dari {host}: {e}")
 
-        # 3. Password WiFi (WPA PreSharedKey) dari WLAN_SECURITY_PATH
-        try:
-            r_sec = session.get(f"{base_url}{WLAN_SECURITY_PATH}", headers=headers, timeout=8)
-            if r_sec.status_code == 200:
-                txt_sec = html.unescape(r_sec.text)
-                m_tm_pass = re.findall(r"Transfer_meaning\s*\(\s*['\"](?:KeyPassphrase|PreSharedKey)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
-                if m_tm_pass:
-                    for item in m_tm_pass:
-                        if item.strip():
-                            res["password_wifi"] = item.strip()
-                            break
-
-                # Fallback jika SSID belum terbaca dari essid_t.gch, coba dari security
-                if not res["nama_wifi"]:
-                    m_tm_essid2 = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
-                    if m_tm_essid2:
-                        for item in m_tm_essid2:
+        # 3. Fallback SSID (Nama WiFi) dari WLAN_ESSID_PATH (ZTE GM220-S)
+        if not res["nama_wifi"]:
+            try:
+                r_essid = session.get(f"{base_url}{WLAN_ESSID_PATH}", headers=headers, timeout=8)
+                if r_essid.status_code == 200:
+                    txt_essid = html.unescape(r_essid.text)
+                    m_tm_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_essid)
+                    if m_tm_essid:
+                        for item in m_tm_essid:
                             if item.strip():
                                 res["nama_wifi"] = item.strip()
                                 break
+                    if not res["nama_wifi"]:
+                        m_var = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_essid, re.I)
+                        if m_var and m_var.group(1).strip():
+                            res["nama_wifi"] = m_var.group(1).strip()
+            except Exception as e:
+                logger.debug(f"Gagal membaca WLAN ESSID dari {host}: {e}")
 
-                # Fallback input value
-                if not res["password_wifi"]:
-                    m_wpa_inp = re.search(r'id=["\'](?:Frm_KeyPassphrase|Frm_Passphrase)["\'][^>]*value=["\']([^"\']+)["\']', txt_sec, re.I)
-                    if m_wpa_inp and m_wpa_inp.group(1).strip():
-                        res["password_wifi"] = m_wpa_inp.group(1).strip()
-        except Exception as e:
-            logger.debug(f"Gagal membaca WLAN Security dari {host}: {e}")
+        # 4. Fallback Password WiFi dari WLAN_SECURITY_PATH (ZTE GM220-S)
+        if not res["password_wifi"] or not res["nama_wifi"]:
+            try:
+                r_sec = session.get(f"{base_url}{WLAN_SECURITY_PATH}", headers=headers, timeout=8)
+                if r_sec.status_code == 200:
+                    txt_sec = html.unescape(r_sec.text)
+                    if not res["password_wifi"]:
+                        m_tm_pass = re.findall(r"Transfer_meaning\s*\(\s*['\"](?:KeyPassphrase|PreSharedKey)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
+                        if m_tm_pass:
+                            for item in m_tm_pass:
+                                if item.strip():
+                                    res["password_wifi"] = item.strip()
+                                    break
+                    if not res["nama_wifi"]:
+                        m_tm_essid2 = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_sec)
+                        if m_tm_essid2:
+                            for item in m_tm_essid2:
+                                if item.strip():
+                                    res["nama_wifi"] = item.strip()
+                                    break
+                    if not res["password_wifi"]:
+                        m_wpa_inp = re.search(r'id=["\'](?:Frm_KeyPassphrase|Frm_Passphrase)["\'][^>]*value=["\']([^"\']+)["\']', txt_sec, re.I)
+                        if m_wpa_inp and m_wpa_inp.group(1).strip():
+                            res["password_wifi"] = m_wpa_inp.group(1).strip()
+            except Exception as e:
+                logger.debug(f"Gagal membaca WLAN Security dari {host}: {e}")
 
-        # Fallback WLAN Status info (ZTE F663 / XPON)
+        # Fallback WLAN Status info (ZTE GM220 / XPON Generic)
         if not res["nama_wifi"]:
             try:
                 r_wlan = session.get(f"{base_url}/getpage.gch?pid=1002&nextpage=e8_status_wlan_info_t.gch", headers=headers, timeout=6)
@@ -589,6 +619,12 @@ class ONTScraperService:
                             res["nama_wifi"] = m_var_ssid.group(1).strip()
             except Exception:
                 pass
+
+        # Bersihkan karakter hex escape ZTE (seperti \x20 -> spasi, \x2d -> -)
+        if res["nama_wifi"]:
+            res["nama_wifi"] = cls.decode_hex_string(res["nama_wifi"])
+        if res["password_wifi"]:
+            res["password_wifi"] = cls.decode_hex_string(res["password_wifi"])
 
         # 4. Fallback Heuristik Model / Vendor jika belum terbaca dari tabel spesifik
         if not res["jenis_modem"]:

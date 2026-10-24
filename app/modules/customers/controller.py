@@ -455,14 +455,26 @@ class CustomerController:
         )
 
     @staticmethod
-    def export_excel(db: Session, request: Optional[Request] = None) -> Response:
-        active_kantor = getattr(request.state, "active_kantor", "cabang") if request else "cabang"
+    def export_excel(
+        db: Session,
+        request: Optional[Request] = None,
+        kantor: Optional[str] = None,
+        q: Optional[str] = None,
+        ip: Optional[str] = None
+    ) -> Response:
+        active_kantor = kantor or (getattr(request.state, "active_kantor", "cabang") if request else "cabang")
         allowed_kantor = getattr(request.state, "allowed_kantor", ["cabang"]) if request else None
-        excel_bytes = CustomerService.generate_excel_export(db=db, kantor=active_kantor, allowed_kantor=allowed_kantor)
+        excel_bytes = CustomerService.generate_excel_export(
+            db=db,
+            kantor=active_kantor,
+            allowed_kantor=allowed_kantor,
+            q=q,
+            ip=ip
+        )
         return Response(
             content=excel_bytes,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": "attachment; filename=data_pelanggan_edteknoguard.xlsx"}
+            headers={"Content-Disposition": f"attachment; filename=data_pelanggan_{active_kantor or 'edteknoguard'}.xlsx"}
         )
 
     @staticmethod

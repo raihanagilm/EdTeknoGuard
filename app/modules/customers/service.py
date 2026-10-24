@@ -1315,7 +1315,9 @@ class CustomerService:
     def generate_excel_export(
         db: Session,
         kantor: Optional[str] = None,
-        allowed_kantor: Optional[List[str]] = None
+        allowed_kantor: Optional[List[str]] = None,
+        q: Optional[str] = None,
+        ip: Optional[str] = None
     ) -> bytes:
         """
         Menghasilkan file Excel (.xlsx) data seluruh pelanggan aktif
@@ -1338,7 +1340,7 @@ class CustomerService:
 
         headers = [
             "Kantor", "ID Pelanggan (Wajib)", "Nama Pelanggan (Wajib)", "Alamat", "No. HP",
-            "POP / OLT", "IP Router / ONT (Wajib)", "Paket Bandwidth", "Tipe Modem",
+            "POP / OLT", "IP Router", "IP ONT", "Paket Bandwidth", "Tipe Modem",
             "MAC Address", "Redaman Baseline (dBm)", "Nama WiFi", "Password WiFi",
             "User Admin", "Pass Admin",
             "Status Kredensial", "Rx Power Terakhir (dBm)", "Status Koneksi", "Pengecekan Terakhir"
@@ -1357,11 +1359,35 @@ class CustomerService:
         ws.row_dimensions[1].height = 28
 
         # Query Seluruh Data Pelanggan Aktif
-        q_cust = db.query(Pelanggan).filter(Pelanggan.is_active == True)
+        q_cust = db.query(Pelanggan).outerjoin(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan).filter(Pelanggan.is_active == True)
         if kantor and kantor != "all":
             q_cust = q_cust.filter(Pelanggan.kantor == kantor)
         elif allowed_kantor:
             q_cust = q_cust.filter(Pelanggan.kantor.in_(allowed_kantor))
+
+        if ip:
+            ip_clean = ip.strip()
+            q_cust = q_cust.filter(
+                or_(
+                    PerangkatONT.ip_router.ilike(f"%{ip_clean}%"),
+                    PerangkatONT.ip_ont.ilike(f"%{ip_clean}%")
+                )
+            )
+
+        if q:
+            search_pat = f"%{q.strip()}%"
+            q_cust = q_cust.filter(
+                or_(
+                    Pelanggan.nama.ilike(search_pat),
+                    Pelanggan.id_pelanggan.ilike(search_pat),
+                    Pelanggan.alamat.ilike(search_pat),
+                    PerangkatONT.ip_router.ilike(search_pat),
+                    PerangkatONT.ip_ont.ilike(search_pat),
+                    PerangkatONT.mac_address.ilike(search_pat),
+                    PerangkatONT.nama_wifi.ilike(search_pat)
+                )
+            )
+
         customers = q_cust.order_by(Pelanggan.id.asc()).all()
 
         for idx, c in enumerate(customers, start=1):
@@ -1375,6 +1401,11 @@ class CustomerService:
             status_val = latest_log.status_koneksi if latest_log else "NORMAL"
             last_check = latest_log.waktu_cek.strftime("%d/%m/%Y %H:%M") if latest_log else "-"
 
+            ip_router_val = c.ip_router or (c.ip_ont if not c.perangkat or not c.perangkat.ip_ont else "-")
+            ip_ont_val = c.ip_ont or "-"
+            if not ip_router_val and not ip_ont_val:
+                ip_router_val = "-"
+
             row_data = [
                 (c.kantor or "cabang").upper(),
                 c.id_pelanggan,
@@ -1382,7 +1413,8 @@ class CustomerService:
                 c.alamat or "-",
                 c.no_hp or "-",
                 c.pop or "-",
-                c.ip_router,
+                c.ip_router or "-",
+                c.ip_ont or "-",
                 c.paket or "-",
                 c.jenis_modem or "-",
                 c.mac_address or "-",
@@ -1408,7 +1440,7 @@ class CustomerService:
                 cell.border = cell_border
 
                 # Center align untuk kolom tertentu
-                if col_num in [1, 2, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
+                if col_num in [1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]:
                     cell.alignment = Alignment(horizontal="center", vertical="center")
                 else:
                     cell.alignment = Alignment(horizontal="left", vertical="center")
