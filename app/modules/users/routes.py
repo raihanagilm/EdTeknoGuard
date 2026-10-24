@@ -88,10 +88,10 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
         if not kode:
             kode = f"kantor_{int(datetime.now().timestamp())}"
 
-    # Cek duplikasi kode
-    existing = db.query(Kantor).filter(Kantor.kode == kode).first()
+    # Cek duplikasi nama kantor
+    existing = db.query(Kantor).filter(Kantor.nama == nama).first()
     if existing:
-        return {"status": "error", "message": f"Kantor dengan kode '{kode}' sudah terdaftar."}
+        return {"status": "error", "message": f"Kantor dengan nama '{nama}' sudah terdaftar."}
 
     # Format port
     parsed_port = None
@@ -107,7 +107,6 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
         parsed_interval = 3
 
     new_kantor = Kantor(
-        kode=kode,
         nama=nama,
         is_active=bool(is_active),
         alamat=alamat if alamat else None,
@@ -259,7 +258,9 @@ async def delete_kantor_json(request: Request, kantor_id: int, db: Session = Dep
         return {"status": "error", "message": "Kantor tidak ditemukan."}
 
     # Cek apakah masih ada pelanggan terdaftar di kantor ini
-    pelanggan_count = db.query(Pelanggan).filter(Pelanggan.kantor == kantor.kode).count()
+    pelanggan_count = db.query(Pelanggan).filter(
+        (Pelanggan.id_kantor == kantor.id_kantor) | (Pelanggan.kantor == kantor.kode)
+    ).count()
     if pelanggan_count > 0:
         return {"status": "error", "message": f"Kantor '{kantor.nama}' masih memiliki {pelanggan_count} pelanggan terdaftar. Pindahkan atau hapus pelanggan terlebih dahulu."}
 
@@ -363,7 +364,7 @@ async def get_users_json(request: Request, db: Session = Depends(get_db)):
             "nama_karyawan": u.nama_karyawan or "",
             "no_wa": u.no_wa or "",
             "role": u.role,
-            "allowed_kantor": parse_allowed_kantor(u.allowed_kantor, all_k),
+            "allowed_kantor": parse_allowed_kantor(u.allowed_kantor_list, all_k),
             "is_active": u.is_active,
             "created_at": u.created_at.strftime("%d/%m/%Y %H:%M") if u.created_at else "-",
             "updated_at": u.updated_at.strftime("%d/%m/%Y %H:%M") if u.updated_at else "-"
@@ -420,8 +421,16 @@ async def add_user_json(request: Request, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_user)
 
+        # Sinkronisasi ke tabel pivot user_kantors
+        target_kantors = all_k if role == "super admin" else cleaned_kantor
+        from app.db.models import UserKantor
+        for k_code in target_kantors:
+            db.add(UserKantor(user_id=new_user.id, kantor_kode=k_code))
+        db.commit()
+
         ActivityLogService.log_activity(
             db=db,
+            user_id=user_session.get("user_id"),
             username=user_session.get("user"),
             action="ADD_USER",
             ip_address=request.client.host if request.client else "unknown",
@@ -477,9 +486,17 @@ async def edit_user_json(request: Request, user_id: int, db: Session = Depends(g
     if password:
         user.hashed_password = get_password_hash(password)
 
+    # Sinkronisasi ke tabel pivot user_kantors
+    target_kantors = all_k if role == "super admin" else cleaned_kantor
+    from app.db.models import UserKantor
+    db.query(UserKantor).filter(UserKantor.user_id == user.id).delete()
+    for k_code in target_kantors:
+        db.add(UserKantor(user_id=user.id, kantor_kode=k_code))
+
     db.commit()
     ActivityLogService.log_activity(
         db=db,
+        user_id=user_session.get("user_id"),
         username=user_session.get("user"),
         action="EDIT_USER",
         ip_address=request.client.host if request.client else "unknown",

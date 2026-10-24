@@ -3,16 +3,15 @@ from sqlalchemy import (
     Column, BigInteger, Integer, String, Text, Numeric, 
     Boolean, DateTime, ForeignKey, Index, UniqueConstraint
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, synonym
 from app.core.database import Base
 from app.core.timezone import get_now_wib
 
 class Kantor(Base):
     __tablename__ = "kantors"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    kode = Column(String(50), unique=True, nullable=False, index=True)
-    nama = Column(String(100), nullable=False)
+    id_kantor = Column(Integer, primary_key=True, autoincrement=True)
+    nama = Column(String(100), unique=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
     alamat = Column(Text, nullable=True)
     mikrotik_host = Column(String(100), nullable=True)
@@ -23,20 +22,31 @@ class Kantor(Base):
     last_mikrotik_sync = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
 
+    id = synonym("id_kantor")
+
+    @property
+    def kode(self):
+        """Backward compatibility for existing code expecting k.kode"""
+        return self.nama.lower().strip() if self.nama else str(self.id_kantor)
+
     pelanggan_list = relationship("Pelanggan", back_populates="kantor_ref")
     tiket_list = relationship("TiketKendala", back_populates="kantor_ref")
     settings_list = relationship("SystemSetting", back_populates="kantor_ref", cascade="all, delete-orphan", passive_deletes=True)
+    modem_credentials = relationship("ModemCredential", back_populates="kantor_ref", cascade="all, delete-orphan", passive_deletes=True, order_by="ModemCredential.urutan.asc()")
+    user_assignments = relationship("UserKantor", back_populates="kantor_ref", cascade="all, delete-orphan", passive_deletes=True)
 
 
 class Paket(Base):
     __tablename__ = "pakets"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id_paket = Column(Integer, primary_key=True, autoincrement=True)
     nama = Column(String(100), unique=True, nullable=False, index=True)
     kecepatan_mbps = Column(Integer, nullable=True)
     harga = Column(Numeric(12, 2), nullable=True)
     deskripsi = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
+
+    id = synonym("id_paket")
 
     pelanggan_list = relationship("Pelanggan", back_populates="paket_ref")
 
@@ -44,7 +54,7 @@ class Paket(Base):
 class PerangkatONT(Base):
     __tablename__ = "perangkat_ont"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_perangkat = Column(BigInteger, primary_key=True, autoincrement=True)
     id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), unique=True, nullable=False, index=True)
     ip_router = Column(String(45), nullable=True, index=True)
     ip_ont = Column(String(45), nullable=True, index=True)
@@ -64,17 +74,22 @@ class PerangkatONT(Base):
 
     pelanggan = relationship("Pelanggan", back_populates="perangkat")
 
+    @property
+    def id(self):
+        """Backward compatibility"""
+        return self.id_perangkat
+
 
 class Pelanggan(Base):
     __tablename__ = "pelanggan"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), unique=True, nullable=False, index=True)
+    id_pelanggan = Column(String(64), primary_key=True, nullable=False, index=True)
     nama = Column(String(150), nullable=False, index=True)
     alamat = Column(Text, nullable=True)
     no_hp = Column(String(50), nullable=True)
     pop = Column(String(100), nullable=True, default="Server Cabang", index=True)
-    kantor = Column(String(50), ForeignKey("kantors.kode", onupdate="CASCADE", ondelete="RESTRICT"), nullable=False, default="cabang", index=True) # cabang, pusat, banyumas
+    id_kantor = Column(Integer, ForeignKey("kantors.id_kantor", onupdate="CASCADE", ondelete="RESTRICT"), nullable=True, index=True)
+    kantor = Column(String(50), nullable=True, default="cabang", index=True) # cabang, pusat, banyumas
     paket = Column(String(50), ForeignKey("pakets.nama", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
     is_monitored = Column(Boolean, default=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
@@ -219,11 +234,13 @@ class Pelanggan(Base):
     def no_wa(self, val):
         self.no_hp = val
 
+    id = synonym("id_pelanggan")
+
 
 class LogPerformaONT(Base):
     __tablename__ = "log_performa_ont"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_log = Column(BigInteger, primary_key=True, autoincrement=True)
     id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
     waktu_cek = Column(DateTime, default=get_now_wib, nullable=False, index=True)
     rx_power = Column(Numeric(5, 2), nullable=True)
@@ -235,6 +252,8 @@ class LogPerformaONT(Base):
 
     pelanggan = relationship("Pelanggan", back_populates="logs")
 
+    id = synonym("id_log")
+
     __table_args__ = (
         Index("idx_pelanggan_waktu", "id_pelanggan", "waktu_cek"),
     )
@@ -243,7 +262,7 @@ class LogPerformaONT(Base):
 class AlertLog(Base):
     __tablename__ = "alert_logs"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_alert = Column(BigInteger, primary_key=True, autoincrement=True)
     id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
     tipe_alert = Column(String(30), nullable=False)  # REDAMAN_DROP, ONT_LOS, OVERHEAT
     rx_power = Column(Numeric(5, 2), nullable=True)
@@ -254,6 +273,8 @@ class AlertLog(Base):
 
     pelanggan = relationship("Pelanggan", back_populates="alerts")
 
+    id = synonym("id_alert")
+
     __table_args__ = (
         Index("idx_alert_pelanggan_waktu", "id_pelanggan", "waktu_kirim"),
     )
@@ -262,13 +283,16 @@ class AlertLog(Base):
 class SystemSetting(Base):
     __tablename__ = "system_settings"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    kantor_kode = Column(String(50), ForeignKey("kantors.kode", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, index=True)
+    id_setting = Column(Integer, primary_key=True, autoincrement=True)
+    id_kantor = Column(Integer, ForeignKey("kantors.id_kantor", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, index=True)
+    kantor_kode = Column(String(50), nullable=True, index=True)
     key_name = Column(String(50), nullable=False, index=True)
     value_text = Column(Text, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
     kantor_ref = relationship("Kantor", back_populates="settings_list")
+
+    id = synonym("id_setting")
 
     __table_args__ = (
         UniqueConstraint("key_name", "kantor_kode", name="uq_setting_key_kantor"),
@@ -278,7 +302,7 @@ class SystemSetting(Base):
 class UserActivityLog(Base):
     __tablename__ = "user_activity_logs"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_activity = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True, index=True)
     username = Column(String(100), nullable=False, index=True)
     nama_karyawan = Column(String(150), nullable=True)
@@ -291,6 +315,8 @@ class UserActivityLog(Base):
     created_at = Column(DateTime, default=get_now_wib, nullable=False, index=True)
 
     user = relationship("User", back_populates="activity_logs")
+
+    id = synonym("id_activity")
 
     __table_args__ = (
         Index("idx_activity_user_action", "username", "action"),
@@ -312,16 +338,33 @@ class User(Base):
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
-    activity_logs = relationship("UserActivityLog", back_populates="user")
+    activity_logs = relationship("UserActivityLog", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    notification_reads = relationship("UserNotificationRead", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    kantor_assignments = relationship("UserKantor", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+
+    @property
+    def allowed_kantor_list(self) -> list:
+        """Mengambil list kode kantor dari relasi user_kantors, fallback ke parsed allowed_kantor jika kosong"""
+        if self.kantor_assignments:
+            return [ka.kantor_kode for ka in self.kantor_assignments if ka.kantor_kode]
+        if self.allowed_kantor:
+            try:
+                import json
+                parsed = json.loads(self.allowed_kantor)
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                pass
+        return ["banyumas"]
 
 
 class TiketKendala(Base):
     __tablename__ = "tiket_kendala"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_tiket = Column(String(32), unique=True, nullable=False, index=True)
+    id_tiket = Column(String(32), primary_key=True, nullable=False, index=True)
     id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
-    kantor = Column(String(50), ForeignKey("kantors.kode", onupdate="CASCADE", ondelete="RESTRICT"), default="cabang", nullable=False, index=True)
+    id_kantor = Column(Integer, ForeignKey("kantors.id_kantor", onupdate="CASCADE", ondelete="RESTRICT"), nullable=True, index=True)
+    kantor = Column(String(50), nullable=False, default="cabang", index=True)
     kategori = Column(String(100), nullable=False)
     deskripsi = Column(Text, nullable=False)
     no_wa_pelapor = Column(String(50), nullable=False)
@@ -335,6 +378,8 @@ class TiketKendala(Base):
     pelanggan = relationship("Pelanggan", back_populates="tiket_list")
     kantor_ref = relationship("Kantor", back_populates="tiket_list")
 
+    id = synonym("id_tiket")
+
     __table_args__ = (
         Index("idx_tiket_status_kantor", "status", "kantor"),
         Index("idx_tiket_pelanggan_waktu", "id_pelanggan", "created_at"),
@@ -344,7 +389,7 @@ class TiketKendala(Base):
 class KuotaPelanggan(Base):
     __tablename__ = "kuota_pelanggan"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_kuota = Column(BigInteger, primary_key=True, autoincrement=True)
     id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
     periode_bulan = Column(String(10), nullable=False, index=True) # format YYYY-MM
     kuota_terpakai_gb = Column(Numeric(8, 2), default=0, nullable=False)
@@ -357,6 +402,8 @@ class KuotaPelanggan(Base):
 
     pelanggan = relationship("Pelanggan", back_populates="kuota_list")
 
+    id = synonym("id_kuota")
+
     __table_args__ = (
         Index("idx_kuota_pelanggan_periode", "id_pelanggan", "periode_bulan"),
     )
@@ -365,17 +412,55 @@ class KuotaPelanggan(Base):
 class UserNotificationRead(Base):
     __tablename__ = "user_notification_reads"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_read = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
     notification_type = Column(String(50), nullable=False, index=True) # "alert_log", "tiket_batch", "alert_batch", dll
     reference_id = Column(String(100), nullable=False, index=True) # id_alert, id_tiket, atau batch key
     read_at = Column(DateTime, default=get_now_wib, nullable=False, index=True)
 
-    user = relationship("User")
+    user = relationship("User", back_populates="notification_reads")
+
+    id = synonym("id_read")
 
     __table_args__ = (
         Index("idx_user_notif_lookup", "user_id", "notification_type", "reference_id"),
     )
+
+
+class UserKantor(Base):
+    __tablename__ = "user_kantors"
+
+    id_user_kantor = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
+    id_kantor = Column(Integer, ForeignKey("kantors.id_kantor", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, index=True)
+    kantor_kode = Column(String(50), nullable=True, index=True)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False)
+
+    user = relationship("User", back_populates="kantor_assignments")
+    kantor_ref = relationship("Kantor", back_populates="user_assignments")
+
+    id = synonym("id_user_kantor")
+
+    __table_args__ = (
+        Index("idx_user_kantor_lookup", "user_id", "id_kantor"),
+    )
+
+
+class ModemCredential(Base):
+    __tablename__ = "modem_credentials"
+
+    id_credential = Column(Integer, primary_key=True, autoincrement=True)
+    id_kantor = Column(Integer, ForeignKey("kantors.id_kantor", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, index=True)
+    kantor_kode = Column(String(50), nullable=True, index=True)
+    username = Column(String(100), nullable=False)
+    password = Column(String(255), nullable=False)
+    urutan = Column(Integer, default=1, nullable=False)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False)
+    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
+
+    kantor_ref = relationship("Kantor", back_populates="modem_credentials")
+
+    id = synonym("id_credential")
 
 
 

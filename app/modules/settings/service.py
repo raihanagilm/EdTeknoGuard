@@ -91,20 +91,36 @@ class SystemSettingsService:
         default_user = db_settings.get("default_modem_user", "admin")
         default_pass = db_settings.get("default_modem_pass", "tekno2024")
 
-        # Parse multi-credentials list JSON spesifik kantor
-        raw_creds = db_settings.get("default_modem_credentials", "")
+        # 1. Coba baca dari tabel ternormalisasi modem_credentials
+        from app.db.models import ModemCredential
         credentials_list = []
-        if raw_creds:
-            try:
-                parsed = json.loads(raw_creds)
-                if isinstance(parsed, list):
-                    credentials_list = [
-                        {"username": str(item.get("username", "")).strip(), "password": str(item.get("password", "")).strip()}
-                        for item in parsed
-                        if item.get("username")
-                    ]
-            except Exception:
-                credentials_list = []
+        if k:
+            creds_rows = (
+                db.query(ModemCredential)
+                .filter(ModemCredential.kantor_kode == k)
+                .order_by(ModemCredential.urutan.asc(), ModemCredential.id.asc())
+                .all()
+            )
+            if creds_rows:
+                credentials_list = [
+                    {"username": r.username, "password": r.password}
+                    for r in creds_rows
+                ]
+
+        # 2. Fallback ke JSON di system_settings jika belum ada di tabel modem_credentials
+        if not credentials_list:
+            raw_creds = db_settings.get("default_modem_credentials", "")
+            if raw_creds:
+                try:
+                    parsed = json.loads(raw_creds)
+                    if isinstance(parsed, list):
+                        credentials_list = [
+                            {"username": str(item.get("username", "")).strip(), "password": str(item.get("password", "")).strip()}
+                            for item in parsed
+                            if item.get("username")
+                        ]
+                except Exception:
+                    credentials_list = []
 
         if not credentials_list:
             credentials_list = [
@@ -205,6 +221,17 @@ class SystemSettingsService:
         if k:
             for key_n, val_n in office_pairs.items():
                 SystemSettingsService._save_setting_pair(db, key_name=key_n, val_text=val_n, kantor_kode=k)
+
+            # Sinkronisasi ke tabel ternormalisasi modem_credentials
+            from app.db.models import ModemCredential
+            db.query(ModemCredential).filter(ModemCredential.kantor_kode == k).delete()
+            for idx, c_item in enumerate(creds_to_save, 1):
+                db.add(ModemCredential(
+                    kantor_kode=k,
+                    username=c_item["username"],
+                    password=c_item["password"],
+                    urutan=idx
+                ))
         else:
             for key_n, val_n in office_pairs.items():
                 SystemSettingsService._save_setting_pair(db, key_name=key_n, val_text=val_n, kantor_kode=None)

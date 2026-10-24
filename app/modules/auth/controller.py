@@ -114,6 +114,7 @@ class AuthController:
 
         ActivityLogService.log_activity(
             db=db,
+            user_id=user.id,
             username=username,
             nama_karyawan=user.nama_karyawan or username,
             role=user.role or "operator",

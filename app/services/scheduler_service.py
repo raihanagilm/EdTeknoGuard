@@ -161,27 +161,47 @@ class MonitoringScheduler:
     def get_setting_from_db(cls, db: Session, key: str, default: str, kantor: Optional[str] = None) -> str:
         k = kantor.lower().strip() if kantor and kantor != "all" else None
         if k:
-            item = db.query(SystemSetting).filter(SystemSetting.key_name == key, SystemSetting.kantor_kode == k).first()
+            # Cari Kantor untuk dapatkan id_kantor jika ada
+            from app.db.models import Kantor
+            k_obj = db.query(Kantor).filter((Kantor.nama.ilike(k)) | (Kantor.id_kantor == (int(k) if k.isdigit() else -1))).first()
+            if k_obj:
+                item = db.query(SystemSetting).filter(
+                    SystemSetting.key_name == key,
+                    (SystemSetting.id_kantor == k_obj.id_kantor) | (SystemSetting.kantor_kode == k)
+                ).first()
+            else:
+                item = db.query(SystemSetting).filter(SystemSetting.key_name == key, SystemSetting.kantor_kode == k).first()
             if item and item.value_text is not None:
                 return item.value_text
-        # Fallback ke setting global (kantor_kode IS NULL)
-        item_global = db.query(SystemSetting).filter(SystemSetting.key_name == key, SystemSetting.kantor_kode.is_(None)).first()
+        # Fallback ke setting global (kantor_kode IS NULL dan id_kantor IS NULL)
+        item_global = db.query(SystemSetting).filter(SystemSetting.key_name == key, SystemSetting.id_kantor.is_(None), SystemSetting.kantor_kode.is_(None)).first()
         return item_global.value_text if (item_global and item_global.value_text is not None) else default
 
     @classmethod
     def set_setting_in_db(cls, db: Session, key: str, value: str, kantor: Optional[str] = None):
         k = kantor.lower().strip() if kantor and kantor != "all" else None
-        q = db.query(SystemSetting).filter(SystemSetting.key_name == key)
+        target_id_kantor = None
         if k:
+            from app.db.models import Kantor
+            k_obj = db.query(Kantor).filter((Kantor.nama.ilike(k)) | (Kantor.id_kantor == (int(k) if k.isdigit() else -1))).first()
+            if k_obj:
+                target_id_kantor = k_obj.id_kantor
+
+        q = db.query(SystemSetting).filter(SystemSetting.key_name == key)
+        if target_id_kantor:
+            q = q.filter((SystemSetting.id_kantor == target_id_kantor) | (SystemSetting.kantor_kode == k))
+        elif k:
             q = q.filter(SystemSetting.kantor_kode == k)
         else:
-            q = q.filter(SystemSetting.kantor_kode.is_(None))
+            q = q.filter(SystemSetting.id_kantor.is_(None), SystemSetting.kantor_kode.is_(None))
         item = q.first()
         if item:
             item.value_text = value
+            if target_id_kantor and not item.id_kantor:
+                item.id_kantor = target_id_kantor
             item.updated_at = get_now_wib()
         else:
-            db.add(SystemSetting(kantor_kode=k, key_name=key, value_text=value))
+            db.add(SystemSetting(id_kantor=target_id_kantor, kantor_kode=k, key_name=key, value_text=value))
         db.commit()
 
     def start(self):

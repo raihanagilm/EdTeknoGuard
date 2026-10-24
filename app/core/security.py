@@ -20,7 +20,7 @@ def get_all_kantor_codes(db=None, active_only: bool = True) -> List[str]:
     if db is not None:
         try:
             from app.db.models import Kantor
-            q = db.query(Kantor.kode)
+            q = db.query(Kantor.nama)
             if active_only:
                 q = q.filter(Kantor.is_active == True)
             codes = [k[0].lower().strip() for k in q.all() if k[0]]
@@ -34,7 +34,7 @@ def get_all_kantor_codes(db=None, active_only: bool = True) -> List[str]:
             from app.db.models import Kantor
             session = SessionLocal()
             try:
-                q = session.query(Kantor.kode)
+                q = session.query(Kantor.nama)
                 if active_only:
                     q = q.filter(Kantor.is_active == True)
                 codes = [k[0].lower().strip() for k in q.all() if k[0]]

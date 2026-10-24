@@ -33,7 +33,7 @@ class UsersController:
                 "username": u.username,
                 "nama_karyawan": u.nama_karyawan or "",
                 "role": u.role,
-                "allowed_kantor": parse_allowed_kantor(u.allowed_kantor),
+                "allowed_kantor": parse_allowed_kantor(u.allowed_kantor_list),
                 "is_active": u.is_active,
                 "created_at": u.created_at,
                 "updated_at": u.updated_at
@@ -87,9 +87,17 @@ class UsersController:
             )
             db.add(new_user)
             db.commit()
+            db.refresh(new_user)
+
+            from app.db.models import UserKantor
+            target_k = ALL_KANTOR if clean_role == "super admin" else cleaned_kantor
+            for kc in target_k:
+                db.add(UserKantor(user_id=new_user.id, kantor_kode=kc))
+            db.commit()
             
             ActivityLogService.log_activity(
                 db=db,
+                user_id=user_session.get("user_id"),
                 username=user_session.get("user"),
                 action="ADD_USER",
                 ip_address=request.client.host if request.client else "unknown",
@@ -101,6 +109,7 @@ class UsersController:
             db.rollback()
             ActivityLogService.log_activity(
                 db=db,
+                user_id=user_session.get("user_id"),
                 username=user_session.get("user"),
                 action="ADD_USER_FAILED",
                 ip_address=request.client.host if request.client else "unknown",
@@ -135,12 +144,15 @@ class UsersController:
             if user.username == "admin":
                 clean_role = "super admin"
                 kantor_json = json.dumps(ALL_KANTOR)
+                target_k = ALL_KANTOR
             else:
                 if clean_role == "super admin":
                     kantor_json = json.dumps(ALL_KANTOR)
+                    target_k = ALL_KANTOR
                 else:
                     cleaned_kantor = parse_allowed_kantor(kantor)
                     kantor_json = json.dumps(cleaned_kantor)
+                    target_k = cleaned_kantor
 
             user.username = username.strip()
             user.nama_karyawan = nama_karyawan.strip() if nama_karyawan else None
@@ -149,10 +161,16 @@ class UsersController:
             
             if password:
                 user.hashed_password = get_password_hash(password)
+
+            from app.db.models import UserKantor
+            db.query(UserKantor).filter(UserKantor.user_id == user.id).delete()
+            for kc in target_k:
+                db.add(UserKantor(user_id=user.id, kantor_kode=kc))
                 
             db.commit()
             ActivityLogService.log_activity(
                 db=db,
+                user_id=user_session.get("user_id"),
                 username=user_session.get("user"),
                 action="EDIT_USER",
                 ip_address=request.client.host if request.client else "unknown",

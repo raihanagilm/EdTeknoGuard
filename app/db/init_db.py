@@ -43,9 +43,9 @@ def init_db():
         from app.db.models import Kantor
         if db.query(Kantor).count() == 0:
             db.add_all([
-                Kantor(kode="pusat", nama="Pusat", alamat="Kantor Pusat ISP TeknoIndonet"),
-                Kantor(kode="cabang", nama="Cabang", alamat="Kantor Cabang Operasional Utama"),
-                Kantor(kode="banyumas", nama="Banyumas", alamat="Kantor Wilayah Operasional Banyumas"),
+                Kantor(nama="Pusat", alamat="Kantor Pusat ISP TeknoIndonet"),
+                Kantor(nama="Cabang", alamat="Kantor Cabang Operasional Utama"),
+                Kantor(nama="Banyumas", alamat="Kantor Wilayah Operasional Banyumas"),
             ])
             db.commit()
             print("[OK] Master data kantor diinisialisasi.")
@@ -54,7 +54,7 @@ def init_db():
         from app.core.security import get_password_hash
         admin_user = db.query(User).filter(User.username == "admin").first()
         if not admin_user:
-            db.add(User(
+            admin_user = User(
                 username="admin",
                 hashed_password=get_password_hash("agiltampan"),
                 nama_karyawan="Super Administrator NOC",
@@ -62,9 +62,17 @@ def init_db():
                 role="super admin",
                 allowed_kantor='["cabang","pusat","banyumas"]',
                 is_active=True
-            ))
+            )
+            db.add(admin_user)
             db.commit()
-            print("[OK] Akun Super Admin default berhasil dibuat.")
+            db.refresh(admin_user)
+
+            from app.db.models import UserKantor
+            all_kantors = db.query(Kantor).all()
+            for kt in all_kantors:
+                db.add(UserKantor(user_id=admin_user.id, id_kantor=kt.id_kantor, kantor_kode=kt.nama.lower()))
+            db.commit()
+            print("[OK] Akun Super Admin default & penugasan kantor berhasil dibuat.")
 
         print("[3/4] Memeriksa data master pelanggan & kredensial portal...")
         customer_count = db.query(Pelanggan).count()
