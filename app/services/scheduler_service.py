@@ -122,39 +122,49 @@ class MonitoringScheduler:
 
     @classmethod
     def cleanup_alert_logs(cls, days: int = 7) -> int:
-        """Menghapus alert_logs yang berusia lebih dari 7 hari. Dipanggil dari job scheduler harian."""
-        db = SessionLocal()
-        try:
-            cutoff = get_now_wib() - timedelta(days=days)
-            deleted = db.query(AlertLog).filter(AlertLog.waktu_kirim < cutoff).delete(synchronize_session=False)
-            db.commit()
-            if deleted > 0:
-                logger.info(f"[CLEANUP] Berhasil membersihkan {deleted} alert log lama (> {days} hari).")
-            return deleted
-        except Exception as e:
-            logger.error(f"[CLEANUP] Gagal membersihkan alert log lama: {e}")
-            db.rollback()
-            return 0
-        finally:
-            db.close()
+        """Menghapus alert_logs yang berusia lebih dari 7 hari di seluruh database tenant kantor."""
+        from app.core.security import get_all_kantor_codes
+        from app.core.tenant_database import TenantDatabaseManager
+        total_deleted = 0
+        cutoff = get_now_wib() - timedelta(days=days)
+        all_k = get_all_kantor_codes()
+        for k in all_k:
+            t_db = TenantDatabaseManager.get_tenant_session(k)
+            try:
+                deleted = t_db.query(AlertLog).filter(AlertLog.waktu_kirim < cutoff).delete(synchronize_session=False)
+                t_db.commit()
+                total_deleted += deleted
+            except Exception as e:
+                t_db.rollback()
+                logger.error(f"[CLEANUP] Gagal membersihkan alert log kantor '{k}': {e}")
+            finally:
+                t_db.close()
+        if total_deleted > 0:
+            logger.info(f"[CLEANUP] Berhasil membersihkan {total_deleted} alert log lama (> {days} hari) di seluruh kantor.")
+        return total_deleted
 
     @classmethod
     def cleanup_activity_logs(cls, days: int = 60) -> int:
-        """Menghapus user_activity_logs yang berusia lebih dari 60 hari (2 bulan). Dipanggil dari job scheduler bulanan."""
-        db = SessionLocal()
-        try:
-            cutoff = get_now_wib() - timedelta(days=days)
-            deleted = db.query(UserActivityLog).filter(UserActivityLog.created_at < cutoff).delete(synchronize_session=False)
-            db.commit()
-            if deleted > 0:
-                logger.info(f"[CLEANUP] Berhasil membersihkan {deleted} log aktivitas lama (> {days} hari / 2 bulan).")
-            return deleted
-        except Exception as e:
-            logger.error(f"[CLEANUP] Gagal membersihkan log aktivitas lama: {e}")
-            db.rollback()
-            return 0
-        finally:
-            db.close()
+        """Menghapus user_activity_logs yang berusia lebih dari 60 hari di seluruh database tenant kantor."""
+        from app.core.security import get_all_kantor_codes
+        from app.core.tenant_database import TenantDatabaseManager
+        total_deleted = 0
+        cutoff = get_now_wib() - timedelta(days=days)
+        all_k = get_all_kantor_codes()
+        for k in all_k:
+            t_db = TenantDatabaseManager.get_tenant_session(k)
+            try:
+                deleted = t_db.query(UserActivityLog).filter(UserActivityLog.created_at < cutoff).delete(synchronize_session=False)
+                t_db.commit()
+                total_deleted += deleted
+            except Exception as e:
+                t_db.rollback()
+                logger.error(f"[CLEANUP] Gagal membersihkan log aktivitas kantor '{k}': {e}")
+            finally:
+                t_db.close()
+        if total_deleted > 0:
+            logger.info(f"[CLEANUP] Berhasil membersihkan {total_deleted} log aktivitas lama (> {days} hari) di seluruh kantor.")
+        return total_deleted
 
 
     @classmethod
@@ -206,7 +216,11 @@ class MonitoringScheduler:
 
     def start(self):
         if self._scheduler and not self._scheduler.running:
-            db = SessionLocal()
+            from app.core.security import get_all_kantor_codes
+            from app.core.tenant_database import TenantDatabaseManager
+            all_k = get_all_kantor_codes()
+            primary_k = all_k[0] if all_k else None
+            db = TenantDatabaseManager.get_tenant_session(primary_k) if primary_k else SessionLocal()
             last_scan_time_str = "-"
             try:
                 interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES))
@@ -219,8 +233,13 @@ class MonitoringScheduler:
                 current_status = "RUNNING"
                 
             try:
-                # Pembersihan log lama > 30 hari otomatis saat startup
-                self.cleanup_old_logs(db, days=30)
+                # Pembersihan log lama > 30 hari otomatis saat startup di seluruh kantor
+                for k in all_k:
+                    t_db = TenantDatabaseManager.get_tenant_session(k)
+                    try:
+                        self.cleanup_old_logs(t_db, days=30)
+                    finally:
+                        t_db.close()
             except Exception as e:
                 logger.error(f"Gagal membersihkan log lama: {e}")
 
@@ -320,54 +339,51 @@ class MonitoringScheduler:
             logger.info("[CLEANUP] Job cleanup alert_logs (setiap hari, >7 hari) & activity_logs (setiap hari, >60 hari) aktif.")
 
     def update_interval(self, minutes: int, kantor: Optional[str] = None):
-        db = SessionLocal()
-        try:
-            self.set_setting_in_db(db, "polling_interval_minutes", str(minutes), kantor=kantor)
-        finally:
-            db.close()
+        from app.core.security import get_all_kantor_codes
+        from app.core.tenant_database import TenantDatabaseManager
+        all_k = get_all_kantor_codes()
+        targets = [kantor.lower().strip()] if (kantor and kantor != "all") else all_k
+        for k in targets:
+            t_db = TenantDatabaseManager.get_tenant_session(k)
+            try:
+                self.set_setting_in_db(t_db, "polling_interval_minutes", str(minutes), kantor=k)
+            finally:
+                t_db.close()
 
         if not kantor or kantor == "all":
             settings.POLLING_INTERVAL_MINUTES = minutes
         logger.info(f"Interval pemantauan kantor '{kantor or 'global'}' diperbarui menjadi {minutes} menit di DB.")
 
     def stop(self, kantor: Optional[str] = None):
-        db = SessionLocal()
-        try:
-            now_str = get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
-            if kantor and kantor != "all":
-                k = kantor.lower().strip()
-                self.set_setting_in_db(db, "scheduler_status", "STOPPED", kantor=k)
-                self.set_setting_in_db(db, "scheduler_paused_at", now_str, kantor=k)
-                logger.info(f"Pemantauan otomatis ONT kantor {k.upper()} dijeda (STOPPED) dan disimpan permanen.")
-            else:
-                self.set_setting_in_db(db, "scheduler_status", "STOPPED", kantor=None)
-                self.set_setting_in_db(db, "scheduler_paused_at", now_str, kantor=None)
-                self.set_setting_in_db(db, "last_paused_reminder_at", now_str, kantor=None)
-                # Sinkronkan juga ke semua kantor terdaftar
-                kantors = db.query(Kantor).all()
-                for kt in kantors:
-                    self.set_setting_in_db(db, "scheduler_status", "STOPPED", kantor=kt.kode.lower())
-                logger.info("Pemantauan otomatis ONT SELURUH KANTOR dijeda (STOPPED) dan disimpan permanen.")
-        finally:
-            db.close()
+        from app.core.security import get_all_kantor_codes
+        from app.core.tenant_database import TenantDatabaseManager
+        all_k = get_all_kantor_codes()
+        targets = [kantor.lower().strip()] if (kantor and kantor != "all") else all_k
+        now_str = get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
+        for k in targets:
+            t_db = TenantDatabaseManager.get_tenant_session(k)
+            try:
+                self.set_setting_in_db(t_db, "scheduler_status", "STOPPED", kantor=k)
+                self.set_setting_in_db(t_db, "scheduler_paused_at", now_str, kantor=k)
+                if not kantor or kantor == "all":
+                    self.set_setting_in_db(t_db, "last_paused_reminder_at", now_str, kantor=k)
+            finally:
+                t_db.close()
+        logger.info(f"Pemantauan otomatis ONT kantor {kantor or 'SELURUH KANTOR'} dijeda (STOPPED) dan disimpan permanen.")
 
     def resume(self, kantor: Optional[str] = None):
-        db = SessionLocal()
-        try:
-            if kantor and kantor != "all":
-                k = kantor.lower().strip()
-                self.set_setting_in_db(db, "scheduler_status", "RUNNING", kantor=k)
-                self.set_setting_in_db(db, "scheduler_paused_at", "", kantor=k)
-                logger.info(f"Pemantauan otomatis ONT kantor {k.upper()} dilanjutkan (RUNNING) dan disimpan permanen.")
-            else:
-                self.set_setting_in_db(db, "scheduler_status", "RUNNING", kantor=None)
-                self.set_setting_in_db(db, "scheduler_paused_at", "", kantor=None)
-                kantors = db.query(Kantor).all()
-                for kt in kantors:
-                    self.set_setting_in_db(db, "scheduler_status", "RUNNING", kantor=kt.kode.lower())
-                logger.info("Pemantauan otomatis ONT SELURUH KANTOR dilanjutkan (RUNNING) dan disimpan permanen.")
-        finally:
-            db.close()
+        from app.core.security import get_all_kantor_codes
+        from app.core.tenant_database import TenantDatabaseManager
+        all_k = get_all_kantor_codes()
+        targets = [kantor.lower().strip()] if (kantor and kantor != "all") else all_k
+        for k in targets:
+            t_db = TenantDatabaseManager.get_tenant_session(k)
+            try:
+                self.set_setting_in_db(t_db, "scheduler_status", "RUNNING", kantor=k)
+                self.set_setting_in_db(t_db, "scheduler_paused_at", "", kantor=k)
+            finally:
+                t_db.close()
+        logger.info(f"Pemantauan otomatis ONT kantor {kantor or 'SELURUH KANTOR'} dilanjutkan (RUNNING) dan disimpan permanen.")
 
     @classmethod
     def check_paused_reminder(cls, db: Session) -> Optional[Dict[str, Any]]:
@@ -524,16 +540,30 @@ class MonitoringScheduler:
     def get_status(self, kantor: Optional[str] = None) -> Dict[str, Any]:
         k = (kantor or "all").lower().strip()
         is_office_active = True
-        db = SessionLocal()
+        
+        # 1. Master db untuk cek status aktif kantor
+        master_db = SessionLocal()
         try:
-            # Cek status aktif/nonaktif kantor dari tabel kantors
             if k != "all":
                 from sqlalchemy import func
                 from app.db.models import Kantor
-                k_obj = db.query(Kantor).filter(func.lower(Kantor.kode) == k).first()
+                k_obj = master_db.query(Kantor).filter(func.lower(Kantor.nama) == k).first()
                 if k_obj is not None:
                     is_office_active = bool(k_obj.is_active)
+        finally:
+            master_db.close()
 
+        # 2. Ambil session tenant database jika k != 'all'
+        from app.core.tenant_database import TenantDatabaseManager
+        if k != "all":
+            db = TenantDatabaseManager.get_tenant_session(k)
+        else:
+            from app.core.security import get_all_kantor_codes
+            all_k = get_all_kantor_codes()
+            fallback_k = all_k[0] if all_k else None
+            db = TenantDatabaseManager.get_tenant_session(fallback_k) if fallback_k else SessionLocal()
+
+        try:
             # Baca status per kantor jika ada, jika tidak ada fallback ke global
             status = self.get_setting_from_db(db, "scheduler_status", "RUNNING", kantor=k if k != "all" else None)
             interval_str = self.get_setting_from_db(db, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES), kantor=k if k != "all" else None)
@@ -550,8 +580,6 @@ class MonitoringScheduler:
             office_state = self.get_office_state(k)
             is_net_err = (net_err_str.lower() == "true") or office_state.is_network_error
 
-            # Pre-check koneksi otomatis jika sebelumnya berstatus error
-            # Jika saat ini perangkat ONT/Gateway kantor sudah terhubung, sembuhkan (auto-heal) langsung!
             if is_net_err and not office_state.is_scanning:
                 if self.check_office_connectivity(db, kantor=k):
                     is_net_err = False

@@ -457,9 +457,12 @@ async def add_user_json(request: Request, db: Session = Depends(get_master_db)):
 
         # Sinkronisasi ke tabel pivot user_kantors
         target_kantors = all_k if role == "super admin" else cleaned_kantor
-        from app.db.models import UserKantor
+        from app.db.models import UserKantor, Kantor
+        all_kantor_objs = {k.nama.lower().strip(): k.id_kantor for k in db.query(Kantor).all()}
         for k_code in target_kantors:
-            db.add(UserKantor(user_id=new_user.id, kantor_kode=k_code))
+            k_id = all_kantor_objs.get(k_code.lower().strip())
+            if k_id:
+                db.add(UserKantor(user_id=new_user.id, id_kantor=k_id))
         db.commit()
 
         ActivityLogService.log_activity(
@@ -522,10 +525,13 @@ async def edit_user_json(request: Request, user_id: int, db: Session = Depends(g
 
     # Sinkronisasi ke tabel pivot user_kantors
     target_kantors = all_k if role == "super admin" else cleaned_kantor
-    from app.db.models import UserKantor
+    from app.db.models import UserKantor, Kantor
+    all_kantor_objs = {k.nama.lower().strip(): k.id_kantor for k in db.query(Kantor).all()}
     db.query(UserKantor).filter(UserKantor.user_id == user.id).delete()
     for k_code in target_kantors:
-        db.add(UserKantor(user_id=user.id, kantor_kode=k_code))
+        k_id = all_kantor_objs.get(k_code.lower().strip())
+        if k_id:
+            db.add(UserKantor(user_id=user.id, id_kantor=k_id))
 
     db.commit()
     ActivityLogService.log_activity(

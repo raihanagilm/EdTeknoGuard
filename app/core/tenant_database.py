@@ -20,10 +20,15 @@ TENANT_TABLE_NAMES = [
     "kuota_pelanggan",
     "system_settings",
     "modem_credentials",
+    "user_activity_logs",
+    "user_notification_reads",
 ]
 
+import urllib.parse
+
 def sanitize_db_name(kode_kantor: str) -> str:
-    cleaned = re.sub(r'[^a-zA-Z0-9_]', '_', kode_kantor.strip().lower())
+    unquoted = urllib.parse.unquote_plus(kode_kantor)
+    cleaned = re.sub(r'[^a-zA-Z0-9_]', '_', unquoted.strip().lower())
     return f"edtekno_{cleaned}"
 
 class TenantDatabaseManager:

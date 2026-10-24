@@ -346,7 +346,9 @@ class User(Base):
     def allowed_kantor_list(self) -> list:
         """Mengambil list kode kantor dari relasi user_kantors, fallback ke parsed allowed_kantor jika kosong"""
         if self.kantor_assignments:
-            return [ka.kantor_kode for ka in self.kantor_assignments if ka.kantor_kode]
+            codes = [ka.kantor_ref.kode for ka in self.kantor_assignments if ka.kantor_ref]
+            if codes:
+                return codes
         if self.allowed_kantor:
             try:
                 import json
@@ -432,8 +434,7 @@ class UserKantor(Base):
 
     id_user_kantor = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
-    id_kantor = Column(Integer, ForeignKey("kantors.id_kantor", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, index=True)
-    kantor_kode = Column(String(50), nullable=True, index=True)
+    id_kantor = Column(Integer, ForeignKey("kantors.id_kantor", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
 
     user = relationship("User", back_populates="kantor_assignments")
@@ -442,6 +443,7 @@ class UserKantor(Base):
     id = synonym("id_user_kantor")
 
     __table_args__ = (
+        UniqueConstraint("user_id", "id_kantor", name="uq_user_kantor"),
         Index("idx_user_kantor_lookup", "user_id", "id_kantor"),
     )
 

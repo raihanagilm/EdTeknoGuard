@@ -40,8 +40,10 @@ def get_db(request: Request = None):
     
     active_kantor = None
     if request:
-        # 1. Cek sesi admin / header
-        active_kantor = getattr(request.state, "active_kantor", None)
+        # 1. Cek query param ?kantor=, sesi admin state, header, atau cookie
+        active_kantor = request.query_params.get("kantor")
+        if not active_kantor:
+            active_kantor = getattr(request.state, "active_kantor", None)
         if not active_kantor:
             active_kantor = request.headers.get("X-Active-Kantor") or request.cookies.get("active_kantor")
 
@@ -57,7 +59,13 @@ def get_db(request: Request = None):
                 except Exception:
                     pass
 
-    if active_kantor and active_kantor.lower() not in ["master", "global", "all"]:
+    if not active_kantor or active_kantor.lower() in ["master", "global", "all"]:
+        # Fallback kantor aktif pertama dari database master
+        from app.core.security import get_all_kantor_codes
+        all_k = get_all_kantor_codes()
+        active_kantor = all_k[0] if all_k else None
+
+    if active_kantor:
         db = TenantDatabaseManager.get_tenant_session(active_kantor)
     else:
         db = SessionLocal()
@@ -66,3 +74,4 @@ def get_db(request: Request = None):
         yield db
     finally:
         db.close()
+

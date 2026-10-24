@@ -168,9 +168,22 @@ def get_quota_json(request: Request, db: Session = Depends(get_db)):
 def poll_realtime_notifications(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db)):
     from app.core.security import get_current_user_optional, get_active_kantor
     from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
+    from app.core.tenant_database import TenantDatabaseManager
+    
     user = get_current_user_optional(request)
     target_kantor = kantor or (get_active_kantor(request, user) if user else "all")
-    return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=target_kantor, user=user)
+    
+    if target_kantor and target_kantor.lower() not in ["master", "global", "all"]:
+        active_db = TenantDatabaseManager.get_tenant_session(target_kantor)
+    else:
+        default_k = get_active_kantor(request, user)
+        active_db = TenantDatabaseManager.get_tenant_session(default_k)
+        target_kantor = default_k
+
+    try:
+        return AdminCustomerMgmtService.get_realtime_notifications(db=active_db, kantor=target_kantor, user=user)
+    finally:
+        active_db.close()
 
 @router.post("/api/notifications/read")
 async def mark_single_notification_read(request: Request, db: Session = Depends(get_db)):

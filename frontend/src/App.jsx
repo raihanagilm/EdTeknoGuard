@@ -201,11 +201,12 @@ export default function App() {
 
   const fetchLiveDashboardData = async () => {
     try {
-      const q = activeOffice && activeOffice !== 'all' ? `?kantor=${activeOffice}` : ''
+      const encodedOffice = encodeURIComponent(activeOffice)
+      const q = activeOffice && activeOffice !== 'all' ? `?kantor=${encodedOffice}` : ''
       const [statusRes, kpiRes, custRes, meRes, notifRes] = await Promise.all([
         fetch(`/api/monitoring/status${q}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/monitoring/kpi${q}`).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`/api/customers?limit=10${activeOffice && activeOffice !== 'all' ? `&kantor=${activeOffice}` : ''}`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`/api/customers?limit=10${activeOffice && activeOffice !== 'all' ? `&kantor=${encodedOffice}` : ''}`).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/auth/me').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/notifications/poll${q}`).then(r => r.ok ? r.json() : null).catch(() => null)
       ])

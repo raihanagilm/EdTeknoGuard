@@ -158,9 +158,14 @@ class AdminCustomerMgmtService:
 
         user_id = user.get("user_id") if user else None
         if not user_id and user and user.get("user"):
-            u_obj = db.query(User).filter(User.username == user.get("user")).first()
-            if u_obj:
-                user_id = u_obj.id
+            from app.core.database import SessionLocal as MasterSessionLocal
+            m_db = MasterSessionLocal()
+            try:
+                u_obj = m_db.query(User).filter(User.username == user.get("user")).first()
+                if u_obj:
+                    user_id = u_obj.id
+            finally:
+                m_db.close()
 
         user_role = user.get("role") if user else "teknisi"
 
@@ -485,9 +490,14 @@ class AdminCustomerMgmtService:
 
         user_id = user.get("user_id")
         if not user_id and user.get("user"):
-            u_obj = db.query(User).filter(User.username == user.get("user")).first()
-            if u_obj:
-                user_id = u_obj.id
+            from app.core.database import SessionLocal as MasterSessionLocal
+            m_db = MasterSessionLocal()
+            try:
+                u_obj = m_db.query(User).filter(User.username == user.get("user")).first()
+                if u_obj:
+                    user_id = u_obj.id
+            finally:
+                m_db.close()
 
         if not user_id:
             return {"status": "error", "message": "User ID tidak valid"}
@@ -524,9 +534,14 @@ class AdminCustomerMgmtService:
 
         user_id = user.get("user_id")
         if not user_id and user.get("user"):
-            u_obj = db.query(User).filter(User.username == user.get("user")).first()
-            if u_obj:
-                user_id = u_obj.id
+            from app.core.database import SessionLocal as MasterSessionLocal
+            m_db = MasterSessionLocal()
+            try:
+                u_obj = m_db.query(User).filter(User.username == user.get("user")).first()
+                if u_obj:
+                    user_id = u_obj.id
+            finally:
+                m_db.close()
 
         if not user_id:
             return {"status": "error", "message": "User ID tidak valid"}

@@ -16,18 +16,16 @@ ALL_KANTOR = DEFAULT_KANTORS
 _serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
 
 def get_all_kantor_codes(db=None, active_only: bool = True) -> List[str]:
-    """Mengambil seluruh kode kantor aktif dari database, fallback ke DEFAULT_KANTORS"""
+    """Mengambil seluruh kode kantor aktif secara dinamis dari tabel master `kantors` di database."""
     if db is not None:
         try:
             from app.db.models import Kantor
             q = db.query(Kantor.nama)
             if active_only:
                 q = q.filter(Kantor.is_active == True)
-            codes = [k[0].lower().strip() for k in q.all() if k[0]]
-            if codes:
-                return codes
+            return [k[0].lower().strip() for k in q.order_by(Kantor.id_kantor.asc()).all() if k[0]]
         except Exception:
-            pass
+            return []
     else:
         try:
             from app.core.database import SessionLocal
@@ -37,14 +35,11 @@ def get_all_kantor_codes(db=None, active_only: bool = True) -> List[str]:
                 q = session.query(Kantor.nama)
                 if active_only:
                     q = q.filter(Kantor.is_active == True)
-                codes = [k[0].lower().strip() for k in q.all() if k[0]]
-                if codes:
-                    return codes
+                return [k[0].lower().strip() for k in q.order_by(Kantor.id_kantor.asc()).all() if k[0]]
             finally:
                 session.close()
         except Exception:
-            pass
-    return DEFAULT_KANTORS
+            return []
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
@@ -126,7 +121,7 @@ def get_active_kantor(request: Request, user: Optional[Dict[str, Any]]) -> str:
     if candidate and candidate in allowed and candidate != "all":
         return candidate
 
-    return allowed[0] if allowed else (all_k[0] if all_k else "cabang")
+    return allowed[0] if allowed else (all_k[0] if all_k else "")
 
 def get_current_user_optional(request: Request) -> Optional[Dict[str, Any]]:
     token = request.cookies.get(SESSION_COOKIE_NAME)
