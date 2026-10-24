@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import re
 from typing import Dict, Optional, List
 from sqlalchemy import create_engine, text
@@ -128,3 +128,66 @@ class TenantDatabaseManager:
             logger.error(f"[TENANT_DB] Gagal menginisialisasi default settings untuk '{kode_kantor}': {e}")
         finally:
             session.close()
+
+    @classmethod
+    def drop_tenant_database(cls, kode_kantor: str):
+        """Menghapus database MySQL tenant secara fisik saat kantor dihapus permanen."""
+        db_name = sanitize_db_name(kode_kantor)
+        if db_name in cls._engines:
+            try:
+                cls._engines[db_name].dispose()
+            except Exception:
+                pass
+            del cls._engines[db_name]
+        if db_name in cls._sessionmakers:
+            del cls._sessionmakers[db_name]
+
+        with master_engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            conn.execute(text(f"DROP DATABASE IF EXISTS `{db_name}`;"))
+            logger.info(f"[TENANT_DB] Database '{db_name}' berhasil dihapus secara fisik dari MySQL.")
+
+    @classmethod
+    def rename_tenant_database(cls, old_kode: str, new_kode: str):
+        """
+        Mengubah nama database MySQL tenant saat nama kantor diubah oleh Super Admin.
+        (Membuat DB baru, me-rename seluruh tabel ke DB baru, lalu drop DB lama).
+        """
+        old_db = sanitize_db_name(old_kode)
+        new_db = sanitize_db_name(new_kode)
+        if old_db == new_db:
+            return
+
+        cls.create_database_if_not_exists(new_kode)
+
+        with master_engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            # Periksa apakah database lama ada
+            check_old = conn.execute(text(f"SHOW DATABASES LIKE '{old_db}';")).fetchall()
+            if check_old:
+                conn.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
+                try:
+                    tables_res = conn.execute(text(f"SHOW TABLES FROM `{old_db}`;")).fetchall()
+                    for row in tables_res:
+                        tbl = row[0]
+                        conn.execute(text(f"RENAME TABLE `{old_db}`.`{tbl}` TO `{new_db}`.`{tbl}`;"))
+                    conn.execute(text(f"DROP DATABASE IF EXISTS `{old_db}`;"))
+                    logger.info(f"[TENANT_DB] Database fisik berhasil di-rename dari '{old_db}' ke '{new_db}'.")
+                finally:
+                    conn.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
+
+        # Update nama kantor & field pelanggan.kantor di dalam tenant DB baru
+        try:
+            new_engine = cls.get_engine_for_kantor(new_kode)
+            with new_engine.connect().execution_options(isolation_level="AUTOCOMMIT") as t_conn:
+                t_conn.execute(text(f"UPDATE `kantors` SET `nama` = '{new_kode.title()}' WHERE 1=1;"))
+                t_conn.execute(text(f"UPDATE `pelanggan` SET `kantor` = '{new_kode}' WHERE 1=1;"))
+        except Exception as e:
+            logger.warning(f"[TENANT_DB] Gagal sinkronisasi data internal kantor di {new_db}: {e}")
+
+        if old_db in cls._engines:
+            try:
+                cls._engines[old_db].dispose()
+            except Exception:
+                pass
+            del cls._engines[old_db]
+        if old_db in cls._sessionmakers:
+            del cls._sessionmakers[old_db]

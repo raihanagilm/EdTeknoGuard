@@ -9,7 +9,7 @@ from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from app.core.database import get_db
+from app.core.database import get_db, get_master_db
 from app.core.security import (
     require_admin, require_super_admin, get_password_hash, 
     get_all_kantor_codes, parse_allowed_kantor
@@ -23,7 +23,7 @@ VALID_ROLES = ["super admin", "admin", "teknisi"]
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("/api/kantor/list")
-async def get_kantors_json(request: Request, db: Session = Depends(get_db)):
+async def get_kantors_json(request: Request, db: Session = Depends(get_master_db)):
     """Mengambil seluruh daftar kantor (kode & nama) untuk switcher dan manajemen kantor"""
     user_session = require_admin(request)
     kantors = db.query(Kantor).order_by(Kantor.id.asc()).all()
@@ -65,7 +65,7 @@ async def get_kantors_json(request: Request, db: Session = Depends(get_db)):
     }
 
 @router.post("/api/kantor/add")
-async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
+async def add_kantor_json(request: Request, db: Session = Depends(get_master_db)):
     """Menambahkan kantor wilayah baru lengkap dengan setting router MikroTik (Khusus Super Admin)"""
     user_session = require_super_admin(request)
     try:
@@ -164,7 +164,7 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
     }
 
 @router.post("/api/kantor/edit/{kantor_id}")
-async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depends(get_db)):
+async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depends(get_master_db)):
     """Mengubah data kantor wilayah & setting router MikroTik (Khusus Super Admin)"""
     user_session = require_super_admin(request)
     kantor = db.query(Kantor).filter(Kantor.id == kantor_id).first()
@@ -186,6 +186,9 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
 
     if not nama:
         return {"status": "error", "message": "Nama kantor wajib diisi."}
+
+    old_kode = kantor.kode
+    new_kode = nama.lower().strip()
 
     kantor.nama = nama
     if is_active is not None:
@@ -213,6 +216,15 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
             pass
 
     db.commit()
+
+    # Rename physical MySQL database if kantor name/code changed
+    if old_kode != new_kode:
+        try:
+            from app.core.tenant_database import TenantDatabaseManager
+            TenantDatabaseManager.rename_tenant_database(old_kode, new_kode)
+            logger.info(f"[KANTOR] Database fisik berhasil di-rename dari 'edtekno_{old_kode}' ke 'edtekno_{new_kode}'")
+        except Exception as e:
+            logger.error(f"[KANTOR] Gagal me-rename database fisik dari {old_kode} ke {new_kode}: {e}")
 
     # Jika konfigurasi host & user MikroTik diisi lengkap dan kantor AKTIF, langsung jalankan penarikan data secara otomatis
     sync_msg = ""
@@ -264,7 +276,7 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
     }
 
 @router.post("/api/kantor/delete/{kantor_id}")
-async def delete_kantor_json(request: Request, kantor_id: int, db: Session = Depends(get_db)):
+async def delete_kantor_json(request: Request, kantor_id: int, db: Session = Depends(get_master_db)):
     """Menghapus kantor wilayah (Khusus Super Admin)"""
     user_session = require_super_admin(request)
     kantor = db.query(Kantor).filter(Kantor.id == kantor_id).first()
@@ -283,24 +295,32 @@ async def delete_kantor_json(request: Request, kantor_id: int, db: Session = Dep
     db.delete(kantor)
     db.commit()
 
+    # Hapus database MySQL tenant secara fisik
+    try:
+        from app.core.tenant_database import TenantDatabaseManager
+        TenantDatabaseManager.drop_tenant_database(deleted_kode)
+        logger.info(f"[KANTOR] Database fisik 'edtekno_{deleted_kode}' berhasil dihapus.")
+    except Exception as e:
+        logger.error(f"[KANTOR] Gagal menghapus database fisik edtekno_{deleted_kode}: {e}")
+
     ActivityLogService.log_activity(
         db=db,
         username=user_session.get("user"),
         action="DELETE_KANTOR",
         ip_address=request.client.host if request.client else "unknown",
         status="SUCCESS",
-        keterangan=f"Berhasil menghapus kantor: {deleted_nama} ({deleted_kode})"
+        keterangan=f"Berhasil menghapus kantor & database fisik: {deleted_nama} ({deleted_kode})"
     )
 
     all_k = get_all_kantor_codes(db=db)
     return {
         "status": "success",
-        "message": f"Kantor '{deleted_nama}' berhasil dihapus permanen.",
+        "message": f"Kantor '{deleted_nama}' beserta database fisiknya berhasil dihapus permanen.",
         "all_kantor": all_k
     }
 
 @router.post("/api/kantor/sync/{kantor_id}")
-async def sync_kantor_mikrotik_json(request: Request, kantor_id: int, db: Session = Depends(get_db)):
+async def sync_kantor_mikrotik_json(request: Request, kantor_id: int, db: Session = Depends(get_master_db)):
     """Memicu penarikan data pelanggan langsung (on-demand) dari router MikroTik kantor terkait"""
     user_session = require_admin(request)
     kantor = db.query(Kantor).filter(Kantor.id == kantor_id).first()
@@ -363,7 +383,7 @@ async def sync_kantor_mikrotik_json(request: Request, kantor_id: int, db: Sessio
         }
 
 @router.get("/api/list")
-async def get_users_json(request: Request, db: Session = Depends(get_db)):
+async def get_users_json(request: Request, db: Session = Depends(get_master_db)):
     user_session = require_admin(request)
     if user_session.get("role") != "super admin":
         return {"status": "error", "message": "Hanya Super Admin yang diizinkan."}
@@ -391,7 +411,7 @@ async def get_users_json(request: Request, db: Session = Depends(get_db)):
     }
 
 @router.post("/api/add")
-async def add_user_json(request: Request, db: Session = Depends(get_db)):
+async def add_user_json(request: Request, db: Session = Depends(get_master_db)):
     user_session = require_admin(request)
     if user_session.get("role") != "super admin":
         return {"status": "error", "message": "Hanya Super Admin yang diizinkan."}
@@ -457,7 +477,7 @@ async def add_user_json(request: Request, db: Session = Depends(get_db)):
         return {"status": "error", "message": f"Username '{username}' sudah terdaftar di sistem."}
 
 @router.post("/api/edit/{user_id}")
-async def edit_user_json(request: Request, user_id: int, db: Session = Depends(get_db)):
+async def edit_user_json(request: Request, user_id: int, db: Session = Depends(get_master_db)):
     user_session = require_admin(request)
     if user_session.get("role") != "super admin":
         return {"status": "error", "message": "Hanya Super Admin yang diizinkan."}
@@ -521,7 +541,7 @@ async def edit_user_json(request: Request, user_id: int, db: Session = Depends(g
 
 
 @router.post("/api/toggle/{user_id}")
-async def toggle_user_json(request: Request, user_id: int, db: Session = Depends(get_db)):
+async def toggle_user_json(request: Request, user_id: int, db: Session = Depends(get_master_db)):
     user_session = require_admin(request)
     if user_session.get("role") != "super admin":
         return {"status": "error", "message": "Hanya Super Admin yang diizinkan."}
@@ -557,7 +577,7 @@ async def toggle_user_json(request: Request, user_id: int, db: Session = Depends
     return {"status": "success", "message": f"Status pengguna '{user.username}' diubah menjadi {status_str}."}
 
 @router.post("/api/delete/{user_id}")
-async def delete_user_json(request: Request, user_id: int, db: Session = Depends(get_db)):
+async def delete_user_json(request: Request, user_id: int, db: Session = Depends(get_master_db)):
     user_session = require_admin(request)
     if user_session.get("role") != "super admin":
         return {"status": "error", "message": "Hanya Super Admin yang diizinkan."}

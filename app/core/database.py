@@ -19,6 +19,8 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+from fastapi import Request
+
 def get_master_db():
     """Dependency eksplisit untuk modul master global (Users, Auth, Kantor Global)"""
     db = SessionLocal()
@@ -27,7 +29,7 @@ def get_master_db():
     finally:
         db.close()
 
-def get_db(request=None):
+def get_db(request: Request = None):
     """
     Dependency dinamis:
     Jika request memiliki active_kantor di state/header/cookie,
