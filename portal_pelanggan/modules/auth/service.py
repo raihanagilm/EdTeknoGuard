@@ -114,10 +114,50 @@ class AuthService:
         if not cust:
             cust = AuthService.find_matching_customer(db=db, nama=ident_raw)
 
+        # Jika belum ketemu di db sesi awal, cari di seluruh tenant database aktif (Pusat, Banyumas, Cabang, Slawi, dll.)
+        active_session = db
+        is_tenant_db_opened = False
+        if not cust:
+            from app.db.models import Kantor
+            from app.core.tenant_database import TenantDatabaseManager
+            from app.core.database import SessionLocal
+            m_db = SessionLocal()
+            try:
+                kantors = m_db.query(Kantor).filter(Kantor.is_active == True).all()
+                for k in kantors:
+                    if not k.kode:
+                        continue
+                    t_db = TenantDatabaseManager.get_tenant_session(k.kode)
+                    try:
+                        t_cust = t_db.query(Pelanggan).filter(
+                            (func.lower(Pelanggan.id_pelanggan) == ident_lower) |
+                            (func.lower(Pelanggan.nama) == ident_lower) |
+                            (Pelanggan.no_hp == ident_raw) |
+                            (Pelanggan.ip_router == ident_raw)
+                        ).first()
+                        if not t_cust:
+                            t_cust = t_db.query(Pelanggan).filter(func.lower(Pelanggan.nama).like(f"%{ident_lower}%")).first()
+                        if not t_cust:
+                            t_cust = AuthService.find_matching_customer(db=t_db, nama=ident_raw)
+                        
+                        if t_cust:
+                            cust = t_cust
+                            active_session = t_db
+                            is_tenant_db_opened = True
+                            break
+                    except Exception:
+                        t_db.close()
+                    if not cust:
+                        t_db.close()
+            finally:
+                m_db.close()
+
         if not cust:
             return False, "Akun tidak ditemukan. Pastikan Nama atau ID Pelanggan Anda sesuai dengan data langganan WiFi Anda di kantor.", None
 
         if not cust.is_active:
+            if is_tenant_db_opened:
+                active_session.close()
             return False, "Layanan akun dinonaktifkan. Silakan hubungi admin kantor.", None
 
         # 2. Verifikasi kata sandi
@@ -131,24 +171,34 @@ class AuthService:
             is_valid = True
 
         if not is_valid:
+            if is_tenant_db_opened:
+                active_session.close()
             return False, "Kata sandi salah. Kata sandi awal adalah: 123456.", None
 
         # 3. Perbarui waktu login terakhir
         cust.last_login = get_now_wib()
-        db.commit()
+        active_session.commit()
 
-        # 4. Buat session token
+        kantor_cust = cust.kantor or ""
+        status_verifikasi_cust = cust.status_verifikasi or ""
+
+        # 4. Buat session token dengan identitas kantor
         token = create_customer_session_token(
             id_pelanggan=cust.id_pelanggan,
             nama=cust.nama,
-            status_verifikasi=cust.status_verifikasi or "TERVERIFIKASI"
+            status_verifikasi=status_verifikasi_cust,
+            kantor=kantor_cust
         )
-        return True, "Login berhasil", {
+        res_data = {
             "token": token,
             "id_pelanggan": cust.id_pelanggan,
             "nama": cust.nama,
-            "status_verifikasi": cust.status_verifikasi or "TERVERIFIKASI"
+            "status_verifikasi": status_verifikasi_cust,
+            "kantor": kantor_cust
         }
+        if is_tenant_db_opened:
+            active_session.close()
+        return True, "Login berhasil", res_data
 
     @staticmethod
     def reset_customer_password(

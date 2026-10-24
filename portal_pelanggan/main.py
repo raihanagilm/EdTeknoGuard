@@ -51,7 +51,9 @@ async def customer_session_middleware(request: Request, call_next):
     if cust and request.method == "GET" and not is_auth_or_static:
         refreshed_token = create_customer_session_token(
             id_pelanggan=cust.get("id_pelanggan", ""),
-            nama=cust.get("nama", "")
+            nama=cust.get("nama", ""),
+            status_verifikasi=cust.get("status_verifikasi", ""),
+            kantor=cust.get("kantor", "")
         )
         response.set_cookie(
             key=CUSTOMER_SESSION_COOKIE,

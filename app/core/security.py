@@ -114,16 +114,19 @@ def get_user_allowed_kantor(user: Dict[str, Any]) -> List[str]:
 
 def get_active_kantor(request: Request, user: Optional[Dict[str, Any]]) -> str:
     all_k = get_all_kantor_codes()
-    if not user:
-        return all_k[0] if all_k else "banyumas"
-    
-    allowed = get_user_allowed_kantor(user)
-    cookie_val = request.cookies.get("active_kantor", "").strip().lower()
-    
-    if cookie_val in allowed and cookie_val != "all":
-        return cookie_val
-        
-    return allowed[0] if allowed else (all_k[0] if all_k else "banyumas")
+    allowed = get_user_allowed_kantor(user) if user else all_k
+
+    # Prioritas: 1. Query param ?kantor=, 2. Header X-Active-Kantor, 3. Cookie active_kantor
+    candidate = (
+        request.query_params.get("kantor")
+        or request.headers.get("X-Active-Kantor")
+        or request.cookies.get("active_kantor", "")
+    ).strip().lower()
+
+    if candidate and candidate in allowed and candidate != "all":
+        return candidate
+
+    return allowed[0] if allowed else (all_k[0] if all_k else "cabang")
 
 def get_current_user_optional(request: Request) -> Optional[Dict[str, Any]]:
     token = request.cookies.get(SESSION_COOKIE_NAME)

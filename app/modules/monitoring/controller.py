@@ -177,7 +177,7 @@ class MonitoringController:
                         detail=f"Akses ditolak: Pelanggan berada di kantor '{cust.kantor.upper()}', di luar akses kantor Anda."
                     )
 
-        res = MonitoringService.scan_single(id_pelanggan)
+        res = MonitoringService.scan_single(id_pelanggan, db=db)
         if not res:
             raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
         return res

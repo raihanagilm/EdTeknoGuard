@@ -714,7 +714,11 @@ class MonitoringScheduler:
             state.stop_requested = False
             state.scan_start_time = time.time()
         
-        db = SessionLocal()
+        from app.core.tenant_database import TenantDatabaseManager
+        if k != "all":
+            db = TenantDatabaseManager.get_tenant_session(k)
+        else:
+            db = SessionLocal()
         try:
             # Cegah pemindaian jika kantor dalam status nonaktif
             if k != "all":
@@ -821,7 +825,7 @@ class MonitoringScheduler:
 
             # Helper function untuk scraping 1 pelanggan secara thread-safe
             def _scan_customer_worker(cust_id: int):
-                worker_db = SessionLocal()
+                worker_db = TenantDatabaseManager.get_tenant_session(k) if k != "all" else SessionLocal()
                 try:
                     c = worker_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_id).first()
                     if not c:
@@ -1087,7 +1091,7 @@ class MonitoringScheduler:
                 logger.info(f"[RETRY_PASS_VALID] Menemukan {len(valid_los_to_retry)} modem VALID berstatus LOS. Menjalankan retry bertahap paralel...")
 
                 def _retry_valid_los_worker(cust_id: int):
-                    worker_db = SessionLocal()
+                    worker_db = TenantDatabaseManager.get_tenant_session(k) if k != "all" else SessionLocal()
                     try:
                         c_retry = worker_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_id).first()
                         if not c_retry:
@@ -1211,7 +1215,7 @@ class MonitoringScheduler:
                 logger.info(f"[SECOND_PASS_INVALID] Menemukan {len(invalid_cust_ids_second_pass)} pelanggan INVALID di kantor {k.upper()}. Memulai putaran ulang paralel...")
 
                 def _retry_customer_worker(cust_id: int):
-                    worker_db = SessionLocal()
+                    worker_db = TenantDatabaseManager.get_tenant_session(k) if k != "all" else SessionLocal()
                     try:
                         inv_cust = worker_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_id).first()
                         if not inv_cust:
@@ -1401,11 +1405,29 @@ class MonitoringScheduler:
                 state.is_scanning = False
             db.close()
 
-    def scan_single(self, id_pelanggan: str) -> Optional[Dict[str, Any]]:
-        db = SessionLocal()
+    def scan_single(self, id_pelanggan: str, db: Optional[Session] = None) -> Optional[Dict[str, Any]]:
+        created_local_db = False
+        if db is None:
+            db = SessionLocal()
+            created_local_db = True
         try:
             cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
             if not cust:
+                # Jika tidak ditemukan di database saat ini, cari di tenant database yang terdaftar
+                from app.db.models import Kantor
+                from app.core.tenant_database import TenantDatabaseManager
+                kantors = db.query(Kantor).filter(Kantor.is_active == True).all()
+                for k in kantors:
+                    if not k.kode:
+                        continue
+                    t_db = TenantDatabaseManager.get_tenant_session(k.kode)
+                    try:
+                        t_cust = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+                        if t_cust:
+                            # Delegasikan eksekusi scan_single ke sesi tenant DB ini
+                            return self.scan_single(id_pelanggan, db=t_db)
+                    finally:
+                        t_db.close()
                 return None
 
             cust_kantor = cust.kantor.lower().strip() if cust.kantor else None
@@ -1585,7 +1607,8 @@ class MonitoringScheduler:
                 "waktu_cek": now.strftime("%Y-%m-%d %H:%M:%S")
             }
         finally:
-            db.close()
+            if created_local_db:
+                db.close()
 
 scheduler = MonitoringScheduler()
 ont_scheduler = scheduler

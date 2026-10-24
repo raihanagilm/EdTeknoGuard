@@ -33,7 +33,7 @@ class KendalaService:
         date_str = now.strftime("%Y%m")
         random_num = random.randint(1000, 9999)
         ticket_id = f"TK-{date_str}-{random_num}"
-        kantor = cust.kantor if cust else "cabang"
+        kantor = (cust.kantor if cust else "") or ""
 
         new_ticket = TiketKendala(
             id_tiket=ticket_id,

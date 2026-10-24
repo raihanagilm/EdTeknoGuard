@@ -1,6 +1,9 @@
 import json
+import logging
 from datetime import datetime
 from typing import List
+
+logger = logging.getLogger("users_routes")
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -120,13 +123,24 @@ async def add_kantor_json(request: Request, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_kantor)
 
+    # Otomatis buat database fisik kantor dan inisialisasi tabel-tabel operasionalnya
+    try:
+        from app.core.tenant_database import TenantDatabaseManager
+        TenantDatabaseManager.provision_new_office(
+            kode_kantor=new_kantor.kode,
+            id_kantor=new_kantor.id,
+            nama_kantor=new_kantor.nama
+        )
+    except Exception as e:
+        logger.error(f"[KANTOR] Gagal membuat database tenant untuk '{nama}': {e}")
+
     ActivityLogService.log_activity(
         db=db,
         username=user_session.get("user"),
         action="ADD_KANTOR",
         ip_address=request.client.host if request.client else "unknown",
         status="SUCCESS",
-        keterangan=f"Berhasil menambahkan kantor baru: {nama} ({kode}) dengan setting MikroTik {mikrotik_host or '-'} (Interval {parsed_interval}m)"
+        keterangan=f"Berhasil menambahkan kantor baru & database fisik: {nama} ({kode}) dengan setting MikroTik {mikrotik_host or '-'} (Interval {parsed_interval}m)"
     )
 
     all_k = get_all_kantor_codes(db=db)

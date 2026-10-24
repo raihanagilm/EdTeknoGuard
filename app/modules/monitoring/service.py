@@ -29,8 +29,8 @@ class MonitoringService:
         return scheduler.execute_scan_sync(kantor=kantor)
 
     @staticmethod
-    def scan_single(id_pelanggan: str) -> Optional[Dict[str, Any]]:
-        return scheduler.scan_single(id_pelanggan)
+    def scan_single(id_pelanggan: str, db: Optional[Session] = None) -> Optional[Dict[str, Any]]:
+        return scheduler.scan_single(id_pelanggan, db=db)
 
     @staticmethod
     def get_kpi_metrics(

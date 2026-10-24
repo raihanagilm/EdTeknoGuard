@@ -30,16 +30,16 @@ def portal_auth_me(request: Request, db: Session = Depends(get_db)):
     return {
         "authenticated": True,
         "customer": {
-            "id_pelanggan": cust.get("id_pelanggan"),
-            "nama": pelanggan.nama if pelanggan else cust.get("nama"),
-            "status_verifikasi": pelanggan.status_verifikasi if pelanggan else cust.get("status_verifikasi", "TERVERIFIKASI"),
-            "ip_router": pelanggan.ip_router if pelanggan else "",
-            "paket": pelanggan.paket if pelanggan else "",
-            "alamat": pelanggan.alamat if pelanggan else "",
-            "no_hp": pelanggan.no_hp if pelanggan else "",
-            "nama_wifi": pelanggan.nama_wifi if pelanggan else "",
-            "kantor": pelanggan.kantor if pelanggan else "cabang",
-            "pop": pelanggan.pop if pelanggan else "Server Cabang"
+            "id_pelanggan": pelanggan.id_pelanggan if pelanggan else cust.get("id_pelanggan", ""),
+            "nama": pelanggan.nama if pelanggan else cust.get("nama", ""),
+            "status_verifikasi": pelanggan.status_verifikasi if pelanggan else cust.get("status_verifikasi", ""),
+            "ip_router": pelanggan.ip_router if (pelanggan and pelanggan.ip_router) else "",
+            "paket": pelanggan.paket if (pelanggan and pelanggan.paket) else "",
+            "alamat": pelanggan.alamat if (pelanggan and pelanggan.alamat) else "",
+            "no_hp": pelanggan.no_hp if (pelanggan and pelanggan.no_hp) else "",
+            "nama_wifi": pelanggan.nama_wifi if (pelanggan and pelanggan.nama_wifi) else "",
+            "kantor": pelanggan.kantor if (pelanggan and pelanggan.kantor) else cust.get("kantor", ""),
+            "pop": pelanggan.pop if (pelanggan and pelanggan.pop) else ""
         }
     }
 
@@ -62,7 +62,8 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_db)):
     payload = {
         "id_pelanggan": data.get("id_pelanggan"),
         "nama": data.get("nama"),
-        "status_verifikasi": data.get("status_verifikasi")
+        "status_verifikasi": data.get("status_verifikasi"),
+        "kantor": data.get("kantor")
     }
     response = JSONResponse(
         content={
@@ -152,19 +153,19 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
     return {
         "ok": True,
         "customer": {
-            "id_pelanggan": pel.id_pelanggan if pel else cust.get("id_pelanggan"),
-            "nama": pel.nama if pel else cust.get("nama"),
+            "id_pelanggan": pel.id_pelanggan if pel else cust.get("id_pelanggan", ""),
+            "nama": pel.nama if pel else cust.get("nama", ""),
             "paket": pel.paket if (pel and pel.paket) else "-",
             "harga_paket": harga_paket,
-            "ip_router": pel.ip_router if pel else "-",
+            "ip_router": pel.ip_router if (pel and pel.ip_router) else "-",
             "nama_wifi": pel.nama_wifi if (pel and pel.nama_wifi) else "",
-            "kantor": pel.kantor if pel else "cabang",
-            "pop": pel.pop if pel else "Server Cabang",
+            "kantor": pel.kantor if (pel and pel.kantor) else cust.get("kantor", ""),
+            "pop": pel.pop if (pel and pel.pop) else "",
             "is_active": pel.is_active if pel else True,
             "status_pembayaran": status_bayar,
             "status_isolir": bool(getattr(pel, "status_isolir", False)),
             "periode_tagihan": periode_teks,
-            "status_verifikasi": pel.status_verifikasi if pel else "TERVERIFIKASI"
+            "status_verifikasi": pel.status_verifikasi if (pel and pel.status_verifikasi) else cust.get("status_verifikasi", "")
         },
         "signal": {
             "rx_power": float(last_log.rx_power) if last_log and last_log.rx_power is not None else None,
@@ -364,8 +365,8 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
             "alamat": pelanggan.alamat or "",
             "paket": pelanggan.paket or "",
             "ip_router": pelanggan.ip_router or "",
-            "kantor": pelanggan.kantor or "cabang",
-            "status_verifikasi": pelanggan.status_verifikasi or "TERVERIFIKASI"
+            "kantor": pelanggan.kantor or "",
+            "status_verifikasi": pelanggan.status_verifikasi or ""
         }
     }
 

@@ -108,7 +108,14 @@ class MikroTikSyncService:
                 "kantor": k.kode
             }
             try:
-                res = cls.sync_customers_from_mikrotik(db, params)
+                from app.core.tenant_database import TenantDatabaseManager
+                # Jalankan sinkronisasi langsung ke database tenant kantor tersebut
+                tenant_db = TenantDatabaseManager.get_tenant_session(k.kode)
+                try:
+                    res = cls.sync_customers_from_mikrotik(tenant_db, params)
+                finally:
+                    tenant_db.close()
+
                 res["kantor"] = k.kode
                 k.last_mikrotik_sync = get_now_wib()
                 db.commit()
@@ -883,65 +890,75 @@ class MikroTikSyncService:
             db_kantors = db.query(Kantor).filter(Kantor.is_active == True).all()
             target_kantors = [k.kode for k in db_kantors if k.kode]
         total_synced = 0
-
-        synced_cids = {}
+        from app.core.tenant_database import TenantDatabaseManager
 
         for knt in target_kantors:
-            queues = cls.get_live_queues_and_bandwidth(db, kantor=knt)
-            for q in queues:
-                cid = q.get("id_pelanggan")
-                if not cid:
-                    continue
+            tenant_db = TenantDatabaseManager.get_tenant_session(knt)
+            try:
+                # Ambil konfigurasi router dari Master DB (db) tapi match pelanggan dari tenant_db
+                queues = cls.get_live_queues_and_bandwidth(tenant_db, kantor=knt)
+                synced_cids = {}
 
-                total_gb = q.get("total_gb", 0.0)
-                up_b = q.get("upload_bytes", 0)
-                dl_b = q.get("download_bytes", 0)
+                for q in queues:
+                    cid = q.get("id_pelanggan")
+                    if not cid:
+                        continue
 
-                # Jika IP/pelanggan memiliki lebih dari 1 queue di WinBox, akumulasikan
-                if cid in synced_cids:
-                    kuota_rec = synced_cids[cid]
-                    kuota_rec.upload_bytes += up_b
-                    kuota_rec.download_bytes += dl_b
-                    kuota_rec.kuota_terpakai_gb = round(float(kuota_rec.kuota_terpakai_gb or 0) + total_gb, 2)
-                    kuota_rec.last_sync_mikrotik = get_now_wib()
-                    kuota_rec.updated_at = get_now_wib()
-                    continue
+                    total_gb = q.get("total_gb", 0.0)
+                    up_b = q.get("upload_bytes", 0)
+                    dl_b = q.get("download_bytes", 0)
 
-                # Ambil atau buat record KuotaPelanggan
-                kuota_rec = db.query(KuotaPelanggan).filter(
-                    KuotaPelanggan.id_pelanggan == cid,
-                    KuotaPelanggan.periode_bulan == current_period
-                ).first()
+                    # Jika IP/pelanggan memiliki lebih dari 1 queue di WinBox, akumulasikan
+                    if cid in synced_cids:
+                        kuota_rec = synced_cids[cid]
+                        kuota_rec.upload_bytes += up_b
+                        kuota_rec.download_bytes += dl_b
+                        kuota_rec.kuota_terpakai_gb = round(float(kuota_rec.kuota_terpakai_gb or 0) + total_gb, 2)
+                        kuota_rec.last_sync_mikrotik = get_now_wib()
+                        kuota_rec.updated_at = get_now_wib()
+                        continue
 
-                if kuota_rec:
-                    kuota_rec.kuota_terpakai_gb = total_gb
-                    kuota_rec.upload_bytes = up_b
-                    kuota_rec.download_bytes = dl_b
-                    kuota_rec.last_sync_mikrotik = get_now_wib()
-                    kuota_rec.updated_at = get_now_wib()
-                else:
-                    kuota_rec = KuotaPelanggan(
-                        id_pelanggan=cid,
-                        periode_bulan=current_period,
-                        kuota_terpakai_gb=total_gb,
-                        upload_bytes=up_b,
-                        download_bytes=dl_b,
-                        last_sync_mikrotik=get_now_wib()
-                    )
-                    db.add(kuota_rec)
-                    db.flush()
+                    # Ambil atau buat record KuotaPelanggan di tenant database
+                    kuota_rec = tenant_db.query(KuotaPelanggan).filter(
+                        KuotaPelanggan.id_pelanggan == cid,
+                        KuotaPelanggan.periode_bulan == current_period
+                    ).first()
 
-                synced_cids[cid] = kuota_rec
+                    if kuota_rec:
+                        kuota_rec.kuota_terpakai_gb = total_gb
+                        kuota_rec.upload_bytes = up_b
+                        kuota_rec.download_bytes = dl_b
+                        kuota_rec.last_sync_mikrotik = get_now_wib()
+                        kuota_rec.updated_at = get_now_wib()
+                    else:
+                        kuota_rec = KuotaPelanggan(
+                            id_pelanggan=cid,
+                            periode_bulan=current_period,
+                            kuota_terpakai_gb=total_gb,
+                            upload_bytes=up_b,
+                            download_bytes=dl_b,
+                            last_sync_mikrotik=get_now_wib()
+                        )
+                        tenant_db.add(kuota_rec)
+                        tenant_db.flush()
 
-                # Update queue_name jika belum tersimpan
-                p = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cid).first()
-                if p and not p.queue_name and q.get("name"):
-                    p.queue_name = q.get("name")
+                    synced_cids[cid] = kuota_rec
 
-                total_synced += 1
+                    # Update queue_name jika belum tersimpan
+                    p = tenant_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cid).first()
+                    if p and not p.queue_name and q.get("name"):
+                        p.queue_name = q.get("name")
 
-        db.commit()
-        msg = f"Berhasil menyinkronkan {total_synced} data pemakaian kuota dari Simple Queues MikroTik ke database!"
+                    total_synced += 1
+
+                tenant_db.commit()
+            except Exception as e:
+                tenant_db.rollback()
+                logger.error(f"[SYNC-KUOTA] Gagal sync kuota kantor '{knt}': {e}")
+            finally:
+                tenant_db.close()
+
+        msg = f"Berhasil menyinkronkan {total_synced} data pemakaian kuota dari Simple Queues MikroTik ke database tenant masing-masing kantor!"
         logger.info(f"[SYNC-KUOTA] {msg}")
         return {"success": True, "total_synced": total_synced, "message": msg}
 
