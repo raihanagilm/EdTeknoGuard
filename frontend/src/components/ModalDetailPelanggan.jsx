@@ -12,7 +12,9 @@ import {
   FileText,
   Server,
   KeyRound,
-  RotateCcw
+  RotateCcw,
+  Thermometer,
+  Gauge
 } from 'lucide-react'
 
 export function ModalDetailPelanggan({
@@ -234,6 +236,28 @@ export function ModalDetailPelanggan({
                   <div>
                     <span className="text-slate-400 block text-[10px]">Jenis Modem:</span>
                     <span className="font-bold text-slate-900">{customer.jenis_modem || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px] flex items-center gap-0.5">
+                      <Thermometer className="w-2.5 h-2.5 text-amber-600" />
+                      <span>Suhu ONT Terakhir:</span>
+                    </span>
+                    <span className="font-bold text-slate-900">
+                      {customer.suhu_ont !== undefined && customer.suhu_ont !== null
+                        ? `${customer.suhu_ont}°C`
+                        : '-'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px] flex items-center gap-0.5">
+                      <Gauge className="w-2.5 h-2.5 text-cyan-600" />
+                      <span>Latensi Terakhir:</span>
+                    </span>
+                    <span className="font-bold text-slate-900">
+                      {customer.latency_ms !== undefined && customer.latency_ms !== null
+                        ? `${customer.latency_ms} ms`
+                        : '-'}
+                    </span>
                   </div>
                 </div>
               </div>

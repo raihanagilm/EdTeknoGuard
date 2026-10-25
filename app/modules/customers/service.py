@@ -184,6 +184,7 @@ class CustomerService:
                 db.query(
                     Pelanggan.id_pelanggan, 
                     PerangkatONT.ip_router, 
+                    PerangkatONT.ip_ont,
                     Pelanggan.nama,
                     Pelanggan.no_hp,
                     Pelanggan.alamat,
@@ -199,21 +200,26 @@ class CustomerService:
                 .all()
             )
             existing_ids = {row[0] for row in existing_customers if row[0]}
-            existing_by_ip = {
-                row[1]: {
+            existing_by_ip = {}
+            for row in existing_customers:
+                cust_info = {
                     "id_pelanggan": row[0],
-                    "nama": row[2] or "",
-                    "no_wa": row[3] or "",
-                    "alamat": row[4] or "",
-                    "paket": row[5] or "",
-                    "pop": row[6] or "",
-                    "kantor": row[7] or "",
-                    "nama_wifi": row[8] or "",
-                    "password_wifi": row[9] or "",
-                    "jenis_modem": row[10] or None
+                    "nama": row[3] or "",
+                    "no_wa": row[4] or "",
+                    "alamat": row[5] or "",
+                    "paket": row[6] or "",
+                    "pop": row[7] or "",
+                    "kantor": row[8] or "",
+                    "nama_wifi": row[9] or "",
+                    "password_wifi": row[10] or "",
+                    "jenis_modem": row[11] or None
                 }
-                for row in existing_customers if row[1]
-            }
+                ip_r = (row[1] or "").strip()
+                ip_o = (row[2] or "").strip()
+                if ip_r:
+                    existing_by_ip[ip_r] = cust_info
+                if ip_o:
+                    existing_by_ip[ip_o] = cust_info
 
             seen_ips_in_batch = {}  # ip_router -> original_row
             mapped_data = []
@@ -335,12 +341,13 @@ class CustomerService:
         batch_ips = {}
         duplicate_reasons = []
 
-        # Ambil IP yang sudah aktif di DB untuk verifikasi tabrakan IP
-        db_ips = {
-            row[0]: row[1] 
-            for row in db.query(PerangkatONT.ip_router, PerangkatONT.id_pelanggan).all() 
-            if row[0]
-        }
+        # Ambil IP yang sudah aktif di DB untuk verifikasi tabrakan IP (baik ip_router maupun ip_ont)
+        db_ips = {}
+        for row in db.query(PerangkatONT.ip_router, PerangkatONT.ip_ont, PerangkatONT.id_pelanggan).all():
+            if row[0]:
+                db_ips[row[0].strip()] = row[2]
+            if row[1]:
+                db_ips[row[1].strip()] = row[2]
 
         # Cache master referensi untuk validasi FK
         from app.db.models import Kantor
@@ -415,8 +422,11 @@ class CustomerService:
                     else:
                         row_kantor = "cabang"
 
-                # Cari pelanggan existing berdasarkan IP Router atau ID Pelanggan
-                existing_ont = db.query(PerangkatONT).filter(PerangkatONT.ip_router == ip_router).first()
+                # Cari pelanggan existing berdasarkan IP Router atau IP ONT atau ID Pelanggan
+                from sqlalchemy import or_
+                existing_ont = db.query(PerangkatONT).filter(
+                    or_(PerangkatONT.ip_router == ip_router, PerangkatONT.ip_ont == ip_router)
+                ).first()
                 existing_pel = None
                 if existing_ont:
                     existing_pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == existing_ont.id_pelanggan).first()
@@ -1225,19 +1235,21 @@ class CustomerService:
                     redaman_baseline = None
 
             pop = get_val(idx_pop) or "Server Cabang"
-            pop_upper = pop.upper()
-            from app.core.security import get_all_kantor_codes
-            valid_kantors = get_all_kantor_codes(db=db)
-            fallback_k = valid_kantors[0] if valid_kantors else "pusat"
+            pop_lower = pop.lower()
+            from app.db.models import Kantor
+            kantor_objs = db.query(Kantor).all()
+            valid_kantors = [k.kode.lower() for k in kantor_objs]
+            fallback_k = valid_kantors[0] if valid_kantors else "cabang"
 
-            if "PUSAT" in pop_upper and "pusat" in valid_kantors:
-                row_kantor = "pusat"
-            elif ("BMS" in pop_upper or "BANYUMAS" in pop_upper) and "banyumas" in valid_kantors:
-                row_kantor = "banyumas"
-            elif "cabang" in valid_kantors:
-                row_kantor = "cabang"
-            else:
-                row_kantor = fallback_k
+            matched_k = None
+            for k in kantor_objs:
+                k_kode = k.kode.lower()
+                k_nama = (k.nama or "").lower()
+                if (k_kode and k_kode in pop_lower) or (k_nama and k_nama in pop_lower):
+                    matched_k = k_kode
+                    break
+
+            row_kantor = matched_k if matched_k else fallback_k
 
             alamat = get_val(idx_alamat) or None
             no_hp = get_val(idx_hp) or None

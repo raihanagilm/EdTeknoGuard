@@ -769,7 +769,7 @@ export default function App() {
       <div className="lg:pl-60 flex-1 flex flex-col">
         
         {/* Top Header Bar */}
-        <header className="h-14 bg-white/90 backdrop-blur-md border-b border-sky-200/80 sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between shadow-2xs">
+        <header className="h-14 bg-white/90 backdrop-blur-md border-b border-sky-200/80 sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-2 sm:gap-3">
             <span className="text-xs font-mono font-bold text-cyan-800 uppercase tracking-wide">
               {(() => {

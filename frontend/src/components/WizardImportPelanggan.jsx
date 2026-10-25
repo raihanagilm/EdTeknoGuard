@@ -14,8 +14,7 @@ import {
   Info,
   Check,
   CheckCircle2,
-  FileSpreadsheet,
-  Download
+  FileSpreadsheet
 } from 'lucide-react'
 import { ToastNotification } from './ToastNotification'
 
@@ -43,24 +42,19 @@ export function WizardImportPelanggan({
   const [importSuccess, setImportSuccess] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL') // ALL | VALID | DUPLICATE | ERROR
 
-  // 1. Kolom Utama Pengayaan Data (Fokus No WA, Alamat & WiFi)
+  // 1. Kolom Utama Pengayaan Data (Fokus No WA, Alamat & Password WiFi)
   const PRIMARY_FIELDS = [
     { key: 'ip_router', label: 'IP Router / ONT (Kunci Pencocokan)', required: true, hint: 'Wajib diisi: 10.10.x.x (Standar ONT) atau 192.168.x.x (IP Lokal)' },
     { key: 'nama', label: 'Nama Pelanggan', required: false, hint: 'Opsional: Perbarui nama jika di database masih default' },
     { key: 'no_wa', label: 'Nomor WhatsApp / HP', required: false, hint: 'Diisi ke profil WhatsApp pelanggan' },
     { key: 'alamat', label: 'Alamat Pemasangan Rumah', required: false, hint: 'Alamat fisik pelanggan di lapangan' },
-    { key: 'nama_wifi', label: 'Nama WiFi (SSID)', required: false, hint: 'SSID WiFi Pelanggan' },
     { key: 'password_wifi', label: 'Password WiFi', required: false, hint: 'Kata sandi WiFi' }
   ]
 
   // 2. Kolom Teknis Lanjutan (Opsional)
   const ADVANCED_FIELDS = [
-    { key: 'pop', label: 'Lokasi POP / ODP', required: false, hint: 'Default: POP-01' },
-    { key: 'paket', label: 'Paket Layanan', required: false, hint: 'Default: Sesuai MikroTik' },
-    { key: 'jenis_modem', label: 'Tipe Modem ONT', required: false, hint: 'Opsional (Sesuai perangkat)' },
     { key: 'user_admin', label: 'Username ONT', required: false, hint: 'Sesuai kredensial ONT' },
-    { key: 'pass_admin', label: 'Password ONT', required: false, hint: 'Sesuai kredensial ONT' },
-    { key: 'id_pelanggan', label: 'ID Pelanggan', required: false, hint: 'Opsional (otomatis sesuai database)' }
+    { key: 'pass_admin', label: 'Password ONT', required: false, hint: 'Sesuai kredensial ONT' }
   ]
 
   const DB_IMPORT_FIELDS = [...PRIMARY_FIELDS, ...ADVANCED_FIELDS]
@@ -228,7 +222,7 @@ export function WizardImportPelanggan({
 
         if (rawPreview.length > 0 && matchCount === 0) {
           setImportError(
-            `Perhatian: Tidak ada IP yang cocok dengan data pelanggan ${activeOffice.toUpperCase()} di database. Harap periksa kembali apakah lembar kerja (sheet) "${importSelectedSheet}" atau berkas Excel yang Anda pilih sudah sesuai dengan kantor aktif saat ini!`
+            `Perhatian: Tidak ada IP pada berkas yang cocok dengan data IP Router maupun IP ONT pelanggan di database. Pastikan kolom IP terpetakan dengan benar dan berkas yang Anda pilih sudah sesuai.`
           )
         }
       } else {
@@ -594,22 +588,6 @@ export function WizardImportPelanggan({
               )}
             </div>
 
-            {/* Template Download Box */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200">
-              <div className="flex items-center gap-2">
-                <Info className="w-4 h-4 text-cyan-600 shrink-0" />
-                <span>Perlu contoh format template standar?</span>
-              </div>
-              <a
-                href="/api/customers/template-excel"
-                download="template_import_pelanggan.xlsx"
-                className="font-bold text-cyan-700 hover:text-cyan-800 underline flex items-center gap-1.5 shrink-0 bg-white px-3 py-1.5 rounded-xl border border-cyan-200 shadow-2xs hover:bg-cyan-50 transition"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Unduh Template Excel</span>
-              </a>
-            </div>
-
             {/* Step 1 Footer */}
             <div className="flex items-center justify-end gap-2 pt-3 border-t border-sky-100 font-sans">
               <button
@@ -720,7 +698,7 @@ export function WizardImportPelanggan({
                   className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition cursor-pointer border border-slate-200"
                 >
                   <span className="flex items-center gap-1.5">
-                    <span>Pengaturan Kolom Teknis Lanjutan (Modem, User Admin, POP, Paket)</span>
+                    <span>Pengaturan Kolom Kredensial ONT (Username & Password ONT)</span>
                     <span className="text-[10px] font-normal text-slate-400">(Opsional)</span>
                   </span>
                   {showAdvancedFields ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}

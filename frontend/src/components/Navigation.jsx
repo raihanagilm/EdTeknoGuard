@@ -52,7 +52,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
   };
 
   return (
-    <aside className="hidden lg:flex w-60 bg-white/95 backdrop-blur-md flex-col fixed inset-y-0 z-40 border-r border-sky-200/80 shadow-sm">
+    <aside className="hidden lg:flex w-60 bg-white/95 backdrop-blur-md flex-col fixed inset-y-0 z-50 border-r border-sky-200/80 shadow-sm">
       {/* Header Identitas */}
       <div className="h-14 flex items-center justify-between px-4 border-b border-sky-100">
         <div className="flex items-center gap-2.5">
@@ -143,7 +143,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
 
 export function MobileNav({ activeTab, setActiveTab, unreadTickets = 0 }) {
   return (
-    <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-sky-200 z-40 h-16 flex items-center px-1 shadow-md">
+    <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-sky-200 z-50 h-16 flex items-center px-1 shadow-md">
       <div className="grid grid-cols-5 w-full items-center text-xs">
         <button
           onClick={() => setActiveTab('pelanggan')}
