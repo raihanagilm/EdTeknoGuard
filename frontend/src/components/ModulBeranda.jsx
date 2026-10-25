@@ -94,6 +94,9 @@ export function ModulBeranda({
   // State Engine & Kontrol
   const [engineStatus, setEngineStatus] = useState('RUNNING')
   const [isOfficeActive, setIsOfficeActive] = useState(true)
+  const [isConfigured, setIsConfigured] = useState(true)
+  const [missingFields, setMissingFields] = useState([])
+  const [configError, setConfigError] = useState(null)
   const [lastScanTime, setLastScanTime] = useState('-')
   const [nextRunTime, setNextRunTime] = useState('-')
   const [intervalMinutes, setIntervalMinutes] = useState(10)
@@ -222,6 +225,15 @@ export function ModulBeranda({
         setEngineStatus(data.status || 'RUNNING')
         if (data.is_office_active !== undefined) {
           setIsOfficeActive(Boolean(data.is_office_active))
+        }
+        if (data.is_configured !== undefined) {
+          setIsConfigured(Boolean(data.is_configured))
+        }
+        if (data.missing_fields !== undefined) {
+          setMissingFields(data.missing_fields || [])
+        }
+        if (data.config_error !== undefined) {
+          setConfigError(data.config_error || null)
         }
         setLastScanTime(data.last_scan_time || '-')
         setNextRunTime(data.next_run_time || '-')
@@ -712,6 +724,13 @@ export function ModulBeranda({
   const handleStartScan = async () => {
     if (isScanning) return
     const targetLabel = getOfficeDisplayName(activeOffice)
+
+    if (!isConfigured) {
+      const errDetail = configError || `Pengaturan kantor ${targetLabel} belum disetel di database. Buka menu Pengaturan.`
+      showToast(errDetail, 'error')
+      return
+    }
+
     showToast(`Memulai pemindaian manual ONT ${targetLabel}...`, 'info')
     setIsScanning(true)
     try {
@@ -722,7 +741,12 @@ export function ModulBeranda({
         await fetchStatus()
         await fetchKpi()
       } else {
-        showToast(res.data?.message || 'Pemindaian sedang berjalan di latar belakang', 'info')
+        const errMsg = res.data?.message || 'Pemindaian gagal dimulai'
+        showToast(errMsg, res.data?.error_type === 'CONFIG_MISSING' ? 'error' : 'info')
+        if (res.data?.error_type === 'CONFIG_MISSING') {
+          setIsConfigured(false)
+          setConfigError(res.data?.message)
+        }
       }
     } catch (err) {
       console.error('Gagal memicu pemindaian:', err)
@@ -849,7 +873,9 @@ export function ModulBeranda({
           <div className="flex items-start sm:items-center gap-2.5 sm:gap-3">
             <div
               className={`h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 ${
-                isNetworkError
+                !isConfigured
+                  ? 'bg-rose-500 shadow-xs shadow-rose-200'
+                  : isNetworkError
                   ? 'bg-rose-500 shadow-xs shadow-rose-200'
                   : engineStatus === 'RUNNING'
                   ? 'bg-emerald-500 shadow-xs shadow-emerald-200'
@@ -858,7 +884,7 @@ export function ModulBeranda({
             >
               <div
                 className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-white ${
-                  engineStatus === 'RUNNING' && !isNetworkError ? 'animate-ping' : ''
+                  isConfigured && engineStatus === 'RUNNING' && !isNetworkError ? 'animate-ping' : ''
                 }`}
               />
             </div>
@@ -866,7 +892,11 @@ export function ModulBeranda({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <span className="text-xs sm:text-sm font-black text-slate-900 font-mono leading-tight">
-                  {isNetworkError ? (
+                  {!isConfigured ? (
+                    <span className="text-rose-600">
+                      Pengaturan Belum Disetel di Database
+                    </span>
+                  ) : isNetworkError ? (
                     <span className="text-rose-600">
                       Pemantauan: Gagal Terhubung
                     </span>
@@ -885,7 +915,9 @@ export function ModulBeranda({
 
                 <span
                   className={`px-1.5 py-0.5 rounded text-[11px] font-black font-mono uppercase tracking-wide border ${
-                    isNetworkError
+                    !isConfigured
+                      ? 'bg-rose-50 text-rose-800 border-rose-200'
+                      : isNetworkError
                       ? 'bg-rose-50 text-rose-800 border-rose-200'
                       : !isOfficeActive
                       ? 'bg-slate-100 text-slate-600 border-slate-300'
@@ -894,7 +926,7 @@ export function ModulBeranda({
                       : 'bg-amber-50 text-amber-800 border-amber-200'
                   }`}
                 >
-                  {isNetworkError ? 'GAGAL JARINGAN' : !isOfficeActive ? 'NONAKTIF' : engineStatus === 'RUNNING' ? 'BERJALAN' : 'DIJEDA'}
+                  {!isConfigured ? 'BELUM DISETEL' : isNetworkError ? 'GAGAL JARINGAN' : !isOfficeActive ? 'NONAKTIF' : engineStatus === 'RUNNING' ? 'BERJALAN' : 'DIJEDA'}
                 </span>
               </div>
 
@@ -947,18 +979,26 @@ export function ModulBeranda({
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={handleStartScan}
-                    disabled={isToggling || (isScanning && isCurrentOfficeScan) || !isOfficeActive}
-                    title={!isOfficeActive ? 'Kantor dalam status nonaktif. Aktifkan kantor di menu Kantor Cabang untuk memindai.' : 'Mulai pemindaian sinyal redaman'}
-                    className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px] ${
+                    disabled={isToggling || (isScanning && isCurrentOfficeScan) || !isOfficeActive || !isConfigured}
+                    title={
                       !isOfficeActive
+                        ? 'Kantor dalam status nonaktif. Aktifkan kantor di menu Kantor Cabang untuk memindai.'
+                        : !isConfigured
+                        ? (configError || 'Pengaturan sistem kantor belum disetel di database. Buka menu Pengaturan untuk menyimpan.')
+                        : 'Mulai pemindaian sinyal redaman'
+                    }
+                    className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px] ${
+                      !isOfficeActive || !isConfigured
                         ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed opacity-60'
                         : 'bg-cyan-700 hover:bg-cyan-800 text-white cursor-pointer disabled:opacity-50'
                     }`}
                   >
-                    <Play className={`w-4 h-4 ${!isOfficeActive ? 'fill-slate-400 text-slate-400' : 'fill-white'}`} />
+                    <Play className={`w-4 h-4 ${!isOfficeActive || !isConfigured ? 'fill-slate-400 text-slate-400' : 'fill-white'}`} />
                     <span>
                       {!isOfficeActive
                         ? 'Kantor Nonaktif'
+                        : !isConfigured
+                        ? 'Pengaturan Kosong'
                         : activeOffice && activeOffice !== 'all'
                         ? `Pindai ${getOfficeDisplayName(activeOffice)}`
                         : 'Mulai Pemantauan (Semua)'}

@@ -26,6 +26,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penghapusan Total Data Default Hardcoded & Proteksi Pemantauan Berbasis Database ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py), [settings/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/service.py), [ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx))**:
+  - **Larangan Nilai Fallback Hardcoded**: Menghapus seluruh nilai bawaan hardcoded (ambang batas warning -26.0, kritis -27.0/-32.0, interval 20 menit, dan pasangan kredensial `admin/tekno2024`, `tekno/tekno2025`). Seluruh konfigurasi pemantauan sekarang **wajib murni diambil dari database** per kantor.
+  - **Blokir Pemindaian Jika Belum Disetel di Database**: Jika pengaturan sistem (ambang batas warning/kritis, interval, atau kredensial modem) belum ada/belum disetel di database kantor:
+    1. Pemantauan otomatis di latar belakang (*background scheduler*) otomatis **dibatalkan/dilewati** dan sistem dilarang mulai bekerja.
+    2. Pemindaian manual (*Scan All* & *Single Probe*) langsung ditolak dengan status error `CONFIG_MISSING`.
+    3. Tombol "Mulai Pemantauan" di Beranda otomatis berstatus dinonaktifkan (*disabled*) dengan label "Pengaturan Kosong".
+  - **Notifikasi In-App & Banner Peringatan**: Sistem memunculkan notifikasi tingkat tinggi (*level: critical*) pada Notification Center serta banner status pada Control Bar Beranda yang memberitahukan secara spesifik parameter mana yang belum disetel dan mengarahkan admin/teknisi untuk mengisi di menu Pengaturan.
+
 - **Perbaikan Reaktivitas Sorting Tabel Riwayat Redaman ([ModulRiwayatRedaman.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulRiwayatRedaman.jsx), [logs_mgmt/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/logs_mgmt/service.py))**:
   - **Dependency Array useEffect**: Menambahkan `sortField` dan `sortDir` ke daftar dependensi `useEffect` sehingga setiap klik header kolom tabel (Waktu Cek, ID Pelanggan, Nama, IP, Sinyal, Suhu, Status) seketika memicu pemanggilan data yang terurut secara realtime.
   - **Backend Sort Mapping**: Menambahkan pemetaan kolom `id_pelanggan` pada `sort_column_map` di [LogsMgmtService](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/logs_mgmt/service.py).

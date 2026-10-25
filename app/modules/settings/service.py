@@ -57,20 +57,21 @@ class SystemSettingsService:
             for r in office_rows:
                 db_settings[r.key_name] = r.value_text
 
-        try:
-            polling_interval = int(db_settings.get("polling_interval_minutes", "20"))
-        except (ValueError, TypeError):
-            polling_interval = 20
+        # Nilai murni dari database tanpa fallback hardcoded
+        polling_interval_val = db_settings.get("polling_interval_minutes")
+        polling_interval = int(polling_interval_val) if (polling_interval_val and polling_interval_val.isdigit()) else None
 
+        warn_th_val = db_settings.get("warning_threshold_dbm")
         try:
-            warning_threshold = float(db_settings.get("warning_threshold_dbm", "-26.0"))
+            warning_threshold = float(warn_th_val) if warn_th_val else None
         except (ValueError, TypeError):
-            warning_threshold = -26.0
+            warning_threshold = None
 
+        crit_th_val = db_settings.get("critical_threshold_dbm")
         try:
-            critical_threshold = float(db_settings.get("critical_threshold_dbm", "-27.0"))
+            critical_threshold = float(crit_th_val) if crit_th_val else None
         except (ValueError, TypeError):
-            critical_threshold = -27.0
+            critical_threshold = None
 
         try:
             notif_interval_hours = float(db_settings.get("notification_alert_interval_hours", "1.0"))
@@ -88,8 +89,8 @@ class SystemSettingsService:
             alert_waiting_minutes = 5
 
         scheduler_status = db_settings.get("scheduler_status", "RUNNING")
-        default_user = db_settings.get("default_modem_user", "admin")
-        default_pass = db_settings.get("default_modem_pass", "tekno2024")
+        default_user = db_settings.get("default_modem_user")
+        default_pass = db_settings.get("default_modem_pass")
 
         # 1. Coba baca dari tabel ternormalisasi modem_credentials
         from app.db.models import ModemCredential
@@ -105,9 +106,10 @@ class SystemSettingsService:
                 credentials_list = [
                     {"username": r.username, "password": r.password}
                     for r in creds_rows
+                    if r.username
                 ]
 
-        # 2. Fallback ke JSON di system_settings jika belum ada di tabel modem_credentials
+        # 2. Baca dari system_settings jika belum ada di tabel modem_credentials
         if not credentials_list:
             raw_creds = db_settings.get("default_modem_credentials", "")
             if raw_creds:
@@ -122,12 +124,8 @@ class SystemSettingsService:
                 except Exception:
                     credentials_list = []
 
-        if not credentials_list:
-            credentials_list = [
-                {"username": default_user, "password": default_pass},
-                {"username": "admin", "password": "admin"},
-                {"username": "tekno", "password": "tekno2025"}
-            ]
+        if not credentials_list and default_user:
+            credentials_list = [{"username": default_user, "password": default_pass or ""}]
 
         # MikroTik Settings
         mikrotik_host = db_settings.get("mikrotik_host", getattr(settings, "MIKROTIK_HOST", "192.168.202.50"))
@@ -141,8 +139,20 @@ class SystemSettingsService:
         mikrotik_auto = db_settings.get("mikrotik_auto_sync", "true").lower() in ["true", "1", "yes"]
         apply_invalid = db_settings.get("apply_to_invalid_customers", "false").lower() in ["true", "1", "yes"]
 
+        missing_cfg = []
+        if polling_interval is None:
+            missing_cfg.append("Interval Pemantauan")
+        if warning_threshold is None:
+            missing_cfg.append("Ambang Batas Peringatan")
+        if critical_threshold is None:
+            missing_cfg.append("Ambang Batas Kritis")
+        if not credentials_list:
+            missing_cfg.append("Kredensial Modem ONT")
+
         return {
             "kantor": k or "all",
+            "is_configured": len(missing_cfg) == 0,
+            "missing_fields": missing_cfg,
             "polling_interval_minutes": polling_interval,
             "warning_threshold_dbm": warning_threshold,
             "critical_threshold_dbm": critical_threshold,

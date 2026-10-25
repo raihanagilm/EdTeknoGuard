@@ -168,10 +168,10 @@ class MonitoringScheduler:
 
 
     @classmethod
-    def get_setting_from_db(cls, db: Session, key: str, default: str, kantor: Optional[str] = None) -> str:
+    def get_setting_from_db(cls, db: Session, key: str, default: Optional[str] = None, kantor: Optional[str] = None) -> Optional[str]:
+        """Mengambil nilai setting dari database. Jika key tidak ditemukan di DB, kembalikan default (bisa None)."""
         k = kantor.lower().strip() if kantor and kantor != "all" else None
         if k:
-            # Cari Kantor untuk dapatkan id_kantor jika ada
             from app.db.models import Kantor
             k_obj = db.query(Kantor).filter((Kantor.nama.ilike(k)) | (Kantor.id_kantor == (int(k) if k.isdigit() else -1))).first()
             if k_obj:
@@ -181,11 +181,87 @@ class MonitoringScheduler:
                 ).first()
             else:
                 item = db.query(SystemSetting).filter(SystemSetting.key_name == key, SystemSetting.kantor_kode == k).first()
-            if item and item.value_text is not None:
+            if item and item.value_text is not None and str(item.value_text).strip() != "":
                 return item.value_text
-        # Fallback ke setting global (kantor_kode IS NULL dan id_kantor IS NULL)
+        # Setting global (kantor_kode IS NULL dan id_kantor IS NULL)
         item_global = db.query(SystemSetting).filter(SystemSetting.key_name == key, SystemSetting.id_kantor.is_(None), SystemSetting.kantor_kode.is_(None)).first()
-        return item_global.value_text if (item_global and item_global.value_text is not None) else default
+        if item_global and item_global.value_text is not None and str(item_global.value_text).strip() != "":
+            return item_global.value_text
+        return default
+
+    @classmethod
+    def check_office_configuration(cls, db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Validasi ketat konfigurasi kantor dari database.
+        TIDAK BOLEH ADA NILAI DEFAULT. Semua data harus murni ada di database.
+        Jika belum ada di database, sistem dilarang mulai bekerja.
+        """
+        k = kantor.lower().strip() if kantor and kantor != "all" else None
+        missing = []
+
+        warn_th_str = cls.get_setting_from_db(db, "warning_threshold_dbm", None, kantor=k)
+        if warn_th_str is None or warn_th_str.strip() == "":
+            missing.append("warning_threshold_dbm (Ambang Batas Peringatan)")
+
+        crit_th_str = cls.get_setting_from_db(db, "critical_threshold_dbm", None, kantor=k)
+        if crit_th_str is None or crit_th_str.strip() == "":
+            missing.append("critical_threshold_dbm (Ambang Batas Kritis)")
+
+        interval_str = cls.get_setting_from_db(db, "polling_interval_minutes", None, kantor=k)
+        if interval_str is None or interval_str.strip() == "":
+            missing.append("polling_interval_minutes (Interval Pemantauan)")
+
+        # Periksa kredensial modem ONT murni dari database:
+        # 1. Dari tabel ternormalisasi modem_credentials
+        from app.db.models import ModemCredential
+        creds_list = []
+        if k:
+            k_alt = k.replace('_', ' ') if '_' in k else k.replace(' ', '_')
+            creds_rows = db.query(ModemCredential).filter(
+                (ModemCredential.kantor_kode == k) | (ModemCredential.kantor_kode == k_alt)
+            ).all()
+            for r in creds_rows:
+                if r.username and r.username.strip():
+                    creds_list.append((r.username.strip(), (r.password or "").strip()))
+
+        # 2. Dari system_settings default_modem_credentials (JSON)
+        if not creds_list:
+            raw_creds = cls.get_setting_from_db(db, "default_modem_credentials", None, kantor=k)
+            if raw_creds and raw_creds.strip() not in ["", "[]"]:
+                try:
+                    p_creds = json.loads(raw_creds)
+                    if isinstance(p_creds, list):
+                        for c in p_creds:
+                            u = str(c.get("username", "")).strip()
+                            p = str(c.get("password", "")).strip()
+                            if u:
+                                creds_list.append((u, p))
+                except Exception:
+                    pass
+
+        # 3. Dari default_modem_user & default_modem_pass di system_settings
+        if not creds_list:
+            u_single = cls.get_setting_from_db(db, "default_modem_user", None, kantor=k)
+            p_single = cls.get_setting_from_db(db, "default_modem_pass", None, kantor=k)
+            if u_single and u_single.strip():
+                creds_list.append((u_single.strip(), (p_single or "").strip()))
+
+        if not creds_list:
+            missing.append("default_modem_credentials (Kredensial Modem ONT)")
+
+        is_configured = (len(missing) == 0)
+        office_label = k.upper() if k else "SEMUA KANTOR"
+        error_msg = f"Pengaturan pemantauan kantor '{office_label}' belum disetel di database ({', '.join(missing)}). Silakan simpan pengaturan terlebih dahulu di menu Pengaturan." if not is_configured else None
+
+        return {
+            "is_configured": is_configured,
+            "missing_fields": missing,
+            "error_message": error_msg,
+            "warn_threshold": float(warn_th_str) if (warn_th_str and not warn_th_str.isalpha()) else None,
+            "crit_threshold": float(crit_th_str) if (crit_th_str and not crit_th_str.isalpha()) else None,
+            "interval_minutes": int(interval_str) if (interval_str and interval_str.isdigit()) else None,
+            "credentials": creds_list
+        }
 
     @classmethod
     def set_setting_in_db(cls, db: Session, key: str, value: str, kantor: Optional[str] = None):
@@ -633,6 +709,12 @@ class MonitoringScheduler:
             else:
                 next_run_time_str = "Segera"
 
+        # Cek apakah konfigurasi kantor di database sudah lengkap (strict database check)
+        cfg_check = self.check_office_configuration(db, kantor=k if k != "all" else None)
+        is_configured = cfg_check["is_configured"]
+        config_error = cfg_check["error_message"]
+        missing_fields = cfg_check["missing_fields"]
+
         # Cek apakah ada kantor lain yang saat ini sedang memindai
         other_active_scans = []
         with self._state_lock:
@@ -643,6 +725,9 @@ class MonitoringScheduler:
         return {
             "status": status,
             "is_office_active": is_office_active,
+            "is_configured": is_configured,
+            "missing_fields": missing_fields,
+            "config_error": config_error,
             "interval_minutes": interval,
             "last_scan_time": last_scan,
             "next_run_time": next_run_time_str,
@@ -685,16 +770,24 @@ class MonitoringScheduler:
 
         # Eksekusi pemindaian mandiri untuk setiap kantor yang status scheduler-nya RUNNING dan intervalnya sudah tercapai
         now_dt = get_now_wib()
+        from app.core.tenant_database import TenantDatabaseManager
         for k_kode in kantor_kodes:
-            db_k = SessionLocal()
+            db_k = TenantDatabaseManager.get_tenant_session(k_kode)
             try:
+                # Validasi konfigurasi ketat: jika pengaturan belum lengkap di DB tenant, JANGAN MULAI BEKERJA
+                cfg_check = self.check_office_configuration(db_k, kantor=k_kode)
+                if not cfg_check["is_configured"]:
+                    logger.warning(f"[SCHEDULER] Kantor '{k_kode.upper()}' dilewati: {cfg_check['error_message']}")
+                    continue
+
                 k_status = self.get_setting_from_db(db_k, "scheduler_status", "RUNNING", kantor=k_kode)
-                
                 if k_status != "RUNNING":
                     continue
 
-                interval_str = self.get_setting_from_db(db_k, "polling_interval_minutes", str(settings.POLLING_INTERVAL_MINUTES), kantor=k_kode)
-                interval_minutes = int(interval_str) if interval_str.isdigit() else settings.POLLING_INTERVAL_MINUTES
+                interval_minutes = cfg_check["interval_minutes"]
+                if not interval_minutes or interval_minutes <= 0:
+                    continue
+
                 last_scan_str = self.get_setting_from_db(db_k, "last_scan_time", "-", kantor=k_kode)
                 
                 # Cek apakah sudah waktunya scan berdasarkan interval kantor di DB
@@ -818,33 +911,28 @@ class MonitoringScheduler:
             los_by_pop = {}
             los_pending_alerts = []
 
-            # Ambil threshold dan kredensial modem ONT dengan prioritas spesifik kantor, fallback ke global
-            eff_warn_th = float(self.get_setting_from_db(db, "warning_threshold_dbm", str(settings.WARNING_THRESHOLD_DBM), kantor=k if k != "all" else None))
-            eff_crit_th = float(self.get_setting_from_db(db, "critical_threshold_dbm", str(settings.CRITICAL_THRESHOLD_DBM), kantor=k if k != "all" else None))
-            default_user = self.get_setting_from_db(db, "default_modem_user", None, kantor=k if k != "all" else None)
-            default_pass = self.get_setting_from_db(db, "default_modem_pass", None, kantor=k if k != "all" else None)
-            raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=k if k != "all" else None)
+            # VALIDASI KETAT DATABASE: Jika konfigurasi kantor belum ada di database, JANGAN MULAI BEKERJA!
+            cfg_check = self.check_office_configuration(db, kantor=k if k != "all" else None)
+            if not cfg_check["is_configured"]:
+                with state.lock:
+                    state.is_scanning = False
+                    state.scan_current = 0
+                logger.warning(f"[SCAN] Pemindaian dibatalkan: {cfg_check['error_message']}")
+                return {
+                    "status": "error",
+                    "error_type": "CONFIG_MISSING",
+                    "is_configured": False,
+                    "missing_fields": cfg_check["missing_fields"],
+                    "message": cfg_check["error_message"],
+                    "target_kantor": k
+                }
 
-            # Jika kredensial spesifik kantor kosong, fallback ke kredensial global
-            if not default_user:
-                default_user = self.get_setting_from_db(db, "default_modem_user", "admin", kantor=None)
-            if not default_pass:
-                default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024", kantor=None)
-            if not raw_creds or raw_creds == "[]":
-                raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=None)
-
-            default_creds_list = []
-            try:
-                import json
-                p_creds = json.loads(raw_creds)
-                if isinstance(p_creds, list):
-                    default_creds_list = [(c.get("username", ""), c.get("password", "")) for c in p_creds if c.get("username")]
-            except Exception:
-                default_creds_list = []
-
-            # Tambahkan default_user & default_pass ke daftar jika belum ada
-            if default_user and default_pass and (default_user, default_pass) not in default_creds_list:
-                default_creds_list.insert(0, (default_user, default_pass))
+            eff_warn_th = cfg_check["warn_threshold"]
+            eff_crit_th = cfg_check["crit_threshold"]
+            default_creds_list = cfg_check["credentials"]
+            primary_cred = default_creds_list[0] if default_creds_list else (None, None)
+            default_user = primary_cred[0]
+            default_pass = primary_cred[1]
 
             unreachable_count = 0
             stats_lock = threading.Lock()
@@ -1498,32 +1586,30 @@ class MonitoringScheduler:
                     "is_offline": True
                 }
 
-            default_user = self.get_setting_from_db(db, "default_modem_user", None, kantor=cust_kantor)
-            default_pass = self.get_setting_from_db(db, "default_modem_pass", None, kantor=cust_kantor)
-            raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=cust_kantor)
+            # Validasi ketat konfigurasi database untuk kantor pelanggan
+            cfg_check = self.check_office_configuration(db, kantor=cust_kantor)
+            if not cfg_check["is_configured"]:
+                return {
+                    "id_pelanggan": cust.id_pelanggan,
+                    "nama": cust.nama,
+                    "status_koneksi": "CONFIG_MISSING",
+                    "status": "CONFIG_MISSING",
+                    "rx_power": None,
+                    "suhu_ont": None,
+                    "mac_address": cust.mac_address,
+                    "status_kredensial": cust.status_kredensial,
+                    "waktu_cek": get_now_wib().strftime("%Y-%m-%d %H:%M:%S"),
+                    "message": f"Uji sinyal ditolak: {cfg_check['error_message']}",
+                    "success": False,
+                    "is_configured": False
+                }
 
-            # Jika kredensial spesifik kantor kosong, fallback ke kredensial global
-            if not default_user:
-                default_user = self.get_setting_from_db(db, "default_modem_user", "admin", kantor=None)
-            if not default_pass:
-                default_pass = self.get_setting_from_db(db, "default_modem_pass", "tekno2024", kantor=None)
-            if not raw_creds or raw_creds == "[]":
-                raw_creds = self.get_setting_from_db(db, "default_modem_credentials", "[]", kantor=None)
-
-            default_creds_list = []
-            try:
-                import json
-                p_creds = json.loads(raw_creds)
-                if isinstance(p_creds, list):
-                    default_creds_list = [(c.get("username", ""), c.get("password", "")) for c in p_creds if c.get("username")]
-            except Exception:
-                default_creds_list = []
-
-            if default_user and default_pass and (default_user, default_pass) not in default_creds_list:
-                default_creds_list.insert(0, (default_user, default_pass))
-
-            eff_warn_th = float(self.get_setting_from_db(db, "warning_threshold_dbm", str(settings.WARNING_THRESHOLD_DBM), kantor=cust_kantor))
-            eff_crit_th = float(self.get_setting_from_db(db, "critical_threshold_dbm", str(settings.CRITICAL_THRESHOLD_DBM), kantor=cust_kantor))
+            eff_warn_th = cfg_check["warn_threshold"]
+            eff_crit_th = cfg_check["crit_threshold"]
+            default_creds_list = cfg_check["credentials"]
+            primary_cred = default_creds_list[0] if default_creds_list else (None, None)
+            default_user = primary_cred[0]
+            default_pass = primary_cred[1]
             target_scrape_ip = cust.ip_ont or cust.ip_router
             scrape_res = ONTScraperService.scrape_ont(
                 ip=target_scrape_ip,

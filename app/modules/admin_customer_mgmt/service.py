@@ -457,6 +457,29 @@ class AdminCustomerMgmtService:
                     "time": get_now_wib().strftime("%H:%M")
                 })
 
+        # -------------------------------------------------------------
+        # 5. PERINGATAN KONFIGURASI DATABASE BELUM LENGKAP
+        # -------------------------------------------------------------
+        from app.services.scheduler_service import ont_scheduler
+        cfg_check = ont_scheduler.check_office_configuration(db, kantor=kantor)
+        if not cfg_check["is_configured"]:
+            k_tag = (kantor or "SEMUA").upper()
+            config_notif_key = f"cfg_missing_{kantor or 'all'}"
+            items_list.insert(0, {
+                "id": config_notif_key,
+                "reference_id": config_notif_key,
+                "type": "config_missing",
+                "title": f"Pengaturan Kantor {k_tag} Belum Lengkap",
+                "message": f"{cfg_check['error_message']} Pemantauan otomatis dan manual dihentikan sampai data disimpan.",
+                "target_tab": "pengaturan",
+                "target_filter": "",
+                "level": "critical",
+                "badge": "PENGATURAN",
+                "time": get_now_wib().strftime("%H:%M"),
+                "kantor": kantor or "all",
+                "is_critical": True
+            })
+
         # Ambil konfigurasi notifikasi (Getaran, Interval, Mode Malam, Interval Pemantauan)
         from app.modules.settings.service import SystemSettingsService
         current_cfg = SystemSettingsService.get_settings(db, kantor=kantor)

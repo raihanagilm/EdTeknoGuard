@@ -163,16 +163,22 @@ export default function App() {
       const res = await fetch(`/api/pengaturan${q}`)
       if (res.ok) {
         const data = await res.json()
-        if (data.polling_interval_minutes) setPollingInterval(data.polling_interval_minutes)
-        if (data.warning_threshold_dbm !== undefined) setWarnThreshold(data.warning_threshold_dbm)
-        if (data.critical_threshold_dbm !== undefined) setCritThreshold(data.critical_threshold_dbm)
+        if (data.polling_interval_minutes !== undefined && data.polling_interval_minutes !== null) {
+          setPollingInterval(data.polling_interval_minutes)
+        }
+        if (data.warning_threshold_dbm !== undefined && data.warning_threshold_dbm !== null) {
+          setWarnThreshold(data.warning_threshold_dbm)
+        }
+        if (data.critical_threshold_dbm !== undefined && data.critical_threshold_dbm !== null) {
+          setCritThreshold(data.critical_threshold_dbm)
+        }
         if (data.app_vibration_enabled !== undefined) setAppVibration(data.app_vibration_enabled)
         if (data.alert_waiting_interval_minutes) setAlertWaitingInterval(data.alert_waiting_interval_minutes)
         if (data.night_mode_enabled !== undefined) setNightModeEnabled(data.night_mode_enabled)
         if (data.night_mode_start) setNightModeStart(data.night_mode_start)
         if (data.night_mode_end) setNightModeEnd(data.night_mode_end)
-        if (data.default_modem_credentials && Array.isArray(data.default_modem_credentials) && data.default_modem_credentials.length > 0) {
-          setModemCredentials(data.default_modem_credentials)
+        if (data.default_modem_credentials !== undefined) {
+          setModemCredentials(Array.isArray(data.default_modem_credentials) ? data.default_modem_credentials : [])
         }
         if (data.apply_to_invalid_customers !== undefined) {
           setApplyToInvalid(Boolean(data.apply_to_invalid_customers))
