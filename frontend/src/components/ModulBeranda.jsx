@@ -37,6 +37,8 @@ import {
 import Chart from 'chart.js/auto'
 import { MonitoringService } from '../services/api'
 import { ModuleHeader, MetricCard, SegmentedStatusBar } from './CommonUI'
+import { ConfirmDialogModal } from './ConfirmDialogModal'
+import { ToastNotification } from './ToastNotification'
 
 // Transformasi Non-linear Sumbu Y (Piecewise Stretched Scale)
 const TICK_DBM_LIST = [0, 5, 10, 15, 20, 25.0, 25.5, 26.0, 26.5, 27.0, 30.0, 35.0]
@@ -101,9 +103,15 @@ export function ModulBeranda({
   const [nextRunTime, setNextRunTime] = useState('-')
   const [intervalMinutes, setIntervalMinutes] = useState(10)
   const [isScanning, setIsScanning] = useState(false)
+  const [isStartingScan, setIsStartingScan] = useState(false)
+  const [scanActionType, setScanActionType] = useState(null) // null | 'pause' | 'resume' | 'stop'
+  const [isStopModalOpen, setIsStopModalOpen] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
   const [isNetworkError, setIsNetworkError] = useState(false)
   const [unreadTicketsCount, setUnreadTicketsCount] = useState(0)
+
+  // Mutex lock untuk mencegah double-click mikro saat request in-flight
+  const actionInProgressRef = useRef(false)
 
   // State Progres Pemindaian
   const [scanProgress, setScanProgress] = useState({
@@ -720,23 +728,32 @@ export function ModulBeranda({
     }
   }, [isScanning, scanProgress?.is_scanning, chartRange, fetchStatus, fetchKpi, fetchNotifications, loadChartData])
 
+  // Helper pengunci aksi kontrol
+  const isAnyActionLoading = isStartingScan || Boolean(scanActionType) || isToggling
+
   // Handler Kontrol Pemindaian
   const handleStartScan = async () => {
-    if (isScanning) return
-    const targetLabel = getOfficeDisplayName(activeOffice)
+    // Sinkron mutex check
+    if (actionInProgressRef.current || isScanning || isAnyActionLoading) {
+      return
+    }
 
+    const targetLabel = getOfficeDisplayName(activeOffice)
     if (!isConfigured) {
       const errDetail = configError || `Pengaturan kantor ${targetLabel} belum disetel di database. Buka menu Pengaturan.`
       showToast(errDetail, 'error')
       return
     }
 
+    actionInProgressRef.current = true
+    setIsStartingScan(true)
     showToast(`Memulai pemindaian manual ONT ${targetLabel}...`, 'info')
-    setIsScanning(true)
+
     try {
       const res = await MonitoringService.triggerScanAll({ kantor: activeOffice })
       if (res.ok && res.data && res.data.status !== 'error') {
         setIsNetworkError(false)
+        setIsScanning(true)
         showToast(res.data?.message || `Pemindaian ONT ${targetLabel} berhasil dimulai!`, 'success')
         await fetchStatus()
         await fetchKpi()
@@ -753,12 +770,19 @@ export function ModulBeranda({
       showToast('Koneksi Gagal: Tidak dapat menghubungi modem ONT (10.10.x.x)', 'error')
       setIsNetworkError(true)
     } finally {
+      // Seketika buka kunci saat request selesai
+      actionInProgressRef.current = false
+      setIsStartingScan(false)
       fetchStatus()
       fetchKpi()
     }
   }
 
   const handlePauseScan = async () => {
+    if (actionInProgressRef.current || isAnyActionLoading) return
+    actionInProgressRef.current = true
+    setScanActionType('pause')
+
     try {
       const res = await MonitoringService.pauseScan({ kantor: activeOffice })
       if (res.ok && res.data?.status !== 'error') {
@@ -769,10 +793,17 @@ export function ModulBeranda({
       }
     } catch (err) {
       showToast('Gagal menjeda pemindaian', 'error')
+    } finally {
+      actionInProgressRef.current = false
+      setScanActionType(null)
     }
   }
 
   const handleResumeScan = async () => {
+    if (actionInProgressRef.current || isAnyActionLoading) return
+    actionInProgressRef.current = true
+    setScanActionType('resume')
+
     try {
       const res = await MonitoringService.resumeScan({ kantor: activeOffice })
       if (res.ok && res.data?.status !== 'error') {
@@ -784,11 +815,24 @@ export function ModulBeranda({
       }
     } catch (err) {
       showToast('Gagal melanjutkan pemindaian', 'error')
+    } finally {
+      actionInProgressRef.current = false
+      setScanActionType(null)
     }
   }
 
-  const handleStopScan = async () => {
-    if (!window.confirm('Hentikan paksa pemindaian? Progres pemindaian saat ini akan direset ke awal.')) return
+  // Buka dialog konfirmasi custom untuk menghentikan pemindaian
+  const handleOpenStopModal = () => {
+    if (actionInProgressRef.current || isAnyActionLoading) return
+    setIsStopModalOpen(true)
+  }
+
+  // Eksekusi penghentian pemindaian setelah dikonfirmasi
+  const handleConfirmStopScan = async () => {
+    if (actionInProgressRef.current) return
+    actionInProgressRef.current = true
+    setScanActionType('stop')
+
     try {
       const res = await MonitoringService.stopScan({ kantor: activeOffice })
       if (res.ok && res.data?.status !== 'error') {
@@ -801,12 +845,18 @@ export function ModulBeranda({
       }
     } catch (err) {
       showToast('Gagal menghentikan pemindaian', 'error')
+    } finally {
+      setIsStopModalOpen(false)
+      actionInProgressRef.current = false
+      setScanActionType(null)
     }
   }
 
   const handleToggleScheduler = async () => {
-    if (isScanning || isToggling) return
+    if (actionInProgressRef.current || isScanning || isAnyActionLoading) return
+    actionInProgressRef.current = true
     setIsToggling(true)
+
     try {
       const wasRunning = engineStatus === 'RUNNING'
       const res = await MonitoringService.toggleScheduler({ kantor: activeOffice })
@@ -823,6 +873,7 @@ export function ModulBeranda({
     } catch (err) {
       showToast('Gagal mengubah jadwal pemantauan', 'error')
     } finally {
+      actionInProgressRef.current = false
       setIsToggling(false)
     }
   }
@@ -979,23 +1030,33 @@ export function ModulBeranda({
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={handleStartScan}
-                    disabled={isToggling || (isScanning && isCurrentOfficeScan) || !isOfficeActive || !isConfigured}
+                    disabled={isAnyActionLoading || (isScanning && isCurrentOfficeScan) || !isOfficeActive || !isConfigured}
                     title={
                       !isOfficeActive
                         ? 'Kantor dalam status nonaktif. Aktifkan kantor di menu Kantor Cabang untuk memindai.'
                         : !isConfigured
                         ? (configError || 'Pengaturan sistem kantor belum disetel di database. Buka menu Pengaturan untuk menyimpan.')
+                        : isStartingScan
+                        ? 'Sedang memproses perintah pemindaian...'
                         : 'Mulai pemindaian sinyal redaman'
                     }
                     className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm min-h-[38px] ${
                       !isOfficeActive || !isConfigured
                         ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed opacity-60'
+                        : isStartingScan
+                        ? 'bg-cyan-800 text-white cursor-wait opacity-80'
                         : 'bg-cyan-700 hover:bg-cyan-800 text-white cursor-pointer disabled:opacity-50'
                     }`}
                   >
-                    <Play className={`w-4 h-4 ${!isOfficeActive || !isConfigured ? 'fill-slate-400 text-slate-400' : 'fill-white'}`} />
+                    {isStartingScan ? (
+                      <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    ) : (
+                      <Play className={`w-4 h-4 ${!isOfficeActive || !isConfigured ? 'fill-slate-400 text-slate-400' : 'fill-white'}`} />
+                    )}
                     <span>
-                      {!isOfficeActive
+                      {isStartingScan
+                        ? 'Memulai...'
+                        : !isOfficeActive
                         ? 'Kantor Nonaktif'
                         : !isConfigured
                         ? 'Pengaturan Kosong'
@@ -1008,21 +1069,30 @@ export function ModulBeranda({
                   {isSuperAdmin && (
                     <button
                       onClick={handleToggleScheduler}
-                      disabled={isToggling || !isOfficeActive}
+                      disabled={isAnyActionLoading || !isOfficeActive}
                       className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl font-mono text-xs font-bold border transition flex items-center justify-center gap-1.5 min-h-[38px] ${
                         !isOfficeActive
                           ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
-                          : 'bg-white hover:bg-cyan-50/60 text-slate-700 border-sky-200 cursor-pointer'
+                          : isToggling
+                          ? 'bg-slate-100 text-slate-500 border-slate-300 cursor-wait opacity-75'
+                          : 'bg-white hover:bg-cyan-50/60 text-slate-700 border-sky-200 cursor-pointer disabled:opacity-50'
                       }`}
                       title={
                         !isOfficeActive
                           ? 'Kantor nonaktif. Aktifkan kantor terlebih dahulu.'
+                          : isToggling
+                          ? 'Sedang mengubah jadwal pemantauan...'
                           : engineStatus === 'RUNNING'
                           ? 'Klik untuk menjeda jadwal pemindaian otomatis (Hanya Super Admin)'
                           : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis (Hanya Super Admin)'
                       }
                     >
-                      {engineStatus === 'RUNNING' ? (
+                      {isToggling ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 text-cyan-700 animate-spin shrink-0" />
+                          <span>Menyimpan...</span>
+                        </>
+                      ) : engineStatus === 'RUNNING' ? (
                         <>
                           <Pause className="w-3.5 h-3.5 text-amber-600" />
                           <span>Jeda Jadwal</span>
@@ -1043,18 +1113,28 @@ export function ModulBeranda({
                 <div className="flex items-center gap-2 w-full sm:w-auto font-mono">
                   <button
                     onClick={handlePauseScan}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px]"
+                    disabled={isAnyActionLoading}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-wait text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer"
                   >
-                    <Pause className="w-4 h-4" />
-                    <span>Jeda Pemindaian</span>
+                    {scanActionType === 'pause' ? (
+                      <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    ) : (
+                      <Pause className="w-4 h-4 shrink-0" />
+                    )}
+                    <span>{scanActionType === 'pause' ? 'Memproses...' : 'Jeda Pemindaian'}</span>
                   </button>
 
                   <button
-                    onClick={handleStopScan}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px]"
+                    onClick={handleOpenStopModal}
+                    disabled={isAnyActionLoading}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-60 disabled:cursor-wait text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer"
                   >
-                    <Square className="w-4 h-4 fill-white" />
-                    <span>Hentikan (Stop)</span>
+                    {scanActionType === 'stop' ? (
+                      <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    ) : (
+                      <Square className="w-4 h-4 fill-white shrink-0" />
+                    )}
+                    <span>{scanActionType === 'stop' ? 'Memproses...' : 'Hentikan (Stop)'}</span>
                   </button>
                 </div>
               )}
@@ -1064,18 +1144,28 @@ export function ModulBeranda({
                 <div className="flex items-center gap-2 w-full sm:w-auto font-mono">
                   <button
                     onClick={handleResumeScan}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px]"
+                    disabled={isAnyActionLoading}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-wait text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer"
                   >
-                    <Play className="w-4 h-4 fill-white" />
-                    <span>Lanjutkan</span>
+                    {scanActionType === 'resume' ? (
+                      <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    ) : (
+                      <Play className="w-4 h-4 fill-white shrink-0" />
+                    )}
+                    <span>{scanActionType === 'resume' ? 'Memproses...' : 'Lanjutkan'}</span>
                   </button>
 
                   <button
-                    onClick={handleStopScan}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px]"
+                    onClick={handleOpenStopModal}
+                    disabled={isAnyActionLoading}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-60 disabled:cursor-wait text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer"
                   >
-                    <Square className="w-4 h-4 fill-white" />
-                    <span>Batalkan (Stop)</span>
+                    {scanActionType === 'stop' ? (
+                      <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    ) : (
+                      <Square className="w-4 h-4 fill-white shrink-0" />
+                    )}
+                    <span>{scanActionType === 'stop' ? 'Memproses...' : 'Batalkan (Stop)'}</span>
                   </button>
                 </div>
               )}
@@ -1323,42 +1413,42 @@ export function ModulBeranda({
             label: 'Total',
             value: kpi.total_monitored,
             colorScheme: 'cyan',
-            onClick: () => onNavigate('pelanggan'),
+            onClick: () => onNavigate('pelanggan', { status: 'ALL' }),
             subLabel: kpi.monitored_inactive > 0 ? `(${kpi.monitored_inactive} OFF)` : 'Modem'
           },
           {
             label: 'Optimal',
             value: kpi.normal,
             colorScheme: 'emerald',
-            onClick: () => onNavigate('pelanggan'),
+            onClick: () => onNavigate('pelanggan', { status: 'NORMAL' }),
             subLabel: `> ${Number(kpi.warning_threshold ?? -26.0).toFixed(1)} dBm`
           },
           {
             label: 'Waspada',
             value: kpi.warning,
             colorScheme: 'amber',
-            onClick: () => onNavigate('pelanggan'),
+            onClick: () => onNavigate('pelanggan', { status: 'WARNING' }),
             subLabel: `≤ ${Number(kpi.warning_threshold ?? -26.0).toFixed(1)} dBm`
           },
           {
             label: 'Kritis',
             value: kpi.critical,
             colorScheme: 'rose',
-            onClick: () => onNavigate('pelanggan'),
+            onClick: () => onNavigate('pelanggan', { status: 'CRITICAL' }),
             subLabel: `≤ ${Number(kpi.critical_threshold ?? -27.0).toFixed(1)} dBm`
           },
           {
             label: 'LOS',
             value: kpi.los,
             colorScheme: 'purple',
-            onClick: () => onNavigate('pelanggan'),
+            onClick: () => onNavigate('pelanggan', { status: 'LOS' }),
             subLabel: 'Putus'
           },
           {
             label: 'Invalid',
             value: kpi.invalid || 0,
             colorScheme: 'orange',
-            onClick: () => onNavigate('pelanggan'),
+            onClick: () => onNavigate('pelanggan', { status: 'INVALID' }),
             subLabel: 'Kredensial'
           }
         ]}
@@ -1724,30 +1814,38 @@ export function ModulBeranda({
       </div>
 
       {/* 7. TOAST NOTIFICATION FLOATING */}
-      {toast.show && (
-        <div
-          className={`fixed bottom-20 md:bottom-6 right-6 z-50 max-w-sm rounded-2xl p-3.5 shadow-xl border text-xs font-mono font-bold flex items-center gap-3 transition-all ${
-            toast.type === 'success'
-              ? 'bg-emerald-600 text-white border-emerald-500'
-              : toast.type === 'info'
-              ? 'bg-cyan-700 text-white border-cyan-600'
-              : 'bg-rose-600 text-white border-rose-500'
-          }`}
-        >
-          <div className="shrink-0">
-            {toast.type === 'success' && <ShieldCheck className="w-5 h-5 text-emerald-100" />}
-            {toast.type === 'info' && <Info className="w-5 h-5 text-cyan-100" />}
-            {toast.type === 'error' && <AlertTriangle className="w-5 h-5 text-rose-100" />}
+      <ToastNotification
+        show={toast.show}
+        type={toast.type}
+        message={toast.message}
+        onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+      />
+
+      {/* 8. MODAL KONFIRMASI KUSTOM (Hentikan / Batalkan Pemindaian) */}
+      <ConfirmDialogModal
+        isOpen={isStopModalOpen}
+        onClose={() => {
+          if (!isScanActionLoading) setIsStopModalOpen(false)
+        }}
+        onConfirm={handleConfirmStopScan}
+        title="Hentikan Paksa Pemindaian?"
+        message={
+          <div className="space-y-1.5">
+            <p>
+              Apakah Anda yakin ingin menghentikan pemindaian ONT di wilayah{' '}
+              <strong className="text-slate-900">{getOfficeDisplayName(activeOffice)}</strong>?
+            </p>
+            <p className="text-rose-700 font-semibold text-xs">
+              Seluruh antrean pemindaian saat ini akan dibatalkan dan progres akan direset ke awal.
+            </p>
           </div>
-          <span className="flex-1 leading-snug">{toast.message}</span>
-          <button
-            onClick={() => setToast((prev) => ({ ...prev, show: false }))}
-            className="opacity-80 hover:opacity-100 p-1 text-white text-base"
-          >
-            &times;
-          </button>
-        </div>
-      )}
+        }
+        confirmText="Ya, Hentikan Pemindaian"
+        cancelText="Batal"
+        variant="danger"
+        isLoading={scanActionType === 'stop'}
+        loadingText="Menghentikan..."
+      />
     </div>
   )
 }

@@ -23,11 +23,15 @@ class ActivityLogService:
     ) -> Optional[UserActivityLog]:
         """Mencatat entri aktivitas pengguna ke dalam database"""
         try:
+            clean_username = username.strip() if username else "unknown"
+            resolved_nama = nama_karyawan.strip() if nama_karyawan else ("Administrator NOC" if clean_username == "admin" else clean_username.title())
+            resolved_role = role if (role and role != "admin") else ("super admin" if clean_username == "admin" else (role or "admin"))
+
             log_entry = UserActivityLog(
                 user_id=user_id,
-                username=username.strip() if username else "unknown",
-                nama_karyawan=nama_karyawan.strip() if nama_karyawan else (username.title() if username else None),
-                role=role or "admin",
+                username=clean_username,
+                nama_karyawan=resolved_nama,
+                role=resolved_role,
                 action=action.upper(),
                 ip_address=ip_address,
                 user_agent=user_agent[:500] if user_agent else None,

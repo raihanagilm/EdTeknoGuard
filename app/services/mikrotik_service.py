@@ -56,6 +56,20 @@ class MikroTikSyncService:
                     kantor = first_k.kode
 
             k = db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else None
+            # Jika di db tenant belum memiliki host (hanya ada di Master DB), fallback ke Master DB
+            if not k or not k.mikrotik_host:
+                try:
+                    from app.core.database import SessionLocal as MasterSessionLocal
+                    m_db = MasterSessionLocal()
+                    try:
+                        k_master = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+                        if k_master and k_master.mikrotik_host:
+                            k = k_master
+                    finally:
+                        m_db.close()
+                except Exception:
+                    pass
+
             if k:
                 host = k.mikrotik_host or ""
                 port = k.mikrotik_port
@@ -639,6 +653,19 @@ class MikroTikSyncService:
             kantor = first_k.kode if first_k else "cabang"
 
         k = db.query(Kantor).filter(Kantor.kode == kantor).first()
+        if not k or not k.mikrotik_host:
+            try:
+                from app.core.database import SessionLocal as MasterSessionLocal
+                m_db = MasterSessionLocal()
+                try:
+                    k_m = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+                    if k_m and k_m.mikrotik_host:
+                        k = k_m
+                finally:
+                    m_db.close()
+            except Exception:
+                pass
+
         if not k or not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
             return {"success": False, "message": f"Kredensial MikroTik belum diatur lengkap di database untuk kantor '{kantor}'."}
 
@@ -712,6 +739,19 @@ class MikroTikSyncService:
             kantor = first_k.kode if first_k else "cabang"
 
         k = db.query(Kantor).filter(Kantor.kode == kantor).first()
+        if not k or not k.mikrotik_host:
+            try:
+                from app.core.database import SessionLocal as MasterSessionLocal
+                m_db = MasterSessionLocal()
+                try:
+                    k_m = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+                    if k_m and k_m.mikrotik_host:
+                        k = k_m
+                finally:
+                    m_db.close()
+            except Exception:
+                pass
+
         if not k or not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
             logger.debug(f"[LIVE-QUEUES] Router MikroTik belum dikonfigurasi lengkap di database untuk kantor '{kantor}'.")
             return []
@@ -839,6 +879,19 @@ class MikroTikSyncService:
         kantor = p.kantor
         from app.db.models import Kantor
         k = db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+        if not k or not k.mikrotik_host:
+            try:
+                from app.core.database import SessionLocal as MasterSessionLocal
+                m_db = MasterSessionLocal()
+                try:
+                    k_m = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+                    if k_m and k_m.mikrotik_host:
+                        k = k_m
+                finally:
+                    m_db.close()
+            except Exception:
+                pass
+
         if k and k.mikrotik_host and k.mikrotik_user and k.mikrotik_port:
             try:
                 connection = routeros_api.RouterOsApiPool(

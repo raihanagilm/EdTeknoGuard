@@ -931,9 +931,20 @@ export default function App() {
               activeOffice={activeOffice}
               currentUser={currentUser}
               kantorList={kantorList}
-              onNavigate={(tab, subTab) => {
+              onNavigate={(tab, subTabOrOptions, maybeOptions) => {
+                let subTab = typeof subTabOrOptions === 'string' ? subTabOrOptions : null
+                let options = typeof subTabOrOptions === 'object' && subTabOrOptions !== null ? subTabOrOptions : (maybeOptions || {})
+                
                 if (tab === 'pengaturan' && subTab) {
                   setSettingsActiveSubTab(subTab)
+                }
+                if (tab === 'pelanggan') {
+                  if (options.status) {
+                    setCustomerStatusFilter(options.status)
+                  }
+                  if (options.search !== undefined) {
+                    setCustomerSearchQuery(options.search)
+                  }
                 }
                 handleTabChange(tab)
               }}

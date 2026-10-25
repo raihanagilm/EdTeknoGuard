@@ -17,6 +17,7 @@ import {
   FileSpreadsheet,
   Download
 } from 'lucide-react'
+import { ToastNotification } from './ToastNotification'
 
 export function WizardImportPelanggan({
   isOpen,
@@ -499,19 +500,21 @@ export function WizardImportPelanggan({
           </div>
         </div>
 
-        {/* Error & Success Notification Alerts */}
-        {importError && (
-          <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold font-sans flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-            <span>{importError}</span>
-          </div>
-        )}
-        {importSuccess && (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-sans flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{importSuccess}</span>
-          </div>
-        )}
+        {/* Error & Success Notification Alerts (Toast) */}
+        <ToastNotification
+          show={Boolean(importError)}
+          type="error"
+          title="Gagal Import"
+          message={importError}
+          onClose={() => setImportError('')}
+        />
+        <ToastNotification
+          show={Boolean(importSuccess)}
+          type="success"
+          title="Import Berhasil"
+          message={importSuccess}
+          onClose={() => setImportSuccess('')}
+        />
 
         {/* ==================== LANGKAH 1: UPLOAD & ANALISIS ==================== */}
         {importStep === 1 && (

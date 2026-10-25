@@ -71,7 +71,12 @@ def sync_mikrotik_quota(
                 "password": knt_obj.mikrotik_pass or "",
                 "kantor": knt_obj.kode
             }
-            sync_cust_res = MikroTikSyncService.sync_customers_from_mikrotik(db, params)
+            from app.core.tenant_database import TenantDatabaseManager
+            tenant_db = TenantDatabaseManager.get_tenant_session(knt_obj.kode)
+            try:
+                sync_cust_res = MikroTikSyncService.sync_customers_from_mikrotik(tenant_db, params)
+            finally:
+                tenant_db.close()
         else:
             # Fallback ke konfigurasi global/auto-sync semua kantor
             res_all = MikroTikSyncService.sync_all_configured_kantors(db)
@@ -88,13 +93,13 @@ def sync_mikrotik_quota(
 
     # Catat audit log aktivitas
     try:
-        ActivityLogService.log_activity(
+        ActivityLogService.log_from_request(
             db=db,
-            username=user_sess.get("user", "admin"),
+            request=request,
             action="SYNC_MIKROTIK_ALL",
-            ip_address=request.client.host if request.client else "unknown",
             status="SUCCESS",
-            keterangan=f"Sinkronisasi MikroTik kantor {kantor or 'semua'}: {res.get('added_customers', 0)} pelanggan baru, {res.get('total_synced', 0)} kuota diperbarui."
+            keterangan=f"Sinkronisasi MikroTik kantor {kantor or 'semua'}: {res.get('added_customers', 0)} pelanggan baru, {res.get('total_synced', 0)} kuota diperbarui.",
+            user=user_sess
         )
     except Exception:
         pass
@@ -122,13 +127,13 @@ def toggle_customer_isolir(
     # Catat audit log aktivitas
     try:
         act = "ISOLIR_PELANGGAN" if isolir else "UNBLOCK_PELANGGAN"
-        ActivityLogService.log_activity(
+        ActivityLogService.log_from_request(
             db=db,
-            username=user_sess.get("user", "admin"),
+            request=request,
             action=act,
-            ip_address=request.client.host if request.client else "unknown",
             status="SUCCESS",
-            keterangan=res.get("message")
+            keterangan=res.get("message"),
+            user=user_sess
         )
     except Exception:
         pass

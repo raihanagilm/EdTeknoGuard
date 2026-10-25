@@ -44,6 +44,8 @@ import {
 } from './CommonUI'
 import { WizardImportPelanggan } from './WizardImportPelanggan'
 import { ModalDetailPelanggan } from './ModalDetailPelanggan'
+import { ConfirmDialogModal } from './ConfirmDialogModal'
+import { ToastNotification } from './ToastNotification'
 
 export function ModulPelanggan({
   activeOffice = 'cabang',
@@ -308,35 +310,69 @@ export function ModulPelanggan({
     fetchCustomers()
   }, [page, limit, filterStatus, filterPop, activeOffice, sortField, sortDir, debouncedSearch])
 
+  // State Modal Konfirmasi Kustom
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    cancelText: 'Batal',
+    variant: 'danger',
+    onConfirm: () => {},
+    isLoading: false,
+    loadingText: 'Memproses...'
+  })
+
   // Bulk Delete Selected Customers
-  const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return
-    const confirmed = window.confirm(
-      `PERINGATAN BAHAYA (CASCADE):\nApakah Anda yakin ingin menghapus ${selectedIds.length} data pelanggan terpilih?\n\nSeluruh data anakan yang terhubung (log redaman, tiket gangguan, kuota pelanggan) akan DIHAPUS PERMANEN secara otomatis dari database!`
-    )
-    if (!confirmed) return
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0 || bulkDeleting) return
 
-    setBulkDeleting(true)
-    try {
-      const res = await fetch('/api/customers/bulk-delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: selectedIds })
-      })
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Massal Data Pelanggan?',
+      message: (
+        <div className="space-y-2">
+          <p>
+            Apakah Anda yakin ingin menghapus{' '}
+            <strong className="text-slate-900">{selectedIds.length} data pelanggan terpilih</strong>?
+          </p>
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-1">
+            <p className="font-bold">⚠️ PERINGATAN CASCADE DATABASE:</p>
+            <p>Seluruh relasi data anak (log performa, riwayat redaman, tiket kendala, dan rekaman kuota) akan dihapus secara fisik dan permanen.</p>
+          </div>
+        </div>
+      ),
+      confirmText: `Ya, Hapus ${selectedIds.length} Pelanggan`,
+      variant: 'danger',
+      isLoading: false,
+      loadingText: 'Menghapus massal...',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, isLoading: true }))
+        setBulkDeleting(true)
+        try {
+          const res = await fetch('/api/customers/bulk-delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: selectedIds })
+          })
 
-      if (res.ok) {
-        setSelectedIds([])
-        fetchCustomers()
-      } else {
-        const errJson = await res.json().catch(() => ({}))
-        alert(errJson.detail || 'Gagal menghapus data terpilih.')
+          if (res.ok) {
+            setSelectedIds([])
+            fetchCustomers()
+            showToast(`Berhasil menghapus ${selectedIds.length} data pelanggan beserta seluruh riwayatnya.`, 'success')
+          } else {
+            const errJson = await res.json().catch(() => ({}))
+            showToast(errJson.detail || 'Gagal menghapus data terpilih.', 'error')
+          }
+        } catch (err) {
+          console.error('Error bulk delete customers:', err)
+          showToast('Terjadi kesalahan koneksi saat menghapus massal.', 'error')
+        } finally {
+          setBulkDeleting(false)
+          setConfirmModal(prev => ({ ...prev, isOpen: false, isLoading: false }))
+        }
       }
-    } catch (err) {
-      console.error('Error bulk delete customers:', err)
-      alert('Terjadi kesalahan koneksi saat menghapus massal.')
-    } finally {
-      setBulkDeleting(false)
-    }
+    })
   }
 
   // Single on-demand ONT probe
@@ -458,90 +494,126 @@ export function ModulPelanggan({
         const json = await res.json()
         setMikrotikSyncing(false)
         await fetchCustomers()
-        const addedText = json.added_customers ? `\n• ${json.added_customers} Pelanggan Baru ditambahkan` : ''
-        const updatedText = json.updated_customers ? `\n• ${json.updated_customers} Pelanggan diperbarui statusnya` : ''
-        const quotaText = `\n• ${json.total_synced || 0} Data Kuota & Traffic disinkronkan`
-        setTimeout(() => {
-          alert(`Sinkronisasi MikroTik Selesai!${addedText}${updatedText}${quotaText}`)
-        }, 100)
+        const addedPart = json.added_customers ? ` (${json.added_customers} Baru)` : ''
+        const quotaPart = ` ${json.total_synced || 0} Kuota & Traffic tersinkronkan.`
+        showToast(`Sinkronisasi MikroTik Berhasil!${addedPart}${quotaPart}`, 'success')
       } else {
         setMikrotikSyncing(false)
         const errJson = await res.json().catch(() => ({}))
-        alert(errJson.detail || 'Gagal sinkronisasi dengan router MikroTik.')
+        showToast(errJson.detail || 'Gagal sinkronisasi dengan router MikroTik.', 'error')
       }
     } catch (err) {
       console.error('MikroTik sync error:', err)
-      alert('Terjadi kesalahan koneksi ke server saat sinkronisasi MikroTik.')
+      showToast('Terjadi kesalahan koneksi ke server saat sinkronisasi MikroTik.', 'error')
     } finally {
       setMikrotikSyncing(false)
     }
   }
 
   // Toggle isolir pelanggan on-demand (Firewall Address List)
-  const handleToggleIsolir = async (c) => {
+  const handleToggleIsolir = (c) => {
     const cId = c.id_pelanggan || c.id
     const currentIsolir = Boolean(c.status_isolir)
     const newStatus = !currentIsolir
+    const actionTitle = newStatus ? 'Isolir Akses Pelanggan?' : 'Buka Isolir Pelanggan?'
+    const actionDesc = newStatus ? 'Memutus akses internet' : 'Memulihkan koneksi internet'
 
-    const actionText = newStatus ? 'MENGISOLIR (Memutus Akses Internet)' : 'MEMBUKA ISOLIR (Memulihkan Akses Internet)'
-    const confirmed = window.confirm(
-      `Konfirmasi Aksi MikroTik:\nApakah Anda yakin ingin ${actionText} untuk pelanggan:\n"${c.nama}" (ID: ${cId})?`
-    )
-    if (!confirmed) return
+    setConfirmModal({
+      isOpen: true,
+      title: actionTitle,
+      message: (
+        <div className="space-y-1.5">
+          <p>
+            Apakah Anda yakin ingin <strong>{actionDesc}</strong> untuk pelanggan{' '}
+            <strong className="text-slate-900">{c.nama}</strong> (ID: {cId})?
+          </p>
+          <p className="text-xs text-slate-500">
+            Perubahan firewall akan langsung diterapkan ke router MikroTik aktif.
+          </p>
+        </div>
+      ),
+      confirmText: newStatus ? 'Ya, Isolir Pelanggan' : 'Ya, Buka Isolir',
+      variant: newStatus ? 'warning' : 'success',
+      isLoading: false,
+      loadingText: 'Menyinkronkan MikroTik...',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, isLoading: true }))
+        setIsolirLoadingId(cId)
+        try {
+          const res = await fetch('/api/mikrotik/toggle-isolir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id_pelanggan: cId,
+              isolir: newStatus
+            })
+          })
 
-    setIsolirLoadingId(cId)
-    try {
-      const res = await fetch('/api/mikrotik/toggle-isolir', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id_pelanggan: cId,
-          isolir: newStatus
-        })
-      })
-
-      if (res.ok) {
-        await fetchCustomers()
-      } else {
-        const errJson = await res.json().catch(() => ({}))
-        alert(errJson.detail || 'Gagal mengubah status isolir pelanggan di MikroTik.')
+          if (res.ok) {
+            await fetchCustomers()
+            showToast(`Status pelanggan ${c.nama} berhasil diperbarui di MikroTik.`, 'success')
+          } else {
+            const errJson = await res.json().catch(() => ({}))
+            showToast(errJson.detail || 'Gagal mengubah status isolir pelanggan di MikroTik.', 'error')
+          }
+        } catch (err) {
+          console.error('Toggle isolir error:', err)
+          showToast('Terjadi kesalahan koneksi ke router MikroTik.', 'error')
+        } finally {
+          setIsolirLoadingId(null)
+          setConfirmModal(prev => ({ ...prev, isOpen: false, isLoading: false }))
+        }
       }
-    } catch (err) {
-      console.error('Toggle isolir error:', err)
-      alert('Terjadi kesalahan koneksi ke router MikroTik.')
-    } finally {
-      setIsolirLoadingId(null)
-    }
+    })
   }
 
   // Reset kata sandi aplikasi TeknoCust pelanggan ke default '123456'
   const [resetPasswordLoadingId, setResetPasswordLoadingId] = useState(null)
-  const handleResetPortalPassword = async (c) => {
+  const handleResetPortalPassword = (c) => {
     const cId = c.id_pelanggan || c.id
     const custName = c.nama || c.name || cId
-    const confirmed = window.confirm(
-      `Konfirmasi Reset Sandi TeknoCust:\nApakah Anda yakin ingin mengembalikan kata sandi aplikasi TeknoCust pelanggan:\n"${custName}" (ID: ${cId})\nkembali ke default: 123456?`
-    )
-    if (!confirmed) return
 
-    setResetPasswordLoadingId(cId)
-    try {
-      const res = await fetch(`/api/customers/${cId}/reset-portal-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        showToast(data.message || `Kata sandi aplikasi TeknoCust ${custName} berhasil di-reset ke 123456.`, 'success')
-      } else {
-        showToast(data.detail || 'Gagal me-reset kata sandi portal pelanggan.', 'error')
+    setConfirmModal({
+      isOpen: true,
+      title: 'Reset Sandi Aplikasi TeknoCust?',
+      message: (
+        <div className="space-y-1.5">
+          <p>
+            Kembalikan kata sandi login aplikasi TeknoCust pelanggan{' '}
+            <strong className="text-slate-900">{custName}</strong> (ID: {cId}) ke kata sandi bawaan?
+          </p>
+          <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 font-mono">
+            Kata sandi baru: <strong>123456</strong>
+          </div>
+        </div>
+      ),
+      confirmText: 'Ya, Reset ke 123456',
+      variant: 'warning',
+      isLoading: false,
+      loadingText: 'Mereset sandi...',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, isLoading: true }))
+        setResetPasswordLoadingId(cId)
+        try {
+          const res = await fetch(`/api/customers/${cId}/reset-portal-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          })
+          const data = await res.json().catch(() => ({}))
+          if (res.ok) {
+            showToast(data.message || `Kata sandi aplikasi TeknoCust ${custName} berhasil di-reset ke 123456.`, 'success')
+          } else {
+            showToast(data.detail || 'Gagal me-reset kata sandi portal pelanggan.', 'error')
+          }
+        } catch (err) {
+          console.error('Reset portal password error:', err)
+          showToast('Koneksi terputus saat me-reset kata sandi portal pelanggan.', 'error')
+        } finally {
+          setResetPasswordLoadingId(null)
+          setConfirmModal(prev => ({ ...prev, isOpen: false, isLoading: false }))
+        }
       }
-    } catch (err) {
-      console.error('Reset portal password error:', err)
-      showToast('Koneksi terputus saat me-reset kata sandi portal pelanggan.', 'error')
-    } finally {
-      setResetPasswordLoadingId(null)
-    }
+    })
   }
 
   // Open Modal Edit Pelanggan
@@ -605,16 +677,43 @@ export function ModulPelanggan({
   }
 
   // Delete Single Customer
-  const handleDeleteCustomer = async (id_pelanggan) => {
-    if (!window.confirm(`Yakin ingin menghapus pelanggan ${id_pelanggan}? Seluruh data anakan (log, tiket, performa) akan dihapus secara CASCADE.`)) return
-    try {
-      const res = await fetch(`/api/customers/${id_pelanggan}`, { method: 'DELETE' })
-      if (res.ok) {
-        fetchCustomers()
+  const handleDeleteCustomer = (id_pelanggan) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Data Pelanggan?',
+      message: (
+        <div className="space-y-2">
+          <p>
+            Yakin ingin menghapus pelanggan <strong className="text-slate-900">{id_pelanggan}</strong>?
+          </p>
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800">
+            <strong>⚠️ CASCADE DELETE:</strong> Seluruh riwayat log redaman, tiket gangguan, dan data kuota pelanggan ini akan dibersihkan permanen dari database.
+          </div>
+        </div>
+      ),
+      confirmText: 'Ya, Hapus Pelanggan',
+      variant: 'danger',
+      isLoading: false,
+      loadingText: 'Menghapus...',
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, isLoading: true }))
+        try {
+          const res = await fetch(`/api/customers/${id_pelanggan}`, { method: 'DELETE' })
+          if (res.ok) {
+            fetchCustomers()
+            showToast(`Data pelanggan ${id_pelanggan} berhasil dihapus.`, 'success')
+          } else {
+            const errJson = await res.json().catch(() => ({}))
+            showToast(errJson.detail || 'Gagal menghapus pelanggan.', 'error')
+          }
+        } catch (err) {
+          console.error('Delete failed:', err)
+          showToast('Koneksi terputus saat menghapus pelanggan.', 'error')
+        } finally {
+          setConfirmModal(prev => ({ ...prev, isOpen: false, isLoading: false }))
+        }
       }
-    } catch (err) {
-      console.error('Delete failed:', err)
-    }
+    })
   }
 
 
@@ -1453,40 +1552,30 @@ export function ModulPelanggan({
         onSuccess={fetchCustomers}
       />
       {/* Floating Toast Notification (Pojok Kanan Bawah) */}
-      {toast.show && (
-        <div className="fixed bottom-5 right-5 z-50 max-w-sm transition-all duration-300 animate-in fade-in slide-in-from-bottom-3">
-          <div
-            className={`p-3.5 rounded-2xl shadow-xl border flex items-start gap-2.5 backdrop-blur-md ${
-              toast.type === 'success'
-                ? 'bg-emerald-900/95 text-emerald-100 border-emerald-500/50'
-                : toast.type === 'warning'
-                ? 'bg-amber-900/95 text-amber-100 border-amber-500/50'
-                : toast.type === 'info'
-                ? 'bg-cyan-900/95 text-cyan-100 border-cyan-500/50'
-                : 'bg-rose-900/95 text-rose-100 border-rose-500/50'
-            }`}
-          >
-            <div className="flex-1 text-xs font-sans leading-relaxed">
-              <div className="font-bold mb-0.5">
-                {toast.type === 'success'
-                  ? 'Pemeriksaan Berhasil'
-                  : toast.type === 'warning'
-                  ? 'Perhatian / Terkunci'
-                  : toast.type === 'info'
-                  ? 'Informasi'
-                  : 'Gagal / Kesalahan'}
-              </div>
-              <div>{toast.message}</div>
-            </div>
-            <button
-              onClick={() => setToast(prev => ({ ...prev, show: false }))}
-              className="text-white/60 hover:text-white text-xs font-bold px-1.5 py-0.5 rounded transition cursor-pointer"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+      <ToastNotification
+        show={toast.show}
+        type={toast.type}
+        message={toast.message}
+        onClose={() => setToast(prev => ({ ...prev, show: false }))}
+      />
+
+      {/* Modal Konfirmasi Kustom */}
+      <ConfirmDialogModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => {
+          if (!confirmModal.isLoading) {
+            setConfirmModal(prev => ({ ...prev, isOpen: false }))
+          }
+        }}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        cancelText={confirmModal.cancelText}
+        variant={confirmModal.variant}
+        isLoading={confirmModal.isLoading}
+        loadingText={confirmModal.loadingText}
+      />
     </div>
   )
 }

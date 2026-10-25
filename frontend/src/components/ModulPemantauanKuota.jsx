@@ -20,6 +20,7 @@ import {
   FilterContainer,
   DataTableContainer
 } from './CommonUI';
+import { ToastNotification } from './ToastNotification';
 
 export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustomer }) {
   const [quotaList, setQuotaList] = useState([]);
@@ -35,6 +36,11 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(15);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
+
+  const showToast = (message, type = 'success', title = '') => {
+    setToast({ show: true, message, type, title });
+  };
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -104,6 +110,15 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
 
   return (
     <div className="space-y-4">
+      {/* Toast Alert */}
+      <ToastNotification
+        show={toast.show}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        onClose={() => setToast(prev => ({ ...prev, show: false }))}
+      />
+
       {/* 1. Segmented Status Ticker Bar Terpadu (Opsi B: 1 Baris Penuh Muat 1 Layar Tanpa Swipe) */}
       <SegmentedStatusBar
         items={[
@@ -262,14 +277,21 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
                 onClick={async () => {
                   try {
                     setLoading(true);
-                    await fetch('/api/mikrotik/sync-quota', {
+                    const resp = await fetch('/api/mikrotik/sync-quota', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ kantor: activeOffice })
                     });
+                    const d = await resp.json();
+                    if (d.success) {
+                      showToast(d.message || `Berhasil sinkronisasi kuota dari router MikroTik!`, 'success', 'Sinkronisasi Berhasil');
+                    } else {
+                      showToast(d.message || 'Gagal sinkronisasi kuota dari router.', 'error', 'Sinkronisasi Gagal');
+                    }
                     await fetchQuota();
                   } catch (e) {
                     console.error('Gagal sync kuota:', e);
+                    showToast('Gagal terhubung ke router MikroTik.', 'error', 'Koneksi Gagal');
                   } finally {
                     setLoading(false);
                   }

@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { UsersService } from '../services/api';
 import { FilterContainer, DataTableContainer } from './CommonUI';
+import { ConfirmDialogModal } from './ConfirmDialogModal';
+import { ToastNotification } from './ToastNotification';
 
 export function ModulKantorCabang() {
   const [kantorList, setKantorList] = useState([]);
@@ -150,13 +152,20 @@ export function ModulKantorCabang() {
     }
   };
 
-  const handleDeleteKantor = async (k) => {
-    if (!window.confirm(`Yakin ingin menghapus kantor "${k.nama}" (${k.kode}) secara permanen? Seluruh relasi data akan dibersihkan.`)) {
-      return;
-    }
+  // State Modal Konfirmasi Hapus Kantor
+  const [deleteConfirmKantor, setDeleteConfirmKantor] = useState(null);
+  const [kantorDeleting, setKantorDeleting] = useState(false);
 
+  const handleOpenDeleteConfirm = (k) => {
+    setDeleteConfirmKantor(k);
+  };
+
+  const handleExecuteDeleteKantor = async () => {
+    if (!deleteConfirmKantor || kantorDeleting) return;
+
+    setKantorDeleting(true);
     try {
-      const res = await UsersService.deleteKantor(k.id);
+      const res = await UsersService.deleteKantor(deleteConfirmKantor.id);
       if (res.ok && res.data && res.data.status === 'success') {
         showToast(res.data.message || 'Kantor berhasil dihapus!');
         fetchKantors();
@@ -167,6 +176,9 @@ export function ModulKantorCabang() {
     } catch (err) {
       console.error('Error delete kantor:', err);
       showToast('Gagal terhubung ke server', 'error');
+    } finally {
+      setKantorDeleting(false);
+      setDeleteConfirmKantor(null);
     }
   };
 
@@ -228,17 +240,12 @@ export function ModulKantorCabang() {
   return (
     <div className="space-y-4">
       {/* Toast Alert */}
-      {toast.show && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-mono font-bold transition-all max-w-md ${
-            toast.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-          }`}
-        >
-          <span>{toast.message}</span>
-        </div>
-      )}
+      <ToastNotification
+        show={toast.show}
+        type={toast.type}
+        message={toast.message}
+        onClose={() => setToast(prev => ({ ...prev, show: false }))}
+      />
 
       {/* Filter Bar & Pagination DI ATAS TABEL */}
       <div className="relative z-30 space-y-2.5">
@@ -468,7 +475,7 @@ export function ModulKantorCabang() {
                                   type="button"
                                   onClick={() => {
                                     setActiveMenuId(null);
-                                    handleDeleteKantor(k);
+                                    handleOpenDeleteConfirm(k);
                                   }}
                                   className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold"
                                 >
@@ -750,6 +757,32 @@ export function ModulKantorCabang() {
           </div>
         </div>
       )}
+
+      {/* Modal Konfirmasi Hapus Kantor */}
+      <ConfirmDialogModal
+        isOpen={Boolean(deleteConfirmKantor)}
+        onClose={() => {
+          if (!kantorDeleting) setDeleteConfirmKantor(null);
+        }}
+        onConfirm={handleExecuteDeleteKantor}
+        title="Hapus Kantor Cabang?"
+        message={
+          <div className="space-y-1.5">
+            <p>
+              Apakah Anda yakin ingin menghapus kantor{' '}
+              <strong className="text-slate-900">{deleteConfirmKantor?.nama}</strong> ({deleteConfirmKantor?.kode}) secara permanen?
+            </p>
+            <p className="text-rose-700 font-semibold text-xs">
+              Tindakan ini tidak dapat dibatalkan. Seluruh relasi data kantor akan dibersihkan.
+            </p>
+          </div>
+        }
+        confirmText="Ya, Hapus Kantor"
+        cancelText="Batal"
+        variant="danger"
+        isLoading={kantorDeleting}
+        loadingText="Menghapus..."
+      />
     </div>
   );
 }

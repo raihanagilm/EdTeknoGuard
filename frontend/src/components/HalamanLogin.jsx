@@ -10,6 +10,7 @@ import {
   ShieldAlert,
   Check
 } from 'lucide-react'
+import { ToastNotification } from './ToastNotification'
 
 export function HalamanLogin({
   onLoginSuccess
@@ -77,13 +78,14 @@ export function HalamanLogin({
             </p>
           </div>
 
-          {/* Error Banner */}
-          {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
-              <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
+          {/* Toast Notification */}
+          <ToastNotification
+            show={Boolean(errorMsg)}
+            type="error"
+            title="Gagal Masuk"
+            message={errorMsg}
+            onClose={() => setErrorMsg('')}
+          />
 
           {/* Form Login */}
           <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold">

@@ -1,9 +1,9 @@
-from datetime import datetime
 from sqlalchemy import (
     Column, BigInteger, Integer, String, Text, Numeric, 
-    Boolean, DateTime, ForeignKey, Index, UniqueConstraint
+    Boolean, DateTime, ForeignKey, Index, UniqueConstraint, func
 )
 from sqlalchemy.orm import relationship, synonym
+from sqlalchemy.ext.hybrid import hybrid_property
 from app.core.database import Base
 from app.core.timezone import get_now_wib
 
@@ -24,10 +24,14 @@ class Kantor(Base):
 
     id = synonym("id_kantor")
 
-    @property
+    @hybrid_property
     def kode(self):
         """Backward compatibility for existing code expecting k.kode"""
         return self.nama.lower().strip() if self.nama else str(self.id_kantor)
+
+    @kode.expression
+    def kode(cls):
+        return func.lower(func.trim(cls.nama))
 
     pelanggan_list = relationship("Pelanggan", back_populates="kantor_ref")
     tiket_list = relationship("TiketKendala", back_populates="kantor_ref")

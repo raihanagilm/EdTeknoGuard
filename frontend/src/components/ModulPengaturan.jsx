@@ -23,6 +23,7 @@ import {
   ChevronDown,
   Phone
 } from 'lucide-react'
+import { ToastNotification } from './ToastNotification'
 
 export function ModulPengaturan({
   settingsActiveSubTab,
@@ -190,22 +191,34 @@ export function ModulPengaturan({
 
   return (
     <div className="space-y-4">
-      {/* Banner & Mobile Switcher */}
-      <div className="space-y-3">
-        {/* Banner Status Notifikasi Simpan */}
-        {!isTeknisi && settingsSaveSuccess && (
-          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Konfigurasi sistem berhasil disimpan dan diterapkan ke server backend database lokal!</span>
-          </div>
-        )}
+      {/* Floating Toast Notification */}
+      <ToastNotification
+        show={Boolean(!isTeknisi && settingsSaveSuccess)}
+        type="success"
+        title="Pengaturan Tersimpan"
+        message="Konfigurasi sistem berhasil disimpan dan diterapkan ke server backend database lokal!"
+      />
+      <ToastNotification
+        show={Boolean(!isTeknisi && settingsSaveError)}
+        type="error"
+        title="Gagal Menyimpan"
+        message={typeof settingsSaveError === 'string' ? settingsSaveError : JSON.stringify(settingsSaveError)}
+      />
+      <ToastNotification
+        show={Boolean(profileSuccess)}
+        type="success"
+        title="Profil Diperbarui"
+        message={profileSuccess}
+      />
+      <ToastNotification
+        show={Boolean(profileError)}
+        type="error"
+        title="Gagal Memperbarui"
+        message={profileError}
+      />
 
-        {!isTeknisi && settingsSaveError && (
-          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
-            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-            <span>{typeof settingsSaveError === 'string' ? settingsSaveError : JSON.stringify(settingsSaveError)}</span>
-          </div>
-        )}
+      {/* Mobile Switcher */}
+      <div className="space-y-3">
 
         {/* 1. MOBILE SEGMENTED SWITCHER (Ala App DANA: Personal vs Pengaturan NOC) */}
         <div className="lg:hidden space-y-2.5">
@@ -787,20 +800,6 @@ export function ModulPengaturan({
           {/* TAB 4: PROFIL & AKUN SAYA (Semua Role: Super Admin, Admin, & Teknisi) - Gaya TeknoCust */}
           {(settingsActiveSubTab === 'account' || (isTeknisi && settingsActiveSubTab !== 'account')) && (
             <div className="space-y-4 animate-in fade-in duration-200">
-              {profileSuccess && (
-                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{profileSuccess}</span>
-                </div>
-              )}
-
-              {profileError && (
-                <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
-                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>{profileError}</span>
-                </div>
-              )}
-
               {/* Section 1: Info Identitas Akun Petugas */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-sky-100">

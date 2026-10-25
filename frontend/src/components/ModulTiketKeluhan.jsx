@@ -23,6 +23,7 @@ import {
   FilterContainer,
   DataTableContainer
 } from './CommonUI';
+import { ToastNotification } from './ToastNotification';
 
 export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer, initialSearch = '', onClearInitialSearch }) {
   const [tickets, setTickets] = useState([]);
@@ -136,17 +137,12 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer,
   return (
     <div className="space-y-4">
       {/* Toast Alert */}
-      {toast.show && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-mono font-bold transition-all ${
-            toast.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-          }`}
-        >
-          <span>{toast.message}</span>
-        </div>
-      )}
+      <ToastNotification
+        show={toast.show}
+        type={toast.type}
+        message={toast.message}
+        onClose={() => setToast(prev => ({ ...prev, show: false }))}
+      />
 
       {/* 1. Segmented Status Ticker Bar Terpadu (Opsi B: 1 Baris Penuh Muat 1 Layar Tanpa Swipe) */}
       <SegmentedStatusBar

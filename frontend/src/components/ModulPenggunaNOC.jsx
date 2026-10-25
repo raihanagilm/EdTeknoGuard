@@ -20,6 +20,8 @@ import {
   FilterContainer,
   DataTableContainer
 } from './CommonUI';
+import { ConfirmDialogModal } from './ConfirmDialogModal';
+import { ToastNotification } from './ToastNotification';
 
 export function ModulPenggunaNOC() {
   const [users, setUsers] = useState([]);
@@ -179,23 +181,56 @@ export function ModulPenggunaNOC() {
     }
   };
 
-  const handleDeleteUser = async (user) => {
-    if (!window.confirm(`Yakin ingin menghapus user "${user.username}" secara permanen?`)) {
-      return;
-    }
+  // State Modal Konfirmasi Kustom
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    cancelText: 'Batal',
+    variant: 'danger',
+    onConfirm: () => {},
+    isLoading: false,
+    loadingText: 'Memproses...'
+  });
 
-    try {
-      const res = await UsersService.delete(user.id);
-      if (res.ok && res.data && res.data.status === 'success') {
-        showToast(res.data.message);
-        fetchUsers();
-      } else {
-        showToast(res.data?.message || 'Gagal menghapus user', 'error');
+  const handleDeleteUser = (user) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Pengguna NOC?',
+      message: (
+        <div className="space-y-1.5">
+          <p>
+            Apakah Anda yakin ingin menghapus user{' '}
+            <strong className="text-slate-900">{user.username}</strong> ({user.nama_lengkap || user.role}) secara permanen?
+          </p>
+          <p className="text-rose-700 font-semibold text-xs">
+            Akses pengguna ini ke sistem NOC akan dicabut seketika.
+          </p>
+        </div>
+      ),
+      confirmText: 'Ya, Hapus Pengguna',
+      variant: 'danger',
+      isLoading: false,
+      loadingText: 'Menghapus...',
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, isLoading: true }));
+        try {
+          const res = await UsersService.delete(user.id);
+          if (res.ok && res.data && res.data.status === 'success') {
+            showToast(res.data.message);
+            fetchUsers();
+          } else {
+            showToast(res.data?.message || 'Gagal menghapus user', 'error');
+          }
+        } catch (err) {
+          console.error('Error delete user:', err);
+          showToast('Gagal terhubung ke server', 'error');
+        } finally {
+          setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+        }
       }
-    } catch (err) {
-      console.error('Error delete user:', err);
-      showToast('Gagal terhubung ke server', 'error');
-    }
+    });
   };
 
   const handleSort = (field) => {
@@ -207,41 +242,59 @@ export function ModulPenggunaNOC() {
     }
   };
 
-  const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0 || bulkDeleting) return;
     
     const validUsersToDelete = users.filter(
       (u) => selectedIds.includes(u.id) && u.username !== 'admin'
     );
 
     if (validUsersToDelete.length === 0) {
-      alert('Akun default super admin (admin) tidak dapat dihapus.');
+      showToast('Akun default super admin (admin) tidak dapat dihapus.', 'error');
       return;
     }
 
-    const confirmed = window.confirm(
-      `Apakah Anda yakin ingin menghapus ${validUsersToDelete.length} pengguna terpilih secara permanen?`
-    );
-    if (!confirmed) return;
-
-    setBulkDeleting(true);
-    try {
-      let successCount = 0;
-      for (const u of validUsersToDelete) {
-        const res = await UsersService.delete(u.id);
-        if (res.ok && res.data && res.data.status === 'success') {
-          successCount++;
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Massal Pengguna?',
+      message: (
+        <div className="space-y-1.5">
+          <p>
+            Apakah Anda yakin ingin menghapus{' '}
+            <strong className="text-slate-900">{validUsersToDelete.length} pengguna terpilih</strong> secara permanen?
+          </p>
+          <p className="text-rose-700 font-semibold text-xs">
+            Seluruh akun yang dipilih tidak akan dapat login lagi ke portal sistem.
+          </p>
+        </div>
+      ),
+      confirmText: 'Ya, Hapus Terpilih',
+      variant: 'danger',
+      isLoading: false,
+      loadingText: 'Menghapus massal...',
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, isLoading: true }));
+        setBulkDeleting(true);
+        try {
+          let successCount = 0;
+          for (const u of validUsersToDelete) {
+            const res = await UsersService.delete(u.id);
+            if (res.ok && res.data && res.data.status === 'success') {
+              successCount++;
+            }
+          }
+          showToast(`Berhasil menghapus ${successCount} pengguna.`);
+          setSelectedIds([]);
+          fetchUsers();
+        } catch (err) {
+          console.error('Error bulk delete users:', err);
+          showToast('Gagal menghapus beberapa pengguna', 'error');
+        } finally {
+          setBulkDeleting(false);
+          setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
         }
       }
-      showToast(`Berhasil menghapus ${successCount} pengguna.`);
-      setSelectedIds([]);
-      fetchUsers();
-    } catch (err) {
-      console.error('Error bulk delete users:', err);
-      showToast('Gagal menghapus beberapa pengguna', 'error');
-    } finally {
-      setBulkDeleting(false);
-    }
+    });
   };
 
   const filteredUsers = users
@@ -275,17 +328,12 @@ export function ModulPenggunaNOC() {
   return (
     <div className="space-y-4">
       {/* Toast Alert */}
-      {toast.show && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-mono font-bold transition-all ${
-            toast.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-          }`}
-        >
-          <span>{toast.message}</span>
-        </div>
-      )}
+      <ToastNotification
+        show={toast.show}
+        type={toast.type}
+        message={toast.message}
+        onClose={() => setToast(prev => ({ ...prev, show: false }))}
+      />
 
       {/* Filter Bar & Aksi Ringkas */}
       <div className="relative z-30">
@@ -783,6 +831,24 @@ export function ModulPenggunaNOC() {
           </div>
         </div>
       )}
+
+      {/* Modal Konfirmasi Kustom */}
+      <ConfirmDialogModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => {
+          if (!confirmModal.isLoading) {
+            setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+          }
+        }}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        cancelText={confirmModal.cancelText}
+        variant={confirmModal.variant}
+        isLoading={confirmModal.isLoading}
+        loadingText={confirmModal.loadingText}
+      />
     </div>
   );
 }
