@@ -31,15 +31,14 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
       title: 'Layanan & Pelanggan',
       items: [
         { id: 'pelanggan', label: 'Data Pelanggan', icon: Users, visible: true },
-        { id: 'tiket', label: 'Tiket Keluhan', icon: Ticket, visible: true }
+        { id: 'tiket', label: 'Tiket Keluhan', icon: Ticket, visible: true, badge: unreadTickets > 0 ? unreadTickets : null }
       ]
     },
     {
       title: 'Sistem & Audit',
       items: [
         { id: 'log', label: 'Log Aktivitas', icon: ScrollText, visible: !isTeknisi },
-        { id: 'pengguna', label: 'Pengguna NOC', icon: ShieldAlert, visible: isSuperAdmin },
-        { id: 'kantor', label: 'Kantor', icon: Building2, visible: isSuperAdmin },
+        { id: 'manajemen-kantor', label: 'Manajemen Kantor', icon: Building2, visible: isSuperAdmin },
         { id: 'pengaturan', label: 'Pengaturan Sistem', icon: Sliders, visible: !isTeknisi }
       ]
     }
@@ -101,7 +100,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
                       <span>{item.label}</span>
                     </div>
                     {item.badge && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white font-mono text-[11px] font-black animate-pulse">
+                      <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white font-mono text-[11px] font-black">
                         {item.badge}
                       </span>
                     )}

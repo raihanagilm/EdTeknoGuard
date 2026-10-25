@@ -784,6 +784,12 @@ export function ModulPelanggan({
         page={page}
         totalPages={Math.max(1, Math.ceil(totalRecords / limit))}
         totalCount={totalRecords}
+        limit={limit}
+        onLimitChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
+        onPageChange={setPage}
         onPrevPage={() => setPage(p => Math.max(1, p - 1))}
         onNextPage={() => setPage(p => Math.min(Math.max(1, Math.ceil(totalRecords / limit)), p + 1))}
         loading={loading}

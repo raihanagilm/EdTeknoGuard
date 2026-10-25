@@ -31,10 +31,18 @@ export function ModulPenggunaNOC() {
   const [sortField, setSortField] = useState('username');
   const [sortDir, setSortDir] = useState('asc');
   const [page, setPage] = useState(1);
-  const limit = 15;
+  const [limit, setLimit] = useState(15);
   const [allKantor, setAllKantor] = useState(['cabang', 'pusat', 'banyumas']);
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [activeMenuId, setActiveMenuId] = useState(null);
+
+  // Tutup dropdown menu baris jika klik di luar
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
 
   // Modal State User
   const [modalOpen, setModalOpen] = useState(false);
@@ -443,12 +451,17 @@ export function ModulPenggunaNOC() {
         page={page}
         totalPages={totalPages}
         totalItems={filteredUsers.length}
+        limit={limit}
+        onLimitChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
         onPageChange={setPage}
       >
-        <table className="w-full text-left border-collapse table-auto md:table-fixed">
+        <table className="w-full text-left border-collapse table-auto">
           <thead>
             <tr className="bg-cyan-50/80 border-b border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
-              <th className="py-2.5 px-3 w-10 text-center">
+              <th className="py-2.5 px-3 w-10 text-center whitespace-nowrap">
                 <input
                   type="checkbox"
                   checked={
@@ -468,18 +481,18 @@ export function ModulPenggunaNOC() {
                   className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
                 />
               </th>
-              <th className="py-2.5 px-3 w-40 cursor-pointer hover:text-cyan-900" onClick={() => handleSort('username')}>
+              <th className="py-2.5 px-3 w-36 cursor-pointer hover:text-cyan-900 whitespace-nowrap" onClick={() => handleSort('username')}>
                 <div className="flex items-center gap-1">
                   <span>Username</span>
                   <ArrowUpDown className="w-3 h-3 text-slate-400" />
                 </div>
               </th>
-              <th className="py-2.5 px-3 w-48">Nama Petugas</th>
-              <th className="py-2.5 px-3 w-36">No. WhatsApp</th>
-              <th className="py-2.5 px-3 w-36">Role Akses</th>
-              <th className="py-2.5 px-3">Kantor Diizinkan</th>
-              <th className="py-2.5 px-3 w-28 text-center">Status</th>
-              <th className="py-2.5 px-3 text-right w-20">Aksi</th>
+              <th className="py-2.5 px-3 min-w-[140px] whitespace-nowrap">Nama Petugas</th>
+              <th className="py-2.5 px-3 w-32 whitespace-nowrap">No. WhatsApp</th>
+              <th className="py-2.5 px-3 w-32 whitespace-nowrap">Role Akses</th>
+              <th className="py-2.5 px-3 min-w-[160px] whitespace-nowrap">Kantor Diizinkan</th>
+              <th className="py-2.5 px-3 w-28 text-center whitespace-nowrap">Status</th>
+              <th className="py-2.5 px-3 text-right w-16 whitespace-nowrap">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
@@ -497,8 +510,10 @@ export function ModulPenggunaNOC() {
                 </td>
               </tr>
             ) : (
-              paginatedUsers.map((u) => {
+              paginatedUsers.map((u, idx) => {
                 const isSelected = selectedIds.includes(u.id);
+                const isMenuOpen = activeMenuId === u.id;
+                const isBottomRow = idx >= paginatedUsers.length - 2;
 
                 return (
                   <tr
@@ -576,38 +591,57 @@ export function ModulPenggunaNOC() {
                       </button>
                     </td>
                     <td className="py-2.5 px-3 text-right">
-                      <div className="relative group inline-block text-left">
+                      <div className="relative inline-block text-left">
                         <button
                           type="button"
-                          className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveMenuId(isMenuOpen ? null : u.id);
+                          }}
+                          className={`p-1.5 rounded-lg border transition cursor-pointer ${
+                            isMenuOpen ? 'bg-cyan-100 border-cyan-400 text-cyan-900' : 'hover:bg-slate-100 text-slate-600 border-slate-200'
+                          }`}
                           title="Pilihan Aksi"
                         >
                           <MoreVertical className="w-3.5 h-3.5" />
                         </button>
 
-                        <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[150px]">
-                          <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
-                            <button
-                              type="button"
-                              onClick={() => openEditModal(u)}
-                              className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
-                            >
-                              <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                              <span>Edit Akun</span>
-                            </button>
-
-                            {u.username !== 'admin' && (
+                        {isMenuOpen && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className={`absolute right-0 z-50 min-w-[160px] ${
+                              isBottomRow ? 'bottom-full pb-1' : 'top-full pt-1'
+                            }`}
+                          >
+                            <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs divide-y divide-slate-100">
                               <button
                                 type="button"
-                                onClick={() => handleDeleteUser(u)}
-                                className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition border-t border-slate-100 cursor-pointer"
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  openEditModal(u);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
                               >
-                                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                                <span>Hapus</span>
+                                <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                <span>Edit Akun</span>
                               </button>
-                            )}
+
+                              {u.username !== 'admin' && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    handleDeleteUser(u);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Hapus</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </td>
                   </tr>

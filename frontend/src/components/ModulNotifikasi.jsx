@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Bell, 
   X, 
@@ -27,7 +28,7 @@ export function ModulNotifikasi({
 }) {
   const panelRef = useRef(null);
 
-  // Close when clicking outside
+  // Close when clicking outside or pressing Escape
   useEffect(() => {
     function handleClickOutside(event) {
       if (panelRef.current && !panelRef.current.contains(event.target)) {
@@ -39,11 +40,20 @@ export function ModulNotifikasi({
         onClose();
       }
     }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
 
@@ -108,18 +118,18 @@ export function ModulNotifikasi({
     return 'bg-cyan-50 border-cyan-200 text-cyan-800';
   };
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop overlay di mobile */}
       <div 
-        className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-[9998] sm:hidden"
+        className="fixed inset-0 bg-slate-900/20 backdrop-blur-2xs z-[99998] sm:hidden"
         onClick={onClose}
       />
 
       <div
         ref={panelRef}
-        className="fixed sm:absolute top-16 sm:top-12 inset-x-3 sm:inset-x-auto sm:right-0 sm:w-[420px] max-h-[80vh] sm:max-h-[85vh] bg-white/95 backdrop-blur-xl rounded-2xl border border-sky-200/90 shadow-2xl z-[9999] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
-        style={{ boxShadow: '0 20px 40px -15px rgba(12, 74, 110, 0.25)' }}
+        className="fixed top-14 sm:top-16 right-3 sm:right-6 w-[calc(100vw-24px)] sm:w-[410px] max-h-[80vh] sm:max-h-[82vh] bg-white rounded-2xl border border-sky-200 shadow-2xl z-[99999] flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150"
+        style={{ boxShadow: '0 20px 45px -10px rgba(12, 74, 110, 0.28)' }}
       >
       {/* Header Panel */}
       <div className="p-3.5 sm:p-4 border-b border-sky-100 flex items-center justify-between bg-gradient-to-r from-sky-50/80 via-white to-cyan-50/80">
@@ -264,6 +274,7 @@ export function ModulNotifikasi({
         Setiap akun memiliki status baca mandiri. Tiket belum selesai akan tetap dimunculkan.
       </div>
     </div>
-    </>
+    </>,
+    document.body
   );
 }

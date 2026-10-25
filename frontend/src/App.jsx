@@ -26,6 +26,7 @@ import { ModulPemantauanKuota } from './components/ModulPemantauanKuota'
 import { ModulLogAktivitas } from './components/ModulLogAktivitas'
 import { ModulPenggunaNOC } from './components/ModulPenggunaNOC'
 import { ModulKantorCabang } from './components/ModulKantorCabang'
+import { ModulManajemenKantor } from './components/ModulManajemenKantor'
 import { ModulNotifikasi } from './components/ModulNotifikasi'
 import { ErrorView } from './components/ErrorView'
 import { ConfirmSaveModal } from './components/Modals'
@@ -40,6 +41,7 @@ export default function App() {
 
   // Navigation & Office Scope State (SOP Multi-Kantor)
   const [activeTab, setActiveTab] = useState('beranda')
+  const [officeSubTab, setOfficeSubTab] = useState('kantor')
   const [customerSearchQuery, setCustomerSearchQuery] = useState('')
   const [customerStatusFilter, setCustomerStatusFilter] = useState('ALL')
   const [activeOffice, setActiveOffice] = useState(() => {
@@ -58,6 +60,7 @@ export default function App() {
     allowed_kantor: 'all'
   })
   const [unreadTickets, setUnreadTickets] = useState(0)
+  const [totalUnreadNotifications, setTotalUnreadNotifications] = useState(0)
   const [notificationList, setNotificationList] = useState([])
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [notificationLoading, setNotificationLoading] = useState(false)
@@ -228,11 +231,22 @@ export default function App() {
       }
 
       if (notifRes) {
-        if (typeof notifRes.total_unread === 'number') {
-          setUnreadTickets(notifRes.total_unread)
-        } else if (typeof notifRes.unread_tickets_count === 'number') {
+        // unread_tickets_count KHUSUS untuk tiket keluhan / kendala pelanggan
+        if (typeof notifRes.unread_tickets_count === 'number') {
           setUnreadTickets(notifRes.unread_tickets_count)
+        } else if (Array.isArray(notifRes.notifications)) {
+          // Fallback: hitung notifikasi yang bertipe tiket
+          const ticketNotifs = notifRes.notifications.filter(n => n.type === 'ticket' || n.target_tab === 'tiket')
+          setUnreadTickets(ticketNotifs.length)
         }
+
+        // total_unread untuk pusat notifikasi / lonceng
+        if (typeof notifRes.total_unread === 'number') {
+          setTotalUnreadNotifications(notifRes.total_unread)
+        } else if (Array.isArray(notifRes.notifications)) {
+          setTotalUnreadNotifications(notifRes.notifications.length)
+        }
+
         if (Array.isArray(notifRes.notifications)) {
           setNotificationList(notifRes.notifications)
         }
@@ -266,7 +280,10 @@ export default function App() {
         })
         // Update local state hanya untuk notifikasi non-kritis
         setNotificationList(prev => prev.filter(n => n.id !== item.id))
-        setUnreadTickets(prev => Math.max(0, prev - 1))
+        setTotalUnreadNotifications(prev => Math.max(0, prev - 1))
+        if (item.type === 'ticket' || item.target_tab === 'tiket') {
+          setUnreadTickets(prev => Math.max(0, prev - 1))
+        }
       } catch (e) {
         console.warn('Failed to mark notification read:', e)
       }
@@ -316,7 +333,10 @@ export default function App() {
         })
       })
       setNotificationList(prev => prev.filter(n => n.id !== item.id))
-      setUnreadTickets(prev => Math.max(0, prev - 1))
+      setTotalUnreadNotifications(prev => Math.max(0, prev - 1))
+      if (item.type === 'ticket' || item.target_tab === 'tiket') {
+        setUnreadTickets(prev => Math.max(0, prev - 1))
+      }
     } catch (e) {
       console.warn('Failed to dismiss notification item:', e)
     }
@@ -340,7 +360,9 @@ export default function App() {
       // Hanya bersihkan yang non-kritis, item kritis tetap dipertahankan
       const criticalOnly = notificationList.filter(n => n.level === 'critical' || n.is_critical)
       setNotificationList(criticalOnly)
-      setUnreadTickets(criticalOnly.length)
+      setTotalUnreadNotifications(criticalOnly.length)
+      const criticalTickets = criticalOnly.filter(n => n.type === 'ticket' || n.target_tab === 'tiket')
+      setUnreadTickets(criticalTickets.length)
     } catch (e) {
       console.warn('Failed to mark all notifications read:', e)
     }
@@ -532,6 +554,7 @@ export default function App() {
     if (clean === 'pelanggan') return 'pelanggan'
     if (clean === 'tiket' || clean === 'admin/tiket') return 'tiket'
     if (clean === 'log' || clean === 'activity-logs') return 'log'
+    if (clean === 'manajemen-kantor') return 'manajemen-kantor'
     if (clean === 'pengguna' || clean === 'users') return 'pengguna'
     if (clean === 'kantor') return 'kantor'
     if (clean === 'mikrotik' || clean === 'routeros') return 'mikrotik'
@@ -549,6 +572,7 @@ export default function App() {
       case 'pelanggan': return '/pelanggan'
       case 'tiket': return '/tiket'
       case 'log': return '/log'
+      case 'manajemen-kantor': return '/manajemen-kantor'
       case 'pengguna': return '/pengguna'
       case 'kantor': return '/kantor'
       case 'mikrotik': return '/mikrotik'
@@ -694,7 +718,7 @@ export default function App() {
     return null
   }
 
-  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'pengguna', 'kantor', 'mikrotik', 'pengaturan']
+  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'manajemen-kantor', 'pengguna', 'kantor', 'mikrotik', 'pengaturan']
   if (!validModules.includes(activeTab)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 sm:p-6 text-slate-900 font-sans">
@@ -750,7 +774,9 @@ export default function App() {
                   pelanggan: 'Data Pelanggan',
                   tiket: 'Tiket Keluhan',
                   log: 'Log Aktivitas',
+                  'manajemen-kantor': 'Manajemen Kantor & Akun',
                   pengguna: 'Manajemen Pengguna',
+                  kantor: 'Manajemen Kantor',
                   pengaturan: 'Pengaturan Sistem'
                 }
                 return tabTitles[activeTab] || `Modul ${activeTab}`
@@ -774,9 +800,9 @@ export default function App() {
                 aria-label="Pusat Notifikasi Pemantauan & Tiket"
               >
                 <Bell className="w-4 h-4" />
-                {unreadTickets > 0 && (
+                {totalUnreadNotifications > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border-2 border-white animate-pulse">
-                    {unreadTickets}
+                    {totalUnreadNotifications}
                   </span>
                 )}
               </button>
@@ -786,7 +812,7 @@ export default function App() {
                 isOpen={isNotificationOpen}
                 onClose={() => setIsNotificationOpen(false)}
                 notifications={notificationList}
-                unreadCount={unreadTickets}
+                unreadCount={totalUnreadNotifications}
                 activeOffice={activeOffice}
                 currentUser={currentUser}
                 onItemClick={handleNotificationItemClick}
@@ -899,7 +925,12 @@ export default function App() {
               activeOffice={activeOffice}
               currentUser={currentUser}
               kantorList={kantorList}
-              onNavigate={(tab) => handleTabChange(tab)}
+              onNavigate={(tab, subTab) => {
+                if (tab === 'pengaturan' && subTab) {
+                  setSettingsActiveSubTab(subTab)
+                }
+                handleTabChange(tab)
+              }}
             />
           )}
 
@@ -943,7 +974,13 @@ export default function App() {
               onClearInitialSearch={() => setTicketInitialSearch('')}
             />
           )}
-          {activeTab === 'log' && <ModulLogAktivitas />}
+          {activeTab === 'log' && <ModulLogAktivitas activeOffice={activeOffice} />}
+          {activeTab === 'manajemen-kantor' && (
+            <ModulManajemenKantor
+              initialSubTab={officeSubTab}
+              onSubTabChange={setOfficeSubTab}
+            />
+          )}
           {activeTab === 'pengguna' && <ModulPenggunaNOC />}
           {activeTab === 'kantor' && <ModulKantorCabang />}
 

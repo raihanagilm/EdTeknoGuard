@@ -39,6 +39,10 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [appliedStartDate, setAppliedStartDate] = useState('');
+  const [appliedEndDate, setAppliedEndDate] = useState('');
+  const [minDate, setMinDate] = useState('');
+  const maxDate = new Date().toISOString().split('T')[0];
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(15);
   const [totalPages, setTotalPages] = useState(1);
@@ -70,8 +74,13 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
       if (search) params.q = search;
       if (filterStatus) params.status = filterStatus;
       if (filterRange === 'custom') {
-        if (startDate) params.start_date = startDate;
-        if (endDate) params.end_date = endDate;
+        if (!appliedStartDate || !appliedEndDate) {
+          // Jangan kirim request jika custom tanggal belum diterapkan
+          setLoading(false);
+          return;
+        }
+        params.start_date = appliedStartDate;
+        params.end_date = appliedEndDate;
       }
 
       const res = await LogsService.list(params);
@@ -81,6 +90,9 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
         const total = res.data.total || res.data.total_count || rawList.length;
         setTotalCount(total);
         setTotalPages(Math.ceil(total / limit) || 1);
+        if (res.data.min_date && !minDate) {
+          setMinDate(res.data.min_date);
+        }
         if (res.data.summary) {
           setSummary(res.data.summary);
         } else {
@@ -96,12 +108,21 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
 
   useEffect(() => {
     fetchLogs();
-  }, [page, limit, filterStatus, filterRange, activeOffice, sortField, sortDir]);
+  }, [page, limit, filterStatus, filterRange, appliedStartDate, appliedEndDate, activeOffice, sortField, sortDir]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
     fetchLogs();
+  };
+
+  const handleApplyCustomDate = () => {
+    if (!startDate || !endDate) return;
+    if (startDate > endDate) return;
+    setAppliedStartDate(startDate);
+    setAppliedEndDate(endDate);
+    setPage(1);
+    setFilterDropdownOpen(false);
   };
 
   const resetFilters = () => {
@@ -110,6 +131,8 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
     setFilterRange('today');
     setStartDate('');
     setEndDate('');
+    setAppliedStartDate('');
+    setAppliedEndDate('');
     setPage(1);
   };
 
@@ -202,9 +225,6 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                       ? 'Semua Waktu'
                       : 'Kustom'}
                   </span>
-                  {filterRange !== 'today' && (
-                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  )}
                 </button>
 
                 {/* Popover Dropdown Rentang Waktu */}
@@ -214,8 +234,8 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                       className="fixed inset-0 z-40"
                       onClick={() => setFilterDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 top-full mt-1.5 z-50 w-56 bg-white rounded-xl p-2.5 shadow-xl border border-slate-300 space-y-1 font-mono text-xs">
-                      <div className="px-2.5 py-1.5 text-[11px] font-black uppercase text-slate-700 tracking-wider">
+                    <div className="absolute right-0 top-full mt-1.5 z-50 w-60 sm:w-64 max-w-[calc(100vw-2rem)] bg-white rounded-xl p-3 shadow-2xl border border-sky-300 space-y-1.5 font-mono text-xs">
+                      <div className="px-2 py-1 text-[11px] font-black uppercase text-slate-700 tracking-wider">
                         Pilih Rentang Waktu:
                       </div>
                       {[
@@ -230,8 +250,10 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                           type="button"
                           onClick={() => {
                             setFilterRange(rng.id);
-                            setPage(1);
-                            if (rng.id !== 'custom') setFilterDropdownOpen(false);
+                            if (rng.id !== 'custom') {
+                              setPage(1);
+                              setFilterDropdownOpen(false);
+                            }
                           }}
                           className={`w-full text-left px-3 py-2 rounded-lg transition flex items-center justify-between cursor-pointer ${
                             filterRange === rng.id
@@ -247,27 +269,36 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                       {filterRange === 'custom' && (
                         <div className="pt-2 border-t border-slate-200 space-y-2 text-[11px]">
                           <div>
-                            <span className="text-slate-700 font-bold block text-[11px] mb-0.5">Mulai:</span>
+                            <span className="text-slate-700 font-bold block text-[11px] mb-1">Mulai:</span>
                             <input
                               type="date"
                               value={startDate}
+                              min={minDate || undefined}
+                              max={endDate || maxDate}
                               onChange={(e) => setStartDate(e.target.value)}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-[11px]"
+                              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-[11px] focus:outline-none focus:border-cyan-500"
                             />
                           </div>
                           <div>
-                            <span className="text-slate-700 font-bold block text-[11px] mb-0.5">Sampai:</span>
+                            <span className="text-slate-700 font-bold block text-[11px] mb-1">Sampai:</span>
                             <input
                               type="date"
                               value={endDate}
+                              min={startDate || minDate || undefined}
+                              max={maxDate}
                               onChange={(e) => setEndDate(e.target.value)}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-[11px]"
+                              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-[11px] focus:outline-none focus:border-cyan-500"
                             />
                           </div>
                           <button
                             type="button"
-                            onClick={() => setFilterDropdownOpen(false)}
-                            className="w-full mt-1.5 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg font-bold text-center cursor-pointer text-xs"
+                            onClick={handleApplyCustomDate}
+                            disabled={!startDate || !endDate || startDate > endDate}
+                            className={`w-full mt-2 py-2 rounded-lg font-bold text-center text-xs transition ${
+                              !startDate || !endDate || startDate > endDate
+                                ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                : 'bg-cyan-700 hover:bg-cyan-800 text-white cursor-pointer shadow-xs'
+                            }`}
                           >
                             Terapkan
                           </button>
@@ -299,17 +330,23 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
         page={page}
         totalPages={totalPages}
         totalCount={totalCount}
+        limit={limit}
+        onLimitChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
+        onPageChange={setPage}
         onPrevPage={() => setPage((p) => Math.max(1, p - 1))}
         onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
         loading={loading}
       >
-        <table className="w-full text-left border-collapse table-auto md:table-fixed">
+        <table className="w-full text-left border-collapse table-auto">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
-              <th className="py-2.5 px-3 w-12 text-center">No</th>
+              <th className="py-2.5 px-3 w-12 text-center whitespace-nowrap">No</th>
               <th
                 onClick={() => handleSort('waktu_cek')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-36"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[140px]"
               >
                 <div className="flex items-center gap-1">
                   <span>Waktu Cek</span>
@@ -322,7 +359,7 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
               </th>
               <th
                 onClick={() => handleSort('id_pelanggan')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-32"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[150px]"
               >
                 <div className="flex items-center gap-1">
                   <span>ID Pelanggan</span>
@@ -335,7 +372,7 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
               </th>
               <th
                 onClick={() => handleSort('nama')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[200px]"
               >
                 <div className="flex items-center gap-1">
                   <span>Nama Pelanggan</span>
@@ -346,10 +383,10 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3 w-32">IP Router ONT</th>
+              <th className="py-2.5 px-3 whitespace-nowrap min-w-[140px]">IP Router ONT</th>
               <th
                 onClick={() => handleSort('rx_power')}
-                className="py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none w-32"
+                className="py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[130px]"
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Daya Rx (dBm)</span>
@@ -360,11 +397,11 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3 text-center w-20">Suhu</th>
-              <th className="py-2.5 px-3 text-center w-20">Latency</th>
+              <th className="py-2.5 px-3 text-center whitespace-nowrap min-w-[80px]">Suhu</th>
+              <th className="py-2.5 px-3 text-center whitespace-nowrap min-w-[90px]">Latency</th>
               <th
                 onClick={() => handleSort('status_koneksi')}
-                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none w-28"
+                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[100px]"
               >
                 <div className="flex items-center justify-center gap-1">
                   <span>Status</span>
@@ -400,23 +437,25 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                     <td className="py-2.5 px-3 text-slate-500 font-medium text-[11px] whitespace-nowrap">
                       {item.waktu_cek || '-'}
                     </td>
-                    <td className="py-2.5 px-3 font-bold text-cyan-900">{item.id_pelanggan}</td>
-                    <td className="py-2.5 px-3 font-sans">
+                    <td className="py-2.5 px-3 font-bold text-cyan-900 whitespace-nowrap">{item.id_pelanggan}</td>
+                    <td className="py-2.5 px-3 font-sans whitespace-nowrap">
                       {onNavigateCustomer && item.nama ? (
                         <button
                           type="button"
                           onClick={() => onNavigateCustomer(item.nama)}
-                          className="font-semibold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition"
+                          className="font-semibold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate max-w-[280px] inline-block align-middle"
                           title={`Lihat detail ${item.nama} di Data Pelanggan`}
                         >
                           {item.nama}
                         </button>
                       ) : (
-                        <span className="font-semibold text-slate-900">{item.nama || '-'}</span>
+                        <span className="font-semibold text-slate-900 truncate max-w-[280px] inline-block align-middle" title={item.nama}>
+                          {item.nama || '-'}
+                        </span>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600">{item.ip_router || '-'}</td>
-                    <td className="py-2.5 px-3 text-right">
+                    <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">{item.ip_router || '-'}</td>
+                    <td className="py-2.5 px-3 text-right whitespace-nowrap">
                       {item.rx_power != null ? (
                         <span
                           className={`font-black ${
@@ -431,13 +470,13 @@ export function ModulRiwayatRedaman({ activeOffice = 'cabang', warnThreshold = -
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-center text-slate-600">
+                    <td className="py-2.5 px-3 text-center text-slate-600 whitespace-nowrap">
                       {item.suhu_ont != null ? `${item.suhu_ont}°C` : '-'}
                     </td>
-                    <td className="py-2.5 px-3 text-center text-slate-600">
+                    <td className="py-2.5 px-3 text-center text-slate-600 whitespace-nowrap">
                       {item.latency_ms != null ? `${item.latency_ms}ms` : '-'}
                     </td>
-                    <td className="py-2.5 px-3 text-center">
+                    <td className="py-2.5 px-3 text-center whitespace-nowrap">
                       {(() => {
                         const statusVal = (item.status_koneksi || 'NORMAL').toUpperCase();
                         let badgeClass = 'bg-emerald-50 text-emerald-700 border border-emerald-200';

@@ -300,6 +300,12 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
         page={page}
         totalPages={totalPages}
         totalCount={filteredQuota.length}
+        limit={limit}
+        onLimitChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
+        onPageChange={setPage}
         onPrevPage={() => setPage((p) => Math.max(1, p - 1))}
         onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
         loading={loading}

@@ -23,6 +23,7 @@ def get_user_logs_api(
     username: Optional[str] = Query(None),
     q: Optional[str] = Query(None),
     action: Optional[str] = Query(None),
+    kantor: Optional[str] = Query(None),
     range: Optional[str] = Query(None, description="Rentang waktu: today, 7d, 30d, custom"),
     start_date: Optional[str] = Query(None),
     end_date: Optional[str] = Query(None),
@@ -47,7 +48,9 @@ def get_user_logs_api(
         sort_by=sort_by,
         sort_dir=sort_dir,
         page=page,
-        limit=limit
+        limit=limit,
+        target_kantor=kantor,
+        current_user=admin
     )
 
 @router.get("/api/activity-logs/dates")

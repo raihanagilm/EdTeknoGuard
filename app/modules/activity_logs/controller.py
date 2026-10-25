@@ -61,7 +61,9 @@ class ActivityLogController:
         sort_by: str = "created_at",
         sort_dir: str = "desc",
         page: int = 1,
-        limit: int = 15
+        limit: int = 15,
+        target_kantor: Optional[str] = None,
+        current_user: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Endpoint JSON untuk fetching log aktivitas dengan filter, sort, dan pagination"""
         total, data, min_date_str = ActivityLogService.get_activity_logs(
@@ -76,7 +78,9 @@ class ActivityLogController:
             sort_by=sort_by,
             sort_dir=sort_dir,
             page=page,
-            limit=limit
+            limit=limit,
+            target_kantor=target_kantor,
+            current_user=current_user
         )
         return {
             "total": total,
@@ -87,6 +91,6 @@ class ActivityLogController:
         }
 
     @staticmethod
-    def get_available_dates(db: Session) -> List[str]:
+    def get_available_dates(db: Session, target_kantor: Optional[str] = None, current_user: Optional[Dict[str, Any]] = None) -> List[str]:
         """Endpoint JSON untuk mendapatkan daftar tanggal yang tersedia di database"""
         return ActivityLogService.get_distinct_dates(db)

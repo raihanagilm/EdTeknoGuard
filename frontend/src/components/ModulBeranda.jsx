@@ -13,6 +13,10 @@ import {
   Settings,
   UserCheck,
   Smartphone,
+  Building2,
+  ScrollText,
+  Sliders,
+  History,
   Play,
   Pause,
   Square,
@@ -1187,101 +1191,88 @@ export function ModulBeranda({
           {/* 1. Data Pelanggan */}
           <button
             onClick={() => onNavigate('pelanggan')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
+            className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
               <Users className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Pelanggan</span>
+            <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Data Pelanggan</span>
           </button>
 
-          {/* 2. Tiket Keluhan */}
+          {/* 2. Riwayat Redaman */}
           <button
-            onClick={() => onNavigate('tiket')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative min-h-[58px]"
+            onClick={() => onNavigate('riwayat')}
+            className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
-              <Ticket className="w-4 h-4 sm:w-5 sm:h-5" />
-              {unreadTicketsCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1 py-0.2 min-w-[15px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs animate-pulse">
-                  {unreadTicketsCount}
-                </span>
-              )}
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
+              <History className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Tiket</span>
+            <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Riwayat Redaman</span>
           </button>
 
           {/* 3. Pemantauan Kuota */}
           <button
             onClick={() => onNavigate('kuota')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
-          >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Database className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Kuota</span>
-          </button>
-
-          {/* 4. Riwayat Redaman */}
-          <button
-            onClick={() => onNavigate('riwayat')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
+            className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
               <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Redaman</span>
+            <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Pemantauan Kuota</span>
           </button>
 
-          {/* 5. Log Aktivitas */}
+          {/* 4. Tiket Keluhan */}
           <button
-            onClick={() => onNavigate('log')}
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
+            onClick={() => onNavigate('tiket')}
+            className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative min-h-[58px]"
           >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
+              <Ticket className="w-4 h-4 sm:w-5 sm:h-5" />
+              {unreadTicketsCount > 0 && (
+                <span className="absolute -top-1 -right-1 px-1 py-0.2 min-w-[15px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs">
+                  {unreadTicketsCount}
+                </span>
+              )}
             </div>
-            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Log</span>
+            <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Tiket Keluhan</span>
           </button>
 
-          {/* 6. Pengaturan Sistem */}
-          {isAdminOrSuper && (
+          {/* 5. Log Aktivitas (Tidak terlihat oleh teknisi) */}
+          {currentUser?.role !== 'teknisi' && (
             <button
-              onClick={() => onNavigate('pengaturan')}
-              className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
+              onClick={() => onNavigate('log')}
+              className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
             >
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-                <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ScrollText className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Pengaturan</span>
+              <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Log Aktivitas</span>
             </button>
           )}
 
-          {/* 7. Manajemen Pengguna */}
+          {/* 6. Manajemen Kantor (Khusus Super Admin) */}
           {isSuperAdmin && (
             <button
-              onClick={() => onNavigate('pengguna')}
-              className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
+              onClick={() => onNavigate('manajemen-kantor')}
+              className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
             >
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-                <UserCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">Pengguna</span>
+              <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Manajemen Kantor</span>
             </button>
           )}
 
-          {/* 8. Web Pelanggan (TeknoCust) */}
-          <a
-            href="/teknocust"
-            target="_blank"
-            rel="noreferrer"
-            className="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
+          {/* 7. Pengaturan Sistem (Diperlihatkan untuk semua user, teknisi diarahkan ke tab personal/account) */}
+          <button
+            onClick={() => onNavigate('pengaturan', currentUser?.role === 'teknisi' ? 'account' : 'thresholds')}
+            className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
           >
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Sliders className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-[11px] font-mono font-bold text-slate-800 leading-tight">TeknoCust</span>
-          </a>
+            <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Pengaturan Sistem</span>
+          </button>
         </div>
       </section>
 

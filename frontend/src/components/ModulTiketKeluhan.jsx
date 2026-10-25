@@ -43,7 +43,7 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer,
   const [sortField, setSortField] = useState('id_tiket');
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(1);
-  const limit = 15;
+  const [limit, setLimit] = useState(15);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   const handleSort = (field) => {
@@ -226,6 +226,12 @@ export function ModulTiketKeluhan({ activeOffice = 'cabang', onNavigateCustomer,
         page={page}
         totalPages={totalPages}
         totalCount={filteredTickets.length}
+        limit={limit}
+        onLimitChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
+        onPageChange={setPage}
         onPrevPage={() => setPage((p) => Math.max(1, p - 1))}
         onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
         loading={loading}

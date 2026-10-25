@@ -17,7 +17,7 @@ import {
   Clock
 } from 'lucide-react';
 import { UsersService } from '../services/api';
-import { FilterContainer } from './CommonUI';
+import { FilterContainer, DataTableContainer } from './CommonUI';
 
 export function ModulKantorCabang() {
   const [kantorList, setKantorList] = useState([]);
@@ -201,7 +201,7 @@ export function ModulKantorCabang() {
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [activeMenuId, setActiveMenuId] = useState(null);
 
   // Tutup dropdown jika klik di luar
@@ -280,48 +280,31 @@ export function ModulKantorCabang() {
             </div>
           </div>
         </FilterContainer>
-
-        {/* Baris Pagination DI ATAS TABEL */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 bg-white/80 backdrop-blur-md rounded-xl border border-sky-200/80 font-mono text-xs text-slate-600">
-          <div className="flex items-center gap-2">
-            <span>Menampilkan <strong>{filteredKantors.length === 0 ? 0 : (page - 1) * limit + 1}</strong> - <strong>{Math.min(page * limit, filteredKantors.length)}</strong> dari <strong>{filteredKantors.length}</strong> kantor</span>
-            <span className="text-slate-300">|</span>
-            <span>Halaman <strong>{page}</strong> / <strong>{totalPages}</strong></span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              disabled={page <= 1 || kantorLoading}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="px-2.5 py-1 rounded-lg border border-sky-200 bg-white hover:bg-cyan-50 disabled:opacity-40 transition font-bold text-[11px] cursor-pointer disabled:cursor-not-allowed"
-            >
-              Sebelumnya
-            </button>
-            <button
-              type="button"
-              disabled={page >= totalPages || kantorLoading}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="px-2.5 py-1 rounded-lg border border-sky-200 bg-white hover:bg-cyan-50 disabled:opacity-40 transition font-bold text-[11px] cursor-pointer disabled:cursor-not-allowed"
-            >
-              Berikutnya
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Tabel Kantor Cabang */}
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl border border-sky-200/80 shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse table-auto md:table-fixed">
+      <DataTableContainer
+        page={page}
+        totalPages={totalPages}
+        totalItems={filteredKantors.length}
+        limit={limit}
+        onLimitChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
+        onPageChange={setPage}
+        loading={kantorLoading}
+      >
+        <table className="w-full text-left border-collapse table-auto">
             <thead>
               <tr className="bg-cyan-50/80 border-b border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
-                <th className="py-2.5 px-3 w-12 text-center">No</th>
-                <th className="py-2.5 px-3 w-36">Kode Kantor</th>
-                <th className="py-2.5 px-3 w-48">Nama Wilayah</th>
-                <th className="py-2.5 px-3 w-28 text-center">Status</th>
-                <th className="py-2.5 px-3 w-64">MikroTik RouterOS</th>
-                <th className="py-2.5 px-3">Alamat / Keterangan</th>
-                <th className="py-2.5 px-3 text-right w-36">Aksi & Sinkron</th>
+                <th className="py-2.5 px-3 w-12 text-center whitespace-nowrap">No</th>
+                <th className="py-2.5 px-3 w-32 whitespace-nowrap">Kode Kantor</th>
+                <th className="py-2.5 px-3 w-40 whitespace-nowrap">Nama Wilayah</th>
+                <th className="py-2.5 px-3 w-28 text-center whitespace-nowrap">Status</th>
+                <th className="py-2.5 px-3 min-w-[200px] whitespace-nowrap">MikroTik RouterOS</th>
+                <th className="py-2.5 px-3 min-w-[180px] whitespace-nowrap">Alamat / Keterangan</th>
+                <th className="py-2.5 px-3 text-right w-36 whitespace-nowrap">Aksi & Sinkron</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-sky-100 font-mono text-xs">
@@ -503,8 +486,7 @@ export function ModulKantorCabang() {
               )}
             </tbody>
           </table>
-        </div>
-      </div>
+      </DataTableContainer>
 
       {/* Modal Tambah / Edit Kantor Wilayah & Setting Router MikroTik */}
       {modalKantorOpen && (

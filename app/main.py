@@ -188,6 +188,18 @@ app.include_router(users_router)
 app.include_router(admin_customer_router)
 app.include_router(mikrotik_router)
 
+# Route Halaman SPA Dashboard NOC (Support Direct URL & Refresh)
+@app.get("/manajemen-kantor")
+@app.get("/pengguna")
+@app.get("/kantor")
+def serve_management_kantor_page(request: Request):
+    from app.core.security import require_admin
+    user = require_admin(request)
+    dist_index = Path("frontend/dist/index.html")
+    if dist_index.exists():
+        return FileResponse(str(dist_index))
+    return RedirectResponse("/", status_code=303)
+
 # Mount Portal Pelanggan
 from portal_pelanggan.main import app as portal_app
 app.mount("/portal", portal_app)
@@ -306,11 +318,16 @@ async def get_kantor_list_alias(request: Request):
 def get_log_alias(request: Request):
     from app.core.database import get_db
     from app.modules.activity_logs.controller import ActivityLogController
-    from app.core.security import require_admin
+    from app.core.security import require_admin, get_current_user_optional
     db = next(get_db(request))
     try:
-        require_admin(request)
+        user = require_admin(request)
         params = dict(request.query_params)
+        
+        target_k = params.get("kantor")
+        if not target_k:
+            target_k = request.headers.get("X-Active-Kantor") or request.cookies.get("active_kantor")
+
         return ActivityLogController.get_logs_data(
             db=db,
             username=params.get("username"),
@@ -323,7 +340,9 @@ def get_log_alias(request: Request):
             sort_by=params.get("sort_by", "created_at"),
             sort_dir=params.get("sort_dir", "desc"),
             page=int(params.get("page", 1)),
-            limit=int(params.get("limit", 15))
+            limit=int(params.get("limit", 15)),
+            target_kantor=target_k,
+            current_user=user
         )
     finally:
         db.close()

@@ -115,18 +115,107 @@ class ActivityLogService:
             return None
 
     @staticmethod
-    def get_distinct_users(db: Session) -> List[Dict[str, str]]:
-        """Mendapatkan daftar unik username & nama karyawan untuk filter dropdown"""
-        rows = (
-            db.query(UserActivityLog.username, UserActivityLog.nama_karyawan)
-            .distinct()
-            .order_by(UserActivityLog.username.asc())
-            .all()
-        )
-        return [
-            {"username": r[0], "nama_karyawan": r[1] or r[0]}
-            for r in rows if r[0]
-        ]
+    def _build_log_filter(
+        query,
+        username: Optional[str] = None,
+        q: Optional[str] = None,
+        action: Optional[str] = None,
+        range_type: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        date: Optional[str] = None
+    ):
+        now = get_now_wib()
+        if range_type == "today":
+            cutoff = datetime.datetime(now.year, now.month, now.day)
+            query = query.filter(UserActivityLog.created_at >= cutoff)
+        elif range_type == "7d":
+            cutoff = now - datetime.timedelta(days=7)
+            query = query.filter(UserActivityLog.created_at >= cutoff)
+        elif range_type == "30d":
+            cutoff = now - datetime.timedelta(days=30)
+            query = query.filter(UserActivityLog.created_at >= cutoff)
+        elif range_type == "custom" and start_date and end_date:
+            try:
+                s_dt = datetime.datetime.strptime(start_date.strip(), "%Y-%m-%d")
+                e_dt = datetime.datetime.strptime(end_date.strip(), "%Y-%m-%d") + datetime.timedelta(days=1)
+                query = query.filter(UserActivityLog.created_at >= s_dt, UserActivityLog.created_at < e_dt)
+            except ValueError:
+                pass
+        elif date and date != "all":
+            try:
+                target_date = datetime.date.fromisoformat(date.strip())
+                next_day = target_date + datetime.timedelta(days=1)
+                query = query.filter(
+                    UserActivityLog.created_at >= datetime.datetime.combine(target_date, datetime.time.min),
+                    UserActivityLog.created_at < datetime.datetime.combine(next_day, datetime.time.min)
+                )
+            except ValueError:
+                pass
+
+        if username and username != "all":
+            query = query.filter(UserActivityLog.username == username.strip())
+
+        if action and action != "all":
+            query = query.filter(UserActivityLog.action == action.strip().upper())
+
+        if q:
+            search_pattern = f"%{q.strip()}%"
+            query = query.filter(
+                or_(
+                    UserActivityLog.username.ilike(search_pattern),
+                    UserActivityLog.nama_karyawan.ilike(search_pattern),
+                    UserActivityLog.action.ilike(search_pattern),
+                    UserActivityLog.ip_address.ilike(search_pattern),
+                    UserActivityLog.keterangan.ilike(search_pattern)
+                )
+            )
+
+        return query
+
+    @staticmethod
+    def get_distinct_users(db: Session, target_kantor: Optional[str] = None, current_user: Optional[Dict[str, Any]] = None) -> List[Dict[str, str]]:
+        """Mendapatkan daftar unik username & nama karyawan untuk filter dropdown lintas kantor"""
+        from app.core.tenant_database import TenantDatabaseManager
+        from app.core.security import get_all_kantor_codes
+
+        kantor_list = []
+        is_super = current_user and (current_user.get("role") == "super admin" or current_user.get("user") == "admin")
+        if target_kantor and target_kantor.lower() != "all":
+            kantor_list = [target_kantor.lower()]
+        elif is_super:
+            kantor_list = get_all_kantor_codes()
+        elif current_user and current_user.get("allowed_kantor"):
+            kantor_list = [k.lower() for k in current_user.get("allowed_kantor", [])]
+
+        if not kantor_list:
+            rows = db.query(UserActivityLog.username, UserActivityLog.nama_karyawan).distinct().all()
+            return [{"username": r[0], "nama_karyawan": r[1] or r[0]} for r in rows if r[0]]
+
+        user_dict = {}
+        for k in kantor_list:
+            try:
+                t_sess = TenantDatabaseManager.get_tenant_session(k)
+                try:
+                    rows = t_sess.query(UserActivityLog.username, UserActivityLog.nama_karyawan).distinct().all()
+                    for r in rows:
+                        if r[0] and r[0] not in user_dict:
+                            user_dict[r[0]] = r[1] or r[0]
+                finally:
+                    t_sess.close()
+            except Exception:
+                pass
+
+        # Tambahkan juga dari master db
+        try:
+            rows = db.query(UserActivityLog.username, UserActivityLog.nama_karyawan).distinct().all()
+            for r in rows:
+                if r[0] and r[0] not in user_dict:
+                    user_dict[r[0]] = r[1] or r[0]
+        except Exception:
+            pass
+
+        return [{"username": u, "nama_karyawan": n} for u, n in sorted(user_dict.items(), key=lambda x: x[0])]
 
     @staticmethod
     def get_distinct_dates(db: Session) -> List[str]:
@@ -156,100 +245,188 @@ class ActivityLogService:
         sort_by: str = "created_at",
         sort_dir: str = "desc",
         page: int = 1,
-        limit: int = 15
+        limit: int = 15,
+        target_kantor: Optional[str] = None,
+        current_user: Optional[Dict[str, Any]] = None
     ) -> Tuple[int, List[Dict[str, Any]], Optional[str]]:
-        """Mengambil data log aktivitas dengan filter rentang waktu/kustom tanggal, sorting dinamis, dan pagination"""
-        query = db.query(UserActivityLog)
+        """Mengambil data log aktivitas dengan dukungan multi-tenant (Super Admin dapat melihat semua kantor atau per kantor terpilih)"""
+        from app.core.tenant_database import TenantDatabaseManager
+        from app.core.security import get_all_kantor_codes
 
-        now = get_now_wib()
-        if range_type == "today":
-            cutoff = datetime.datetime(now.year, now.month, now.day)
-            query = query.filter(UserActivityLog.created_at >= cutoff)
-        elif range_type == "7d":
-            cutoff = now - datetime.timedelta(days=7)
-            query = query.filter(UserActivityLog.created_at >= cutoff)
-        elif range_type == "30d":
-            cutoff = now - datetime.timedelta(days=30)
-            query = query.filter(UserActivityLog.created_at >= cutoff)
-        elif range_type == "custom" and start_date and end_date:
+        is_super = current_user and (current_user.get("role") == "super admin" or current_user.get("user") == "admin")
+        kantor_list = []
+        if target_kantor and target_kantor.lower() != "all":
+            kantor_list = [target_kantor.lower()]
+        elif is_super:
+            kantor_list = get_all_kantor_codes()
+        elif current_user and current_user.get("allowed_kantor"):
+            kantor_list = [k.lower() for k in current_user.get("allowed_kantor", [])]
+
+        # Jika hanya 1 database spesifik dan bukan agregasi multi-kantor
+        if len(kantor_list) <= 1:
+            active_db = db
+            close_sess = False
+            active_k_name = kantor_list[0].upper() if kantor_list else "PUSAT"
+            if kantor_list:
+                try:
+                    active_db = TenantDatabaseManager.get_tenant_session(kantor_list[0])
+                    close_sess = True
+                except Exception:
+                    active_db = db
+                    close_sess = False
+
             try:
-                s_dt = datetime.datetime.strptime(start_date.strip(), "%Y-%m-%d")
-                e_dt = datetime.datetime.strptime(end_date.strip(), "%Y-%m-%d") + datetime.timedelta(days=1)
-                query = query.filter(UserActivityLog.created_at >= s_dt, UserActivityLog.created_at < e_dt)
-            except ValueError:
-                pass
-        elif date and date != "all":
-            try:
-                target_date = datetime.date.fromisoformat(date.strip())
-                next_day = target_date + datetime.timedelta(days=1)
-                query = query.filter(
-                    UserActivityLog.created_at >= datetime.datetime.combine(target_date, datetime.time.min),
-                    UserActivityLog.created_at < datetime.datetime.combine(next_day, datetime.time.min)
+                query = active_db.query(UserActivityLog)
+                query = ActivityLogService._build_log_filter(
+                    query=query,
+                    username=username,
+                    q=q,
+                    action=action,
+                    range_type=range_type,
+                    start_date=start_date,
+                    end_date=end_date,
+                    date=date
                 )
-            except ValueError:
-                pass  # Abaikan format tanggal yang tidak valid
+                total_count = query.count()
 
-        # Filter berdasarkan username/karyawan tertentu
-        if username and username != "all":
-            query = query.filter(UserActivityLog.username == username.strip())
+                col_map = {
+                    "created_at": UserActivityLog.created_at,
+                    "username": UserActivityLog.username,
+                    "nama_karyawan": UserActivityLog.nama_karyawan,
+                    "role": UserActivityLog.role,
+                    "action": UserActivityLog.action,
+                    "ip_address": UserActivityLog.ip_address,
+                    "status": UserActivityLog.status,
+                    "id": UserActivityLog.id
+                }
+                target_col = col_map.get(sort_by, UserActivityLog.created_at)
+                if sort_dir.lower() == "desc":
+                    query = query.order_by(desc(target_col))
+                else:
+                    query = query.order_by(asc(target_col))
 
-        # Filter berdasarkan aksi
-        if action and action != "all":
-            query = query.filter(UserActivityLog.action == action.strip().upper())
+                offset = (page - 1) * limit
+                logs = query.offset(offset).limit(limit).all()
 
-        # Pencarian fleksibel
-        if q:
-            search_pattern = f"%{q.strip()}%"
-            query = query.filter(
-                or_(
-                    UserActivityLog.username.ilike(search_pattern),
-                    UserActivityLog.nama_karyawan.ilike(search_pattern),
-                    UserActivityLog.action.ilike(search_pattern),
-                    UserActivityLog.ip_address.ilike(search_pattern),
-                    UserActivityLog.keterangan.ilike(search_pattern)
-                )
+                results = []
+                for l in logs:
+                    results.append({
+                        "id": l.id,
+                        "kantor": active_k_name,
+                        "username": l.username,
+                        "nama_karyawan": l.nama_karyawan or l.username,
+                        "role": l.role,
+                        "action": l.action,
+                        "ip_address": l.ip_address or "-",
+                        "user_agent": l.user_agent or "-",
+                        "status": l.status,
+                        "keterangan": l.keterangan or "-",
+                        "created_at": l.created_at.strftime("%Y-%m-%d %H:%M:%S") if l.created_at else "-",
+                        "waktu": l.created_at.strftime("%Y-%m-%d %H:%M:%S") if l.created_at else "-"
+                    })
+
+                earliest = active_db.query(func.min(UserActivityLog.created_at)).scalar()
+                min_date_str = earliest.strftime("%Y-%m-%d") if earliest else get_today_wib().strftime("%Y-%m-%d")
+                return total_count, results, min_date_str
+            finally:
+                if close_sess:
+                    active_db.close()
+
+        # Agregasi Lintas Semua Kantor (Super Admin Mode)
+        all_logs = []
+        earliest_dates = []
+
+        # 1. Tarik dari database master jika ada
+        try:
+            q_master = db.query(UserActivityLog)
+            q_master = ActivityLogService._build_log_filter(
+                query=q_master,
+                username=username,
+                q=q,
+                action=action,
+                range_type=range_type,
+                start_date=start_date,
+                end_date=end_date,
+                date=date
             )
+            master_logs = q_master.all()
+            for l in master_logs:
+                all_logs.append({
+                    "id": l.id,
+                    "kantor": "MASTER",
+                    "username": l.username,
+                    "nama_karyawan": l.nama_karyawan or l.username,
+                    "role": l.role,
+                    "action": l.action,
+                    "ip_address": l.ip_address or "-",
+                    "user_agent": l.user_agent or "-",
+                    "status": l.status,
+                    "keterangan": l.keterangan or "-",
+                    "raw_created_at": l.created_at,
+                    "created_at": l.created_at.strftime("%Y-%m-%d %H:%M:%S") if l.created_at else "-",
+                    "waktu": l.created_at.strftime("%Y-%m-%d %H:%M:%S") if l.created_at else "-"
+                })
+                if l.created_at:
+                    earliest_dates.append(l.created_at)
+        except Exception:
+            pass
 
-        total_count = query.count()
+        # 2. Tarik dari setiap tenant DB kantor yang terdaftar
+        for k in kantor_list:
+            try:
+                t_sess = TenantDatabaseManager.get_tenant_session(k)
+                try:
+                    q_tenant = t_sess.query(UserActivityLog)
+                    q_tenant = ActivityLogService._build_log_filter(
+                        query=q_tenant,
+                        username=username,
+                        q=q,
+                        action=action,
+                        range_type=range_type,
+                        start_date=start_date,
+                        end_date=end_date,
+                        date=date
+                    )
+                    t_logs = q_tenant.all()
+                    for l in t_logs:
+                        all_logs.append({
+                            "id": l.id,
+                            "kantor": k.upper(),
+                            "username": l.username,
+                            "nama_karyawan": l.nama_karyawan or l.username,
+                            "role": l.role,
+                            "action": l.action,
+                            "ip_address": l.ip_address or "-",
+                            "user_agent": l.user_agent or "-",
+                            "status": l.status,
+                            "keterangan": l.keterangan or "-",
+                            "raw_created_at": l.created_at,
+                            "created_at": l.created_at.strftime("%Y-%m-%d %H:%M:%S") if l.created_at else "-",
+                            "waktu": l.created_at.strftime("%Y-%m-%d %H:%M:%S") if l.created_at else "-"
+                        })
+                        if l.created_at:
+                            earliest_dates.append(l.created_at)
+                finally:
+                    t_sess.close()
+            except Exception as e:
+                print(f"[ActivityLogService] Error fetching logs for kantor {k}: {e}")
 
-        # Dynamic column sorting
-        col_map = {
-            "created_at": UserActivityLog.created_at,
-            "username": UserActivityLog.username,
-            "nama_karyawan": UserActivityLog.nama_karyawan,
-            "role": UserActivityLog.role,
-            "action": UserActivityLog.action,
-            "ip_address": UserActivityLog.ip_address,
-            "status": UserActivityLog.status,
-            "id": UserActivityLog.id
-        }
-        target_col = col_map.get(sort_by, UserActivityLog.created_at)
-        if sort_dir.lower() == "desc":
-            query = query.order_by(desc(target_col))
+        total_count = len(all_logs)
+
+        # Sorting dinamis di memori
+        reverse_sort = (sort_dir.lower() == "desc")
+        if sort_by == "created_at":
+            all_logs.sort(key=lambda x: x.get("raw_created_at") or datetime.datetime.min, reverse=reverse_sort)
+        elif sort_by in ["username", "nama_karyawan", "role", "action", "ip_address", "status", "kantor"]:
+            all_logs.sort(key=lambda x: str(x.get(sort_by, "")).lower(), reverse=reverse_sort)
         else:
-            query = query.order_by(asc(target_col))
+            all_logs.sort(key=lambda x: x.get("raw_created_at") or datetime.datetime.min, reverse=True)
 
         offset = (page - 1) * limit
-        logs = query.offset(offset).limit(limit).all()
+        paginated_logs = all_logs[offset:offset + limit]
 
-        results = []
-        for l in logs:
-            results.append({
-                "id": l.id,
-                "username": l.username,
-                "nama_karyawan": l.nama_karyawan or l.username,
-                "role": l.role,
-                "action": l.action,
-                "ip_address": l.ip_address or "-",
-                "user_agent": l.user_agent or "-",
-                "status": l.status,
-                "keterangan": l.keterangan or "-",
-                "waktu": l.created_at.strftime("%Y-%m-%d %H:%M:%S") if l.created_at else "-"
-            })
-
-        earliest = db.query(func.min(UserActivityLog.created_at)).scalar()
-        min_date_str = earliest.strftime("%Y-%m-%d") if earliest else get_today_wib().strftime("%Y-%m-%d")
-        return total_count, results, min_date_str
+        min_date_str = min(earliest_dates).strftime("%Y-%m-%d") if earliest_dates else get_today_wib().strftime("%Y-%m-%d")
+        return total_count, paginated_logs, min_date_str
 
     @staticmethod
     def cleanup_old_activity_logs(db: Session, days: int = 60) -> int:
