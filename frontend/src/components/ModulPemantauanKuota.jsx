@@ -10,7 +10,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  Check
+  Check,
+  Activity
 } from 'lucide-react';
 import { QuotaService } from '../services/api';
 import {
@@ -297,11 +298,12 @@ export function ModulPemantauanKuota({ activeOffice = 'cabang', onNavigateCustom
                   }
                 }}
                 disabled={loading}
-                className="px-2.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition min-h-[34px] sm:min-h-[36px] flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs disabled:opacity-50"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 text-[11px] sm:text-xs font-mono font-bold transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-xs disabled:opacity-50"
                 title="Sinkronkan data kuota langsung dari Simple Queues MikroTik"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Sync MikroTik</span>
+                <Activity className={`w-3.5 h-3.5 text-cyan-700 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{loading ? 'Syncing...' : 'Sync MikroTik'}</span>
+                <span className="sm:hidden">{loading ? '...' : 'Sync'}</span>
               </button>
 
               <button

@@ -345,7 +345,7 @@ class MikroTikSyncService:
             except Exception as e:
                 logger.debug(f"Info: Pemrosesan PPPoE router selesai: {e}")
 
-            # 4. Ambil Simple Queues untuk pemetaan paket kecepatan
+            # 4. Ambil Simple Queues untuk pemetaan paket kecepatan dan pendaftaran pelanggan statis/queue
             ip_to_rate = {}
             try:
                 queue_resource = api.get_resource("/queue/simple")
@@ -353,9 +353,34 @@ class MikroTikSyncService:
                 for q in raw_queues:
                     target = q.get("target", "")
                     max_limit = q.get("max-limit", "")
+                    name = q.get("name", "").strip()
+                    comment = q.get("comment", "").strip() or name
+                    disabled = q.get("disabled", "false").lower() == "true"
+
                     if target:
                         clean_ip = target.split("/")[0].strip()
-                        ip_to_rate[clean_ip] = max_limit
+                        # Hanya proses target yang berupa format IP Address valid (10.x, 192.168.x, 172.x, dsb)
+                        # Abaikan interface / dynamic binding seperti <pppoe-xxx@teknoindo.net>
+                        is_valid_ip = bool(re.match(r'^(?:10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[0-1])\.)\d{1,3}\.\d{1,3}$', clean_ip))
+
+                        if is_valid_ip:
+                            ip_to_rate[clean_ip] = max_limit
+
+                            # Periksa apakah ini perangkat office/non-customer
+                            is_office = any(kw in (name or comment).upper() for kw in NON_CUSTOMER_KEYWORDS)
+                            if not is_office:
+                                if clean_ip not in devices_by_ip:
+                                    devices_by_ip[clean_ip] = {
+                                        "address": clean_ip,
+                                        "mac-address": "",
+                                        "comment": comment or name,
+                                        "status": "waiting" if disabled else "bound",
+                                        "source": "queue"
+                                    }
+                                else:
+                                    # Jika belum memiliki comment valid atau nama di device sebelumnya, lengkapi dari queue
+                                    if not devices_by_ip[clean_ip].get("comment") and (comment or name):
+                                        devices_by_ip[clean_ip]["comment"] = comment or name
             except Exception as e:
                 logger.warning(f"Tidak dapat mengambil simple queues: {e}")
 
@@ -650,7 +675,7 @@ class MikroTikSyncService:
         from app.db.models import Kantor
         if not kantor:
             first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-            kantor = first_k.kode if first_k else "cabang"
+            kantor = first_k.kode if first_k else ""
 
         k = db.query(Kantor).filter(Kantor.kode == kantor).first()
         if not k or not k.mikrotik_host:
@@ -736,7 +761,7 @@ class MikroTikSyncService:
         from app.db.models import Kantor
         if not kantor:
             first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-            kantor = first_k.kode if first_k else "cabang"
+            kantor = first_k.kode if first_k else ""
 
         k = db.query(Kantor).filter(Kantor.kode == kantor).first()
         if not k or not k.mikrotik_host:

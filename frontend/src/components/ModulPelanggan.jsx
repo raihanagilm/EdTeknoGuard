@@ -803,11 +803,11 @@ export function ModulPelanggan({
                 className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] ${
                   !isOfficeActive
                     ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
-                    : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-indigo-200 cursor-pointer'
+                    : 'bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border-cyan-200 cursor-pointer'
                 }`}
                 title={!isOfficeActive ? 'Kantor dalam status nonaktif. Sinkronisasi MikroTik dimatikan.' : 'Sinkronisasi Kuota & Traffic Real-Time dari Router MikroTik'}
               >
-                <Activity className={`w-3.5 h-3.5 ${!isOfficeActive ? 'text-slate-400' : 'text-indigo-600'} ${mikrotikSyncing ? 'animate-spin' : ''}`} />
+                <Activity className={`w-3.5 h-3.5 ${!isOfficeActive ? 'text-slate-400' : 'text-cyan-700'} ${mikrotikSyncing ? 'animate-spin' : ''}`} />
                 <span>{mikrotikSyncing ? 'Syncing...' : !isOfficeActive ? 'Sync Mati' : 'Sync MikroTik'}</span>
               </button>
 
