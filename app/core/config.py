@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     SNMP_SIMULATION_MODE: bool = False
     MIKROTIK_SIMULATION_MODE: bool = False
 
+    # Integrasi API Network Bill (Tekno Bill)
+    NETWORK_BILL_BASE_URL: str = "https://pop.teknoindo.net/api/v1"
+    NETWORK_BILL_API_TOKEN: str = ""
+    NETWORK_BILL_BILLING_TOKEN: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

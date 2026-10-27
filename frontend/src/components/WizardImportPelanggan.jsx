@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Upload,
   RefreshCw,
@@ -14,7 +14,10 @@ import {
   Info,
   Check,
   CheckCircle2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Globe,
+  Database,
+  Building2
 } from 'lucide-react'
 import { ToastNotification } from './ToastNotification'
 
@@ -41,6 +44,46 @@ export function WizardImportPelanggan({
   const [importError, setImportError] = useState('')
   const [importSuccess, setImportSuccess] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL') // ALL | VALID | DUPLICATE | ERROR
+
+  // Mapping standar nama kantor EdTeknoGuard ke kemungkinan slug PoP di Network Bill
+  const resolvePopSlugFromOffice = (office, popsList = []) => {
+    const raw = (office || '').toLowerCase().trim()
+    const cleanRaw = raw.replace(/\s+/g, '') // hilangkan spasi: 'karang gede' -> 'karanggede'
+
+    // 1. Cek pencocokan ke daftar PoP jika sudah dimuat
+    if (popsList && popsList.length > 0) {
+      const match = popsList.find(
+        (p) =>
+          p.slug.toLowerCase() === raw ||
+          p.slug.toLowerCase() === cleanRaw ||
+          p.name.toLowerCase().replace(/\s+/g, '').includes(cleanRaw)
+      )
+      if (match) return match.slug
+    }
+
+    // 2. Mapping bawaan ISP EdTeknoGuard:
+    if (cleanRaw === 'cabang' || cleanRaw === 'slawi') return 'slawi'
+    if (cleanRaw === 'banyumas' || cleanRaw === 'bms') return 'banyumas'
+    if (cleanRaw.includes('karanggede') || cleanRaw.includes('karang')) return 'karanggede'
+    if (cleanRaw.includes('tengaran')) return 'tengaran'
+    if (cleanRaw === 'pusat') return 'pusat'
+    return cleanRaw || 'slawi'
+  }
+
+  // State Integrasi Network Bill API (api-v1)
+  const [importSource, setImportSource] = useState('file') // 'file' | 'network_bill'
+  const [networkBillPops, setNetworkBillPops] = useState([])
+  const [selectedPop, setSelectedPop] = useState(() => resolvePopSlugFromOffice(activeOffice))
+  const [networkBillLimitMode, setNetworkBillLimitMode] = useState('all') // default langsung tarik semua ('all')
+  const [networkBillLoadingPops, setNetworkBillLoadingPops] = useState(false)
+  const [networkBillFetching, setNetworkBillFetching] = useState(false)
+
+  // Otomatis update selectedPop saat user berpindah kantor aktif (activeOffice)
+  useEffect(() => {
+    if (activeOffice) {
+      setSelectedPop(resolvePopSlugFromOffice(activeOffice, networkBillPops))
+    }
+  }, [activeOffice, networkBillPops])
 
   // 1. Kolom Utama Pengayaan Data (Fokus No WA, Alamat & Password WiFi)
   const PRIMARY_FIELDS = [
@@ -166,13 +209,54 @@ export function WizardImportPelanggan({
     }
   }
 
-  const handleSheetChange = (sheetName) => {
-    setImportSelectedSheet(sheetName)
-    const found = importSheets.find((s) => s.name === sheetName)
-    if (found) {
-      const cols = found.columns || []
-      setImportColumns(cols)
-      autoMapColumns(cols)
+  const loadNetworkBillPops = async () => {
+    setNetworkBillLoadingPops(true)
+    setImportError('')
+    try {
+      const res = await fetch('/api/customers/network-bill/pops')
+      const data = await res.json()
+      if (res.ok && data.result) {
+        const pops = data.result || []
+        setNetworkBillPops(pops)
+        if (pops.length > 0 && !selectedPop) {
+          setSelectedPop(pops[0].slug)
+        }
+      } else {
+        setImportError(data.detail || 'Gagal memuat daftar PoP dari Network Bill.')
+      }
+    } catch (err) {
+      setImportError('Gagal menghubungi backend untuk daftar PoP.')
+    } finally {
+      setNetworkBillLoadingPops(false)
+    }
+  }
+
+  const handleFetchNetworkBillPreview = async () => {
+    const pop = resolvePopSlugFromOffice(activeOffice, networkBillPops)
+    const limit = networkBillLimitMode === '1' ? 1 : 0 // 0 = tarik semua pelanggan
+    setNetworkBillFetching(true)
+    setImportError('')
+
+    try {
+      const res = await fetch(`/api/customers/network-bill/preview?pop=${encodeURIComponent(pop)}&limit=${limit}`, {
+        method: 'POST'
+      })
+      const data = await res.json()
+      if (res.ok && data.result) {
+        const rawPreview = data.result.preview_data || []
+        setExistingDbIds(data.result.existing_ids || [])
+        setExistingDbIps(data.result.existing_ips || [])
+        setImportPreviewData(rawPreview)
+        setSelectedImportIndices([])
+        setStatusFilter('ALL')
+        setImportStep(3) // Langsung lompat ke Langkah 3 Pratinjau & Perbandingan!
+      } else {
+        setImportError(data.detail || 'Gagal menarik data dari API Network Bill.')
+      }
+    } catch (err) {
+      setImportError('Gagal menghubungi server untuk penarikan data Network Bill.')
+    } finally {
+      setNetworkBillFetching(false)
     }
   }
 
@@ -398,9 +482,8 @@ export function WizardImportPelanggan({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div
-        className={`bg-white rounded-3xl border border-sky-200 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 w-full my-auto ${
-          importStep === 3 ? 'max-w-5xl' : 'max-w-2xl'
-        } p-5 sm:p-6 transition-all`}
+        className={`bg-white rounded-3xl border border-sky-200 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 w-full my-auto ${importStep === 3 ? 'max-w-5xl' : 'max-w-2xl'
+          } p-5 sm:p-6 transition-all`}
       >
         {/* Modal Header & Step Indicator */}
         <div className="border-b border-sky-100 pb-4 space-y-3">
@@ -410,9 +493,15 @@ export function WizardImportPelanggan({
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 font-sans">
-                  Lengkapi Data Pelanggan
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-slate-900 font-sans">
+                    Lengkapi Data Pelanggan
+                  </h3>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-cyan-800 bg-cyan-100/90 px-2 py-0.5 rounded-lg uppercase tracking-tight border border-cyan-200">
+                    <Building2 className="w-3 h-3 text-cyan-700 shrink-0" />
+                    <span>Kantor {activeOffice}</span>
+                  </span>
+                </div>
                 <p className="text-xs text-slate-400 font-mono">
                   Lengkapi Nomor WhatsApp, Alamat Pemasangan, dan Kredensial WiFi berdasarkan IP Router ONT
                 </p>
@@ -430,22 +519,20 @@ export function WizardImportPelanggan({
           {/* 3 Step Interactive / Informative Progress Cards */}
           <div className="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
             <div
-              className={`flex items-center gap-2 p-2 rounded-xl border transition ${
-                importStep === 1
+              className={`flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 1
                   ? 'bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs'
                   : importStep > 1
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold'
-                  : 'bg-slate-50 border-slate-200 text-slate-400'
-              }`}
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold'
+                    : 'bg-slate-50 border-slate-200 text-slate-400'
+                }`}
             >
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${
-                  importStep === 1
+                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 1
                     ? 'bg-cyan-600 text-white'
                     : importStep > 1
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-slate-200 text-slate-600'
-                }`}
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-slate-200 text-slate-600'
+                  }`}
               >
                 {importStep > 1 ? <Check className="w-3.5 h-3.5" /> : '1'}
               </div>
@@ -453,22 +540,20 @@ export function WizardImportPelanggan({
             </div>
 
             <div
-              className={`flex items-center gap-2 p-2 rounded-xl border transition ${
-                importStep === 2
+              className={`flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 2
                   ? 'bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs'
                   : importStep > 2
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold'
-                  : 'bg-slate-50 border-slate-200 text-slate-400'
-              }`}
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold'
+                    : 'bg-slate-50 border-slate-200 text-slate-400'
+                }`}
             >
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${
-                  importStep === 2
+                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 2
                     ? 'bg-cyan-600 text-white'
                     : importStep > 2
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-slate-200 text-slate-600'
-                }`}
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-slate-200 text-slate-600'
+                  }`}
               >
                 {importStep > 2 ? <Check className="w-3.5 h-3.5" /> : '2'}
               </div>
@@ -476,16 +561,14 @@ export function WizardImportPelanggan({
             </div>
 
             <div
-              className={`flex items-center gap-2 p-2 rounded-xl border transition ${
-                importStep === 3
+              className={`flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 3
                   ? 'bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs'
                   : 'bg-slate-50 border-slate-200 text-slate-400'
-              }`}
+                }`}
             >
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${
-                  importStep === 3 ? 'bg-cyan-600 text-white' : 'bg-slate-200 text-slate-600'
-                }`}
+                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 3 ? 'bg-cyan-600 text-white' : 'bg-slate-200 text-slate-600'
+                  }`}
               >
                 3
               </div>
@@ -510,103 +593,216 @@ export function WizardImportPelanggan({
           onClose={() => setImportSuccess('')}
         />
 
-        {/* ==================== LANGKAH 1: UPLOAD & ANALISIS ==================== */}
+        {/* ==================== LANGKAH 1: SUMBER DATA (FILE VS NETWORK BILL) ==================== */}
         {importStep === 1 && (
           <div className="space-y-4 font-mono text-xs">
-            <div className="p-6 rounded-3xl bg-cyan-50/40 border-2 border-dashed border-cyan-300 text-center space-y-3 hover:bg-cyan-50/70 transition">
-              <div className="w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center mx-auto shadow-xs">
-                <Upload className="w-7 h-7" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-800 mb-1 cursor-pointer">
-                  Pilih Berkas Excel (.xlsx, .xls) atau CSV (.csv)
-                </label>
-                <p className="text-[11px] text-slate-500 font-sans mb-3">
-                  Sistem akan menganalisis nama lembar kerja (sheet) dan mendeteksi susunan header kolom secara otomatis.
-                </p>
-                <input
-                  type="file"
-                  accept=".csv, .xlsx, .xls"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      handleImportFileSelected(e.target.files[0])
-                    }
-                  }}
-                  className="text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700 cursor-pointer shadow-xs transition"
-                />
-              </div>
+            {/* Tab Pemilihan Sumber */}
+            <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setImportSource('file')}
+                className={`flex-1 py-2 px-3 rounded-xl font-bold font-sans text-xs flex items-center justify-center gap-2 transition cursor-pointer ${importSource === 'file'
+                    ? 'bg-white text-cyan-900 shadow-2xs border border-slate-200/80'
+                    : 'text-slate-500 hover:text-slate-800'
+                  }`}
+              >
+                <FileSpreadsheet className="w-4 h-4 text-cyan-600" />
+                <span>Unggah Berkas Spreadsheet (Excel / CSV)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setImportSource('network_bill')
+                  if (networkBillPops.length === 0) {
+                    loadNetworkBillPops()
+                  }
+                }}
+                className={`flex-1 py-2 px-3 rounded-xl font-bold font-sans text-xs flex items-center justify-center gap-2 transition cursor-pointer ${importSource === 'network_bill'
+                    ? 'bg-white text-cyan-900 shadow-2xs border border-slate-200/80'
+                    : 'text-slate-500 hover:text-slate-800'
+                  }`}
+              >
+                <Globe className="w-4 h-4 text-cyan-600" />
+                <span>Tarik dari Network Bill (API v1)</span>
+              </button>
+            </div>
 
-              {importAnalyzing && (
-                <div className="flex items-center justify-center gap-2 text-cyan-800 font-bold text-xs pt-2">
-                  <RefreshCw className="w-4 h-4 animate-spin text-cyan-600" />
-                  <span>Sedang menganalisis struktur berkas...</span>
-                </div>
-              )}
-
-              {importFile && !importAnalyzing && (
-                <div className="p-3 rounded-2xl bg-white border border-cyan-200 text-left space-y-2 text-xs">
-                  <div className="flex items-center justify-between font-bold text-cyan-950">
-                    <span className="flex items-center gap-1.5">
-                      <FileSpreadsheet className="w-4 h-4 text-cyan-600" />
-                      <span>{importFile.name}</span>
-                    </span>
-                    <span className="text-[11px] text-slate-500 font-mono">
-                      {(importFile.size / 1024).toFixed(1)} KB
-                    </span>
+            {/* Opsi 1: File Spreadsheet */}
+            {importSource === 'file' && (
+              <div className="space-y-3">
+                <div className="p-6 rounded-3xl bg-cyan-50/40 border-2 border-dashed border-cyan-300 text-center space-y-3 hover:bg-cyan-50/70 transition">
+                  <div className="w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center mx-auto shadow-xs">
+                    <Upload className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-800 mb-1 cursor-pointer">
+                      Pilih Berkas Excel (.xlsx, .xls) atau CSV (.csv)
+                    </label>
+                    <p className="text-[11px] text-slate-500 font-sans mb-3">
+                      Sistem akan menganalisis nama lembar kerja (sheet) dan mendeteksi susunan header kolom secara otomatis.
+                    </p>
+                    <input
+                      type="file"
+                      accept=".csv, .xlsx, .xls"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleImportFileSelected(e.target.files[0])
+                        }
+                      }}
+                      className="text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700 cursor-pointer shadow-xs transition"
+                    />
                   </div>
 
-                  {isExcelFile && importSheets.length > 0 && (
-                    <div className="pt-2 border-t border-slate-100 space-y-1.5">
-                      <label className="block text-[11px] font-bold text-slate-700">
-                        Pilih Lembar Kerja (Sheet Excel):
-                      </label>
-                      <select
-                        value={importSelectedSheet}
-                        onChange={(e) => handleSheetChange(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-cyan-500 bg-cyan-50/30"
-                      >
-                        {importSheets.map((s, idx) => (
-                          <option key={idx} value={s.name}>
-                            {s.name} ({s.columns.length} Kolom terdeteksi, ~{s.row_count} baris data)
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-[10px] text-cyan-800 font-sans">
-                        Pilih sheet yang sesuai dengan kantor aktif saat ini (<strong className="uppercase">{activeOffice}</strong>). Contoh: sheet <span className="font-mono font-bold">PELANGGAN BMS</span> untuk Banyumas, atau <span className="font-mono font-bold">PELANGGAN CABANG</span> untuk Cabang.
-                      </p>
+                  {importAnalyzing && (
+                    <div className="flex items-center justify-center gap-2 text-cyan-800 font-bold text-xs pt-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-cyan-600" />
+                      <span>Sedang menganalisis struktur berkas...</span>
                     </div>
                   )}
 
-                  <div className="text-[11px] text-slate-600 font-sans">
-                    Terdeteksi <strong>{importColumns.length}</strong> kolom:{' '}
-                    <span className="font-mono text-[10px] text-cyan-900 bg-cyan-50 px-1.5 py-0.5 rounded">
-                      {importColumns.slice(0, 6).join(', ')}
-                      {importColumns.length > 6 ? ` (+${importColumns.length - 6} lainnya)` : ''}
+                  {importFile && !importAnalyzing && (
+                    <div className="p-3 rounded-2xl bg-white border border-cyan-200 text-left space-y-2 text-xs">
+                      <div className="flex items-center justify-between font-bold text-cyan-950">
+                        <span className="flex items-center gap-1.5">
+                          <FileSpreadsheet className="w-4 h-4 text-cyan-600" />
+                          <span>{importFile.name}</span>
+                        </span>
+                        <span className="text-[11px] text-slate-500 font-mono">
+                          {(importFile.size / 1024).toFixed(1)} KB
+                        </span>
+                      </div>
+
+                      {isExcelFile && importSheets.length > 0 && (
+                        <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                          <label className="block text-[11px] font-bold text-slate-700">
+                            Pilih Lembar Kerja (Sheet Excel):
+                          </label>
+                          <select
+                            value={importSelectedSheet}
+                            onChange={(e) => handleSheetChange(e.target.value)}
+                            className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-cyan-500 bg-cyan-50/30"
+                          >
+                            {importSheets.map((s, idx) => (
+                              <option key={idx} value={s.name}>
+                                {s.name} ({s.columns.length} Kolom terdeteksi, ~{s.row_count} baris data)
+                              </option>
+                            ))}
+                          </select>
+                          <p className="text-[10px] text-cyan-800 font-sans">
+                            Pilih sheet yang sesuai dengan kantor aktif saat ini (<strong className="uppercase">{activeOffice}</strong>).
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="text-[11px] text-slate-600 font-sans">
+                        Terdeteksi <strong>{importColumns.length}</strong> kolom:{' '}
+                        <span className="font-mono text-[10px] text-cyan-900 bg-cyan-50 px-1.5 py-0.5 rounded">
+                          {importColumns.slice(0, 6).join(', ')}
+                          {importColumns.length > 6 ? ` (+${importColumns.length - 6} lainnya)` : ''}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Step 1 File Footer */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-sky-100 font-sans">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!importFile || importAnalyzing || importColumns.length === 0}
+                    onClick={handleProceedToStep2}
+                    className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  >
+                    <span>Lanjut ke Pemetaan Kolom</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Opsi 2: Network Bill API */}
+            {importSource === 'network_bill' && (
+              <div className="space-y-4">
+                <div className="p-5 rounded-3xl bg-cyan-50/40 border border-cyan-200 text-left space-y-4 font-sans">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                      <Database className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        Sinkronisasi Langsung dari Network Bill API (v1)
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Tarik data pelanggan, nomor WhatsApp, IP router, MAC address, dan koordinat ODP langsung dari server billing terpusat.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-700 block">
+                        Mode Penarikan Data (Pelanggan &amp; Jaringan):
+                      </label>
+                      <select
+                        value={networkBillLimitMode}
+                        onChange={(e) => setNetworkBillLimitMode(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-cyan-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-cyan-500"
+                      >
+                        <option value="1">Uji Coba 1 Data Pelanggan (Untuk Cek &amp; Bandingkan Format)</option>
+                        <option value="all">Tarik Semua Pelanggan di Kantor Ini (Sinkron Massal)</option>
+                      </select>
+                      <p className="text-[10px] text-emerald-700 font-medium">
+                        Otomatis mengambil data untuk wilayah <strong className="uppercase">{activeOffice}</strong> (tanpa tagihan / billing).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white/80 border border-cyan-100 text-[11px] text-slate-600 flex items-start gap-2">
+                    <Info className="w-4 h-4 text-cyan-600 shrink-0 mt-0.5" />
+                    <span>
+                      Data yang ditarik akan langsung dibandingkan dengan database lokal EdTeknoGuard pada Langkah 3 (Pratinjau). Anda dapat memilih versi data mana yang ingin disimpan sebelum disimpan ke database.
                     </span>
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Step 1 Footer */}
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-sky-100 font-sans">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                disabled={!importFile || importAnalyzing || importColumns.length === 0}
-                onClick={handleProceedToStep2}
-                className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
-              >
-                <span>Lanjut ke Pemetaan Kolom</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+                {/* Step 1 Network Bill Footer */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-sky-100 font-sans">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    disabled={networkBillFetching}
+                    onClick={handleFetchNetworkBillPreview}
+                    className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  >
+                    {networkBillFetching ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Menghubungi API Network Bill...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        <span>Tarik &amp; Bandingkan Data di Pratinjau</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -646,13 +842,12 @@ export function WizardImportPelanggan({
                     return (
                       <div
                         key={field.key}
-                        className={`p-3 rounded-2xl border transition ${
-                          field.required && !isMapped
+                        className={`p-3 rounded-2xl border transition ${field.required && !isMapped
                             ? 'bg-amber-50/50 border-amber-300'
                             : isMapped
-                            ? 'bg-cyan-50/30 border-cyan-200'
-                            : 'bg-slate-50/50 border-slate-200'
-                        }`}
+                              ? 'bg-cyan-50/30 border-cyan-200'
+                              : 'bg-slate-50/50 border-slate-200'
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <label className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
@@ -672,9 +867,8 @@ export function WizardImportPelanggan({
                         <select
                           value={importMapping[field.key] || ''}
                           onChange={(e) => setImportMapping({ ...importMapping, [field.key]: e.target.value })}
-                          className={`w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 ${
-                            field.required && !isMapped ? 'border-amber-400 bg-white' : 'border-slate-300 bg-white'
-                          }`}
+                          className={`w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 ${field.required && !isMapped ? 'border-amber-400 bg-white' : 'border-slate-300 bg-white'
+                            }`}
                         >
                           <option value="">-- [ Kosong / Nilai Default ] --</option>
                           {importColumns.map((col, cIdx) => (
@@ -711,9 +905,8 @@ export function WizardImportPelanggan({
                       return (
                         <div
                           key={field.key}
-                          className={`p-3 rounded-2xl border transition ${
-                            isMapped ? 'bg-cyan-50/30 border-cyan-200' : 'bg-slate-50/50 border-slate-200'
-                          }`}
+                          className={`p-3 rounded-2xl border transition ${isMapped ? 'bg-cyan-50/30 border-cyan-200' : 'bg-slate-50/50 border-slate-200'
+                            }`}
                         >
                           <div className="flex items-center justify-between mb-1">
                             <label className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
@@ -787,11 +980,10 @@ export function WizardImportPelanggan({
               <button
                 type="button"
                 onClick={() => setStatusFilter('ALL')}
-                className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
-                  statusFilter === 'ALL'
+                className={`p-3 rounded-2xl text-left transition border cursor-pointer ${statusFilter === 'ALL'
                     ? 'bg-cyan-100/90 border-cyan-400 text-cyan-950 ring-2 ring-cyan-400/40 shadow-xs'
                     : 'bg-cyan-50/70 border-cyan-200 text-cyan-900 hover:bg-cyan-100/50'
-                }`}
+                  }`}
               >
                 <span className="text-[10px] font-bold text-cyan-700 block">Total Baris</span>
                 <strong className="text-base font-black">{importPreviewData.length}</strong>
@@ -800,11 +992,10 @@ export function WizardImportPelanggan({
               <button
                 type="button"
                 onClick={() => setStatusFilter('MATCH')}
-                className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
-                  statusFilter === 'MATCH'
+                className={`p-3 rounded-2xl text-left transition border cursor-pointer ${statusFilter === 'MATCH'
                     ? 'bg-emerald-100/90 border-emerald-400 text-emerald-950 ring-2 ring-emerald-400/40 shadow-xs'
                     : 'bg-emerald-50/70 border-emerald-200 text-emerald-900 hover:bg-emerald-100/50'
-                }`}
+                  }`}
               >
                 <span className="text-[10px] font-bold text-emerald-700 block">Siap Lengkapi (Cocok)</span>
                 <strong className="text-base font-black">
@@ -815,11 +1006,10 @@ export function WizardImportPelanggan({
               <button
                 type="button"
                 onClick={() => setStatusFilter('CONFLICT')}
-                className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
-                  statusFilter === 'CONFLICT'
+                className={`p-3 rounded-2xl text-left transition border cursor-pointer ${statusFilter === 'CONFLICT'
                     ? 'bg-amber-100/90 border-amber-400 text-amber-950 ring-2 ring-amber-400/40 shadow-xs'
                     : 'bg-amber-50/70 border-amber-200 text-amber-900 hover:bg-amber-100/50'
-                }`}
+                  }`}
               >
                 <span className="text-[10px] font-bold text-amber-700 block">Data Berbeda (Pilih Versi)</span>
                 <strong className="text-base font-black">
@@ -830,11 +1020,10 @@ export function WizardImportPelanggan({
               <button
                 type="button"
                 onClick={() => setStatusFilter('UNREGISTERED')}
-                className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
-                  statusFilter === 'UNREGISTERED'
+                className={`p-3 rounded-2xl text-left transition border cursor-pointer ${statusFilter === 'UNREGISTERED'
                     ? 'bg-slate-200 border-slate-400 text-slate-900 ring-2 ring-slate-400/40 shadow-xs'
                     : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100/70'
-                }`}
+                  }`}
               >
                 <span className="text-[10px] font-bold text-slate-600 block">IP Belum Terdaftar</span>
                 <strong className="text-base font-black">
@@ -855,20 +1044,20 @@ export function WizardImportPelanggan({
                       {statusFilter === 'UNREGISTERED'
                         ? `Aksi IP Belum Terdaftar (${selectedImportIndices.length} Baris Dipilih)`
                         : statusFilter === 'CONFLICT'
-                        ? `Aksi Resolusi Data Berbeda (${selectedImportIndices.length} Baris Dipilih)`
-                        : statusFilter === 'MATCH'
-                        ? `Aksi Data Cocok (${selectedImportIndices.length} Baris Dipilih)`
-                        : `Aksi Massal Baris Terpilih (${selectedImportIndices.length} Baris Dipilih)`}
+                          ? `Aksi Resolusi Data Berbeda (${selectedImportIndices.length} Baris Dipilih)`
+                          : statusFilter === 'MATCH'
+                            ? `Aksi Data Cocok (${selectedImportIndices.length} Baris Dipilih)`
+                            : `Aksi Massal Baris Terpilih (${selectedImportIndices.length} Baris Dipilih)`}
                     </span>
                   </span>
                   <p className="text-[11px] font-sans text-slate-600">
                     {statusFilter === 'UNREGISTERED'
                       ? 'Pilih apakah ingin mendaftarkan IP ini sebagai pelanggan baru offline atau melewatinya.'
                       : statusFilter === 'CONFLICT'
-                      ? 'Pilih versi data yang akan digunakan untuk baris yang memiliki perbedaan.'
-                      : statusFilter === 'MATCH'
-                      ? 'Seluruh baris terpilih cocok dengan database dan siap diperbarui.'
-                      : 'Terapkan tindakan serentak untuk baris yang dicentang.'}
+                        ? 'Pilih versi data yang akan digunakan untuk baris yang memiliki perbedaan.'
+                        : statusFilter === 'MATCH'
+                          ? 'Seluruh baris terpilih cocok dengan database dan siap diperbarui.'
+                          : 'Terapkan tindakan serentak untuk baris yang dicentang.'}
                   </p>
                 </div>
 
@@ -1061,19 +1250,18 @@ export function WizardImportPelanggan({
                     return (
                       <tr
                         key={idx}
-                        className={`transition ${
-                          selectedImportIndices.includes(idx)
+                        className={`transition ${selectedImportIndices.includes(idx)
                             ? 'bg-amber-50/70 border-l-2 border-l-amber-500'
                             : isSkip
-                            ? 'opacity-40 bg-slate-50'
-                            : isErr
-                            ? 'bg-rose-50/40'
-                            : isConflict
-                            ? 'bg-amber-50/40'
-                            : isUnreg
-                            ? 'bg-slate-50/60'
-                            : 'hover:bg-cyan-50/30'
-                        }`}
+                              ? 'opacity-40 bg-slate-50'
+                              : isErr
+                                ? 'bg-rose-50/40'
+                                : isConflict
+                                  ? 'bg-amber-50/40'
+                                  : isUnreg
+                                    ? 'bg-slate-50/60'
+                                    : 'hover:bg-cyan-50/30'
+                          }`}
                       >
                         <td className="py-2 px-3 text-center">
                           <input
@@ -1085,9 +1273,14 @@ export function WizardImportPelanggan({
                         </td>
                         <td className="py-2 px-3 text-slate-400 font-mono">{idx + 1}</td>
                         <td className="py-2 px-3 font-mono">
-                          <span className="font-bold text-cyan-900 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-200">
+                          <span className="font-bold text-cyan-900 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-200 block w-fit">
                             {d.ip_router || '-'}
                           </span>
+                          {(d.mac_address || old.mac_address) && (
+                            <span className="text-[10px] text-slate-500 font-mono block mt-0.5">
+                              MAC: {d.mac_address || old.mac_address}
+                            </span>
+                          )}
                         </td>
                         <td className="py-2 px-3 font-sans">
                           <div className="font-bold text-slate-800">{d.nama || old.nama || '-'}</div>
@@ -1095,7 +1288,7 @@ export function WizardImportPelanggan({
                             {d.id_pelanggan || old.id_pelanggan || '-'}
                           </span>
                         </td>
-                        
+
                         {/* No WA (Perbandingan Baru vs Lama jika ada konflik) */}
                         <td className="py-2 px-3">
                           {isConflict && old.no_wa && (d.no_wa || d.no_hp) && old.no_wa !== (d.no_wa || d.no_hp) ? (
@@ -1174,11 +1367,10 @@ export function WizardImportPelanggan({
                                     updated[idx]._action = 'update'
                                     setImportPreviewData(updated)
                                   }}
-                                  className={`px-1.5 py-0.5 rounded border transition cursor-pointer ${
-                                    isNewVersion
+                                  className={`px-1.5 py-0.5 rounded border transition cursor-pointer ${isNewVersion
                                       ? 'bg-cyan-700 text-white border-cyan-800 font-bold'
                                       : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
-                                  }`}
+                                    }`}
                                 >
                                   Pakai Baru
                                 </button>
@@ -1190,11 +1382,10 @@ export function WizardImportPelanggan({
                                     updated[idx]._action = 'update'
                                     setImportPreviewData(updated)
                                   }}
-                                  className={`px-1.5 py-0.5 rounded border transition cursor-pointer ${
-                                    !isNewVersion
+                                  className={`px-1.5 py-0.5 rounded border transition cursor-pointer ${!isNewVersion
                                       ? 'bg-slate-700 text-white border-slate-800 font-bold'
                                       : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
-                                  }`}
+                                    }`}
                                 >
                                   Pakai Lama
                                 </button>
@@ -1214,11 +1405,10 @@ export function WizardImportPelanggan({
                                     updated[idx]._action = isSkip ? 'insert' : 'skip'
                                     setImportPreviewData(updated)
                                   }}
-                                  className={`px-2 py-0.5 rounded border transition cursor-pointer font-bold ${
-                                    isSkip
+                                  className={`px-2 py-0.5 rounded border transition cursor-pointer font-bold ${isSkip
                                       ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
                                       : 'bg-emerald-600 text-white border-emerald-700'
-                                  }`}
+                                    }`}
                                 >
                                   {isSkip ? '+ Simpan Offline' : 'Didaftarkan Offline'}
                                 </button>

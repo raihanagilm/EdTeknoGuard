@@ -238,6 +238,10 @@ export function ModalDetailPelanggan({
                     <span className="font-bold text-slate-900">{customer.jenis_modem || '-'}</span>
                   </div>
                   <div>
+                    <span className="text-slate-400 block text-[10px]">MAC Address:</span>
+                    <span className="font-bold text-slate-900 font-mono">{customer.mac_address || '-'}</span>
+                  </div>
+                  <div>
                     <span className="text-slate-400 block text-[10px] flex items-center gap-0.5">
                       <Thermometer className="w-2.5 h-2.5 text-amber-600" />
                       <span>Suhu ONT Terakhir:</span>

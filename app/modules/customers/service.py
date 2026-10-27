@@ -481,6 +481,13 @@ class CustomerService:
                             existing_ont.password_wifi = new_wifi_pass
                             has_change = True
 
+                    # 5. Update MAC Address
+                    new_mac = str(row_data.get("mac_address", "")).strip()
+                    if new_mac:
+                        if not existing_ont.mac_address or selected_version == "new":
+                            existing_ont.mac_address = new_mac
+                            has_change = True
+
                     if has_change:
                         from app.core.timezone import get_now_wib
                         existing_pel.updated_at = get_now_wib()

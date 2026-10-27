@@ -219,6 +219,24 @@ async def preview_import(
         mapping=mapping
     )
 
+@router.get("/api/customers/network-bill/pops")
+def get_network_bill_pops(
+    user: dict = Depends(require_admin)
+):
+    """Mendapatkan daftar PoP yang diizinkan untuk klien API Network Bill"""
+    return CustomerController.network_bill_get_pops()
+
+@router.post("/api/customers/network-bill/preview")
+def preview_network_bill_import(
+    pop: str = Query(..., description="Slug PoP target (misal: slawi)"),
+    limit: int = Query(0, ge=0, le=50000, description="Jumlah data yang ditarik (0 = seluruh pelanggan)"),
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Pratinjau data pelanggan langsung dari API Network Bill sebelum diimpor/disinkronkan"""
+    effective_limit = 999999 if limit == 0 else limit
+    return CustomerController.network_bill_preview(db=db, pop=pop, limit=effective_limit)
+
 @router.post("/api/customers/import/execute")
 async def execute_import(
     request: Request,

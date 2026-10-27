@@ -1063,6 +1063,11 @@ export function ModulPelanggan({
                               -
                             </span>
                           )}
+                          {c.mac_address && (
+                            <span className="text-[9px] font-mono text-slate-500 bg-slate-50 border border-slate-200 px-1 py-0.2 rounded truncate max-w-[110px]" title={`MAC: ${c.mac_address}`}>
+                              {c.mac_address}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>

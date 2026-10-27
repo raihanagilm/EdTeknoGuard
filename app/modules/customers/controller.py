@@ -510,6 +510,31 @@ class CustomerController:
             raise HTTPException(status_code=500, detail=f"Gagal memproses preview: {e}")
 
     @staticmethod
+    def network_bill_get_pops() -> Dict[str, Any]:
+        """Ambil daftar PoP yang tersedia dari API Network Bill"""
+        from app.services.network_bill_service import NetworkBillService
+        pops = NetworkBillService.fetch_pops()
+        return {
+            "status": "success",
+            "result": pops
+        }
+
+    @staticmethod
+    def network_bill_preview(db: Session, pop: str, limit: int = 1) -> Dict[str, Any]:
+        """Ambil pratinjau data langsung dari API Network Bill"""
+        from app.services.network_bill_service import NetworkBillService
+        try:
+            res = NetworkBillService.preview_from_api(pop_slug=pop, limit=limit, db=db)
+            return {
+                "status": "success",
+                "result": res
+            }
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Gagal menarik pratinjau dari Network Bill: {e}")
+
+    @staticmethod
     def execute_import(db: Session, data_list: list, target_kantor: Optional[str] = None, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if user and user.get("role") in ("operator", "teknisi", "karyawan"):
             raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan mengeksekusi import pelanggan")

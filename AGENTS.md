@@ -142,7 +142,7 @@ EdTeknoGuard/
    - Sistem memiliki mekanisme debounce menit (default 30 menit) di `telegram_service.py` untuk mencegah pengiriman alert berulang ke teknisi jika modem masih dalam status gangguan yang sama.
 5. **Standar Ikon UI Wajib SVG Inline Bersih**:
    - Seluruh ikon antarmuka (tombol, badge, header modal, indikator sorting, dan aksi tabel) **WAJIB** menggunakan standar SVG inline bersih dengan atribut stroke/fill yang konsisten.
-   - **DILARANG KERAS** menggunakan emoji (seperti ⚡, 🔄, ⏭️, ⚙️, 🚨, dsb.) atau library icon eksternal sebagai ikon tombol/tabel UI.
+   - **DILARANG KERAS** menggunakan emoji (seperti 🏢, ⚡, 🔄, ⏭️, ⚙️, 🚨, 📁, dsb.) di seluruh antarmuka web (UI). Seluruh indikator wilayah, kantor, tombol, badge, dan modal **WAJIB** menggunakan ikon SVG murni / Lucide icons (contoh: `<Building2 />` untuk kantor/gedung).
 6. **Toggle Pemantauan ON/OFF Pelanggan (`is_monitored`)**:
    - Modem dengan `is_monitored = False` otomatis dilewati (*skipped*) oleh background scheduler pemindaian berkala dan dibungkam dari pengiriman alert Telegram.
    - Kartu statistik KPI di `/pelanggan` dan Dashboard mengecualikan modem nonaktif, menampilkan badge `(X OFF)` pada Total Terpantau.
