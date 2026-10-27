@@ -59,7 +59,7 @@ class PerangkatONT(Base):
     __tablename__ = "perangkat_ont"
 
     id_perangkat = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", onupdate="CASCADE", ondelete="CASCADE"), unique=True, nullable=False, index=True)
     ip_router = Column(String(45), nullable=True, index=True)
     ip_ont = Column(String(45), nullable=True, index=True)
     jenis_modem = Column(String(50), nullable=True, default=None, index=True)
@@ -245,7 +245,7 @@ class LogPerformaONT(Base):
     __tablename__ = "log_performa_ont"
 
     id_log = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
     waktu_cek = Column(DateTime, default=get_now_wib, nullable=False, index=True)
     rx_power = Column(Numeric(5, 2), nullable=True)
     suhu_ont = Column(Numeric(4, 1), nullable=True)
@@ -267,7 +267,7 @@ class AlertLog(Base):
     __tablename__ = "alert_logs"
 
     id_alert = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
     tipe_alert = Column(String(30), nullable=False)  # REDAMAN_DROP, ONT_LOS, OVERHEAT
     rx_power = Column(Numeric(5, 2), nullable=True)
     pesan = Column(Text, nullable=False)
@@ -368,7 +368,7 @@ class TiketKendala(Base):
     __tablename__ = "tiket_kendala"
 
     id_tiket = Column(String(32), primary_key=True, nullable=False, index=True)
-    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
     id_kantor = Column(Integer, ForeignKey("kantors.id_kantor", onupdate="CASCADE", ondelete="RESTRICT"), nullable=True, index=True)
     kantor = Column(String(50), nullable=False, default="cabang", index=True)
     kategori = Column(String(100), nullable=False)
@@ -396,7 +396,7 @@ class KuotaPelanggan(Base):
     __tablename__ = "kuota_pelanggan"
 
     id_kuota = Column(BigInteger, primary_key=True, autoincrement=True)
-    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE"), nullable=False, index=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
     periode_bulan = Column(String(10), nullable=False, index=True) # format YYYY-MM
     kuota_terpakai_gb = Column(Numeric(8, 2), default=0, nullable=False)
     upload_bytes = Column(BigInteger, default=0, nullable=False) # Akumulasi Upload byte dari Simple Queue

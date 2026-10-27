@@ -186,9 +186,10 @@ EdTeknoGuard/
       - Alur pendaftaran mandiri warga desa ditiadakan demi kemudahan warga dan kepastian otentikasi data ISP.
       - Akun pelanggan dibuat langsung oleh kantor ISP saat pemasangan modem dengan kata sandi awal `123456`.
       - Rute `/portal/daftar` otomatis mengalihkan pengguna ke `/portal/login`.
-    - **Autentikasi & Sesi Pelanggan (`/portal/login`)**:
-      - Seluruh akun pelanggan dapat masuk menggunakan ID Pelanggan, Nomor WhatsApp, atau IP Router dengan kata sandi awal: `123456`.
-      - Antarmuka ramah warga menggunakan bahasa Indonesia bersih, dilengkapi toggle lihat kata sandi (ikon SVG mata terbuka/tertutup) dan tautan *"Lupa Kata Sandi?"*.
+    - **Autentikasi & Sesi Pelanggan (`/portal/login` & TeknoCust)**:
+      - Seluruh akun pelanggan masuk menggunakan **Nomor WhatsApp Terdaftar** (sebagai data identitas unik pelanggan) dengan kata sandi awal: `123456`.
+      - Sistem backend mengimplementasikan normalisasi digit nomor WA fleksibel (mendukung format `08...`, `628...`, `+628...`, maupun digit lokal) dengan fallback ke ID Pelanggan/Nama jika diperlukan.
+      - Antarmuka ramah warga menggunakan bahasa Indonesia bersih, dilengkapi icon SVG Phone murni, toggle lihat kata sandi (ikon SVG mata terbuka/tertutup), dan tautan *"Lupa Kata Sandi?"*.
       - Sesi 30 hari via secure cookie `edtekno_pelanggan_session`.
     - **Fitur Lupa & Reset Kata Sandi Mandiri (`/portal/lupa-password`)**:
       - **Opsi Verifikasi Mandiri**:

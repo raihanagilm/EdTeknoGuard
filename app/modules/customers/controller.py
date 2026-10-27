@@ -151,6 +151,12 @@ class CustomerController:
         dl_bytes = int(kuota_rec.download_bytes) if kuota_rec and kuota_rec.download_bytes else 0
         last_sync_str = kuota_rec.last_sync_mikrotik.strftime("%d/%m %H:%M") if kuota_rec and kuota_rec.last_sync_mikrotik else None
 
+        latest_log = logs[0] if logs else None
+        suhu_val = float(latest_log.suhu_ont) if (latest_log and latest_log.suhu_ont is not None) else None
+        lat_val = int(latest_log.latency_ms) if (latest_log and latest_log.latency_ms is not None) else None
+        rx_val = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else None
+        status_val = latest_log.status_koneksi if latest_log else "UNTESTED"
+
         return {
             "customer": {
                 "id_pelanggan": cust.id_pelanggan,
@@ -165,6 +171,10 @@ class CustomerController:
                 "jenis_modem": cust.jenis_modem,
                 "mac_address": cust.mac_address,
                 "redaman_baseline": float(cust.redaman_baseline) if cust.redaman_baseline else None,
+                "rx_power": rx_val,
+                "status_koneksi": status_val,
+                "suhu_ont": suhu_val,
+                "latency_ms": lat_val,
                 "nama_wifi": cust.nama_wifi or "-",
                 "password_wifi": cust.password_wifi or "-",
                 "user_admin": cust.user_admin or "-",

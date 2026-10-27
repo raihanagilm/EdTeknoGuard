@@ -231,7 +231,14 @@ export function ModulPelanggan({
       if (res.ok) {
         const json = await res.json()
         if (json.customer) {
-          setDetailCustomer(json.customer)
+          setDetailCustomer((prev) => ({
+            ...prev,
+            ...json.customer,
+            suhu_ont: json.customer.suhu_ont ?? prev?.suhu_ont,
+            latency_ms: json.customer.latency_ms ?? prev?.latency_ms,
+            rx_power: json.customer.rx_power ?? prev?.rx_power ?? prev?.rx,
+            status_koneksi: json.customer.status_koneksi ?? prev?.status_koneksi ?? prev?.status,
+          }))
         }
       }
     } catch (err) {

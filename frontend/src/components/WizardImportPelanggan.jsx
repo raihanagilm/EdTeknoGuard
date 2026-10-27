@@ -78,6 +78,37 @@ export function WizardImportPelanggan({
   const [networkBillLoadingPops, setNetworkBillLoadingPops] = useState(false)
   const [networkBillFetching, setNetworkBillFetching] = useState(false)
 
+  // Fungsi reset seluruh state wizard agar fresh kembali saat dibuka
+  const resetWizardState = () => {
+    setImportStep(1)
+    setShowAdvancedFields(false)
+    setImportFile(null)
+    setImportAnalyzing(false)
+    setIsExcelFile(false)
+    setImportSheets([])
+    setImportSelectedSheet('')
+    setImportColumns([])
+    setImportMapping({})
+    setImportPreviewData([])
+    setSelectedImportIndices([])
+    setExistingDbIds([])
+    setExistingDbIps([])
+    setImportLoading(false)
+    setImportError('')
+    setImportSuccess('')
+    setStatusFilter('ALL')
+    setImportSource('file')
+    setNetworkBillLimitMode('all')
+    setNetworkBillFetching(false)
+  }
+
+  // Reset otomatis saat modal Lengkapi Data dibuka kembali
+  useEffect(() => {
+    if (isOpen) {
+      resetWizardState()
+    }
+  }, [isOpen])
+
   // Otomatis update selectedPop saat user berpindah kantor aktif (activeOffice)
   useEffect(() => {
     if (activeOffice) {
@@ -458,9 +489,10 @@ export function WizardImportPelanggan({
       if (res.ok && data.status === 'success') {
         setImportSuccess(data.message || 'Import data pelanggan berhasil disimpan ke database!')
         setTimeout(() => {
+          resetWizardState()
           onClose()
           if (onSuccess) onSuccess()
-        }, 1500)
+        }, 1200)
       } else {
         setImportError(data.detail || data.message || 'Gagal menyimpan data import ke database.')
       }
@@ -1284,9 +1316,16 @@ export function WizardImportPelanggan({
                         </td>
                         <td className="py-2 px-3 font-sans">
                           <div className="font-bold text-slate-800">{d.nama || old.nama || '-'}</div>
-                          <span className="text-[10px] text-slate-400 font-mono block">
-                            {d.id_pelanggan || old.id_pelanggan || '-'}
-                          </span>
+                          <div className="mt-0.5 space-y-0.5">
+                            <span className="text-[10px] font-bold font-mono text-cyan-800 bg-cyan-50 border border-cyan-200 px-1.5 py-0.2 rounded inline-block">
+                              {d.id_pelanggan || d.network_bill_code || old.id_pelanggan || '-'}
+                            </span>
+                            {old.id_pelanggan && d.id_pelanggan && old.id_pelanggan !== d.id_pelanggan && (
+                              <span className="text-[9px] text-slate-400 font-mono block line-through" title="ID lama di database lokal">
+                                Lama: {old.id_pelanggan}
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* No WA (Perbandingan Baru vs Lama jika ada konflik) */}

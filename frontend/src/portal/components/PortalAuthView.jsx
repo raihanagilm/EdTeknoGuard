@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  User,
+  Phone,
   Lock,
   Eye,
   EyeOff,
@@ -174,7 +174,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
       if (res.ok && res.data?.ok) {
         onLoginSuccess(res.data.customer);
       } else {
-        setError(res.data?.message || 'ID Pelanggan / No. WA / Nama atau Kata Sandi salah!');
+        setError(res.data?.message || 'Nomor WhatsApp atau Kata Sandi salah!');
       }
     } catch {
       setError('Gagal menghubungi server TeknoIndonet.');
@@ -239,20 +239,20 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 
               {/* FORM LOGIN */}
               <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
-                {/* ID Pelanggan / No WA / Nama */}
+                {/* Nomor WhatsApp */}
                 <div className="space-y-1">
                   <label htmlFor="identifier" className="text-[11px] font-semibold text-slate-700 block">
-                    ID Pelanggan / No. WA / Nama Terdaftar
+                    Nomor WhatsApp Terdaftar
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                       id="identifier"
-                      type="text"
+                      type="tel"
                       required
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder="Masukkan ID, No. WA, atau Nama"
+                      placeholder="Contoh: 081234567890"
                       className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[42px]"
                     />
                   </div>
@@ -344,10 +344,10 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                 {isInfoExpanded && (
                   <div className="px-3 pb-3 text-[11px] text-slate-600 space-y-2 border-t border-slate-200 animate-fadeIn">
                     <p className="leading-relaxed pt-2">
-                      Aplikasi ini khusus pelanggan <strong className="text-blue-700">TeknoIndonet</strong>. Gunakan <strong>ID Pelanggan</strong>, <strong>No. WA</strong>, atau <strong>Nama</strong> yang Anda daftarkan saat pemasangan.
+                      Aplikasi ini khusus pelanggan <strong className="text-blue-700">TeknoIndonet</strong>. Cukup masukkan <strong className="text-blue-700 font-bold">Nomor WhatsApp</strong> yang terdaftar saat pemasangan WiFi rumah Anda.
                     </p>
                     <p className="leading-relaxed text-slate-600">
-                      Kata sandi awal adalah <strong className="text-blue-700 font-mono font-bold">123456</strong>. Setelah berhasil login, Anda sangat disarankan untuk segera mengganti kata sandi demi keamanan.
+                      Kata sandi awal adalah <strong className="text-blue-700 font-mono font-bold">123456</strong>. Setelah berhasil login, Anda dapat langsung memantau kuota, mengganti nama WiFi, hingga melaporkan kendala.
                     </p>
                   </div>
                 )}

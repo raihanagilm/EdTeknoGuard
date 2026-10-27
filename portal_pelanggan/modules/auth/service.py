@@ -81,40 +81,85 @@ class AuthService:
         return None
 
     @staticmethod
+    def _clean_phone(phone: Optional[str]) -> str:
+        """Membersihkan string nomor HP menjadi deretan angka murni."""
+        if not phone:
+            return ""
+        return re.sub(r"\D", "", str(phone))
+
+    @staticmethod
+    def _match_phone_customer(db: Session, clean_input: str) -> Optional[Pelanggan]:
+        """Mencocokkan nomor WhatsApp input dengan database berdasarkan nomor murni atau akhiran nomor."""
+        if not clean_input or len(clean_input) < 6:
+            return None
+
+        # Siapkan variasi format umum Indonesia (08..., 628..., 8...)
+        core = clean_input
+        if core.startswith("62"):
+            core = core[2:]
+        elif core.startswith("0"):
+            core = core[1:]
+
+        candidates = [clean_input, f"0{core}", f"62{core}", core]
+
+        # 1. Coba pencocokan langsung di database
+        for cand in candidates:
+            cust = db.query(Pelanggan).filter(Pelanggan.no_hp == cand).first()
+            if cust:
+                return cust
+
+        # 2. Coba pencocokan regex / akhiran nomor (minimal 8-9 digit terakhir untuk memastikan unik)
+        suffix = core[-8:] if len(core) >= 8 else core
+        all_pelanggan = db.query(Pelanggan).filter(Pelanggan.no_hp.isnot(None)).all()
+        for c in all_pelanggan:
+            c_clean = AuthService._clean_phone(c.no_hp)
+            if not c_clean:
+                continue
+            if c_clean == clean_input or c_clean.endswith(suffix):
+                return c
+
+        return None
+
+    @staticmethod
     def authenticate(
         db: Session,
         identifier: str,
         password: str
     ) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
-        """Autentikasi login portal langsung menggunakan tabel data master Pelanggan."""
+        """Autentikasi login portal langsung menggunakan Nomor WhatsApp atau ID Pelanggan."""
         ident_raw = (identifier or "").strip()
         ident_lower = ident_raw.lower()
         pwd = (password or "").strip()
 
         if not ident_raw:
-            return False, "Mohon masukkan Nama, ID Pelanggan, atau Nomor WhatsApp Anda.", None
+            return False, "Mohon masukkan Nomor WhatsApp atau ID Pelanggan Anda.", None
 
         if not pwd:
             return False, "Mohon masukkan kata sandi Anda.", None
 
-        # 1. Cari pelanggan berdasarkan ID Pelanggan, Nama, atau Nomor HP
-        cust = db.query(Pelanggan).filter(
-            (func.lower(Pelanggan.id_pelanggan) == ident_lower) |
-            (func.lower(Pelanggan.nama) == ident_lower) |
-            (Pelanggan.no_hp == ident_raw)
-        ).first()
+        clean_phone_input = AuthService._clean_phone(ident_raw)
 
-        # Jika belum cocok persis, cari substring nama
+        # 1. Prioritas Utama: Cari berdasarkan Nomor WhatsApp (karena unik per pelanggan)
+        cust = None
+        if clean_phone_input and len(clean_phone_input) >= 6:
+            cust = AuthService._match_phone_customer(db, clean_phone_input)
+
+        # 2. Alternatif: Cari berdasarkan ID Pelanggan atau Nama Terdaftar persis
         if not cust:
+            cust = db.query(Pelanggan).filter(
+                (func.lower(Pelanggan.id_pelanggan) == ident_lower) |
+                (func.lower(Pelanggan.nama) == ident_lower)
+            ).first()
+
+        # 3. Substring nama atau algoritma scoring sebagai fallback
+        if not cust and not clean_phone_input.isdigit():
             cust = db.query(Pelanggan).filter(
                 func.lower(Pelanggan.nama).like(f"%{ident_lower}%")
             ).first()
+            if not cust:
+                cust = AuthService.find_matching_customer(db=db, nama=ident_raw)
 
-        # Jika masih belum ketemu, coba cari dengan algoritma scoring
-        if not cust:
-            cust = AuthService.find_matching_customer(db=db, nama=ident_raw)
-
-        # Jika belum ketemu di db sesi awal, cari di seluruh tenant database aktif (Pusat, Banyumas, Cabang, Slawi, dll.)
+        # Jika belum ketemu di db sesi awal, cari di seluruh tenant database aktif
         active_session = db
         is_tenant_db_opened = False
         if not cust:
@@ -129,17 +174,22 @@ class AuthService:
                         continue
                     t_db = TenantDatabaseManager.get_tenant_session(k.kode)
                     try:
-                        t_cust = t_db.query(Pelanggan).filter(
-                            (func.lower(Pelanggan.id_pelanggan) == ident_lower) |
-                            (func.lower(Pelanggan.nama) == ident_lower) |
-                            (Pelanggan.no_hp == ident_raw) |
-                            (Pelanggan.ip_router == ident_raw)
-                        ).first()
+                        t_cust = None
+                        if clean_phone_input and len(clean_phone_input) >= 6:
+                            t_cust = AuthService._match_phone_customer(t_db, clean_phone_input)
+
                         if not t_cust:
+                            t_cust = t_db.query(Pelanggan).filter(
+                                (func.lower(Pelanggan.id_pelanggan) == ident_lower) |
+                                (func.lower(Pelanggan.nama) == ident_lower) |
+                                (Pelanggan.ip_router == ident_raw)
+                            ).first()
+
+                        if not t_cust and not clean_phone_input.isdigit():
                             t_cust = t_db.query(Pelanggan).filter(func.lower(Pelanggan.nama).like(f"%{ident_lower}%")).first()
-                        if not t_cust:
-                            t_cust = AuthService.find_matching_customer(db=t_db, nama=ident_raw)
-                        
+                            if not t_cust:
+                                t_cust = AuthService.find_matching_customer(db=t_db, nama=ident_raw)
+
                         if t_cust:
                             cust = t_cust
                             active_session = t_db
@@ -153,7 +203,7 @@ class AuthService:
                 m_db.close()
 
         if not cust:
-            return False, "Akun tidak ditemukan. Pastikan Nama atau ID Pelanggan Anda sesuai dengan data langganan WiFi Anda di kantor.", None
+            return False, "Nomor WhatsApp atau Akun tidak ditemukan. Pastikan Nomor WA yang dimasukkan sesuai dengan data terdaftar.", None
 
         if not cust.is_active:
             if is_tenant_db_opened:

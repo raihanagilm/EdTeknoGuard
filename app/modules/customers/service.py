@@ -446,6 +446,15 @@ class CustomerService:
                     # MODE LENGKAPI DATA (Enrichment Update)
                     has_change = False
 
+                    # 0. Update ID Pelanggan ke Kode Resmi API (misal: CUST-SLA-xxx -> PLG-0002)
+                    target_id_pel = str(row_data.get("network_bill_code") or id_pel or "").strip()
+                    if target_id_pel and existing_pel.id_pelanggan != target_id_pel:
+                        # Cek apakah target ID baru belum dipakai pelanggan lain
+                        conflict_pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == target_id_pel).first()
+                        if not conflict_pel:
+                            existing_pel.id_pelanggan = target_id_pel
+                            has_change = True
+
                     # 1. Update No. WhatsApp
                     if new_wa:
                         if not existing_pel.no_hp:

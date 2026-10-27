@@ -185,9 +185,14 @@ class NetworkBillService:
             long = conn.get("longitude")
             lokasi_gps = f"{lat},{long}" if lat is not None and long is not None else ""
 
+            # Gunakan code PLG (contoh: PLG-0002) sebagai ID Pelanggan resmi yang valid dari Network Bill
+            official_code = str(item.get("code") or "").strip()
+            if not official_code:
+                official_code = f"PLG-{str(item.get('id', '')).zfill(4)}" if item.get("id") else str(index)
+
             # Standard row data untuk EdTeknoGuard
             mapped_row = {
-                "id_pelanggan": str(item.get("id")),
+                "id_pelanggan": official_code,
                 "nama": item.get("name") or "",
                 "no_wa": item.get("whatsapp") or "",
                 "no_hp": item.get("whatsapp") or "",
@@ -198,7 +203,7 @@ class NetworkBillService:
                 "lokasi_gps": lokasi_gps,
                 "pop": pop_slug.upper(),
                 "network_bill_id": item.get("id"),
-                "network_bill_code": item.get("code"),
+                "network_bill_code": item.get("code") or official_code,
                 "status_langganan": item.get("status")
             }
 
