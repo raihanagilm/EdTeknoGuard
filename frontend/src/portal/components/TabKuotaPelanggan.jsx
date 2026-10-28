@@ -30,7 +30,18 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
 
   useEffect(() => {
     fetchKuota();
+    const interval = setInterval(() => {
+      fetchKuota();
+    }, 20000);
+    return () => clearInterval(interval);
   }, []);
+
+  // Update kuotaData jika dashboardData diperbarui dari polling induk
+  useEffect(() => {
+    if (dashboardData?.kuota && !kuotaData) {
+      fetchKuota();
+    }
+  }, [dashboardData]);
 
   // Total GB bulan ini
   const totalGB = kuotaData?.kuota_terpakai_gb !== undefined && kuotaData?.kuota_terpakai_gb !== null
@@ -39,7 +50,18 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
     ? Number(dashboardData.kuota.kuota_terpakai_gb).toFixed(1)
     : '0.0';
 
-  const paketNama = kuotaData?.kecepatan_paket || dashboardData?.kuota?.kecepatan_paket || customer?.paket || '-';
+  const rawPaketNama = kuotaData?.kecepatan_paket || dashboardData?.kuota?.kecepatan_paket || customer?.paket || '-';
+  const cleanPaketLabel = (raw) => {
+    if (!raw || raw === '-') return '-';
+    const trimmed = String(raw).trim();
+    if (/^paket\s+/i.test(trimmed)) return trimmed;
+    return `Paket ${trimmed}`;
+  };
+  const paketNama = cleanPaketLabel(rawPaketNama);
+
+  // Dynamic Kuota Bar (skala proporsional)
+  const kuotaNum = parseFloat(totalGB) || 0;
+  const kuotaBarPercent = Math.min(100, Math.max(8, Math.round((kuotaNum / Math.max(50, Math.ceil(kuotaNum / 50) * 50)) * 100)));
 
   // 7 Hari histori dari backend (atau fallback dinamis 7 hari terakhir jika belum ada data)
   const getDynamicEmptyHistory = () => {
@@ -111,7 +133,10 @@ export function TabKuotaPelanggan({ customer, dashboardData }) {
                 <span className="text-lg font-bold text-gray-500">GB</span>
               </div>
               <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-700 bg-blue-600" style={{ width: '68%' }} />
+                <div
+                  className="h-full rounded-full transition-all duration-700 bg-blue-600"
+                  style={{ width: `${kuotaBarPercent}%` }}
+                />
               </div>
               <div className="mt-3 flex items-center justify-between text-xs">
                 <span className="text-gray-600 font-medium">Paket aktif:</span>

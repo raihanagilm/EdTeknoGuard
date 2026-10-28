@@ -239,12 +239,26 @@ class AuthService:
             status_verifikasi=status_verifikasi_cust,
             kantor=kantor_cust
         )
+        
+        # Ambil IP dengan fallback ke ip_ont jika ip_router None/kosong
+        ip_display = ""
+        try:
+            ip_display = cust.ip_router or cust.ip_ont or ""
+        except Exception:
+            ip_display = ""
+
         res_data = {
             "token": token,
             "id_pelanggan": cust.id_pelanggan,
             "nama": cust.nama,
             "status_verifikasi": status_verifikasi_cust,
-            "kantor": kantor_cust
+            "kantor": kantor_cust,
+            "no_hp": cust.no_hp or "",
+            "alamat": cust.alamat or "",
+            "paket": cust.paket or "",
+            "ip_router": ip_display,
+            "nama_wifi": cust.nama_wifi or "",
+            "pop": cust.pop or ""
         }
         if is_tenant_db_opened:
             active_session.close()

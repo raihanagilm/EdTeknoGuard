@@ -140,9 +140,12 @@ EdTeknoGuard/
    - **Peringatan Penghapusan Data Utama**: Modal pop-up konfirmasi hapus data pelanggan (baik tunggal maupun massal) **WAJIB** menampilkan kotak peringatan bahaya yang merinci secara eksplisit bahwa menghapus data utama pelanggan akan menghapus permanen seluruh data anakannya yang terkait dari database.
    - **Pembersihan Bersih Tanpa Orphan**: Aksi hapus data utama pelanggan langsung mengeksekusi penghapusan berjenjang fisik (hard delete CASCADE) sehingga tidak ada data yatim (*orphaned records*) yang tersisa di sistem.
    - Sistem memiliki mekanisme debounce menit (default 30 menit) di `telegram_service.py` untuk mencegah pengiriman alert berulang ke teknisi jika modem masih dalam status gangguan yang sama.
-5. **Standar Ikon UI Wajib SVG Inline Bersih**:
-   - Seluruh ikon antarmuka (tombol, badge, header modal, indikator sorting, dan aksi tabel) **WAJIB** menggunakan standar SVG inline bersih dengan atribut stroke/fill yang konsisten.
+5. **Standar Ikon UI Wajib SVG Inline Bersih & Larangan Dot Indikator Kosong**:
+   - Seluruh ikon antarmuka (tombol, badge, header modal, indikator status, sorting, dan aksi tabel) **WAJIB** menggunakan standar SVG inline bersih / Lucide icons dengan atribut stroke/fill yang konsisten.
    - **DILARANG KERAS** menggunakan emoji (seperti 🏢, ⚡, 🔄, ⏭️, ⚙️, 🚨, 📁, dsb.) di seluruh antarmuka web (UI). Seluruh indikator wilayah, kantor, tombol, badge, dan modal **WAJIB** menggunakan ikon SVG murni / Lucide icons (contoh: `<Building2 />` untuk kantor/gedung).
+   - **DILARANG KERAS** menggunakan dot indikator buatan elemen HTML kosong seperti:
+     `<span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>` atau variasi `<span class="... rounded-full bg-*-500 ..."></span>`.
+     Setiap penanda status (seperti Terverifikasi, Aktif, Terisolir, Normal, Warning, Kritis) **WAJIB** menggunakan ikon SVG semantik yang jelas (misalnya `<CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />`, `<ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />`, `<AlertTriangle />`, `<XCircle />`) yang dibungkus dalam badge teks yang rapi dan mudah dipahami, bukan sekadar bulatan dot warna polos tanpa bentuk.
 6. **Toggle Pemantauan ON/OFF Pelanggan (`is_monitored`)**:
    - Modem dengan `is_monitored = False` otomatis dilewati (*skipped*) oleh background scheduler pemindaian berkala dan dibungkam dari pengiriman alert Telegram.
    - Kartu statistik KPI di `/pelanggan` dan Dashboard mengecualikan modem nonaktif, menampilkan badge `(X OFF)` pada Total Terpantau.

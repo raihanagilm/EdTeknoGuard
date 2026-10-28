@@ -97,9 +97,21 @@ async def inject_current_user_middleware(request: Request, call_next):
         request.state.allowed_kantor = get_user_allowed_kantor(current_user)
         request.state.active_kantor = get_active_kantor(request, current_user)
     else:
+        # Periksa apakah ada sesi portal pelanggan (TeknoCust)
+        cust_kantor = None
+        cust_cookie = request.cookies.get("edtekno_pelanggan_session")
+        if cust_cookie:
+            try:
+                from portal_pelanggan.core.security import verify_customer_session_token
+                c_data = verify_customer_session_token(cust_cookie)
+                if c_data and c_data.get("kantor"):
+                    cust_kantor = c_data.get("kantor")
+            except Exception:
+                pass
+
         from app.core.security import get_all_kantor_codes
         all_k = get_all_kantor_codes()
-        fallback_k = all_k[0] if all_k else None
+        fallback_k = cust_kantor or (all_k[0] if all_k else None)
         request.state.allowed_kantor = all_k
         request.state.active_kantor = fallback_k
     response = await call_next(request)

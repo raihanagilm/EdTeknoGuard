@@ -26,6 +26,15 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Aturan Mutlak Larangan Dot Indikator Kosong & Sinkronisasi Realtime Portal ([AGENTS.md](file:///d:/databaru/Magang/EdTeknoGuard/AGENTS.md), [TabProfilPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx), [TabBerandaPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabBerandaPelanggan.jsx), [TabKuotaPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabKuotaPelanggan.jsx), [PortalPelangganApp.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/PortalPelangganApp.jsx))**:
+  - **Larangan Mutlak Tag Dot Polos**: Dilarang keras menggunakan dot indikator kosong seperti `<span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>` di seluruh UI antarmuka web. Setiap penanda status wajib menggunakan ikon SVG semantik yang jelas (misalnya `<CheckCircle2 />`, `<ShieldCheck />`, `<AlertTriangle />`) berstandar Lucide icons / SVG inline murni.
+  - **Pembersihan Kode Lama**: Mengganti dot hijau polos pada status verifikasi akun di `TabProfilPelanggan.jsx` dengan ikon `<CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />`.
+  - **Redesain Tab Profil Pelanggan ([TabProfilPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx))**:
+    - Kartu identitas profil kini menampilkan Avatar inisial bulat tegas, Nama Pelanggan, ID Pelanggan font mono, tombol *"Edit Data"* dengan ikon pensil, dan tabel rincian data diri (Kantor Layanan, No WhatsApp, Alamat Lengkap, Paket Internet, IP Modem Router).
+    - Tombol Edit Data membuka modal dialog pop-up yang memungkinkan pelanggan memperbarui Nama, Nomor WhatsApp, dan Alamat Rumah secara interaktif.
+    - Menambahkan baris menu navigasi *Gaya List Row Gojek* untuk **Pengaturan WiFi Rumah** (langsung membuka tab kelola SSID/Password WiFi) dan **Ganti Kata Sandi Akun** (accordion expand form kata sandi baru).
+
+
 - **Penghapusan Total Data Default Hardcoded & Proteksi Pemantauan Berbasis Database ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py), [settings/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/service.py), [ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx))**:
   - **Larangan Nilai Fallback Hardcoded**: Menghapus seluruh nilai bawaan hardcoded (ambang batas warning -26.0, kritis -27.0/-32.0, interval 20 menit, dan pasangan kredensial `admin/tekno2024`, `tekno/tekno2025`). Seluruh konfigurasi pemantauan sekarang **wajib murni diambil dari database** per kantor.
   - **Blokir Pemindaian Jika Belum Disetel di Database**: Jika pengaturan sistem (ambang batas warning/kritis, interval, atau kredensial modem) belum ada/belum disetel di database kantor:

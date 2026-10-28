@@ -52,12 +52,19 @@ export function PortalPelangganApp() {
         window.history.pushState({}, '', newUrl);
       }
     }
+    // Selalu ambil data terbaru database saat membuka tab beranda atau kuota
+    if (tab === 'beranda' || tab === 'kuota') {
+      fetchDashboard();
+    }
   };
 
   useEffect(() => {
     const handlePopState = () => {
       const tab = getPortalTabFromPath(window.location.pathname);
       setActiveTab(tab);
+      if (tab === 'beranda' || tab === 'kuota') {
+        fetchDashboard();
+      }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -99,10 +106,22 @@ export function PortalPelangganApp() {
     fetchSession();
   }, []);
 
+  // Polling data terbaru dari database setiap 15 detik saat aktif login
+  useEffect(() => {
+    if (!isAuthenticated || viewState !== 'app') return;
+
+    const interval = setInterval(() => {
+      fetchDashboard();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, viewState]);
+
   const handleLoginSuccess = (custData) => {
     setIsAuthenticated(true);
     setCustomer(custData);
     setViewState('app');
+    fetchSession();
     fetchDashboard();
   };
 
@@ -196,6 +215,7 @@ export function PortalPelangganApp() {
             <TabProfilPelanggan
               customer={customer}
               dashboardData={dashboardData}
+              onNavigate={(tab) => switchTab(tab)}
               onLogout={handleLogout}
             />
           )}

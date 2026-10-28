@@ -53,6 +53,58 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
     ? Math.round(signal.latency_ms)
     : '-';
 
+  // Format Nama Paket agar tidak terjadi duplikasi "Paket Paket 10 Mbps"
+  const cleanPaketLabel = (rawPaket) => {
+    if (!rawPaket || rawPaket === '-') return '-';
+    const trimmed = String(rawPaket).trim();
+    if (/^paket\s+/i.test(trimmed)) {
+      return trimmed;
+    }
+    return `Paket ${trimmed}`;
+  };
+
+  // Kalkulasi persentase kesehatan bar secara dinamis
+  // 1. Daya Terima (-15 dBm sangat baik [100%], -26 dBm batas warning [50%], <= -28 dBm kritis [15%])
+  const getRxPowerProgress = (val) => {
+    if (val === '-' || val === null || val === undefined) return { percent: 0, color: '#9ca3af' };
+    const num = Number(val);
+    if (isNaN(num)) return { percent: 0, color: '#9ca3af' };
+    if (num > -26.0) return { percent: Math.min(100, Math.max(70, Math.round(((num - -26.0) / 11.0) * 30 + 70))), color: '#2563eb' };
+    if (num >= -27.0) return { percent: 50, color: '#f59e0b' };
+    return { percent: 25, color: '#ef4444' };
+  };
+
+  // 2. Suhu ONT (Normal 20-55°C [ideal < 50°C], Warning 55-65°C, Hot >65°C)
+  const getSuhuProgress = (val) => {
+    if (val === '-' || val === null || val === undefined) return { percent: 0, color: '#9ca3af' };
+    const num = Number(val);
+    if (isNaN(num)) return { percent: 0, color: '#9ca3af' };
+    const pct = Math.min(100, Math.max(10, Math.round((num / 70) * 100)));
+    const color = num < 55 ? '#2563eb' : num <= 65 ? '#f59e0b' : '#ef4444';
+    return { percent: pct, color };
+  };
+
+  // 3. Latensi (Sangat bagus <20ms, Baik 20-50ms, Sedang 50-100ms, Tinggi >100ms)
+  const getLatencyProgress = (val) => {
+    if (val === '-' || val === null || val === undefined) return { percent: 0, color: '#9ca3af' };
+    const num = Number(val);
+    if (isNaN(num)) return { percent: 0, color: '#9ca3af' };
+    // Persentase kualitas (makin rendah latency, makin bagus bar-nya)
+    if (num <= 20) return { percent: 95, color: '#2563eb' };
+    if (num <= 50) return { percent: 80, color: '#2563eb' };
+    if (num <= 100) return { percent: 60, color: '#3b82f6' };
+    if (num <= 200) return { percent: 40, color: '#f59e0b' };
+    return { percent: 20, color: '#ef4444' };
+  };
+
+  const rxBar = getRxPowerProgress(rxPowerValue);
+  const suhuBar = getSuhuProgress(suhuOntValue);
+  const latencyBar = getLatencyProgress(latencyValue);
+
+  // Kuota bar: representasi pemakaian wajar bulan berjalan (misal skala proporsional dinamis hingga 100GB+)
+  const kuotaNum = parseFloat(kuotaTerpakai) || 0;
+  const kuotaBarPercent = Math.min(100, Math.max(5, Math.round((kuotaNum / Math.max(50, Math.ceil(kuotaNum / 50) * 50)) * 100)));
+
   // Inisial Nama Pelanggan
   const getInitials = (namaStr) => {
     if (!namaStr || namaStr === '-') return 'US';
@@ -133,8 +185,8 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
-                      width: '66%',
-                      background: '#2563eb'
+                      width: `${rxBar.percent}%`,
+                      background: rxBar.color
                     }}
                   />
                 </div>
@@ -156,8 +208,8 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
-                      width: '75%',
-                      background: '#2563eb'
+                      width: `${suhuBar.percent}%`,
+                      background: suhuBar.color
                     }}
                   />
                 </div>
@@ -179,8 +231,8 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
-                      width: '35%',
-                      background: '#2563eb'
+                      width: `${latencyBar.percent}%`,
+                      background: latencyBar.color
                     }}
                   />
                 </div>
@@ -290,11 +342,14 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
               {kuotaTerpakai} <span className="text-sm text-gray-600 font-semibold font-sans">GB</span>
             </div>
             <div className="h-2 rounded-full bg-gray-100 overflow-hidden w-full mb-2.5">
-              <div className="h-full bg-blue-600 rounded-full transition-all duration-700" style={{ width: '65%' }} />
+              <div
+                className="h-full bg-blue-600 rounded-full transition-all duration-700"
+                style={{ width: `${kuotaBarPercent}%` }}
+              />
             </div>
             <div className="flex justify-between text-xs text-gray-600 font-medium">
               <span>Pemakaian Bulan Ini</span>
-              <span className="font-semibold text-gray-700">Paket {customer.paket || '-'}</span>
+              <span className="font-semibold text-gray-700">{cleanPaketLabel(customer.paket)}</span>
             </div>
           </section>
 

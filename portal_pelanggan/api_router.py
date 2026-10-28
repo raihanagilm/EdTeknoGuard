@@ -27,13 +27,45 @@ def portal_auth_me(request: Request, db: Session = Depends(get_db)):
     id_pel = cust.get("id_pelanggan")
     pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first() if id_pel else None
     
+    # Fallback jika session DB belum mengarah ke tenant kantor pelanggan yang benar
+    if not pelanggan and id_pel:
+        c_kantor = cust.get("kantor")
+        from app.core.tenant_database import TenantDatabaseManager
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pelanggan = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                t_db.close()
+            except Exception:
+                pass
+        if not pelanggan:
+            from app.core.security import get_all_kantor_codes
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    p_found = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    k_db.close()
+                    if p_found:
+                        pelanggan = p_found
+                        break
+                except Exception:
+                    pass
+    
+    # Ambil IP dengan fallback ke ip_ont jika ip_router None/kosong
+    ip_display = ""
+    if pelanggan:
+        try:
+            ip_display = pelanggan.ip_router or pelanggan.ip_ont or ""
+        except Exception:
+            ip_display = ""
+
     return {
         "authenticated": True,
         "customer": {
             "id_pelanggan": pelanggan.id_pelanggan if pelanggan else cust.get("id_pelanggan", ""),
             "nama": pelanggan.nama if pelanggan else cust.get("nama", ""),
             "status_verifikasi": pelanggan.status_verifikasi if pelanggan else cust.get("status_verifikasi", ""),
-            "ip_router": pelanggan.ip_router if (pelanggan and pelanggan.ip_router) else "",
+            "ip_router": ip_display,
             "paket": pelanggan.paket if (pelanggan and pelanggan.paket) else "",
             "alamat": pelanggan.alamat if (pelanggan and pelanggan.alamat) else "",
             "no_hp": pelanggan.no_hp if (pelanggan and pelanggan.no_hp) else "",
@@ -63,7 +95,13 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_db)):
         "id_pelanggan": data.get("id_pelanggan"),
         "nama": data.get("nama"),
         "status_verifikasi": data.get("status_verifikasi"),
-        "kantor": data.get("kantor")
+        "kantor": data.get("kantor"),
+        "no_hp": data.get("no_hp", ""),
+        "alamat": data.get("alamat", ""),
+        "paket": data.get("paket", ""),
+        "ip_router": data.get("ip_router", ""),
+        "nama_wifi": data.get("nama_wifi", ""),
+        "pop": data.get("pop", "")
     }
     response = JSONResponse(
         content={
@@ -340,6 +378,7 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
         return JSONResponse(status_code=401, content={"authenticated": False})
         
     body = await request.json()
+    nama = body.get("nama", "").strip()
     no_hp = body.get("no_hp", "").strip()
     alamat = body.get("alamat", "").strip()
     
@@ -347,6 +386,8 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
         
+    if nama:
+        pelanggan.nama = nama
     if no_hp:
         pelanggan.no_hp = no_hp
     if alamat:
