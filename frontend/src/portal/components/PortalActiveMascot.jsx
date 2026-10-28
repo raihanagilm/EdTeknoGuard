@@ -15,6 +15,8 @@ import '../../styles/mascots/mascot-analisis-redaman.css';
 import '../../styles/mascots/mascot-percaya-diri.css';
 import '../../styles/mascots/mascot-tersipu.css';
 import '../../styles/mascots/mascot-bosan.css';
+import '../../styles/mascots/mascot-security.css';
+import '../../styles/mascots/mascot-bingung.css';
 
 /**
  * Daftar maskot rotasi berkala (bergantian setiap 5 menit / 300 detik)
@@ -89,7 +91,7 @@ export function getActiveMascotKey(data, rotatingIndex) {
 /**
  * Komponen Maskot Interaktif Portal
  */
-export function PortalActiveMascot({ data, className = 'w-20 h-16' }) {
+export function PortalActiveMascot({ data, mascotKey: customMascotKey, className = 'w-20 h-16' }) {
   const [rotatingIndex, setRotatingIndex] = useState(0);
 
   // Interval rotasi 5 menit (300.000 ms)
@@ -101,7 +103,7 @@ export function PortalActiveMascot({ data, className = 'w-20 h-16' }) {
     return () => clearInterval(timer);
   }, []);
 
-  const mascotKey = getActiveMascotKey(data, rotatingIndex);
+  const mascotKey = customMascotKey || getActiveMascotKey(data, rotatingIndex);
   const svgHtml = PORTAL_MASCOTS_SVG[mascotKey] || PORTAL_MASCOTS_SVG['menyapa'];
 
   return (

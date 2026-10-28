@@ -110,6 +110,10 @@ export class PortalKendalaService {
 }
 
 export class PortalWifiService {
+  static async getWifi() {
+    return new PortalApiService().get('/wifi');
+  }
+
   static async changeWifi(payload) {
     return new PortalApiService().post('/wifi/ganti', payload);
   }

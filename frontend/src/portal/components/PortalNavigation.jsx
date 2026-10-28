@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Home,
   AlertCircle,
-  Wifi,
+  CreditCard,
   PieChart,
   User,
   LogOut,
@@ -49,17 +49,17 @@ export function PortalBottomNav({ activeTab, onTabChange }) {
           <span className="text-[11px] tracking-tight mt-0.5 font-semibold">Kendala</span>
         </button>
 
-        {/* 2. WiFi */}
+        {/* 2. Bayar (Pembayaran & Tagihan) */}
         <button
-          onClick={() => onTabChange('wifi')}
+          onClick={() => onTabChange('pembayaran')}
           className={`flex flex-col items-center justify-center min-h-[48px] transition ${
-            activeTab === 'wifi' ? 'text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700'
+            activeTab === 'pembayaran' ? 'text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          <div className={`p-1 rounded-xl transition ${activeTab === 'wifi' ? 'bg-blue-50' : ''}`}>
-            <Wifi className={`w-5 h-5 ${activeTab === 'wifi' ? 'stroke-[2.5]' : 'stroke-2'}`} />
+          <div className={`p-1 rounded-xl transition ${activeTab === 'pembayaran' ? 'bg-blue-50' : ''}`}>
+            <CreditCard className={`w-5 h-5 ${activeTab === 'pembayaran' ? 'stroke-[2.5]' : 'stroke-2'}`} />
           </div>
-          <span className="text-[11px] tracking-tight mt-0.5 font-semibold">WiFi</span>
+          <span className="text-[11px] tracking-tight mt-0.5 font-semibold">Bayar</span>
         </button>
 
         {/* 3. Beranda (Tengah / Center Elevated Button) */}

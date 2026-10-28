@@ -310,6 +310,45 @@ async def portal_kendala_delete(ticket_id: str, request: Request, db: Session = 
         "message": f"Tiket keluhan '{ticket_id}' berhasil dihapus."
     }
 
+@api_router.get("/wifi")
+def portal_wifi_get(request: Request, db: Session = Depends(get_db)):
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"authenticated": False})
+        
+    pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust.get("id_pelanggan")).first()
+    if not pelanggan:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
+        
+    # Ambil IP Pengguna dari Request (support reverse proxy X-Forwarded-For)
+    client_ip = request.headers.get("x-forwarded-for")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else ""
+        
+    ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
+    
+    # Deteksi apakah klien sedang terhubung langsung ke modem ONT pelanggan
+    # Catatan: Tidak boleh menggunakan subnet /24 karena berisiko false-positive pada jaringan dengan subnet sama
+    is_home_wifi = False
+    if ip_target and client_ip:
+        if client_ip == ip_target:
+            is_home_wifi = True
+
+    default_ssid = f"WiFi-{pelanggan.nama.replace(' ', '')}" if pelanggan.nama else "WiFi-Rumah"
+    current_ssid = pelanggan.nama_wifi or default_ssid
+    current_password = pelanggan.password_wifi or "Belum Disetel"
+    
+    return {
+        "ok": True,
+        "nama_wifi": current_ssid,
+        "password_wifi": current_password,
+        "is_connected_to_home_wifi": is_home_wifi,
+        "client_ip": client_ip,
+        "ip_router": ip_target
+    }
+
 @api_router.post("/wifi/ganti")
 async def portal_wifi_change(request: Request, db: Session = Depends(get_db)):
     cust = get_current_customer_optional(request)
@@ -320,6 +359,7 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_db)):
     nama_wifi = body.get("nama_wifi", "").strip()
     password_wifi = body.get("password_wifi", "").strip()
     konfirmasi = body.get("konfirmasi_password", "").strip()
+    is_local_client_probe = body.get("is_local_client_probe", False) # Konfirmasi probe langsung dari browser client ke modem ONT
     
     if len(nama_wifi) < 3:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Nama WiFi (SSID) minimal 3 karakter!"})
@@ -334,13 +374,43 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_db)):
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
         
+    # Deteksi jaringan IP klien
+    client_ip = request.headers.get("x-forwarded-for")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else ""
+        
+    ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
+    
+    # Syarat Wajib: Harus terhubung langsung ke modem WiFi rumah
+    is_home_wifi = False
+    if ip_target and client_ip and client_ip == ip_target:
+        is_home_wifi = True
+    elif is_local_client_probe:
+        # Client membuktikan telah terhubung secara lokal melalui browser probe ke gateway modem
+        is_home_wifi = True
+            
+    # KEBIJAKAN STRICT: WAJIB TERSAMBUNG KE MODEM WIFI RUMAH
+    if not is_home_wifi:
+        return JSONResponse(
+            status_code=403,
+            content={
+                "ok": False,
+                "is_connected_to_home_wifi": False,
+                "message": "Gagal: Anda tidak terhubung ke WiFi rumah ini! Sambungkan HP/laptop Anda ke sinyal WiFi rumah terlebih dahulu untuk mengubah pengaturan."
+            }
+        )
+        
     pelanggan.nama_wifi = nama_wifi
     pelanggan.password_wifi = password_wifi
     db.commit()
     
     return {
         "ok": True,
-        "message": "Pengaturan nama dan kata sandi WiFi rumah berhasil diperbarui!"
+        "message": "Pengaturan nama dan kata sandi WiFi rumah berhasil diperbarui!",
+        "nama_wifi": nama_wifi,
+        "password_wifi": password_wifi
     }
 
 @api_router.post("/profil/ganti-password")

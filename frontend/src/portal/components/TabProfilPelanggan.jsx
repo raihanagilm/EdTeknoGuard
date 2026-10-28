@@ -22,10 +22,14 @@ import {
 import { PortalProfilService } from '../services/portalApi';
 import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
+import { PortalToastNotification } from './PortalToastNotification';
 
 export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogout }) {
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  // Floating Toast State (Pengganti banner inline)
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
   
   // Profile Data Edit State
   const [nama, setNama] = useState(customer?.nama || '');
@@ -73,16 +77,31 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
         alamat: alamat
       });
       if (res.ok && res.data?.ok) {
-        setProfileMessage({ type: 'success', text: res.data.message || 'Data diri berhasil disimpan!' });
+        setToast({
+          show: true,
+          type: 'success',
+          title: 'Berhasil Disimpan',
+          message: res.data.message || 'Data diri (Alamat & No. Kontak) berhasil diperbarui!'
+        });
         if (res.data.customer) {
           setCurrentCustomer((prev) => ({ ...prev, ...res.data.customer }));
         }
         setIsEditModalOpen(false);
       } else {
-        setProfileMessage({ type: 'error', text: res.data?.message || 'Gagal menyimpan perubahan profil.' });
+        setToast({
+          show: true,
+          type: 'error',
+          title: 'Gagal Menyimpan',
+          message: res.data?.message || 'Gagal menyimpan perubahan profil.'
+        });
       }
     } catch (err) {
-      setProfileMessage({ type: 'error', text: 'Gagal menghubungi server.' });
+      setToast({
+        show: true,
+        type: 'error',
+        title: 'Kesalahan Sistem',
+        message: 'Gagal menghubungi server.'
+      });
     } finally {
       setProfileSaving(false);
     }
@@ -91,16 +110,25 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setPasswordMessage({ type: '', text: '' });
 
     if (passwordBaru.length < 6) {
-      setPasswordMessage({ type: 'error', text: 'Kata sandi baru minimal 6 karakter!' });
+      setToast({
+        show: true,
+        type: 'error',
+        title: 'Kata Sandi Lemah',
+        message: 'Kata sandi baru minimal 6 karakter!'
+      });
       setLoading(false);
       return;
     }
 
     if (passwordBaru !== konfirmasiPassword) {
-      setPasswordMessage({ type: 'error', text: 'Konfirmasi kata sandi baru tidak cocok!' });
+      setToast({
+        show: true,
+        type: 'error',
+        title: 'Tidak Cocok',
+        message: 'Konfirmasi kata sandi baru tidak cocok!'
+      });
       setLoading(false);
       return;
     }
@@ -111,21 +139,37 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
         konfirmasi_password: konfirmasiPassword
       });
       if (res.ok && res.data?.ok) {
-        setPasswordMessage({ type: 'success', text: res.data.message || 'Kata sandi akun portal Anda berhasil diubah!' });
+        setToast({
+          show: true,
+          type: 'success',
+          title: 'Kata Sandi Diperbarui',
+          message: res.data.message || 'Kata sandi akun portal Anda berhasil diubah!'
+        });
         setPasswordBaru('');
         setKonfirmasiPassword('');
+        setIsPasswordExpanded(false);
       } else {
-        setPasswordMessage({ type: 'error', text: res.data?.message || 'Gagal mengubah kata sandi.' });
+        setToast({
+          show: true,
+          type: 'error',
+          title: 'Gagal Mengubah Sandi',
+          message: res.data?.message || 'Gagal mengubah kata sandi.'
+        });
       }
     } catch (err) {
-      setPasswordMessage({ type: 'error', text: 'Gagal menghubungi server.' });
+      setToast({
+        show: true,
+        type: 'error',
+        title: 'Kesalahan Sistem',
+        message: 'Gagal menghubungi server.'
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827] relative">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
         title="Profil & Akun Pelanggan"
@@ -137,30 +181,6 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
         <div className="pb-24 space-y-3">
-          {/* Feedback Notifikasi Profil */}
-          {profileMessage.text && (
-            <div className="px-3">
-              <div
-                className={`p-3 rounded-2xl text-xs font-bold flex items-center justify-between gap-2 shadow-xs ${
-                  profileMessage.type === 'success'
-                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
-                    : 'bg-rose-50 border border-rose-200 text-rose-800'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  {profileMessage.type === 'success' ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  ) : (
-                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                  )}
-                  <span>{profileMessage.text}</span>
-                </div>
-                <button onClick={() => setProfileMessage({ type: '', text: '' })} className="p-1 hover:opacity-75 cursor-pointer">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* ═══ CARD PUTIH PROFIL & DATA DIRI (PERSIS SEPERTI GAMBAR USER) ═══ */}
           <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
@@ -263,23 +283,6 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
 
               {isPasswordExpanded && (
                 <div className="p-4 pt-1 space-y-4 border-t border-gray-100 bg-gray-50/50">
-                  {passwordMessage.text && (
-                    <div
-                      className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 ${
-                        passwordMessage.type === 'success'
-                          ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
-                          : 'bg-rose-50 border border-rose-200 text-rose-800'
-                      }`}
-                    >
-                      {passwordMessage.type === 'success' ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                      )}
-                      <span>{passwordMessage.text}</span>
-                    </div>
-                  )}
-
                   <form onSubmit={handleChangePassword} className="space-y-3 text-xs font-semibold">
                     <div className="space-y-1.5">
                       <label className="text-gray-700 block">Kata Sandi Baru</label>
@@ -439,6 +442,15 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
           </div>
         </div>
       )}
+
+      {/* ═══ TOAST NOTIFIKASI MELAYANG (DI ATAS BOTTOM NAV) ═══ */}
+      <PortalToastNotification
+        show={toast.show}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+      />
     </div>
   );
 }

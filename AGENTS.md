@@ -212,7 +212,7 @@ EdTeknoGuard/
     - **Menu Profil Pelanggan (`/portal/profil`)**:
       - Terfokus murni pada identitas dan status langganan terverifikasi serta form ganti password mandiri.
     - **Desain Mobile-First & Sticky Bottom Navigation 5 Tab**:
-      - Dilengkapi *sticky bottom navigation bar* 5 menu (`Beranda`, `Kendala`, `WiFi`, `Kuota`, `Profil`) dengan area sentuh ramah jempol (>= 44x44 px).
+      - Dilengkapi *sticky bottom navigation bar* 5 menu (`Kendala`, `Bayar`, `Beranda`, `Kuota`, `Profil`) dengan area sentuh ramah jempol (>= 44x44 px). Menu WiFi terintegrasi langsung di dalam halaman Profil.
 
 12. **Navigasi Admin NOC & Modul Manajemen Pelanggan**:
     - **Sidebar Tetap Kiri Desktop (`w-64`) & Off-Canvas Burger Drawer Mobile**:

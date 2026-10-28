@@ -32,7 +32,24 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Redesain Tab Profil Pelanggan ([TabProfilPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx))**:
     - Kartu identitas profil kini menampilkan Avatar inisial bulat tegas, Nama Pelanggan, ID Pelanggan font mono, tombol *"Edit Data"* dengan ikon pensil, dan tabel rincian data diri (Kantor Layanan, No WhatsApp, Alamat Lengkap, Paket Internet, IP Modem Router).
     - Tombol Edit Data membuka modal dialog pop-up yang memungkinkan pelanggan memperbarui Nama, Nomor WhatsApp, dan Alamat Rumah secara interaktif.
-    - Menambahkan baris menu navigasi *Gaya List Row Gojek* untuk **Pengaturan WiFi Rumah** (langsung membuka tab kelola SSID/Password WiFi) dan **Ganti Kata Sandi Akun** (accordion expand form kata sandi baru).
+  - **Pembaruan Navigasi Bawah TeknoCust ([PortalNavigation.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalNavigation.jsx))**:
+    - Tombol tab ke-2 pada *Sticky Bottom Navigation* diubah dari **WiFi** menjadi **Bayar** (ikon `<CreditCard />` Lucide SVG) yang langsung mengarah ke halaman Pembayaran & Tagihan Mandiri (`/portal/pembayaran`).
+    - Pengaturan WiFi rumah kini terintegrasi secara ergonomis di halaman Profil pelanggan (`/portal/profil`).
+  - **Peningkatan Keamanan & Fitur Kelola WiFi Rumah ([TabWifiPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabWifiPelanggan.jsx), [api_router.py](file:///d:/databaru/Magang/EdTeknoGuard/portal_pelanggan/api_router.py), [portalApi.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/services/portalApi.js))**:
+    - **Tampilan Kredensial Aktif**: Menampilkan Nama WiFi (SSID) aktif dan Kata Sandi WiFi saat ini yang tersensor (`••••••••`) dengan tombol toggle intip/lihat serta tombol salin (*copy to clipboard*).
+    - **Penghapusan Total Asumsi Subnet `/24`**: Menghapus logika pengecekan blok IP 3 oktet (`target_subnet == client_subnet`) dan bypass dev `127.0.0.1` yang sebelumnya menyebabkan *false-positive* (terdeteksi tersambung WiFi rumah padahal berada di WiFi lain dalam subnet yang sama).
+    - **Kebijakan Verifikasi Sambungan Ketat (Strict Mandatory Connection)**:
+      - Pengguna **WAJIB** terbukti tersambung ke modem WiFi rumah sendiri (pencocokan IP target persis).
+      - Jika tidak tersambung ke WiFi rumah, formulir dan tombol *"Simpan Perubahan WiFi"* dikunci total (*disabled*) disertai pesan peringatan keamanan yang jelas.
+      - Endpoint backend `POST /wifi/ganti` memberikan respon penolakan tegas `HTTP 403 Forbidden` jika permintaan datang dari luar jangkauan WiFi rumah.
+    - **Penyederhanaan UI (Collapsible Accordion & Banner Terpadu)**:
+      - Formulir ubah nama & sandi WiFi diubah menjadi komponen dropdown/accordion (*collapsible*) yang rapi dan tersembunyi secara default sehingga tampilan tidak membebani layar.
+      - Peringatan sebelum ganti (wajib terhubung ke WiFi rumah) dan pemberitahuan setelah ganti (perangkat terputus sesaat) disatukan ke dalam **satu banner edukasi terpadu** yang ringkas, jelas, dan bersih.
+      - **Overlay Maskot Interaktif**: Ketika perangkat terdeteksi belum tersambung ke modem WiFi rumah, seluruh formulir input ditutupi dengan lapisan overlay elegan (`backdrop-blur-md bg-white/90`) yang menampilkan maskot interaktif bertema penjaga keamanan (`security`), badge peringatan, penjelasan edukatif, dan tombol *"Cek Ulang Sambungan"* (`fetchWifiDetails`).
+  - **Standardisasi Toast Notifikasi Mengambang ([PortalToastNotification.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalToastNotification.jsx), [TabProfilPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx), [TabWifiPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabWifiPelanggan.jsx))**:
+    - **Penghapusan Banner Inline Pendorong Layout**: Menghapus seluruh kotak notifikasi inline di atas card yang sebelumnya mendorong layout konten ke bawah saat muncul.
+    - **Komponen Notifikasi Terpadu (`PortalToastNotification`)**: Dibuatkan komponen reusable yang melayang mengambang di pojok bawah di atas *Sticky Bottom Navigation* (`bottom-20`), dilengkapi auto-dismiss (3.5 detik), tombol close silang (`X`), ikon semantik SVG murni Lucide (`CheckCircle2`, `AlertCircle`, `AlertTriangle`, `Info`), dan efek glassmorphism transparan.
+
 
 
 - **Penghapusan Total Data Default Hardcoded & Proteksi Pemantauan Berbasis Database ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py), [settings/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/service.py), [ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx))**:
