@@ -16,6 +16,7 @@ import {
 import { PortalKendalaService } from '../services/portalApi';
 import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
+import { PortalToastNotification } from './PortalToastNotification';
 
 export function TabKendalaPelanggan({ customer, dashboardData }) {
   const [tickets, setTickets] = useState([]);
@@ -32,7 +33,11 @@ export function TabKendalaPelanggan({ customer, dashboardData }) {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [ticketToDelete, setTicketToDelete] = useState(null);
-  const [message, setMessage] = useState('');
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
+
+  const showToast = (msg, type = 'success', title = '') => {
+    setToast({ show: true, message: msg, type, title });
+  };
 
   const fetchTickets = async () => {
     setLoading(true);
@@ -55,7 +60,6 @@ export function TabKendalaPelanggan({ customer, dashboardData }) {
   const handleCreateTicket = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setMessage('');
 
     try {
       const res = await PortalKendalaService.create({
@@ -64,15 +68,15 @@ export function TabKendalaPelanggan({ customer, dashboardData }) {
         no_wa: noWa
       });
       if (res.ok && res.data.ok) {
-        setMessage('Keluhan Anda berhasil dikirim ke teknisi piket NOC!');
+        showToast('Keluhan Anda berhasil dikirim ke teknisi piket NOC!', 'success', 'Tiket Terkirim');
         setDeskripsi('');
         setShowCreateModal(false);
         fetchTickets();
       } else {
-        setMessage(res.data?.message || 'Gagal mengirim tiket keluhan.');
+        showToast(res.data?.message || 'Gagal mengirim tiket keluhan.', 'error');
       }
     } catch (err) {
-      setMessage('Gagal menghubungi server.');
+      showToast('Gagal menghubungi server.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -83,14 +87,14 @@ export function TabKendalaPelanggan({ customer, dashboardData }) {
     try {
       const res = await PortalKendalaService.delete(idTiket);
       if (res.ok && res.data?.ok) {
-        setMessage(res.data.message || 'Tiket keluhan berhasil dihapus.');
+        showToast(res.data.message || 'Tiket keluhan berhasil dihapus.', 'info', 'Tiket Dihapus');
         setTicketToDelete(null);
         fetchTickets();
       } else {
-        setMessage(res.data?.message || 'Gagal menghapus tiket keluhan.');
+        showToast(res.data?.message || 'Gagal menghapus tiket keluhan.', 'error');
       }
     } catch (err) {
-      setMessage('Gagal menghubungi server.');
+      showToast('Gagal menghubungi server.', 'error');
     } finally {
       setDeletingId(null);
     }
@@ -129,21 +133,6 @@ export function TabKendalaPelanggan({ customer, dashboardData }) {
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
         <div className="pb-24 space-y-3">
-
-          {/* Feedback Notifikasi */}
-          {message && (
-            <div className="px-3">
-              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between gap-2 shadow-xs">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{message}</span>
-                </div>
-                <button onClick={() => setMessage('')} className="p-1 text-emerald-600 hover:text-emerald-800 cursor-pointer">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* ═══ CARD PUTIH LAPOR GANGGUAN (naik menimpa header) ═══ */}
           <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
@@ -409,6 +398,15 @@ export function TabKendalaPelanggan({ customer, dashboardData }) {
           </div>
         </div>
       )}
+
+      {/* Floating Toast Notification Terpadu */}
+      <PortalToastNotification
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        title={toast.title}
+        onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+      />
     </div>
   );
 }

@@ -41,6 +41,12 @@ class KuotaService:
             db.add(kuota)
             db.commit()
             db.refresh(kuota)
+        elif not kuota.kecepatan_paket and cust and cust.paket:
+            kuota.kecepatan_paket = cust.paket
+            try:
+                db.commit()
+            except Exception:
+                db.rollback()
 
         usage_history = []
         total_now = float(kuota.kuota_terpakai_gb) if (kuota and kuota.kuota_terpakai_gb is not None) else 0.0

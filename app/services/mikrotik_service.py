@@ -1002,17 +1002,23 @@ class MikroTikSyncService:
                         KuotaPelanggan.periode_bulan == current_period
                     ).first()
 
+                    # Ambil data pelanggan untuk mengisi kecepatan_paket
+                    p = tenant_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cid).first()
+
                     if kuota_rec:
                         kuota_rec.kuota_terpakai_gb = total_gb
                         kuota_rec.upload_bytes = up_b
                         kuota_rec.download_bytes = dl_b
                         kuota_rec.last_sync_mikrotik = get_now_wib()
                         kuota_rec.updated_at = get_now_wib()
+                        if not kuota_rec.kecepatan_paket and p and p.paket:
+                            kuota_rec.kecepatan_paket = p.paket
                     else:
                         kuota_rec = KuotaPelanggan(
                             id_pelanggan=cid,
                             periode_bulan=current_period,
                             kuota_terpakai_gb=total_gb,
+                            kecepatan_paket=p.paket if p and p.paket else None,
                             upload_bytes=up_b,
                             download_bytes=dl_b,
                             last_sync_mikrotik=get_now_wib()
@@ -1023,7 +1029,6 @@ class MikroTikSyncService:
                     synced_cids[cid] = kuota_rec
 
                     # Update queue_name jika belum tersimpan
-                    p = tenant_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cid).first()
                     if p and not p.queue_name and q.get("name"):
                         p.queue_name = q.get("name")
 

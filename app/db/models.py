@@ -105,6 +105,7 @@ class Pelanggan(Base):
 
     # Kredensial & Status Akses Portal Warga Mandiri
     password_hash = Column(String(255), nullable=True)
+    foto_profil = Column(String(255), nullable=True) # Path relatif gambar webp, misal: /static/uploads/profil/BMS-0118.webp
     lokasi_gps = Column(String(100), nullable=True)
     status_verifikasi = Column(String(30), default="TERVERIFIKASI", nullable=False, index=True) # TERVERIFIKASI, PENDING, DITOLAK
     last_login = Column(DateTime, nullable=True)

@@ -212,6 +212,12 @@ def serve_management_kantor_page(request: Request):
         return FileResponse(str(dist_index))
     return RedirectResponse("/", status_code=303)
 
+# Mount Static Files (Uploads, Profil Pelanggan, Aset Statis)
+static_dir = Path("static")
+static_dir.mkdir(parents=True, exist_ok=True)
+(static_dir / "uploads" / "profil").mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Mount Portal Pelanggan
 from portal_pelanggan.main import app as portal_app
 app.mount("/portal", portal_app)

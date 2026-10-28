@@ -30,9 +30,18 @@ export function PortalHeader({
       <div className="relative px-5 pt-4 pb-7 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           {avatarInitials ? (
-            <div className="w-10 h-10 rounded-full bg-blue-900/40 border border-white/40 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-xs">
-              {avatarInitials}
-            </div>
+            customer?.foto_profil ? (
+              <img
+                src={customer.foto_profil}
+                alt=""
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                className="w-10 h-10 rounded-full object-cover border border-white/60 shrink-0 shadow-xs"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-900/40 border border-white/40 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-xs">
+                {avatarInitials}
+              </div>
+            )
           ) : (
             <div className="shrink-0 inline-flex items-center justify-center leading-none overflow-visible" style={{ lineHeight: 0 }}>
               <PortalActiveMascot

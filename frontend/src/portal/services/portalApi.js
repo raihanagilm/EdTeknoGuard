@@ -127,6 +127,14 @@ export class PortalProfilService {
   static async updateProfile(payload) {
     return new PortalApiService().post('/profil/update', payload);
   }
+
+  static async uploadFoto(imageBase64) {
+    return new PortalApiService().post('/profil/foto', { image_base64: imageBase64 });
+  }
+
+  static async deleteFoto() {
+    return new PortalApiService().request('/profil/foto', { method: 'DELETE' });
+  }
 }
 
 export const portalApi = new PortalApiService();

@@ -71,7 +71,8 @@ def portal_auth_me(request: Request, db: Session = Depends(get_db)):
             "no_hp": pelanggan.no_hp if (pelanggan and pelanggan.no_hp) else "",
             "nama_wifi": pelanggan.nama_wifi if (pelanggan and pelanggan.nama_wifi) else "",
             "kantor": pelanggan.kantor if (pelanggan and pelanggan.kantor) else cust.get("kantor", ""),
-            "pop": pelanggan.pop if (pelanggan and pelanggan.pop) else ""
+            "pop": pelanggan.pop if (pelanggan and pelanggan.pop) else "",
+            "foto_profil": pelanggan.foto_profil if (pelanggan and pelanggan.foto_profil) else ""
         }
     }
 
@@ -203,7 +204,8 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
             "status_pembayaran": status_bayar,
             "status_isolir": bool(getattr(pel, "status_isolir", False)),
             "periode_tagihan": periode_teks,
-            "status_verifikasi": pel.status_verifikasi if (pel and pel.status_verifikasi) else cust.get("status_verifikasi", "")
+            "status_verifikasi": pel.status_verifikasi if (pel and pel.status_verifikasi) else cust.get("status_verifikasi", ""),
+            "foto_profil": pel.foto_profil if (pel and pel.foto_profil) else ""
         },
         "signal": {
             "rx_power": float(last_log.rx_power) if last_log and last_log.rx_power is not None else None,
@@ -231,11 +233,15 @@ def portal_kuota_data(request: Request, db: Session = Depends(get_db)):
         
     data = KuotaService.get_kuota_details(db, cust.get("id_pelanggan"))
     kuota = data.get("kuota")
+    pel = data.get("pelanggan")
+    
+    # Ambil paket dari kuota, jika kosong fallback ke paket di profil pelanggan
+    paket_nama = (kuota.kecepatan_paket if (kuota and kuota.kecepatan_paket) else "") or (pel.paket if (pel and pel.paket) else "") or "-"
     
     return {
         "ok": True,
         "kuota_terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota else 0.0,
-        "kecepatan_paket": kuota.kecepatan_paket if (kuota and kuota.kecepatan_paket) else "-",
+        "kecepatan_paket": paket_nama,
         "periode_bulan": kuota.periode_bulan if kuota else "",
         "usage_history": data.get("usage_history", [])
     }
@@ -477,8 +483,109 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
             "paket": pelanggan.paket or "",
             "ip_router": pelanggan.ip_router or "",
             "kantor": pelanggan.kantor or "",
-            "status_verifikasi": pelanggan.status_verifikasi or ""
+            "status_verifikasi": pelanggan.status_verifikasi or "",
+            "foto_profil": pelanggan.foto_profil or ""
         }
+    }
+
+@api_router.post("/profil/foto")
+async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_db)):
+    """
+    Upload & Simpan Foto Profil Pelanggan yang telah dicompress ke format WebP di client.
+    Mendukung payload JSON { "image_base64": "data:image/webp;base64,..." }
+    File disimpan di static/uploads/profil/{id_pelanggan}.webp dan path-nya dicatat ke tabel pelanggan.
+    """
+    import base64
+    import re
+    from pathlib import Path
+    
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"authenticated": False})
+        
+    id_pel = cust.get("id_pelanggan")
+    pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    if not pelanggan:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
+        
+    body = await request.json()
+    image_data = body.get("image_base64", "").strip()
+    if not image_data:
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Data foto tidak ditemukan!"})
+        
+    # Ekstrak data base64 (hapus prefix data:image/...;base64,)
+    if "," in image_data:
+        header, base64_str = image_data.split(",", 1)
+    else:
+        base64_str = image_data
+        
+    try:
+        binary_data = base64.b64decode(base64_str)
+    except Exception:
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Format gambar base64 tidak valid!"})
+        
+    # Batasi ukuran maksimal 1MB setelah compress (biasanya webp hanya 20-50KB)
+    if len(binary_data) > 1024 * 1024:
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Ukuran foto terlalu besar (maksimal 1 MB)!"})
+        
+    # Pastikan direktori static/uploads/profil ada
+    upload_dir = Path("static/uploads/profil")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Sanitasi nama file menggunakan id_pelanggan yang aman
+    safe_filename = re.sub(r"[^a-zA-Z0-9_\-]", "_", id_pel) + ".webp"
+    file_path = upload_dir / safe_filename
+    
+    # Tulis file biner webp ke disk server
+    with open(file_path, "wb") as f:
+        f.write(binary_data)
+        
+    # Simpan URL path relatif dengan query timestamp untuk cache-busting saat di-update
+    import time
+    timestamp = int(time.time())
+    relative_url = f"/static/uploads/profil/{safe_filename}?v={timestamp}"
+    
+    pelanggan.foto_profil = relative_url
+    db.commit()
+    db.refresh(pelanggan)
+    
+    return {
+        "ok": True,
+        "message": "Foto profil berhasil diperbarui!",
+        "foto_profil": relative_url
+    }
+
+@api_router.delete("/profil/foto")
+def portal_profil_delete_foto(request: Request, db: Session = Depends(get_db)):
+    """
+    Hapus Foto Profil Pelanggan dan kembalikan ke avatar inisial nama default.
+    """
+    import re
+    from pathlib import Path
+    
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"authenticated": False})
+        
+    id_pel = cust.get("id_pelanggan")
+    pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    if not pelanggan:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
+        
+    safe_filename = re.sub(r"[^a-zA-Z0-9_\-]", "_", id_pel) + ".webp"
+    file_path = Path("static/uploads/profil") / safe_filename
+    if file_path.exists():
+        try:
+            file_path.unlink()
+        except Exception:
+            pass
+            
+    pelanggan.foto_profil = None
+    db.commit()
+    
+    return {
+        "ok": True,
+        "message": "Foto profil berhasil dihapus dan kembali ke inisial nama."
     }
 
 

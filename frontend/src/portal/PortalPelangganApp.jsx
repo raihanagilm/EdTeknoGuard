@@ -216,6 +216,7 @@ export function PortalPelangganApp() {
               customer={customer}
               dashboardData={dashboardData}
               onNavigate={(tab) => switchTab(tab)}
+              onCustomerUpdate={(updated) => setCustomer((prev) => ({ ...prev, ...updated }))}
               onLogout={handleLogout}
             />
           )}

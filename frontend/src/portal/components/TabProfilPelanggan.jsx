@@ -17,14 +17,16 @@ import {
   Bell,
   X,
   Wifi,
-  Pencil
+  Pencil,
+  Camera,
+  Trash2
 } from 'lucide-react';
 import { PortalProfilService } from '../services/portalApi';
 import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
 import { PortalToastNotification } from './PortalToastNotification';
 
-export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogout }) {
+export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onCustomerUpdate, onLogout }) {
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
@@ -37,7 +39,9 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
   const [alamat, setAlamat] = useState(customer?.alamat || '');
   const [currentCustomer, setCurrentCustomer] = useState(customer || {});
   const [profileSaving, setProfileSaving] = useState(false);
-  const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [fotoLoadError, setFotoLoadError] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   // Password State
   const [passwordBaru, setPasswordBaru] = useState('');
@@ -45,16 +49,143 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
   const [showPasswordBaru, setShowPasswordBaru] = useState(false);
   const [showPasswordKonfirm, setShowPasswordKonfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     if (customer) {
       setCurrentCustomer(customer);
+      setFotoLoadError(false);
       setNama(customer.nama || '');
       setNoHp(customer.no_hp || '');
       setAlamat(customer.alamat || '');
     }
   }, [customer]);
+
+  /**
+   * Mengompresi file gambar dari HP menjadi WebP maksimal 400x400 px, kualitas 80%
+   */
+  const compressImageToWebp = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 400; // Ukuran avatar optimal
+          let width = img.width;
+          let height = img.height;
+
+          // Hitung rasio crop persegi di tengah
+          const minDim = Math.min(width, height);
+          const startX = (width - minDim) / 2;
+          const startY = (height - minDim) / 2;
+
+          canvas.width = maxDim;
+          canvas.height = maxDim;
+          const ctx = canvas.getContext('2d');
+          
+          // Gambar avatar persegi terpusat
+          ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, maxDim, maxDim);
+
+          // Ekspor ke WebP kualitas 0.82 (ukuran biasanya cuma 15KB - 30KB)
+          const webpDataUrl = canvas.toDataURL('image/webp', 0.82);
+          resolve(webpDataUrl);
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
+  const handleFotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input agar bisa pilih file yang sama jika diinginkan
+    e.target.value = '';
+
+    if (!file.type.startsWith('image/')) {
+      setToast({
+        show: true,
+        type: 'error',
+        title: 'Bukan Gambar',
+        message: 'Mohon pilih berkas foto yang valid (JPG, PNG, atau WEBP).'
+      });
+      return;
+    }
+
+    setUploadingFoto(true);
+    try {
+      const compressedWebp = await compressImageToWebp(file);
+      const res = await PortalProfilService.uploadFoto(compressedWebp);
+      if (res.ok && res.data?.ok) {
+        const newUrl = res.data.foto_profil;
+        setCurrentCustomer((prev) => ({ ...prev, foto_profil: newUrl }));
+        if (onCustomerUpdate) {
+          onCustomerUpdate({ foto_profil: newUrl });
+        }
+        setToast({
+          show: true,
+          type: 'success',
+          title: 'Foto Tersimpan',
+          message: 'Foto profil Anda berhasil diunggah & diperbarui!'
+        });
+      } else {
+        setToast({
+          show: true,
+          type: 'error',
+          title: 'Gagal Mengunggah',
+          message: res.data?.message || 'Gagal menyimpan foto profil.'
+        });
+      }
+    } catch (err) {
+      setToast({
+        show: true,
+        type: 'error',
+        title: 'Kesalahan Kompresi',
+        message: 'Gagal memproses gambar foto profil.'
+      });
+    } finally {
+      setUploadingFoto(false);
+    }
+  };
+
+  const handleDeleteFoto = async () => {
+    if (!currentCustomer?.foto_profil) return;
+    setUploadingFoto(true);
+    try {
+      const res = await PortalProfilService.deleteFoto();
+      if (res.ok && res.data?.ok) {
+        setCurrentCustomer((prev) => ({ ...prev, foto_profil: null }));
+        if (onCustomerUpdate) {
+          onCustomerUpdate({ foto_profil: null });
+        }
+        setToast({
+          show: true,
+          type: 'info',
+          title: 'Foto Dihapus',
+          message: 'Foto profil telah dihapus dan kembali ke inisial nama.'
+        });
+      } else {
+        setToast({
+          show: true,
+          type: 'error',
+          title: 'Gagal Menghapus',
+          message: res.data?.message || 'Gagal menghapus foto profil.'
+        });
+      }
+    } catch (err) {
+      setToast({
+        show: true,
+        type: 'error',
+        title: 'Kesalahan Sistem',
+        message: 'Gagal menghubungi server.'
+      });
+    } finally {
+      setUploadingFoto(false);
+    }
+  };
 
   // Inisial avatar (2 huruf)
   const getInitials = (namaStr) => {
@@ -187,18 +318,68 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onLogo
             {/* Card Header Identitas Pelanggan */}
             <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2">
               <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 text-white font-black text-sm font-mono shadow-xs"
-                  style={{ background: '#2563eb' }}
-                >
-                  {getInitials(currentCustomer?.nama)}
+                {/* Avatar Bulat dengan Badge Tombol Kamera */}
+                <div className="relative shrink-0">
+                  {currentCustomer?.foto_profil && !fotoLoadError ? (
+                    <img
+                      src={currentCustomer.foto_profil}
+                      alt=""
+                      onError={() => setFotoLoadError(true)}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-xs"
+                    />
+                  ) : (
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-sm font-mono shadow-xs border-2 border-white"
+                      style={{ background: '#2563eb' }}
+                    >
+                      {getInitials(currentCustomer?.nama)}
+                    </div>
+                  )}
+
+                  {/* Tombol Kamera Unggah Foto */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingFoto}
+                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-blue-600 hover:text-blue-800 hover:bg-gray-50 transition cursor-pointer disabled:opacity-50"
+                    title="Ubah Foto Profil"
+                    aria-label="Ubah Foto Profil"
+                  >
+                    {uploadingFoto ? (
+                      <RefreshCw className="w-2.5 h-2.5 animate-spin text-blue-600" />
+                    ) : (
+                      <Camera className="w-3 h-3" />
+                    )}
+                  </button>
+
+                  {/* Hidden File Input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFotoChange}
+                    className="hidden"
+                  />
                 </div>
+
                 <div className="min-w-0">
                   <div className="text-[15px] font-black text-gray-900 leading-tight truncate">
                     {currentCustomer?.nama || 'Profil Pelanggan'}
                   </div>
-                  <div className="mt-0.5 text-xs text-gray-500 font-mono font-medium">
-                    {currentCustomer?.id_pelanggan || '-'}
+                  <div className="mt-0.5 text-xs text-gray-500 font-mono font-medium flex items-center gap-2">
+                    <span>{currentCustomer?.id_pelanggan || '-'}</span>
+                    {currentCustomer?.foto_profil && (
+                      <button
+                        type="button"
+                        onClick={handleDeleteFoto}
+                        disabled={uploadingFoto}
+                        className="text-[10px] text-gray-400 hover:text-rose-600 font-sans flex items-center gap-0.5 transition cursor-pointer"
+                        title="Hapus Foto Profil"
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                        <span>Hapus</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
