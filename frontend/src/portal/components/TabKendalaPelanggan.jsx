@@ -190,9 +190,17 @@ export function TabKendalaPelanggan({ customer, dashboardData }) {
             {/* Ticket List */}
             <div className="px-4 pb-4 space-y-3">
               {loading ? (
-                <div className="p-8 text-center text-gray-400 bg-gray-50 rounded-2xl border border-gray-100">
-                  <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-600 mb-2" />
-                  <span className="text-xs font-semibold">Memuat daftar laporan keluhan...</span>
+                <div className="space-y-2.5 animate-pulse">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="w-20 h-4 bg-gray-200 rounded" />
+                        <div className="w-16 h-4 bg-gray-200 rounded-full" />
+                      </div>
+                      <div className="w-3/4 h-3.5 bg-gray-200 rounded" />
+                      <div className="w-1/2 h-3 bg-gray-100 rounded" />
+                    </div>
+                  ))}
                 </div>
               ) : filteredTickets.length === 0 ? (
                 <div className="p-8 bg-gray-50 rounded-2xl border border-gray-100 text-center space-y-2">

@@ -18,6 +18,9 @@ import {
 } from 'lucide-react';
 import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
+import { Users } from 'lucide-react';
+import { ModalPerangkatTerhubung } from './ModalPerangkatTerhubung';
+import { PortalWifiService } from '../services/portalApi';
 
 export function TabBerandaPelanggan({ data, onNavigate }) {
   const signal = data?.signal || {
@@ -78,6 +81,50 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   };
   const customerInitials = getInitials(customer.nama);
+
+  // State Modal Perangkat Terhubung (Menu Cepat)
+  const [showDevicesModal, setShowDevicesModal] = useState(false);
+  const [devicesList, setDevicesList] = useState([]);
+  const [loadingDevices, setLoadingDevices] = useState(false);
+  const [scanningDevices, setScanningDevices] = useState(false);
+  const [lastDeviceUpdate, setLastDeviceUpdate] = useState('');
+
+  const fetchConnectedDevices = async () => {
+    setLoadingDevices(true);
+    try {
+      const res = await PortalWifiService.getConnectedDevices();
+      if (res.ok && res.data) {
+        setDevicesList(res.data.devices || []);
+        const now = new Date();
+        setLastDeviceUpdate(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingDevices(false);
+    }
+  };
+
+  const handleScanDevices = async () => {
+    setScanningDevices(true);
+    try {
+      const res = await PortalWifiService.scanConnectedDevices();
+      if (res.ok && res.data) {
+        setDevicesList(res.data.devices || []);
+        const now = new Date();
+        setLastDeviceUpdate(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setScanningDevices(false);
+    }
+  };
+
+  const openDevicesModal = () => {
+    setShowDevicesModal(true);
+    fetchConnectedDevices();
+  };
 
   return (
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
@@ -184,8 +231,23 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
               <span className="text-xs text-gray-600 font-medium">Akses Cepat</span>
             </div>
 
-            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-              {/* 1. Tombol WiFi */}
+            <div className="grid grid-cols-6 gap-1 sm:gap-1.5">
+              {/* 1. Tombol Perangkat Terhubung (Cek Pengguna WiFi) */}
+              <button
+                type="button"
+                onClick={openDevicesModal}
+                className="rounded-xl p-2 sm:p-2.5 flex flex-col items-center gap-1.5 transition active:scale-[0.97] border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/70 hover:border-blue-300"
+              >
+                <div
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shadow-xs"
+                  style={{ background: '#2563eb' }}
+                >
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <span className="text-[11px] font-bold text-gray-800 leading-none">Perangkat</span>
+              </button>
+
+              {/* 2. Tombol WiFi */}
               <button
                 type="button"
                 onClick={() => onNavigate('wifi')}
@@ -358,8 +420,16 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
 
         </div>
       </main>
+      {/* ═══ MODAL POP-UP PERANGKAT TERHUBUNG MODEM ONT ═══ */}
+      <ModalPerangkatTerhubung
+        isOpen={showDevicesModal}
+        onClose={() => setShowDevicesModal(false)}
+        devices={devicesList}
+        loading={loadingDevices}
+        scanning={scanningDevices}
+        onRefresh={handleScanDevices}
+        lastUpdated={lastDeviceUpdate}
+      />
     </div>
   );
 }
-
-export default TabBerandaPelanggan;

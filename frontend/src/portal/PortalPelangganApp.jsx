@@ -16,6 +16,7 @@ import {
   PortalDashboardService
 } from './services/portalApi';
 import { PortalErrorView } from './components/PortalErrorView';
+import { PortalSemanticSkeleton } from './components/PortalSemanticSkeleton';
 import { RefreshCw } from 'lucide-react';
 
 export function PortalPelangganApp() {
@@ -139,11 +140,8 @@ export function PortalPelangganApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="text-center space-y-3">
-          <RefreshCw className="w-8 h-8 text-cyan-600 animate-spin mx-auto" />
-          <div className="text-xs font-bold text-slate-600 font-mono">Memuat Portal TeknoCust...</div>
-        </div>
+      <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center">
+        <PortalSemanticSkeleton tab="app" />
       </div>
     );
   }

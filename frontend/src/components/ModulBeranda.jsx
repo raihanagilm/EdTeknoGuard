@@ -112,6 +112,7 @@ export function ModulBeranda({
 
   // Mutex lock untuk mencegah double-click mikro saat request in-flight
   const actionInProgressRef = useRef(false)
+  const isFetchingStatusRef = useRef(false)
 
   // State Progres Pemindaian
   const [scanProgress, setScanProgress] = useState({
@@ -225,6 +226,8 @@ export function ModulBeranda({
 
   // 2. Fetch Engine Status
   const fetchStatus = useCallback(async () => {
+    if (isFetchingStatusRef.current) return
+    isFetchingStatusRef.current = true
     try {
       const res = await MonitoringService.getStatus({ kantor: activeOffice })
       if (res.ok && res.data) {
@@ -282,6 +285,8 @@ export function ModulBeranda({
     } catch (err) {
       console.error('Gagal mengambil status monitoring:', err)
       setIsNetworkError(true)
+    } finally {
+      isFetchingStatusRef.current = false
     }
   }, [isScanning, chartRange, activeOffice, fetchKpi])
 
@@ -700,13 +705,13 @@ export function ModulBeranda({
       }
     }, 8000)
 
-    // 2. Fast polling ke backend saat pemindaian aktif (dipercepat ke 800ms agar update data cepat)
+    // 2. Fast polling ke backend saat pemindaian aktif (interval 1500ms agar browser tetap ringan dan tidak freeze)
     const fastInterval = setInterval(() => {
       if (document.hidden) return
       if (isScanning || (scanProgress && scanProgress.is_scanning)) {
         fetchStatus()
       }
-    }, 800)
+    }, 1500)
 
     // 3. Local stopwatch ticker 1 detik: berjalan mulus di client sehingga angka detik tidak pernah loncat
     const secondTicker = setInterval(() => {
@@ -733,8 +738,9 @@ export function ModulBeranda({
 
   // Handler Kontrol Pemindaian
   const handleStartScan = async () => {
-    // Sinkron mutex check
-    if (actionInProgressRef.current || isScanning || isAnyActionLoading) {
+    // Sinkron mutex check: hanya blokir jika kantor yang sedang aktif ini yang memang sedang memindai
+    const isThisOfficeScanning = isScanning && isCurrentOfficeScan
+    if (actionInProgressRef.current || isThisOfficeScanning || isAnyActionLoading) {
       return
     }
 

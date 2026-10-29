@@ -277,5 +277,24 @@ EdTeknoGuard/
    - **Larangan Tanda Em Dash (`—`)**: Seluruh tag `<title>` dan header halaman dilarang menggunakan karakter em dash (`—`). Gunakan tanda titik dua (`:`) atau koma (`,`) dengan format: `Nama Halaman: Nama Aplikasi`.
    - **Keterbacaan Manusia & Kalimat Aktif**: Kalimat petunjuk operasional, panduan jaringan, dan deskripsi sistem wajib disusun ringkas, aktif, dan langsung pada poin tanpa istilah berbelit.
 
+7. **Standar Transisi State & Navigasi: Larangan Full-Page Spinner & Kewajiban Semantik Skeleton Loading (Global)**:
+   - **Kebijakan Wajib Mutlak**: DILARANG KERAS menggunakan spinner lingkaran kosong di tengah layar (RefreshCw animate-spin full-screen / blocking screen spinner) saat inisialisasi awal, perpindahan tab, atau navigasi halaman, baik di Dashboard NOC TeknoGuard maupun Portal Pelanggan TeknoCust.
+   - **Kewajiban Skeleton Semantik (Layout Preservation)**:
+     - Seluruh status pemuatan data (*loading state*) saat pertama kali membuka halaman atau berpindah tab **WAJIB** menggunakan **Skeleton Loading Semantik** (nimate-pulse bg-slate-200/70 atau g-gray-200/80 rounded-...).
+     - Struktur skeleton **HARUS** mencerminkan tata letak asli halaman yang sedang dimuat (misal: bentuk kartu profil, bar kuota, deretan daftar tiket, atau tabel baris riwayat data) guna mengeliminasi lonjakan tata letak visual (*Cumulative Layout Shift / CLS*).
+   - **Shell Tetap Utuh (Persistent Shell)**:
+     - Saat berpindah tab, header/top bar dan bottom navigation bar **HARUS TETAP UTUH DI POSISINYA (PERSISTENT)**, hanya area konten utama (*content area*) yang menampilkan blok skeleton shimmer sebelum data siap.
+   - **Silent Background Refresh on Stale Data**:
+     - Jika halaman/tab sudah pernah dimuat sebelumnya dan memiliki data cache/state lokal, perpindahan kembali ke tab tersebut dilarang memunculkan skeleton ulang dari nol. Tampilkan data yang ada terlebih dahulu, lalu lakukan sinkronisasi data terbaru di latar belakang (*silent background fetch*) dengan indikator pembaruan non-intrusif.
 
-
+8. **Arsitektur Database Multi-Tenant & Script Inisialisasi (init_db)**:
+   - **Database Master (edteknoguard) HANYA memuat 4 Tabel Master**:
+     - kantors (Master daftar kantor cabang/wilayah)
+     - users (Master akun pengguna NOC & Teknisi)
+     - user_kantors (Relasi penugasan user ke kantor yang diizinkan)
+     - user_activity_logs (Audit trail global aktivitas pengguna NOC)
+   - **Database Tenant Per-Kantor (edtekno_{kode_kantor})**:
+     - Memuat 12 tabel operasional terisolasi per kantor: pelanggan, perangkat_ont, log_performa_ont, lert_logs, 	iket_kendala, kuota_pelanggan, pakets, system_settings, modem_credentials, user_notification_reads, perangkat_terhubung, dan kantors (referensi lokal).
+   - **Aturan Eksekusi Inisialisasi (python -m app.db.init_db)**:
+     - DILARANG KERAS mengeksekusi Base.metadata.create_all(bind=engine) tanpa filter tabel master di database master.
+     - Script inisialisasi wajib membatasi pembuatan tabel master hanya pada 4 tabel tersebut dan mendelegasikan pembuatan tabel operasional ke masing-masing database tenant via TenantDatabaseManager.init_tenant_schema.

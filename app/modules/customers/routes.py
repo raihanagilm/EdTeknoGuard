@@ -161,6 +161,25 @@ def toggle_customer_monitoring(
         db=db, id_pelanggan=id_pelanggan, user=user, request=request
     )
 
+@router.get("/api/customers/{id_pelanggan}/perangkat-terhubung")
+def get_customer_connected_devices(
+    id_pelanggan: str,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Route untuk mendapatkan daftar riwayat perangkat yang terhubung ke modem ONT pelanggan"""
+    return CustomerController.get_connected_devices(db=db, id_pelanggan=id_pelanggan)
+
+@router.post("/api/customers/{id_pelanggan}/perangkat-terhubung/scan")
+def scan_customer_connected_devices(
+    request: Request,
+    id_pelanggan: str,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Route untuk melakukan live probe & scanning perangkat terhubung langsung ke modem ONT pelanggan"""
+    return CustomerController.scan_connected_devices(db=db, id_pelanggan=id_pelanggan, request=request, user=user)
+
 @router.post("/api/customers/bulk-delete")
 def bulk_delete_customers(
     request: Request,

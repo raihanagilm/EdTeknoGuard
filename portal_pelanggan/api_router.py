@@ -588,4 +588,43 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_db)):
         "message": "Foto profil berhasil dihapus dan kembali ke inisial nama."
     }
 
+@api_router.get("/wifi/perangkat-terhubung")
+def portal_get_connected_devices(request: Request, db: Session = Depends(get_db)):
+    """
+    Mendapatkan riwayat perangkat terhubung milik pelanggan yang sedang login di TeknoCust.
+    """
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Belum login"})
+    
+    id_pel = cust.get("id_pelanggan")
+    from app.services.connected_device_service import ConnectedDeviceService
+    devices = ConnectedDeviceService.get_connected_devices(db=db, id_pelanggan=id_pel)
+    return {
+        "ok": True,
+        "id_pelanggan": id_pel,
+        "total": len(devices),
+        "devices": devices
+    }
+
+@api_router.post("/wifi/perangkat-terhubung/scan")
+def portal_scan_connected_devices(request: Request, db: Session = Depends(get_db)):
+    """
+    Live scanning mandiri perangkat terhubung langsung ke modem ONT dari aplikasi TeknoCust.
+    """
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Belum login"})
+    
+    id_pel = cust.get("id_pelanggan")
+    from app.services.connected_device_service import ConnectedDeviceService
+    res = ConnectedDeviceService.scan_and_sync_ont_devices(db=db, id_pelanggan=id_pel)
+    return {
+        "ok": res.get("success", False),
+        "message": res.get("message", ""),
+        "total": res.get("total", 0),
+        "devices": res.get("devices", [])
+    }
+
+
 

@@ -607,3 +607,30 @@ class CustomerController:
                 )
             raise HTTPException(status_code=500, detail=f"Gagal mengeksekusi import: {e}")
 
+    @staticmethod
+    def get_connected_devices(db: Session, id_pelanggan: str) -> Dict[str, Any]:
+        from app.services.connected_device_service import ConnectedDeviceService
+        devices = ConnectedDeviceService.get_connected_devices(db=db, id_pelanggan=id_pelanggan)
+        return {
+            "status": "success",
+            "id_pelanggan": id_pelanggan,
+            "total": len(devices),
+            "devices": devices
+        }
+
+    @staticmethod
+    def scan_connected_devices(db: Session, id_pelanggan: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from app.services.connected_device_service import ConnectedDeviceService
+        from app.modules.activity_logs.service import ActivityLogService
+        res = ConnectedDeviceService.scan_and_sync_ont_devices(db=db, id_pelanggan=id_pelanggan)
+        if request and user:
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="SCAN_PERANGKAT_TERHUBUNG",
+                status="SUCCESS" if res.get("success") else "WARNING",
+                keterangan=f"Scan perangkat terhubung modem ONT pelanggan {id_pelanggan} ({res.get('total', 0)} perangkat)",
+                user=user
+            )
+        return res
+

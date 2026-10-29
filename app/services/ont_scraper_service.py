@@ -23,6 +23,14 @@ PON_STATUS_INFO_PATH = "/getpage.gch?pid=1002&nextpage=pon_status_link_info_t.gc
 STATUS_DEV_PATH = "/getpage.gch?pid=1002&nextpage=status_dev_info_t.gch"
 WLAN_ESSID_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch"
 WLAN_SECURITY_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_secrity_t.gch"
+WLAN_ASSOCIATED_PATHS = [
+    "/getpage.gch?pid=1002&nextpage=net_wlan_assoc_t.gch",
+    "/getpage.gch?pid=1002&nextpage=net_wlan_user_t.gch",
+    "/getpage.gch?pid=1002&nextpage=e8_status_wlan_info_t.gch",
+    "/getpage.gch?pid=1002&nextpage=status_wlan_info_t.gch",
+    "/getpage.gch?pid=1002&nextpage=net_dhcp_dynamic_t.gch",
+    "/getpage.gch?pid=1002&nextpage=dhcp_client_list_t.gch"
+]
 
 # Daftar kandidat path status optik lintas vendor (ZTE, Huawei, FiberHome, VSOL, XPON Generic)
 COMMON_OPTICAL_PATHS = [
@@ -649,6 +657,127 @@ class ONTScraperService:
                 res["jenis_modem"] = "FiberHome ONT"
 
         return res
+
+    @classmethod
+    def scrape_connected_devices(
+        cls,
+        session: requests.Session,
+        base_url: str,
+        host: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Mengekstrak daftar perangkat yang sedang terhubung ke modem ONT (WiFi / LAN)
+        dari halaman associated devices atau DHCP client status ZTE & XPON.
+        """
+        headers = {
+            "Host": host,
+            "Referer": f"{base_url}/template.gch",
+            "Connection": "keep-alive",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+        devices = []
+        seen_macs = set()
+
+        for path in WLAN_ASSOCIATED_PATHS:
+            try:
+                r = session.get(f"{base_url}{path}", headers=headers, timeout=6)
+                if r.status_code != 200 or "logout_from" in r.text or len(r.text) < 100:
+                    continue
+
+                html_text = html.unescape(r.text)
+
+                # Pola 1: Ekstraksi baris tabel HTML <tr>...<td>MAC</td>...</tr>
+                tr_matches = re.findall(r'<tr[^>]*>(.*?)</tr>', html_text, re.I | re.S)
+                for tr in tr_matches:
+                    mac_found = re.search(r'([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})', tr)
+                    if mac_found:
+                        mac_clean = mac_found.group(1).replace("-", ":").upper()
+                        if mac_clean in seen_macs:
+                            continue
+
+                        ip_found = re.search(r'\b(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)\b', tr)
+                        ip_str = ip_found.group(1) if ip_found else None
+
+                        tds = re.findall(r'<td[^>]*>(.*?)</td>', tr, re.I | re.S)
+                        hostname = None
+                        rssi = None
+                        for td in tds:
+                            clean_td = re.sub(r'<[^>]+>', '', td).strip()
+                            if not clean_td or clean_td == mac_clean or (ip_str and clean_td == ip_str):
+                                continue
+                            m_rssi = re.search(r'([+-]?\d+)\s*(?:dBm|%|db)?', clean_td, re.I)
+                            if m_rssi and ("dbm" in clean_td.lower() or abs(int(m_rssi.group(1))) > 20):
+                                try:
+                                    rssi = int(m_rssi.group(1))
+                                    continue
+                                except Exception:
+                                    pass
+                            if not hostname and len(clean_td) >= 2 and not clean_td.isdigit():
+                                hostname = clean_td[:60]
+
+                        seen_macs.add(mac_clean)
+                        devices.append({
+                            "mac_address": mac_clean,
+                            "ip_address": ip_str,
+                            "hostname": hostname,
+                            "tipe_koneksi": "WIFI" if "wlan" in path.lower() else "LAN",
+                            "rssi": rssi,
+                            "status": "ONLINE"
+                        })
+
+                # Pola 2: Format Javascript array ZTE
+                js_macs = re.findall(r'Transfer_meaning\s*\(\s*["\'][^"\']*["\']\s*,\s*["\']([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})["\']\s*\)', html_text)
+                if not js_macs:
+                    js_macs = re.findall(r'["\']([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})["\']', html_text)
+
+                for mac_candidate in js_macs:
+                    clean_mac = mac_candidate.replace("-", ":").upper()
+                    if clean_mac not in seen_macs:
+                        seen_macs.add(clean_mac)
+                        devices.append({
+                            "mac_address": clean_mac,
+                            "ip_address": None,
+                            "hostname": None,
+                            "tipe_koneksi": "WIFI" if "wlan" in path.lower() else "LAN",
+                            "rssi": None,
+                            "status": "ONLINE"
+                        })
+            except Exception as e:
+                logger.debug(f"Pengecekan associated devices di {path} untuk {host} gagal: {e}")
+                continue
+
+        return devices
+
+    @classmethod
+    def get_connected_devices_live(
+        cls,
+        ip: str,
+        user_admin: str,
+        pass_admin: str
+    ) -> Dict[str, Any]:
+        """
+        Metode mandiri (on-demand) untuk login ke ONT dan mengambil daftar perangkat terhubung.
+        """
+        host = ip.strip()
+        base_url = f"http://{host}"
+        session = requests.Session()
+
+        ok, auth_user = cls.attempt_login(session, base_url, host, user_admin, pass_admin)
+        if not ok:
+            return {
+                "success": False,
+                "error_type": "AUTH_FAILED",
+                "message": f"Gagal login ke modem ONT {host} dengan kredensial yang diberikan.",
+                "devices": []
+            }
+
+        devices = cls.scrape_connected_devices(session, base_url, host)
+        return {
+            "success": True,
+            "ip": host,
+            "total": len(devices),
+            "devices": devices
+        }
 
     @classmethod
     def update_wifi_credentials(

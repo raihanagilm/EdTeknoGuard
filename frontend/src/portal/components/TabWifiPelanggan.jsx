@@ -23,6 +23,8 @@ import { PortalWifiService } from '../services/portalApi';
 import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
 import { PortalToastNotification } from './PortalToastNotification';
+import { Users } from 'lucide-react';
+import { ModalPerangkatTerhubung } from './ModalPerangkatTerhubung';
 
 export function TabWifiPelanggan({ customer, dashboardData }) {
   // Current WiFi Info
@@ -45,6 +47,50 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
+
+  // State Modal Perangkat Terhubung
+  const [showDevicesModal, setShowDevicesModal] = useState(false);
+  const [devicesList, setDevicesList] = useState([]);
+  const [loadingDevices, setLoadingDevices] = useState(false);
+  const [scanningDevices, setScanningDevices] = useState(false);
+  const [lastDeviceUpdate, setLastDeviceUpdate] = useState('');
+
+  const fetchConnectedDevices = async () => {
+    setLoadingDevices(true);
+    try {
+      const res = await PortalWifiService.getConnectedDevices();
+      if (res.ok && res.data) {
+        setDevicesList(res.data.devices || []);
+        const now = new Date();
+        setLastDeviceUpdate(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingDevices(false);
+    }
+  };
+
+  const handleScanDevices = async () => {
+    setScanningDevices(true);
+    try {
+      const res = await PortalWifiService.scanConnectedDevices();
+      if (res.ok && res.data) {
+        setDevicesList(res.data.devices || []);
+        const now = new Date();
+        setLastDeviceUpdate(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setScanningDevices(false);
+    }
+  };
+
+  const openDevicesModal = () => {
+    setShowDevicesModal(true);
+    fetchConnectedDevices();
+  };
 
   const fetchWifiDetails = async () => {
     setFetchingWifi(true);
@@ -225,6 +271,25 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
                 )}
               </div>
             </div>
+
+            {/* Tombol Cepat: Cek Siapa Saja Yang Terhubung */}
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={openDevicesModal}
+                className="w-full py-2.5 px-3.5 rounded-xl bg-blue-50 hover:bg-blue-100/80 text-blue-700 border border-blue-200/70 text-xs font-bold flex items-center justify-between transition active:scale-[0.98] cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                    <Users className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Lihat Siapa Saja Yang Terhubung</span>
+                </div>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-blue-600 text-white">
+                  Cek Sekarang
+                </span>
+              </button>
+            </div>
           </section>
 
           {/* ═══ CARD 2: PENGATURAN GANTI NAMA & KATA SANDI (COLLAPSIBLE DROPDOWN) ═══ */}
@@ -385,6 +450,17 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
 
         </div>
       </main>
+
+      {/* ═══ MODAL POP-UP PERANGKAT TERHUBUNG MODEM ONT ═══ */}
+      <ModalPerangkatTerhubung
+        isOpen={showDevicesModal}
+        onClose={() => setShowDevicesModal(false)}
+        devices={devicesList}
+        loading={loadingDevices}
+        scanning={scanningDevices}
+        onRefresh={handleScanDevices}
+        lastUpdated={lastDeviceUpdate}
+      />
 
       {/* ═══ TOAST NOTIFIKASI MELAYANG (DI ATAS BOTTOM NAV) ═══ */}
       <PortalToastNotification

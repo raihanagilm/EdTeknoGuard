@@ -1,14 +1,12 @@
 import os
 import sys
-import random
-from datetime import datetime, timedelta
+import logging
 from app.core.timezone import get_now_wib
 from app.core.database import engine, Base, SessionLocal
 from app.db.models import (
-    Pelanggan, LogPerformaONT, AlertLog, SystemSetting,
-    User, UserActivityLog, TiketKendala, KuotaPelanggan
+    Kantor, User, UserKantor, UserActivityLog
 )
-from app.services.importer_service import ImporterService
+from app.core.tenant_database import TenantDatabaseManager, TENANT_TABLE_NAMES
 from app.core.config import settings
 
 if sys.stdout.encoding != "utf-8":
@@ -17,122 +15,81 @@ if sys.stdout.encoding != "utf-8":
     except Exception:
         pass
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("init_db")
+
+MASTER_TABLE_NAMES = ["kantors", "users", "user_kantors", "user_activity_logs"]
+
 def init_db():
-    print("[1/4] Membuat tabel di Database MySQL Lokal...")
-    Base.metadata.create_all(bind=engine)
-    print("[OK] Tabel berhasil dibuat di Database MySQL Lokal.")
+    print("=" * 65)
+    print(" 🛡️  EdTeknoGuard - Inisialisasi Database Multi-Tenant")
+    print("=" * 65)
+
+    # 1. Pastikan HANYA 4 tabel master yang dibuat di Database Master (edteknoguard)
+    print("\n[1/3] Memastikan 4 Tabel Master di Database Utama (edteknoguard)...")
+    from app.db import models
+    master_tables = [
+        models.Base.metadata.tables[tbl]
+        for tbl in MASTER_TABLE_NAMES
+        if tbl in models.Base.metadata.tables
+    ]
+    Base.metadata.create_all(bind=engine, tables=master_tables)
+    print("  -> Tabel Master terdaftar: " + ", ".join(MASTER_TABLE_NAMES))
+    print("  -> [OK] Database master bersih dari tabel operasional/pelanggan.")
 
     db = SessionLocal()
     try:
-        print("[2/4] Mengatur konfigurasi default system_settings...")
-        default_settings = {
-            "scheduler_status": "RUNNING",
-            "polling_interval_minutes": str(settings.POLLING_INTERVAL_MINUTES),
-            "warning_threshold_dbm": str(settings.WARNING_THRESHOLD_DBM),
-            "critical_threshold_dbm": str(settings.CRITICAL_THRESHOLD_DBM),
-            "last_scan_time": get_now_wib().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        for k, v in default_settings.items():
-            item = db.query(SystemSetting).filter(SystemSetting.key_name == k).first()
-            if not item:
-                db.add(SystemSetting(key_name=k, value_text=v))
-        db.commit()
-        print("[OK] System settings terkonfigurasi.")
-
-        # Inisialisasi Master Kantor
-        from app.db.models import Kantor
-        if db.query(Kantor).count() == 0:
-            db.add_all([
-                Kantor(nama="Pusat", alamat="Kantor Pusat ISP TeknoIndonet"),
-                Kantor(nama="Cabang", alamat="Kantor Cabang Operasional Utama"),
-                Kantor(nama="Banyumas", alamat="Kantor Wilayah Operasional Banyumas"),
-            ])
+        # Inisialisasi Master Kantor default jika belum ada
+        kantor_count = db.query(Kantor).count()
+        if kantor_count == 0:
+            print("\n[INFO] Menambahkan kantor default...")
+            default_kantors = [
+                Kantor(nama="Karang Gede", alamat="Kantor Operasional Karang Gede"),
+                Kantor(nama="Banyumas", alamat="Kantor Operasional Banyumas"),
+                Kantor(nama="Tengaran", alamat="Kantor Operasional Tengaran"),
+                Kantor(nama="Slawi", alamat="Kantor Operasional Slawi"),
+            ]
+            db.add_all(default_kantors)
             db.commit()
-            print("[OK] Master data kantor diinisialisasi.")
+            print("  -> [OK] Kantor default dibuat.")
 
-        # Inisialisasi User Super Admin Default
+        # Inisialisasi Super Admin default jika belum ada
         from app.core.security import get_password_hash
         admin_user = db.query(User).filter(User.username == "admin").first()
         if not admin_user:
+            print("\n[INFO] Membuat Super Admin default (admin / agiltampan)...")
             admin_user = User(
                 username="admin",
                 hashed_password=get_password_hash("agiltampan"),
                 nama_karyawan="Super Administrator NOC",
                 no_wa="081234567890",
                 role="super admin",
-                allowed_kantor='["cabang","pusat","banyumas"]',
                 is_active=True
             )
             db.add(admin_user)
             db.commit()
             db.refresh(admin_user)
 
-            from app.db.models import UserKantor
             all_kantors = db.query(Kantor).all()
             for kt in all_kantors:
                 db.add(UserKantor(user_id=admin_user.id, id_kantor=kt.id_kantor, kantor_kode=kt.nama.lower()))
             db.commit()
-            print("[OK] Akun Super Admin default & penugasan kantor berhasil dibuat.")
+            print("  -> [OK] Super Admin & hak akses kantor berhasil dibuat.")
 
-        print("[3/4] Memeriksa data master pelanggan & kredensial portal...")
-        customer_count = db.query(Pelanggan).count()
-        print(f"[INFO] Database memiliki {customer_count} pelanggan terdaftar (Data tersinkronisasi otomatis via MikroTik DHCP Leases).")
-        
-        # Inisialisasi/Migrasi Password Default TeknoCust (123456) bagi pelanggan yang belum memiliki hash
-        from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
-        default_pwd_hash = get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
-        null_pwd_custs = db.query(Pelanggan).filter((Pelanggan.password_hash == None) | (Pelanggan.password_hash == "")).all()
-        if null_pwd_custs:
-            for c in null_pwd_custs:
-                c.password_hash = default_pwd_hash
-            db.commit()
-            print(f"[OK] {len(null_pwd_custs)} pelanggan berhasil diperbarui dengan password portal default ({DEFAULT_CUSTOMER_PASSWORD}).")
-        else:
-            print("[INFO] Seluruh kredensial portal pelanggan sudah terverifikasi.")
+        # 2. Sinkronkan skema seluruh database tenant (per-kantor)
+        print("\n[2/3] Memastikan skema seluruh database tenant aktif...")
+        kantors = db.query(Kantor).filter(Kantor.is_active == True).all()
+        for k in kantors:
+            try:
+                TenantDatabaseManager.init_tenant_schema(k.nama)
+                print(f"  -> [OK] Skema tenant '{k.nama}' siap.")
+            except Exception as e:
+                print(f"  -> [WARN] Gagal inisialisasi tenant '{k.nama}': {e}")
 
-        print("[4/4] Memeriksa data historis log performa...")
-        log_count = db.query(LogPerformaONT).count()
-        if log_count == 0:
-            print("[SEED] Menghasilkan log historis awal untuk grafik (7 hari terakhir)...")
-            customers = db.query(Pelanggan).limit(30).all()
-            now = get_now_wib()
-            logs_to_add = []
-
-            for cust in customers:
-                base_rx = float(cust.redaman_baseline) if cust.redaman_baseline else -21.5
-                for day_offset in range(7, -1, -1):
-                    for hour in [0, 4, 8, 12, 16, 20]:
-                        ts = now - timedelta(days=day_offset, hours=(24 - hour))
-                        if ts > now:
-                            continue
-                        
-                        noise = random.uniform(-0.8, 0.8)
-                        rx = round(base_rx + noise, 2)
-                        
-                        if rx <= settings.CRITICAL_THRESHOLD_DBM:
-                            status = "CRITICAL"
-                        elif rx <= settings.WARNING_THRESHOLD_DBM:
-                            status = "WARNING"
-                        else:
-                            status = "NORMAL"
-
-                        logs_to_add.append(LogPerformaONT(
-                            id_pelanggan=cust.id_pelanggan,
-                            waktu_cek=ts,
-                            rx_power=rx,
-                            suhu_ont=round(random.uniform(41.0, 48.5), 1),
-                            uptime=random.randint(3600, 864000),
-                            status_koneksi=status,
-                            latency_ms=random.randint(3, 18),
-                            keterangan="Initial Seed Log"
-                        ))
-
-            if logs_to_add:
-                db.bulk_save_objects(logs_to_add)
-                db.commit()
-                print(f"[OK] Berhasil menyimpan {len(logs_to_add)} log historis performa awal.")
-        else:
-            print(f"[INFO] Database sudah memiliki {log_count} log performa.")
+        print("\n[3/3] Verifikasi selesai!")
+        print("=" * 65)
+        print("✅ INISIALISASI DATABASE MULTI-TENANT SELESAI!")
+        print("=" * 65)
 
     finally:
         db.close()

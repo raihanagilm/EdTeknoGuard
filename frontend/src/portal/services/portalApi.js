@@ -117,6 +117,14 @@ export class PortalWifiService {
   static async changeWifi(payload) {
     return new PortalApiService().post('/wifi/ganti', payload);
   }
+
+  static async getConnectedDevices() {
+    return new PortalApiService().get('/wifi/perangkat-terhubung');
+  }
+
+  static async scanConnectedDevices() {
+    return new PortalApiService().post('/wifi/perangkat-terhubung/scan');
+  }
 }
 
 export class PortalProfilService {

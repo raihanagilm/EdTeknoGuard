@@ -115,11 +115,12 @@ class Pelanggan(Base):
     paket_ref = relationship("Paket", back_populates="pelanggan_list")
 
     # Relasi ke seluruh data anakan (Cascading Deletion)
-    perangkat = relationship("PerangkatONT", back_populates="pelanggan", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+    perangkat = relationship("PerangkatONT", back_populates="pelanggan", uselist=False, lazy="joined", cascade="all, delete-orphan", passive_deletes=True)
     logs = relationship("LogPerformaONT", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
     alerts = relationship("AlertLog", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
     tiket_list = relationship("TiketKendala", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
     kuota_list = relationship("KuotaPelanggan", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
+    perangkat_terhubung_list = relationship("PerangkatTerhubung", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
 
     # Properti pembantu (Property shortcuts) untuk backward-compatibility transparan
     def _get_or_create_perangkat(self):
@@ -129,7 +130,10 @@ class Pelanggan(Base):
 
     @property
     def ip_router(self):
-        return self.perangkat.ip_router if self.perangkat else None
+        try:
+            return self.perangkat.ip_router if self.perangkat else None
+        except Exception:
+            return None
 
     @ip_router.setter
     def ip_router(self, val):
@@ -137,7 +141,10 @@ class Pelanggan(Base):
 
     @property
     def ip_ont(self):
-        return self.perangkat.ip_ont if self.perangkat else None
+        try:
+            return self.perangkat.ip_ont if self.perangkat else None
+        except Exception:
+            return None
 
     @ip_ont.setter
     def ip_ont(self, val):
@@ -145,7 +152,10 @@ class Pelanggan(Base):
 
     @property
     def jenis_modem(self):
-        return self.perangkat.jenis_modem if self.perangkat else None
+        try:
+            return self.perangkat.jenis_modem if self.perangkat else None
+        except Exception:
+            return None
 
     @jenis_modem.setter
     def jenis_modem(self, val):
@@ -153,7 +163,10 @@ class Pelanggan(Base):
 
     @property
     def user_admin(self):
-        return self.perangkat.user_admin if self.perangkat else None
+        try:
+            return self.perangkat.user_admin if self.perangkat else None
+        except Exception:
+            return None
 
     @user_admin.setter
     def user_admin(self, val):
@@ -161,7 +174,10 @@ class Pelanggan(Base):
 
     @property
     def pass_admin(self):
-        return self.perangkat.pass_admin if self.perangkat else None
+        try:
+            return self.perangkat.pass_admin if self.perangkat else None
+        except Exception:
+            return None
 
     @pass_admin.setter
     def pass_admin(self, val):
@@ -169,7 +185,10 @@ class Pelanggan(Base):
 
     @property
     def status_kredensial(self):
-        return self.perangkat.status_kredensial if self.perangkat else "UNTESTED"
+        try:
+            return self.perangkat.status_kredensial if self.perangkat else "UNTESTED"
+        except Exception:
+            return "UNTESTED"
 
     @status_kredensial.setter
     def status_kredensial(self, val):
@@ -177,7 +196,10 @@ class Pelanggan(Base):
 
     @property
     def failed_credentials(self):
-        return self.perangkat.failed_credentials if self.perangkat else None
+        try:
+            return self.perangkat.failed_credentials if self.perangkat else None
+        except Exception:
+            return None
 
     @failed_credentials.setter
     def failed_credentials(self, val):
@@ -185,7 +207,10 @@ class Pelanggan(Base):
 
     @property
     def redaman_baseline(self):
-        return self.perangkat.redaman_baseline if self.perangkat else None
+        try:
+            return self.perangkat.redaman_baseline if self.perangkat else None
+        except Exception:
+            return None
 
     @redaman_baseline.setter
     def redaman_baseline(self, val):
@@ -193,7 +218,10 @@ class Pelanggan(Base):
 
     @property
     def nama_wifi(self):
-        return self.perangkat.nama_wifi if self.perangkat else None
+        try:
+            return self.perangkat.nama_wifi if self.perangkat else None
+        except Exception:
+            return None
 
     @nama_wifi.setter
     def nama_wifi(self, val):
@@ -201,7 +229,10 @@ class Pelanggan(Base):
 
     @property
     def password_wifi(self):
-        return self.perangkat.password_wifi if self.perangkat else None
+        try:
+            return self.perangkat.password_wifi if self.perangkat else None
+        except Exception:
+            return None
 
     @password_wifi.setter
     def password_wifi(self, val):
@@ -468,6 +499,30 @@ class ModemCredential(Base):
     kantor_ref = relationship("Kantor", back_populates="modem_credentials")
 
     id = synonym("id_credential")
+
+
+class PerangkatTerhubung(Base):
+    __tablename__ = "perangkat_terhubung"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
+    mac_address = Column(String(30), nullable=False, index=True)
+    ip_address = Column(String(45), nullable=True, index=True)
+    hostname = Column(String(100), nullable=True)
+    tipe_koneksi = Column(String(20), default="WIFI", nullable=False) # WIFI atau LAN
+    rssi = Column(Integer, nullable=True) # Kekuatan sinyal (dBm) jika ada dari modem
+    ssid = Column(String(100), nullable=True) # SSID jika connect via WiFi
+    status = Column(String(20), default="ONLINE", nullable=False, index=True) # ONLINE, OFFLINE
+    first_seen = Column(DateTime, default=get_now_wib, nullable=False)
+    last_seen = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False, index=True)
+
+    pelanggan = relationship("Pelanggan", back_populates="perangkat_terhubung_list")
+
+    __table_args__ = (
+        UniqueConstraint("id_pelanggan", "mac_address", name="uq_pelanggan_mac"),
+        Index("idx_perangkat_terhubung_lookup", "id_pelanggan", "status"),
+    )
+
 
 
 
