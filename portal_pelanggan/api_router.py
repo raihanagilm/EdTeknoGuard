@@ -158,7 +158,7 @@ async def portal_auth_lupa_password(request: Request, db: Session = Depends(get_
         )
         
     matched_cust.password_hash = get_password_hash(password_baru)
-    target_db.commit()
+    db.commit()
     
     return {
         "ok": True,
@@ -429,7 +429,7 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_db)):
         
     pelanggan.nama_wifi = nama_wifi
     pelanggan.password_wifi = password_wifi
-    target_db.commit()
+    db.commit()
     
     return {
         "ok": True,
@@ -459,7 +459,7 @@ async def portal_profil_change_password(request: Request, db: Session = Depends(
         return JSONResponse(status_code=400, content={"ok": False, "message": "Konfirmasi kata sandi tidak cocok!"})
         
     pelanggan.password_hash = get_password_hash(password_baru)
-    target_db.commit()
+    db.commit()
     
     return {
         "ok": True,
@@ -488,7 +488,7 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
     if alamat:
         pelanggan.alamat = alamat
         
-    target_db.commit()
+    db.commit()
     db.refresh(pelanggan)
     
     return {
@@ -565,7 +565,7 @@ async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_
     relative_url = f"/static/uploads/profil/{safe_filename}?v={timestamp}"
     
     pelanggan.foto_profil = relative_url
-    target_db.commit()
+    db.commit()
     db.refresh(pelanggan)
     
     return {
@@ -600,7 +600,7 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_db)):
             pass
             
     pelanggan.foto_profil = None
-    target_db.commit()
+    db.commit()
     
     return {
         "ok": True,
@@ -617,8 +617,44 @@ def portal_get_connected_devices(request: Request, db: Session = Depends(get_db)
         return JSONResponse(status_code=401, content={"ok": False, "message": "Belum login"})
     
     id_pel = cust.get("id_pelanggan")
+    target_db = db
+
+    # Tenant database fallback jika pelanggan berada di cabang database lain
+    from app.db.models import Pelanggan
+    pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    if not pel and id_pel:
+        from app.core.tenant_database import TenantDatabaseManager
+        from app.core.security import get_all_kantor_codes
+        c_kantor = cust.get("kantor")
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pel = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if pel:
+                    target_db = t_db
+            except Exception:
+                pass
+        if not pel:
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    pel = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if pel:
+                        target_db = k_db
+                        break
+                except Exception:
+                    continue
+
     from app.services.connected_device_service import ConnectedDeviceService
-    devices = ConnectedDeviceService.get_connected_devices(db=db, id_pelanggan=id_pel)
+    try:
+        devices = ConnectedDeviceService.get_connected_devices(db=target_db, id_pelanggan=id_pel)
+    finally:
+        if target_db is not db:
+            try:
+                target_db.close()
+            except Exception:
+                pass
+
     return {
         "ok": True,
         "id_pelanggan": id_pel,
@@ -636,8 +672,44 @@ def portal_scan_connected_devices(request: Request, db: Session = Depends(get_db
         return JSONResponse(status_code=401, content={"ok": False, "message": "Belum login"})
     
     id_pel = cust.get("id_pelanggan")
+    target_db = db
+
+    # Tenant database fallback jika pelanggan berada di cabang database lain
+    from app.db.models import Pelanggan
+    pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    if not pel and id_pel:
+        from app.core.tenant_database import TenantDatabaseManager
+        from app.core.security import get_all_kantor_codes
+        c_kantor = cust.get("kantor")
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pel = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if pel:
+                    target_db = t_db
+            except Exception:
+                pass
+        if not pel:
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    pel = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if pel:
+                        target_db = k_db
+                        break
+                except Exception:
+                    continue
+
     from app.services.connected_device_service import ConnectedDeviceService
-    res = ConnectedDeviceService.scan_and_sync_ont_devices(db=db, id_pelanggan=id_pel)
+    try:
+        res = ConnectedDeviceService.scan_and_sync_ont_devices(db=target_db, id_pelanggan=id_pel)
+    finally:
+        if target_db is not db:
+            try:
+                target_db.close()
+            except Exception:
+                pass
+
     return {
         "ok": res.get("success", False),
         "message": res.get("message", ""),
