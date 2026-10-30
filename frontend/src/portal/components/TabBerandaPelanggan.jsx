@@ -20,7 +20,9 @@ import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
 import { Users } from 'lucide-react';
 import { ModalPerangkatTerhubung } from './ModalPerangkatTerhubung';
-import { PortalWifiService } from '../services/portalApi';
+import { ModalSpeedTestOokla } from './ModalSpeedTestOokla';
+import { Gauge, Play } from 'lucide-react';
+import { PortalDashboardService, PortalWifiService } from '../services/portalApi';
 
 export function TabBerandaPelanggan({ data, onNavigate }) {
   const signal = data?.signal || {
@@ -88,6 +90,33 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
   const [loadingDevices, setLoadingDevices] = useState(false);
   const [scanningDevices, setScanningDevices] = useState(false);
   const [lastDeviceUpdate, setLastDeviceUpdate] = useState('');
+  const [showSpeedTestModal, setShowSpeedTestModal] = useState(false);
+  const [liveSignal, setLiveSignal] = useState(null);
+  const [lastSpeedTestData, setLastSpeedTestData] = useState(customer?.last_speed_test || null);
+
+  useEffect(() => {
+    if (customer?.last_speed_test) {
+      setLastSpeedTestData(customer.last_speed_test);
+    }
+  }, [customer?.last_speed_test]);
+
+  const targetSpeedMbps = (() => {
+    const raw = String(customer.paket || '');
+    const m = raw.match(/(\d+)\s*(?:mbps|m)/i);
+    return m ? parseInt(m[1], 10) : 10;
+  })();
+
+  const handleOpenSpeedTestModal = () => {
+    setShowSpeedTestModal(true);
+  };
+
+  const handleProbeSignalLive = () => {
+    PortalDashboardService.liveProbeSignal().then((res) => {
+      if (res && res.ok && res.data?.signal) {
+        setLiveSignal(res.data.signal);
+      }
+    }).catch(() => {});
+  };
 
   const fetchConnectedDevices = async () => {
     setLoadingDevices(true);
@@ -141,186 +170,207 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
         <div className="pb-6 space-y-4">
 
-          {/* ═══ KARTU UTAMA: STATUS SINYAL & KONDISI PERANGKAT ═══ */}
-          <section className="mx-4 bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 overflow-hidden">
-            {/* Header Kondisi Perangkat */}
-            <div
-              className="relative p-4 pr-32 min-h-[96px]"
-              style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)' }}
-            >
-              {/* Radial Glow Halus */}
-              <div
-                className="absolute top-0 right-0 w-32 h-32 pointer-events-none rounded-full"
-                style={{
-                  background: 'radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, transparent 70%)'
-                }}
-              />
-
-              {/* Maskot Kanan Atas */}
-              <div
-                className="absolute top-2 right-2 w-24 h-20 pointer-events-none z-10 inline-flex items-center justify-center leading-none"
-                style={{ lineHeight: 0 }}
-              >
-                <PortalActiveMascot data={data} className="w-24 h-20" />
-              </div>
-
-              {/* Teks Kiri */}
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-100 text-blue-700 shrink-0">
-                  <Activity className="w-4 h-4 stroke-[2.2]" />
+          {/* ═══ KARTU UTAMA: KONDISI PERANGKAT & SPEED TEST JARINGAN ═══ */}
+          <section className="mx-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Header: Maskot di KIRI Judul Kondisi Perangkat & Tombol Speed Test di KANAN */}
+            <div className="p-3.5 sm:p-4 bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white flex items-center justify-between gap-3 border-b border-gray-100">
+              {/* Sisi Kiri: Maskot + Judul */}
+              <div className="flex items-center gap-3 min-w-0">
+                {/* Maskot di sebelah kiri teks judul */}
+                <div className="shrink-0 pointer-events-none select-none">
+                  <PortalActiveMascot data={data} className="w-14 h-12 drop-shadow-xs" />
                 </div>
-                <h2 className="text-sm font-bold text-gray-900 leading-tight">
-                  Kondisi Perangkat
-                </h2>
+                <div>
+                  <h2 className="text-sm font-bold text-gray-900 leading-tight">
+                    Kondisi Perangkat
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-medium leading-none mt-1">
+                    Status fisik &amp; performa jaringan
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-gray-600 mt-2 font-medium">
-                Pembacaan real-time dari modem pelanggan
-              </p>
+
+              {/* Sisi Kanan: Tombol Mulai Speed Test Jelas */}
+              <button
+                type="button"
+                onClick={handleOpenSpeedTestModal}
+                title="Uji kecepatan internet riil (Speed Test)"
+                className="group flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-[0.98] transition cursor-pointer shrink-0"
+              >
+                <Gauge className="w-4 h-4 transition-transform group-hover:rotate-12" />
+                <span className="text-xs font-bold">Uji Speed</span>
+              </button>
             </div>
 
-            {/* 3 Metrik Baris Data Terpadu */}
-            <dl className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100 bg-white m-0 p-0">
+            {/* 3 Metrik Baris Data Sejajar (Daya Terima | Suhu | Hasil Speed Test) */}
+            <div className="grid grid-cols-3 divide-x divide-gray-100 py-3.5 px-2 bg-white">
               {/* 1. Daya Terima (dBm) */}
-              <div className="px-2.5 py-3.5 text-center">
-                <dt className="flex items-center justify-center gap-1 mb-1">
-                  <Signal className="w-3.5 h-3.5 text-gray-500" />
-                  <span className="text-[11px] text-gray-700 font-semibold">Daya Terima</span>
-                </dt>
-                <dd className="m-0">
-                  <span className="text-base font-black font-mono text-gray-900">
-                    {rxPowerValue}
-                  </span>
-                  <span className="text-[11px] text-gray-600 font-mono ml-0.5 font-medium">dBm</span>
-                </dd>
+              <div className="px-2 text-center flex flex-col items-center justify-center">
+                <div className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-tight mb-1">
+                  <Signal className="w-3 h-3 text-emerald-600" />
+                  <span>Daya Terima</span>
+                </div>
+                <div className="text-sm sm:text-base font-black font-mono text-gray-900 leading-none">
+                  {rxPowerValue}
+                </div>
+                <span className="text-[10px] text-gray-400 font-mono mt-0.5">dBm</span>
               </div>
 
               {/* 2. Suhu ONT (°C) */}
-              <div className="px-2.5 py-3.5 text-center">
-                <dt className="flex items-center justify-center gap-1 mb-1">
-                  <Thermometer className="w-3.5 h-3.5 text-gray-500" />
-                  <span className="text-[11px] text-gray-700 font-semibold">Suhu ONT</span>
-                </dt>
-                <dd className="m-0">
-                  <span className="text-base font-black font-mono text-gray-900">
-                    {suhuOntValue}
-                  </span>
-                  <span className="text-[11px] text-gray-600 font-mono ml-0.5 font-medium">°C</span>
-                </dd>
+              <div className="px-2 text-center flex flex-col items-center justify-center">
+                <div className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-tight mb-1">
+                  <Thermometer className="w-3 h-3 text-orange-500" />
+                  <span>Suhu ONT</span>
+                </div>
+                <div className="text-sm sm:text-base font-black font-mono text-gray-900 leading-none">
+                  {suhuOntValue}
+                </div>
+                <span className="text-[10px] text-gray-400 font-mono mt-0.5">°C</span>
               </div>
 
-              {/* 3. Latensi (ms) */}
-              <div className="px-2.5 py-3.5 text-center">
-                <dt className="flex items-center justify-center gap-1 mb-1">
-                  <Timer className="w-3.5 h-3.5 text-gray-500" />
-                  <span className="text-[11px] text-gray-700 font-semibold">Latensi</span>
-                </dt>
-                <dd className="m-0">
-                  <span className="text-base font-black font-mono text-gray-900">
-                    {latencyValue}
-                  </span>
-                  <span className="text-[11px] text-gray-600 font-mono ml-0.5 font-medium">ms</span>
-                </dd>
+              {/* 3. Hasil Speed Test Terakhir */}
+              <div className="px-2 text-center flex flex-col items-center justify-center py-0.5">
+                <div className="flex items-center gap-1 text-[10px] font-bold text-blue-600 uppercase tracking-tight mb-1 group-hover:text-blue-700">
+                  <Gauge className="w-3 h-3 text-blue-600" />
+                  <span>Speed Test</span>
+                </div>
+                {lastSpeedTestData && lastSpeedTestData.download !== null ? (
+                  <>
+                    <div className="text-xs sm:text-sm font-black font-mono text-blue-700 leading-none">
+                      ↓{Number(lastSpeedTestData.download).toFixed(1)} <span className="text-[10px] font-bold text-cyan-600">↑{Number(lastSpeedTestData.upload).toFixed(1)}</span>
+                    </div>
+                    <span className="text-[10px] text-gray-400 font-mono mt-0.5">
+                      {lastSpeedTestData.ping ? `${lastSpeedTestData.ping}ms` : 'Mbps'}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-xs font-bold text-gray-400 leading-none">
+                      Belum diuji
+                    </div>
+                    <span className="text-[10px] text-blue-600 font-semibold group-hover:underline mt-0.5">
+                      Tes Sekarang
+                    </span>
+                  </>
+                )}
               </div>
-            </dl>
+            </div>
           </section>
 
-          {/* ═══ MENU LAYANAN (Akses Cepat Termasuk Pembayaran) ═══ */}
+          {/* ═══ MENU LAYANAN (BARIS 1: 5 MENU, BARIS 2: AKUN SAYA KONSISTEN) ═══ */}
           <section className="px-4">
-            <div className="flex items-center justify-between mb-2.5 px-1">
+            <div className="flex items-center justify-between mb-2 px-1">
               <h2 className="text-sm font-bold text-gray-900">Menu Layanan</h2>
-              <span className="text-xs text-gray-600 font-medium">Akses Cepat</span>
+              <span className="text-xs text-gray-500 font-medium">Akses Cepat</span>
             </div>
 
-            <div className="grid grid-cols-6 gap-1 sm:gap-1.5">
-              {/* 1. Tombol Perangkat Terhubung (Cek Pengguna WiFi) */}
-              <button
-                type="button"
-                onClick={openDevicesModal}
-                className="rounded-xl p-2 sm:p-2.5 flex flex-col items-center gap-1.5 transition active:scale-[0.97] border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/70 hover:border-blue-300"
-              >
-                <div
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shadow-xs"
-                  style={{ background: '#2563eb' }}
+            <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-xs space-y-2">
+              {/* Baris 1: 5 Kolom Menu */}
+              <div className="grid grid-cols-5 gap-1 sm:gap-2">
+                {/* 1. Perangkat */}
+                <button
+                  type="button"
+                  onClick={openDevicesModal}
+                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
                 >
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-bold text-gray-800 leading-none">Perangkat</span>
-              </button>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
+                    style={{ background: '#2563eb' }}
+                  >
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
+                    Perangkat
+                  </span>
+                </button>
 
-              {/* 2. Tombol WiFi */}
-              <button
-                type="button"
-                onClick={() => onNavigate('wifi')}
-                className="rounded-xl p-2 sm:p-2.5 flex flex-col items-center gap-1.5 transition active:scale-[0.97] border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/70 hover:border-blue-300"
-              >
-                <div
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shadow-xs"
-                  style={{ background: '#2563eb' }}
+                {/* 2. WiFi */}
+                <button
+                  type="button"
+                  onClick={() => onNavigate('wifi')}
+                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
                 >
-                  <Wifi className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-bold text-gray-800 leading-none">WiFi</span>
-              </button>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
+                    style={{ background: '#2563eb' }}
+                  >
+                    <Wifi className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
+                    WiFi
+                  </span>
+                </button>
 
-              {/* 2. Tombol Kendala */}
-              <button
-                type="button"
-                onClick={() => onNavigate('kendala')}
-                className="rounded-xl p-2 sm:p-2.5 flex flex-col items-center gap-1.5 transition active:scale-[0.97] border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/70 hover:border-blue-300"
-              >
-                <div
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shadow-xs"
-                  style={{ background: '#2563eb' }}
+                {/* 3. Kendala */}
+                <button
+                  type="button"
+                  onClick={() => onNavigate('kendala')}
+                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
                 >
-                  <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-bold text-gray-800 leading-none">Kendala</span>
-              </button>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
+                    style={{ background: '#2563eb' }}
+                  >
+                    <AlertTriangle className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
+                    Kendala
+                  </span>
+                </button>
 
-              {/* 3. Tombol Kuota */}
-              <button
-                type="button"
-                onClick={() => onNavigate('kuota')}
-                className="rounded-xl p-2 sm:p-2.5 flex flex-col items-center gap-1.5 transition active:scale-[0.97] border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/70 hover:border-blue-300"
-              >
-                <div
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shadow-xs"
-                  style={{ background: '#2563eb' }}
+                {/* 4. Kuota */}
+                <button
+                  type="button"
+                  onClick={() => onNavigate('kuota')}
+                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
                 >
-                  <PieChart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-bold text-gray-800 leading-none">Kuota</span>
-              </button>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
+                    style={{ background: '#2563eb' }}
+                  >
+                    <PieChart className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
+                    Kuota
+                  </span>
+                </button>
 
-              {/* 4. Tombol Pembayaran (Segera Hadir) */}
-              <button
-                type="button"
-                onClick={() => onNavigate('pembayaran')}
-                className="rounded-xl p-2 sm:p-2.5 flex flex-col items-center gap-1.5 transition active:scale-[0.97] border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/70 hover:border-blue-300"
-              >
-                <div
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shadow-xs"
-                  style={{ background: '#2563eb' }}
+                {/* 5. Bayar */}
+                <button
+                  type="button"
+                  onClick={() => onNavigate('pembayaran')}
+                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
                 >
-                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-bold text-gray-800 leading-none">Bayar</span>
-              </button>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
+                    style={{ background: '#2563eb' }}
+                  >
+                    <CreditCard className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
+                    Bayar
+                  </span>
+                </button>
+              </div>
 
-              {/* 5. Tombol Akun */}
-              <button
-                type="button"
-                onClick={() => onNavigate('profil')}
-                className="rounded-xl p-2 sm:p-2.5 flex flex-col items-center gap-1.5 transition active:scale-[0.97] border border-blue-100 bg-gradient-to-br from-blue-50 to-blue-100/70 hover:border-blue-300"
-              >
-                <div
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shadow-xs"
-                  style={{ background: '#2563eb' }}
+              {/* Baris 2: Akun Saya (Sejajar di Kolom 1 Pojok Kiri Persis Bawah Perangkat) */}
+              <div className="grid grid-cols-5 gap-1 sm:gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => onNavigate('profil')}
+                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
                 >
-                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <span className="text-[11px] font-bold text-gray-800 leading-none">Akun</span>
-              </button>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
+                    style={{ background: '#2563eb' }}
+                  >
+                    <ShieldCheck className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
+                    Akun
+                  </span>
+                </button>
+              </div>
             </div>
           </section>
 
@@ -398,25 +448,7 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
             </div>
           </section>
 
-          {/* ═══ BANNER PANDUAN PENEMPATAN MODEM ═══ */}
-          <div className="px-4">
-            <div
-              className="rounded-2xl relative"
-              style={{ background: '#2563eb' }}
-            >
-              <div className="p-4 flex items-start gap-3 text-white">
-                <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/25 flex items-center justify-center shrink-0">
-                  <Info className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold mb-1 text-white">Panduan Penempatan Modem ONT</div>
-                  <p className="text-xs text-white/95 leading-relaxed font-normal">
-                    Letakkan modem ONT di ruang terbuka yang tinggi, hindari menaruh di dalam lemari atau di balik dinding tebal agar sinyal WiFi menyebar merata ke seluruh ruangan.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+
 
         </div>
       </main>
@@ -429,6 +461,21 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
         scanning={scanningDevices}
         onRefresh={handleScanDevices}
         lastUpdated={lastDeviceUpdate}
+      />
+
+      {/* ═══ MODAL / POP-UP HALAMAN SPEED TEST OOKLA STYLE ═══ */}
+      <ModalSpeedTestOokla
+        isOpen={showSpeedTestModal}
+        onClose={() => setShowSpeedTestModal(false)}
+        targetSpeed={targetSpeedMbps}
+        latencyValue={latencyValue !== '-' ? latencyValue : null}
+        customer={customer}
+        onProbeSignal={handleProbeSignalLive}
+        onTestComplete={(result) => {
+          if (result) {
+            setLastSpeedTestData(result);
+          }
+        }}
       />
     </div>
   );

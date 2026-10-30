@@ -9,14 +9,17 @@ import {
   RefreshCw,
   Server,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  ShieldCheck
 } from 'lucide-react';
+import { PortalActiveMascot } from './PortalActiveMascot';
 
 export function ModalSpeedTestOokla({
   isOpen,
   onClose,
   targetSpeed = 10,
   latencyValue = null,
+  customer = null,
   onProbeSignal = null,
   onTestComplete = null
 }) {
@@ -30,6 +33,8 @@ export function ModalSpeedTestOokla({
   const [jitterMs, setJitterMs] = useState(null);
   const [progressPercent, setProgressPercent] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
+  const [checkingWifi, setCheckingWifi] = useState(false);
+  const isConnectedToHomeWifi = customer?.is_connected_to_home_wifi === true;
 
   const abortControllerRef = useRef(null);
   const isMountedRef = useRef(true);
@@ -361,7 +366,20 @@ export function ModalSpeedTestOokla({
   // ════════════════════════════════════════════════════════════════════════
   // 4. MAIN ORCHESTRATOR
   // ════════════════════════════════════════════════════════════════════════
+  const handleRecheckConnection = async () => {
+    setCheckingWifi(true);
+    try {
+      if (onProbeSignal) {
+        await onProbeSignal();
+      }
+    } catch (_) {}
+    finally {
+      setCheckingWifi(false);
+    }
+  };
+
   const runRealSpeedTest = async () => {
+    if (!isConnectedToHomeWifi) return;
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -506,10 +524,10 @@ export function ModalSpeedTestOokla({
             </div>
             <div>
               <span className="text-sm font-bold tracking-tight text-white block leading-tight">
-                Speed Test Jaringan
+                Uji Kecepatan Modem ONT
               </span>
               <span className="text-xs text-blue-100 leading-none">
-                LibreSpeed Engine
+                {customer?.nama ? `Pelanggan: ${customer.nama}` : 'Jaringan Router Pelanggan'}
               </span>
             </div>
           </div>
@@ -574,6 +592,13 @@ export function ModalSpeedTestOokla({
             <span>Paket:</span>
             <span className="font-bold text-slate-800">
               {targetSpeed}M
+            </span>
+          </div>
+          <div className="w-px h-3 bg-slate-200" />
+          <div className="flex items-center gap-1 text-slate-600" title="IP Modem ONT Pelanggan">
+            <span>IP:</span>
+            <span className="font-bold text-blue-700">
+              {customer?.ip_router || '10.x.x.x'}
             </span>
           </div>
         </div>
@@ -682,14 +707,55 @@ export function ModalSpeedTestOokla({
           )}
         </div>
 
+        {/* ═══ OVERLAY MASKOT: JIKA TIDAK BERADA DALAM KONEKSI MODEM/ROUTER ═══ */}
+        {!isConnectedToHomeWifi && (
+          <div className="absolute inset-0 z-30 backdrop-blur-md bg-white/95 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+            <div className="w-28 h-24 mb-1 drop-shadow-md">
+              <PortalActiveMascot
+                mascotKey="security"
+                className="w-full h-full"
+              />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-black uppercase tracking-wider mb-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+              <span>Proteksi Jaringan Modem</span>
+            </div>
+            <h4 className="text-sm font-black text-gray-900 mb-1.5 leading-snug">
+              Anda Belum Tersambung ke Modem WiFi
+            </h4>
+            <p className="text-xs text-gray-600 max-w-xs leading-relaxed mb-4 font-normal">
+              Pengujian speed test ini khusus mengukur bandwidth riil modem router Anda. Pastikan HP atau laptop Anda sudah terhubung ke WiFi rumah ini terlebih dahulu.
+            </p>
+            <div className="flex items-center gap-2 w-full max-w-xs">
+              <button
+                type="button"
+                onClick={handleRecheckConnection}
+                disabled={checkingWifi}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white font-bold text-xs shadow-md active:scale-95 transition cursor-pointer disabled:opacity-50"
+                style={{ background: '#2563eb' }}
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${checkingWifi ? 'animate-spin' : ''}`} />
+                <span>Cek Ulang Sambungan</span>
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-3 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs transition active:scale-95 cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ═══ FOOTER KONTROL: STATUS & TOMBOL ═══ */}
         <div className="px-3.5 pb-3.5 pt-2 flex flex-col items-center gap-2 bg-white border-t border-gray-100 shrink-0">
           {/* Status Singkat */}
           <div className="text-[11px] text-gray-500 font-medium text-center min-h-[16px] flex items-center justify-center gap-1">
             {testPhase === 'idle' && (
-              <span className="flex items-center gap-1 text-gray-500 text-[10px]">
+              <span className="flex items-center gap-1 text-gray-600 text-[10px]">
                 <Server className="w-3 h-3 text-blue-600" />
-                Server ISP Lokal &bull; Siap diuji
+                Menguji koneksi modem {customer?.ip_router ? `(${customer.ip_router})` : ''} ke gateway ISP
               </span>
             )}
             {testPhase === 'ping' && 'Mengukur latensi ping & jitter...'}

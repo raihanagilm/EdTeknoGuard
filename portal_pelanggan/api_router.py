@@ -176,6 +176,17 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
     last_log = data.get("last_log")
     kuota = data.get("kuota")
     
+    # Deteksi apakah klien sedang terhubung langsung ke modem ONT pelanggan
+    client_ip = request.headers.get("x-forwarded-for")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else ""
+    ip_target = (pel.ip_router or pel.ip_ont or "").strip() if pel else ""
+    is_home_wifi = False
+    if ip_target and client_ip and client_ip == ip_target:
+        is_home_wifi = True
+    
     # Status pembayaran riil dari DB: jika status_isolir == True maka BELUM_BAYAR (terisolir), jika False maka LUNAS
     status_bayar = "BELUM_BAYAR" if (pel and getattr(pel, "status_isolir", False)) else "LUNAS"
     harga_paket = float(pel.paket_ref.harga) if (pel and pel.paket_ref and pel.paket_ref.harga is not None) else None
@@ -206,6 +217,7 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
             "periode_tagihan": periode_teks,
             "status_verifikasi": pel.status_verifikasi if (pel and pel.status_verifikasi) else cust.get("status_verifikasi", ""),
             "foto_profil": pel.foto_profil if (pel and pel.foto_profil) else "",
+            "is_connected_to_home_wifi": is_home_wifi,
             "last_speed_test": {
                 "download": float(pel.last_speed_download) if (pel and pel.last_speed_download is not None) else None,
                 "upload": float(pel.last_speed_upload) if (pel and pel.last_speed_upload is not None) else None,
