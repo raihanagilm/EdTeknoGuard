@@ -1,5 +1,7 @@
-/* Mascot: atur-kabel */
-.mascot-svg {
+/* Mascot: atur-kabel (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-atur-kabel .mascot-svg,
+.mascot-container-atur-kabel .mascot-svg,
+.mascot-atur-kabel .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,129 +11,131 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-atur-kabel .rig-torso, .mascot-container-atur-kabel .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-atur-kabel .rig-leg-l, .mascot-container-atur-kabel .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-atur-kabel .rig-leg-r, .mascot-container-atur-kabel .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-atur-kabel .rig-antenna-l, .mascot-container-atur-kabel .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-atur-kabel .rig-antenna-r, .mascot-container-atur-kabel .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-atur-kabel .rig-brows, .mascot-container-atur-kabel .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-atur-kabel .rig-eyes, .mascot-container-atur-kabel .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-atur-kabel .rig-glasses, .mascot-container-atur-kabel .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-atur-kabel .rig-mouth, .mascot-container-atur-kabel .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-atur-kabel .rig-arm-l, .mascot-container-atur-kabel .rig-arm-l {
       transform-box: view-box;
       transform-origin: 38px 100px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-atur-kabel .rig-arm-r, .mascot-container-atur-kabel .rig-arm-r {
       transform-box: view-box;
       transform-origin: 201px 102px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-atur-kabel .rig-prop, .mascot-container-atur-kabel .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-atur-kabel_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-atur-kabel .led-1, .mascot-container-atur-kabel .led-1 { animation: mascot-atur-kabel_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-atur-kabel .led-2, .mascot-container-atur-kabel .led-2 { animation: mascot-atur-kabel_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-atur-kabel .led-3, .mascot-container-atur-kabel .led-3 { animation: mascot-atur-kabel_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-atur-kabel_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-atur-kabel_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-atur-kabel_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-atur-kabel_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-atur-kabel_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         35% { transform: translateY(-4px) rotate(-2deg); }
         70% { transform: translateY(-5px) rotate(2deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-atur-kabel_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-7deg) translateY(-2px); }
         70% { transform: rotate(6deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-atur-kabel_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-5deg); }
         70% { transform: rotate(7deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-atur-kabel_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-9deg); }
         70% { transform: rotate(6deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-atur-kabel_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-6deg); }
         70% { transform: rotate(9deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-atur-kabel_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         30% { transform: translate(-3px, 2px) scaleY(1); }
         48% { transform: translate(0px, 1px) scaleY(0.1); }
         75% { transform: translate(3px, -1px) scaleY(1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-atur-kabel_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         35% { transform: scale(1.18, 1.3); }
         70% { transform: scale(0.92, 0.9); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-atur-kabel_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(-18deg); }
         60% { transform: rotate(10deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-atur-kabel_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         40% { transform: rotate(10deg); }
         80% { transform: rotate(-6deg); }
       }
+    
+  

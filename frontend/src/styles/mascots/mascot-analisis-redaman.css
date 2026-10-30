@@ -1,5 +1,7 @@
-/* Mascot: analisis-redaman */
-.mascot-svg {
+/* Mascot: analisis-redaman (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-analisis-redaman .mascot-svg,
+.mascot-container-analisis-redaman .mascot-svg,
+.mascot-analisis-redaman .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,131 +11,133 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-analisis-redaman .rig-torso, .mascot-container-analisis-redaman .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-analisis-redaman .rig-leg-l, .mascot-container-analisis-redaman .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-analisis-redaman .rig-leg-r, .mascot-container-analisis-redaman .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-analisis-redaman .rig-antenna-l, .mascot-container-analisis-redaman .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-analisis-redaman .rig-antenna-r, .mascot-container-analisis-redaman .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-analisis-redaman .rig-brows, .mascot-container-analisis-redaman .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-analisis-redaman .rig-eyes, .mascot-container-analisis-redaman .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-analisis-redaman .rig-glasses, .mascot-container-analisis-redaman .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-analisis-redaman .rig-mouth, .mascot-container-analisis-redaman .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-analisis-redaman .rig-arm-l, .mascot-container-analisis-redaman .rig-arm-l {
       transform-box: view-box;
       transform-origin: 47px 94px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-analisis-redaman .rig-arm-r, .mascot-container-analisis-redaman .rig-arm-r {
       transform-box: view-box;
       transform-origin: 188px 94px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-analisis-redaman .rig-prop, .mascot-container-analisis-redaman .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-analisis-redaman_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-analisis-redaman .led-1, .mascot-container-analisis-redaman .led-1 { animation: mascot-analisis-redaman_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-analisis-redaman .led-2, .mascot-container-analisis-redaman .led-2 { animation: mascot-analisis-redaman_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-analisis-redaman .led-3, .mascot-container-analisis-redaman .led-3 { animation: mascot-analisis-redaman_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-analisis-redaman_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #10B981; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-analisis-redaman_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-analisis-redaman_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-analisis-redaman_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-analisis-redaman_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         40% { transform: translateY(-6px) rotate(1.5deg); }
         75% { transform: translateY(-2px) rotate(-1deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-analisis-redaman_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         40% { transform: rotate(7deg) translateY(-2px); }
         75% { transform: rotate(-5deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-analisis-redaman_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         40% { transform: rotate(5deg); }
         75% { transform: rotate(-7deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-analisis-redaman_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-7deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-analisis-redaman_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(9deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-analisis-redaman_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         30% { transform: translate(3px, -2px) scaleY(1); }
         48% { transform: translate(2px, -1px) scaleY(0.1); }
         75% { transform: translate(0px, 0px) scaleY(1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-analisis-redaman_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         25% { transform: scale(1.15, 1.35); }
         50% { transform: scale(0.95, 0.9); }
         75% { transform: scale(1.12, 1.25); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-analisis-redaman_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-14deg); }
         70% { transform: rotate(6deg); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-analisis-redaman_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(10deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-analisis-redaman_propAnim {
         0%, 100% { transform: translateY(0px) scale(1); }
         50% { transform: translateY(-5px) scale(1.04); }
       }
+    
+  

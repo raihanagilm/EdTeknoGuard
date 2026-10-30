@@ -1,5 +1,7 @@
-/* Mascot: terkejut */
-.mascot-svg {
+/* Mascot: terkejut (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-terkejut .mascot-svg,
+.mascot-container-terkejut .mascot-svg,
+.mascot-terkejut .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,132 +11,134 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-terkejut .rig-torso, .mascot-container-terkejut .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-terkejut .rig-leg-l, .mascot-container-terkejut .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-terkejut .rig-leg-r, .mascot-container-terkejut .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-terkejut .rig-antenna-l, .mascot-container-terkejut .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-terkejut .rig-antenna-r, .mascot-container-terkejut .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-terkejut .rig-brows, .mascot-container-terkejut .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-terkejut .rig-eyes, .mascot-container-terkejut .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-terkejut .rig-glasses, .mascot-container-terkejut .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-terkejut .rig-mouth, .mascot-container-terkejut .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-terkejut .rig-arm-l, .mascot-container-terkejut .rig-arm-l {
       transform-box: view-box;
       transform-origin: 46px 106px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-terkejut .rig-arm-r, .mascot-container-terkejut .rig-arm-r {
       transform-box: view-box;
       transform-origin: 194px 106px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-terkejut .rig-prop, .mascot-container-terkejut .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-terkejut_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-terkejut .led-1, .mascot-container-terkejut .led-1 { animation: mascot-terkejut_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-terkejut .led-2, .mascot-container-terkejut .led-2 { animation: mascot-terkejut_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-terkejut .led-3, .mascot-container-terkejut .led-3 { animation: mascot-terkejut_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-terkejut_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #EF4444; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-terkejut_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-terkejut_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-terkejut_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-terkejut_torsoAnim {
         0%, 100% { transform: translateY(0px) scale(1, 1); }
         30% { transform: translateY(-8px) scale(0.97, 1.03); }
         65% { transform: translateY(-2px) scale(1.01, 0.99); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-terkejut_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(10deg) translateY(-3px); }
         65% { transform: rotate(-4deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-terkejut_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(-10deg) translateY(-3px); }
         65% { transform: rotate(4deg); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-terkejut_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(-14deg); }
         65% { transform: rotate(4deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-terkejut_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(14deg); }
         65% { transform: rotate(-4deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-terkejut_eyesAnim {
         0%, 50%, 58%, 100% { transform: scale(1); }
         30% { transform: scale(1.1); }
         54% { transform: scale(1, 0.12); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-terkejut_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         30% { transform: scale(1.15, 1.25); }
         65% { transform: scale(0.9, 0.85); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-terkejut_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(14deg); }
         65% { transform: rotate(-4deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-terkejut_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(-14deg); }
         65% { transform: rotate(4deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-terkejut_propAnim {
         0%, 100% { transform: scale(0.9); opacity: 0.6; }
         30% { transform: scale(1.25); opacity: 1; }
       }
+    
+  

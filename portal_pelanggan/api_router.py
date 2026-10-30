@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, Form
+from fastapi import APIRouter, Request, Response, Depends, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -158,7 +158,7 @@ async def portal_auth_lupa_password(request: Request, db: Session = Depends(get_
         )
         
     matched_cust.password_hash = get_password_hash(password_baru)
-    db.commit()
+    target_db.commit()
     
     return {
         "ok": True,
@@ -205,7 +205,14 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
             "status_isolir": bool(getattr(pel, "status_isolir", False)),
             "periode_tagihan": periode_teks,
             "status_verifikasi": pel.status_verifikasi if (pel and pel.status_verifikasi) else cust.get("status_verifikasi", ""),
-            "foto_profil": pel.foto_profil if (pel and pel.foto_profil) else ""
+            "foto_profil": pel.foto_profil if (pel and pel.foto_profil) else "",
+            "last_speed_test": {
+                "download": float(pel.last_speed_download) if (pel and pel.last_speed_download is not None) else None,
+                "upload": float(pel.last_speed_upload) if (pel and pel.last_speed_upload is not None) else None,
+                "ping": pel.last_speed_ping if pel else None,
+                "jitter": pel.last_speed_jitter if pel else None,
+                "tested_at": pel.last_speed_test_at.strftime("%d/%m %H:%M") if (pel and pel.last_speed_test_at) else None
+            }
         },
         "signal": {
             "rx_power": float(last_log.rx_power) if last_log and last_log.rx_power is not None else None,
@@ -410,7 +417,7 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_db)):
         
     pelanggan.nama_wifi = nama_wifi
     pelanggan.password_wifi = password_wifi
-    db.commit()
+    target_db.commit()
     
     return {
         "ok": True,
@@ -440,7 +447,7 @@ async def portal_profil_change_password(request: Request, db: Session = Depends(
         return JSONResponse(status_code=400, content={"ok": False, "message": "Konfirmasi kata sandi tidak cocok!"})
         
     pelanggan.password_hash = get_password_hash(password_baru)
-    db.commit()
+    target_db.commit()
     
     return {
         "ok": True,
@@ -469,7 +476,7 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
     if alamat:
         pelanggan.alamat = alamat
         
-    db.commit()
+    target_db.commit()
     db.refresh(pelanggan)
     
     return {
@@ -546,7 +553,7 @@ async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_
     relative_url = f"/static/uploads/profil/{safe_filename}?v={timestamp}"
     
     pelanggan.foto_profil = relative_url
-    db.commit()
+    target_db.commit()
     db.refresh(pelanggan)
     
     return {
@@ -581,7 +588,7 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_db)):
             pass
             
     pelanggan.foto_profil = None
-    db.commit()
+    target_db.commit()
     
     return {
         "ok": True,
@@ -626,5 +633,233 @@ def portal_scan_connected_devices(request: Request, db: Session = Depends(get_db
         "devices": res.get("devices", [])
     }
 
+@api_router.post("/dashboard/live-probe")
+def portal_live_probe_signal(request: Request, db: Session = Depends(get_db)):
+    """
+    Live on-demand probe langsung ke modem ONT pelanggan saat menekan tombol uji kecepatan / maskot.
+    Mengambil data riil redaman optik (Rx Power dBm), suhu ONT (°C), dan latensi (ms).
+    """
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Belum login"})
+    
+    id_pel = cust.get("id_pelanggan")
+    from app.db.models import Pelanggan, LogPerformaONT, SystemSetting
+    import json
+    from app.services.ont_scraper_service import ONTScraperService
+    from app.core.timezone import get_now_wib
+
+    pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    target_db = db
+
+    # Tenant database fallback jika pelanggan berada di cabang database lain
+    if not pel and id_pel:
+        from app.core.tenant_database import TenantDatabaseManager
+        from app.core.security import get_all_kantor_codes
+        c_kantor = cust.get("kantor")
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pel = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if pel:
+                    target_db = t_db
+            except Exception:
+                pass
+        if not pel:
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    pel = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if pel:
+                        target_db = k_db
+                        break
+                except Exception:
+                    continue
+
+    if not pel:
+        # Graceful response agar tidak memicu 404 pada frontend console
+        return JSONResponse(
+            status_code=200,
+            content={"ok": False, "message": "Data pelanggan tidak ditemukan", "signal": None}
+        )
+
+    if not pel.ip_router:
+        return JSONResponse(
+            status_code=200,
+            content={"ok": False, "message": "IP Router modem belum disetel", "signal": None}
+        )
+
+    # Ambil default modem credentials dari database
+    setting = target_db.query(SystemSetting).filter(SystemSetting.key == "default_modem_credentials").first()
+    default_creds = []
+    if setting and setting.value:
+        try:
+            default_creds = json.loads(setting.value)
+        except Exception:
+            default_creds = []
+
+    scrape_res = ONTScraperService.scrape_ont(
+        ip=pel.ip_router,
+        customer_user=pel.user_admin,
+        customer_pass=pel.pass_admin,
+        default_credentials_list=default_creds,
+        failed_credentials_json=pel.failed_credentials,
+        ont_type=pel.tipe_ont,
+        mode_cek=pel.mode_cek or "HTTP"
+    )
+
+    now = get_now_wib()
+    if scrape_res.get("success"):
+        rx_val = scrape_res.get("rx_power")
+        suhu_val = scrape_res.get("suhu_ont")
+        latency_val = scrape_res.get("latency_ms")
+        status_koneksi = scrape_res.get("status_koneksi", "NORMAL")
+
+        # Catat ke LogPerformaONT agar sinkron time-series
+        log_entry = LogPerformaONT(
+            id_pelanggan=pel.id_pelanggan,
+            ip_router=pel.ip_router,
+            rx_power=rx_val,
+            suhu_ont=suhu_val,
+            latency_ms=latency_val,
+            status_koneksi=status_koneksi,
+            waktu_cek=now
+        )
+        target_db.add(log_entry)
+
+        # Update kredensial valid jika baru ditemukan
+        if scrape_res.get("used_user"):
+            pel.user_admin = scrape_res.get("used_user")
+            pel.pass_admin = scrape_res.get("used_pass")
+            pel.status_kredensial = "VALID"
+        pel.last_probe_at = now
+        target_db.commit()
+
+        return {
+            "ok": True,
+            "signal": {
+                "rx_power": float(rx_val) if rx_val is not None else None,
+                "suhu_ont": float(suhu_val) if suhu_val is not None else None,
+                "latency_ms": latency_val,
+                "status_koneksi": status_koneksi,
+                "waktu_cek": now.strftime("%H:%M:%S") + " WIB"
+            }
+        }
+    else:
+        # Jika modem offline / tidak dapat diakses langsung, ambil data terakhir dari database
+        last_log = target_db.query(LogPerformaONT).filter(
+            LogPerformaONT.id_pelanggan == id_pel
+        ).order_by(LogPerformaONT.waktu_cek.desc()).first()
+
+        return {
+            "ok": True,
+            "message": "Menggunakan data performa tersimpan terkini",
+            "signal": {
+                "rx_power": float(last_log.rx_power) if (last_log and last_log.rx_power is not None) else None,
+                "suhu_ont": float(last_log.suhu_ont) if (last_log and last_log.suhu_ont is not None) else None,
+                "latency_ms": last_log.latency_ms if (last_log and last_log.latency_ms is not None) else None,
+                "status_koneksi": last_log.status_koneksi if last_log else "NORMAL",
+                "waktu_cek": str(last_log.waktu_cek) if last_log and last_log.waktu_cek else "-"
+            }
+        }
 
 
+
+
+
+# ══════════════════════════════════════════════════════════════════
+# SPEED TEST RIIL (LIBRESPEED & OPENSPEEDTEST COMPATIBLE ENDPOINTS)
+# ══════════════════════════════════════════════════════════════════
+import os
+from fastapi.responses import StreamingResponse
+
+def _generate_speedtest_bytes(total_bytes: int):
+    chunk_size = 65536  # 64 KB
+    sent = 0
+    while sent < total_bytes:
+        size = min(chunk_size, total_bytes - sent)
+        yield os.urandom(size)
+        sent += size
+
+@api_router.get("/speedtest/ping")
+def speedtest_ping():
+    """Endpoint Ping RTT super ringan untuk menghitung latensi & jitter riil."""
+    return Response(
+        content="pong",
+        media_type="text/plain",
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"}
+    )
+
+@api_router.get("/speedtest/download")
+def speedtest_download(bytes: int = 15728640):
+    """Endpoint Download mengalirkan bytes acak (incompressible) untuk mengukur throughput riil."""
+    safe_size = max(1048576, min(bytes, 52428800))  # 1MB - 50MB
+    headers = {
+        "Content-Type": "application/octet-stream",
+        "Content-Length": str(safe_size),
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma": "no-cache"
+    }
+    return StreamingResponse(_generate_speedtest_bytes(safe_size), headers=headers)
+
+@api_router.post("/speedtest/upload")
+async def speedtest_upload(request: Request):
+    """Endpoint Upload menerima binary payload dan menghitung throughput upload riil."""
+    total_bytes = 0
+    async for chunk in request.stream():
+        total_bytes += len(chunk)
+    return Response(
+        content=f'{{"ok":true,"received_bytes":{total_bytes}}}',
+        media_type="application/json",
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"}
+    )
+
+
+@api_router.post("/speedtest/save")
+async def speedtest_save_result(request: Request, db: Session = Depends(get_db)):
+    """Simpan hasil speed test pelanggan ke database agar persisten."""
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Unauthorized"})
+
+    id_pelanggan = cust.get("id_pelanggan")
+    pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+    if not pel:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Pelanggan tidak ditemukan"})
+
+    try:
+        body = await request.json()
+        download = body.get("download")
+        upload = body.get("upload")
+        ping = body.get("ping")
+        jitter = body.get("jitter")
+
+        if download is not None:
+            pel.last_speed_download = round(float(download), 2)
+        if upload is not None:
+            pel.last_speed_upload = round(float(upload), 2)
+        if ping is not None:
+            pel.last_speed_ping = int(ping)
+        if jitter is not None:
+            pel.last_speed_jitter = int(jitter)
+
+        from app.core.timezone import get_now_wib
+        pel.last_speed_test_at = get_now_wib()
+
+        db.commit()
+        db.refresh(pel)
+
+        return {
+            "ok": True,
+            "message": "Hasil pengujian berhasil disimpan",
+            "data": {
+                "download": float(pel.last_speed_download) if pel.last_speed_download is not None else None,
+                "upload": float(pel.last_speed_upload) if pel.last_speed_upload is not None else None,
+                "ping": pel.last_speed_ping,
+                "jitter": pel.last_speed_jitter,
+                "tested_at": pel.last_speed_test_at.strftime("%Y-%m-%d %H:%M:%S") if pel.last_speed_test_at else None
+            }
+        }
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500, content={"ok": False, "message": str(e)})

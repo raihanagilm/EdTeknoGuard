@@ -1,5 +1,7 @@
-/* Mascot: menyapa */
-.mascot-svg {
+/* Mascot: menyapa (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-menyapa .mascot-svg,
+.mascot-container-menyapa .mascot-svg,
+.mascot-menyapa .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,133 +11,135 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-menyapa .rig-torso, .mascot-container-menyapa .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-menyapa .rig-leg-l, .mascot-container-menyapa .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-menyapa .rig-leg-r, .mascot-container-menyapa .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-menyapa .rig-antenna-l, .mascot-container-menyapa .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-menyapa .rig-antenna-r, .mascot-container-menyapa .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-menyapa .rig-brows, .mascot-container-menyapa .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-menyapa .rig-eyes, .mascot-container-menyapa .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-menyapa .rig-glasses, .mascot-container-menyapa .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-menyapa .rig-mouth, .mascot-container-menyapa .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-menyapa .rig-arm-l, .mascot-container-menyapa .rig-arm-l {
       transform-box: view-box;
       transform-origin: 38px 100px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-menyapa .rig-arm-r, .mascot-container-menyapa .rig-arm-r {
       transform-box: view-box;
       transform-origin: 200px 95px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-menyapa .rig-prop, .mascot-container-menyapa .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-menyapa_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-menyapa .led-1, .mascot-container-menyapa .led-1 { animation: mascot-menyapa_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-menyapa .led-2, .mascot-container-menyapa .led-2 { animation: mascot-menyapa_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-menyapa .led-3, .mascot-container-menyapa .led-3 { animation: mascot-menyapa_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-menyapa_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-menyapa_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-menyapa_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-menyapa_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-menyapa_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         25% { transform: translateY(-5px) rotate(1.5deg); }
         50% { transform: translateY(-1px) rotate(0deg); }
         75% { transform: translateY(-5px) rotate(-1.2deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-menyapa_legLAnim {
         0%, 100% { transform: rotate(0deg) translateY(0px); }
         25% { transform: rotate(8deg) translateY(-2px); }
         75% { transform: rotate(-6deg) translateY(0px); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-menyapa_legRAnim {
         0%, 100% { transform: rotate(0deg) translateY(0px); }
         25% { transform: rotate(6deg) translateY(0px); }
         75% { transform: rotate(-8deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-menyapa_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(-8deg); }
         65% { transform: rotate(5deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-menyapa_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         30% { transform: rotate(9deg); }
         65% { transform: rotate(-6deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-menyapa_eyesAnim {
         0%, 42%, 50%, 100% { transform: translate(0px, 0px) scaleY(1); }
         20% { transform: translate(2px, -1px) scaleY(1); }
         46% { transform: translate(1px, 0px) scaleY(0.1); }
         75% { transform: translate(-1px, -1px) scaleY(1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-menyapa_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         20% { transform: scale(1.18, 1.35) translateY(1px); }
         40% { transform: scale(0.95, 0.85); }
         65% { transform: scale(1.15, 1.3) translateY(1px); }
         85% { transform: scale(1, 1); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-menyapa_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         20% { transform: rotate(-20deg); }
         40% { transform: rotate(10deg); }
         60% { transform: rotate(-20deg); }
         80% { transform: rotate(6deg); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-menyapa_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(7deg); }
       }
+    
+  

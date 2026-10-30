@@ -1,5 +1,7 @@
-/* Mascot: tersipu */
-.mascot-svg {
+/* Mascot: tersipu (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-tersipu .mascot-svg,
+.mascot-container-tersipu .mascot-svg,
+.mascot-tersipu .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,126 +11,128 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-tersipu .rig-torso, .mascot-container-tersipu .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-tersipu .rig-leg-l, .mascot-container-tersipu .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-tersipu .rig-leg-r, .mascot-container-tersipu .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-tersipu .rig-antenna-l, .mascot-container-tersipu .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-tersipu .rig-antenna-r, .mascot-container-tersipu .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-tersipu .rig-brows, .mascot-container-tersipu .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-tersipu .rig-eyes, .mascot-container-tersipu .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-tersipu .rig-glasses, .mascot-container-tersipu .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-tersipu .rig-mouth, .mascot-container-tersipu .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-tersipu .rig-arm-l, .mascot-container-tersipu .rig-arm-l {
       transform-box: view-box;
       transform-origin: 50px 96px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-tersipu .rig-arm-r, .mascot-container-tersipu .rig-arm-r {
       transform-box: view-box;
       transform-origin: 190px 96px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-tersipu .rig-prop, .mascot-container-tersipu .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-tersipu_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-tersipu .led-1, .mascot-container-tersipu .led-1 { animation: mascot-tersipu_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-tersipu .led-2, .mascot-container-tersipu .led-2 { animation: mascot-tersipu_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-tersipu .led-3, .mascot-container-tersipu .led-3 { animation: mascot-tersipu_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-tersipu_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-tersipu_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-tersipu_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-tersipu_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-tersipu_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         33% { transform: translateY(2px) rotate(2.5deg); }
         66% { transform: translateY(2px) rotate(-2.5deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-tersipu_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(-7deg); }
         66% { transform: rotate(5deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-tersipu_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(-5deg); }
         66% { transform: rotate(7deg); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-tersipu_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(-10deg); }
         66% { transform: rotate(4deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-tersipu_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(-4deg); }
         66% { transform: rotate(10deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-tersipu_eyesAnim {
         0%, 42%, 50%, 100% { transform: translate(0px, 0px) scaleY(1); }
         25% { transform: translate(-2px, 2px) scaleY(1); }
         46% { transform: translate(0px, 2px) scaleY(0.1); }
         75% { transform: translate(2px, 2px) scaleY(1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-tersipu_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         50% { transform: scale(1.18, 1.2) translateY(-1px); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-tersipu_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-7deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-tersipu_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(7deg); }
       }
+    
+  

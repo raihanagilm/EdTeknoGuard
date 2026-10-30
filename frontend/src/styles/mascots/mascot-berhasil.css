@@ -1,5 +1,7 @@
-/* Mascot: berhasil */
-.mascot-svg {
+/* Mascot: berhasil (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-berhasil .mascot-svg,
+.mascot-container-berhasil .mascot-svg,
+.mascot-berhasil .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,132 +11,134 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-berhasil .rig-torso, .mascot-container-berhasil .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-berhasil .rig-leg-l, .mascot-container-berhasil .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-berhasil .rig-leg-r, .mascot-container-berhasil .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-berhasil .rig-antenna-l, .mascot-container-berhasil .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-berhasil .rig-antenna-r, .mascot-container-berhasil .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-berhasil .rig-brows, .mascot-container-berhasil .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-berhasil .rig-eyes, .mascot-container-berhasil .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-berhasil .rig-glasses, .mascot-container-berhasil .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-berhasil .rig-mouth, .mascot-container-berhasil .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-berhasil .rig-arm-l, .mascot-container-berhasil .rig-arm-l {
       transform-box: view-box;
       transform-origin: 38px 100px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-berhasil .rig-arm-r, .mascot-container-berhasil .rig-arm-r {
       transform-box: view-box;
       transform-origin: 201px 102px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-berhasil .rig-prop, .mascot-container-berhasil .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berhasil_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-berhasil .led-1, .mascot-container-berhasil .led-1 { animation: mascot-berhasil_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-berhasil .led-2, .mascot-container-berhasil .led-2 { animation: mascot-berhasil_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-berhasil .led-3, .mascot-container-berhasil .led-3 { animation: mascot-berhasil_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-berhasil_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-berhasil_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-berhasil_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-berhasil_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-berhasil_torsoAnim {
         0%, 100% { transform: translateY(0px) scale(1, 1); }
         35% { transform: translateY(-8px) scale(0.98, 1.02); }
         70% { transform: translateY(-2px) scale(1.01, 0.99); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-berhasil_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(9deg) translateY(-3px); }
         70% { transform: rotate(-6deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-berhasil_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-9deg) translateY(-3px); }
         70% { transform: rotate(6deg); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-berhasil_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-11deg); }
         70% { transform: rotate(5deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-berhasil_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(11deg); }
         70% { transform: rotate(-5deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-berhasil_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         35% { transform: translate(0px, -2px) scaleY(1.05); }
         48% { transform: translate(0px, 0px) scaleY(0.1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-berhasil_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         35% { transform: scale(1.18, 1.25); }
         70% { transform: scale(0.95, 0.92); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-berhasil_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-18deg); }
         70% { transform: rotate(8deg); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-berhasil_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(14deg); }
         70% { transform: rotate(-5deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-berhasil_propAnim {
         0%, 100% { transform: translateY(0px) scale(1); }
         35% { transform: translateY(-6px) scale(1.12); }
       }
+    
+  

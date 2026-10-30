@@ -1,5 +1,7 @@
-/* Mascot: siaga-24jam */
-.mascot-svg {
+/* Mascot: siaga-24jam (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-siaga-24jam .mascot-svg,
+.mascot-container-siaga-24jam .mascot-svg,
+.mascot-siaga-24jam .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,126 +11,128 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-siaga-24jam .rig-torso, .mascot-container-siaga-24jam .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-siaga-24jam .rig-leg-l, .mascot-container-siaga-24jam .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-siaga-24jam .rig-leg-r, .mascot-container-siaga-24jam .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-siaga-24jam .rig-antenna-l, .mascot-container-siaga-24jam .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-siaga-24jam .rig-antenna-r, .mascot-container-siaga-24jam .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-siaga-24jam .rig-brows, .mascot-container-siaga-24jam .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-siaga-24jam .rig-eyes, .mascot-container-siaga-24jam .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-siaga-24jam .rig-glasses, .mascot-container-siaga-24jam .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-siaga-24jam .rig-mouth, .mascot-container-siaga-24jam .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-siaga-24jam .rig-arm-l, .mascot-container-siaga-24jam .rig-arm-l {
       transform-box: view-box;
       transform-origin: 38px 100px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-siaga-24jam .rig-arm-r, .mascot-container-siaga-24jam .rig-arm-r {
       transform-box: view-box;
       transform-origin: 201px 102px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-siaga-24jam .rig-prop, .mascot-container-siaga-24jam .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-siaga-24jam_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-siaga-24jam .led-1, .mascot-container-siaga-24jam .led-1 { animation: mascot-siaga-24jam_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-siaga-24jam .led-2, .mascot-container-siaga-24jam .led-2 { animation: mascot-siaga-24jam_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-siaga-24jam .led-3, .mascot-container-siaga-24jam .led-3 { animation: mascot-siaga-24jam_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-siaga-24jam_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-siaga-24jam_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-siaga-24jam_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-siaga-24jam_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-siaga-24jam_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(-6px) rotate(1deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-siaga-24jam_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(6deg) translateY(-2px); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-siaga-24jam_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-6deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-siaga-24jam_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-8deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-siaga-24jam_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(8deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-siaga-24jam_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         25% { transform: translate(-2px, 1px) scaleY(1); }
         48% { transform: translate(0px, 0px) scaleY(0.1); }
         75% { transform: translate(2px, -1px) scaleY(1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-siaga-24jam_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         35% { transform: scale(1.15, 1.2); }
         70% { transform: scale(0.9, 0.85); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-siaga-24jam_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-12deg); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-siaga-24jam_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(8deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-siaga-24jam_propAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(-5px) rotate(8deg); }
       }
+    
+  

@@ -1,5 +1,7 @@
-/* Mascot: juara */
-.mascot-svg {
+/* Mascot: juara (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-juara .mascot-svg,
+.mascot-container-juara .mascot-svg,
+.mascot-juara .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,131 +11,133 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-juara .rig-torso, .mascot-container-juara .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-juara .rig-leg-l, .mascot-container-juara .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-juara .rig-leg-r, .mascot-container-juara .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-juara .rig-antenna-l, .mascot-container-juara .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-juara .rig-antenna-r, .mascot-container-juara .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-juara .rig-brows, .mascot-container-juara .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-juara .rig-eyes, .mascot-container-juara .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-juara .rig-glasses, .mascot-container-juara .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-juara .rig-mouth, .mascot-container-juara .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-juara .rig-arm-l, .mascot-container-juara .rig-arm-l {
       transform-box: view-box;
       transform-origin: 38px 101px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-juara .rig-arm-r, .mascot-container-juara .rig-arm-r {
       transform-box: view-box;
       transform-origin: 202px 101px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-juara .rig-prop, .mascot-container-juara .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-juara_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-juara .led-1, .mascot-container-juara .led-1 { animation: mascot-juara_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-juara .led-2, .mascot-container-juara .led-2 { animation: mascot-juara_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-juara .led-3, .mascot-container-juara .led-3 { animation: mascot-juara_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-juara_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-juara_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-juara_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-juara_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-juara_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         33% { transform: translateY(-6px) rotate(2deg); }
         66% { transform: translateY(-4px) rotate(-1.5deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-juara_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(8deg) translateY(-2px); }
         66% { transform: rotate(-6deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-juara_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(6deg); }
         66% { transform: rotate(-8deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-juara_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(-9deg); }
         66% { transform: rotate(6deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-juara_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(9deg); }
         66% { transform: rotate(-6deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-juara_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         30% { transform: translate(2px, -1px) scaleY(1); }
         48% { transform: translate(1px, 0px) scaleY(0.1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-juara_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         25% { transform: scale(1.15, 1.3); }
         50% { transform: scale(0.92, 0.85); }
         75% { transform: scale(1.15, 1.25); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-juara_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(14deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-juara_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-14deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-juara_propAnim {
         0%, 100% { transform: translateY(0px) scale(1); }
         50% { transform: translateY(-6px) scale(1.1); }
       }
+    
+  

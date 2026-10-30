@@ -87,6 +87,10 @@ export class PortalDashboardService {
   static async getDashboard() {
     return new PortalApiService().get('/dashboard');
   }
+
+  static async liveProbeSignal() {
+    return new PortalApiService().post('/dashboard/live-probe', {});
+  }
 }
 
 export class PortalKuotaService {

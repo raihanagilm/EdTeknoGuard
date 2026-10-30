@@ -1,5 +1,7 @@
-/* Mascot: percaya-diri */
-.mascot-svg {
+/* Mascot: percaya-diri (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-percaya-diri .mascot-svg,
+.mascot-container-percaya-diri .mascot-svg,
+.mascot-percaya-diri .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,123 +11,126 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+    @keyframes mascot-percaya-diri_eyesAnim { 0%, 100% { transform: none; } }
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-percaya-diri .rig-torso, .mascot-container-percaya-diri .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-percaya-diri .rig-leg-l, .mascot-container-percaya-diri .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-percaya-diri .rig-leg-r, .mascot-container-percaya-diri .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-percaya-diri .rig-antenna-l, .mascot-container-percaya-diri .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-percaya-diri .rig-antenna-r, .mascot-container-percaya-diri .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-percaya-diri .rig-brows, .mascot-container-percaya-diri .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-percaya-diri .rig-eyes, .mascot-container-percaya-diri .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-percaya-diri .rig-glasses, .mascot-container-percaya-diri .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-percaya-diri .rig-mouth, .mascot-container-percaya-diri .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-percaya-diri .rig-arm-l, .mascot-container-percaya-diri .rig-arm-l {
       transform-box: view-box;
       transform-origin: 49px 105px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-percaya-diri .rig-arm-r, .mascot-container-percaya-diri .rig-arm-r {
       transform-box: view-box;
       transform-origin: 203px 93px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-percaya-diri .rig-prop, .mascot-container-percaya-diri .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-percaya-diri_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-percaya-diri .led-1, .mascot-container-percaya-diri .led-1 { animation: mascot-percaya-diri_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-percaya-diri .led-2, .mascot-container-percaya-diri .led-2 { animation: mascot-percaya-diri_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-percaya-diri .led-3, .mascot-container-percaya-diri .led-3 { animation: mascot-percaya-diri_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-percaya-diri_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-percaya-diri_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-percaya-diri_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-percaya-diri_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-percaya-diri_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
         45% { transform: translateY(-6px) rotate(1.5deg) scale(1.02); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-percaya-diri_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(6deg) translateY(-2px); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-percaya-diri_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-6deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-percaya-diri_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-7deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-percaya-diri_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(9deg); }
       }
-      @keyframes glassesAnim {
+      @keyframes mascot-percaya-diri_glassesAnim {
         0%, 100% { transform: translateY(0px); }
         45% { transform: translateY(-2px); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-percaya-diri_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         45% { transform: scale(1.18, 1.15) rotate(-3deg); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-percaya-diri_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-8deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-percaya-diri_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-12deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-percaya-diri_propAnim {
         0%, 100% { transform: scale(0.8) rotate(0deg); opacity: 0.6; }
         45% { transform: scale(1.3) rotate(25deg); opacity: 1; }
       }
+    
+  

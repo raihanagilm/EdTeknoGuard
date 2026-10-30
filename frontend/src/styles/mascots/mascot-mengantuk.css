@@ -1,5 +1,7 @@
-/* Mascot: mengantuk */
-.mascot-svg {
+/* Mascot: mengantuk (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-mengantuk .mascot-svg,
+.mascot-container-mengantuk .mascot-svg,
+.mascot-mengantuk .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,123 +11,125 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-mengantuk .rig-torso, .mascot-container-mengantuk .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-mengantuk .rig-leg-l, .mascot-container-mengantuk .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-mengantuk .rig-leg-r, .mascot-container-mengantuk .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-mengantuk .rig-antenna-l, .mascot-container-mengantuk .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-mengantuk .rig-antenna-r, .mascot-container-mengantuk .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-mengantuk .rig-brows, .mascot-container-mengantuk .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-mengantuk .rig-eyes, .mascot-container-mengantuk .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-mengantuk .rig-glasses, .mascot-container-mengantuk .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-mengantuk .rig-mouth, .mascot-container-mengantuk .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-mengantuk .rig-arm-l, .mascot-container-mengantuk .rig-arm-l {
       transform-box: view-box;
       transform-origin: 50px 96px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-mengantuk .rig-arm-r, .mascot-container-mengantuk .rig-arm-r {
       transform-box: view-box;
       transform-origin: 194px 106px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-mengantuk .rig-prop, .mascot-container-mengantuk .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-mengantuk_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-mengantuk .led-1, .mascot-container-mengantuk .led-1 { animation: mascot-mengantuk_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-mengantuk .led-2, .mascot-container-mengantuk .led-2 { animation: mascot-mengantuk_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-mengantuk .led-3, .mascot-container-mengantuk .led-3 { animation: mascot-mengantuk_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-mengantuk_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #38BDF8; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-mengantuk_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-mengantuk_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-mengantuk_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-mengantuk_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(5px) rotate(3deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-mengantuk_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-5deg) translateY(-2px); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-mengantuk_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(5deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-mengantuk_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-12deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-mengantuk_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(12deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-mengantuk_eyesAnim {
         0%, 100% { transform: translateY(0px) scaleX(1); }
         50% { transform: translateY(2px) scaleX(0.95); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-mengantuk_mouthAnim {
         0%, 100% { transform: scale(0.85, 0.75); }
         50% { transform: scale(1.15, 1.3); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-mengantuk_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-10deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-mengantuk_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(8deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-mengantuk_propAnim {
         0%, 100% { transform: translate(0px, 0px) scale(0.9); opacity: 0.5; }
         50% { transform: translate(4px, -6px) scale(1.12); opacity: 1; }
       }
+    
+  

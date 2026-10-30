@@ -1,5 +1,7 @@
-/* Mascot: security */
-.mascot-svg {
+/* Mascot: security (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-security .mascot-svg,
+.mascot-container-security .mascot-svg,
+.mascot-security .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,125 +11,127 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-security .rig-torso, .mascot-container-security .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-security .rig-leg-l, .mascot-container-security .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-security .rig-leg-r, .mascot-container-security .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-security .rig-antenna-l, .mascot-container-security .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-security .rig-antenna-r, .mascot-container-security .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-security .rig-brows, .mascot-container-security .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-security .rig-eyes, .mascot-container-security .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-security .rig-glasses, .mascot-container-security .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-security .rig-mouth, .mascot-container-security .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-security .rig-arm-l, .mascot-container-security .rig-arm-l {
       transform-box: view-box;
       transform-origin: 48px 94px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-security .rig-arm-r, .mascot-container-security .rig-arm-r {
       transform-box: view-box;
       transform-origin: 183px 98px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-security .rig-prop, .mascot-container-security .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-security_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-security .led-1, .mascot-container-security .led-1 { animation: mascot-security_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-security .led-2, .mascot-container-security .led-2 { animation: mascot-security_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-security .led-3, .mascot-container-security .led-3 { animation: mascot-security_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-security_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #38BDF8; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-security_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-security_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-security_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-security_torsoAnim {
         0%, 100% { transform: translateY(0px) scale(1); }
         50% { transform: translateY(-5px) scale(1.015); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-security_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(6deg) translateY(-2px); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-security_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-6deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-security_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-7deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-security_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(7deg); }
       }
-      @keyframes browAnim {
+      @keyframes mascot-security_browAnim {
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-2px); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-security_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         25% { transform: translate(-2px, 0px) scaleY(1); }
         48% { transform: translate(0px, 0px) scaleY(0.1); }
         75% { transform: translate(2px, 0px) scaleY(1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-security_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         50% { transform: scale(1.15, 1.2); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-security_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(10deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-security_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-8deg) translateY(-2px); }
       }
+    
+  

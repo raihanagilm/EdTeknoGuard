@@ -1,5 +1,7 @@
-/* Mascot: ai-bot */
-.mascot-svg {
+/* Mascot: ai-bot (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-ai-bot .mascot-svg,
+.mascot-container-ai-bot .mascot-svg,
+.mascot-ai-bot .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,126 +11,128 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-ai-bot .rig-torso, .mascot-container-ai-bot .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-ai-bot .rig-leg-l, .mascot-container-ai-bot .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-ai-bot .rig-leg-r, .mascot-container-ai-bot .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-ai-bot .rig-antenna-l, .mascot-container-ai-bot .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-ai-bot .rig-antenna-r, .mascot-container-ai-bot .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-ai-bot .rig-brows, .mascot-container-ai-bot .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-ai-bot .rig-eyes, .mascot-container-ai-bot .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-ai-bot .rig-glasses, .mascot-container-ai-bot .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-ai-bot .rig-mouth, .mascot-container-ai-bot .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-ai-bot .rig-arm-l, .mascot-container-ai-bot .rig-arm-l {
       transform-box: view-box;
       transform-origin: 46px 94px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-ai-bot .rig-arm-r, .mascot-container-ai-bot .rig-arm-r {
       transform-box: view-box;
       transform-origin: 194px 94px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-ai-bot .rig-prop, .mascot-container-ai-bot .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-ai-bot_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-ai-bot .led-1, .mascot-container-ai-bot .led-1 { animation: mascot-ai-bot_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-ai-bot .led-2, .mascot-container-ai-bot .led-2 { animation: mascot-ai-bot_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-ai-bot .led-3, .mascot-container-ai-bot .led-3 { animation: mascot-ai-bot_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-ai-bot_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #38BDF8; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-ai-bot_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-ai-bot_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-ai-bot_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-ai-bot_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(-8px) rotate(1deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-ai-bot_legLAnim {
         0%, 100% { transform: scale(1); opacity: 0.9; }
         50% { transform: scale(1.08); opacity: 1; }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-ai-bot_legRAnim {
         0%, 100% { transform: scale(1) translateY(0px); opacity: 0.75; }
         50% { transform: scale(0.92) translateY(4px); opacity: 1; }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-ai-bot_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-10deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-ai-bot_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(10deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-ai-bot_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         25% { transform: translate(2px, -1px) scaleY(1.05); }
         48% { transform: translate(0px, 0px) scaleY(0.1); }
         75% { transform: translate(-2px, -1px) scaleY(1.05); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-ai-bot_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         30% { transform: scale(1.18, 1.32); }
         65% { transform: scale(0.94, 0.88); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-ai-bot_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-12deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-ai-bot_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(12deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-ai-bot_propAnim {
         0%, 100% { transform: scale(0.85) translateY(0px); opacity: 0.7; }
         50% { transform: scale(1.2) translateY(-4px); opacity: 1; }
       }
+    
+  

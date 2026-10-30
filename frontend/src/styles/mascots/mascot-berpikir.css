@@ -1,5 +1,7 @@
-/* Mascot: berpikir */
-.mascot-svg {
+/* Mascot: berpikir (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-berpikir .mascot-svg,
+.mascot-container-berpikir .mascot-svg,
+.mascot-berpikir .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,135 +11,137 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-berpikir .rig-torso, .mascot-container-berpikir .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-berpikir .rig-leg-l, .mascot-container-berpikir .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-berpikir .rig-leg-r, .mascot-container-berpikir .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-berpikir .rig-antenna-l, .mascot-container-berpikir .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-berpikir .rig-antenna-r, .mascot-container-berpikir .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-berpikir .rig-brows, .mascot-container-berpikir .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-berpikir .rig-eyes, .mascot-container-berpikir .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-berpikir .rig-glasses, .mascot-container-berpikir .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-berpikir .rig-mouth, .mascot-container-berpikir .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-berpikir .rig-arm-l, .mascot-container-berpikir .rig-arm-l {
       transform-box: view-box;
       transform-origin: 39px 99px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-berpikir .rig-arm-r, .mascot-container-berpikir .rig-arm-r {
       transform-box: view-box;
       transform-origin: 202px 105px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-berpikir .rig-prop, .mascot-container-berpikir .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-berpikir_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-berpikir .led-1, .mascot-container-berpikir .led-1 { animation: mascot-berpikir_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-berpikir .led-2, .mascot-container-berpikir .led-2 { animation: mascot-berpikir_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-berpikir .led-3, .mascot-container-berpikir .led-3 { animation: mascot-berpikir_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-berpikir_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #10B981; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-berpikir_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-berpikir_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-berpikir_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-berpikir_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         45% { transform: translateY(-5px) rotate(1deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-berpikir_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(6deg) translateY(-2px); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-berpikir_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-6deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-berpikir_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-10deg); }
         70% { transform: rotate(6deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-berpikir_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(10deg); }
         70% { transform: rotate(-6deg); }
       }
-      @keyframes browAnim {
+      @keyframes mascot-berpikir_browAnim {
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-2px); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-berpikir_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         30% { transform: translate(-2px, 0px) scaleY(1); }
         48% { transform: translate(0px, 0px) scaleY(0.1); }
         75% { transform: translate(2px, 0px) scaleY(1); }
       }
-      @keyframes glassesAnim {
+      @keyframes mascot-berpikir_glassesAnim {
         0%, 100% { transform: translateY(0px); }
         45% { transform: translateY(-1px); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-berpikir_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         50% { transform: scale(1.15, 1.2); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-berpikir_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(8deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-berpikir_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-10deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-berpikir_propAnim {
         0%, 100% { transform: translateY(0px) scale(1); }
         50% { transform: translateY(-5px) scale(1.08); }
       }
+    
+  

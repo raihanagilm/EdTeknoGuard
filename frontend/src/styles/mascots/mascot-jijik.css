@@ -1,5 +1,7 @@
-/* Mascot: jijik */
-.mascot-svg {
+/* Mascot: jijik (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-jijik .mascot-svg,
+.mascot-container-jijik .mascot-svg,
+.mascot-jijik .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,120 +11,122 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-jijik .rig-torso, .mascot-container-jijik .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-jijik .rig-leg-l, .mascot-container-jijik .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-jijik .rig-leg-r, .mascot-container-jijik .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-jijik .rig-antenna-l, .mascot-container-jijik .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-jijik .rig-antenna-r, .mascot-container-jijik .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-jijik .rig-brows, .mascot-container-jijik .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-jijik .rig-eyes, .mascot-container-jijik .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-jijik .rig-glasses, .mascot-container-jijik .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-jijik .rig-mouth, .mascot-container-jijik .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-jijik .rig-arm-l, .mascot-container-jijik .rig-arm-l {
       transform-box: view-box;
       transform-origin: 38px 98px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-jijik .rig-arm-r, .mascot-container-jijik .rig-arm-r {
       transform-box: view-box;
       transform-origin: 202px 98px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-jijik .rig-prop, .mascot-container-jijik .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-jijik_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-jijik .led-1, .mascot-container-jijik .led-1 { animation: mascot-jijik_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-jijik .led-2, .mascot-container-jijik .led-2 { animation: mascot-jijik_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-jijik .led-3, .mascot-container-jijik .led-3 { animation: mascot-jijik_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-jijik_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #F59E0B; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-jijik_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-jijik_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-jijik_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-jijik_torsoAnim {
         0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
         45% { transform: translate(-5px, -3px) rotate(-3deg); }
         75% { transform: translate(-2px, -1px) rotate(-1deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-jijik_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(8deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-jijik_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(10deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-jijik_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-12deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-jijik_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(10deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-jijik_eyesAnim {
         0%, 100% { transform: scale(1, 1); }
         45% { transform: scale(1.08, 0.82); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-jijik_mouthAnim {
         0%, 100% { transform: translateY(0px) scale(1, 1); }
         45% { transform: translateY(2px) scale(1.12, 1.28); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-jijik_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(14deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-jijik_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         45% { transform: rotate(-14deg); }
       }
+    
+  

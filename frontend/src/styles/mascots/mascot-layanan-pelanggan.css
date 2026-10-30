@@ -1,5 +1,7 @@
-/* Mascot: layanan-pelanggan */
-.mascot-svg {
+/* Mascot: layanan-pelanggan (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-layanan-pelanggan .mascot-svg,
+.mascot-container-layanan-pelanggan .mascot-svg,
+.mascot-layanan-pelanggan .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,132 +11,134 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-layanan-pelanggan .rig-torso, .mascot-container-layanan-pelanggan .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-layanan-pelanggan .rig-leg-l, .mascot-container-layanan-pelanggan .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-layanan-pelanggan .rig-leg-r, .mascot-container-layanan-pelanggan .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-layanan-pelanggan .rig-antenna-l, .mascot-container-layanan-pelanggan .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-layanan-pelanggan .rig-antenna-r, .mascot-container-layanan-pelanggan .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-layanan-pelanggan .rig-brows, .mascot-container-layanan-pelanggan .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-layanan-pelanggan .rig-eyes, .mascot-container-layanan-pelanggan .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-layanan-pelanggan .rig-glasses, .mascot-container-layanan-pelanggan .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-layanan-pelanggan .rig-mouth, .mascot-container-layanan-pelanggan .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-layanan-pelanggan .rig-arm-l, .mascot-container-layanan-pelanggan .rig-arm-l {
       transform-box: view-box;
       transform-origin: 44px 98px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-layanan-pelanggan .rig-arm-r, .mascot-container-layanan-pelanggan .rig-arm-r {
       transform-box: view-box;
       transform-origin: 200px 101px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-layanan-pelanggan .rig-prop, .mascot-container-layanan-pelanggan .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-layanan-pelanggan_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-layanan-pelanggan .led-1, .mascot-container-layanan-pelanggan .led-1 { animation: mascot-layanan-pelanggan_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-layanan-pelanggan .led-2, .mascot-container-layanan-pelanggan .led-2 { animation: mascot-layanan-pelanggan_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-layanan-pelanggan .led-3, .mascot-container-layanan-pelanggan .led-3 { animation: mascot-layanan-pelanggan_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-layanan-pelanggan_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-layanan-pelanggan_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-layanan-pelanggan_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-layanan-pelanggan_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-layanan-pelanggan_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         33% { transform: translateY(-4px) rotate(1.2deg); }
         66% { transform: translateY(-3px) rotate(-1.2deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-layanan-pelanggan_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(6deg) translateY(-2px); }
         66% { transform: rotate(-5deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-layanan-pelanggan_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(5deg); }
         66% { transform: rotate(-6deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-layanan-pelanggan_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(-7deg); }
         66% { transform: rotate(5deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-layanan-pelanggan_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         33% { transform: rotate(7deg); }
         66% { transform: rotate(-5deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-layanan-pelanggan_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(2px, 1px) scaleY(1); }
         25% { transform: translate(4px, 2px) scaleY(1); }
         48% { transform: translate(3px, 1px) scaleY(0.1); }
         75% { transform: translate(1px, 0px) scaleY(1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-layanan-pelanggan_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         18% { transform: scale(1.15, 1.4); }
         36% { transform: scale(0.9, 0.8); }
         55% { transform: scale(1.2, 1.45); }
         75% { transform: scale(0.95, 0.9); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-layanan-pelanggan_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         20% { transform: rotate(-8deg); }
         40% { transform: rotate(4deg); }
         60% { transform: rotate(-9deg); }
         80% { transform: rotate(3deg); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-layanan-pelanggan_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(6deg); }
       }
+    
+  

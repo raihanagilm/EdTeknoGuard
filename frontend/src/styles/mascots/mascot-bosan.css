@@ -1,5 +1,7 @@
-/* Mascot: bosan */
-.mascot-svg {
+/* Mascot: bosan (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-bosan .mascot-svg,
+.mascot-container-bosan .mascot-svg,
+.mascot-bosan .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,121 +11,123 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-bosan .rig-torso, .mascot-container-bosan .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-bosan .rig-leg-l, .mascot-container-bosan .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-bosan .rig-leg-r, .mascot-container-bosan .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-bosan .rig-antenna-l, .mascot-container-bosan .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-bosan .rig-antenna-r, .mascot-container-bosan .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-bosan .rig-brows, .mascot-container-bosan .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-bosan .rig-eyes, .mascot-container-bosan .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-bosan .rig-glasses, .mascot-container-bosan .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-bosan .rig-mouth, .mascot-container-bosan .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-bosan .rig-arm-l, .mascot-container-bosan .rig-arm-l {
       transform-box: view-box;
       transform-origin: 50px 96px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-bosan .rig-arm-r, .mascot-container-bosan .rig-arm-r {
       transform-box: view-box;
       transform-origin: 190px 96px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-bosan .rig-prop, .mascot-container-bosan .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-bosan_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-bosan .led-1, .mascot-container-bosan .led-1 { animation: mascot-bosan_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-bosan .led-2, .mascot-container-bosan .led-2 { animation: mascot-bosan_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-bosan .led-3, .mascot-container-bosan .led-3 { animation: mascot-bosan_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-bosan_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #64748B; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-bosan_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-bosan_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-bosan_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-bosan_torsoAnim {
         0%, 100% { transform: translateY(0px) scale(1, 1); }
         50% { transform: translateY(4px) scale(1.02, 0.97); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-bosan_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-5deg) translateY(-1px); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-bosan_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(5deg) translateY(-1px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-bosan_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-10deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-bosan_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(10deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-bosan_eyesAnim {
         0%, 44%, 54%, 100% { transform: translate(0px, 0px) scaleY(1); }
         25% { transform: translate(2px, 1px) scaleY(0.9); }
         50% { transform: translate(1px, 2px) scaleY(0.15); }
         75% { transform: translate(-1px, 1px) scaleY(0.9); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-bosan_mouthAnim {
         0%, 100% { transform: scaleX(1); }
         50% { transform: scaleX(1.2) translateY(1px); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-bosan_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-6deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-bosan_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(6deg); }
       }
+    
+  

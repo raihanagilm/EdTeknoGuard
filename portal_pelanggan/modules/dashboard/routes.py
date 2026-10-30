@@ -8,3 +8,8 @@ router = APIRouter(tags=["Dashboard Pelanggan"])
 @router.get("/")
 def dashboard_home(request: Request, db: Session = Depends(get_db)):
     return DashboardController.render_dashboard(request, db)
+
+@router.post("/live-probe")
+def dashboard_live_probe(request: Request, db: Session = Depends(get_db)):
+    from portal_pelanggan.api_router import portal_live_probe_signal
+    return portal_live_probe_signal(request, db)

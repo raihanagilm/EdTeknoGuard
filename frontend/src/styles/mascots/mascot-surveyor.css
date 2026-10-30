@@ -1,5 +1,7 @@
-/* Mascot: surveyor */
-.mascot-svg {
+/* Mascot: surveyor (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-surveyor .mascot-svg,
+.mascot-container-surveyor .mascot-svg,
+.mascot-surveyor .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,132 +11,134 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-surveyor .rig-torso, .mascot-container-surveyor .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-surveyor .rig-leg-l, .mascot-container-surveyor .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-surveyor .rig-leg-r, .mascot-container-surveyor .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-surveyor .rig-antenna-l, .mascot-container-surveyor .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-surveyor .rig-antenna-r, .mascot-container-surveyor .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-surveyor .rig-brows, .mascot-container-surveyor .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-surveyor .rig-eyes, .mascot-container-surveyor .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-surveyor .rig-glasses, .mascot-container-surveyor .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-surveyor .rig-mouth, .mascot-container-surveyor .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-surveyor .rig-arm-l, .mascot-container-surveyor .rig-arm-l {
       transform-box: view-box;
       transform-origin: 40px 93px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-surveyor .rig-arm-r, .mascot-container-surveyor .rig-arm-r {
       transform-box: view-box;
       transform-origin: 204px 99px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-surveyor .rig-prop, .mascot-container-surveyor .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-surveyor_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-surveyor .led-1, .mascot-container-surveyor .led-1 { animation: mascot-surveyor_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-surveyor .led-2, .mascot-container-surveyor .led-2 { animation: mascot-surveyor_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-surveyor .led-3, .mascot-container-surveyor .led-3 { animation: mascot-surveyor_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-surveyor_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-surveyor_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-surveyor_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-surveyor_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-surveyor_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         35% { transform: translateY(-5px) rotate(-1.5deg); }
         70% { transform: translateY(-3px) rotate(1.5deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-surveyor_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-7deg) translateY(-2px); }
         70% { transform: rotate(6deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-surveyor_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-5deg); }
         70% { transform: rotate(7deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-surveyor_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-8deg); }
         70% { transform: rotate(6deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-surveyor_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(8deg); }
         70% { transform: rotate(-6deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-surveyor_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scaleY(1); }
         25% { transform: translate(-3px, 1px) scaleY(1); }
         48% { transform: translate(0px, 0px) scaleY(0.1); }
         75% { transform: translate(3px, -2px) scaleY(1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-surveyor_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         35% { transform: scale(1.15, 1.3); }
         70% { transform: scale(0.95, 0.9); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-surveyor_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(8deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-surveyor_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         40% { transform: rotate(-14deg); }
         75% { transform: rotate(5deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-surveyor_propAnim {
         0%, 100% { transform: translateY(0px) scale(1); }
         50% { transform: translateY(-7px) scale(1.08); }
       }
+    
+  

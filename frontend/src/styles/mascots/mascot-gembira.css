@@ -1,5 +1,7 @@
-/* Mascot: gembira */
-.mascot-svg {
+/* Mascot: gembira (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-gembira .mascot-svg,
+.mascot-container-gembira .mascot-svg,
+.mascot-gembira .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,133 +11,135 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-gembira .rig-torso, .mascot-container-gembira .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-gembira .rig-leg-l, .mascot-container-gembira .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-gembira .rig-leg-r, .mascot-container-gembira .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-gembira .rig-antenna-l, .mascot-container-gembira .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-gembira .rig-antenna-r, .mascot-container-gembira .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-gembira .rig-brows, .mascot-container-gembira .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-gembira .rig-eyes, .mascot-container-gembira .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-gembira .rig-glasses, .mascot-container-gembira .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-gembira .rig-mouth, .mascot-container-gembira .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-gembira .rig-arm-l, .mascot-container-gembira .rig-arm-l {
       transform-box: view-box;
       transform-origin: 48px 94px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-gembira .rig-arm-r, .mascot-container-gembira .rig-arm-r {
       transform-box: view-box;
       transform-origin: 192px 94px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-gembira .rig-prop, .mascot-container-gembira .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-gembira_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-gembira .led-1, .mascot-container-gembira .led-1 { animation: mascot-gembira_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-gembira .led-2, .mascot-container-gembira .led-2 { animation: mascot-gembira_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-gembira .led-3, .mascot-container-gembira .led-3 { animation: mascot-gembira_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-gembira_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #22C55E; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-gembira_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-gembira_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-gembira_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-gembira_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         25% { transform: translateY(-7px) rotate(2deg); }
         50% { transform: translateY(-2px) rotate(0deg); }
         75% { transform: translateY(-7px) rotate(-2deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-gembira_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         25% { transform: rotate(10deg) translateY(-2px); }
         75% { transform: rotate(-8deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-gembira_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         25% { transform: rotate(8deg); }
         75% { transform: rotate(-10deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-gembira_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         25% { transform: rotate(-10deg); }
         75% { transform: rotate(8deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-gembira_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         25% { transform: rotate(10deg); }
         75% { transform: rotate(-8deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-gembira_eyesAnim {
         0%, 100% { transform: translateY(0px) scaleY(1); }
         25%, 75% { transform: translateY(-2px) scaleY(1.1); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-gembira_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         25% { transform: scale(1.15, 1.28); }
         50% { transform: scale(0.92, 0.85); }
         75% { transform: scale(1.18, 1.3); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-gembira_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         25%, 75% { transform: rotate(16deg); }
         50% { transform: rotate(-4deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-gembira_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         25%, 75% { transform: rotate(-16deg); }
         50% { transform: rotate(4deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-gembira_propAnim {
         0%, 100% { transform: scale(0.85) rotate(0deg); }
         50% { transform: scale(1.25) rotate(20deg); }
       }
+    
+  

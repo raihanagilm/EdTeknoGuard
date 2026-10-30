@@ -110,6 +110,13 @@ class Pelanggan(Base):
     status_verifikasi = Column(String(30), default="TERVERIFIKASI", nullable=False, index=True) # TERVERIFIKASI, PENDING, DITOLAK
     last_login = Column(DateTime, nullable=True)
 
+    # Hasil Speed Test Terakhir Pelanggan
+    last_speed_download = Column(Numeric(6, 2), nullable=True)
+    last_speed_upload = Column(Numeric(6, 2), nullable=True)
+    last_speed_ping = Column(Integer, nullable=True)
+    last_speed_jitter = Column(Integer, nullable=True)
+    last_speed_test_at = Column(DateTime, nullable=True)
+
     # Relasi master referensi
     kantor_ref = relationship("Kantor", back_populates="pelanggan_list")
     paket_ref = relationship("Paket", back_populates="pelanggan_list")

@@ -122,6 +122,7 @@ export function PortalPelangganApp() {
     setIsAuthenticated(true);
     setCustomer(custData);
     setViewState('app');
+    switchTab('beranda');
     fetchSession();
     fetchDashboard();
   };

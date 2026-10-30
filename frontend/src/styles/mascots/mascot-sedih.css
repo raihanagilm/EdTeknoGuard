@@ -1,5 +1,7 @@
-/* Mascot: sedih */
-.mascot-svg {
+/* Mascot: sedih (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-sedih .mascot-svg,
+.mascot-container-sedih .mascot-svg,
+.mascot-sedih .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,129 +11,131 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-sedih .rig-torso, .mascot-container-sedih .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-sedih .rig-leg-l, .mascot-container-sedih .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-sedih .rig-leg-r, .mascot-container-sedih .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-sedih .rig-antenna-l, .mascot-container-sedih .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-sedih .rig-antenna-r, .mascot-container-sedih .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-sedih .rig-brows, .mascot-container-sedih .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-sedih .rig-eyes, .mascot-container-sedih .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-sedih .rig-glasses, .mascot-container-sedih .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-sedih .rig-mouth, .mascot-container-sedih .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-sedih .rig-arm-l, .mascot-container-sedih .rig-arm-l {
       transform-box: view-box;
       transform-origin: 50px 96px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-sedih .rig-arm-r, .mascot-container-sedih .rig-arm-r {
       transform-box: view-box;
       transform-origin: 190px 96px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-sedih .rig-prop, .mascot-container-sedih .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-sedih_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-sedih .led-1, .mascot-container-sedih .led-1 { animation: mascot-sedih_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-sedih .led-2, .mascot-container-sedih .led-2 { animation: mascot-sedih_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-sedih .led-3, .mascot-container-sedih .led-3 { animation: mascot-sedih_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-sedih_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #38BDF8; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-sedih_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-sedih_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-sedih_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-sedih_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg) scale(1, 1); }
         50% { transform: translateY(5px) rotate(-1.5deg) scale(1.02, 0.97); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-sedih_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-5deg) translateY(-2px); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-sedih_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(5deg) translateY(-2px); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-sedih_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-14deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-sedih_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(14deg); }
       }
-      @keyframes browAnim {
+      @keyframes mascot-sedih_browAnim {
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(2px) rotate(-2deg); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-sedih_eyesAnim {
         0%, 44%, 54%, 100% { transform: translateY(0px) scaleY(1); }
         50% { transform: translateY(2px) scaleY(0.2); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-sedih_mouthAnim {
         0%, 100% { transform: translateY(0px) scale(1, 1); }
         35% { transform: translateY(2px) scale(1.12, 1.25); }
         70% { transform: translateY(1px) scale(0.92, 0.9); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-sedih_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-8deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-sedih_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(8deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-sedih_propAnim {
         0% { transform: translateY(-2px); opacity: 0.2; }
         50% { transform: translateY(6px); opacity: 1; }
         100% { transform: translateY(14px); opacity: 0; }
       }
+    
+  

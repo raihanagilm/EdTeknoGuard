@@ -1,5 +1,7 @@
-/* Mascot: takut */
-.mascot-svg {
+/* Mascot: takut (Scoped from D:\Si Router\Maskot_Bergerak) */
+.mascot-takut .mascot-svg,
+.mascot-container-takut .mascot-svg,
+.mascot-takut .mascot-router-svg {
   display: inline-flex;
   line-height: 0;
   width: 100%;
@@ -9,138 +11,140 @@
   overflow: visible;
 }
 
-    /* ==========================================================
+/* ==========================================================
        SISTEM RIGGING SMOOTH 3 DETIK (MULTI-PART NATURAL MOTION)
        ========================================================== */
-    .rig-torso {
+    .mascot-takut .rig-torso, .mascot-container-takut .rig-torso {
       transform-box: view-box;
       transform-origin: 120px 132px;
-      animation: torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_torsoAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-l {
+    .mascot-takut .rig-leg-l, .mascot-container-takut .rig-leg-l {
       transform-box: view-box;
       transform-origin: 93px 130px;
-      animation: legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_legLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-leg-r {
+    .mascot-takut .rig-leg-r, .mascot-container-takut .rig-leg-r {
       transform-box: view-box;
       transform-origin: 147px 130px;
-      animation: legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_legRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-l {
+    .mascot-takut .rig-antenna-l, .mascot-container-takut .rig-antenna-l {
       transform-box: view-box;
       transform-origin: 83px 53px;
-      animation: antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_antLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-antenna-r {
+    .mascot-takut .rig-antenna-r, .mascot-container-takut .rig-antenna-r {
       transform-box: view-box;
       transform-origin: 157px 53px;
-      animation: antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_antRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-brows {
+    .mascot-takut .rig-brows, .mascot-container-takut .rig-brows {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_browAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-eyes {
+    .mascot-takut .rig-eyes, .mascot-container-takut .rig-eyes {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_eyesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-glasses {
+    .mascot-takut .rig-glasses, .mascot-container-takut .rig-glasses {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_glassesAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-mouth {
+    .mascot-takut .rig-mouth, .mascot-container-takut .rig-mouth {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_mouthAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-l {
+    .mascot-takut .rig-arm-l, .mascot-container-takut .rig-arm-l {
       transform-box: view-box;
       transform-origin: 38px 96px;
-      animation: armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_armLAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-arm-r {
+    .mascot-takut .rig-arm-r, .mascot-container-takut .rig-arm-r {
       transform-box: view-box;
       transform-origin: 202px 96px;
-      animation: armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_armRAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
-    .rig-prop {
+    .mascot-takut .rig-prop, .mascot-container-takut .rig-prop {
       transform-box: fill-box;
       transform-origin: center center;
-      animation: propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+      animation: mascot-takut_propAnim 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
 
-    /* Sinkronisasi LED */
-    .led-1 { animation: ledPulse 3s ease-in-out infinite 0s; }
-    .led-2 { animation: ledPulse 3s ease-in-out infinite 0.4s; }
-    .led-3 { animation: ledPulse 3s ease-in-out infinite 0.8s; }
-    @keyframes ledPulse {
+    /* LED Indikator Berdenyut */
+    .mascot-takut .led-1, .mascot-container-takut .led-1 { animation: mascot-takut_ledPulse 3s ease-in-out infinite 0s; }
+    .mascot-takut .led-2, .mascot-container-takut .led-2 { animation: mascot-takut_ledPulse 3s ease-in-out infinite 0.4s; }
+    .mascot-takut .led-3, .mascot-container-takut .led-3 { animation: mascot-takut_ledPulse 3s ease-in-out infinite 0.8s; }
+    @keyframes mascot-takut_ledPulse {
       0%, 100% { fill: #0F172A; }
       50% { fill: #F59E0B; }
     }
 
     /* Default fallback jika bagian opsional kosong */
-    @keyframes browAnim { 0%, 100% { transform: none; } }
-    @keyframes glassesAnim { 0%, 100% { transform: none; } }
-    @keyframes propAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-takut_browAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-takut_glassesAnim { 0%, 100% { transform: none; } }
+    @keyframes mascot-takut_propAnim { 0%, 100% { transform: none; } }
 
     /* Keyframes Spesifik Karakter (Siklus 3 Detik Smooth) */
     
-      @keyframes torsoAnim {
+      @keyframes mascot-takut_torsoAnim {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         25% { transform: translateY(3px) rotate(-1.8deg); }
         50% { transform: translateY(1px) rotate(1.8deg); }
         75% { transform: translateY(4px) rotate(-1.5deg); }
       }
-      @keyframes legLAnim {
+      @keyframes mascot-takut_legLAnim {
         0%, 100% { transform: rotate(0deg); }
         25%, 75% { transform: rotate(-7deg) translateY(-1px); }
         50% { transform: rotate(5deg); }
       }
-      @keyframes legRAnim {
+      @keyframes mascot-takut_legRAnim {
         0%, 100% { transform: rotate(0deg); }
         25%, 75% { transform: rotate(7deg) translateY(-1px); }
         50% { transform: rotate(-5deg); }
       }
-      @keyframes antLAnim {
+      @keyframes mascot-takut_antLAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(-14deg); }
         70% { transform: rotate(-6deg); }
       }
-      @keyframes antRAnim {
+      @keyframes mascot-takut_antRAnim {
         0%, 100% { transform: rotate(0deg); }
         35% { transform: rotate(14deg); }
         70% { transform: rotate(6deg); }
       }
-      @keyframes browAnim {
+      @keyframes mascot-takut_browAnim {
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-3px); }
       }
-      @keyframes eyesAnim {
+      @keyframes mascot-takut_eyesAnim {
         0%, 44%, 52%, 100% { transform: translate(0px, 0px) scale(1); }
         25% { transform: translate(-3px, 0px) scale(1.06); }
         48% { transform: translate(0px, 0px) scale(1, 0.12); }
         75% { transform: translate(3px, 0px) scale(1.06); }
       }
-      @keyframes mouthAnim {
+      @keyframes mascot-takut_mouthAnim {
         0%, 100% { transform: scale(1, 1); }
         25% { transform: scale(1.15, 1.3); }
         50% { transform: scale(0.9, 0.85); }
         75% { transform: scale(1.12, 1.25); }
       }
-      @keyframes armLAnim {
+      @keyframes mascot-takut_armLAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(-10deg); }
       }
-      @keyframes armRAnim {
+      @keyframes mascot-takut_armRAnim {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(10deg); }
       }
-      @keyframes propAnim {
+      @keyframes mascot-takut_propAnim {
         0% { transform: translateY(-2px); opacity: 0.2; }
         50% { transform: translateY(5px); opacity: 1; }
         100% { transform: translateY(12px); opacity: 0; }
       }
+    
+  

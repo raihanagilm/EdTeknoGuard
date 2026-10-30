@@ -1,25 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { PORTAL_MASCOTS_SVG } from './portalMascotsSvg';
-
-// Import CSS untuk masing-masing maskot secara terpisah/modular
-import '../../styles/mascots/mascot-gangguan.css';
-import '../../styles/mascots/mascot-marah.css';
-import '../../styles/mascots/mascot-gembira.css';
-import '../../styles/mascots/mascot-sedih.css';
-import '../../styles/mascots/mascot-pelanggan.css';
-import '../../styles/mascots/mascot-layanan-pelanggan.css';
-import '../../styles/mascots/mascot-teknisi.css';
-import '../../styles/mascots/mascot-menyapa.css';
-import '../../styles/mascots/mascot-rekomendasi.css';
-import '../../styles/mascots/mascot-analisis-redaman.css';
-import '../../styles/mascots/mascot-percaya-diri.css';
-import '../../styles/mascots/mascot-tersipu.css';
-import '../../styles/mascots/mascot-bosan.css';
-import '../../styles/mascots/mascot-security.css';
-import '../../styles/mascots/mascot-bingung.css';
+import '../../styles/mascots/index.css';
 
 /**
- * Daftar maskot rotasi berkala (bergantian setiap 5 menit / 300 detik)
+ * Daftar maskot rotasi berkala (bergantian setiap 3 menit / 180 detik)
  */
 const ROTATING_MASCOTS = [
   'menyapa',
@@ -27,8 +11,21 @@ const ROTATING_MASCOTS = [
   'analisis-redaman',
   'percaya-diri',
   'tersipu',
-  'bosan'
+  'bosan',
+  'berpikir',
+  'juara',
+  'bintang',
+  'memantau',
+  'siaga-24jam'
 ];
+
+/**
+ * Menghitung indeks maskot sinkron dengan waktu nyata jam dinding (interval 3 menit)
+ */
+const getWallClockMascotIndex = () => {
+  const threeMinutesMs = 3 * 60 * 1000;
+  return Math.floor(Date.now() / threeMinutesMs) % ROTATING_MASCOTS.length;
+};
 
 /**
  * Menentukan maskot prioritas berdasarkan kondisi aktivitas sistem:
@@ -40,11 +37,11 @@ const ROTATING_MASCOTS = [
  * 6. layanan-pelanggan.html jika laporan ditangani admin (tiket status DICEK_ADMIN)
  * 7. teknisi.html jika laporan ditangani teknisi (tiket status DIPROSES)
  * 
- * Jika tidak ada event darurat di atas, sistem akan merotasi 6 maskot santai setiap 5 menit:
- * menyapa -> rekomendasi -> analisis-redaman -> percaya-diri -> tersipu -> bosan
+ * Jika tidak ada event darurat di atas, sistem akan merotasi maskot santai setiap 3 menit sinkron jam dinding:
  */
 export function getActiveMascotKey(data, rotatingIndex) {
-  if (!data) return ROTATING_MASCOTS[rotatingIndex % ROTATING_MASCOTS.length];
+  const currentIndex = typeof rotatingIndex === 'number' ? rotatingIndex : getWallClockMascotIndex();
+  if (!data) return ROTATING_MASCOTS[currentIndex % ROTATING_MASCOTS.length];
 
   const customer = data.customer || {};
   const signal = data.signal || {};
@@ -84,21 +81,22 @@ export function getActiveMascotKey(data, rotatingIndex) {
     return 'gembira';
   }
 
-  // Fallback: rotasi 5 menit sekali
-  return ROTATING_MASCOTS[rotatingIndex % ROTATING_MASCOTS.length];
+  // Fallback: rotasi sinkron jam dinding
+  return ROTATING_MASCOTS[currentIndex % ROTATING_MASCOTS.length];
 }
 
 /**
  * Komponen Maskot Interaktif Portal
  */
 export function PortalActiveMascot({ data, mascotKey: customMascotKey, className = 'w-20 h-16' }) {
-  const [rotatingIndex, setRotatingIndex] = useState(0);
+  const [rotatingIndex, setRotatingIndex] = useState(() => getWallClockMascotIndex());
 
-  // Interval rotasi 5 menit (300.000 ms)
+  // Interval pengecekan waktu setiap 10 detik agar pergantian tepat di batas 3 menit jam dinding
   useEffect(() => {
     const timer = setInterval(() => {
-      setRotatingIndex((prev) => (prev + 1) % ROTATING_MASCOTS.length);
-    }, 5 * 60 * 1000);
+      const newIdx = getWallClockMascotIndex();
+      setRotatingIndex((prev) => (prev !== newIdx ? newIdx : prev));
+    }, 10000);
 
     return () => clearInterval(timer);
   }, []);
