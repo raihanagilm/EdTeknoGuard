@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Users,
   Smartphone,
@@ -11,8 +11,13 @@ import {
   CheckCircle2,
   Signal,
   Clock,
-  HelpCircle
+  HelpCircle,
+  Ban,
+  Unlock,
+  AlertTriangle,
+  Lock
 } from 'lucide-react';
+import { PortalWifiService } from '../services/portalApi';
 
 export function ModalPerangkatTerhubung({
   isOpen,
@@ -21,12 +26,54 @@ export function ModalPerangkatTerhubung({
   loading,
   scanning,
   onRefresh,
+  onDeviceUpdate,
   lastUpdated
 }) {
+  const [blockingMac, setBlockingMac] = useState(null);
+  const [feedbackMsg, setFeedbackMsg] = useState(null);
+
   if (!isOpen) return null;
 
-  const onlineDevices = devices.filter((d) => d.status === 'ONLINE');
-  const offlineDevices = devices.filter((d) => d.status !== 'ONLINE');
+  const onlineDevices = devices.filter((d) => d.status === 'ONLINE' && !d.is_blocked);
+  const blockedDevices = devices.filter((d) => d.is_blocked);
+  const offlineDevices = devices.filter((d) => d.status !== 'ONLINE' && !d.is_blocked);
+
+  const handleToggleBlock = async (dev) => {
+    const action = dev.is_blocked ? 'membuka blokir' : 'memblokir';
+    const confirmText = dev.is_blocked
+      ? `Izinkan kembali perangkat "${dev.hostname || dev.mac_address}" agar dapat tersambung ke internet WiFi?`
+      : `Yakin ingin memblokir perangkat "${dev.hostname || dev.mac_address}"? Akses internet perangkat ini akan diputus.`;
+
+    if (!window.confirm(confirmText)) return;
+
+    setBlockingMac(dev.mac_address);
+    setFeedbackMsg(null);
+    try {
+      const res = await PortalWifiService.toggleBlockDevice(dev.mac_address, !dev.is_blocked);
+      if (res.ok) {
+        setFeedbackMsg({
+          type: 'success',
+          text: res.data?.message || `Perangkat berhasil ${dev.is_blocked ? 'dibuka blokirnya' : 'diblokir'}.`
+        });
+        if (onDeviceUpdate) {
+          onDeviceUpdate(dev.mac_address, !dev.is_blocked);
+        } else if (onRefresh) {
+          onRefresh();
+        }
+      } else {
+        setFeedbackMsg({
+          type: 'error',
+          text: res.data?.message || 'Gagal mengubah status blokir perangkat.'
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedbackMsg({ type: 'error', text: 'Terjadi kesalahan sistem saat menghubungi modem.' });
+    } finally {
+      setBlockingMac(null);
+      setTimeout(() => setFeedbackMsg(null), 4000);
+    }
+  };
 
   const getDeviceIcon = (dev) => {
     const host = (dev.hostname || '').toLowerCase();
@@ -94,6 +141,24 @@ export function ModalPerangkatTerhubung({
           </button>
         </div>
 
+        {/* Feedback Alert jika berhasil blokir/unblokir */}
+        {feedbackMsg && (
+          <div
+            className={`mx-4 mt-3 p-3 rounded-xl flex items-center gap-2.5 text-xs font-semibold animate-in fade-in slide-in-from-top-1 ${
+              feedbackMsg.type === 'success'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {feedbackMsg.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <span>{feedbackMsg.text}</span>
+          </div>
+        )}
+
         {/* Modal Body / Device List */}
         <div className="p-4 overflow-y-auto space-y-4 flex-1">
           {loading && devices.length === 0 ? (
@@ -155,17 +220,81 @@ export function ModalPerangkatTerhubung({
                           </div>
                         </div>
 
-                        {dev.rssi !== null && dev.rssi !== undefined && (
-                          <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 text-slate-600 text-[10px] font-mono font-semibold">
-                            <Signal className="w-3 h-3 text-blue-500" />
-                            <span>{dev.rssi} dBm</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {dev.rssi !== null && dev.rssi !== undefined && (
+                            <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 text-slate-600 text-[10px] font-mono font-semibold">
+                              <Signal className="w-3 h-3 text-blue-500" />
+                              <span>{dev.rssi} dBm</span>
+                            </div>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleToggleBlock(dev)}
+                            disabled={blockingMac === dev.mac_address}
+                            title="Blokir akses internet perangkat ini"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50"
+                          >
+                            <Ban className={`w-3.5 h-3.5 ${blockingMac === dev.mac_address ? 'animate-spin' : ''}`} />
+                            <span>{blockingMac === dev.mac_address ? 'Proses...' : 'Blokir'}</span>
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
+              {/* Blocked Section (Perangkat yang Diblokir) */}
+              {blockedDevices.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-red-600 flex items-center gap-1">
+                      <Lock className="w-3 h-3" />
+                      Diblokir ({blockedDevices.length})
+                    </span>
+                    <span className="text-[10px] text-red-500 font-semibold">Akses Terputus</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {blockedDevices.map((dev) => (
+                      <div
+                        key={dev.id || dev.mac_address}
+                        className="p-3 rounded-xl bg-red-50/40 border border-red-100 shadow-2xs flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 opacity-75">
+                          <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                            <Ban className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-800 truncate flex items-center gap-1.5">
+                              <span className="line-through decoration-red-400">{dev.hostname || 'Perangkat Tanpa Nama'}</span>
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-red-100 text-red-700 uppercase">
+                                Diblokir
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-mono flex items-center gap-2 mt-0.5">
+                              {dev.ip_address && <span>{dev.ip_address}</span>}
+                              <span className="text-[10px] text-slate-400">{dev.mac_address}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleBlock(dev)}
+                          disabled={blockingMac === dev.mac_address}
+                          title="Buka blokir perangkat ini agar dapat mengakses internet kembali"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold active:scale-95 transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0"
+                        >
+                          <Unlock className={`w-3.5 h-3.5 ${blockingMac === dev.mac_address ? 'animate-spin' : ''}`} />
+                          <span>{blockingMac === dev.mac_address ? 'Proses...' : 'Buka Blokir'}</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Offline / Riwayat Perangkat Terakhir */}
               {offlineDevices.length > 0 && (
@@ -196,7 +325,17 @@ export function ModalPerangkatTerhubung({
                             </div>
                           </div>
                         </div>
-                        <span className="text-[10px] text-slate-400 shrink-0">Offline</span>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleBlock(dev)}
+                          disabled={blockingMac === dev.mac_address}
+                          title="Blokir perangkat ini"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 text-[10px] font-semibold transition cursor-pointer"
+                        >
+                          <Ban className="w-3 h-3" />
+                          <span>Blokir</span>
+                        </button>
                       </div>
                     ))}
                   </div>

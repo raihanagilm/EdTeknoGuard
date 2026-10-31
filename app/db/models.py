@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, BigInteger, Integer, String, Text, Numeric, 
-    Boolean, DateTime, ForeignKey, Index, UniqueConstraint, func
+    Boolean, DateTime, Date, ForeignKey, Index, UniqueConstraint, func
 )
 from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -127,6 +127,7 @@ class Pelanggan(Base):
     alerts = relationship("AlertLog", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
     tiket_list = relationship("TiketKendala", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
     kuota_list = relationship("KuotaPelanggan", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
+    kuota_harian_list = relationship("LogKuotaHarian", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
     perangkat_terhubung_list = relationship("PerangkatTerhubung", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
 
     # Properti pembantu (Property shortcuts) untuk backward-compatibility transparan
@@ -454,6 +455,31 @@ class KuotaPelanggan(Base):
     )
 
 
+class LogKuotaHarian(Base):
+    """
+    Tabel pencatatan riil pemakaian kuota harian pelanggan dari MikroTik.
+    Menyimpan delta / selisih pemakaian per hari (tanggal).
+    """
+    __tablename__ = "log_kuota_harian"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
+    tanggal = Column(Date, nullable=False, index=True) # YYYY-MM-DD
+    pemakaian_gb = Column(Numeric(8, 2), default=0, nullable=False)
+    upload_bytes = Column(BigInteger, default=0, nullable=False)
+    download_bytes = Column(BigInteger, default=0, nullable=False)
+    last_raw_bytes = Column(BigInteger, default=0, nullable=False) # Counter byte terakhir dari Simple Queue hari itu
+    created_at = Column(DateTime, default=get_now_wib, nullable=False)
+    updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
+
+    pelanggan = relationship("Pelanggan", back_populates="kuota_harian_list")
+
+    __table_args__ = (
+        UniqueConstraint("id_pelanggan", "tanggal", name="uq_pelanggan_tanggal"),
+        Index("idx_kuota_harian_pel_tgl", "id_pelanggan", "tanggal"),
+    )
+
+
 class UserNotificationRead(Base):
     __tablename__ = "user_notification_reads"
 
@@ -520,6 +546,8 @@ class PerangkatTerhubung(Base):
     rssi = Column(Integer, nullable=True) # Kekuatan sinyal (dBm) jika ada dari modem
     ssid = Column(String(100), nullable=True) # SSID jika connect via WiFi
     status = Column(String(20), default="ONLINE", nullable=False, index=True) # ONLINE, OFFLINE
+    is_blocked = Column(Boolean, default=False, nullable=False, index=True) # Status blokir akses internet/WiFi
+    blocked_at = Column(DateTime, nullable=True)
     first_seen = Column(DateTime, default=get_now_wib, nullable=False)
     last_seen = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False, index=True)
 

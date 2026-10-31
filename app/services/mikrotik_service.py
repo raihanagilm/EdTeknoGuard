@@ -957,9 +957,10 @@ class MikroTikSyncService:
         Membaca counter akumulasi bytes dari Simple Queues lalu
         menyinkronkan ke tabel `kuota_pelanggan` pada periode bulan berjalan (YYYY-MM).
         """
-        from app.db.models import KuotaPelanggan, Kantor
+        from app.db.models import KuotaPelanggan, LogKuotaHarian, Kantor
         from app.core.timezone import get_current_period
         current_period = get_current_period()
+        today_date = get_now_wib().date()
 
         if kantor and kantor != "all":
             target_kantors = [kantor]
@@ -1027,6 +1028,34 @@ class MikroTikSyncService:
                         tenant_db.flush()
 
                     synced_cids[cid] = kuota_rec
+
+                    # Sinkronkan juga snapshot riil kuota harian (LogKuotaHarian)
+                    raw_bytes_now = up_b + dl_b
+                    harian_rec = tenant_db.query(LogKuotaHarian).filter(
+                        LogKuotaHarian.id_pelanggan == cid,
+                        LogKuotaHarian.tanggal == today_date
+                    ).first()
+
+                    if harian_rec:
+                        delta_bytes = max(0, raw_bytes_now - (harian_rec.last_raw_bytes or 0)) if raw_bytes_now >= (harian_rec.last_raw_bytes or 0) else raw_bytes_now
+                        harian_rec.upload_bytes = (harian_rec.upload_bytes or 0) + max(0, up_b - (harian_rec.last_raw_bytes or 0) if up_b >= (harian_rec.last_raw_bytes or 0) else up_b)
+                        harian_rec.download_bytes = (harian_rec.download_bytes or 0) + max(0, dl_b - (harian_rec.last_raw_bytes or 0) if dl_b >= (harian_rec.last_raw_bytes or 0) else dl_b)
+                        harian_rec.last_raw_bytes = raw_bytes_now
+                        delta_gb = round(float(delta_bytes) / (1024 ** 3), 2)
+                        harian_rec.pemakaian_gb = round(float(harian_rec.pemakaian_gb or 0) + delta_gb, 2)
+                        harian_rec.updated_at = get_now_wib()
+                    else:
+                        harian_rec = LogKuotaHarian(
+                            id_pelanggan=cid,
+                            tanggal=today_date,
+                            pemakaian_gb=total_gb,
+                            upload_bytes=up_b,
+                            download_bytes=dl_b,
+                            last_raw_bytes=raw_bytes_now,
+                            created_at=get_now_wib(),
+                            updated_at=get_now_wib()
+                        )
+                        tenant_db.add(harian_rec)
 
                     # Update queue_name jika belum tersimpan
                     if p and not p.queue_name and q.get("name"):

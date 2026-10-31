@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.core.database import get_portal_db
 from portal_pelanggan.modules.auth.controller import AuthController
 from portal_pelanggan.core.security import get_portal_base_url as get_base_url
 
@@ -16,7 +16,7 @@ def login_submit(
     request: Request,
     identifier: str = Form(...),
     password: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_portal_db)
 ):
     return AuthController.handle_login(request, db, identifier, password)
 
@@ -37,7 +37,7 @@ def lupa_password_submit(
     nama: str = Form(""),
     no_hp: str = Form(""),
     password_baru: str = Form("123456"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_portal_db)
 ):
     return AuthController.handle_lupa_password(
         request, db, ip_router=ip_router, nama=nama, no_hp=no_hp, password_baru=password_baru

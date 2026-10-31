@@ -129,6 +129,13 @@ export class PortalWifiService {
   static async scanConnectedDevices() {
     return new PortalApiService().post('/wifi/perangkat-terhubung/scan');
   }
+
+  static async toggleBlockDevice(macAddress, block = null) {
+    return new PortalApiService().post('/wifi/perangkat-terhubung/toggle-block', {
+      mac_address: macAddress,
+      block: block
+    });
+  }
 }
 
 export class PortalProfilService {

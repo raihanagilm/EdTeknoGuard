@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Response, Depends, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.core.database import get_portal_db
 from app.db.models import Pelanggan, TiketKendala
 from portal_pelanggan.core.security import (
     get_current_customer_optional,
@@ -19,7 +19,7 @@ from portal_pelanggan.modules.kendala.service import KendalaService
 api_router = APIRouter(prefix="/api", tags=["Portal Pelanggan REST API"])
 
 @api_router.get("/auth/me")
-def portal_auth_me(request: Request, db: Session = Depends(get_db)):
+def portal_auth_me(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return {"authenticated": False, "message": "Belum login"}
@@ -77,7 +77,7 @@ def portal_auth_me(request: Request, db: Session = Depends(get_db)):
     }
 
 @api_router.post("/auth/login")
-async def portal_auth_login(request: Request, db: Session = Depends(get_db)):
+async def portal_auth_login(request: Request, db: Session = Depends(get_portal_db)):
     body = await request.json()
     identifier = body.get("identifier", "").strip()
     password = body.get("password", "").strip()
@@ -140,7 +140,7 @@ def portal_auth_logout():
     return response
 
 @api_router.post("/auth/lupa-password")
-async def portal_auth_lupa_password(request: Request, db: Session = Depends(get_db)):
+async def portal_auth_lupa_password(request: Request, db: Session = Depends(get_portal_db)):
     body = await request.json()
     ip_router = body.get("ip_router", "").strip()
     nama = body.get("nama", "").strip()
@@ -166,7 +166,7 @@ async def portal_auth_lupa_password(request: Request, db: Session = Depends(get_
     }
 
 @api_router.get("/dashboard")
-def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
+def portal_dashboard_data(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -245,7 +245,7 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_db)):
     }
 
 @api_router.get("/kuota")
-def portal_kuota_data(request: Request, db: Session = Depends(get_db)):
+def portal_kuota_data(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -266,7 +266,7 @@ def portal_kuota_data(request: Request, db: Session = Depends(get_db)):
     }
 
 @api_router.get("/kendala")
-def portal_kendala_list(request: Request, db: Session = Depends(get_db)):
+def portal_kendala_list(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -289,7 +289,7 @@ def portal_kendala_list(request: Request, db: Session = Depends(get_db)):
     }
 
 @api_router.post("/kendala/buat")
-async def portal_kendala_create(request: Request, db: Session = Depends(get_db)):
+async def portal_kendala_create(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -317,7 +317,7 @@ async def portal_kendala_create(request: Request, db: Session = Depends(get_db))
     }
 
 @api_router.delete("/kendala/{ticket_id}")
-async def portal_kendala_delete(ticket_id: str, request: Request, db: Session = Depends(get_db)):
+async def portal_kendala_delete(ticket_id: str, request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -336,7 +336,7 @@ async def portal_kendala_delete(ticket_id: str, request: Request, db: Session = 
     }
 
 @api_router.get("/wifi")
-def portal_wifi_get(request: Request, db: Session = Depends(get_db)):
+def portal_wifi_get(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -375,7 +375,7 @@ def portal_wifi_get(request: Request, db: Session = Depends(get_db)):
     }
 
 @api_router.post("/wifi/ganti")
-async def portal_wifi_change(request: Request, db: Session = Depends(get_db)):
+async def portal_wifi_change(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -439,7 +439,7 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_db)):
     }
 
 @api_router.post("/profil/ganti-password")
-async def portal_profil_change_password(request: Request, db: Session = Depends(get_db)):
+async def portal_profil_change_password(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -467,7 +467,7 @@ async def portal_profil_change_password(request: Request, db: Session = Depends(
     }
 
 @api_router.post("/profil/update")
-async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
+async def portal_profil_update(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
         return JSONResponse(status_code=401, content={"authenticated": False})
@@ -508,7 +508,7 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_db)):
     }
 
 @api_router.post("/profil/foto")
-async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_db)):
+async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_portal_db)):
     """
     Upload & Simpan Foto Profil Pelanggan yang telah dicompress ke format WebP di client.
     Mendukung payload JSON { "image_base64": "data:image/webp;base64,..." }
@@ -575,7 +575,7 @@ async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_
     }
 
 @api_router.delete("/profil/foto")
-def portal_profil_delete_foto(request: Request, db: Session = Depends(get_db)):
+def portal_profil_delete_foto(request: Request, db: Session = Depends(get_portal_db)):
     """
     Hapus Foto Profil Pelanggan dan kembalikan ke avatar inisial nama default.
     """
@@ -608,7 +608,7 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_db)):
     }
 
 @api_router.get("/wifi/perangkat-terhubung")
-def portal_get_connected_devices(request: Request, db: Session = Depends(get_db)):
+def portal_get_connected_devices(request: Request, db: Session = Depends(get_portal_db)):
     """
     Mendapatkan riwayat perangkat terhubung milik pelanggan yang sedang login di TeknoCust.
     """
@@ -663,7 +663,7 @@ def portal_get_connected_devices(request: Request, db: Session = Depends(get_db)
     }
 
 @api_router.post("/wifi/perangkat-terhubung/scan")
-def portal_scan_connected_devices(request: Request, db: Session = Depends(get_db)):
+def portal_scan_connected_devices(request: Request, db: Session = Depends(get_portal_db)):
     """
     Live scanning mandiri perangkat terhubung langsung ke modem ONT dari aplikasi TeknoCust.
     """
@@ -717,8 +717,70 @@ def portal_scan_connected_devices(request: Request, db: Session = Depends(get_db
         "devices": res.get("devices", [])
     }
 
+@api_router.post("/wifi/perangkat-terhubung/toggle-block")
+async def portal_toggle_block_device(request: Request, db: Session = Depends(get_portal_db)):
+    """
+    Blokir atau Buka Blokir (Unblock) perangkat WiFi/LAN yang terhubung ke modem.
+    """
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Belum login"})
+
+    id_pel = cust.get("id_pelanggan")
+    body = await request.json()
+    mac = body.get("mac_address", "").strip()
+    block = body.get("block", None)
+
+    if not mac:
+        return JSONResponse(status_code=400, content={"ok": False, "message": "MAC Address perangkat wajib disertakan."})
+
+    target_db = db
+
+    # Tenant database fallback jika pelanggan berada di cabang database lain
+    from app.db.models import Pelanggan
+    pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    if not pel and id_pel:
+        from app.core.tenant_database import TenantDatabaseManager
+        from app.core.security import get_all_kantor_codes
+        c_kantor = cust.get("kantor")
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pel = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if pel:
+                    target_db = t_db
+            except Exception:
+                pass
+        if not pel:
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    pel = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if pel:
+                        target_db = k_db
+                        break
+                except Exception:
+                    continue
+
+    from app.services.connected_device_service import ConnectedDeviceService
+    try:
+        res = ConnectedDeviceService.toggle_block_device(db=target_db, id_pelanggan=id_pel, mac_address=mac, block=block)
+    finally:
+        if target_db is not db:
+            try:
+                target_db.close()
+            except Exception:
+                pass
+
+    return {
+        "ok": res.get("success", False),
+        "message": res.get("message", ""),
+        "is_blocked": res.get("is_blocked"),
+        "device": res.get("device")
+    }
+
 @api_router.post("/dashboard/live-probe")
-def portal_live_probe_signal(request: Request, db: Session = Depends(get_db)):
+def portal_live_probe_signal(request: Request, db: Session = Depends(get_portal_db)):
     """
     Live on-demand probe langsung ke modem ONT pelanggan saat menekan tombol uji kecepatan / maskot.
     Mengambil data riil redaman optik (Rx Power dBm), suhu ONT (°C), dan latensi (ms).
@@ -900,7 +962,7 @@ async def speedtest_upload(request: Request):
 
 
 @api_router.post("/speedtest/save")
-async def speedtest_save_result(request: Request, db: Session = Depends(get_db)):
+async def speedtest_save_result(request: Request, db: Session = Depends(get_portal_db)):
     """Simpan hasil speed test pelanggan ke database agar persisten."""
     cust = get_current_customer_optional(request)
     if not cust:

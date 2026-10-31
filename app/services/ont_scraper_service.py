@@ -24,12 +24,12 @@ STATUS_DEV_PATH = "/getpage.gch?pid=1002&nextpage=status_dev_info_t.gch"
 WLAN_ESSID_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch"
 WLAN_SECURITY_PATH = "/getpage.gch?pid=1002&nextpage=net_wlan_secrity_t.gch"
 WLAN_ASSOCIATED_PATHS = [
+    "/getpage.gch?pid=1002&nextpage=net_dhcp_dynamic_t.gch",
     "/getpage.gch?pid=1002&nextpage=net_wlan_assoc_t.gch",
+    "/getpage.gch?pid=1002&nextpage=dhcp_client_list_t.gch",
     "/getpage.gch?pid=1002&nextpage=net_wlan_user_t.gch",
     "/getpage.gch?pid=1002&nextpage=e8_status_wlan_info_t.gch",
-    "/getpage.gch?pid=1002&nextpage=status_wlan_info_t.gch",
-    "/getpage.gch?pid=1002&nextpage=net_dhcp_dynamic_t.gch",
-    "/getpage.gch?pid=1002&nextpage=dhcp_client_list_t.gch"
+    "/getpage.gch?pid=1002&nextpage=status_wlan_info_t.gch"
 ]
 
 # Daftar kandidat path status optik lintas vendor (ZTE, Huawei, FiberHome, VSOL, XPON Generic)
@@ -725,23 +725,61 @@ class ONTScraperService:
                             "status": "ONLINE"
                         })
 
-                # Pola 2: Format Javascript array ZTE
-                js_macs = re.findall(r'Transfer_meaning\s*\(\s*["\'][^"\']*["\']\s*,\s*["\']([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})["\']\s*\)', html_text)
-                if not js_macs:
-                    js_macs = re.findall(r'["\']([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})["\']', html_text)
+                # Pola 2: Ekstraksi struktur ZTE Transfer_meaning('KeyN', 'Val\x3a...')
+                # Contoh: Transfer_meaning('MACAddr0','6e\x3a7a\x3aeb\x3a74\x3af6\x3ae7');
+                #         Transfer_meaning('IPAddr0','192\x2e168\x2e1\x2e3');
+                #         Transfer_meaning('HostName0','OPPO\x2dA18');
+                zte_calls = re.findall(r"Transfer_meaning\s*\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]*)['\"]\s*\)", html_text)
+                if zte_calls:
+                    zte_items = {}
+                    for k, v in zte_calls:
+                        decoded_v = re.sub(r'\\x([0-9a-fA-F]{2})', lambda m: chr(int(m.group(1), 16)), v).strip()
+                        m_idx = re.match(r'([A-Za-z]+)(\d+)', k)
+                        if m_idx:
+                            field_name, item_idx = m_idx.group(1), int(m_idx.group(2))
+                            zte_items.setdefault(item_idx, {})[field_name] = decoded_v
 
-                for mac_candidate in js_macs:
-                    clean_mac = mac_candidate.replace("-", ":").upper()
-                    if clean_mac not in seen_macs:
+                    for _, item_data in sorted(zte_items.items()):
+                        mac_raw = item_data.get("MACAddr") or item_data.get("MacAddr")
+                        if not mac_raw:
+                            continue
+                        m_mac = re.search(r'([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})', mac_raw)
+                        if not m_mac:
+                            continue
+                        clean_mac = m_mac.group(1).replace("-", ":").upper()
+                        if clean_mac in seen_macs or clean_mac == "00:00:00:00:00:00" or clean_mac == "FF:FF:FF:FF:FF:FF":
+                            continue
+
+                        ip_val = item_data.get("IPAddr") or item_data.get("IpAddr")
+                        host_val = item_data.get("HostName") or item_data.get("Hostname")
+                        phy_port = item_data.get("PhyPortName") or ""
+                        is_wifi = "SSID" in phy_port.upper() or "WLAN" in path.lower() or "WIFI" in phy_port.upper()
+
                         seen_macs.add(clean_mac)
                         devices.append({
                             "mac_address": clean_mac,
-                            "ip_address": None,
-                            "hostname": None,
-                            "tipe_koneksi": "WIFI" if "wlan" in path.lower() else "LAN",
+                            "ip_address": ip_val if ip_val and ip_val != "0.0.0.0" else None,
+                            "hostname": host_val if host_val else None,
+                            "tipe_koneksi": "WIFI" if is_wifi else "LAN",
                             "rssi": None,
                             "status": "ONLINE"
                         })
+
+                # Pola 3: Fallback regex MAC bebas jika pola 1 & 2 belum menemukan
+                if not devices:
+                    js_macs = re.findall(r'["\']([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})["\']', html_text)
+                    for mac_candidate in js_macs:
+                        clean_mac = mac_candidate.replace("-", ":").upper()
+                        if clean_mac not in seen_macs and clean_mac != "00:00:00:00:00:00" and clean_mac != "FF:FF:FF:FF:FF:FF":
+                            seen_macs.add(clean_mac)
+                            devices.append({
+                                "mac_address": clean_mac,
+                                "ip_address": None,
+                                "hostname": None,
+                                "tipe_koneksi": "WIFI" if "wlan" in path.lower() else "LAN",
+                                "rssi": None,
+                                "status": "ONLINE"
+                            })
             except Exception as e:
                 logger.debug(f"Pengecekan associated devices di {path} untuk {host} gagal: {e}")
                 continue

@@ -150,6 +150,16 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
     }
   };
 
+  const handleDeviceStatusUpdate = (macAddress, isBlocked) => {
+    setDevicesList((prev) =>
+      prev.map((dev) =>
+        dev.mac_address === macAddress
+          ? { ...dev, is_blocked: isBlocked, blocked_at: isBlocked ? new Date().toISOString() : null }
+          : dev
+      )
+    );
+  };
+
   const openDevicesModal = () => {
     setShowDevicesModal(true);
     fetchConnectedDevices();
@@ -460,6 +470,7 @@ export function TabBerandaPelanggan({ data, onNavigate }) {
         loading={loadingDevices}
         scanning={scanningDevices}
         onRefresh={handleScanDevices}
+        onDeviceUpdate={handleDeviceStatusUpdate}
         lastUpdated={lastDeviceUpdate}
       />
 

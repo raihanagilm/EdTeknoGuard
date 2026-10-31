@@ -106,6 +106,8 @@ class ConnectedDeviceService:
                 "rssi": r.rssi,
                 "ssid": r.ssid,
                 "status": r.status,
+                "is_blocked": bool(r.is_blocked),
+                "blocked_at": r.blocked_at.strftime("%Y-%m-%d %H:%M:%S") if r.blocked_at else None,
                 "first_seen": r.first_seen.strftime("%Y-%m-%d %H:%M:%S") if r.first_seen else None,
                 "last_seen": r.last_seen.strftime("%Y-%m-%d %H:%M:%S") if r.last_seen else None,
             }
@@ -206,4 +208,47 @@ class ConnectedDeviceService:
             "message": f"Berhasil memindai {len(synced)} perangkat terhubung dari modem ONT.",
             "total": len(synced),
             "devices": synced
+        }
+
+    @classmethod
+    def toggle_block_device(cls, db: Session, id_pelanggan: str, mac_address: str, block: Optional[bool] = None) -> Dict[str, Any]:
+        """
+        Blokir atau Buka Blokir (Unblock) perangkat terhubung pelanggan berdasarkan MAC address.
+        """
+        item = (
+            db.query(PerangkatTerhubung)
+            .filter(
+                PerangkatTerhubung.id_pelanggan == id_pelanggan,
+                PerangkatTerhubung.mac_address == mac_address
+            )
+            .first()
+        )
+
+        if not item:
+            return {"success": False, "message": f"Perangkat dengan MAC {mac_address} tidak ditemukan."}
+
+        new_status = not item.is_blocked if block is None else block
+        item.is_blocked = new_status
+        item.blocked_at = get_now_wib() if new_status else None
+        item.updated_at = get_now_wib()
+
+        db.commit()
+        db.refresh(item)
+
+        action_text = "diblokir" if new_status else "diizinkan kembali (unblock)"
+        return {
+            "success": True,
+            "message": f"Perangkat '{item.hostname or item.mac_address}' berhasil {action_text}.",
+            "is_blocked": item.is_blocked,
+            "blocked_at": item.blocked_at.strftime("%Y-%m-%d %H:%M:%S") if item.blocked_at else None,
+            "device": {
+                "id": item.id,
+                "mac_address": item.mac_address,
+                "ip_address": item.ip_address,
+                "hostname": item.hostname or "Perangkat N/A",
+                "tipe_koneksi": item.tipe_koneksi,
+                "status": item.status,
+                "is_blocked": bool(item.is_blocked),
+                "blocked_at": item.blocked_at.strftime("%Y-%m-%d %H:%M:%S") if item.blocked_at else None,
+            }
         }
