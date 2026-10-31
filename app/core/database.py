@@ -17,7 +17,13 @@ engine = create_engine(
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+
+# Deklarasi Model Terpisah: MasterBase (Global) & TenantBase (Per-Kantor)
+MasterBase = declarative_base()
+TenantBase = declarative_base()
+
+# Base alias untuk backward compatibility
+Base = MasterBase
 
 from fastapi import Request
 
@@ -47,7 +53,7 @@ def get_portal_db(request: Request = None):
         cust_cookie = request.cookies.get("edtekno_pelanggan_session")
         if cust_cookie:
             try:
-                from portal_pelanggan.core.security import verify_customer_session_token
+                from app.portal.core.security import verify_customer_session_token
                 c_data = verify_customer_session_token(cust_cookie)
                 if c_data and c_data.get("kantor"):
                     target_kantor = c_data.get("kantor").lower().strip()
@@ -96,7 +102,7 @@ def get_db(request: Request = None):
             cust_cookie = request.cookies.get("edtekno_pelanggan_session")
             if cust_cookie:
                 try:
-                    from portal_pelanggan.core.security import verify_customer_session_token
+                    from app.portal.core.security import verify_customer_session_token
                     c_data = verify_customer_session_token(cust_cookie)
                     if c_data and c_data.get("kantor"):
                         active_kantor = c_data.get("kantor").lower().strip()
@@ -116,7 +122,7 @@ def get_db(request: Request = None):
             cust_cookie = request.cookies.get("edtekno_pelanggan_session")
             if cust_cookie:
                 try:
-                    from portal_pelanggan.core.security import verify_customer_session_token
+                    from app.portal.core.security import verify_customer_session_token
                     c_data = verify_customer_session_token(cust_cookie)
                     if c_data and c_data.get("kantor"):
                         active_kantor = c_data.get("kantor").lower().strip()

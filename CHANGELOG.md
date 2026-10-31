@@ -11,7 +11,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 > **ATURAN MUTLAK BAGI SELURUH PENGEMBANG & AI AGENT:**
 > 1. **Dilarang Menghapus atau Merusak Fitur yang Sudah Stabil**: Setiap fitur yang telah tercatat dalam dokumen ini tidak boleh diubah secara sepihak, ditimpa, atau dihilangkan fungsinya tanpa instruksi eksplisit dari pengguna.
 > 2. **Wajib Memperbarui Changelog**: Setiap kali ada penambahan fitur baru, perbaikan bug (*hotfix*), optimasi kode, maupun perubahan antarmuka, AI Agent atau developer **WAJIB** mencatatnya pada bagian `[Unreleased]` atau versi terkait.
-> 3. **Cek Fitur Sebelum Modifikasi**: Sebelum memodifikasi kode atau merestrukturisasi modul, periksa daftar fitur di dokumen ini serta panduan pada [AGENTS.md](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/AGENTS.md) dan [designsystempro.md](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) untuk memastikan tidak terjadi regresi.
+> 3. **Cek Fitur Sebelum Modifikasi**: Sebelum memodifikasi kode atau merestrukturisasi modul, periksa daftar fitur di dokumen ini serta panduan pada [AGENTS.md](AGENTS.md) dan [designsystempro.md](designsystempro.md) untuk memastikan tidak terjadi regresi.
 
 ---
 
@@ -26,21 +26,21 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
-- **Standar Skeleton Loading Semantik & Larangan Full-Page Spinner Global ([AGENTS.md](file:///d:/databaru/Magang/EdTeknoGuard/AGENTS.md), [PortalSemanticSkeleton.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalSemanticSkeleton.jsx), [PortalPelangganApp.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/PortalPelangganApp.jsx), [TabKendalaPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabKendalaPelanggan.jsx))**:
+- **Standar Skeleton Loading Semantik & Larangan Full-Page Spinner Global ([AGENTS.md](AGENTS.md), [PortalSemanticSkeleton.jsx](frontend/src/portal/components/PortalSemanticSkeleton.jsx), [PortalPelangganApp.jsx](frontend/src/portal/PortalPelangganApp.jsx), [TabKendalaPelanggan.jsx](frontend/src/portal/components/TabKendalaPelanggan.jsx))**:
   - **Larangan Full-Page Spinner**: Menghapus penggunaan spinner blocking kosong di tengah layar (`RefreshCw animate-spin` full-screen) saat inisialisasi aplikasi maupun navigasi halaman/tab.
   - **Komponen Baru `PortalSemanticSkeleton`**: Menyediakan kerangka shimmer semantik (`animate-pulse`) yang presisi merefleksikan geometri layout asli (kartu status, metrik, daftar tiket, bar kuota, form WiFi, dan data profil) untuk meniadakan lonjakan visual (*Cumulative Layout Shift / CLS*).
   - **Persistent Shell & Silent Data Refresh**: Header dan bottom navigation bar tetap kokoh di posisinya saat transisi, dan data yang telah tersimpan tidak lagi di-reset menjadi skeleton saat dikunjungi ulang.
 
-- **Aturan Mutlak Larangan Dot Indikator Kosong & Sinkronisasi Realtime Portal ([AGENTS.md](file:///d:/databaru/Magang/EdTeknoGuard/AGENTS.md), [TabProfilPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx), [TabBerandaPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabBerandaPelanggan.jsx), [TabKuotaPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabKuotaPelanggan.jsx), [PortalPelangganApp.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/PortalPelangganApp.jsx))**:
+- **Aturan Mutlak Larangan Dot Indikator Kosong & Sinkronisasi Realtime Portal ([AGENTS.md](AGENTS.md), [TabProfilPelanggan.jsx](frontend/src/portal/components/TabProfilPelanggan.jsx), [TabBerandaPelanggan.jsx](frontend/src/portal/components/TabBerandaPelanggan.jsx), [TabKuotaPelanggan.jsx](frontend/src/portal/components/TabKuotaPelanggan.jsx), [PortalPelangganApp.jsx](frontend/src/portal/PortalPelangganApp.jsx))**:
   - **Larangan Mutlak Tag Dot Polos**: Dilarang keras menggunakan dot indikator kosong seperti `<span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>` di seluruh UI antarmuka web. Setiap penanda status wajib menggunakan ikon SVG semantik yang jelas (misalnya `<CheckCircle2 />`, `<ShieldCheck />`, `<AlertTriangle />`) berstandar Lucide icons / SVG inline murni.
   - **Pembersihan Kode Lama**: Mengganti dot hijau polos pada status verifikasi akun di `TabProfilPelanggan.jsx` dengan ikon `<CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />`.
-  - **Redesain Tab Profil Pelanggan ([TabProfilPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx))**:
+  - **Redesain Tab Profil Pelanggan ([TabProfilPelanggan.jsx](frontend/src/portal/components/TabProfilPelanggan.jsx))**:
     - Kartu identitas profil kini menampilkan Avatar inisial bulat tegas, Nama Pelanggan, ID Pelanggan font mono, tombol *"Edit Data"* dengan ikon pensil, dan tabel rincian data diri (Kantor Layanan, No WhatsApp, Alamat Lengkap, Paket Internet, IP Modem Router).
     - Tombol Edit Data membuka modal dialog pop-up yang memungkinkan pelanggan memperbarui Nama, Nomor WhatsApp, dan Alamat Rumah secara interaktif.
-  - **Pembaruan Navigasi Bawah TeknoCust ([PortalNavigation.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalNavigation.jsx))**:
+  - **Pembaruan Navigasi Bawah TeknoCust ([PortalNavigation.jsx](frontend/src/portal/components/PortalNavigation.jsx))**:
     - Tombol tab ke-2 pada *Sticky Bottom Navigation* diubah dari **WiFi** menjadi **Bayar** (ikon `<CreditCard />` Lucide SVG) yang langsung mengarah ke halaman Pembayaran & Tagihan Mandiri (`/portal/pembayaran`).
     - Pengaturan WiFi rumah kini terintegrasi secara ergonomis di halaman Profil pelanggan (`/portal/profil`).
-  - **Peningkatan Keamanan & Fitur Kelola WiFi Rumah ([TabWifiPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabWifiPelanggan.jsx), [api_router.py](file:///d:/databaru/Magang/EdTeknoGuard/portal_pelanggan/api_router.py), [portalApi.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/services/portalApi.js))**:
+  - **Peningkatan Keamanan & Fitur Kelola WiFi Rumah ([TabWifiPelanggan.jsx](frontend/src/portal/components/TabWifiPelanggan.jsx), [api_router.py](portal_pelanggan/api_router.py), [portalApi.js](frontend/src/portal/services/portalApi.js))**:
     - **Tampilan Kredensial Aktif**: Menampilkan Nama WiFi (SSID) aktif dan Kata Sandi WiFi saat ini yang tersensor (`••••••••`) dengan tombol toggle intip/lihat serta tombol salin (*copy to clipboard*).
     - **Penghapusan Total Asumsi Subnet `/24`**: Menghapus logika pengecekan blok IP 3 oktet (`target_subnet == client_subnet`) dan bypass dev `127.0.0.1` yang sebelumnya menyebabkan *false-positive* (terdeteksi tersambung WiFi rumah padahal berada di WiFi lain dalam subnet yang sama).
     - **Kebijakan Verifikasi Sambungan Ketat (Strict Mandatory Connection)**:
@@ -51,14 +51,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
       - Formulir ubah nama & sandi WiFi diubah menjadi komponen dropdown/accordion (*collapsible*) yang rapi dan tersembunyi secara default sehingga tampilan tidak membebani layar.
       - Peringatan sebelum ganti (wajib terhubung ke WiFi rumah) dan pemberitahuan setelah ganti (perangkat terputus sesaat) disatukan ke dalam **satu banner edukasi terpadu** yang ringkas, jelas, dan bersih.
       - **Overlay Maskot Interaktif**: Ketika perangkat terdeteksi belum tersambung ke modem WiFi rumah, seluruh formulir input ditutupi dengan lapisan overlay elegan (`backdrop-blur-md bg-white/90`) yang menampilkan maskot interaktif bertema penjaga keamanan (`security`), badge peringatan, penjelasan edukatif, dan tombol *"Cek Ulang Sambungan"* (`fetchWifiDetails`).
-  - **Fitur Upload & Kompresi Foto Profil WebP Mandiri ([TabProfilPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx), [PortalHeader.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalHeader.jsx), [api_router.py](file:///d:/databaru/Magang/EdTeknoGuard/portal_pelanggan/api_router.py), [models.py](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py))**:
+  - **Fitur Upload & Kompresi Foto Profil WebP Mandiri ([TabProfilPelanggan.jsx](frontend/src/portal/components/TabProfilPelanggan.jsx), [PortalHeader.jsx](frontend/src/portal/components/PortalHeader.jsx), [api_router.py](portal_pelanggan/api_router.py), [models.py](app/db/models.py))**:
     - **Kompresi Klien Otomatis (WebP Canvas)**: Foto yang dipilih pelanggan (kamera atau galeri HP) dikompresi otomatis di browser menjadi resolusi avatar 400x400 px format WebP (ukuran susut hingga hanya ~20-35 KB).
     - **Penyimpanan Server & Database Ringan**: File gambar fisik disimpan di `static/uploads/profil/{id_pelanggan}.webp` pada server (dimount via FastAPI `StaticFiles`), sedangkan database hanya menyimpan string path relatif (`foto_profil` di tabel `pelanggan`) untuk efisiensi performa maksimal.
     - **Avatar Dinamis & Tombol Kamera**: Menampilkan foto profil bulat dengan badge tombol kamera kecil di sampingnya, tombol hapus foto kembali ke inisial nama, serta integrasi foto avatar pada *PortalHeader*.
 
 
 
-- **Penghapusan Total Data Default Hardcoded & Proteksi Pemantauan Berbasis Database ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py), [settings/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/service.py), [ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx))**:
+- **Penghapusan Total Data Default Hardcoded & Proteksi Pemantauan Berbasis Database ([scheduler_service.py](app/services/scheduler_service.py), [settings/service.py](app/modules/settings/service.py), [ModulBeranda.jsx](frontend/src/components/ModulBeranda.jsx))**:
   - **Larangan Nilai Fallback Hardcoded**: Menghapus seluruh nilai bawaan hardcoded (ambang batas warning -26.0, kritis -27.0/-32.0, interval 20 menit, dan pasangan kredensial `admin/tekno2024`, `tekno/tekno2025`). Seluruh konfigurasi pemantauan sekarang **wajib murni diambil dari database** per kantor.
   - **Blokir Pemindaian Jika Belum Disetel di Database**: Jika pengaturan sistem (ambang batas warning/kritis, interval, atau kredensial modem) belum ada/belum disetel di database kantor:
     1. Pemantauan otomatis di latar belakang (*background scheduler*) otomatis **dibatalkan/dilewati** dan sistem dilarang mulai bekerja.
@@ -66,23 +66,23 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     3. Tombol "Mulai Pemantauan" di Beranda otomatis berstatus dinonaktifkan (*disabled*) dengan label "Pengaturan Kosong".
   - **Notifikasi In-App & Banner Peringatan**: Sistem memunculkan notifikasi tingkat tinggi (*level: critical*) pada Notification Center serta banner status pada Control Bar Beranda yang memberitahukan secara spesifik parameter mana yang belum disetel dan mengarahkan admin/teknisi untuk mengisi di menu Pengaturan.
 
-- **Perbaikan Reaktivitas Sorting Tabel Riwayat Redaman ([ModulRiwayatRedaman.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulRiwayatRedaman.jsx), [logs_mgmt/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/logs_mgmt/service.py))**:
+- **Perbaikan Reaktivitas Sorting Tabel Riwayat Redaman ([ModulRiwayatRedaman.jsx](frontend/src/components/ModulRiwayatRedaman.jsx), [logs_mgmt/service.py](app/modules/logs_mgmt/service.py))**:
   - **Dependency Array useEffect**: Menambahkan `sortField` dan `sortDir` ke daftar dependensi `useEffect` sehingga setiap klik header kolom tabel (Waktu Cek, ID Pelanggan, Nama, IP, Sinyal, Suhu, Status) seketika memicu pemanggilan data yang terurut secara realtime.
-  - **Backend Sort Mapping**: Menambahkan pemetaan kolom `id_pelanggan` pada `sort_column_map` di [LogsMgmtService](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/logs_mgmt/service.py).
+  - **Backend Sort Mapping**: Menambahkan pemetaan kolom `id_pelanggan` pada `sort_column_map` di [LogsMgmtService](app/modules/logs_mgmt/service.py).
 
-- **Grafik Pemantauan Khusus Pemindaian Massal & Timestamp Seragam ([monitoring/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/monitoring/service.py), [scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+- **Grafik Pemantauan Khusus Pemindaian Massal & Timestamp Seragam ([monitoring/service.py](app/modules/monitoring/service.py), [scheduler_service.py](app/services/scheduler_service.py))**:
   - **Timestamp Seragam per Siklus Scan**: Seluruh log hasil pemindaian massal (termasuk hasil perbaikan dari Pass Kedua retry) menggunakan satu waktu timestamp `waktu_cek` yang sama persis (saat pemindaian dimulai), mencegah titik-titik data terpecah ke menit berbeda.
   - **Eksklusi Single Check Mandiri**: Query data grafik (harian, 7 hari, 30 hari) secara otomatis menyaring dan mengecualikan pengujian mandiri (*Single Probe*) per pelanggan, sehingga grafik dashboard murni menampilkan riwayat tren pemindaian massal berkala.
 
-- **Penjadwalan Interval Murni Pasca Pemindaian Tuntas ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+- **Penjadwalan Interval Murni Pasca Pemindaian Tuntas ([scheduler_service.py](app/services/scheduler_service.py))**:
   - Memperbarui pencatatan `last_scan_time` di database dengan waktu saat pemindaian selesai total (`finish_time`), memastikan hitung mundur interval pemindaian berikutnya dihitung murni setelah seluruh proses pemindaian tuntas.
 
-- **Stopwatch Real-Time Ticker & Akselerasi Polling Progres Pemindaian ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx))**:
+- **Stopwatch Real-Time Ticker & Akselerasi Polling Progres Pemindaian ([ModulBeranda.jsx](frontend/src/components/ModulBeranda.jsx))**:
   - **Local Stopwatch Ticker 1-Detik**: Menambahkan interval ticker lokal di client React yang berdetak mulus setiap 1.000 ms selama proses pemindaian aktif, mengeliminasi masalah angka detik yang meloncat atau membeku akibat jeda request HTTP.
   - **Akselerasi Polling Fast Interval**: Interval polling status pemindaian ke backend dipercepat dari 1.500 ms menjadi 800 ms saat scan aktif untuk pembaruan data yang responsif.
   - **Anti-Jitter Monotonic Timer**: Menerapkan fungsi `Math.max()` saat menerima respon backend sehingga waktu berjalan tidak pernah mengalami glitch mundur (*time rollback*) akibat latency jaringan.
 
-- **Optimasi Pemindaian Serentak Multi-Pool (VALID & INVALID) & Pass Kedua Retry LOS Bertahap ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+- **Optimasi Pemindaian Serentak Multi-Pool (VALID & INVALID) & Pass Kedua Retry LOS Bertahap ([scheduler_service.py](app/services/scheduler_service.py))**:
   - **Dual Concurrent ThreadPool Executors dengan Autoscaling Dinamis**:
     - **Pool VALID (Autoscale Dinamis per 100 data, Cap 65 Worker)**:
       - Formula: Base 25 worker + 10 worker untuk setiap penambahan kelipatan 100 pelanggan (contoh: `<100`: 25w, `100-199`: 35w, `200-299`: 45w, `300-399`: 55w, `>=400`: 65w).
@@ -96,45 +96,45 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Pass Kedua untuk Pelanggan INVALID**: Tetap dijalankan secara paralel (15 worker) untuk memastikan seluruh kredensial dicoba tuntas.
 
 - **Penyelarasan Segmented Status Ticker Bar, Status Kredensial INVALID & Kontrol Cepat Sorting Pelanggan**:
-  - **Penghapusan Kartu "Lockout" & "Belum Cek" dari Ticker Bar ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx), [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx), [monitoring/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/monitoring/service.py), [customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+  - **Penghapusan Kartu "Lockout" & "Belum Cek" dari Ticker Bar ([ModulBeranda.jsx](frontend/src/components/ModulBeranda.jsx), [ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx), [monitoring/service.py](app/modules/monitoring/service.py), [customers/service.py](app/modules/customers/service.py))**:
     - Kartu `Lockout` dan `Belum Cek` dihapus sepenuhnya dari Ticker Bar Atas di Beranda dan Pelanggan.
     - Ticker Bar kembali bersih & konsisten menampilkan 5 kartu metrik sinyal optik utama: **`TOTAL`**, **`OPTIMAL`**, **`WASPADA`**, **`KRITIS`**, dan **`LOS`** baik di desktop maupun mobile.
-  - **Penyederhanaan Status Kredensial Menjadi Murni 2 Status: "VALID" & "INVALID" ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py), [ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py), [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx))**:
+  - **Penyederhanaan Status Kredensial Menjadi Murni 2 Status: "VALID" & "INVALID" ([scheduler_service.py](app/services/scheduler_service.py), [ont_scraper_service.py](app/services/ont_scraper_service.py), [ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx))**:
     - Menghapus badge abu-abu `BELUM UJI` dari antarmuka. Status kredensial modem di kolom *WIFI & ADMIN ONT* kini murni hanya memiliki 2 status pasti:
       1. **`VALID`** (hijau): Username & password terverifikasi cocok dan login modem berhasil.
       2. **`INVALID`** (merah): Segala bentuk kegagalan autentikasi (salah password, akun ditolak, atau modem sedang lock countdown).
     - Kolom Redaman untuk modem yang gagal login/belum terbaca tetap konsisten menampilkan tanda `-` dengan badge netral `BELUM CEK`.
-  - **Dropdown Kredensial Interaktif dari Database & Auto Live Check (Opsi A) ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx), [customers/controller.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/controller.py))**:
+  - **Dropdown Kredensial Interaktif dari Database & Auto Live Check (Opsi A) ([ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx), [customers/controller.py](app/modules/customers/controller.py))**:
     - Kolom *WIFI & ADMIN ONT* kini menyajikan dropdown interaktif berisi daftar seluruh kredensial modem yang tersimpan di database (`system_settings`) kantor terkait.
     - Admin/Super Admin dapat langsung memilih pasangan `username:password` modem secara manual. Pemilihan ini otomatis menyimpan perubahan ke database pelanggan dan seketika memicu pengujian live (*single probe*) ke modem fisik.
     - Mekanisme fallback otomatis scraper tetap aktif jika kredensial yang dipilih belum cocok.
-  - **Pemindaian Massal Paralel Multi-Threading (5 Worker Pool) per Kantor ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+  - **Pemindaian Massal Paralel Multi-Threading (5 Worker Pool) per Kantor ([scheduler_service.py](app/services/scheduler_service.py))**:
     - **Isolasi Per-Kantor Terjaga**: Arsitektur pemisahan kantor (`cabang`, `pusat`, `banyumas`) tetap mutlak independen. Paralelisme diterapkan murni di dalam lingkup satu kantor (*intra-office device concurrency*).
     - **Worker Pool 5 Thread Simultan**: Menggantikan loop sekuensial lambat dengan `ThreadPoolExecutor(max_workers=5)` sehingga waktu pemindaian ~156 modem berkurang drastis dari beberapa menit menjadi hanya dalam hitungan detik.
     - **Thread-Safe DB Session & Atomisitas**: Setiap worker mengeksekusi scraping dengan sesi SQLAlchemy independen (`SessionLocal()`) dengan blok `try ... finally: worker_db.close()`, serta sinkronisasi counter KPI dan checkpoint progress dengan `threading.Lock()`.
     - **Penyelarasan Query Relasi PerangkatONT pada Second Pass**: Memperbaiki query filter `invalid_cust_ids` yang sebelumnya salah membaca field properti Python menjadi query relasional eksplisit `join(Pelanggan.perangkat).filter(PerangkatONT.status_kredensial == "INVALID")`, sehingga seluruh modem yang lockout/invalid pada pemindaian pertama berhasil ditarik dan diproses putaran ulang rotasi kredensialnya hingga tuntas.
     - **Paralel Second Pass Retry**: Putaran kedua (SECOND PASS) untuk modem yang perlu rotasi kredensial/menunggu countdown lockout juga diproses secara simultan (3–5 workers) sehingga tidak saling memblokir antrean.
     - **Kontrol Interupsi Responsif**: Status tombol Pause dan Stop (Berhenti Paksa) di antarmuka web tetap direspons seketika oleh pool eksekusi.
-  - **Peningkatan Second Pass Pemindaian Massal & Rotasi Kredensial Tuntas ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py), [ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py))**:
+  - **Peningkatan Second Pass Pemindaian Massal & Rotasi Kredensial Tuntas ([scheduler_service.py](app/services/scheduler_service.py), [ont_scraper_service.py](app/services/ont_scraper_service.py))**:
     - **Rotasi Penuh Kredensial Database**: Pada putaran kedua (SECOND PASS) setelah pemindaian pelanggan normal selesai, sistem secara otomatis menguji seluruh modem yang berstatus lockout/invalid dengan mencoba satu per satu seluruh pasangan kredensial yang ada di database settings kantor aktif.
     - **Stay Connection Lockout Recovery**: Jika modem mengalami jeda keamanan/lockout saat mencoba suatu kredensial, scraper menahan sesi HTTP (`stay connection`) hingga countdown selesai, lalu **melanjutkan pengujian ke kredensial ke-2, ke-3, hingga kredensial terakhir**.
     - **Auto-Update Kredensial Valid**: Begitu salah satu kredensial berhasil login, `user_admin` dan `pass_admin` pelanggan di database seketika diperbarui secara otomatis menjadi kredensial yang valid tersebut (`status_kredensial = VALID`).
     - **Notifikasi Kredensial Tidak Cocok**: Hanya jika seluruh kredensial di database telah dicoba dan semuanya ditolak modem, sistem menetapkan status akhir `INVALID` dengan keterangan: *"Kredensial Tidak Cocok: Seluruh pasangan kredensial di Pengaturan Sistem telah dicoba dan ditolak modem."*
-  - **Penyelarasan Backend Sorting Kolom Redaman (dBm) ([customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+  - **Penyelarasan Backend Sorting Kolom Redaman (dBm) ([customers/service.py](app/modules/customers/service.py))**:
     - Nilai `effective_status` pada sorting database MySQL menggunakan `case` sekarang mengembalikan `"UNTESTED"` untuk modem tanpa log (bukan lagi fallback `"NORMAL"`).
     - Menambahkan filter query eksplisit untuk status `UNTESTED` agar mencakup modem yang belum memiliki entri di `log_performa_ont`.
     - **Prioritas Tampilan BELUM CEK pada Sorting Redaman**: Saat pengguna mengklik header tabel **Redaman (dBm)** (`sort_by=rx_power`, urutan `asc`), modem dengan status `BELUM CEK` (`rx_power IS NULL`) kini secara otomatis diurutkan di baris paling atas/awal tabel, mempermudah identifikasi modem yang belum teruji tanpa mengganggu pengurutan numerik dBm.
-  - **Siklus Sorting Bertahap Kolom IP & Router ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) & [customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py))**:
+  - **Siklus Sorting Bertahap Kolom IP & Router ([ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx) & [customers/service.py](app/modules/customers/service.py))**:
     - Header kolom gabungan **IP & Router** menerapkan sistem siklus 4 status berurutan per klik:
       1. **Klik 1**: Mengurutkan berdasarkan **IP Router** (`ip_router asc`). Label header berubah menjadi *IP Router*.
       2. **Klik 2**: Mengurutkan berdasarkan **IP ONT** (`ip_ont asc`). Label header berubah menjadi *IP ONT*.
       3. **Klik 3**: Mengurutkan berdasarkan **Jenis Modem** (`jenis_modem asc`). Label header berubah menjadi *Modem*.
-  - **Penambahan Card Shortcut & Sorting Kredensial INVALID ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx), [ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx), [customers/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/service.py), [monitoring/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/monitoring/service.py))**:
+  - **Penambahan Card Shortcut & Sorting Kredensial INVALID ([ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx), [ModulBeranda.jsx](frontend/src/components/ModulBeranda.jsx), [customers/service.py](app/modules/customers/service.py), [monitoring/service.py](app/modules/monitoring/service.py))**:
     - **Card Shortcut `Invalid`**: Menambahkan segmen kartu `Invalid` (warna oranye kontras) pada Segmented Status Ticker Bar di halaman Data Pelanggan dan Beranda untuk menampilkan jumlah riil modem dengan kredensial gagal/invalid. Mengklik kartu ini langsung menyaring tabel menampilkan seluruh pelanggan berstatus kredensial `INVALID`.
     - **Sorting Header `WiFi & Admin ONT`**: Mengklik header tabel `WiFi & Admin ONT` (`sort_by=status_kredensial`) pada arah `asc` kini memprioritaskan dan mengumpulkan seluruh modem `INVALID` di posisi paling atas tabel, memudahkan teknisi/admin langsung mengevaluasi dan mengganti pasangan kredensial modem yang bermasalah.
 
 - **Peningkatan Scraper ONT: Adaptasi Karakteristik Vendor, 1-3 Percobaan per Kredensial, Stay-Connection Lockout & Status LOCKOUT**:
-  - **Deteksi Karakteristik Vendor Modem ([ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py))**:
+  - **Deteksi Karakteristik Vendor Modem ([ont_scraper_service.py](app/services/ont_scraper_service.py))**:
     - Menambahkan `detect_ont_vendor_behavior` dan `parse_lockout_info` untuk mengenali karakteristik modem (ZTE GM220/XPON, Huawei, FiberHome, dan Generic XPON) secara heuristik.
     - Menetapkan kebutuhan sesi HTTP dan durasi lockout spesifik vendor (ZTE: 60 detik dengan `require_stay_connection=True`, vendor lain: 30–60 detik).
   - **Mekanisme 1-3 Percobaan per Kredensial & Stay-Connection Lockout**:
@@ -143,21 +143,21 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
       - **Cek Redaman Mandiri (Single Probe di Data Pelanggan)**: Scraper **mempertahankan koneksi HTTP (stay connection)** tanpa menutup socket TCP/sesi, menunggu sisa countdown selesai (`time.sleep(lock_secs + 1)`), menyegarkan form token, lalu melanjutkan percobaan kredensial berikutnya.
       - **Pemantauan Massal (Background Scheduler)**: Mengaktifkan parameter `is_mass_scan=True` sehingga jika mendeteksi lockout, sistem langsung menandai status `LOCKOUT` dan segera memindai pelanggan berikutnya agar antrian scan massal tidak terhenti.
   - **Penyelarasan Status `LOCKOUT` di Database & Frontend**:
-    - Status `LOCKOUT` disimpan secara resmi di tabel [log_performa_ont](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py) database MySQL Local.
-    - Tabel [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) menampilkan badge status **`LOCKOUT`** berwarna oranye kontras yang jelas dan otomatis mengaktifkan countdown timer cooldown di UI.
+    - Status `LOCKOUT` disimpan secara resmi di tabel [log_performa_ont](app/db/models.py) database MySQL Local.
+    - Tabel [ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx) menampilkan badge status **`LOCKOUT`** berwarna oranye kontras yang jelas dan otomatis mengaktifkan countdown timer cooldown di UI.
 
 - **Pembersihan Data Statis & Redundansi Modul Arsitektur Frontend & Backend**:
-  - **Pembersihan File Duplikat [ModulManajemenPengguna.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulManajemenPengguna.jsx)**: Menghapus permanen berkas duplikat lama berukuran 61 KB yang tidak pernah dipakai dan memastikan sistem terpusat pada [ModulPenggunaNOC.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPenggunaNOC.jsx).
-  - **Pembersihan Komponen Usang [Modals.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/Modals.jsx)**: Menghapus komponen `OntDetailModal` yang sudah tidak terpakai sehingga [Modals.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/Modals.jsx) terfokus murni pada `ConfirmSaveModal`.
-  - **Pembersihan Data Mock di App.jsx**: Menghapus total array statis `ontData` (Bpk. Hendro, Siti Aminah, dll.) serta rendering canvas waveform manual di [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx).
+  - **Pembersihan File Duplikat [ModulManajemenPengguna.jsx](frontend/src/components/ModulManajemenPengguna.jsx)**: Menghapus permanen berkas duplikat lama berukuran 61 KB yang tidak pernah dipakai dan memastikan sistem terpusat pada [ModulPenggunaNOC.jsx](frontend/src/components/ModulPenggunaNOC.jsx).
+  - **Pembersihan Komponen Usang [Modals.jsx](frontend/src/components/Modals.jsx)**: Menghapus komponen `OntDetailModal` yang sudah tidak terpakai sehingga [Modals.jsx](frontend/src/components/Modals.jsx) terfokus murni pada `ConfirmSaveModal`.
+  - **Pembersihan Data Mock di App.jsx**: Menghapus total array statis `ontData` (Bpk. Hendro, Siti Aminah, dll.) serta rendering canvas waveform manual di [App.jsx](frontend/src/App.jsx).
   - **Penyelarasan Seluruh Fallback Paket & Sinyal**: Menghapus seluruh asumsi hardcoded `'20 Mbps Unlimited'`, `'ZTE GM220-S'`, serta angka dummy signal/kuota (`-26.38 dBm`, `163.7 GB`, `random.uniform()`) di portal pelanggan dan backend admin, mengubahnya menjadi pembacaan database riil atau `-`/`0.0`.
-  - **Pembaruan Dokumen [AGENTS.md](file:///d:/databaru/Magang/EdTeknoGuard/AGENTS.md)**: Memutakhirkan bagan pohon struktur direktori agar mencerminkan seluruh modul baru (`admin_customer_mgmt`, `users`, `activity_logs`, `mikrotik`, dan `portal_pelanggan`).
+  - **Pembaruan Dokumen [AGENTS.md](AGENTS.md)**: Memutakhirkan bagan pohon struktur direktori agar mencerminkan seluruh modul baru (`admin_customer_mgmt`, `users`, `activity_logs`, `mikrotik`, dan `portal_pelanggan`).
 
-- **Navigasi Form Edit Pelanggan & Menu Aksi Titik Tiga ([ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx))**:
+- **Navigasi Form Edit Pelanggan & Menu Aksi Titik Tiga ([ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx))**:
   - **Kembali ke Detail Pelanggan dari Form Edit**: Menambahkan tombol panah navigasi `<ArrowLeft />` ("Detail") pada header modal Edit Pelanggan dan mengintegrasikan tombol "Batal" agar pengguna dapat langsung kembali ke Modal Detail Pelanggan tanpa harus mencari ulang baris pelanggan.
   - **Aksi Baris Tabel Titik Tiga (...)**: Mengembalikan aksi baris tabel menjadi tombol popover titik tiga (`MoreVertical`) rapi yang memuat: Detail Pelanggan, Hubungi WA, Isolir/Buka Isolir Akses, Edit Data, dan Hapus Data, dengan penyesuaian posisi pintar (`bottom-full` pada baris bawah) dan backdrop transparan agar tidak terpotong.
 
-- **Pusat Notifikasi Mandiri, Agregasi Batching (>5), & Isolasi Status Baca Antar User ([ModulNotifikasi.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulNotifikasi.jsx), [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx), [service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/admin_customer_mgmt/service.py))**:
+- **Pusat Notifikasi Mandiri, Agregasi Batching (>5), & Isolasi Status Baca Antar User ([ModulNotifikasi.jsx](frontend/src/components/ModulNotifikasi.jsx), [App.jsx](frontend/src/App.jsx), [service.py](app/modules/admin_customer_mgmt/service.py))**:
   - **Pusat Notifikasi Popover Flyout Mandiri (`ModulNotifikasi.jsx`)**:
     - Tombol lonceng di navbar kini membuka panel notifikasi mandiri yang modern, cepat, dan responsif tanpa memaksa navigasi langsung ke halaman tiket keluhan.
     - Mengintegrasikan dua kategori informasi utama secara real-time: **Hasil Pemantauan Redaman ONT** (LOS, Critical, Warning) dan **Tiket Keluhan Pelanggan** (Menunggu, Diproses), serta pengingat status scheduler terjeda khusus Super Admin.
@@ -174,7 +174,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Pembersihan Bersih Dependensi Telegram**:
     - Menghapus berkas `app/services/telegram_service.py` serta seluruh atribut dan variabel konfigurasi Telegram dari `app/core/config.py`, `init_db.py`, dan schemas, sepenuhnya beralih ke Native Android Notification & Web Notification Center.
 
-- **Pengaturan Sistem Nyata dari Database MySQL Local & Terisolasi Per Kantor Aktif ([ModulPengaturan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx), [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx), [service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/service.py))**:
+- **Pengaturan Sistem Nyata dari Database MySQL Local & Terisolasi Per Kantor Aktif ([ModulPengaturan.jsx](frontend/src/components/ModulPengaturan.jsx), [App.jsx](frontend/src/App.jsx), [service.py](app/modules/settings/service.py))**:
   - **Data Riil Langsung dari Database MySQL Local**: Seluruh form konfigurasi di Modul Pengaturan membaca dan menulis data nyata ke tabel `system_settings` pada database MySQL Local (`127.0.0.1:3306`, db `edteknoguard`), sepenuhnya meniadakan data dummy/palsu.
   - **Isolasi Pengaturan Mandiri Per Kantor Aktif (`activeOffice`)**:
     - Nilai default interval pemantauan yang aman adalah **20 menit**.
@@ -188,7 +188,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - Menampilkan badge kantor aktif `🏢 Kantor: {activeOffice}` di header Tab 1 (Parameter & Ambang Batas) dan Tab 2 (Kredensial Modem ONT).
 
 - **Arsitektur Pemantauan Paralel Multi-Kantor & Jeda Jadwal Mandiri Per Kantor (Backend & Frontend)**:
-  - **Dukungan Multi-Threading Paralel Penuh Antar Kantor ([scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py))**:
+  - **Dukungan Multi-Threading Paralel Penuh Antar Kantor ([scheduler_service.py](app/services/scheduler_service.py))**:
     - Merestrukturisasi engine singleton `MonitoringScheduler` dari status tunggal global menjadi `OfficeScanState` yang thread-safe dengan `threading.Lock` per kantor.
     - Setiap kantor kini dapat menjalankan pemindaian secara bersamaan (*true parallel multi-office scanning*) tanpa memblokir kantor lainnya: Banyumas, Cabang, Pusat, maupun kantor baru yang ditambahkan di masa mendatang dapat dipindai serentak.
     - Pemindaian manual (`POST /api/monitoring/scan-all`) dieksekusi secara asinkron di latar belakang menggunakan thread terpisah per kantor dan langsung mengembalikan respons `status: "started"`.
@@ -199,7 +199,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - Jika dijeda tanpa menentukan kantor (secara global), sistem secara otomatis menyinkronkan status ke seluruh kantor terdaftar di database.
   - **Dukungan Kantor Baru Dinamis Tanpa Batasan Hardcode**:
     - Seluruh logika pembacaan status kantor, scheduler wrapper, dan checkpoint JSON (`data/scan_state_{kantor}.json`) mendukung penambahan kantor baru secara dinamis dari tabel `kantors`.
-  - **Sinkronisasi Antarmuka Pengguna Frontend ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))**:
+  - **Sinkronisasi Antarmuka Pengguna Frontend ([ModulBeranda.jsx](frontend/src/components/ModulBeranda.jsx) & [api.js](frontend/src/services/api.js))**:
     - Tombol "Jeda Jadwal" / "Aktifkan Jadwal" pada Beranda kini mengirimkan parameter `{ kantor: activeOffice }` sehingga aksi Super Admin hanya menjeda jadwal untuk kantor aktif yang sedang dibuka.
     - Status mesin pemantau di Control Bar ("Pemantauan Otomatis: Aktif" vs "Dijeda") secara dinamis mencerminkan status jadwal spesifik kantor yang sedang dibuka (`activeOffice`).
     - Aksi Jeda Pemindaian, Lanjutkan, dan Stop Pemindaian kini mengirimkan parameter `{ kantor: activeOffice }` secara akurat.
@@ -211,39 +211,39 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Sinkronisasi Otomatis Status & Metrik KPI Berdasarkan Kantor Aktif**:
     - `fetchStatus()` dan `fetchKpi()` kini otomatis meneruskan parameter `{ kantor: activeOffice }` ke backend, dan langsung dieksekusi secara instan saat pengguna berpindah kantor di dropdown navbar atas tanpa tertahan timer polling.
     - Endpoint `/api/monitoring/status` di backend diperbarui untuk menghitung data `total_customers` dan status pemantauan secara terisolasi per kantor yang diminta.
-  - **Isolasi Visual Pemindaian Real-Time ([ModulBeranda.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx))**:
+  - **Isolasi Visual Pemindaian Real-Time ([ModulBeranda.jsx](frontend/src/components/ModulBeranda.jsx))**:
     - Progress bar pemindaian aktif dan status jeda kini terisolasi 100% per kantor aktif (`activeOffice`). Jika kantor yang sedang dipindai adalah `Banyumas`, tampilan kantor `Pusat` dan `Cabang` tetap bersih dalam kondisi standby tanpa menampilkan progress bar Banyumas yang membingungkan.
     - **Opsi B Khusus Super Admin**: Super Admin saat membuka kantor lain disajikan banner informasi kompak latar belakang (*"Informasi: Pemindaian Kantor [BANYUMAS] sedang berjalan di latar belakang: X/Y ONT"*), memberikan visibilitas penuh tanpa merusak ruang kerja kantor aktif.
     - Admin Cabang dan Teknisi hanya melihat proses pemindaian yang relevan dengan kantor yang ditugaskan kepada mereka.
   - **Pengetatan Hak Akses Kontrol Pemindaian & Jadwal Scheduler**:
     - **Jeda Jadwal Otomatis (Scheduler Toggle)**: Dibatasi eksklusif hanya untuk `super admin` baik di UI maupun di endpoint backend `POST /api/monitoring/toggle-scheduler`.
     - **Jeda, Lanjutkan, & Batalkan Pemindaian Aktif**: Super Admin berhak mengontrol pemindaian di seluruh kantor, sedangkan Admin Cabang dibatasi ketat hanya untuk mengontrol pemindaian yang menargetkan kantor yang diizinkannya (`_validate_scan_control_permission`). Teknisi dilarang mengontrol pemindaian massal.
-  - **Form Login Bersih & Aman ([HalamanLogin.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/HalamanLogin.jsx))**:
+  - **Form Login Bersih & Aman ([HalamanLogin.jsx](frontend/src/components/HalamanLogin.jsx))**:
     - Menghapus nilai hardcoded username `admin` dan password `agiltampan` pada initial state form login.
     - Input login kini selalu bersih/kosong dengan placeholder netral demi keamanan sistem.
-  - **Modul Pengguna NOC ([ModulPenggunaNOC.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPenggunaNOC.jsx))**: Tombol aksi langsung edit dan hapus pada setiap baris tabel kini dikemas ke dalam tombol menu titik tiga (`MoreVertical`), menyajikan opsi popover elegan *"Edit Akun"* dan *"Hapus"* (dengan proteksi terhadap akun master `admin`).
-  - **Modul Kantor Cabang ([ModulKantorCabang.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulKantorCabang.jsx))**: Tombol aksi langsung (*Sync MikroTik*, *Edit*, *Hapus*) kini diringkas ke dalam tombol menu titik tiga (`MoreVertical`), menyajikan pilihan popover *"Sync MikroTik"* (khusus router yang memiliki host), *"Edit Kantor"*, dan *"Hapus Kantor"* (terproteksi untuk kantor default sistem).
+  - **Modul Pengguna NOC ([ModulPenggunaNOC.jsx](frontend/src/components/ModulPenggunaNOC.jsx))**: Tombol aksi langsung edit dan hapus pada setiap baris tabel kini dikemas ke dalam tombol menu titik tiga (`MoreVertical`), menyajikan opsi popover elegan *"Edit Akun"* dan *"Hapus"* (dengan proteksi terhadap akun master `admin`).
+  - **Modul Kantor Cabang ([ModulKantorCabang.jsx](frontend/src/components/ModulKantorCabang.jsx))**: Tombol aksi langsung (*Sync MikroTik*, *Edit*, *Hapus*) kini diringkas ke dalam tombol menu titik tiga (`MoreVertical`), menyajikan pilihan popover *"Sync MikroTik"* (khusus router yang memiliki host), *"Edit Kantor"*, dan *"Hapus Kantor"* (terproteksi untuk kantor default sistem).
 
 - **Penyelarasan Pengaturan Sistem Real Database & Eliminasi Tab Redundan Router MikroTik**:
-  - **Sinkronisasi Otomatis Data Pengaturan Real Database**: [ModulPengaturan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) kini otomatis memanggil `fetchBackendSettings()` saat komponen pertama kali di-mount, memastikan nilai interval pemantauan, ambang batas redaman (-26 dBm / -27 dBm), kredensial ONT multi-fallback, dan preferensi notifikasi selalu terisi langsung dari database (tabel `system_settings`), bukan nilai template/placeholder bawaan.
-  - **Sertifikasi Data Profil Nyata**: Endpoint `GET /api/auth/me` pada [app/main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) diperbarui untuk menyertakan `no_wa` dari database, sehingga data pengguna yang tampil di tab Personal (Profil & Kata Sandi) memuat ID, Nama, No. WhatsApp, Kantor Layanan, dan Hak Akses riil.
-  - **Penghapusan Tab Redundan Router MikroTik**: Tab "Router MikroTik" dihilangkan dari navigasi mobile switcher (grid 3 tab) dan desktop tree menu [ModulPengaturan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) karena konfigurasi router MikroTik telah dikonsolidasikan secara penuh per kantor cabang di [ModulKantorCabang.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulKantorCabang.jsx).
+  - **Sinkronisasi Otomatis Data Pengaturan Real Database**: [ModulPengaturan.jsx](frontend/src/components/ModulPengaturan.jsx) kini otomatis memanggil `fetchBackendSettings()` saat komponen pertama kali di-mount, memastikan nilai interval pemantauan, ambang batas redaman (-26 dBm / -27 dBm), kredensial ONT multi-fallback, dan preferensi notifikasi selalu terisi langsung dari database (tabel `system_settings`), bukan nilai template/placeholder bawaan.
+  - **Sertifikasi Data Profil Nyata**: Endpoint `GET /api/auth/me` pada [app/main.py](app/main.py) diperbarui untuk menyertakan `no_wa` dari database, sehingga data pengguna yang tampil di tab Personal (Profil & Kata Sandi) memuat ID, Nama, No. WhatsApp, Kantor Layanan, dan Hak Akses riil.
+  - **Penghapusan Tab Redundan Router MikroTik**: Tab "Router MikroTik" dihilangkan dari navigasi mobile switcher (grid 3 tab) dan desktop tree menu [ModulPengaturan.jsx](frontend/src/components/ModulPengaturan.jsx) karena konfigurasi router MikroTik telah dikonsolidasikan secara penuh per kantor cabang di [ModulKantorCabang.jsx](frontend/src/components/ModulKantorCabang.jsx).
 
 - **Fitur Ekstraksi & Pembaruan Kredensial WiFi ONT (Live Web GUI ZTE GM220-S)**:
-  - **Ekstraksi SSID & WPA Password Otomatis**: Layanan [ont_scraper_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/ont_scraper_service.py) kini otomatis membuka path `/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch` dan `net_wlan_secrity_t.gch` untuk membaca SSID (`Transfer_meaning('ESSID')`) dan kata sandi WPA (`Transfer_meaning('KeyPassphrase'/'PreSharedKey')`).
+  - **Ekstraksi SSID & WPA Password Otomatis**: Layanan [ont_scraper_service.py](app/services/ont_scraper_service.py) kini otomatis membuka path `/getpage.gch?pid=1002&nextpage=net_wlan_essid_t.gch` dan `net_wlan_secrity_t.gch` untuk membaca SSID (`Transfer_meaning('ESSID')`) dan kata sandi WPA (`Transfer_meaning('KeyPassphrase'/'PreSharedKey')`).
   - **Sinkronisasi Otomatis ke Database**: Pada pemindaian berkala (`scheduled_job_wrapper`) maupun *Single Probe Check* (`single_ont_check`), SSID dan Password WiFi yang berhasil diekstrak otomatis disimpan ke entitas `PerangkatONT` / `Pelanggan` di database.
   - **Fungsi Update WiFi Berproteksi Safe Mode (`dry_run=True`)**:
     - Disiapkan metode `ONTScraperService.update_wifi_credentials(ip, user, password, new_ssid, new_password, dry_run=True)` untuk mengirim perubahan WiFi ke modem.
     - Sesuai instruksi pengguna, mode aman aktif secara default (`dry_run=True`) sehingga perubahan tersimpan di database dan tervalidasi tanpa mengeksekusi request fisik yang merusak perangkat modem.
     - Endpoint REST API baru: `POST /api/customers/{id_pelanggan}/change-wifi`.
-  - **Antarmuka Form Edit Pelanggan**: Modal edit data pelanggan di [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) telah dilengkapi kolom input **Nama WiFi (SSID)** dan **Password WiFi** font monospace.
+  - **Antarmuka Form Edit Pelanggan**: Modal edit data pelanggan di [ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx) telah dilengkapi kolom input **Nama WiFi (SSID)** dan **Password WiFi** font monospace.
 
 - **Konsolidasi Monitoring MikroTik & Eliminasi Perangkat Kantor Internal**:
   - **Eksklusi Perangkat Kantor Internal**: Seluruh perangkat internal kantor (`SERVER-NOC-LOCAL`, `Modem Office`, `CCTV-NVR-OFFICE`, `DESKTOP-F0AS19V`, dsb.) otomatis difilter keluar dari pemantauan Simple Queues MikroTik sehingga data monitoring murni berisi pelanggan ISP.
   - **Pembersihan Modul MikroTik Terpisah**: Menghapus `ModulMikroTikNOC.jsx` dan navigasi tab `/mikrotik` di Sidebar dan router aplikasi.
   - **Integrasi Single Source of Truth ke Modul Pelanggan**:
     - **Data Kuota & Traffic Real-Time**: Endpoint `GET /api/customers` dan `GET /api/customers/{id_pelanggan}` kini langsung melakukan *outer join* ke `KuotaPelanggan` periode bulan berjalan (`YYYY-MM`), menyajikan `kuota_terpakai_gb`, `upload_bytes`, `download_bytes`, `status_isolir`, dan `queue_name` secara presisi dan real-time.
-    - **Kolom Kuota & Badge Isolir di Tabel**: Tabel pelanggan di [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) kini memuat kolom **Kuota (Bln Ini)** dengan rincian total GB, breakdown ▲ Upload • ▼ Download, serta label **DIISOLIR** jika akses pelanggan diputus.
+    - **Kolom Kuota & Badge Isolir di Tabel**: Tabel pelanggan di [ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx) kini memuat kolom **Kuota (Bln Ini)** dengan rincian total GB, breakdown ▲ Upload • ▼ Download, serta label **DIISOLIR** jika akses pelanggan diputus.
     - **Tombol Sync MikroTik**: Menambahkan tombol pemicu sinkronisasi manual langsung pada toolbar tabel pelanggan (`POST /api/mikrotik/sync-quota`).
     - **Aksi Isolir / Buka Isolir Cepat**: Menambahkan opsi isolir / unblock langsung pada menu titik tiga setiap baris pelanggan (`POST /api/mikrotik/toggle-isolir`).
     - **Informasi Jaringan MikroTik di Modal Detail**: Menampilkan status isolir, rincian traffic, nama rule Simple Queue, dan timestamp sinkronisasi pada pop-up detail pelanggan.
@@ -265,26 +265,26 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - Server POP kini disajikan secara dinamis dari database, bukan hardcoded.
 
 - **Dukungan Dua IP Terpisah Pelanggan: IP ONT (10.10.x.x) & IP Router (192.168.x.x)**:
-  - **Arsitektur Basis Data Multi-IP**: Ditambahkan kolom `ip_ont` pada tabel `perangkat_ont` di database serta shortcut property di model `Pelanggan` ([app/db/models.py](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py)).
-  - **Pemetaan Otomatis MikroTik**: Pada [mikrotik_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/mikrotik_service.py), sistem memetakan perangkat dengan IP `10.10.x.x` (dari ARP Table/VLAN optik) ke `ip_ont` dan IP `192.168.x.x` (dari DHCP Lease) ke `ip_router`. Jika satu pelanggan (berdasarkan MAC atau Comment identik) memiliki kedua IP, sistem menyatukannya ke 1 data pelanggan yang sama.
-  - **Tampilan Tabel Pelanggan Bertingkat Bersih Tanpa Ikon**: Kolom *IP & Wilayah* di [ModulPelanggan.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) menyajikan kedua data IP secara bertingkat bersih dengan badge teks monospaced (`ONT: 10.10.x.x` dan `Router: 192.168.x.x`) tanpa menggunakan emoji atau ikon grafis.
+  - **Arsitektur Basis Data Multi-IP**: Ditambahkan kolom `ip_ont` pada tabel `perangkat_ont` di database serta shortcut property di model `Pelanggan` ([app/db/models.py](app/db/models.py)).
+  - **Pemetaan Otomatis MikroTik**: Pada [mikrotik_service.py](app/services/mikrotik_service.py), sistem memetakan perangkat dengan IP `10.10.x.x` (dari ARP Table/VLAN optik) ke `ip_ont` dan IP `192.168.x.x` (dari DHCP Lease) ke `ip_router`. Jika satu pelanggan (berdasarkan MAC atau Comment identik) memiliki kedua IP, sistem menyatukannya ke 1 data pelanggan yang sama.
+  - **Tampilan Tabel Pelanggan Bertingkat Bersih Tanpa Ikon**: Kolom *IP & Wilayah* di [ModulPelanggan.jsx](frontend/src/components/ModulPelanggan.jsx) menyajikan kedua data IP secara bertingkat bersih dengan badge teks monospaced (`ONT: 10.10.x.x` dan `Router: 192.168.x.x`) tanpa menggunakan emoji atau ikon grafis.
   - **Penamaan Menu Sidebar**: Menu navigasi diubah menjadi **"Kantor"** (bukan *Kantor Cabang*) untuk menyelaraskan cakupan multi-kantor (Pusat, Cabang, Banyumas).
 
 - **Pemisahan Halaman Mandiri Pengguna NOC & Kantor Serta Tombol Sync WinBox On-Demand**:
   - **Pemisahan Modul Navigasi**: Tab Pengguna dan Kantor pada Manajemen Pengguna kini dipecah menjadi dua file page mandiri:
-    - [ModulPenggunaNOC.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPenggunaNOC.jsx): Khusus akun petugas NOC, peran (super admin, admin, teknisi), dan izin multi-kantor.
-    - [ModulKantorCabang.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulKantorCabang.jsx): Khusus master data kantor operasional dan konfigurasi router MikroTik per wilayah.
+    - [ModulPenggunaNOC.jsx](frontend/src/components/ModulPenggunaNOC.jsx): Khusus akun petugas NOC, peran (super admin, admin, teknisi), dan izin multi-kantor.
+    - [ModulKantorCabang.jsx](frontend/src/components/ModulKantorCabang.jsx): Khusus master data kantor operasional dan konfigurasi router MikroTik per wilayah.
   - **Tombol "Sync WinBox Sekarang"**: Disediakan tombol aksi sinkronisasi langsung di setiap baris kantor pada tabel Kantor.
   - **Pesan Status Jaringan Informatif & Dinamis**: Jika router tidak dapat dijangkau, sistem memberikan pesan: *"Router MikroTik (<IP>:<Port>) tidak dapat dijangkau. Pastikan jaringan server terhubung ke jaringan router."*
-  - **Auto-Sync Mandiri Latar Belakang (*Decoupled Daemon*)**: Auto-sync MikroTik dipisahkan menjadi job mandiri `mikrotik_auto_sync_job` di [scheduler_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/scheduler_service.py) yang berjalan setiap 3 menit terpisah dari siklus pemantauan redaman ONT, sehingga tetap aktif memindai walaupun data pelanggan sedang kosong (0) atau pemantauan redaman sedang dijeda.
+  - **Auto-Sync Mandiri Latar Belakang (*Decoupled Daemon*)**: Auto-sync MikroTik dipisahkan menjadi job mandiri `mikrotik_auto_sync_job` di [scheduler_service.py](app/services/scheduler_service.py) yang berjalan setiap 3 menit terpisah dari siklus pemantauan redaman ONT, sehingga tetap aktif memindai walaupun data pelanggan sedang kosong (0) atau pemantauan redaman sedang dijeda.
 
 - **Perluasan Auto-Sync MikroTik: Pengambilan Otomatis IP 10.10.x.x (ARP Table & PPPoE Active)**:
-  - **Dukungan Multi-Source MikroTik**: Selain membaca `/ip/dhcp-server/lease`, service [mikrotik_service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/services/mikrotik_service.py) kini otomatis memindai `/ip/arp` (ARP Table) dan `/ppp/active` (PPPoE Sessions).
+  - **Dukungan Multi-Source MikroTik**: Selain membaca `/ip/dhcp-server/lease`, service [mikrotik_service.py](app/services/mikrotik_service.py) kini otomatis memindai `/ip/arp` (ARP Table) dan `/ppp/active` (PPPoE Sessions).
   - **Penangkapan IP Statis & VLAN ONT 10.10.x.x**: Modem pelanggan atau ONT yang dikonfigurasi dengan IP statis `10.10.x.x` (yang tidak muncul di DHCP lease dinamis) kini secara otomatis tertangkap dan tersinkronisasi ke database lengkap dengan MAC Address dan Comment.
   - **Siklus Eksekusi**: Berjalan otomatis di latar belakang setiap 5 menit via APScheduler bersamaan dengan siklus sinkronisasi berkala per kantor.
 
 - **Pembaruan Alur Data Pelanggan: Penghapusan Tombol Tambah Manual & Penyempurnaan Fitur "Lengkapi Data" Berbasis IP Router**:
-  - **Penghapusan Tombol Tambah Manual**: Tombol "Tambah" pada toolbar [`ModulPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx) dihapus bersih karena seluruh data pelanggan baru telah tersinkronisasi otomatis dari DHCP Leases router MikroTik.
+  - **Penghapusan Tombol Tambah Manual**: Tombol "Tambah" pada toolbar [`ModulPelanggan.jsx`](frontend/src/components/ModulPelanggan.jsx) dihapus bersih karena seluruh data pelanggan baru telah tersinkronisasi otomatis dari DHCP Leases router MikroTik.
   - **Transformasi Wizard Import Menjadi "Lengkapi Data Pelanggan"**:
     - Tombol "Import" diubah label dan ikonnya menjadi **"Lengkapi Data"** (ikon spreadsheet cyan) tanpa kata *Wizard*.
     - Fokus utama import adalah pengayaan data (*enrichment*) untuk melengkapi kolom yang tidak ada di MikroTik: **Nomor WhatsApp**, **Alamat Pemasangan Fisik**, dan **Kredensial WiFi Rumah (SSID & Password)**.
@@ -295,7 +295,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Penanganan IP Belum Terdaftar**:
     - Baris dengan IP yang belum tercatat di database diberi penanda khusus dengan tombol fleksibel: **Lewati (Skip)** atau **Daftarkan Offline (Status Waiting / Belum Dipantau)**.
   - **Perbaikan Koneksi Vite HMR WebSocket**:
-    - Menambahkan konfigurasi `hmr: { clientPort: 7891 }` pada [`vite.config.js`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/vite.config.js) untuk mengatasi error koneksi WebSocket Hot Module Replacement.
+    - Menambahkan konfigurasi `hmr: { clientPort: 7891 }` pada [`vite.config.js`](frontend/vite.config.js) untuk mengatasi error koneksi WebSocket Hot Module Replacement.
 
 - **Penambahan Manajemen Kantor & Konfigurasi MikroTik per Wilayah di Modul Manajemen Pengguna (Tab Kantor Cabang)**:
   - **Sistem Multi-Tab di Manajemen Pengguna (`ModulManajemenPengguna.jsx`)**: Mengelompokkan antarmuka menjadi 2 sub-tab ergonomis:
@@ -333,7 +333,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Docker Compose Siap Deploy Lokal**: Menambahkan service container `mysql:8.0` (port `33070:3306`) dengan persistent volume `mysql_data`, healthcheck otomatis, konfigurasi charset `utf8mb4`, dan dependency linking yang aman ke service `edteknoguard` (port `7890:7890`).
   - **Skrip Migrasi Basis Data MySQL Lokal (`db/init.sql`)**: Menyediakan skrip DDL SQL lengkap (3NF) dengan foreign key cascade deletion, indexing optimal, dan initial seed data (kantor pusat/cabang/banyumas, POP, paket layanan, system settings default, dan akun super admin) yang dimount langsung ke `/docker-entrypoint-initdb.d/init.sql` pada container MySQL.
   - **Skrip Eksekutor Migrasi Mandiri Python (`migrate.py`)**: Membuat CLI script migrasi berbasis Python dengan fitur auto-detect database, pembuatan schema otomatis, seed data master, opsi `--fresh` (drop & rebuild dari awal), dan opsi `--sql` (eksekusi langsung berkas `db/init.sql`).
-  - **Integrasi Notifikasi Native Murni OS Android & iOS**: Memperbarui berkas panduan [`PROMTBUATKEANDROIDSTUDIO.txt`](file:///d:/databaru/Magang/EdTeknoGuard/PROMTBUATKEANDROIDSTUDIO.txt) dan kode `MainActivity.kt` dengan `JavascriptInterface` (`AndroidBridge.showNativeNotification`) serta framework `UNUserNotificationCenter` pada iOS Swift. Notifikasi darurat (alarm drop redaman / tiket baru) kini bersumber langsung dari sistem operasi smartphone (Notification Bar / Push Banner OS dengan ringtone & haptic vibration), baik saat aplikasi aktif maupun saat HP dalam kondisi standby/layar mati.
+  - **Integrasi Notifikasi Native Murni OS Android & iOS**: Memperbarui berkas panduan [`PROMTBUATKEANDROIDSTUDIO.txt`](PROMTBUATKEANDROIDSTUDIO.txt) dan kode `MainActivity.kt` dengan `JavascriptInterface` (`AndroidBridge.showNativeNotification`) serta framework `UNUserNotificationCenter` pada iOS Swift. Notifikasi darurat (alarm drop redaman / tiket baru) kini bersumber langsung dari sistem operasi smartphone (Notification Bar / Push Banner OS dengan ringtone & haptic vibration), baik saat aplikasi aktif maupun saat HP dalam kondisi standby/layar mati.
   - **Auto-Migration Startup Lifecycle**: Menambahkan eksekusi `init_db()` pada startup lifecycle `app/main.py` agar pembuatan skema tabel relasional otomatis berjalan saat aplikasi pertama kali boot jika dijalankan di luar docker.
 
 
@@ -374,7 +374,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 - **Modularisasi & Pemisahan File CSS Maskot (`frontend/src/styles/mascots/`)**:
   - **Ekstraksi CSS Mandiri Per Maskot**: Seluruh stylesheet animasi dan rigging dari 33 maskot HTML di `media/` dipisahkan menjadi file CSS mandiri di `frontend/src/styles/mascots/` (seperti `mascot-menyapa.css`, `mascot-pusing.css`, `mascot-teknisi.css`, dsb.) dengan index barrel loader.
   - **Sanitasi `frontend/src/index.css`**: Menghapus seluruh ratusan baris keyframes dan class rigging maskot dari `index.css` agar styling global aplikasi tetap ramping, bersih, dan mudah dikelola.
-  - **Import Terisolasi Pada Komponen**: Komponen portal seperti [PortalAuthView.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalAuthView.jsx) dan [PortalResetPasswordView.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/PortalResetPasswordView.jsx) kini mengimpor file CSS maskot masing-masing secara terpisah tanpa saling mempengaruhi komponen lain.
+  - **Import Terisolasi Pada Komponen**: Komponen portal seperti [PortalAuthView.jsx](frontend/src/portal/components/PortalAuthView.jsx) dan [PortalResetPasswordView.jsx](frontend/src/portal/components/PortalResetPasswordView.jsx) kini mengimpor file CSS maskot masing-masing secara terpisah tanpa saling mempengaruhi komponen lain.
 
 - **Redesain Antarmuka Login Portal Pelanggan TeknoCust (`PortalAuthView.jsx`)**:
   - **Arsitektur Dual-Panel Mobile Shell Kompak & Terfokus Pada Form**:
@@ -389,7 +389,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Judul Terpusat & Konten Panduan**: Mengusung judul **`Lupa Password`**, panduan pemulihan akun oleh Admin NOC, serta tombol *"Kembali ke Halaman Masuk"* yang responsif dan interaktif.
 
 - **Pemisahan Halaman Login Mandiri (`HalamanLogin.jsx`) & Fitur Ingat Saya (30 Hari Inaktivitas)**:
-  - **Modularisasi Komponen Mandiri**: Memisahkan antarmuka login dari [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx) ke file mandiri [HalamanLogin.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/HalamanLogin.jsx) di folder `frontend/src/components/`, merapikan hierarki kode dan menyederhanakan maintainability komponen root.
+  - **Modularisasi Komponen Mandiri**: Memisahkan antarmuka login dari [App.jsx](frontend/src/App.jsx) ke file mandiri [HalamanLogin.jsx](frontend/src/components/HalamanLogin.jsx) di folder `frontend/src/components/`, merapikan hierarki kode dan menyederhanakan maintainability komponen root.
   - **Fitur Checkbox Ingat Saya**:
     - Menambahkan checkbox *Ingat Saya* di form login dengan keterangan: *"Sesi aktif otomatis selama 30 hari sejak akses terakhir"*.
     - Terintegrasi dengan backend FastAPI via parameter `remember_me` di `POST /api/auth/login`. Jika dicentang, cookie sesi disetel dengan masa berlaku 30 hari (`max_age=2.592.000` detik); jika tidak, disetel sebagai *session cookie* (otomatis kedaluwarsa begitu browser ditutup).
@@ -408,19 +408,19 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - `Log Aktivitas Audit` -> `/log` (sebelumnya `/activity-logs`)
     - `Manajemen Pengguna` -> `/pengguna` (sebelumnya `/users`)
     - `Pengaturan Sistem` -> `/pengaturan` (sebelumnya `/settings`)
-    - Path lama tetap didukung di [App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx) sebagai alias/fallback agar tidak memutus tautan yang sudah tersimpan atau bookmark.
+    - Path lama tetap didukung di [App.jsx](frontend/src/App.jsx) sebagai alias/fallback agar tidak memutus tautan yang sudah tersimpan atau bookmark.
   - **Kesesuaian Endpoint REST API Backend**:
-    - Data Pelanggan: `/api/pelanggan` (di [routes.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/routes.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
-    - Riwayat Redaman: `/api/riwayat` (di [routes.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/logs_mgmt/routes.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
-    - Pemakaian Kuota: `/api/kuota` (di [main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
-    - Tiket Gangguan: `/api/tiket` (di [main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
-    - Log Aktivitas: `/api/log` (di [main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
-    - Pengguna: `/api/pengguna/list` (di [main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
-    - Pengaturan: `/api/pengaturan` (di [routes.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/routes.py) & [api.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/services/api.js))
+    - Data Pelanggan: `/api/pelanggan` (di [routes.py](app/modules/customers/routes.py) & [api.js](frontend/src/services/api.js))
+    - Riwayat Redaman: `/api/riwayat` (di [routes.py](app/modules/logs_mgmt/routes.py) & [api.js](frontend/src/services/api.js))
+    - Pemakaian Kuota: `/api/kuota` (di [main.py](app/main.py) & [api.js](frontend/src/services/api.js))
+    - Tiket Gangguan: `/api/tiket` (di [main.py](app/main.py) & [api.js](frontend/src/services/api.js))
+    - Log Aktivitas: `/api/log` (di [main.py](app/main.py) & [api.js](frontend/src/services/api.js))
+    - Pengguna: `/api/pengguna/list` (di [main.py](app/main.py) & [api.js](frontend/src/services/api.js))
+    - Pengaturan: `/api/pengaturan` (di [routes.py](app/modules/settings/routes.py) & [api.js](frontend/src/services/api.js))
   - **Pembersihan Modul Pengaturan**: Menghapus badge counter pada tab sidebar Kredensial ONT dan menampilkan Kantor Layanan sebagai teks biasa tanpa uppercase penuh.
 
   - Memastikan seluruh modul aplikasi web NOC (`TeknoGuard`) dan Portal Mandiri Pelanggan (`TeknoCust`) secara konsisten menggunakan keluarga huruf **Roboto Flex** (`--font-sans: 'Roboto Flex', sans-serif`).
-  - Menetapkan deklarasi eksplisit `font-family: 'Roboto Flex'` pada `:root`, `html`, `body`, serta elemen formulir (`button`, `input`, `select`, `textarea`) di [index.css](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/index.css), menjamin perenderan tipografi seragam dan presisi di seluruh browser dan perangkat.
+  - Menetapkan deklarasi eksplisit `font-family: 'Roboto Flex'` pada `:root`, `html`, `body`, serta elemen formulir (`button`, `input`, `select`, `textarea`) di [index.css](frontend/src/index.css), menjamin perenderan tipografi seragam dan presisi di seluruh browser dan perangkat.
 
 - **Penyelarasan Tipografi Roboto Flex & Audit Impeccable Modul Pengaturan (`ModulPengaturan.jsx`)**:
   - **Eliminasi AI Tell Warna Gradien & AI Palette**: Mengubah seluruh tombol simpan (Tab 1, Tab 2, Tab 3, dan Tab 4) dari gradien multi-stop (`bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600`) menjadi warna solid profesional `bg-cyan-700 hover:bg-cyan-800 text-white shadow-sm`. Mengganti latar avatar pengguna pada profil dari gradien menjadi `bg-cyan-700 text-white`.
@@ -485,7 +485,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - Menaikkan tombol *"Uji Sinyal"* dari `text-[10px]` ke `text-[11px] font-bold text-cyan-900 bg-cyan-50 border-cyan-300 hover:bg-cyan-700 hover:text-white`.
 
 - **Penyelarasan Navigasi, Stacking & Impeccable Audit Modul Pemantauan Kuota (`ModulPemantauanKuota.jsx` & `App.jsx`)**:
-  - **Eliminasi AI Tell Nested Card pada Header**: Meratakan wadah office switcher di top navigation [`App.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx) (`bg-white/60 border border-sky-200`) untuk menghilangkan tumpukan kartu ganda di dalam header.
+  - **Eliminasi AI Tell Nested Card pada Header**: Meratakan wadah office switcher di top navigation [`App.jsx`](frontend/src/App.jsx) (`bg-white/60 border border-sky-200`) untuk menghilangkan tumpukan kartu ganda di dalam header.
   - **Integrasi Bar Navigasi Pagination**: Mengintegrasikan bar pagination terpadu pada `DataTableContainer` lengkap dengan props `page`, `totalPages`, `totalCount`, `onPrevPage`, dan `onNextPage` (15 baris per halaman), selaras dengan modul tabel lainnya di TeknoGuard NOC.
   - **Resolusi Stacking Context & Text Occlusion Filter Popover**: Membungkus filter bar dengan `relative z-30` dan popover dropdown dengan `z-50` agar melayang di atas tabel tanpa menutupi atau tertumpuk di bawah header tabel.
   - **Peningkatan Tipografi Fungsional & Kontras WCAG AA**:
@@ -498,25 +498,25 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Eliminasi Hairline Border with Wide Shadow**: Menggantikan border tipis 0.8px dan efek bayangan terlalu difus (`shadow-2xl` 50px blur) pada popover dropdown dengan border tegas terdefinisi (`border-slate-300`) dan bayangan natural (`shadow-lg`).
   - **Eliminasi Glowing Shadow Accents**: Merapikan active indicator glow menjadi solid ring (`ring-1 ring-black/5` dan border solid) yang ramah kontras tanpa efek pendar neon buatan.
   - **Pencegahan Teks Terhalang (Text Occlusion)**: Memperbaiki backdrop overlay (`fixed inset-0 z-40`) dan menaikkan container popover ke `z-50` dengan styling button item yang solid (`hover:bg-slate-100`, text `font-medium`) sehingga teks rentang waktu terbaca utuh dan tidak terdistorsi elemen tabel di bawahnya.
-  - **Eliminasi Nested Cards di Footer Tabel**: Meratakan wadah navigasi pagination `DataTableContainer` pada [`CommonUI.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/CommonUI.jsx) dengan menghapus background `bg-cyan-50/30`, menjadikannya bagian seamless dari kontainer tabel tanpa kesan kartu bertumpuk.
+  - **Eliminasi Nested Cards di Footer Tabel**: Meratakan wadah navigasi pagination `DataTableContainer` pada [`CommonUI.jsx`](frontend/src/components/CommonUI.jsx) dengan menghapus background `bg-cyan-50/30`, menjadikannya bagian seamless dari kontainer tabel tanpa kesan kartu bertumpuk.
   - **Peningkatan Ukuran Teks Fungsional (Undersized Functional Text)**: Menaikkan seluruh label header kolom tabel (`No`, `Waktu Cek`, `ID Pelanggan`, `Nama Pelanggan`, `IP Router ONT`, `Daya Rx (dBm)`, `Suhu`, `Latency`, `Status`) dari `text-[10px]` ke `text-[11px] font-mono font-bold text-slate-700` (memenuhi batas minimum 11px floor).
   - **Perbaikan Kontras Popover Filter (Low Contrast Text)**: Memperbaiki kontras teks heading popover `"Pilih Rentang Waktu:"` dari warna pudar `#90a1b9` (2.6:1) menjadi `text-[11px] font-black uppercase text-slate-700` dengan rasio kontras > 5.5:1 (lolos WCAG AA >= 4.5:1).
 
 - **Pembersihan Nested Cards & Border Stacking Modul Beranda (Impeccable Audit)**:
-  - **Eliminasi Nested Cards di Kontrol Chart**: Meratakan kontainer pembungkus filter tanggal dan tombol segmented range grafik di [`ModulBeranda.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) menjadi kontrol inline flat tanpa wadah border bertumpuk.
+  - **Eliminasi Nested Cards di Kontrol Chart**: Meratakan kontainer pembungkus filter tanggal dan tombol segmented range grafik di [`ModulBeranda.jsx`](frontend/src/components/ModulBeranda.jsx) menjadi kontrol inline flat tanpa wadah border bertumpuk.
   - **Eliminasi Nested Cards di Grid Pintasan Bawah**: Meratakan dua kartu pintasan master pelanggan dan tiket aduan (`div.grid.grid-cols-2`) menjadi tile interaktif solid (`bg-white border border-sky-200`) tanpa penumpukan elevasi kartu ganda.
 
 - **Migrasi Tipografi ke Google Fonts Roboto Flex (Material You / Wear OS Design)**:
-  - **Penyelarasan Font Utama Sistem**: Menggantikan font keluarga `Inter` dengan **`Roboto Flex`** (`wght@100..1000` variable font) pada [`index.html`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/index.html), mendaftarkan token `--font-sans` pada `@theme` Tailwind CSS v4 di [`index.css`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/index.css), dan menetapkannya sebagai fallback utama sistem.
-  - **Dukungan Tipografi Grafik Telemetri**: Mengintegrasikan `Roboto Flex` ke sumbu ordinat dan absis serta tooltip Chart.js di [`ModulBeranda.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) untuk konsistensi pembacaan data telemetri optik.
+  - **Penyelarasan Font Utama Sistem**: Menggantikan font keluarga `Inter` dengan **`Roboto Flex`** (`wght@100..1000` variable font) pada [`index.html`](frontend/index.html), mendaftarkan token `--font-sans` pada `@theme` Tailwind CSS v4 di [`index.css`](frontend/src/index.css), dan menetapkannya sebagai fallback utama sistem.
+  - **Dukungan Tipografi Grafik Telemetri**: Mengintegrasikan `Roboto Flex` ke sumbu ordinat dan absis serta tooltip Chart.js di [`ModulBeranda.jsx`](frontend/src/components/ModulBeranda.jsx) untuk konsistensi pembacaan data telemetri optik.
 
 - **Penyelesaian Audit Impeccable & Anti-Slop (Konsistensi Kontras WCAG AA, Tipografi Fungsional, & Eliminasi AI Palette)**:
   - **Resolusi Masalah Missing Module Backend**:
-    - Menambahkan file konfigurasi [`.vscode/settings.json`](file:///d:/databaru/Magang/EdTeknoGuard/.vscode/settings.json) dengan parameter `python.defaultInterpreterPath` yang mengarah ke instalasi Python 3.14 sistem pengguna, memperbaiki deteksi interpreter bawaan Inkscape yang menyebabkan error `Cannot find module` pada FastAPI, SQLAlchemy, dan bcrypt.
+    - Menambahkan file konfigurasi [`.vscode/settings.json`](.vscode/settings.json) dengan parameter `python.defaultInterpreterPath` yang mengarah ke instalasi Python 3.14 sistem pengguna, memperbaiki deteksi interpreter bawaan Inkscape yang menyebabkan error `Cannot find module` pada FastAPI, SQLAlchemy, dan bcrypt.
   - **Penyelesaian Temuan Impeccable Refinement**:
     - **Undersized Functional Text**: Badge `Batas: -26.0 dBm` dinaikkan dari `9px/10px` ke `text-[11px] font-mono font-bold bg-amber-50 text-amber-900 border-amber-300` dengan rasio kontras 6.2:1.
-    - **Low Contrast Buttons**: Tombol segmented range grafik (`Hari Ini`, `Kemarin`, `7 Hari`) di [`ModulBeranda.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx) diperbarui dari `#0092b8` menjadi `bg-cyan-700 text-white` (rasio kontras 5.1:1, lolos WCAG AA).
-    - **Eliminasi Nested Cards (Card Inside Card)**: Meratakan header dan footer profil sidebar pada [`Navigation.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/Navigation.jsx), serta meratakan blok standby telemetri dan kartu navigasi cepat di [`ModulBeranda.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulBeranda.jsx).
+    - **Low Contrast Buttons**: Tombol segmented range grafik (`Hari Ini`, `Kemarin`, `7 Hari`) di [`ModulBeranda.jsx`](frontend/src/components/ModulBeranda.jsx) diperbarui dari `#0092b8` menjadi `bg-cyan-700 text-white` (rasio kontras 5.1:1, lolos WCAG AA).
+    - **Eliminasi Nested Cards (Card Inside Card)**: Meratakan header dan footer profil sidebar pada [`Navigation.jsx`](frontend/src/components/Navigation.jsx), serta meratakan blok standby telemetri dan kartu navigasi cepat di [`ModulBeranda.jsx`](frontend/src/components/ModulBeranda.jsx).
   - **Eliminasi AI Gradient & Penegasan Palet Brand**:
     - Mengganti gradien artifisial (`from-cyan-600 to-sky-600`, `from-cyan-600 via-sky-600 to-blue-600`) pada tombol utama, icon wrapper, progress bar, dan mobile navigation center button dengan warna solid terarah (`bg-cyan-700`, `text-cyan-900`) yang memiliki kontras tinggi dan konsisten.
   - **Peningkatan Batas Minimum Ukuran Teks Fungsional (>= 11px)**:
@@ -524,26 +524,26 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Peningkatan Rasio Kontras Teks (WCAG AA >= 4.5:1)**:
     - Memperbaiki kontras teks di atas permukaan terang dari `#90a1b9` (2.6:1) dan `#ffffff` pada background cyan muda menjadi warna solid berbobot tinggi seperti `text-slate-800`, `text-cyan-950`, `text-emerald-800`, `text-rose-800`, dan `text-amber-800` (rasio kontras > 5:1).
   - **Kerapian Touch Target Mobile Nav (>= 48px)**:
-    - Mengoptimalkan ketinggian Sticky Bottom Navigation mobile di [`Navigation.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/Navigation.jsx) menjadi `h-16` dengan touch target tombol `min-h-[48px]` dan ikon `w-5 h-5` ramah jempol.
+    - Mengoptimalkan ketinggian Sticky Bottom Navigation mobile di [`Navigation.jsx`](frontend/src/components/Navigation.jsx) menjadi `h-16` dengan touch target tombol `min-h-[48px]` dan ikon `w-5 h-5` ramah jempol.
 
 - **Penyusunan Rapi Kolom Tabel Pelanggan, Modal Detail Pribadi & Integrasi Pesan WhatsApp**:
-  - **Tata Letak Tabel Ringkas & Fungsional NOC** ([`ModulPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx)):
+  - **Tata Letak Tabel Ringkas & Fungsional NOC** ([`ModulPelanggan.jsx`](frontend/src/components/ModulPelanggan.jsx)):
     - Kolom tabel disederhanakan dan disusun proporsional: `No`, `ID Pelanggan`, `Nama Pelanggan` (dengan alamat ringkas), `IP & Wilayah` (IP Router + POP + Badge Kantor), `WiFi & Admin ONT` (Nama SSID WiFi & Akun Modem), `Redaman (dBm)`, `Status`, dan `Aksi`.
     - **Modal Detail Pelanggan & Kontak WhatsApp**: Aksi dropdown "Detail Pelanggan" dan klik nama pelanggan membuka modal detail lengkap (Nomor WhatsApp, Paket Layanan, Server POP, Alamat Fisik + Titik GPS Maps, Kredensial WiFi SSID/Password, IP ONT & Jenis Modem) dilengkapi tombol langsung **"Kirim Pesan WA"** (`https://wa.me/62...`).
-  - **Aksi Hubungi Pelanggan di Tiket Keluhan** ([`ModulTiketKeluhan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulTiketKeluhan.jsx)):
+  - **Aksi Hubungi Pelanggan di Tiket Keluhan** ([`ModulTiketKeluhan.jsx`](frontend/src/components/ModulTiketKeluhan.jsx)):
     - Menu dropdown aksi titik tiga (`...`) dilengkapi opsi **"Hubungi WA"** dengan template pesan WhatsApp terformat otomatis memuat nomor tiket, kategori, dan deskripsi gangguan pelanggan.
   - **Navigasi Silang Nama Pelanggan Antar-Modul**:
-    - Di modul **Riwayat Redaman** ([`ModulRiwayatRedaman.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulRiwayatRedaman.jsx)), **Pemantauan Kuota** ([`ModulPemantauanKuota.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPemantauanKuota.jsx)), dan **Tiket Keluhan** ([`ModulTiketKeluhan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulTiketKeluhan.jsx)), seluruh nama pelanggan yang tampil dapat diklik langsung untuk mengarahkan pengguna ke halaman **Data Pelanggan** dengan filter pencarian otomatis sesuai nama pelanggan terkait.
+    - Di modul **Riwayat Redaman** ([`ModulRiwayatRedaman.jsx`](frontend/src/components/ModulRiwayatRedaman.jsx)), **Pemantauan Kuota** ([`ModulPemantauanKuota.jsx`](frontend/src/components/ModulPemantauanKuota.jsx)), dan **Tiket Keluhan** ([`ModulTiketKeluhan.jsx`](frontend/src/components/ModulTiketKeluhan.jsx)), seluruh nama pelanggan yang tampil dapat diklik langsung untuk mengarahkan pengguna ke halaman **Data Pelanggan** dengan filter pencarian otomatis sesuai nama pelanggan terkait.
 
 - **Sorting Kolom Interaktif & Bulk Action Bar (Hapus Terpilih & Batal)**:
   - **Tabel Tanpa Checkbox**:
-    - [`ModulRiwayatRedaman.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulRiwayatRedaman.jsx): Checkbox dibersihkan, sorting kolom terintegrasi ke backend (`sort_by`, `sort_dir`), kolom `No` urut rapi.
-    - [`ModulPemantauanKuota.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPemantauanKuota.jsx): Checkbox dibersihkan, sorting kolom ID Pelanggan, Nama, Paket, Total GB, kolom `No` urut rapi.
-    - [`ModulTiketKeluhan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulTiketKeluhan.jsx): Checkbox dibersihkan, sorting kolom ID Tiket, Nama Pelanggan, Kategori, Redaman, Status Tiket, kolom `No` urut rapi.
-    - [`ModulLogAktivitas.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulLogAktivitas.jsx): Checkbox dibersihkan, sorting kolom Waktu, User, Aksi, Status terhubung ke backend, kolom `No` urut rapi.
+    - [`ModulRiwayatRedaman.jsx`](frontend/src/components/ModulRiwayatRedaman.jsx): Checkbox dibersihkan, sorting kolom terintegrasi ke backend (`sort_by`, `sort_dir`), kolom `No` urut rapi.
+    - [`ModulPemantauanKuota.jsx`](frontend/src/components/ModulPemantauanKuota.jsx): Checkbox dibersihkan, sorting kolom ID Pelanggan, Nama, Paket, Total GB, kolom `No` urut rapi.
+    - [`ModulTiketKeluhan.jsx`](frontend/src/components/ModulTiketKeluhan.jsx): Checkbox dibersihkan, sorting kolom ID Tiket, Nama Pelanggan, Kategori, Redaman, Status Tiket, kolom `No` urut rapi.
+    - [`ModulLogAktivitas.jsx`](frontend/src/components/ModulLogAktivitas.jsx): Checkbox dibersihkan, sorting kolom Waktu, User, Aksi, Status terhubung ke backend, kolom `No` urut rapi.
   - **Tabel Dengan Checkbox & Bulk Action Bar**:
-    - [`ModulPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPelanggan.jsx): Sorting kolom ID, Nama, IP, POP, Redaman, Status; saat baris dicentang muncul Bar Aksi di atas tabel dengan tombol **"Hapus Terpilih (X)"** (dengan konfirmasi bahaya CASCADE) dan **"Batal"**.
-    - [`ModulManajemenPengguna.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulManajemenPengguna.jsx): Sorting kolom Username, Role, Status; saat baris dicentang muncul Bar Aksi di atas tabel dengan tombol **"Hapus Terpilih (X)"** (proteksi akun super admin) dan **"Batal"**.
+    - [`ModulPelanggan.jsx`](frontend/src/components/ModulPelanggan.jsx): Sorting kolom ID, Nama, IP, POP, Redaman, Status; saat baris dicentang muncul Bar Aksi di atas tabel dengan tombol **"Hapus Terpilih (X)"** (dengan konfirmasi bahaya CASCADE) dan **"Batal"**.
+    - [`ModulManajemenPengguna.jsx`](frontend/src/components/ModulManajemenPengguna.jsx): Sorting kolom Username, Role, Status; saat baris dicentang muncul Bar Aksi di atas tabel dengan tombol **"Hapus Terpilih (X)"** (proteksi akun super admin) dan **"Batal"**.
 
 - **Standardisasi Tabel Data (No Urut, Checkbox Seleksi Baris, & Menu Aksi Titik Tiga)**:
   - **Penambahan Kolom Nomor Urut (`No`)**: Menambahkan kolom penomoran urut otomatis dinamis di seluruh tabel data:
@@ -567,7 +567,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - Penyediaan endpoint `GET /users/api/kantor/list` untuk sinkronisasi dinamis daftar kantor di frontend dan backend.
 
 - **Modularisasi & Peningkatan Wizard Import Data Pelanggan (`WizardImportPelanggan.jsx`)**:
-  - **Pemisahan Komponen Mandiri**: Mengekstraksi wizard import data pelanggan dari `ModulPelanggan.jsx` menjadi file komponen mandiri [`WizardImportPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/WizardImportPelanggan.jsx).
+  - **Pemisahan Komponen Mandiri**: Mengekstraksi wizard import data pelanggan dari `ModulPelanggan.jsx` menjadi file komponen mandiri [`WizardImportPelanggan.jsx`](frontend/src/components/WizardImportPelanggan.jsx).
   - **Penghapusan Opsi Kantor Wilayah Manual**: Menghapus field pemetaan kantor pada Langkah 2 karena kantor otomatis mengikuti kantor aktif yang sedang dibuka pengguna di navbar atas sesuai standar SOP multi-cabang.
   - **4 Kartu Metrik Filter Interaktif pada Langkah 3**: Menjadikan kartu metrik *Total Baris*, *Siap Diimpor (Valid)*, *Duplikat Terdeteksi*, dan *Tidak Lengkap (Error)* dapat diklik untuk menyaring tampilan baris pada tabel pratinjau secara instan.
   - **Logika Cerdas Toolbar Aksi Baris Terpilih**:
@@ -581,10 +581,10 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 - **Normalisasi Database 3NF, Dekomposisi Entitas Perangkat ONT & Relasi Terpadu**:
   - **Dekomposisi Tabel Modem (`perangkat_ont`)**: Memecah atribut fisik modem (IP router, jenis modem, MAC address, redaman baseline, kredensial Web GUI ONT, dan password WiFi) dari tabel master `pelanggan` ke entitas baru `perangkat_ont` dengan relasi 1-to-1 dan `ON DELETE CASCADE`.
   - **Master Data Referensi**: Membuat tabel `kantors`, `pops`, dan `pakets` untuk normalisasi master wilayah operasional, POP jaringan, dan paket bandwidth layanan.
-  - **Dokumentasi ERD 3NF Resmi**: Memperbarui berkas [db/schema.md](file:///d:/databaru/Magang/EdTeknoGuard/db/schema.md) yang memuat diagram Mermaid ERD ternormalisasi, kamus data lengkap untuk seluruh entitas, serta aturan integritas referensial.
+  - **Dokumentasi ERD 3NF Resmi**: Memperbarui berkas [db/schema.md](db/schema.md) yang memuat diagram Mermaid ERD ternormalisasi, kamus data lengkap untuk seluruh entitas, serta aturan integritas referensial.
   - **Integritas Relasi Berjenjang (*Cascade Deletion*)**: Memastikan seluruh tabel anakan pelanggan (`perangkat_ont`, `log_performa_ont`, `alert_logs`, `tiket_kendala`, `kuota_pelanggan`) terikat `ForeignKey("pelanggan.id_pelanggan", ondelete="CASCADE")` dan `cascade="all, delete-orphan", passive_deletes=True`.
   - **Optimasi Indexing Query Database**: Menambahkan indeks komposit pada tabel berukuran besar (`idx_pelanggan_waktu`, `idx_alert_pelanggan_waktu`, `idx_tiket_status_kantor`, `idx_tiket_pelanggan_waktu`, `idx_kuota_pelanggan_periode`, `idx_activity_user_action`, `idx_activity_action_created`).
-  - **Penambahan Kontak WhatsApp Petugas (`no_wa`)**: Menambahkan kolom `no_wa VARCHAR(50) NULL` pada tabel `users`, model SQLAlchemy [`User`](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py), endpoint backend API (`/users/api/list`, `/users/api/add`, `/users/api/edit`), serta antarmuka tabel dan form modal pada [`ModulManajemenPengguna.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulManajemenPengguna.jsx).
+  - **Penambahan Kontak WhatsApp Petugas (`no_wa`)**: Menambahkan kolom `no_wa VARCHAR(50) NULL` pada tabel `users`, model SQLAlchemy [`User`](app/db/models.py), endpoint backend API (`/users/api/list`, `/users/api/add`, `/users/api/edit`), serta antarmuka tabel dan form modal pada [`ModulManajemenPengguna.jsx`](frontend/src/components/ModulManajemenPengguna.jsx).
 
 - **Pembaruan Top Header Bar (Ikon Lonceng Notifikasi & Menu Titik Tiga dengan Logout)**:
   - **Ikon Lonceng Notifikasi Cepat**: Menambahkan tombol lonceng di header atas dengan counter badge real-time untuk jumlah tiket keluhan yang belum dibaca (`unreadTickets`).
@@ -592,7 +592,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Pembaruan Status Sistem**: Menghapus teks "TiDB Cloud Aktif" dan menggantinya dengan indikator status dot hijau "Sistem Aktif" yang bersih dan netral.
   
 - **Transformasi Halaman Personal / Akun Petugas (Desain Identik TeknoCust)**:
-  - **Card Identitas Profil Modern**: Menyelaraskan tab *Personal* pada [`ModulPengaturan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/ModulPengaturan.jsx) agar menggunakan layout card rounded-3xl bergradien identik dengan antarmuka TeknoCust (Avatar huruf inisial gradien cyan-blue, badge hijau *"Akun Terverifikasi"*, dan tombol *"Edit Data"*).
+  - **Card Identitas Profil Modern**: Menyelaraskan tab *Personal* pada [`ModulPengaturan.jsx`](frontend/src/components/ModulPengaturan.jsx) agar menggunakan layout card rounded-3xl bergradien identik dengan antarmuka TeknoCust (Avatar huruf inisial gradien cyan-blue, badge hijau *"Akun Terverifikasi"*, dan tombol *"Edit Data"*).
   - **Daftar Ringkasan Rapi (Key-Value List)**: Menampilkan ID Pengguna, Username Login, Badge Wilayah Kantor Layanan (`bg-cyan-50 text-cyan-800`), Nomor WhatsApp petugas, dan Hak Akses / Peran.
   - **Inline Mode Edit Data Diri**: Tombol *"Edit Data"* membuka form inline untuk mengubah Nama Lengkap dan Nomor WhatsApp petugas secara cepat dengan feedback visual responsif.
   - **Expandable Card Ganti Kata Sandi**: Kartu accordion mandiri dengan header *"Ganti Kata Sandi Akun"* dan toggle *"Ubah Sandi / Tutup"* (animasi rotasi chevron) yang dapat dibuka/tutup tanpa membebani halaman.
@@ -601,8 +601,8 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Integrasi Panduan Kontekstual & Logout Footer**: Card ketentuan ambang batas redaman dan cara kerja multi-kredensial fallback disematkan rapi di dalam masing-masing form tab, sementara tombol *"Keluar dari Sesi TeknoGuard"* diposisikan secara konsisten di bagian paling bawah halaman untuk semua pengguna.
 
 - **Fitur Pembaruan Data Diri Mandiri Pelanggan (TeknoCust Portal)**:
-  - **Edit Nomor WhatsApp / Telepon & Alamat Domisili**: Pelanggan kini dapat langsung mengubah nomor WhatsApp aktif dan alamat lengkap secara mandiri melalui tab Profil pada portal TeknoCust ([`TabProfilPelanggan.jsx`](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/TabProfilPelanggan.jsx)).
-  - **Penyimpanan Langsung ke Database Master**: Endpoint backend `POST /portal/api/profil/update` di [`api_router.py`](file:///d:/databaru/Magang/EdTeknoGuard/portal_pelanggan/api_router.py) memvalidasi dan memperbarui data master pelanggan di database TiDB / MySQL dengan respon status sukses dan auto-update state lokal frontend tanpa perlu refresh.
+  - **Edit Nomor WhatsApp / Telepon & Alamat Domisili**: Pelanggan kini dapat langsung mengubah nomor WhatsApp aktif dan alamat lengkap secara mandiri melalui tab Profil pada portal TeknoCust ([`TabProfilPelanggan.jsx`](frontend/src/portal/components/TabProfilPelanggan.jsx)).
+  - **Penyimpanan Langsung ke Database Master**: Endpoint backend `POST /portal/api/profil/update` di [`api_router.py`](portal_pelanggan/api_router.py) memvalidasi dan memperbarui data master pelanggan di database TiDB / MySQL dengan respon status sukses dan auto-update state lokal frontend tanpa perlu refresh.
   - **Penyederhanaan Form Profil & Password**: Menghilangkan field ID Pelanggan redundan, menampilkan identitas kantor ISP terdaftar, mengintegrasikan toggle show/hide mata pada kedua inputan kata sandi baru, dan accordion collapsible "Klik untuk Ganti Kata Sandi".
 
 - **Resolusi Penuh Konektivitas Vite Proxy & REST API Endpoints (Pemantauan Kuota, Tiket Keluhan, Manajemen Pengguna)**:
@@ -663,8 +663,8 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 - **Hak Akses & Otorisasi Pengaturan Sistem (`/settings` & `/pengaturan`)**:
   - Membuka akses menu dan endpoint **Pengaturan Sistem** (`/settings`, `/pengaturan`, `GET /api/settings`, `POST /api/settings`) untuk role **`admin`** di samping **`super admin`**, memungkinkan Admin Cabang/Pusat/Banyumas mengatur parameter monitoring, ambang batas redaman, dan kredensial modem ONT.
   - Mempertahankan menu **Manajemen Pengguna (`/users`)** eksklusif hanya untuk role **`super admin`**.
-  - Mengimplementasikan helper dependency `require_admin_role` di [`app/core/security.py`](file:///d:/databaru/Magang/EdTeknoGuard/app/core/security.py) yang membatasi role `teknisi` dari akses pengaturan dengan proteksi HTTP 303/403.
-  - Memperbarui visibilitas menu sidebar di [`templates/layouts/base.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/layouts/base.html) dan tombol cepat di Dashboard [`templates/dashboard/index.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/dashboard/index.html) agar muncul untuk role `admin` dan `super admin`.
+  - Mengimplementasikan helper dependency `require_admin_role` di [`app/core/security.py`](app/core/security.py) yang membatasi role `teknisi` dari akses pengaturan dengan proteksi HTTP 303/403.
+  - Memperbarui visibilitas menu sidebar di [`templates/layouts/base.html`](templates/layouts/base.html) dan tombol cepat di Dashboard [`templates/dashboard/index.html`](templates/dashboard/index.html) agar muncul untuk role `admin` dan `super admin`.
 - **Penyelarasan & Perapian Tata Letak Kontrol Pemindaian (`Control Bar`)**:
   - Merapikan posisi dan ukuran tombol kontrol pemindaian (**Jeda Pemindaian** & **Hentikan Stop**) pada tampilan mobile agar berjajar simetris secara 2-kolom seimbang dengan target sentuh ergonomis (`min-h-[36px]`).
   - Merapikan susunan teks status pemindaian, badge counter ONT, indikator durasi berjalan, estimasi waktu total, dan progress bar visual agar terstruktur rapi, proporsional, dan tidak bertumpuk.
@@ -685,9 +685,9 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ### Fixed
 - **Resolusi 500 Internal Server Error saat Simpan Pengaturan Sistem (`POST /api/settings`)**:
-  - Menambahkan atribut field `telegram_alert_interval_hours` pada [`SystemSettingsSchema`](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/settings/schemas.py) untuk mencegah kegagalan `AttributeError` di `SystemSettingsService.update_settings` saat membaca parameter debounce notifikasi.
+  - Menambahkan atribut field `telegram_alert_interval_hours` pada [`SystemSettingsSchema`](app/modules/settings/schemas.py) untuk mencegah kegagalan `AttributeError` di `SystemSettingsService.update_settings` saat membaca parameter debounce notifikasi.
 - **Resolusi 404 Not Found pada Polling Status Tiket Pelanggan (`GET /api/portal/ticket-status`)**:
-  - Menyediakan endpoint API `/api/portal/ticket-status` pada router utama [`app/main.py`](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py) dan [`portal_pelanggan/modules/kendala/routes.py`](file:///d:/databaru/Magang/EdTeknoGuard/portal_pelanggan/modules/kendala/routes.py) untuk menyajikan status tiket keluhan aktif pelanggan secara aman.
+  - Menyediakan endpoint API `/api/portal/ticket-status` pada router utama [`app/main.py`](app/main.py) dan [`portal_pelanggan/modules/kendala/routes.py`](portal_pelanggan/modules/kendala/routes.py) untuk menyajikan status tiket keluhan aktif pelanggan secara aman.
 - **Perbaikan Efek Hover pada Navigasi Mobile (Bottom Dock)**:
   - Memperbaiki efek *hover* pada menu navigasi bawah agar teks dan ikon tidak pudar/hilang ketika kursor diarahkan atau disentuh. Mengganti variabel warna hover menjadi warna putih tegas (`#ffffff`) dengan *background highlight* transparan halus (`rgba(255,255,255,0.12)`).
   - Memastikan tab yang sedang aktif tetap mempertahankan warna teks dan ikon hitam (`#0f172a`) di atas latar putih meskipun sedang di-hover.
@@ -700,8 +700,8 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - Memperbaiki kesalahan sintaksis Jinja2 berupa tag penutup `{% endblock %}` untuk blok `content` yang hilang sebelum `{% block scripts %}` pada berkas `templates/users/index.html`.
   - Menambahkan rute alias `@router.get("")` dan `@router.get("/")` agar permintaan ke `/users` dan `/users/` langsung merespons dengan **HTTP 200 OK** tanpa redirect 307.
 
-  - Memverifikasi secara visual hasil render menggunakan **Chrome DevTools MCP** dengan tangkapan layar beresolusi tinggi ([`static/dashboard_polished.png`](file:///d:/databaru/Magang/EdTeknoGuard/static/dashboard_polished.png)).
-  - Memperbarui file token terpusat [`static/css/components.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/components.css), layout master [`templates/layouts/base.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/layouts/base.html), serta komponen [`templates/components/control_bar.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/control_bar.html), [`templates/components/kpi_cards.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/kpi_cards.html), [`templates/components/charts.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/charts.html), dan [`templates/dashboard/index.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/dashboard/index.html).
+  - Memverifikasi secara visual hasil render menggunakan **Chrome DevTools MCP** dengan tangkapan layar beresolusi tinggi ([`static/dashboard_polished.png`](static/dashboard_polished.png)).
+  - Memperbarui file token terpusat [`static/css/components.css`](static/css/components.css), layout master [`templates/layouts/base.html`](templates/layouts/base.html), serta komponen [`templates/components/control_bar.html`](templates/components/control_bar.html), [`templates/components/kpi_cards.html`](templates/components/kpi_cards.html), [`templates/components/charts.html`](templates/components/charts.html), dan [`templates/dashboard/index.html`](templates/dashboard/index.html).
 
 - **Audit Konsolidasi Palet 1 Warna Utama pada Dashboard**:
   - Menyeragamkan seluruh elemen antarmuka halaman Dashboard (`/`) ke **1 warna tema utama** (Tabler Azure Primary `#206bc4`):
@@ -768,18 +768,18 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - `profil/index.html`: Kartu rincian identitas langganan, tombol peta GPS, collapsible ganti password akun portal, dan tombol logout.
 - **Implementasi Penuh Tabler UI & Authentic Tabler Icons (preview.tabler.io & D:\UI_Panduan)**:
   - **Aset Resmi Lokal**: Mengintegrasikan `tabler.min.css` dan `tabler.min.js` dari `D:\UI_Panduan\tabler-dist` serta seluruh pustaka ikon SVG murni dari `D:\UI_Panduan\tabler-icons`.
-  - **Navigasi Base & Shell Aplikasi ([templates/layouts/base.html](file:///d:/databaru/Magang/EdTeknoGuard/templates/layouts/base.html))**:
+  - **Navigasi Base & Shell Aplikasi ([templates/layouts/base.html](templates/layouts/base.html))**:
     - **Header & Top Bar Tabler**: Mengadopsi header putih bersih dengan border 1px `#e6e8eb`, status LED real-time beranimasi pulse, breadcrumb portal yang rapi, dropdown Kantor Switcher, dan popover notifikasi aduan/tiket masuk.
     - **Sidebar Desktop**: Desain modular Tabler dengan pengelompokan seksi (`NOC & JARINGAN`, `MANAJEMEN PELANGGAN`, `SISTEM & AUDIT`), highlight aktif warna Azure Blue `#206bc4` dengan left border strip, badge counter tiket, dan profil pengguna bawah yang terintegrasi.
     - **Sticky Bottom Navigation (5-Tab)**: Navigasi mobile ergonomis dengan tombol tengah Beranda menonjol (elevated center), badge unread tiket, dan area sentuh >= 44px ramah jempol.
     - **Authentic Tabler SVG Icons**: Seluruh ikon antarmuka (dashboard, logs, users, tickets, kuota, audit, settings, building, bell, logout, chevrons) dikonversi ke standar resmi Tabler Icons (`viewBox="0 0 24 24" stroke-width="2"`).
-  - **Halaman Dashboard Utama ([templates/dashboard/index.html](file:///d:/databaru/Magang/EdTeknoGuard/templates/dashboard/index.html))**:
+  - **Halaman Dashboard Utama ([templates/dashboard/index.html](templates/dashboard/index.html))**:
     - **Tabler Page Header**: Pretitle `PUSAT KOMANDO JARINGAN ISP`, judul tebal `Monitoring & Deteksi Dini ONT`, dan status badges.
     - **Action Grid Layanan & Operasional**: Grid kartu aksi modular Tabler dengan micro-hover interaction dan unread counter.
-    - **Control Bar ([templates/components/control_bar.html](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/control_bar.html))**: Status ribbon atas 3-kondisi (Running/Green, Stopped/Amber, Network Error/Red), timestamp pengecekan terakhir, dan tombol aksi Tabler (Player Play, Pause, Stop).
-    - **KPI Cards ([templates/components/kpi_cards.html](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/kpi_cards.html))**: 4 kartu metrik Tabler dengan status top ribbon (`.card-status-azure`, `.card-status-green`, `.card-status-amber`, `.card-status-red`), ikon Tabler router/wifi-off/alert-triangle, angka tebal dan unit jelas.
-    - **Telemetry & Chart Redaman ([templates/components/charts.html](file:///d:/databaru/Magang/EdTeknoGuard/templates/components/charts.html))**: Telemetry card dengan 4 data summary chips (Rata-rata, Terbaik, Terendah, Total Sampel), date picker, range button (Hari Ini, Kemarin, 7 Hari), dan Chart.js bertema Tabler Azure Blue.
-  - **Design System Tokens ([static/css/components.css](file:///d:/databaru/Magang/EdTeknoGuard/static/css/components.css))**:
+    - **Control Bar ([templates/components/control_bar.html](templates/components/control_bar.html))**: Status ribbon atas 3-kondisi (Running/Green, Stopped/Amber, Network Error/Red), timestamp pengecekan terakhir, dan tombol aksi Tabler (Player Play, Pause, Stop).
+    - **KPI Cards ([templates/components/kpi_cards.html](templates/components/kpi_cards.html))**: 4 kartu metrik Tabler dengan status top ribbon (`.card-status-azure`, `.card-status-green`, `.card-status-amber`, `.card-status-red`), ikon Tabler router/wifi-off/alert-triangle, angka tebal dan unit jelas.
+    - **Telemetry & Chart Redaman ([templates/components/charts.html](templates/components/charts.html))**: Telemetry card dengan 4 data summary chips (Rata-rata, Terbaik, Terendah, Total Sampel), date picker, range button (Hari Ini, Kemarin, 7 Hari), dan Chart.js bertema Tabler Azure Blue.
+  - **Design System Tokens ([static/css/components.css](static/css/components.css))**:
     - Standarisasi token Tabler: canvas background `#f4f6fa`, kartu `#ffffff` dengan border `#e6e8eb`, status ribbon, status dot pulsing, dan tombol hierarki Tabler.
 - **Penerapan Tema Warna 60% Biru Laut Dominan (Ocean Blue) & Outline CSS**:
   - Mengimplementasikan aturan rasio warna **60-30-10** secara ketat:
@@ -790,14 +790,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 - **Penerapan Apple Human Interface Guidelines (HIG) Design System pada Dashboard**:
   - Mengadopsi bahasa desain resmi Apple HIG pada seluruh elemen Dashboard NOC: material translucent frosted glass (`.apple-card` dengan `backdrop-filter: blur(20px)` dan hairline border `rgba(60, 60, 67, 0.12)`), Apple Health Metric Widgets (`.kpi-metric-card`), Apple Segmented Controls (`.apple-segmented-control`), Apple System Buttons (`.apple-btn`), serta Squircle Action Grid Cards (`.action-grid-card`).
   - **Penyederhanaan Palet Warna (Neutral Monochromatic with Alert-Only Highlights)**: Mengeliminasi warna-warni berlebih pada kartu, grid ikon, badge informasi umum, dan summary chips ke warna abu-abu netral Apple (*Apple System Gray* `#f2f2f7` & `#1c1c1e`). Warna aksen (hijau, kuning/amber, merah/rose) diisolasi khusus untuk indikator status sistem, peringatan redaman kritis/warning, dan notifikasi tiket darurat.
-  - Memisahkan CSS secara modular berbasis OOP di [`static/css/components.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/components.css) dan JS di [`static/js/dashboard.js`](file:///d:/databaru/Magang/EdTeknoGuard/static/js/dashboard.js).
+  - Memisahkan CSS secara modular berbasis OOP di [`static/css/components.css`](static/css/components.css) dan JS di [`static/js/dashboard.js`](static/js/dashboard.js).
   - Memberikan penamaan ID dan class semantik per elemen (`#dashboardServiceGridSection`, `#kpiCardTotal`, `#dashboardControlBar`, `#dashboardQuickShortcuts`, `#dashboardChartCard`, dll.) sehingga mudah dipelihara dan dapat langsung digunakan kembali (*reusable*) pada halaman lain.
 - **Sistem Desain Komponen Modular OOP & Pemisahan CSS/JS Dashboard (`components.css`)**:
-  - Membuat stylesheet sistem desain terpusat di [`static/css/components.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/components.css) yang mengelompokkan komponen secara OOP: Card Container (`.tekno-card`), Button System (`.tekno-btn` dengan varian primary, success, warning, danger, secondary), Status Badges (`.tekno-badge`), Action Grid Cards (`.action-grid-card`), KPI Cards (`.kpi-metric-card`), dan Toast Notifications (`.tekno-toast`).
-  - Memperbarui halaman Dashboard ([`templates/dashboard/index.html`](file:///d:/databaru/Magang/EdTeknoGuard/templates/dashboard/index.html)), Control Bar, KPI Cards, dan Charts dengan penamaan elemen semantik (`#dashboardServiceGridSection`, `#kpiCardTotal`, `#dashboardControlBar`, `#dashboardQuickShortcuts`) sehingga dapat langsung digunakan kembali (*reusable*) pada modul halaman lain dengan konsistensi penuh.
+  - Membuat stylesheet sistem desain terpusat di [`static/css/components.css`](static/css/components.css) yang mengelompokkan komponen secara OOP: Card Container (`.tekno-card`), Button System (`.tekno-btn` dengan varian primary, success, warning, danger, secondary), Status Badges (`.tekno-badge`), Action Grid Cards (`.action-grid-card`), KPI Cards (`.kpi-metric-card`), dan Toast Notifications (`.tekno-toast`).
+  - Memperbarui halaman Dashboard ([`templates/dashboard/index.html`](templates/dashboard/index.html)), Control Bar, KPI Cards, dan Charts dengan penamaan elemen semantik (`#dashboardServiceGridSection`, `#kpiCardTotal`, `#dashboardControlBar`, `#dashboardQuickShortcuts`) sehingga dapat langsung digunakan kembali (*reusable*) pada modul halaman lain dengan konsistensi penuh.
 - **Pembaruan Halaman Login Admin (Clean White Theme & Ingat Saya)**:
   - Mengubah desain halaman login menjadi tema putih bersih (*clean white theme* `#ffffff` / `#f8fafc`) dengan rasio kontras WCAG 4.5:1.
-  - Memisahkan CSS murni ke [`static/css/login.css`](file:///d:/databaru/Magang/EdTeknoGuard/static/css/login.css) dan JavaScript modular ke [`static/js/login.js`](file:///d:/databaru/Magang/EdTeknoGuard/static/js/login.js) dengan penamaan class/id elemen yang semantik dan terstruktur untuk mempermudah pemeliharaan jangka panjang.
+  - Memisahkan CSS murni ke [`static/css/login.css`](static/css/login.css) dan JavaScript modular ke [`static/js/login.js`](static/js/login.js) dengan penamaan class/id elemen yang semantik dan terstruktur untuk mempermudah pemeliharaan jangka panjang.
   - Menambahkan komponen checkbox **"Ingat saya"** (`#remember_me`) yang menyimpan username ke local storage peramban pengguna secara otomatis.
 - **Fitur Photo-Style Zoom & Pan Khusus Mobile pada Grafik Chart.js (Gambar 1)**:
   - Tombol kontrol zoom (+, -, Reset) kini disembunyikan di desktop dan diisolasi khusus tampilan mobile (`sm:hidden`).
@@ -922,7 +922,7 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - Mengeliminasi ID ganda, redundansi tabel `akun_pelanggan`, dan memastikan satu entitas pelanggan tunggal untuk operasional NOC dan portal pelanggan warga desa.
 - **Modal Peringatan Penghapusan Berjenjang (CASCADE Deletion Warning)**:
   - Pembaruan modal konfirmasi hapus tunggal dan hapus massal di `/pelanggan` dengan kotak peringatan bahaya yang merinci daftar seluruh data anakan yang akan ikut terhapus permanen.
-- Penambahan file panduan riwayat perubahan [CHANGELOG.md](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/CHANGELOG.md) dan integrasi aturan wajib pencatatan pada [AGENTS.md](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/AGENTS.md) dan [README.md](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/README.md).
+- Penambahan file panduan riwayat perubahan [CHANGELOG.md](CHANGELOG.md) dan integrasi aturan wajib pencatatan pada [AGENTS.md](AGENTS.md) dan [README.md](README.md).
 
 ### Changed
 - **Penyempurnaan Form Modal Pelanggan (Tambah & Edit Data) dengan Layout 2-Tab Ergonomis**:

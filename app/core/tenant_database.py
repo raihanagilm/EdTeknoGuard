@@ -8,21 +8,20 @@ from app.core.database import Base, engine as master_engine, SessionLocal as Mas
 
 logger = logging.getLogger("tenant_database")
 
-# Tabel-tabel yang dicopy skemanya dari master (termasuk kantors sebagai local reference)
-TENANT_TABLE_NAMES = [
-    "kantors",
-    "pakets",
-    "pelanggan",
-    "perangkat_ont",
-    "log_performa_ont",
-    "alert_logs",
-    "tiket_kendala",
-    "kuota_pelanggan",
-    "system_settings",
-    "modem_credentials",
-    "user_activity_logs",
-    "user_notification_reads",
-]
+# Daftar nama tabel tenant (diambil langsung dari TenantBase metadata)
+def get_tenant_table_names() -> List[str]:
+    from app.db.models import TenantBase
+    return list(TenantBase.metadata.tables.keys())
+
+class _TenantTableNamesProxy(list):
+    def __iter__(self):
+        return iter(get_tenant_table_names())
+    def __contains__(self, item):
+        return item in get_tenant_table_names()
+    def __len__(self):
+        return len(get_tenant_table_names())
+
+TENANT_TABLE_NAMES = _TenantTableNamesProxy()
 
 import urllib.parse
 
@@ -94,14 +93,9 @@ class TenantDatabaseManager:
 
         from app.db import models
 
-        tables_to_create = [
-            models.Base.metadata.tables[tbl_name]
-            for tbl_name in TENANT_TABLE_NAMES
-            if tbl_name in models.Base.metadata.tables
-        ]
-
-        models.Base.metadata.create_all(bind=tenant_engine, tables=tables_to_create)
-        logger.info(f"[TENANT_DB] Skema {len(tables_to_create)} tabel berhasil dibuat di database '{db_name}'.")
+        # Otomatis membuat seluruh tabel yang terdaftar pada TenantBase
+        models.TenantBase.metadata.create_all(bind=tenant_engine)
+        logger.info(f"[TENANT_DB] Seluruh skema tabel TenantBase ({len(models.TenantBase.metadata.tables)} tabel) berhasil dibuat di database '{db_name}'.")
 
     @classmethod
     def provision_new_office(cls, kode_kantor: str, id_kantor: Optional[int] = None, nama_kantor: Optional[str] = None):
@@ -110,12 +104,7 @@ class TenantDatabaseManager:
         try:
             from app.db.models import Kantor, SystemSetting
             # Sinkronkan entri kantor lokal ke tenant DB
-            if nama_kantor:
-                k_local = session.query(Kantor).filter(Kantor.nama == nama_kantor).first()
-                if not k_local:
-                    k_obj = Kantor(id_kantor=id_kantor, nama=nama_kantor, is_active=True)
-                    session.add(k_obj)
-                    session.commit()
+            # Catatan: Kantor sekarang murni berada di MasterBase (tidak diduplikasi ke tenant)
 
             existing = session.query(SystemSetting).first()
             if not existing:

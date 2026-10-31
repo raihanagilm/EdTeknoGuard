@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { PORTAL_MASCOTS_SVG } from './portalMascotsSvg';
 import '../../styles/mascots/index.css';
+
+/**
+ * Cache in-memory untuk SVG yang telah di-fetch agar tidak fetch berulang kali
+ */
+const svgCache = {};
 
 /**
  * Daftar maskot rotasi berkala (bergantian setiap 3 menit / 180 detik)
@@ -29,15 +33,6 @@ const getWallClockMascotIndex = () => {
 
 /**
  * Menentukan maskot prioritas berdasarkan kondisi aktivitas sistem:
- * 1. gangguan.html jika redaman optik >= -28.0 dBm (yaitu <= -28 dBm secara fisik sinyal drop / critical / los)
- * 2. marah.html jika pelanggan belum bayar tagihan (status_pembayaran === 'BELUM_BAYAR')
- * 3. gembira.html jika user sudah membayar tagihan (status_pembayaran === 'LUNAS_BARU' / baru lunas)
- * 4. sedih.html jika pelanggan sudah tidak aktif (is_active === false)
- * 5. pelanggan.html jika user melaporkan kendala (tiket status MENUNGGU)
- * 6. layanan-pelanggan.html jika laporan ditangani admin (tiket status DICEK_ADMIN)
- * 7. teknisi.html jika laporan ditangani teknisi (tiket status DIPROSES)
- * 
- * Jika tidak ada event darurat di atas, sistem akan merotasi maskot santai setiap 3 menit sinkron jam dinding:
  */
 export function getActiveMascotKey(data, rotatingIndex) {
   const currentIndex = typeof rotatingIndex === 'number' ? rotatingIndex : getWallClockMascotIndex();
@@ -66,13 +61,13 @@ export function getActiveMascotKey(data, rotatingIndex) {
   // 5, 6, 7. Status tiket kendala jika ada tiket aktif
   if (latestTicket && ['MENUNGGU', 'DICEK_ADMIN', 'DIPROSES'].includes(latestTicket.status)) {
     if (latestTicket.status === 'MENUNGGU') {
-      return 'pelanggan'; // Pelanggan baru melapor kendala
+      return 'pelanggan';
     }
     if (latestTicket.status === 'DICEK_ADMIN') {
-      return 'layanan-pelanggan'; // Laporan ditangani admin customer service
+      return 'layanan-pelanggan';
     }
     if (latestTicket.status === 'DIPROSES') {
-      return 'teknisi'; // Laporan ditangani teknisi di lapangan
+      return 'teknisi';
     }
   }
 
@@ -86,12 +81,14 @@ export function getActiveMascotKey(data, rotatingIndex) {
 }
 
 /**
- * Komponen Maskot Interaktif Portal
+ * Komponen Maskot Interaktif Portal (Memuat SVG mandiri secara asinkron dari /mascots/<key>.svg)
  */
 export function PortalActiveMascot({ data, mascotKey: customMascotKey, className = 'w-20 h-16' }) {
   const [rotatingIndex, setRotatingIndex] = useState(() => getWallClockMascotIndex());
+  const mascotKey = customMascotKey || getActiveMascotKey(data, rotatingIndex);
+  const [svgContent, setSvgContent] = useState(() => svgCache[mascotKey] || '');
 
-  // Interval pengecekan waktu setiap 10 detik agar pergantian tepat di batas 3 menit jam dinding
+  // Interval rotasi sinkron jam dinding
   useEffect(() => {
     const timer = setInterval(() => {
       const newIdx = getWallClockMascotIndex();
@@ -101,14 +98,37 @@ export function PortalActiveMascot({ data, mascotKey: customMascotKey, className
     return () => clearInterval(timer);
   }, []);
 
-  const mascotKey = customMascotKey || getActiveMascotKey(data, rotatingIndex);
-  const svgHtml = PORTAL_MASCOTS_SVG[mascotKey] || PORTAL_MASCOTS_SVG['menyapa'];
+  // Fetch SVG jika belum ada di cache
+  useEffect(() => {
+    if (svgCache[mascotKey]) {
+      setSvgContent(svgCache[mascotKey]);
+      return;
+    }
+
+    let isMounted = true;
+    fetch(`/mascots/${mascotKey}.svg`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
+      .then((svgText) => {
+        svgCache[mascotKey] = svgText;
+        if (isMounted) setSvgContent(svgText);
+      })
+      .catch((err) => {
+        console.warn(`[PortalActiveMascot] Gagal memuat SVG /mascots/${mascotKey}.svg:`, err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [mascotKey]);
 
   return (
     <div
       className={`relative pointer-events-none select-none inline-flex items-center justify-center leading-none mascot-container-${mascotKey} ${className} [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:object-contain`}
       style={{ overflow: 'visible', lineHeight: 0 }}
-      dangerouslySetInnerHTML={{ __html: svgHtml }}
+      dangerouslySetInnerHTML={{ __html: svgContent }}
     />
   );
 }

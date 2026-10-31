@@ -1,5 +1,14 @@
-import React from 'react';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Phone,
+  RefreshCw,
+  Send,
+  CheckCircle2,
+  KeyRound
+} from 'lucide-react';
+import { PortalAuthService } from '../services/portalApi';
 import '../../styles/mascots/mascot-pusing.css';
 
 /* ░░░ Komponen Maskot Animasi Si Router Pusing (pusing.html) ░░░ */
@@ -99,54 +108,18 @@ function RouterPusingMascot({ className = "w-28 h-20" }) {
             />
           </g>
 
-          {/* Mulut Pusing Bergelombang */}
+          {/* Mulut Berombak Bingung */}
           <g className="rig-mouth">
             <path
-              d="M110 98C113.333 95.3333 116.667 95.3333 120 98C123.333 100.667 126.667 100.667 130 98"
+              d="M106 97C110 99.5 114 99.5 118 97C122 94.5 126 94.5 130 97C134 99.5 138 99.5 142 97"
               stroke="#0F172A"
               strokeWidth="3.5"
               strokeLinecap="round"
-            />
-          </g>
-
-          {/* Tangan Kiri Menempel Kepala */}
-          <g className="rig-arm-l">
-            <path
-              d="M39 103C16.81 89.9516 22.1448 63.7323 51.2985 62.0229"
-              stroke="#0F172A"
-              strokeWidth="4.5"
-              strokeLinecap="round"
-            />
-            <path
-              d="M49.2601 56.6381C52.2569 58.0522 53.54 61.628 52.1259 64.6248C50.7118 67.6217 47.136 68.9047 44.1392 67.4906C41.1424 66.0765 39.8593 62.5008 41.2734 59.5039C42.6875 56.5071 46.2633 55.224 49.2601 56.6381Z"
-              fill="#20C5D2"
-              stroke="#0F172A"
-              strokeWidth="3.5"
-            />
-          </g>
-
-          {/* Tangan Kanan Menempel Kepala */}
-          <g className="rig-arm-r">
-            <path
-              d="M201.761 102.567C223.951 89.5185 218.616 63.2992 189.463 61.5898"
-              stroke="#0F172A"
-              strokeWidth="4.5"
-              strokeLinecap="round"
-            />
-            <path
-              d="M191.501 56.205C188.504 57.6191 187.221 61.1949 188.635 64.1917C190.049 67.1886 193.625 68.4716 196.622 67.0575C199.619 65.6434 200.902 62.0677 199.488 59.0708C198.073 56.074 194.498 54.7909 191.501 56.205Z"
-              fill="#20C5D2"
-              stroke="#0F172A"
-              strokeWidth="3.5"
             />
           </g>
 
           {/* Bintang-Bintang Pusing Berputar Melayang di Atas Kepala */}
-          <g className="rig-prop">
-            <path
-              d="M103.833 41.9131L106.778 48.0512L112.667 49.0742L107.759 53.1663L109.722 59.3044L103.833 55.2123L97.9444 59.3044L99.9074 53.1663L95 49.0742L100.889 48.0512L103.833 41.9131Z"
-              fill="#F59E0B"
-            />
+          <g className="rig-stars">
             <path
               d="M121.5 50.6086L124.444 56.7467L130.333 57.7698L125.426 61.8618L127.389 67.9999L121.5 63.9079L115.611 67.9999L117.574 61.8618L112.667 57.7698L118.556 56.7467L121.5 50.6086Z"
               fill="#F59E0B"
@@ -175,17 +148,45 @@ function RouterPusingMascot({ className = "w-28 h-20" }) {
 }
 
 export function PortalResetPasswordView({ onBackToLogin }) {
+  // Step: 'input_phone' | 'submitted_success'
+  const [step, setStep] = useState('input_phone');
+  const [noHp, setNoHp] = useState('');
+  const [submittedData, setSubmittedData] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Handle kirim permintaan reset password ke Admin NOC
+  const handleRequestReset = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setLoading(true);
+
+    try {
+      const res = await PortalAuthService.mintaResetPassword(noHp);
+      if (res.ok && res.data?.ok) {
+        setSubmittedData(res.data);
+        setStep('submitted_success');
+      } else {
+        setErrorMsg(res.data?.message || 'Gagal memproses permintaan reset password.');
+      }
+    } catch (err) {
+      setErrorMsg('Terjadi kesalahan jaringan atau server. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="h-[100dvh] w-full bg-slate-200 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden">
       <div className="w-full sm:max-w-[430px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative">
 
         {/* ░░░ PANEL ATAS: gradient biru diperbesar + Maskot Si Router Pusing ░░░ */}
-        <div className="relative bg-gradient-to-br from-sky-500 via-blue-600 to-blue-800 h-[210px] sm:h-[230px] overflow-hidden shrink-0">
-          {/* Ornamen dekoratif */}
+        <div className="relative bg-gradient-to-br from-sky-500 via-blue-600 to-blue-800 h-[190px] sm:h-[210px] overflow-hidden shrink-0">
           <div className="absolute -top-14 -right-14 w-48 h-48 bg-white/10 rounded-full pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 w-52 h-52 bg-cyan-300/10 rounded-full pointer-events-none" />
 
-          {/* Header Brand Atas: Logo Frame 36 + TeknoCust + Subtitle */}
+          {/* Header Brand Atas */}
           <div className="relative z-10 pt-4 px-5">
             <div className="flex items-center gap-3">
               <img
@@ -210,49 +211,125 @@ export function PortalResetPasswordView({ onBackToLogin }) {
           </div>
         </div>
 
-        {/* ░░░ PANEL BAWAH: card putih overlap + panduan reset kata sandi ░░░ */}
+        {/* ░░░ PANEL BAWAH: card putih overlap + alur dinamis lupa password ░░░ */}
         <div className="relative -mt-5 bg-white rounded-t-[1.75rem] shadow-2xl flex-1 flex flex-col justify-between overflow-y-auto z-10">
           <div className="px-5 pt-4 pb-4 sm:px-6 sm:pt-5 sm:pb-5 flex flex-col justify-between min-h-full">
             <div>
-              {/* Header Title: Lupa Password */}
+              {/* Header Title */}
               <div className="text-center mb-3 sm:mb-4">
                 <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                   Lupa Password
                 </h1>
                 <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
-                  Bantuan pemulihan kata sandi akun pelanggan TeknoCust
+                  {step === 'submitted_success'
+                    ? 'Permintaan reset telah terkirim ke Tim Admin NOC'
+                    : 'Pemulihan kata sandi akun pelanggan TeknoCust'}
                 </p>
               </div>
 
-              {/* Box Informasi Resmi Pemulihan Sandi */}
-              <div className="p-4 rounded-xl border border-slate-200 text-xs text-slate-700 space-y-3 leading-relaxed bg-white shadow-xs">
-                <div className="font-bold text-slate-800 flex items-center gap-2 text-xs">
-                  <AlertCircle className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Dikelola Langsung Oleh Admin NOC</span>
+              {/* Alert Feedback Error */}
+              {errorMsg && (
+                <div className="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2 animate-fadeIn">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                  <span className="font-semibold leading-relaxed">{errorMsg}</span>
                 </div>
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  Untuk menjaga keamanan akun Anda dan mencegah akses tidak sah, pengaturan ulang kata sandi ditangani langsung oleh <strong>Tim Admin NOC TeknoIndonet</strong>.
-                </p>
+              )}
 
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/90 space-y-2 text-xs text-slate-600">
-                  <div className="font-semibold text-slate-800">Langkah Mudah Pemulihan Sandi:</div>
-                  <ul className="list-disc list-inside space-y-1 text-slate-600 leading-relaxed">
-                    <li>Hubungi Admin atau Teknisi TeknoIndonet wilayah Anda.</li>
-                    <li>Sebutkan <strong>Nama Terdaftar</strong>, <strong>No. WA</strong>, atau <strong>IP Router</strong> Anda.</li>
-                    <li>Admin akan mengatur ulang kata sandi Anda kembali ke default (<strong className="font-mono text-blue-700 font-bold">123456</strong>).</li>
-                  </ul>
+              {/* ═══════════════════════════════════════════════════════════ */}
+              {/* TAHAP 1: FORM INPUT NOMOR WHATSAPP                         */}
+              {/* ═══════════════════════════════════════════════════════════ */}
+              {step === 'input_phone' && (
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-xl border border-blue-100 bg-blue-50/60 text-xs text-blue-900 space-y-1.5 leading-relaxed">
+                    <div className="font-bold flex items-center gap-1.5 text-blue-800">
+                      <KeyRound className="w-4 h-4 text-blue-600 shrink-0" />
+                      <span>Pemulihan Sandi Melalui Admin</span>
+                    </div>
+                    <p className="text-blue-800/90 text-[11px] leading-relaxed">
+                      Masukkan Nomor WhatsApp terdaftar Anda. Sistem akan membuatkan kata sandi baru secara aman dan meneruskannya ke tiket Admin NOC TeknoIndonet untuk dikirimkan langsung ke WhatsApp Anda.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleRequestReset} className="space-y-3">
+                    <div className="space-y-1">
+                      <label htmlFor="reset-phone" className="text-[11px] font-semibold text-slate-700 block">
+                        Nomor WhatsApp Terdaftar
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <input
+                          id="reset-phone"
+                          type="tel"
+                          required
+                          value={noHp}
+                          onChange={(e) => setNoHp(e.target.value)}
+                          placeholder="Contoh: 081234567890 atau 628..."
+                          className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[42px]"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full mt-2 py-2.5 sm:py-3 px-4 rounded-lg bg-gradient-to-r from-sky-500 via-blue-600 to-blue-700 hover:from-sky-600 hover:to-blue-800 text-white font-bold text-xs sm:text-sm shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]"
+                    >
+                      <span>{loading ? 'Memproses Permintaan...' : 'Kirim Permintaan Reset'}</span>
+                      {loading ? <RefreshCw className="w-4 h-4 animate-spin shrink-0" /> : <Send className="w-4 h-4 shrink-0" />}
+                    </button>
+                  </form>
                 </div>
-              </div>
+              )}
 
-              {/* Tombol Kembali ke Halaman Masuk */}
-              <button
-                type="button"
-                onClick={onBackToLogin}
-                className="w-full mt-4 py-2.5 sm:py-3 px-4 rounded-lg bg-gradient-to-r from-sky-500 via-blue-600 to-blue-700 hover:from-sky-600 hover:to-blue-800 text-white font-bold text-xs sm:text-sm shadow-sm transition active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
-              >
-                <ArrowLeft className="w-4 h-4 shrink-0" />
-                <span>Kembali ke Halaman Masuk</span>
-              </button>
+              {/* ═══════════════════════════════════════════════════════════ */}
+              {/* TAHAP 2: PERMINTAAN DITERIMA ADMIN NOC                     */}
+              {/* ═══════════════════════════════════════════════════════════ */}
+              {step === 'submitted_success' && (
+                <div className="space-y-4 animate-fadeIn text-center py-2">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100 shadow-xs">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-1.5 px-2">
+                    <h3 className="text-base font-black text-slate-900">
+                      Permintaan Reset Diterima!
+                    </h3>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Permintaan reset kata sandi untuk pelanggan <strong className="text-slate-800 font-bold">{submittedData?.nama || 'Anda'}</strong> telah masuk ke antrean Tim Admin NOC.
+                    </p>
+                    <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200/90 text-left space-y-1 text-xs text-slate-700">
+                      <div className="font-bold text-slate-800 text-[11px] uppercase tracking-wide">
+                        Langkah Selanjutnya:
+                      </div>
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        Admin NOC TeknoIndonet akan segera mengirimkan kata sandi baru ke nomor WhatsApp Anda:
+                      </p>
+                      <div className="text-xs font-mono font-bold text-blue-700 bg-white p-2 rounded-lg border border-blue-200 inline-block mt-1">
+                        {submittedData?.no_hp || noHp}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={onBackToLogin}
+                    className="w-full mt-3 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-sm transition active:scale-[0.99] cursor-pointer min-h-[44px]"
+                  >
+                    Kembali ke Halaman Masuk
+                  </button>
+                </div>
+              )}
+
+              {/* Tombol Kembali ke Halaman Masuk (saat form input) */}
+              {step === 'input_phone' && (
+                <button
+                  type="button"
+                  onClick={onBackToLogin}
+                  className="w-full mt-4 py-2.5 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px]"
+                >
+                  <ArrowLeft className="w-4 h-4 shrink-0" />
+                  <span>Kembali ke Halaman Masuk</span>
+                </button>
+              )}
             </div>
 
             {/* Footer copyright */}

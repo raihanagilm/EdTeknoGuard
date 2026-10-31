@@ -296,7 +296,7 @@ class CustomerController:
             )
         return {
             "status": "success",
-            "message": f"Kata sandi aplikasi TeknoCust pelanggan '{cust.nama}' berhasil di-reset ke '123456'",
+            "message": f"Kata sandi aplikasi TeknoCust pelanggan '{cust.nama}' berhasil di-reset ke Nomor WhatsApp terdaftar",
             "id_pelanggan": cust.id_pelanggan
         }
 

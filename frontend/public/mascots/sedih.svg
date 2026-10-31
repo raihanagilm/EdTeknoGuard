@@ -1,0 +1,85 @@
+<svg class="mascot-svg" viewBox="0 0 240 158" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Badan Utama & Seluruh Anggota Tubuh Menyatu (Torso Rig) -->
+      <g class="rig-torso">
+        <!-- Kaki Kiri & Kaki Kanan (Menyatu di belakang bodi agar tidak pernah copot & ikut bergerak) -->
+        <g class="rig-leg-l">
+          <path d="M85 118V154H101V118" fill="#20C5D2"/>
+          <path d="M85 118V154H101V118" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+        </g>
+        <g class="rig-leg-r">
+          <path d="M139 118V154H155V118" fill="#20C5D2"/>
+          <path d="M139 118V154H155V118" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Antena Kiri & Kanan -->
+        <g class="rig-antenna-l">
+          <path d="M78 53.9999L68 17.9999C67 13.9999 73 12.9999 76 15.9999L88 51.9999L78 53.9999Z" fill="#2563EB" stroke="#0F172A" stroke-width="5" stroke-linejoin="round"/>
+        </g>
+        <g class="rig-antenna-r">
+          <path d="M162 53.9999L172 17.9999C173 13.9999 167 12.9999 164 15.9999L152 51.9999L162 53.9999Z" fill="#2563EB" stroke="#0F172A" stroke-width="5" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Bodi Router -->
+        <g class="rig-body">
+          <path d="M58 54C72 50 168 50 182 54C196 58 206 102 200 120C196 128 178 132 120 132C62 132 44 128 40 120C34 102 44 58 58 54Z" fill="#20C5D2" stroke="#0F172A" stroke-width="5.5" stroke-linejoin="round"/>
+          <path d="M44 114C70 118 170 118 196 114" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M120 125.5C121.933 125.5 123.5 123.933 123.5 122C123.5 120.067 121.933 118.5 120 118.5C118.067 118.5 116.5 120.067 116.5 122C116.5 123.933 118.067 125.5 120 125.5Z" stroke="#0F172A" stroke-width="1.8"/>
+          <path d="M120 119V122" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round"/>
+        </g>
+
+        <!-- Lampu Indikator LED -->
+        <g class="rig-leds">
+          
+          <path class="led-1" d="M64 124.5C65.3807 124.5 66.5 123.381 66.5 122C66.5 120.619 65.3807 119.5 64 119.5C62.6193 119.5 61.5 120.619 61.5 122C61.5 123.381 62.6193 124.5 64 124.5Z" fill="#0F172A"/>
+          <path class="led-2" d="M72 124.5C73.3807 124.5 74.5 123.381 74.5 122C74.5 120.619 73.3807 119.5 72 119.5C70.6193 119.5 69.5 120.619 69.5 122C69.5 123.381 70.6193 124.5 72 124.5Z" fill="#0F172A"/>
+          <path class="led-3" d="M80 124.5C81.3807 124.5 82.5 123.381 82.5 122C82.5 120.619 81.3807 119.5 80 119.5C78.6193 119.5 77.5 120.619 77.5 122C77.5 123.381 78.6193 124.5 80 124.5Z" fill="#0F172A"/>
+        </g>
+
+        <!-- Alis (Jika ada) -->
+        <g class="rig-brows">
+          <path d="M80 76C90 70 102 74 104 80" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+          <path d="M160 76C150 70 138 74 136 80" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <!-- Bola Mata (Berkedip & Melirik) -->
+        <g class="rig-eyes">
+          <path d="M92 96.5C96.6944 96.5 100.5 92.6944 100.5 88C100.5 83.3056 96.6944 79.5 92 79.5C87.3056 79.5 83.5 83.3056 83.5 88C83.5 92.6944 87.3056 96.5 92 96.5Z" fill="#0F172A"/>
+          <path d="M94 88.5C95.933 88.5 97.5 86.933 97.5 85C97.5 83.067 95.933 81.5 94 81.5C92.067 81.5 90.5 83.067 90.5 85C90.5 86.933 92.067 88.5 94 88.5Z" fill="white"/>
+          <path d="M148 96.5C152.694 96.5 156.5 92.6944 156.5 88C156.5 83.3056 152.694 79.5 148 79.5C143.306 79.5 139.5 83.3056 139.5 88C139.5 92.6944 143.306 96.5 148 96.5Z" fill="#0F172A"/>
+          <path d="M146 88.5C147.933 88.5 149.5 86.933 149.5 85C149.5 83.067 147.933 81.5 146 81.5C144.067 81.5 142.5 83.067 142.5 85C142.5 86.933 144.067 88.5 146 88.5Z" fill="white"/>
+        </g>
+
+        <!-- Kacamata / Visor (Tidak ikut terpejam saat mata berkedip) -->
+        <g class="rig-glasses">
+          
+        </g>
+
+        <!-- Mulut -->
+        <g class="rig-mouth">
+          <path d="M112 106C116 98 124 98 128 106" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <!-- Objek Meja / Monitor / Laptop (Di belakang tangan) -->
+        <g class="rig-desk-prop">
+          
+        </g>
+
+        <!-- Tangan Kiri -->
+        <g class="rig-arm-l">
+          <path d="M50 96C54 116 80 120 108 116" stroke="#0F172A" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M112 121C114.761 121 117 118.761 117 116C117 113.239 114.761 111 112 111C109.239 111 107 113.239 107 116C107 118.761 109.239 121 112 121Z" fill="#20C5D2" stroke="#0F172A" stroke-width="3"/>
+        </g>
+
+        <!-- Tangan Kanan -->
+        <g class="rig-arm-r">
+          <path d="M190 96C186 116 160 120 132 116" stroke="#0F172A" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M128 121C130.761 121 133 118.761 133 116C133 113.239 130.761 111 128 111C125.239 111 123 113.239 123 116C123 118.761 125.239 121 128 121Z" fill="#20C5D2" stroke="#0F172A" stroke-width="3"/>
+        </g>
+
+        <!-- Properti & Efek Pendukung -->
+        <g class="rig-prop">
+          <path d="M87.291 95.9141C87.701 95.5041 88.2452 95.3979 88.8418 95.5967C90.076 96.0081 91.5 97.7652 91.5 100.623C91.4999 101.491 91.1786 102.093 90.7422 102.457C90.2996 102.826 89.6992 102.983 89.082 102.88C87.8879 102.681 86.5001 101.45 86.5 98.623C86.5 97.1924 86.8593 96.3459 87.291 95.9141Z" fill="#38BDF8" stroke="white"/>
+          <path d="M155.158 88.9739C155.755 88.7751 156.299 88.8813 156.709 89.2913C157.141 89.7231 157.5 90.5696 157.5 92.0002C157.5 94.8275 156.112 96.058 154.918 96.2571C154.301 96.3599 153.7 96.203 153.258 95.8342C152.821 95.4705 152.5 94.8681 152.5 94.0002C152.5 91.1424 153.924 89.3853 155.158 88.9739Z" fill="#38BDF8" stroke="white"/>
+        </g>
+      </g>
+    </svg>

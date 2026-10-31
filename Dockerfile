@@ -27,9 +27,9 @@ RUN addgroup --system app && adduser --system --ingroup app app
 
 # Salin kode aplikasi (pemilik: app)
 COPY --chown=app:app app ./app
-COPY --chown=app:app templates ./templates
+COPY --chown=app:app database ./database
+COPY --chown=app:app routes ./routes
 COPY --chown=app:app static ./static
-COPY --chown=app:app portal_pelanggan ./portal_pelanggan
 
 # Folder runtime untuk scan_state.json (untuk hasil volume mount docker-compose)
 RUN mkdir -p /app/data && chown -R app:app /app

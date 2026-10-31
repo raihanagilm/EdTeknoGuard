@@ -1,0 +1,256 @@
+# Product Requirements Document (PRD): EdTeknoGuard
+
+Dokumen ini mendefinisikan **alur kerja sistem, logika bisnis, dan kebutuhan fungsional** dari aplikasi **EdTeknoGuard** (Sistem Deteksi Dini & Monitoring Kualitas Jaringan ONT/Modem Berbasis Python FastAPI, TiDB Cloud, dan Telegram Alerting).
+
+> 🔗 **Tautan Dokumen Terkait:**
+> - 📐 [Design System Pro — Rulebook UI/UX (designsystempro.md)](designsystempro.md) — **Sumber Kebenaran Tunggal (*Single Source of Truth*)** untuk seluruh komponen, spacing, tipografi, warna, dan pola interaksi UI/UX.
+> - 🎨 [Pedoman Desain & Tampilan (desain.md)](desain.md) — Mengatur warna tampilan, komponen visual, dan mobile-first.
+> - 🏗️ [Struktur File/Folder & Database (arsitektur.md)](arsitektur.md) — Mengatur struktur direktori proyek dan skema tabel TiDB.
+> - 📖 [README Utama Proyek](README.md) — Gambaran umum dan panduan menjalankan sistem.
+> - 🤖 [Pedoman AI Agent (AGENTS.md)](AGENTS.md) — Aturan sistem dan instruksi AI Agent.
+> - 📜 [Riwayat Perubahan & Changelog (CHANGELOG.md)](CHANGELOG.md) — Riwayat perubahan, rilis versi, dan perlindungan stabilitas fitur.
+
+---
+
+## 1. Latar Belakang & Tujuan Produk
+
+Sebagai penyedia layanan internet (ISP lokal), kualitas redaman optik (*Rx Optical Power*) pada modem/ONT pelanggan merupakan indikator kesehatan jaringan yang paling vital. Sinyal optik yang memburuk (redaman drop) sering kali diakibatkan oleh:
+- Kabel *dropcore* tertekuk atau terjepit di tiang/atap.
+- Konektor FO (*fast connector* / adaptor) kotor atau berdebu.
+- *Splice* kabel optik mengalami degradasi.
+- Port ODP kendor.
+
+**Tujuan EdTeknoGuard:**
+1. **Mendeteksi dini** penurunan redaman sebelum pelanggan mengalami keluhan lambat/putus (*proactive maintenance*).
+2. **Memberikan notifikasi otomatis seketika** ke tim teknisi via Telegram.
+3. **Menyediakan data historis** performa modem dalam bentuk grafik agar teknisi bisa melihat tren apakah penurunan terjadi bertahap atau mendadak.
+4. **Memberikan kemudahan bagi teknisi lapangan** untuk memantau status redaman lewat smartphone dengan antarmuka yang ringan dan cepat.
+
+---
+
+## 2. Pengguna & Hak Akses
+
+- **Role Utama (Tahap 1):** **Administrator / NOC Team**
+  - Mengontrol jalannya mesin pemantau (*Scheduler*).
+  - Melakukan pemindaian manual (*on-demand scan*).
+  - Melihat dashboard ringkasan metrik jaringan.
+  - Membaca dan memfilter daftar seluruh pelanggan berdasarkan POP dan status kesehatan sinyal.
+  - Menerima laporan gangguan otomatis di Telegram.
+
+---
+
+## 3. Alur Kerja Utama Sistem (Workflows)
+
+### 3.1 Alur Pemantauan Otomatis (Periodic Scheduler - Tiap 5 Menit)
+
+```mermaid
+flowchart TD
+    A[Mulai Interval 5 Menit] --> B{Status Scheduler Aktif?}
+    B -- Tidak (Dijeda) --> C[Tidur sampai interval berikutnya]
+    B -- Ya (Running) --> D[Ambil Seluruh Data Pelanggan Aktif dari TiDB]
+    D --> E[Eksekusi Query SNMP Asinkron ke IP Pelanggan]
+    E --> F{Respon Diterima?}
+    F -- Ya --> G[Hitung Nilai Rx Power dBm, Suhu, Uptime]
+    F -- Timeout / Gagal --> H[Tandai Status: LOS / MATI]
+    G --> I[Evaluasi Threshold Bisnis]
+    I --> J[Simpan Log ke Tabel log_performa_ont]
+    H --> J
+    J --> K{Status Warning / LOS & Lolos Anti-Spam?}
+    K -- Ya --> L[Kirim Pesan Alert ke Telegram Teknisi & Grup]
+    K -- Tidak --> M[Selesai Pemindaian Siklus Ini]
+    L --> M
+```
+
+1. **Trigger Interval:** Sistem menjalankan *background job* setiap **5 menit sekali**.
+2. **Pemeriksaan State:** Memeriksa apakah status pemantauan sedang `RUNNING` atau `STOPPED` (dapat diatur lewat dashboard).
+3. **Pengambilan Target:** Mengambil seluruh daftar pelanggan aktif dari database TiDB.
+4. **Polling SNMP:** Menembak protokol SNMP UDP 161 ke IP Manajemen ONT (`10.10.x.x`) sesuai OID merek masing-masing (Huawei, ZTE, GM220-S, dll).
+5. **Penyimpanan Log:** Hasil pengukuran dicatat ke tabel `log_performa_ont` beserta waktu cek presisi.
+6. **Trigger Alert:** Jika terdeteksi kondisi darurat atau penurunan sinyal, sistem mengirimkan pesan ke Telegram.
+
+---
+
+### 3.2 Alur Pemantauan Manual (On-Demand Trigger)
+
+Selain berjalan otomatis tiap 5 menit, admin/teknisi dapat memicu pemeriksaan sewaktu-waktu:
+
+1. **Tombol "Cek Redaman Sekarang" (Scan All):**
+   - Menjalankan pemindaian serentak untuk seluruh pelanggan di database secara asynchronous.
+   - Status antarmuka langsung menampilkan animasi *loading spinner* dan progress bar.
+   - Setelah selesai, angka metrik KPI dan tabel pelanggan diperbarui seketika tanpa perlu refresh halaman browser (*via Alpine.js*).
+2. **Tombol "Cek Live" (Single ONT Check):**
+   - Tersedia di setiap baris/kartu pelanggan.
+   - Berguna saat teknisi sedang berada di lokasi rumah pelanggan: setelah teknisi membersihkan konektor atau membenahi kabel dropcore, teknisi menekan tombol "Cek Live" untuk langsung melihat nilai redaman terbaru detik itu juga.
+
+---
+
+### 3.3 Alur Kontrol Mesin Pemantau (Jeda / Lanjutkan)
+
+Admin dapat menghentikan sementara loop pemantauan berkala (misal saat sedang ada *maintenance* jaringan besar-besaran):
+- **Aksi Stop:** Menekan tombol **"Jeda Monitoring"** $\rightarrow$ API memperbarui pengaturan `scheduler_status = 'STOPPED'` di database $\rightarrow$ background worker berhenti mengecek ONT.
+- **Aksi Resume:** Menekan tombol **"Lanjutkan Monitoring"** $\rightarrow$ API memperbarui pengaturan `scheduler_status = 'RUNNING'` $\rightarrow$ background worker kembali aktif tiap 5 menit.
+
+---
+
+## 4. Logika Penilaian Kesehatan Redaman & Ambang Batas (Business Rules)
+
+Sesuai arahan teknis lapangan, batas peringatan awal ditetapkan mulai **`-26.0 dBm`**:
+
+```
+           [ Hasil Pembacaan Rx Optical Power Dari ONT ]
+                                  |
+     +----------------------------+----------------------------+
+     |                                                         |
+Nilai: > -26.0 dBm                                       Nilai: <= -26.0 dBm
+(Misal: -15 s/d -25.9 dBm)                                     |
+     |                                       +-----------------+-----------------+
+     v                                       |                                   |
+[ STATUS: NORMAL ]                    Rentang: -26.0 s/d -31.9 dBm         Rentang: < -32.0 dBm
+- Warna: Hijau Emerald                (Misal: -26.4 dBm, -27.8 dBm)        (Misal: -33.5 dBm)
+- Simpan ke log DB.                          |                                   |
+- Tidak kirim alert.                         v                                   v
+                                      [ STATUS: WARNING ]                 [ STATUS: CRITICAL ]
+                                      - Warna: Kuning Amber               - Warna: Merah Rose
+                                      - Peringatan Awal Kerusakan         - Gangguan Parah
+                                      - Simpan ke log DB                  - Simpan ke log DB
+                                      - Kirim Alert Telegram              - Kirim Alert Telegram
+```
+
+### Klasifikasi Status:
+1. **NORMAL (`> -26.0 dBm`):**
+   - Sinyal optik dalam rentang prima. Pelanggan menikmati internet stabil.
+2. **WARNING (`-26.0 dBm` s/d `-31.9 dBm`):**
+   - **Peringatan Dini.** Pada `-27.0 dBm`, paket internet sudah berisiko mengalami *jitter* dan *packet loss*.
+   - Tindakan: Sistem mencatat log dan mengirimkan notifikasi ke Telegram teknisi untuk dijadwalkan inspeksi fisik.
+3. **CRITICAL (`< -32.0 dBm`):**
+   - Sinyal sangat redup, ONT terancam putus-nyambung berulang kali (*intermittent link*).
+   - Tindakan: Peringatan prioritas tinggi di dashboard dan Telegram.
+4. **LOS / ONT MATI (SNMP Timeout / Ping RTO):**
+   - Modem tidak merespon sama sekali.
+   - Sistem melakukan evaluasi:
+     - **Gangguan Massal:** Jika $\ge 3$ pelanggan pada POP/ODP yang sama mati bersamaan $\rightarrow$ indikasi kabel feeder/distribusi putus atau listrik gardu padam.
+     - **Gangguan Individu:** Jika hanya 1 pelanggan mati $\rightarrow$ kemungkinan adaptor modem dicabut atau kabel dropcore lokal putus.
+
+---
+
+## 5. Alur Notifikasi Telegram Multi-Recipient
+
+### 5.1 Mekanisme Pengiriman
+1. Sistem membaca daftar penerima dari konfigurasi `.env` (`TELEGRAM_CHAT_IDS`).
+2. Pesan dikirimkan secara paralel/asinkron menggunakan `HTTPX` ke:
+   - ID Pengguna Telegram masing-masing teknisi.
+   - ID Grup Telegram NOC / Operasional ISP.
+3. **Format Pesan:**
+   ```text
+   ⚠️ [EdTeknoGuard] PERINGATAN REDAMAN DROP!
+
+   👤 Pelanggan: Mas Andi (ID: 2072026320)
+   📍 POP: Mini Klero
+   🌐 IP ONT: 10.10.2.15
+   📟 Jenis Modem: GM220-S XPON
+   📊 Redaman Terkini: -27.40 dBm
+   ⚡ Batas Aman: > -26.00 dBm
+   ⏰ Waktu Cek: 10/09/2026 11:45:00 WIB
+
+   🛠️ Tindakan: Segera periksa bending kabel dropcore atau kebersihan konektor FO di lokasi pelanggan.
+   ```
+
+### 5.2 Aturan Anti-Spam (Debounce Mechanism)
+Untuk mencegah teknisi dibanjiri pesan Telegram setiap 5 menit:
+- Setiap kali alert berhasil dikirim, sistem mencatat waktu kirim di tabel `alert_logs`.
+- Jika pada siklus pemindaian 5 menit berikutnya pelanggan tersebut masih berstatus *Warning* dengan nilai redaman yang relatif sama ($\pm 0.5$ dBm), sistem **tidak akan mengirim ulang alert**.
+- Alert baru akan dikirimkan kembali jika:
+  1. Statusnya memburuk dari *Warning* menjadi *Critical* atau *LOS*.
+  2. Gangguan masih berlangsung setelah melewati jeda **30 menit**.
+  3. Status telah kembali normal lalu drop lagi di kemudian hari.
+
+---
+
+## 6. Alur Visualisasi Grafik Historis
+
+Untuk mempermudah analisa teknis, dashboard menyediakan visualisasi grafik (Chart.js):
+1. **Tab Harian (Hari Ini):**
+   - Menampilkan fluktuasi redaman per jam sepanjang hari ini.
+   - Membantu melihat apakah redaman drop terjadi pada jam tertentu (misal akibat suhu siang hari atau kabel tertiup angin).
+2. **Tab Mingguan (7 Hari):**
+   - Menampilkan rata-rata dan nilai terburuk redaman per hari dalam 1 pekan terakhir.
+3. **Tab Bulanan (30 Hari):**
+   - Menampilkan tren jangka panjang degradasi redaman kabel optik.
+4. **Garis Ambang Batas (Threshold Line):**
+   - Pada grafik selalu tergambar garis horizontal oranye putus-putus pada titik `-26.0 dBm` sebagai batas visual yang tegas.
+
+---
+
+## 7. Standar & Kepatuhan UI/UX (Design System Pro)
+
+Seluruh perancangan, pengembangan, penambahan fitur, dan perbaikan antarmuka (UI/UX) pada **EdTeknoGuard** (baik portal admin NOC maupun portal pelanggan mandiri) **WAJIB MENGIKUTI DAN MEMATUHI** aturan yang telah dibakukan dalam:
+
+👉 **[`designsystempro.md` — Rulebook UI/UX (Design System V2)](designsystempro.md)**
+
+### Ketentuan Utama yang Mengikat:
+1. **Prinsip Utama:** *"Terlihat rapi" ≠ "Terstruktur dengan benar."* Setiap komponen, jarak (spacing), warna, dan elevasi wajib memiliki alasan matematis dan fungsional dari rulebook.
+2. **Foundations:**
+   - **Grid & Spacing:** Wajib menggunakan sistem modular 8pt/4pt (4px, 8px, 12px, 16px, 24px, 32px, 48px, dst.). Dilarang menggunakan nilai arbitrer acak (seperti 13px, 17px, 23px).
+   - **Color Balance (60-30-10):** 60% warna dominan netral/background, 30% warna sekunder/surface kontainer, 10% warna aksen/brand (`#4F46E5` / status alert).
+   - **Accessibility & Contrast:** Kontras teks wajib memenuhi standar WCAG AA (minimal 4.5:1 untuk teks normal, 3:1 untuk teks besar).
+   - **Touch Target:** Area sentuh interaktif pada seluruh antarmuka mobile minimal berukuran **44 x 44 px** (`min-h-[44px]` dan `min-w-[44px]`).
+3. **Komponen & Pola Interaksi:**
+   - **Button Hierarchy:** Primary (aksi utama), Secondary (aksi alternatif), Ghost/Tertiary (aksi pelengkap), dan Destructive (aksi berbahaya/hapus dengan modal konfirmasi).
+   - **Form Fields:** Label jelas di atas input, placeholder sebagai contoh bukan pengganti label, error message deskriptif di bawah input.
+   - **Ikon Antarmuka:** Wajib SVG inline murni bersih; dilarang menggunakan emoji atau font-icon eksternal sebagai tombol aksi UI.
+   - **Mobile-First Navigation:** Navigasi mobile wajib ramah satu tangan (bottom navigation bar atau drawer burger menu off-canvas).
+
+---
+
+## 8. Spesifikasi Native Android Studio (Kotlin - Dual Product Flavors)
+
+Untuk memastikan pengawasan darurat berjalan tanpa henti dan andal di perangkat ponsel teknisi NOC dan warga desa, sistem didukung aplikasi native wrapper Android Studio berbasis Gradle Product Flavors yang menghasilkan 2 aplikasi mandiri dari 1 basis kode:
+
+```text
+Domain Server Ngrok: https://duty-astride-outright.ngrok-free.dev
+Min SDK: 26 (Android 8.0 Oreo), Target SDK: 34 (Android 14)
+```
+
+### 8.1 Konfigurasi Product Flavors (`app/build.gradle.kts`)
+- **Flavor 1: `guard` (Khusus Karyawan, Teknisi & Admin NOC)**
+  - Application ID: `com.edtekno.guard`
+  - App Name: `EdTeknoGuard`
+  - Base URL: `https://duty-astride-outright.ngrok-free.dev/login`
+  - Role Type: `KARYAWAN`
+  - Output APK: `EdTeknoGuard.apk`
+- **Flavor 2: `cust` (Khusus Pelanggan Warga Desa)**
+  - Application ID: `com.edtekno.cust`
+  - App Name: `EdTeknoCust`
+  - Base URL: `https://duty-astride-outright.ngrok-free.dev/portal/login`
+  - Role Type: `PELANGGAN`
+  - Output APK: `EdTeknoCust.apk`
+
+### 8.2 Arsitektur Native WebView (`MainActivity.kt`)
+1. **Fullscreen WebView Modern**:
+   - `JavaScriptEnabled = true`, `DomStorageEnabled = true`, `DatabaseEnabled = true`, `CacheMode = LOAD_DEFAULT`.
+   - `CookieManager` persisten untuk menyimpan sesi login 30 hari (`MAX_SESSION_AGE`).
+   - `SwipeRefreshLayout` untuk tarik-ke-bawah guna memuat ulang halaman.
+2. **WebChromeClient Lengkap**:
+   - File Chooser (`ValueCallback<Array<Uri>>`): Mendukung upload foto kendala modem/tiang langsung dari kamera atau galeri HP.
+   - `GeolocationPermissions`: Otomatis meminta & menyetujui izin GPS untuk membaca koordinat rumah warga.
+3. **Smart Back Navigation**:
+   - Jika `webView.canGoBack()`, tombol back HP mundur di riwayat web.
+   - Jika di halaman utama, ketuk dua kali (*double tap*) dalam 2 detik untuk keluar aplikasi.
+4. **Error Handling**: Tampilan offline ramah jika internet putus dengan tombol "Coba Lagi".
+5. **Battery Optimization Exemption**: Meminta `Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` saat aplikasi pertama kali dibuka agar background worker tidak dimatikan Doze Mode Android.
+
+### 8.3 Persistent Background Service & Engine Notifikasi Darurat (`EdTeknoBackgroundService.kt`)
+1. **Foreground Service & WakeLock**:
+   - Berjalan dengan `START_STICKY` dan partial `WakeLock` agar CPU tetap siaga melakukan pengecekan berkala tanpa tertidur.
+   - Auto-Restart via `BootReceiver.kt` saat HP reboot (`ACTION_BOOT_COMPLETED` & `ACTION_MY_PACKAGE_REPLACED`).
+2. **Logika Background Polling Engine (Tiap 30-60 detik & Notifikasi Tiap 5 Menit)**:
+   - **Flavor `guard` (Karyawan & Teknisi NOC)**:
+     - Melakukan polling berkala ke `/api/notifications/poll` dan `/api/monitoring/status`.
+     - **Pemicu Tiket Menunggu**: Jika ada tiket keluhan pelanggan berstatus `MENUNGGU` yang belum ditindaklanjuti admin/teknisi:
+       * Sistem memunculkan Heads-Up Notification melayang (prioritas `IMPORTANCE_HIGH` / `MAX`) dan mengulang peringatan secara berkala tiap **5 menit**.
+       * Memutar efek nada alarm darurat (`RingtoneManager.TYPE_ALARM`) dan getaran pola kuat SOS `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)` (sesuai konfigurasi sakelar getaran di pengaturan pengguna).
+       * Mendukung filter jam malam (*Night Mode*) yang dapat diatur pengguna agar tidak mengganggu istirahat di luar jam siaga.
+     - **Pemicu Redaman Optik Drop**: Jika terdeteksi status `WARNING` ($\le -26.0$ dBm) atau `CRITICAL` / `LOS` ($\le -27.0$ dBm), sirine darurat dan lampu LED merah diaktifkan.
+   - **Flavor `cust` (Pelanggan Warga Desa)**:
+     - Memeriksa pembaruan status tiket aduan milik pelanggan.
+     - Begitu status tiket berubah (`DICEK ADMIN`, `DIPROSES TEKNISI`, atau `SELESAI`), kirimkan notifikasi ramah: *"Tiket Kendala: [Status Baru]. Teknisi kami sedang menindaklanjuti."* dengan nada `TYPE_NOTIFICATION` dan getaran lembut `longArrayOf(0, 300, 200, 300)`.

@@ -17,16 +17,9 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import settings
 from app.services.scheduler_service import scheduler
-from app.modules.auth.routes import router as auth_router
-from app.modules.dashboard.routes import router as dashboard_router
-from app.modules.monitoring.routes import router as monitoring_router
-from app.modules.customers.routes import router as customers_router
-from app.modules.logs_mgmt.routes import router as logs_router
-from app.modules.settings.routes import router as settings_router
-from app.modules.activity_logs.routes import router as activity_logs_router
-from app.modules.users.routes import router as users_router
-from app.modules.admin_customer_mgmt.routes import router as admin_customer_router
-from app.modules.mikrotik.routes import router as mikrotik_router
+# Gerbang Rute Resmi routes/ (Laravel Style Routing)
+from routes.api import register_api_routes
+from routes.portal import register_portal_routes
 
 logging.basicConfig(
     level=logging.INFO,
@@ -49,6 +42,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+from app.middleware import SlidingSessionMiddleware
+app.add_middleware(SlidingSessionMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -102,7 +97,7 @@ async def inject_current_user_middleware(request: Request, call_next):
         cust_cookie = request.cookies.get("edtekno_pelanggan_session")
         if cust_cookie:
             try:
-                from portal_pelanggan.core.security import verify_customer_session_token
+                from app.portal.core.security import verify_customer_session_token
                 c_data = verify_customer_session_token(cust_cookie)
                 if c_data and c_data.get("kantor"):
                     cust_kantor = c_data.get("kantor")
@@ -188,17 +183,9 @@ def serve_frontend_dist_root_files(request: Request):
         return FileResponse(str(target))
     return JSONResponse(status_code=404, content={"detail": f"{filename} not found"})
 
-# Registrasi Router
-app.include_router(auth_router)
-app.include_router(dashboard_router)
-app.include_router(monitoring_router)
-app.include_router(customers_router)
-app.include_router(logs_router)
-app.include_router(settings_router)
-app.include_router(activity_logs_router)
-app.include_router(users_router)
-app.include_router(admin_customer_router)
-app.include_router(mikrotik_router)
+# Registrasi Router via Gerbang Rute Resmi routes/api.py (Standar Laravel Routes)
+from routes.api import register_api_routes
+register_api_routes(app)
 
 # Route Halaman SPA Dashboard NOC (Support Direct URL & Refresh)
 @app.get("/manajemen-kantor")
@@ -218,9 +205,9 @@ static_dir.mkdir(parents=True, exist_ok=True)
 (static_dir / "uploads" / "profil").mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Mount Portal Pelanggan
-from portal_pelanggan.main import app as portal_app
-app.mount("/portal", portal_app)
+# Mount Portal Pelanggan via Gerbang Rute routes/portal.py (Standar Laravel Route)
+from routes.portal import register_portal_routes
+register_portal_routes(app)
 
 @app.get("/api/notifications/poll")
 def poll_notifications_alias(request: Request, kantor: Optional[str] = None):

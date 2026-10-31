@@ -347,7 +347,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                       Aplikasi ini khusus pelanggan <strong className="text-blue-700">TeknoIndonet</strong>. Cukup masukkan <strong className="text-blue-700 font-bold">Nomor WhatsApp</strong> yang terdaftar saat pemasangan WiFi rumah Anda.
                     </p>
                     <p className="leading-relaxed text-slate-600">
-                      Kata sandi awal adalah <strong className="text-blue-700 font-mono font-bold">123456</strong>. Setelah berhasil login, Anda dapat langsung memantau kuota, mengganti nama WiFi, hingga melaporkan kendala.
+                      Kata sandi awal adalah <strong className="text-blue-700 font-bold">Nomor WhatsApp terdaftar</strong> Anda. Setelah berhasil login, Anda dapat langsung memantau kuota, mengganti nama WiFi, hingga melaporkan kendala.
                     </p>
                   </div>
                 )}

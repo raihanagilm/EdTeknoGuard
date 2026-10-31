@@ -1,110 +1,126 @@
 # EdTeknoGuard 🛡️
 
-**EdTeknoGuard** adalah sistem pemantauan dan deteksi dini performa ONT/Modem pelanggan berbasis **Python FastAPI**, **TiDB Cloud (MySQL Engine)**, **Jinja2 + Tailwind CSS + Alpine.js**, dan **Telegram Alerting Multi-Recipient** untuk jaringan penyedia layanan internet (ISP lokal).
+**EdTeknoGuard** adalah sistem terpadu pemantauan berkala (*automated periodic monitoring*) dan deteksi dini (*early warning system*) performa modem ONT (Optical Network Terminal) seperti ZTE GM220-S & XPON serta manajemen operasional jaringan untuk penyedia layanan internet (ISP lokal).
 
 ---
 
+```text
                ┌────────────────────────────────────────────────────────┐
                │                  SERVER TEKNOGUARD                     │
                └───────────────┬────────────────────────┬───────────────┘
                                │                        │
        JALUR 1: MIKROTIK ROUTEROS API            JALUR 2: LIVE ONT HTTP SCRAPER
-      (Ke Router Utama ISP 192.168.202.50)      (Ke Modem ONT ZTE GM220-S 192.168.10.x)
+      (Ke Router Utama ISP MikroTik)            (Ke Modem ONT ZTE GM220-S / XPON)
                                │                        │
              ┌─────────────────┴──────────┐   ┌─────────┴───────────────────────┐
-             │ • IP & MAC Address         │   │ • Redaman Optik Rx Power (dBm)  │
+             │ • IP & MAC Address Leases  │   │ • Redaman Optik Rx Power (dBm)  │
              │ • Simple Queue Bandwidth   │   │ • Suhu Modem (°C) & Uptime      │
              │ • Limit Upload & Download  │   │ • Tx Power & GPON Link State    │
-             │ • Kuota Terpakai (GB)      │   │ • Nama SSID & Password WiFi     │
-             │ • Status Dial PPPoE        │   │   (Hanya jika scraper login ke  │
-             └────────────────────────────┘   │    halaman wlan_security.gch)   │
-                                              └─────────────────────────────────┘
-
+             │ • Akumulasi Kuota (GB)     │   │ • Nama SSID & Password WiFi     │
+             │ • Status Dial PPPoE/Isolir │   │ • Deteksi Perangkat Terhubung   │
+             └────────────────────────────┘   └─────────────────────────────────┘
+```
 
 ## 📑 Navigasi Dokumen & Standar Proyek
 
-Seluruh dokumentasi proyek dirancang saling terhubung dan memiliki pembagian fokus yang jelas:
-- 📐 [Design System Pro — Rulebook UI/UX (designsystempro.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) — **Sumber Kebenaran Tunggal (*Single Source of Truth*)** untuk seluruh komponen, spacing, tipografi, warna, dan standar interaksi UI/UX.
-- 🤖 [Pedoman AI Agent (AGENTS.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/AGENTS.md) — Pedoman arsitektur sistem, aturan SOP, dan instruksi wajib AI Agent.
-- 📜 [Riwayat Perubahan & Changelog (CHANGELOG.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/CHANGELOG.md) — Catatan riwayat penambahan fitur, perbaikan bug, dan perlindungan stabilitas fitur.
-- 🎨 [Pedoman Tampilan & UI/UX (desain.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/desain.md) — Mengatur warna tampilan, palet status redaman (-26.0 dBm), tipografi, komponen visual, dan tata letak mobile-first.
-- 🏗️ [Struktur File/Folder & Database (arsitektur.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/arsitektur.md) — Mengatur struktur direktori proyek, skema tabel TiDB Cloud (MySQL Engine), konfigurasi, dan relasi entitas.
-- 📋 [Alur Kerja Sistem & Logika Bisnis (prd.md)](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/prd.md) — Mengatur alur kerja pemantauan otomatis 5 menit, pemindaian manual on-demand, mekanisme alert Telegram multi-recipient, dan penanganan gangguan optik.
+Dokumentasi proyek tersimpan terstruktur di direktori `docs/`:
+- 🤖 [Pedoman AI Agent (AGENTS.md)](AGENTS.md) — Arsitektur sistem, SOP redaman, dan instruksi wajib AI Agent.
+- 📜 [Riwayat Perubahan & Changelog (CHANGELOG.md)](CHANGELOG.md) — Acuan riwayat perubahan sistem (*regression shield*).
+- 📐 [Design System Pro — Rulebook UI/UX (docs/designsystempro.md)](docs/designsystempro.md) — Single Source of Truth antarmuka, tata letak, dan interaktivitas UI/UX.
+- 🏗️ [Arsitektur Sistem & Direktori (docs/arsitektur.md)](docs/arsitektur.md) — Arsitektur multi-tenant, model database, dan alur data.
+- 📋 [Alur Kerja Sistem & PRD (docs/prd.md)](docs/prd.md) — Alur monitoring berkala, on-demand probe, dan SOP penanganan gangguan.
+- 🚀 [Panduan Deployment VPS (docs/DEPLOY_VPS.md)](docs/DEPLOY_VPS.md) — Prosedur deployment ke server produksi.
 
 ---
 
 ## 🚀 Fitur Unggulan
 
-1. **Deteksi Dini Redaman Menurun (Threshold -26.0 dBm):**
-   - Mengidentifikasi potensi gangguan sebelum pelanggan komplain (standar awal peringatan ditetapkan di `-26.0 dBm`).
-2. **Mesin Pemantau Otomatis (Interval 5 Menit):**
-   - Background worker berjalan secara periodik tiap 5 menit untuk mengambil metrik performa ONT (redaman dBm, uptime, suhu).
-   - Dilengkapi kontrol manual runtime: Tombol **"Cek Redaman Sekarang"** (on-demand) dan **"Jeda / Lanjutkan Monitoring"**.
-3. **Peringatan Instan Telegram Multi-Penerima:**
-   - Mengirim notifikasi bahaya/warning otomatis ke beberapa teknisi sekaligus (daftar Chat ID) atau ke Grup Tim NOC.
-   - Dilengkapi proteksi *anti-spam debounce* agar tidak membanjiri chat saat gangguan berlangsung.
-4. **Visualisasi Historis & Grafik Analitik:**
-   - Menyajikan grafik tren degradasi redaman pelanggan: Harian (per jam), Mingguan (7 hari), dan Bulanan (30 hari).
-5. **Manajemen Data Pelanggan Terintegrasi:**
-   - Mengakomodasi data dari `DAFTAR PELANGGAN TIJ.xlsx` dan `DAFTAR PELANGGAN TIJ(PELANGGAN CABANG).csv`.
-   - Klasifikasi berdasarkan POP (Server Cabang, Server Pusat, Mini Server Pabelan, Mini Klero, BMS).
-6. **Mobile-First NOC Interface:**
-   - Antarmuka super ringan dan reaktif menggunakan **Alpine.js** dan **Tailwind CSS**, nyaman digunakan teknisi langsung dari smartphone di tiang jaringan.
+1. **Deteksi Dini Redaman Menurun (SOP Threshold -26.0 dBm & -27.0 dBm):**
+   - Normal: `> -26.0 dBm` (Aman / Optimal).
+   - Warning: `-26.0 dBm` s/d `-27.0 dBm` (Peringatan Dini kualitas drop).
+   - Kritis / LOS: `<= -27.0 dBm` atau LOS (Segera Dicek Lapangan).
+2. **Mesin Pemantau Multi-Kantor & Auto-Recovery:**
+   - Background worker APScheduler memindai seluruh kantor cabang secara periodik.
+   - Persistent scheduler state di MySQL & otomatis menjadwalkan *Catch-Up Scan* saat server reboot/restart.
+3. **Multi-Kredensial Modem ONT (Exhaustive Scan & Fallback Chain):**
+   - Mendukung multi-pasangan username & password modem per kantor dengan memori kegagalan (*failed_credentials*) untuk scanning super cepat.
+4. **Portal Pelanggan Mandiri (TeknoCust):**
+   - Sub-aplikasi mandiri untuk warga (`/portal`) dengan fitur cek redaman, pemantauan kuota, kelola nama & password WiFi rumah, serta tiket lapor kendala.
+5. **Integrasi MikroTik RouterOS API:**
+   - Sinkronisasi otomatis DHCP Leases, status isolir pelanggan, dan penghitungan kuota pemakaian riil dari Simple Queues.
+6. **Notifikasi Native APK Android (Web Wrapper):**
+   - Notifikasi darurat ditangani langsung melalui web push / native Android Studio wrapper.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Python 3.10+ / FastAPI / SQLAlchemy / PyMySQL / HTTPX
-- **Database:** TiDB Cloud Serverless (MySQL-Compatible Engine)
-- **Frontend:** HTML5 + Jinja2 + Tailwind CSS + Alpine.js + Chart.js
-- **Kolektor Protokol:** SNMP v2c (pysnmp) + ICMP Latency Ping (dengan modul simulasi fallback)
-- **Alert Service:** Telegram Bot API (Multi-Chat ID & Group Broadcast)
+- **Backend:** Python 3.10+ / FastAPI / SQLAlchemy 2.x / PyMySQL / Uvicorn / HTTPX / APScheduler
+- **Database:** MySQL Local (Arsitektur Multi-Database: `MasterBase` untuk master global, `TenantBase` terisolasi per kantor)
+- **Frontend Admin (TeknoGuard):** React 18 + Vite + Tailwind CSS + Lucide Icons + Chart.js
+- **Frontend Portal Warga (TeknoCust):** React 18 SPA terintegrasi di `/portal` (Mobile-First)
 
 ---
 
 ## ⚙️ Panduan Menjalankan Aplikasi
 
 ### 1. Prasyarat Lingkungan
-Pastikan dependensi Python terpasang:
+Pastikan Python 3.10+ dan Node.js 18+ sudah terpasang.
+
+Pasang dependensi Python backend:
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 2. Konfigurasi Lingkungan (`.env`)
-Buat file `.env` berdasarkan template `.env.example`:
-```ini
-APP_NAME=
-APP_ENV=
-APP_PORT=
-
-# TiDB Cloud Database
-DB_HOST=
-DB_PORT=
-DB_USER=
-DB_PASSWORD=
-DB_NAME=
-
-# Telegram Bot Alerting
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-TELEGRAM_CHAT_IDS=
-
-# Monitoring Settings
-POLLING_INTERVAL_MINUTES=5
-WARNING_THRESHOLD_DBM=-26.0
-SNMP_SIMULATION_MODE=true
+Pasang dependensi frontend React:
+```bash
+cd frontend
+npm install
+cd ..
 ```
 
-### 3. Inisialisasi Database & Import Pelanggan
+### 2. Konfigurasi Lingkungan (`.env`)
+Salin file template `.env.example` menjadi `.env` lalu sesuaikan konfigurasi database MySQL:
+```ini
+APP_NAME=EdTeknoGuard
+APP_ENV=development
+APP_PORT=7890
+
+# Database MySQL Lokal
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=edteknoguard
+
+# Default Monitoring Parameters
+POLLING_INTERVAL_MINUTES=5
+WARNING_THRESHOLD_DBM=-26.0
+CRITICAL_THRESHOLD_DBM=-27.0
+```
+
+### 3. Inisialisasi Database
+Jalankan script inisialisasi skema tabel master dan tenant default:
 ```bash
 python -m app.db.init_db
 ```
 
-### 4. Menjalankan Server Web
-source venv/bin/activate
+### 4. Menjalankan Aplikasi
 
+**Mode Pengembangan (Backend & Frontend):**
+
+Jalankan FastAPI Backend:
 ```bash
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 7890
-atau 
-uvicorn app.main:app --reload --port 7890
+uvicorn app.main:app --reload --host 0.0.0.0 --port 7890
 ```
+
+Jalankan Vite Frontend (pada terminal terpisah):
+```bash
+cd frontend
+npm run dev
+```
+
+Akses aplikasi di browser:
+- **Dashboard Admin NOC (TeknoGuard):** `http://localhost:5173` (atau port 7890 jika build terdistribusi)
+- **Portal Pelanggan (TeknoCust):** `http://localhost:5173/portal` (atau `http://localhost:7890/portal`)
+- **Dokumentasi API Swagger:** `http://localhost:7890/docs`

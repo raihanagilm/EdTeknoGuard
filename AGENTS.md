@@ -10,7 +10,7 @@ Dokumen ini adalah acuan arsitektur dan pedoman sistem (*System Instruction / Ru
 
 ### Tujuan Utama:
 1. Mendeteksi penurunan daya terima optik (*Optical Rx Power dBm*) sebelum pelanggan mengalami *Loss of Signal* (LOS) atau gangguan koneksi.
-2. Mengirimkan notifikasi darurat secara otomatis ke grup/chat ID tim teknisi via **Bot Telegram**.
+2. Mengirimkan notifikasi darurat dan alert gangguan secara otomatis ke perangkat tim teknisi via **Notifikasi Native APK Android**.
 3. Menyediakan antarmuka dashboard operasional NOC yang intuitif, mobile-first, dan modular.
 
 ---
@@ -23,9 +23,9 @@ Dokumen ini adalah acuan arsitektur dan pedoman sistem (*System Instruction / Ru
 | **Server ASGI** | Uvicorn |
 | **Database** | MySQL Local via SQLAlchemy & PyMySQL |
 | **Scheduler** | APScheduler (`BackgroundScheduler` daemon) |
-| **Frontend Rendering** | Jinja2 Templates (Server-Side Rendered) |
+| **Frontend SPA** | React 18 + Vite (Admin NOC & Portal Pelanggan TeknoCust) |
 | **Styling** | Tailwind CSS (Mobile-First responsive) |
-| **Interaktivitas UI** | Alpine.js 3.x (Reaktif ringan tanpa build tools kompleks) |
+| **Ikon UI** | Lucide Icons / SVG Inline Murni |
 | **Visualisasi Grafik** | Chart.js |
 | **Ikon UI** | Standar SVG inline murni bersih (bebas ketergantungan library eksternal, DILARANG KERAS memakai emoji/font icons) |
 | **Integrasi Eksternal** | HTTP Scraper Modem ONT ZTE GM220-S & Notifikasi Native APK Android (Web Wrapper) |
@@ -81,16 +81,19 @@ EdTeknoGuard/
 ├── app/
 │   ├── core/                  # Konfigurasi aplikasi, env loader, security, db engine
 │   │   ├── config.py
-│   │   ├── database.py
+│   │   ├── database.py        # MasterBase & TenantBase declarative engine
+│   │   ├── tenant_database.py # Multi-tenant MySQL manager & dynamic session routing
 │   │   ├── timezone.py        # Zona waktu WIB terpusat
 │   │   └── security.py        # Proteksi sesi admin NOC (30 hari sliding expiration)
 │   ├── db/
-│   │   └── models.py          # SQLAlchemy models: Pelanggan, LogPerformaONT, SystemSetting, AlertLog, TiketKendala, KuotaPelanggan, User, ActivityLog
+│   │   ├── models.py          # SQLAlchemy models: MasterBase (Kantor, User, UserKantor, UserActivityLog)
+│   │   │                      # & TenantBase (Pelanggan, PerangkatONT, LogPerformaONT, SystemSetting, dsb.)
+│   │   └── init_db.py         # Skrip bootstrap inisialisasi tabel master & tenant
 │   ├── modules/               # Modular berbasis domain (MVC Architecture)
-│   │   ├── auth/              # Halaman & REST endpoint autentikasi admin NOC
+│   │   ├── auth/              # REST endpoint autentikasi admin NOC
 │   │   ├── dashboard/         # Dashboard KPI & visualisasi
 │   │   ├── customers/         # CRUD master pelanggan, live check, import Excel/CSV
-│   │   ├── admin_customer_mgmt/ # Manajemen tiket kendala, monitoring kuota, & realtime notification polling
+│   │   ├── admin_customer_mgmt/ # Manajemen tiket kendala, monitoring kuota, & notification polling
 │   │   ├── monitoring/        # Engine trigger full scan, single probe, status, & chart-data
 │   │   ├── logs_mgmt/         # Histori time-series pembacaan redaman optik
 │   │   ├── settings/          # Pengaturan sistem: parameter interval, threshold redaman, & kredensial ONT
@@ -101,20 +104,28 @@ EdTeknoGuard/
 │   │   ├── ont_scraper_service.py   # Live HTTP Web Scraper ONT ZTE GM220-S & XPON
 │   │   ├── scheduler_service.py     # Background worker interval (APScheduler)
 │   │   ├── mikrotik_service.py      # RouterOS API client & sinkronisasi otomatis
+│   │   ├── connected_device_service.py # Scanner perangkat terhubung WiFi/LAN
 │   │   └── snmp_service.py          # Engine SNMP polling
 │   └── main.py                # FastAPI app bootstrap, middleware sesi, & router registry
-├── frontend/                  # Single Page Application React (NOC & Manajemen)
+├── docs/                      # Dokumentasi sistem, panduan teknis, dan mockups
+│   ├── arsitektur.md
+│   ├── prd.md
+│   ├── designsystempro.md
+│   ├── desain.md
+│   ├── DEPLOY_VPS.md
+│   └── mockups/
+├── frontend/                  # Single Page Application React 18 (NOC & Portal Warga)
 │   ├── src/
-│   │   ├── components/        # Komponen UI: ModulBeranda, ModulPelanggan, ModalDetailPelanggan, ModulPengaturan, ModulPenggunaNOC, ModulKantorCabang, dsb.
+│   │   ├── components/        # Komponen UI NOC: ModulBeranda, ModulPelanggan, ModulPengaturan, dsb.
 │   │   ├── portal/            # Komponen sub-aplikasi TeknoCust untuk warga pelanggan mandiri
 │   │   ├── services/          # HTTP API client layer terpusat
-│   │   ├── App.jsx            # Shell aplikasi utama & navigasi tab
+│   │   ├── App.jsx            # Shell aplikasi utama NOC & navigasi tab
 │   │   └── main.jsx
 │   └── package.json
 ├── portal_pelanggan/          # Backend endpoint mandiri Portal Pelanggan (/portal & /teknocust)
 │   ├── modules/               # Modul auth pelanggan, dashboard warga, kuota, kendala, wifi, profil
 │   └── api_router.py          # Sub-router FastAPI portal pelanggan
-├── static/                    # Aset statis (CSS, JS, Ikon SVG murni)
+├── tests/                     # Automated unit & integration tests (pytest)
 ├── AGENTS.md                  # Pedoman arsitektur agen AI (dokumen ini)
 ├── CHANGELOG.md               # Catatan riwayat perubahan & perlindungan fitur sistem
 ├── README.md
@@ -133,13 +144,13 @@ EdTeknoGuard/
    - Mekanisme *Sliding Expiration*: Selama pengguna aktif mengakses aplikasi, masa berlaku sesi otomatis diperpanjang 30 hari ke depan. Jika pengguna tidak mengakses aplikasi selama 30 hari berturut-turut, sesi otomatis kedaluwarsa dan pengguna dialihkan ke `/login`.
    - Sesi disimpan secara aman melalui session cookie terproteksi (`edteknoguard_session`).
 2. **Kerahasiaan Credential**:
-   - Secret key, bot token Telegram, dan kredensial database MySQL **WAJIB** berada di file `.env`.
+   - Secret key dan kredensial database MySQL **WAJIB** berada di file `.env`.
 3. **Pop-up Konfirmasi & Penghapusan Berjenjang (CASCADE Deletion) & Normalisasi Data**:
    - **Normalisasi Tunggal Master Pelanggan**: Entitas akun portal telah digabung langsung ke dalam tabel master `pelanggan` (`password_hash`, `lokasi_gps`, `status_verifikasi`, `last_login`), mengeliminasi tabel redundan `akun_pelanggan`.
    - **Database CASCADE Wajib**: Seluruh 4 tabel anakan pelanggan (`log_performa_ont`, `alert_logs`, `tiket_kendala`, `kuota_pelanggan`) **WAJIB** memiliki constraint ForeignKey dengan `ON DELETE CASCADE` di database dan `cascade="all, delete-orphan", passive_deletes=True` pada model SQLAlchemy.
    - **Peringatan Penghapusan Data Utama**: Modal pop-up konfirmasi hapus data pelanggan (baik tunggal maupun massal) **WAJIB** menampilkan kotak peringatan bahaya yang merinci secara eksplisit bahwa menghapus data utama pelanggan akan menghapus permanen seluruh data anakannya yang terkait dari database.
    - **Pembersihan Bersih Tanpa Orphan**: Aksi hapus data utama pelanggan langsung mengeksekusi penghapusan berjenjang fisik (hard delete CASCADE) sehingga tidak ada data yatim (*orphaned records*) yang tersisa di sistem.
-   - Sistem memiliki mekanisme debounce menit (default 30 menit) di `telegram_service.py` untuk mencegah pengiriman alert berulang ke teknisi jika modem masih dalam status gangguan yang sama.
+   - Sistem memiliki mekanisme debounce menit (default 30 menit) untuk mencegah pencatatan alert berulang ke teknisi jika modem masih dalam status gangguan yang sama.
 5. **Standar Ikon UI Wajib SVG Inline Bersih & Larangan Dot Indikator Kosong**:
    - Seluruh ikon antarmuka (tombol, badge, header modal, indikator status, sorting, dan aksi tabel) **WAJIB** menggunakan standar SVG inline bersih / Lucide icons dengan atribut stroke/fill yang konsisten.
    - **DILARANG KERAS** menggunakan emoji (seperti 🏢, ⚡, 🔄, ⏭️, ⚙️, 🚨, 📁, dsb.) di seluruh antarmuka web (UI). Seluruh indikator wilayah, kantor, tombol, badge, dan modal **WAJIB** menggunakan ikon SVG murni / Lucide icons (contoh: `<Building2 />` untuk kantor/gedung).
@@ -147,7 +158,7 @@ EdTeknoGuard/
      `<span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>` atau variasi `<span class="... rounded-full bg-*-500 ..."></span>`.
      Setiap penanda status (seperti Terverifikasi, Aktif, Terisolir, Normal, Warning, Kritis) **WAJIB** menggunakan ikon SVG semantik yang jelas (misalnya `<CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />`, `<ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />`, `<AlertTriangle />`, `<XCircle />`) yang dibungkus dalam badge teks yang rapi dan mudah dipahami, bukan sekadar bulatan dot warna polos tanpa bentuk.
 6. **Toggle Pemantauan ON/OFF Pelanggan (`is_monitored`)**:
-   - Modem dengan `is_monitored = False` otomatis dilewati (*skipped*) oleh background scheduler pemindaian berkala dan dibungkam dari pengiriman alert Telegram.
+   - Modem dengan `is_monitored = False` otomatis dilewati (*skipped*) oleh background scheduler pemindaian berkala dan dibungkam dari pencatatan/pengiriman alert.
    - Kartu statistik KPI di `/pelanggan` dan Dashboard mengecualikan modem nonaktif, menampilkan badge `(X OFF)` pada Total Terpantau.
 7. **Filter Rentang Tanggal & Real-Time Auto-Refresh**:
    - Filter tanggal terpadu (`Semua Tanggal`, `Hari Ini`, `7 Hari Terakhir`, `30 Hari Terakhir`, `Kustom Tanggal` dengan picker rentang `s/d`) diterapkan pada `/logs` dan `/pelanggan`.
@@ -159,7 +170,7 @@ EdTeknoGuard/
      - `teknisi`: Menggantikan peran `karyawan` sebelumnya, fokus pada pemantauan real-time status redaman ONT & probe on-demand terbatas pada kantor yang diizinkan. Dibatasi dari aksi manipulasi/penghapusan data pelanggan serta dibatasi dari menu Pengaturan Sistem dan Manajemen Pengguna.
    - **Tiga Wilayah Kantor**: `cabang` (Kantor Cabang), `pusat` (Kantor Pusat), dan `banyumas` (Kantor Banyumas).
    - **Office Switcher**: Dropdown interaktif di navbar atas untuk Super Admin dan user multi-kantor untuk berpindah kantor aktif (`cabang`, `pusat`, `banyumas`). Opsi "Semua Kantor" telah ditiadakan agar pemantauan, scanning, dan pelaporan selalu fokus dan terisolasi per kantor yang dipilih secara spesifik.
-   - **Notifikasi Telegram**: Setiap alert redaman drop, status kritis/LOS, dan batch alert wajib memuat identitas wilayah kantor pelanggan (misal: `🏢 <b>Kantor:</b> CABANG`).
+   - **Notifikasi Darurat & Alert Log**: Setiap alert redaman drop, status kritis/LOS, dan batch alert wajib memuat identitas wilayah kantor pelanggan (misal: `Kantor: CABANG`).
 9. **Model Pemantauan Hybrid 3 Kantor (Background Scheduler vs Scan Manual)**:
    - **Pemantauan Otomatis Latar Belakang (*Background Scheduler*)**:
      - Berjalan otomatis secara periodik (tiap X menit) via APScheduler daemon untuk **memindai seluruh pelanggan aktif di seluruh kantor (`cabang`, `pusat`, `banyumas`)** sekaligus tanpa intervensi manual.
@@ -252,13 +263,13 @@ EdTeknoGuard/
    - Setiap AI Agent **WAJIB** membaca dan memahami file markdown (`.md`) seperti `AGENTS.md`, `CHANGELOG.md`, `README.md`, `designsystempro.md`, `prd.md`, dan dokumen lainnya di proyek untuk menjaga konteks tetap konsisten antar sesi.
    - Jika ada perubahan arsitektur, fitur, atau aturan baru, agen **WAJIB** memperbarui dokumen `.md` ini agar saling terhubung dan selalu *up-to-date*.
 2. **Kepatuhan Mutlak Design System Pro (`designsystempro.md`)**:
-   - File [`designsystempro.md`](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) adalah **Sumber Kebenaran Tunggal (*Single Source of Truth* / SSOT)** untuk seluruh antarmuka, tata letak, komponen, dan interaktivitas UI/UX di proyek EdTeknoGuard (baik aplikasi admin NOC maupun portal pelanggan).
+   - File [`designsystempro.md`](designsystempro.md) adalah **Sumber Kebenaran Tunggal (*Single Source of Truth* / SSOT)** untuk seluruh antarmuka, tata letak, komponen, dan interaktivitas UI/UX di proyek EdTeknoGuard (baik aplikasi admin NOC maupun portal pelanggan).
    - Setiap AI Agent **WAJIB SELALU MENGECEK DAN MEMATUHI** seluruh aturan di `designsystempro.md` sebelum dan saat merancang, membuat, memodifikasi, atau mereview UI/UX (termasuk spacing 8pt/4pt, color ratio 60-30-10, kontras WCAG 4.5:1, touch target minimal 44x44 px, button hierarchy, form patterns, modal/drawer, dan UX principles).
    - Prinsip dasar yang wajib dipegang: *"Terlihat rapi" ≠ "Terstruktur dengan benar."* Setiap angka padding/margin, warna, elevasi, dan komponen harus memiliki landasan aturan dari rulebook tersebut.
 3. **Implementasi Mobile-First**:
    - Setiap kali pengguna menginstruksikan pendekatan **mobile first**, agen **WAJIB** mengacu pada `designsystempro.md` serta menggunakan MCP atau skill dari `appllama-skills` sebagai referensi dan alat bantu.
 4. **Kewajiban Pencatatan & Perlindungan Fitur di CHANGELOG.md**:
-   - File [`CHANGELOG.md`](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/CHANGELOG.md) adalah acuan riwayat perubahan sistem yang berfungsi sebagai **benteng pencegahan regresi (*regression shield*)**.
+   - File [`CHANGELOG.md`](CHANGELOG.md) adalah acuan riwayat perubahan sistem yang berfungsi sebagai **benteng pencegahan regresi (*regression shield*)**.
    - **Perlindungan Fitur Existing**: Sebelum menambahkan atau memodifikasi kode, AI Agent **WAJIB** meninjau `CHANGELOG.md` untuk memahami fitur apa saja yang sudah berjalan stabil. DILARANG KERAS merusak, menimpa (*overwrite*), atau menghilangkan fitur lama tanpa instruksi eksplisit dari pengguna.
    - **Pencatatan Wajib**: Setiap kali selesai melakukan perbaikan bug, penambahan fitur, perubahan fungsi, atau pembaruan konfigurasi, AI Agent **WAJIB** mencatat perubahan tersebut di `CHANGELOG.md` pada seksi `[Unreleased]` atau versi terkait menggunakan kategori baku (`Added`, `Changed`, `Fixed`, `Removed`, `Security`).
 5. **Kewajiban Paritas Fitur & Adaptasi Desain UI Mobile vs Desktop (Prinsip Non-Negosiasi)**:

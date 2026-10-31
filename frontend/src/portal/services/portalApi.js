@@ -78,8 +78,16 @@ export class PortalAuthService {
     return new PortalApiService().post('/auth/logout');
   }
 
+  static async mintaResetPassword(no_hp) {
+    return new PortalApiService().post('/auth/minta-reset-password', { no_hp });
+  }
+
+  static async konfirmasiResetPassword(payload) {
+    return new PortalApiService().post('/auth/konfirmasi-reset-password', payload);
+  }
+
   static async resetPassword(payload) {
-    return new PortalApiService().post('/auth/lupa-password', payload);
+    return new PortalApiService().post('/auth/konfirmasi-reset-password', payload);
   }
 }
 

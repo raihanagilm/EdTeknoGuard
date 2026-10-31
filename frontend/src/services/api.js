@@ -94,6 +94,10 @@ export class MonitoringService {
     return new ApiService().get('/api/monitoring/available-dates', params);
   }
 
+  static async getLogDates(params = {}) {
+    return new ApiService().get('/api/monitoring/available-dates', params);
+  }
+
   static async triggerScanAll(params = {}) {
     const query = new URLSearchParams(params).toString();
     const endpoint = `/api/monitoring/scan-all${query ? `?${query}` : ''}`;
