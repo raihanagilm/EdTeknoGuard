@@ -72,7 +72,8 @@ def portal_auth_me(request: Request, db: Session = Depends(get_portal_db)):
             "nama_wifi": pelanggan.nama_wifi if (pelanggan and pelanggan.nama_wifi) else "",
             "kantor": pelanggan.kantor if (pelanggan and pelanggan.kantor) else cust.get("kantor", ""),
             "pop": pelanggan.pop if (pelanggan and pelanggan.pop) else "",
-            "foto_profil": pelanggan.foto_profil if (pelanggan and pelanggan.foto_profil) else ""
+            "foto_profil": pelanggan.foto_profil if (pelanggan and pelanggan.foto_profil) else "",
+            "is_connected_to_home_wifi": check_is_home_wifi(request, pelanggan)
         }
     }
 
@@ -165,6 +166,69 @@ async def portal_auth_lupa_password(request: Request, db: Session = Depends(get_
         "message": f"Kata sandi untuk ID Pelanggan {matched_cust.id_pelanggan} ({matched_cust.nama}) berhasil diubah!"
     }
 
+
+def check_is_home_wifi(request: Request, pelanggan) -> bool:
+    """
+    Validasi ketat apakah perangkat klien saat ini benar-benar terhubung ke WiFi modem pelanggan:
+    1. Jika akses via IP publik/WAN router (client_ip == ip_target), cocok 100%.
+    2. Jika akses dari localhost / development:
+       - Memeriksa SSID aktif yang terhubung pada adaptor WiFi (misal via netsh di Windows).
+       - Jika SSID aktif cocok dengan nama_wifi pelanggan -> True.
+       - Jika SSID aktif adalah WiFi lain (misal 'RUANG BEDAH' vs 'Tekno PSB') -> False!
+       - Memeriksa MAC Gateway lokal (192.168.1.1) via ARP. Jika cocok dengan MAC modem pelanggan -> True, jika beda -> False.
+    3. Jika klien di belakang NAT/LAN tapi subnet berbeda atau bukan modem pelanggan -> False.
+    """
+    if not pelanggan:
+        return False
+
+    client_ip = request.headers.get("x-forwarded-for")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else ""
+
+    ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
+    cust_mac = (pelanggan.mac_address or (pelanggan.perangkat.mac_address if pelanggan.perangkat else "") or "").strip().upper()
+    cust_ssid = (pelanggan.nama_wifi or "").strip().lower()
+
+    # 1. Kecocokan IP WAN/Router persis
+    if ip_target and client_ip and client_ip == ip_target:
+        return True
+
+    # 2. Pengecekan perangkat lokal (Localhost / Development)
+    if client_ip in ["127.0.0.1", "::1", "localhost"]:
+        import subprocess, re
+        
+        # A. Cocokkan SSID aktif adaptor Wi-Fi
+        try:
+            out_wlan = subprocess.check_output("netsh wlan show interfaces", text=True, timeout=2)
+            m_ssid = re.search(r"^\s*SSID\s*:\s*(.+)$", out_wlan, re.MULTILINE)
+            if m_ssid:
+                active_ssid = m_ssid.group(1).strip().lower()
+                if cust_ssid:
+                    if active_ssid == cust_ssid:
+                        return True
+                    else:
+                        # Terhubung ke SSID lain (misal 'RUANG BEDAH' padahal modem adalah 'Tekno PSB')
+                        return False
+        except Exception:
+            pass
+
+        # B. Cocokkan Physical Address / MAC Gateway Modem Default
+        try:
+            out_arp = subprocess.check_output("arp -a 192.168.1.1", text=True, timeout=2)
+            m_mac = re.search(r"([0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2})", out_arp)
+            if m_mac and cust_mac:
+                active_gateway_mac = m_mac.group(1).replace("-", ":").upper()
+                if active_gateway_mac == cust_mac:
+                    return True
+                else:
+                    return False
+        except Exception:
+            pass
+
+    return False
+
 @api_router.get("/dashboard")
 def portal_dashboard_data(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
@@ -183,9 +247,8 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_portal_db)
     else:
         client_ip = request.client.host if request.client else ""
     ip_target = (pel.ip_router or pel.ip_ont or "").strip() if pel else ""
-    is_home_wifi = False
-    if ip_target and client_ip and client_ip == ip_target:
-        is_home_wifi = True
+    
+    is_home_wifi = check_is_home_wifi(request, pel)
     
     # Status pembayaran riil dari DB: jika status_isolir == True maka BELUM_BAYAR (terisolir), jika False maka LUNAS
     status_bayar = "BELUM_BAYAR" if (pel and getattr(pel, "status_isolir", False)) else "LUNAS"
@@ -354,12 +417,7 @@ def portal_wifi_get(request: Request, db: Session = Depends(get_portal_db)):
         
     ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
     
-    # Deteksi apakah klien sedang terhubung langsung ke modem ONT pelanggan
-    # Catatan: Tidak boleh menggunakan subnet /24 karena berisiko false-positive pada jaringan dengan subnet sama
-    is_home_wifi = False
-    if ip_target and client_ip:
-        if client_ip == ip_target:
-            is_home_wifi = True
+    is_home_wifi = check_is_home_wifi(request, pelanggan)
 
     default_ssid = f"WiFi-{pelanggan.nama.replace(' ', '')}" if pelanggan.nama else "WiFi-Rumah"
     current_ssid = pelanggan.nama_wifi or default_ssid
@@ -408,13 +466,7 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_portal_
         
     ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
     
-    # Syarat Wajib: Harus terhubung langsung ke modem WiFi rumah
-    is_home_wifi = False
-    if ip_target and client_ip and client_ip == ip_target:
-        is_home_wifi = True
-    elif is_local_client_probe:
-        # Client membuktikan telah terhubung secara lokal melalui browser probe ke gateway modem
-        is_home_wifi = True
+    is_home_wifi = check_is_home_wifi(request, pelanggan) or is_local_client_probe
             
     # KEBIJAKAN STRICT: WAJIB TERSAMBUNG KE MODEM WIFI RUMAH
     if not is_home_wifi:
@@ -836,23 +888,35 @@ def portal_live_probe_signal(request: Request, db: Session = Depends(get_portal_
         )
 
     # Ambil default modem credentials dari database
-    setting = target_db.query(SystemSetting).filter(SystemSetting.key == "default_modem_credentials").first()
+    setting = target_db.query(SystemSetting).filter(SystemSetting.key_name == "default_modem_credentials").first()
     default_creds = []
-    if setting and setting.value:
+    if setting and setting.value_text:
         try:
-            default_creds = json.loads(setting.value)
+            default_creds = json.loads(setting.value_text)
         except Exception:
             default_creds = []
 
-    scrape_res = ONTScraperService.scrape_ont(
-        ip=pel.ip_router,
-        customer_user=pel.user_admin,
-        customer_pass=pel.pass_admin,
-        default_credentials_list=default_creds,
-        failed_credentials_json=pel.failed_credentials,
-        ont_type=pel.tipe_ont,
-        mode_cek=pel.mode_cek or "HTTP"
-    )
+    # Format default credentials menjadi list of (user, pass) tuples
+    creds_tuples = []
+    if isinstance(default_creds, list):
+        for item in default_creds:
+            if isinstance(item, dict):
+                creds_tuples.append((item.get("username", ""), item.get("password", "")))
+            elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                creds_tuples.append((item[0], item[1]))
+
+    try:
+        scrape_res = ONTScraperService.scrape_ont(
+            ip=pel.ip_router,
+            customer_user=pel.user_admin,
+            customer_pass=pel.pass_admin,
+            customer_name=pel.nama,
+            default_credentials=creds_tuples,
+            is_mass_scan=False,
+            exhaustive_first_scan=False
+        )
+    except Exception as scrape_err:
+        scrape_res = {"success": False, "error": str(scrape_err)}
 
     now = get_now_wib()
     if scrape_res.get("success"):

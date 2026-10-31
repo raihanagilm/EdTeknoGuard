@@ -34,7 +34,22 @@ export function ModalSpeedTestOokla({
   const [progressPercent, setProgressPercent] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [checkingWifi, setCheckingWifi] = useState(false);
-  const isConnectedToHomeWifi = customer?.is_connected_to_home_wifi === true;
+  const [localWifiConnected, setLocalWifiConnected] = useState(customer?.is_connected_to_home_wifi === true);
+  const isConnectedToHomeWifi = localWifiConnected || customer?.is_connected_to_home_wifi === true;
+
+  // Sinkronkan localWifiConnected jika prop customer berubah
+  useEffect(() => {
+    if (customer?.is_connected_to_home_wifi !== undefined) {
+      setLocalWifiConnected(customer.is_connected_to_home_wifi === true);
+    }
+  }, [customer?.is_connected_to_home_wifi]);
+
+  // Cek status sambungan saat modal dibuka
+  useEffect(() => {
+    if (isOpen) {
+      handleRecheckConnection();
+    }
+  }, [isOpen]);
 
   const abortControllerRef = useRef(null);
   const isMountedRef = useRef(true);
@@ -369,6 +384,14 @@ export function ModalSpeedTestOokla({
   const handleRecheckConnection = async () => {
     setCheckingWifi(true);
     try {
+      // 1. Panggil API wifi portal untuk deteksi status sambungan riil
+      const res = await fetch('/portal/api/wifi');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.ok && json.is_connected_to_home_wifi !== undefined) {
+          setLocalWifiConnected(json.is_connected_to_home_wifi === true);
+        }
+      }
       if (onProbeSignal) {
         await onProbeSignal();
       }
