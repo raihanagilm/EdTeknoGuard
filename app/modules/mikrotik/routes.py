@@ -58,21 +58,37 @@ def sync_mikrotik_quota(
     user_sess = require_admin(request)
     kantor = payload.get("kantor")
 
+    # Normalisasi kantor: jika 'cabang', arahkan ke 'slawi'
+    if kantor == "cabang":
+        kantor = "slawi"
+
     # 1. Tarik data pelanggan dari router MikroTik kantor yang bersangkutan
     sync_cust_res = {"added_count": 0, "updated_count": 0}
     try:
         from app.db.models import Kantor
-        knt_obj = db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor and kantor != "all" else None
-        if knt_obj and knt_obj.mikrotik_host and knt_obj.mikrotik_user:
-            params = {
-                "host": knt_obj.mikrotik_host,
-                "port": knt_obj.mikrotik_port or 8728,
-                "username": knt_obj.mikrotik_user,
-                "password": knt_obj.mikrotik_pass or "",
-                "kantor": knt_obj.kode
-            }
+        from app.core.database import SessionLocal
+        # Selalu baca konfigurasi router MikroTik dari Master DB agar kredensial host/port/user akurat
+        m_db = SessionLocal()
+        m_params = None
+        knt_kode = None
+        try:
+            knt_obj = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor and kantor != "all" else None
+            if knt_obj and knt_obj.mikrotik_host and knt_obj.mikrotik_user:
+                knt_kode = knt_obj.kode
+                m_params = {
+                    "host": knt_obj.mikrotik_host,
+                    "port": knt_obj.mikrotik_port or 8728,
+                    "username": knt_obj.mikrotik_user,
+                    "password": knt_obj.mikrotik_pass or "",
+                    "kantor": knt_obj.kode
+                }
+        finally:
+            m_db.close()
+
+        if m_params and knt_kode:
+            params = m_params
             from app.core.tenant_database import TenantDatabaseManager
-            tenant_db = TenantDatabaseManager.get_tenant_session(knt_obj.kode)
+            tenant_db = TenantDatabaseManager.get_tenant_session(knt_kode)
             try:
                 sync_cust_res = MikroTikSyncService.sync_customers_from_mikrotik(tenant_db, params)
             finally:

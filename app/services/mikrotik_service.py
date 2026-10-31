@@ -637,7 +637,7 @@ class MikroTikSyncService:
                 # Buat entri PerangkatONT melalui relasi objek agar sinkron dengan cascade
                 new_cust.perangkat = PerangkatONT(
                     id_pelanggan=id_pelanggan,
-                    ip_router=ip if not is_ont_ip else None,
+                    ip_router=ip,
                     ip_ont=ip if is_ont_ip else None,
                     mac_address=mac if mac else None,
                     jenis_modem=None,

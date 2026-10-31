@@ -238,7 +238,12 @@ async def edit_kantor_json(request: Request, kantor_id: int, db: Session = Depen
                 "password": kantor.mikrotik_pass or "",
                 "kantor": kantor.kode
             }
-            res_sync = MikroTikSyncService.sync_customers_from_mikrotik(db, params)
+            from app.core.tenant_database import TenantDatabaseManager
+            t_sess = TenantDatabaseManager.get_tenant_session(kantor.kode)
+            try:
+                res_sync = MikroTikSyncService.sync_customers_from_mikrotik(t_sess, params)
+            finally:
+                t_sess.close()
             if res_sync.get("success"):
                 sync_msg = f" Sinkronisasi otomatis berhasil: {res_sync.get('added_count', 0)} pelanggan baru ditambahkan, {res_sync.get('updated_count', 0)} diperbarui."
             else:
@@ -349,7 +354,12 @@ async def sync_kantor_mikrotik_json(request: Request, kantor_id: int, db: Sessio
     }
 
     try:
-        res = MikroTikSyncService.sync_customers_from_mikrotik(db, params)
+        from app.core.tenant_database import TenantDatabaseManager
+        t_sess = TenantDatabaseManager.get_tenant_session(kantor.kode)
+        try:
+            res = MikroTikSyncService.sync_customers_from_mikrotik(t_sess, params)
+        finally:
+            t_sess.close()
         if res.get("success"):
             from app.core.timezone import get_now_wib
             kantor.last_mikrotik_sync = get_now_wib()
