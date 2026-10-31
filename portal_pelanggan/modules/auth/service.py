@@ -220,16 +220,15 @@ class AuthService:
         is_valid = False
         if cust.password_hash:
             is_valid = verify_password(pwd, cust.password_hash)
-        
-        # Fallback ke kata sandi default 123456 jika belum pernah diganti atau password_hash masih None
-        if not is_valid and pwd == DEFAULT_CUSTOMER_PASSWORD:
+        elif pwd == DEFAULT_CUSTOMER_PASSWORD:
+            # Hanya jika password_hash belum pernah diisi (None/kosong), izinkan default 123456
             cust.password_hash = get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
             is_valid = True
 
         if not is_valid:
             if is_tenant_db_opened:
                 active_session.close()
-            return False, "Kata sandi salah. Kata sandi awal adalah: 123456.", None
+            return False, "Kata sandi salah. Silakan coba lagi.", None
 
         # 3. Perbarui waktu login terakhir
         cust.last_login = get_now_wib()

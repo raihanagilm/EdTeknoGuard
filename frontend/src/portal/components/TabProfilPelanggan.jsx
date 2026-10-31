@@ -199,7 +199,6 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onCust
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setProfileSaving(true);
-    setProfileMessage({ type: '', text: '' });
 
     try {
       const res = await PortalProfilService.updateProfile({
@@ -216,6 +215,9 @@ export function TabProfilPelanggan({ customer, dashboardData, onNavigate, onCust
         });
         if (res.data.customer) {
           setCurrentCustomer((prev) => ({ ...prev, ...res.data.customer }));
+        }
+        if (onCustomerUpdate && res.data.customer) {
+          onCustomerUpdate(res.data.customer);
         }
         setIsEditModalOpen(false);
       } else {
