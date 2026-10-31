@@ -129,22 +129,30 @@ class ConnectedDeviceService:
         ip = pelanggan.ip_router or pelanggan.ip_ont
         scraped_devices = []
 
+        # Target IP scraper: prioritaskan IP router pelanggan, fallback ke 192.168.1.1 (gateway lokal modem)
+        target_ips = []
         if ip:
-            user_admin = pelanggan.user_admin or "admin"
-            pass_admin = pelanggan.pass_admin or "admin"
+            target_ips.append(ip)
+        if "192.168.1.1" not in target_ips:
+            target_ips.append("192.168.1.1")
+
+        user_admin = pelanggan.user_admin or "admin"
+        pass_admin = pelanggan.pass_admin or "admin"
+
+        for target_ip in target_ips:
             try:
                 res = ONTScraperService.get_connected_devices_live(
-                    ip=ip,
+                    ip=target_ip,
                     user_admin=user_admin,
                     pass_admin=pass_admin
                 )
-                if res.get("success"):
+                if res.get("success") and res.get("devices"):
                     scraped_devices = res.get("devices", [])
+                    break
             except Exception as e:
-                logger.warning(f"Gagal probe live ONT {ip}: {e}")
+                logger.warning(f"Gagal probe live ONT {target_ip}: {e}")
 
-        # Jika live ONT scraper tidak mendapatkan perangkat (karena jaringan lab/timeout),
-        # gunakan generator perangkat pelanggan yang konsisten
+        # Hanya gunakan generator simulasi jika scraper modem fisik benar-benar gagal (misal modem mati)
         if not scraped_devices:
             scraped_devices = cls.generate_simulated_devices(pelanggan)
 
@@ -235,10 +243,62 @@ class ConnectedDeviceService:
         db.commit()
         db.refresh(item)
 
+        # ═══ EKSEKUSI BLOKIR FISIK LANGSUNG KE PERANGKAT KERAS MODEM ONT ═══
+        pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+        modem_physical_ok = False
+        modem_msg = ""
+        if pelanggan:
+            ip_cand = []
+            if pelanggan.ip_router:
+                ip_cand.append(pelanggan.ip_router)
+            if "192.168.1.1" not in ip_cand:
+                ip_cand.append("192.168.1.1")
+
+            user_ont = pelanggan.user_admin or "admin"
+            pass_ont = pelanggan.pass_admin or "admin"
+
+            # Ambil default credentials
+            from app.db.models import SystemSetting
+            import json
+            setting = db.query(SystemSetting).filter(SystemSetting.key_name == "default_modem_credentials").first()
+            def_creds = []
+            if setting and setting.value_text:
+                try:
+                    raw_c = json.loads(setting.value_text)
+                    if isinstance(raw_c, list):
+                        for r_item in raw_c:
+                            if isinstance(r_item, dict):
+                                def_creds.append((r_item.get("username", ""), r_item.get("password", "")))
+                except Exception:
+                    def_creds = []
+
+            for m_ip in ip_cand:
+                try:
+                    res_m = ONTScraperService.set_mac_filter_block(
+                        ip=m_ip,
+                        user_admin=user_ont,
+                        pass_admin=pass_ont,
+                        mac_address=mac_address,
+                        block=new_status,
+                        default_credentials=def_creds
+                    )
+                    if res_m.get("success"):
+                        modem_physical_ok = True
+                        modem_msg = res_m.get("message", "")
+                        break
+                    else:
+                        modem_msg = res_m.get("message", "")
+                except Exception as ex:
+                    modem_msg = str(ex)
+
         action_text = "diblokir" if new_status else "diizinkan kembali (unblock)"
+        final_message = f"Perangkat '{item.hostname or item.mac_address}' berhasil {action_text} di modem ONT dan database."
+        if not modem_physical_ok and modem_msg:
+            final_message = f"Status dicatat di sistem ({action_text}). Catatan modem: {modem_msg}"
+
         return {
             "success": True,
-            "message": f"Perangkat '{item.hostname or item.mac_address}' berhasil {action_text}.",
+            "message": final_message,
             "is_blocked": item.is_blocked,
             "blocked_at": item.blocked_at.strftime("%Y-%m-%d %H:%M:%S") if item.blocked_at else None,
             "device": {

@@ -32,12 +32,18 @@ class AuthService:
 
         # 1. Prioritas 1: Jika IP Router diisi, cocokkan langsung IP unik
         if ip_clean:
-            cust_by_ip = db.query(Pelanggan).filter(Pelanggan.ip_router == ip_clean).first()
+            from app.db.models import PerangkatONT
+            cust_by_ip = db.query(Pelanggan).join(PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan).filter(
+                (PerangkatONT.ip_router == ip_clean) | (PerangkatONT.ip_ont == ip_clean)
+            ).first()
             if cust_by_ip:
                 return cust_by_ip
 
         nama_clean = AuthService._clean_text(nama_raw)
         alamat_clean = AuthService._clean_text(alamat_raw)
+        if not nama_clean:
+            return None
+
         nama_tokens = set(nama_clean.split())
 
         all_customers = db.query(Pelanggan).all()

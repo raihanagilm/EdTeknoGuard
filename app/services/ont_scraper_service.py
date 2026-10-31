@@ -825,6 +825,7 @@ class ONTScraperService:
         pass_admin: str,
         new_ssid: Optional[str] = None,
         new_wifi_password: Optional[str] = None,
+        default_credentials: Optional[List[Tuple[str, str]]] = None,
         dry_run: bool = True
     ) -> Dict[str, Any]:
         """
@@ -853,46 +854,198 @@ class ONTScraperService:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         }
 
-        # 1. Login ke modem
-        ok, _ = cls.attempt_login(session, base_url, host, user_admin, pass_admin)
+        # 1. Login ke modem dengan fallback kredensial
+        candidates = []
+        if user_admin and pass_admin:
+            candidates.append((user_admin.strip(), pass_admin.strip()))
+        if default_credentials:
+            for item in default_credentials:
+                if isinstance(item, (list, tuple)) and len(item) >= 2:
+                    c_pair = (item[0].strip(), item[1].strip())
+                    if c_pair not in candidates:
+                        candidates.append(c_pair)
+
+        ok = False
+        active_user, active_pass = user_admin, pass_admin
+        for cand_user, cand_pass in candidates:
+            ok, _ = cls.attempt_login(session, base_url, host, cand_user, cand_pass)
+            if ok:
+                active_user, active_pass = cand_user, cand_pass
+                break
+
         if not ok:
             return {
                 "success": False,
                 "error_type": "AUTH_FAILED",
-                "message": f"Gagal login ke modem ONT {host} saat mencoba memperbarui WiFi."
+                "message": f"Gagal login ke modem ONT {host} saat mencoba memperbarui WiFi. Periksa kredensial admin modem."
             }
 
         # 2. Update SSID jika diberikan
         if new_ssid:
             try:
+                r_essid = session.get(f"{base_url}{WLAN_ESSID_PATH}", headers=headers, timeout=8)
+                token_match = re.search(r'session_token\s*=\s*[\'"](\d+)[\'"]', r_essid.text)
+                session_token = token_match.group(1) if token_match else ""
+
                 payload_ssid = {
                     "IF_ACTION": "apply",
-                    "IF_INDEX": "1",
-                    "Frm_ESSID": new_ssid.strip()
+                    "IF_CONFIGTAG": "Y",
+                    "IF_VIEWID": "IGD.LD1.WLAN1",
+                    "Enable": "1",
+                    "ESSID": new_ssid.strip(),
+                    "ESSIDHideEnable": "0",
+                    "MaxUserNum": "32",
+                    "_SESSION_TOKEN": session_token
                 }
-                session.post(f"{base_url}{WLAN_ESSID_PATH}", data=payload_ssid, headers=headers, timeout=10)
+                session.post(f"{base_url}{WLAN_ESSID_PATH}", data=payload_ssid, headers=headers, timeout=12)
             except Exception as e:
                 return {"success": False, "message": f"Gagal mengirim SSID baru ke modem: {str(e)}"}
 
         # 3. Update WPA Password jika diberikan
         if new_wifi_password:
             try:
+                r_sec = session.get(f"{base_url}{WLAN_SECURITY_PATH}", headers=headers, timeout=8)
+                token_match_sec = re.search(r'session_token\s*=\s*[\'"](\d+)[\'"]', r_sec.text)
+                session_token_sec = token_match_sec.group(1) if token_match_sec else ""
+
                 payload_sec = {
                     "IF_ACTION": "apply",
-                    "IF_INDEX": "1",
-                    "Frm_KeyPassphrase": new_wifi_password.strip()
+                    "IF_CONFIGTAG": "Y",
+                    "IF_PSKTAG": "Y",
+                    "IF_VIEWID": "IGD.LD1.WLAN1",
+                    "BeaconType": "WPAand11i",
+                    "WPAAuthMode": "PSKAuthentication",
+                    "11iAuthMode": "PSKAuthentication",
+                    "WPAEncryptType": "TKIPandAESEncryption",
+                    "11iEncryptType": "TKIPandAESEncryption",
+                    "KeyPassphrase": new_wifi_password.strip(),
+                    "WPAGroupRekey": "0",
+                    "_SESSION_TOKEN": session_token_sec
                 }
-                session.post(f"{base_url}{WLAN_SECURITY_PATH}", data=payload_sec, headers=headers, timeout=10)
+                session.post(f"{base_url}{WLAN_SECURITY_PATH}", data=payload_sec, headers=headers, timeout=12)
             except Exception as e:
                 return {"success": False, "message": f"Gagal mengirim Password WiFi baru ke modem: {str(e)}"}
 
         return {
             "success": True,
             "mode": "LIVE_EXECUTION",
-            "message": f"Kredensial WiFi modem ONT {host} berhasil diperbarui secara fisik.",
+            "message": f"Kredensial WiFi modem ONT {host} berhasil diperbarui langsung ke perangkat modem.",
             "nama_wifi": new_ssid,
             "password_wifi": new_wifi_password
         }
+
+    @classmethod
+    def set_mac_filter_block(
+        cls,
+        ip: str,
+        user_admin: str,
+        pass_admin: str,
+        mac_address: str,
+        block: bool = True,
+        default_credentials: Optional[List[Tuple[str, str]]] = None
+    ) -> Dict[str, Any]:
+        """
+        Menerapkan blokir / buka blokir MAC address fisik langsung pada hardware modem ONT ZTE GM220-S via sec_macfilter_conf_t.gch.
+        Mode: Discard (Blacklist).
+        """
+        host = ip.strip()
+        base_url = f"http://{host}"
+        mac_clean = mac_address.strip().lower()
+
+        session = requests.Session()
+        headers = {
+            "Host": host,
+            "Referer": f"{base_url}/getpage.gch?pid=1002&nextpage=sec_macfilter_conf_t.gch",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+
+        # 1. Login ke modem dengan fallback kredensial
+        candidates = []
+        if user_admin and pass_admin:
+            candidates.append((user_admin.strip(), pass_admin.strip()))
+        if default_credentials:
+            for item in default_credentials:
+                if isinstance(item, (list, tuple)) and len(item) >= 2:
+                    c_pair = (item[0].strip(), item[1].strip())
+                    if c_pair not in candidates:
+                        candidates.append(c_pair)
+
+        ok = False
+        for cand_user, cand_pass in candidates:
+            ok, _ = cls.attempt_login(session, base_url, host, cand_user, cand_pass)
+            if ok:
+                break
+
+        if not ok:
+            return {"success": False, "message": f"Gagal login ke modem ONT {host} saat mengatur filter MAC."}
+
+        # 2. Buka halaman MAC Filter untuk mengambil token session & rule saat ini
+        try:
+            r_page = session.get(f"{base_url}/getpage.gch?pid=1002&nextpage=sec_macfilter_conf_t.gch", headers=headers, timeout=8)
+            token_match = re.search(r'session_token\s*=\s*[\'"](\d+)[\'"]', r_page.text)
+            session_token = token_match.group(1) if token_match else ""
+
+            # Cari daftar SrcMacAddr yang sudah ada
+            existing_macs = re.findall(
+                r'Transfer_meaning\s*\(\s*[\'"]SrcMacAddr([0-9]*)[\'"]\s*,\s*[\'"]([^\'"]+)[\'"]\s*\)',
+                r_page.text
+            )
+            # existing_macs: [('', 'C2\x3a65...'), ('1', '...')]
+
+            normalized_existing = {}
+            for idx_str, raw_m in existing_macs:
+                norm = raw_m.replace(r"\x3a", ":").replace(r"\x3A", ":").lower()
+                real_idx = int(idx_str) if idx_str else 0
+                normalized_existing[norm] = real_idx
+
+            if block:
+                # Jika diminta memblokir tapi MAC sudah terdaftar di modem -> Sukses langsung
+                if mac_clean in normalized_existing:
+                    return {"success": True, "message": f"MAC {mac_address} sudah aktif diblokir pada modem."}
+
+                # Langkah A: Pastikan Global MAC Filter Aktif dengan Mode Discard (Blacklist)
+                payload_enable = {
+                    "IF_ACTION": "basic_apply",
+                    "MacFilterEnable": "1",
+                    "MacFilterTarget": "Discard",
+                    "_SESSION_TOKEN": session_token
+                }
+                r_en = session.post(f"{base_url}/getpage.gch?pid=1002&nextpage=sec_macfilter_conf_t.gch", data=payload_enable, headers=headers, timeout=10)
+                token_match_en = re.search(r'session_token\s*=\s*[\'"](\d+)[\'"]', r_en.text)
+                if token_match_en:
+                    session_token = token_match_en.group(1)
+
+                # Langkah B: Tambah Rule Blokir Baru
+                payload_rule = {
+                    "IF_ACTION": "new",
+                    "IF_INDEX": "-1",
+                    "Enable": "1",
+                    "Type": "Bridge+Route",
+                    "Protocol": "ALL",
+                    "SrcMacAddr": mac_clean,
+                    "DstMacAddr": "00:00:00:00:00:00",
+                    "MacFilterTarget": "Discard",
+                    "MacFilterEnable": "1",
+                    "_SESSION_TOKEN": session_token
+                }
+                session.post(f"{base_url}/getpage.gch?pid=1002&nextpage=sec_macfilter_conf_t.gch", data=payload_rule, headers=headers, timeout=10)
+                return {"success": True, "message": f"Perangkat MAC {mac_address} berhasil diblokir secara fisik di modem ONT."}
+            else:
+                # Jika diminta membuka blokir (Unblock)
+                if mac_clean not in normalized_existing:
+                    return {"success": True, "message": f"MAC {mac_address} tidak ditemukan dalam daftar blokir modem."}
+
+                del_idx = normalized_existing[mac_clean]
+                payload_del = {
+                    "IF_ACTION": "delete",
+                    "IF_INDEX": str(del_idx),
+                    "_SESSION_TOKEN": session_token
+                }
+                session.post(f"{base_url}/getpage.gch?pid=1002&nextpage=sec_macfilter_conf_t.gch", data=payload_del, headers=headers, timeout=10)
+                return {"success": True, "message": f"Blokir perangkat MAC {mac_address} berhasil dibuka pada modem ONT."}
+
+        except Exception as e:
+            return {"success": False, "message": f"Gagal mengeksekusi filter MAC modem: {str(e)}"}
 
     @classmethod
     def scrape_ont(

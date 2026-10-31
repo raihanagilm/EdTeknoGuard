@@ -44,6 +44,7 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
   const [passwordWifi, setPasswordWifi] = useState('');
   const [konfirmasiPassword, setKonfirmasiPassword] = useState('');
   const [showPasswordNew, setShowPasswordNew] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
@@ -85,6 +86,16 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
     } finally {
       setScanningDevices(false);
     }
+  };
+
+  const handleDeviceStatusUpdate = (macAddress, isBlocked) => {
+    setDevicesList((prev) =>
+      prev.map((dev) =>
+        dev.mac_address === macAddress
+          ? { ...dev, is_blocked: isBlocked, blocked_at: isBlocked ? new Date().toISOString() : null }
+          : dev
+      )
+    );
   };
 
   const openDevicesModal = () => {
@@ -384,15 +395,23 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
                       <div className="relative">
                         <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                         <input
-                          type={showPasswordNew ? 'text' : 'password'}
+                          type={showPasswordConfirm ? 'text' : 'password'}
                           required
                           disabled={!currentWifi.is_connected_to_home_wifi}
                           minLength={8}
                           value={konfirmasiPassword}
                           onChange={(e) => setKonfirmasiPassword(e.target.value)}
                           placeholder="Ketik ulang kata sandi baru"
-                          className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                          className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                         />
+                        <button
+                          type="button"
+                          disabled={!currentWifi.is_connected_to_home_wifi}
+                          onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 cursor-pointer disabled:pointer-events-none"
+                        >
+                          {showPasswordConfirm ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
                       </div>
                     </div>
 
@@ -459,6 +478,7 @@ export function TabWifiPelanggan({ customer, dashboardData }) {
         loading={loadingDevices}
         scanning={scanningDevices}
         onRefresh={handleScanDevices}
+        onDeviceUpdate={handleDeviceStatusUpdate}
         lastUpdated={lastDeviceUpdate}
       />
 

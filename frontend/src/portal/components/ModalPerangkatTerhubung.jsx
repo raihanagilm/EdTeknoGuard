@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   Smartphone,
@@ -29,34 +29,63 @@ export function ModalPerangkatTerhubung({
   onDeviceUpdate,
   lastUpdated
 }) {
+  const [internalDevices, setInternalDevices] = useState(devices || []);
   const [blockingMac, setBlockingMac] = useState(null);
   const [feedbackMsg, setFeedbackMsg] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    device: null,
+    isBlocking: true
+  });
+
+  // Sinkronkan state lokal setiap kali prop devices dari luar berubah
+  useEffect(() => {
+    if (devices) {
+      setInternalDevices(devices);
+    }
+  }, [devices]);
 
   if (!isOpen) return null;
 
-  const onlineDevices = devices.filter((d) => d.status === 'ONLINE' && !d.is_blocked);
-  const blockedDevices = devices.filter((d) => d.is_blocked);
-  const offlineDevices = devices.filter((d) => d.status !== 'ONLINE' && !d.is_blocked);
+  const currentList = internalDevices;
+  const onlineDevices = currentList.filter((d) => d.status === 'ONLINE' && !d.is_blocked);
+  const blockedDevices = currentList.filter((d) => d.is_blocked);
+  const offlineDevices = currentList.filter((d) => d.status !== 'ONLINE' && !d.is_blocked);
 
-  const handleToggleBlock = async (dev) => {
-    const action = dev.is_blocked ? 'membuka blokir' : 'memblokir';
-    const confirmText = dev.is_blocked
-      ? `Izinkan kembali perangkat "${dev.hostname || dev.mac_address}" agar dapat tersambung ke internet WiFi?`
-      : `Yakin ingin memblokir perangkat "${dev.hostname || dev.mac_address}"? Akses internet perangkat ini akan diputus.`;
+  const handleRequestConfirm = (dev) => {
+    setConfirmModal({
+      isOpen: true,
+      device: dev,
+      isBlocking: !dev.is_blocked
+    });
+  };
 
-    if (!window.confirm(confirmText)) return;
+  const handleExecuteToggleBlock = async () => {
+    const dev = confirmModal.device;
+    if (!dev) return;
 
+    setConfirmModal({ isOpen: false, device: null, isBlocking: true });
     setBlockingMac(dev.mac_address);
     setFeedbackMsg(null);
     try {
       const res = await PortalWifiService.toggleBlockDevice(dev.mac_address, !dev.is_blocked);
       if (res.ok) {
+        const nextBlockedState = !dev.is_blocked;
+        // Langsung perbarui state visual internal seketika
+        setInternalDevices((prev) =>
+          prev.map((item) =>
+            item.mac_address === dev.mac_address
+              ? { ...item, is_blocked: nextBlockedState, blocked_at: nextBlockedState ? new Date().toISOString() : null }
+              : item
+          )
+        );
+
         setFeedbackMsg({
           type: 'success',
-          text: res.data?.message || `Perangkat berhasil ${dev.is_blocked ? 'dibuka blokirnya' : 'diblokir'}.`
+          text: res.data?.message || `Perangkat berhasil ${nextBlockedState ? 'diblokir' : 'dibuka blokirnya'}.`
         });
         if (onDeviceUpdate) {
-          onDeviceUpdate(dev.mac_address, !dev.is_blocked);
+          onDeviceUpdate(dev.mac_address, nextBlockedState);
         } else if (onRefresh) {
           onRefresh();
         }
@@ -230,13 +259,22 @@ export function ModalPerangkatTerhubung({
 
                           <button
                             type="button"
-                            onClick={() => handleToggleBlock(dev)}
+                            onClick={() => handleRequestConfirm(dev)}
                             disabled={blockingMac === dev.mac_address}
                             title="Blokir akses internet perangkat ini"
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[76px] justify-center"
                           >
-                            <Ban className={`w-3.5 h-3.5 ${blockingMac === dev.mac_address ? 'animate-spin' : ''}`} />
-                            <span>{blockingMac === dev.mac_address ? 'Proses...' : 'Blokir'}</span>
+                            {blockingMac === dev.mac_address ? (
+                              <>
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                <span>Proses...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Ban className="w-3.5 h-3.5" />
+                                <span>Blokir</span>
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
@@ -282,13 +320,22 @@ export function ModalPerangkatTerhubung({
 
                         <button
                           type="button"
-                          onClick={() => handleToggleBlock(dev)}
+                          onClick={() => handleRequestConfirm(dev)}
                           disabled={blockingMac === dev.mac_address}
                           title="Buka blokir perangkat ini agar dapat mengakses internet kembali"
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold active:scale-95 transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold active:scale-95 transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0 min-w-[94px] justify-center"
                         >
-                          <Unlock className={`w-3.5 h-3.5 ${blockingMac === dev.mac_address ? 'animate-spin' : ''}`} />
-                          <span>{blockingMac === dev.mac_address ? 'Proses...' : 'Buka Blokir'}</span>
+                          {blockingMac === dev.mac_address ? (
+                            <>
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                              <span>Proses...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Unlock className="w-3.5 h-3.5" />
+                              <span>Buka Blokir</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     ))}
@@ -328,13 +375,22 @@ export function ModalPerangkatTerhubung({
 
                         <button
                           type="button"
-                          onClick={() => handleToggleBlock(dev)}
+                          onClick={() => handleRequestConfirm(dev)}
                           disabled={blockingMac === dev.mac_address}
                           title="Blokir perangkat ini"
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 text-[10px] font-semibold transition cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 text-[10px] font-bold transition cursor-pointer disabled:opacity-50 min-w-[70px] justify-center"
                         >
-                          <Ban className="w-3 h-3" />
-                          <span>Blokir</span>
+                          {blockingMac === dev.mac_address ? (
+                            <>
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                              <span>Proses...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Ban className="w-3 h-3" />
+                              <span>Blokir</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     ))}
@@ -352,6 +408,74 @@ export function ModalPerangkatTerhubung({
             </p>
           </div>
         </div>
+
+        {/* ═══ MODAL KONFIRMASI KUSTOM (PENGGANTI WINDOW.CONFIRM BROWSER) ═══ */}
+        {confirmModal.isOpen && confirmModal.device && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150 p-5 text-left">
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  confirmModal.isBlocking ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'
+                }`}>
+                  {confirmModal.isBlocking ? (
+                    <Ban className="w-5 h-5" />
+                  ) : (
+                    <Unlock className="w-5 h-5" />
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 leading-tight">
+                    {confirmModal.isBlocking ? 'Blokir Akses Perangkat?' : 'Buka Blokir Perangkat?'}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    {confirmModal.device.hostname || confirmModal.device.mac_address}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 mb-4 text-xs text-slate-600 leading-relaxed">
+                {confirmModal.isBlocking ? (
+                  <>
+                    Akses internet untuk perangkat <strong className="text-slate-800">{confirmModal.device.hostname || 'ini'}</strong> (<span className="font-mono text-[11px]">{confirmModal.device.mac_address}</span>) akan diputus secara langsung di modem.
+                  </>
+                ) : (
+                  <>
+                    Perangkat <strong className="text-slate-800">{confirmModal.device.hostname || 'ini'}</strong> (<span className="font-mono text-[11px]">{confirmModal.device.mac_address}</span>) akan diizinkan kembali terhubung ke jaringan internet WiFi.
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal({ isOpen: false, device: null, isBlocking: true })}
+                  className="flex-1 py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold transition active:scale-95 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecuteToggleBlock}
+                  className={`flex-1 py-2 px-3 rounded-xl text-white text-xs font-bold shadow-md transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 ${
+                    confirmModal.isBlocking ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                  }`}
+                >
+                  {confirmModal.isBlocking ? (
+                    <>
+                      <Ban className="w-3.5 h-3.5" />
+                      <span>Ya, Blokir</span>
+                    </>
+                  ) : (
+                    <>
+                      <Unlock className="w-3.5 h-3.5" />
+                      <span>Ya, Buka Blokir</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

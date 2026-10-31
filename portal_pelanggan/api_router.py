@@ -151,19 +151,53 @@ async def portal_auth_lupa_password(request: Request, db: Session = Depends(get_
     if len(password_baru) < 6:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Kata sandi baru minimal 6 karakter!"})
         
-    matched_cust = AuthService.find_matching_customer(db, nama=nama, ip_router=ip_router)
+    matched_cust = None
+    target_db = db
+
+    # 1. Coba pencocokan di sesi DB default
+    if ip_router or nama:
+        matched_cust = AuthService.find_matching_customer(db, nama=nama, ip_router=ip_router)
+
+    # 2. Jika belum ketemu, cari di seluruh tenant database aktif
+    if not matched_cust and (ip_router or nama or no_hp):
+        from app.core.security import get_all_kantor_codes
+        from app.core.tenant_database import TenantDatabaseManager
+        for k_code in get_all_kantor_codes():
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(k_code)
+                # Coba via no_hp jika diisi
+                if no_hp:
+                    clean_phone = AuthService._clean_phone(no_hp)
+                    if clean_phone and len(clean_phone) >= 6:
+                        matched_cust = AuthService._match_phone_customer(t_db, clean_phone)
+                # Coba via find_matching_customer
+                if not matched_cust and (ip_router or nama):
+                    matched_cust = AuthService.find_matching_customer(t_db, nama=nama, ip_router=ip_router)
+                
+                if matched_cust:
+                    target_db = t_db
+                    break
+                else:
+                    t_db.close()
+            except Exception:
+                pass
+
     if not matched_cust:
         return JSONResponse(
             status_code=404,
             content={"ok": False, "message": "Data verifikasi tidak cocok dengan data pelanggan mana pun!"}
         )
         
+    id_pel_res = matched_cust.id_pelanggan
+    nama_res = matched_cust.nama
     matched_cust.password_hash = get_password_hash(password_baru)
-    db.commit()
+    target_db.commit()
+    if target_db != db:
+        target_db.close()
     
     return {
         "ok": True,
-        "message": f"Kata sandi untuk ID Pelanggan {matched_cust.id_pelanggan} ({matched_cust.nama}) berhasil diubah!"
+        "message": f"Kata sandi untuk ID Pelanggan {id_pel_res} ({nama_res}) berhasil diubah!"
     }
 
 
@@ -479,13 +513,74 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_portal_
             }
         )
         
+    # Eksekusi sinkronisasi fisik ke modem ONT riil (bukan hanya database)
+    from app.services.ont_scraper_service import ONTScraperService
+    
+    # Prioritaskan IP gateway lokal 192.168.1.1 jika pelanggan tersambung di WiFi rumahnya sendiri
+    target_modem_ips = []
+    if ip_target:
+        target_modem_ips.append(ip_target)
+    if "192.168.1.1" not in target_modem_ips:
+        target_modem_ips.append("192.168.1.1")
+
+    user_ont = pelanggan.user_admin or "admin"
+    pass_ont = pelanggan.pass_admin or "admin"
+    
+    modem_updated = False
+    modem_error_msg = ""
+
+    # Ambil default modem credentials dari database sebagai fallback
+    from app.db.models import SystemSetting
+    import json
+    setting = db.query(SystemSetting).filter(SystemSetting.key_name == "default_modem_credentials").first()
+    default_creds_tuples = []
+    if setting and setting.value_text:
+        try:
+            raw_creds = json.loads(setting.value_text)
+            if isinstance(raw_creds, list):
+                for item in raw_creds:
+                    if isinstance(item, dict):
+                        default_creds_tuples.append((item.get("username", ""), item.get("password", "")))
+        except Exception:
+            default_creds_tuples = []
+
+    for m_ip in target_modem_ips:
+        try:
+            update_res = ONTScraperService.update_wifi_credentials(
+                ip=m_ip,
+                user_admin=user_ont,
+                pass_admin=pass_ont,
+                new_ssid=nama_wifi,
+                new_wifi_password=password_wifi,
+                default_credentials=default_creds_tuples,
+                dry_run=False
+            )
+            if update_res.get("success"):
+                modem_updated = True
+                break
+            else:
+                modem_error_msg = update_res.get("message", "")
+        except Exception as ex:
+            modem_error_msg = str(ex)
+
+    # Simpan ke database terpusat
     pelanggan.nama_wifi = nama_wifi
     pelanggan.password_wifi = password_wifi
+    if hasattr(pelanggan, "perangkat") and pelanggan.perangkat:
+        pelanggan.perangkat.nama_wifi = nama_wifi
+        pelanggan.perangkat.password_wifi = password_wifi
+
     db.commit()
-    
+    db.refresh(pelanggan)
+
+    pesan_sukses = "Nama WiFi (SSID) dan Kata Sandi baru berhasil diperbarui langsung ke modem router dan database!"
+    if not modem_updated and modem_error_msg:
+        pesan_sukses = f"Tersimpan di database. Catatan modem: {modem_error_msg}"
+
     return {
         "ok": True,
-        "message": "Pengaturan nama dan kata sandi WiFi rumah berhasil diperbarui!",
+        "modem_updated": modem_updated,
+        "message": pesan_sukses,
         "nama_wifi": nama_wifi,
         "password_wifi": password_wifi
     }
@@ -500,18 +595,52 @@ async def portal_profil_change_password(request: Request, db: Session = Depends(
     password_baru = body.get("password_baru", "").strip()
     konfirmasi = body.get("konfirmasi_password", "").strip()
     
-    pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust.get("id_pelanggan")).first()
-    if not pelanggan:
-        return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
-        
     if len(password_baru) < 6:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Kata sandi baru minimal 6 karakter!"})
         
     if password_baru != konfirmasi:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Konfirmasi kata sandi tidak cocok!"})
         
+    id_pel = cust.get("id_pelanggan")
+    pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    target_db = db
+    
+    # Fallback jika session DB belum mengarah ke tenant kantor pelanggan yang benar
+    if not pelanggan and id_pel:
+        c_kantor = cust.get("kantor")
+        from app.core.tenant_database import TenantDatabaseManager
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pelanggan = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if pelanggan:
+                    target_db = t_db
+                else:
+                    t_db.close()
+            except Exception:
+                pass
+        if not pelanggan:
+            from app.core.security import get_all_kantor_codes
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    p_found = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if p_found:
+                        pelanggan = p_found
+                        target_db = k_db
+                        break
+                    else:
+                        k_db.close()
+                except Exception:
+                    pass
+
+    if not pelanggan:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
+        
     pelanggan.password_hash = get_password_hash(password_baru)
-    db.commit()
+    target_db.commit()
+    if target_db != db:
+        target_db.close()
     
     return {
         "ok": True,
@@ -529,7 +658,38 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_porta
     no_hp = body.get("no_hp", "").strip()
     alamat = body.get("alamat", "").strip()
     
-    pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust.get("id_pelanggan")).first()
+    id_pel = cust.get("id_pelanggan")
+    pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    target_db = db
+
+    if not pelanggan and id_pel:
+        c_kantor = cust.get("kantor")
+        from app.core.tenant_database import TenantDatabaseManager
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pelanggan = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if pelanggan:
+                    target_db = t_db
+                else:
+                    t_db.close()
+            except Exception:
+                pass
+        if not pelanggan:
+            from app.core.security import get_all_kantor_codes
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    p_found = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if p_found:
+                        pelanggan = p_found
+                        target_db = k_db
+                        break
+                    else:
+                        k_db.close()
+                except Exception:
+                    pass
+
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
         
@@ -540,23 +700,26 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_porta
     if alamat:
         pelanggan.alamat = alamat
         
-    db.commit()
-    db.refresh(pelanggan)
+    target_db.commit()
+    target_db.refresh(pelanggan)
+    cust_res = {
+        "id_pelanggan": pelanggan.id_pelanggan,
+        "nama": pelanggan.nama,
+        "no_hp": pelanggan.no_hp or "",
+        "alamat": pelanggan.alamat or "",
+        "paket": pelanggan.paket or "",
+        "ip_router": pelanggan.ip_router or "",
+        "kantor": pelanggan.kantor or "",
+        "status_verifikasi": pelanggan.status_verifikasi or "",
+        "foto_profil": pelanggan.foto_profil or ""
+    }
+    if target_db != db:
+        target_db.close()
     
     return {
         "ok": True,
         "message": "Data diri (Alamat & No. Kontak) berhasil diperbarui!",
-        "customer": {
-            "id_pelanggan": pelanggan.id_pelanggan,
-            "nama": pelanggan.nama,
-            "no_hp": pelanggan.no_hp or "",
-            "alamat": pelanggan.alamat or "",
-            "paket": pelanggan.paket or "",
-            "ip_router": pelanggan.ip_router or "",
-            "kantor": pelanggan.kantor or "",
-            "status_verifikasi": pelanggan.status_verifikasi or "",
-            "foto_profil": pelanggan.foto_profil or ""
-        }
+        "customer": cust_res
     }
 
 @api_router.post("/profil/foto")
@@ -576,6 +739,36 @@ async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_
         
     id_pel = cust.get("id_pelanggan")
     pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    target_db = db
+
+    if not pelanggan and id_pel:
+        c_kantor = cust.get("kantor")
+        from app.core.tenant_database import TenantDatabaseManager
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pelanggan = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if pelanggan:
+                    target_db = t_db
+                else:
+                    t_db.close()
+            except Exception:
+                pass
+        if not pelanggan:
+            from app.core.security import get_all_kantor_codes
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    p_found = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if p_found:
+                        pelanggan = p_found
+                        target_db = k_db
+                        break
+                    else:
+                        k_db.close()
+                except Exception:
+                    pass
+
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
         
@@ -617,8 +810,10 @@ async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_
     relative_url = f"/static/uploads/profil/{safe_filename}?v={timestamp}"
     
     pelanggan.foto_profil = relative_url
-    db.commit()
-    db.refresh(pelanggan)
+    target_db.commit()
+    target_db.refresh(pelanggan)
+    if target_db != db:
+        target_db.close()
     
     return {
         "ok": True,
@@ -640,6 +835,36 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_portal
         
     id_pel = cust.get("id_pelanggan")
     pelanggan = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+    target_db = db
+
+    if not pelanggan and id_pel:
+        c_kantor = cust.get("kantor")
+        from app.core.tenant_database import TenantDatabaseManager
+        if c_kantor:
+            try:
+                t_db = TenantDatabaseManager.get_tenant_session(c_kantor)
+                pelanggan = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                if pelanggan:
+                    target_db = t_db
+                else:
+                    t_db.close()
+            except Exception:
+                pass
+        if not pelanggan:
+            from app.core.security import get_all_kantor_codes
+            for k_code in get_all_kantor_codes():
+                try:
+                    k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                    p_found = k_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
+                    if p_found:
+                        pelanggan = p_found
+                        target_db = k_db
+                        break
+                    else:
+                        k_db.close()
+                except Exception:
+                    pass
+
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
         
@@ -652,7 +877,9 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_portal
             pass
             
     pelanggan.foto_profil = None
-    db.commit()
+    target_db.commit()
+    if target_db != db:
+        target_db.close()
     
     return {
         "ok": True,
