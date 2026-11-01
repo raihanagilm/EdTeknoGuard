@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   Users,
   Smartphone,
@@ -118,29 +118,29 @@ export function ConnectedDevicesModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden border border-slate-100"
+        className="w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150 max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/70 to-indigo-50/50">
+        <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/70 to-indigo-50/50 gap-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
               <Users className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight truncate">
                   Perangkat Terhubung
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700">
                   {onlineDevices.length} Aktif
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 leading-tight">
                 Siapa saja yang memakai WiFi modem Anda
               </p>
             </div>
@@ -229,7 +229,7 @@ export function ConnectedDevicesModal({
                     {onlineDevices.map((dev) => (
                       <div
                         key={dev.id || dev.mac_address}
-                        className="p-3 rounded-xl bg-white border border-slate-100 shadow-2xs flex items-center justify-between gap-3 hover:border-blue-200 transition"
+                        className="p-2.5 sm:p-3 rounded-xl bg-white border border-slate-100 shadow-2xs flex items-center justify-between gap-2 sm:gap-3 hover:border-blue-200 transition"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
@@ -244,7 +244,7 @@ export function ConnectedDevicesModal({
                             </div>
                             <div className="text-[11px] text-slate-500 font-mono flex items-center gap-2 mt-0.5">
                               {dev.ip_address && <span>{dev.ip_address}</span>}
-                              <span className="text-[10px] text-slate-400">{dev.mac_address}</span>
+                              <span className="text-[10px] text-slate-400 font-mono tracking-tight">{dev.mac_address}</span>
                             </div>
                           </div>
                         </div>
@@ -262,7 +262,7 @@ export function ConnectedDevicesModal({
                             onClick={() => handleRequestConfirm(dev)}
                             disabled={blockingMac === dev.mac_address}
                             title="Blokir akses internet perangkat ini"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[76px] justify-center"
+                            className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[68px] sm:min-w-[76px] justify-center shrink-0"
                           >
                             {blockingMac === dev.mac_address ? (
                               <>
@@ -298,7 +298,7 @@ export function ConnectedDevicesModal({
                     {blockedDevices.map((dev) => (
                       <div
                         key={dev.id || dev.mac_address}
-                        className="p-3 rounded-xl bg-red-50/40 border border-red-100 shadow-2xs flex items-center justify-between gap-3"
+                        className="p-2.5 sm:p-3 rounded-xl bg-red-50/40 border border-red-100 shadow-2xs flex items-center justify-between gap-2 sm:gap-3"
                       >
                         <div className="flex items-center gap-2.5 min-w-0 opacity-75">
                           <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
@@ -313,7 +313,7 @@ export function ConnectedDevicesModal({
                             </div>
                             <div className="text-[11px] text-slate-500 font-mono flex items-center gap-2 mt-0.5">
                               {dev.ip_address && <span>{dev.ip_address}</span>}
-                              <span className="text-[10px] text-slate-400">{dev.mac_address}</span>
+                              <span className="text-[10px] text-slate-400 font-mono tracking-tight">{dev.mac_address}</span>
                             </div>
                           </div>
                         </div>
@@ -323,7 +323,7 @@ export function ConnectedDevicesModal({
                           onClick={() => handleRequestConfirm(dev)}
                           disabled={blockingMac === dev.mac_address}
                           title="Buka blokir perangkat ini agar dapat mengakses internet kembali"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold active:scale-95 transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0 min-w-[94px] justify-center"
+                          className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold active:scale-95 transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0 min-w-[84px] sm:min-w-[94px] justify-center"
                         >
                           {blockingMac === dev.mac_address ? (
                             <>

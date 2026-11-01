@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   Phone,
   Lock,
@@ -185,7 +185,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 
   return (
     <div className="h-[100dvh] w-full bg-slate-200 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden">
-      <div className="w-full sm:max-w-[430px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative">
+      <div className="w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative">
 
         {/* ░░░ PANEL ATAS: gradient biru diperbesar sedikit + Maskot Si Router Menyapa ░░░ */}
         <div className="relative bg-gradient-to-br from-sky-500 via-blue-600 to-blue-800 h-[210px] sm:h-[230px] overflow-hidden shrink-0">

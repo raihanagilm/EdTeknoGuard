@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   User,
   ShieldCheck,
@@ -319,7 +319,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
           <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
             {/* Card Header Identitas Pelanggan */}
             <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 {/* Avatar Bulat dengan Badge Tombol Kamera */}
                 <div className="relative shrink-0">
                   {currentCustomer?.foto_profil && !fotoLoadError ? (
@@ -365,11 +365,11 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                 </div>
 
                 <div className="min-w-0">
-                  <div className="text-[15px] font-black text-gray-900 leading-tight truncate">
+                  <div className="portal-heading text-gray-900 leading-tight truncate">
                     {currentCustomer?.nama || 'Profil Pelanggan'}
                   </div>
-                  <div className="mt-0.5 text-xs text-gray-500 font-mono font-medium flex items-center gap-2">
-                    <span>{currentCustomer?.id_pelanggan || '-'}</span>
+                  <div className="mt-0.5 text-[11px] sm:text-xs text-gray-500 font-mono font-medium flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="font-bold text-gray-700 tracking-tight leading-none text-[10px] sm:text-xs truncate max-w-[140px] sm:max-w-[190px]" title={currentCustomer?.id_pelanggan}>{currentCustomer?.id_pelanggan || '-'}</span>
                     {currentCustomer?.foto_profil && (
                       <button
                         type="button"
@@ -389,7 +389,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 portal-body-bold transition flex items-center gap-1 sm:gap-1.5 cursor-pointer shrink-0"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit Data</span>
@@ -398,7 +398,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
 
             {/* Card Body: Rincian Data Diri */}
             <div className="p-4 pt-3">
-              <div className="space-y-2.5 text-xs">
+              <div className="space-y-2 sm:space-y-2.5 portal-body-normal">
                 <div className="flex items-center justify-between py-1 border-b border-gray-50">
                   <span className="text-gray-600">Kantor Layanan</span>
                   <span className="font-semibold text-gray-900 capitalize">
@@ -438,8 +438,8 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                   <Wifi className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-gray-900">Pengaturan WiFi Rumah</div>
-                  <div className="text-[11px] text-gray-500 font-medium">Ubah Nama SSID & Kata Sandi WiFi</div>
+                  <div className="portal-body-bold text-gray-900">Pengaturan WiFi Rumah</div>
+                  <div className="portal-caption text-gray-500 font-medium">Ubah Nama SSID & Kata Sandi WiFi</div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
@@ -457,8 +457,8 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                     <Lock className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-gray-900">Ganti Kata Sandi Akun</div>
-                    <div className="text-[11px] text-gray-500 font-medium">Amankan akses masuk portal mandiri</div>
+                    <div className="portal-body-bold text-gray-900">Ganti Kata Sandi Akun</div>
+                    <div className="portal-caption text-gray-500 font-medium">Amankan akses masuk portal mandiri</div>
                   </div>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${isPasswordExpanded ? 'rotate-180' : ''}`} />
@@ -529,7 +529,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
           <div className="mx-3">
             <button
               onClick={onLogout}
-              className="w-full py-3.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 portal-body-bold flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Keluar dari Akun Portal</span>

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Bell } from 'lucide-react';
 import { PortalActiveMascot } from './PortalActiveMascot';
 
@@ -55,17 +55,17 @@ export function PortalHeader({
           <div className="min-w-0 flex-1">
             {greeting ? (
               <>
-                <div className="text-xs text-white/90 font-medium leading-none">{greeting}</div>
-                <div className="text-[15px] font-bold text-white leading-tight mt-1 truncate">
+                <div className="portal-subheading text-white/90 leading-none">{greeting}</div>
+                <div className="portal-heading text-white leading-tight mt-0.5 sm:mt-1 truncate">
                   {title}
                 </div>
               </>
             ) : (
               <>
-                <h1 className="text-[15px] font-black tracking-tight leading-none text-white truncate">
+                <h1 className="portal-heading font-black tracking-tight leading-none text-white truncate">
                   {title}
                 </h1>
-                <p className="text-xs text-white/95 mt-1 leading-tight font-medium truncate">
+                <p className="portal-subheading text-white/95 mt-0.5 sm:mt-1 leading-tight truncate">
                   {subtitle}
                 </p>
               </>

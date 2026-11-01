@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   HelpCircle,
   Clock,
@@ -200,7 +200,7 @@ export function TicketsView({ activeOffice = 'cabang', onNavigateCustomer, initi
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari nomor tiket, nama warga, ID pelanggan, atau kategori kendala..."
-              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+              className="w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
           </div>
@@ -458,7 +458,7 @@ export function TicketsView({ activeOffice = 'cabang', onNavigateCustomer, initi
       {/* Modal Kelola Status Tiket */}
       {selectedTicket && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono">
+          <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono">
             <div className="flex items-center justify-between border-b border-sky-100 pb-2.5">
               <div>
                 <h3 className="text-sm font-black text-slate-900">Kelola Status Tiket</h3>

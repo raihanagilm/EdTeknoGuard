@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import {
   UserPlus,
   Phone,
@@ -1518,7 +1518,7 @@ export function CustomersView({
       {/* Modal Edit Pelanggan */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono">
             <div className="flex items-center justify-between border-b border-sky-100 pb-2.5">
               <div className="flex items-center gap-2">
                 {returnToDetailCustomer && (

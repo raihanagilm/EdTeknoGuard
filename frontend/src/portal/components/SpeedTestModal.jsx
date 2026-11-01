@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   X,
@@ -536,7 +536,7 @@ export function SpeedTestModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[350px] bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150"
+        className="w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ═══ TOP APP BAR ═══ */}

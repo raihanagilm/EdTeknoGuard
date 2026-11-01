@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import {
   AlertCircle,
   Plus,
@@ -145,7 +145,7 @@ export function PortalTicketsTab({ customer, dashboardData }) {
                 </div>
                 <div className="min-w-0">
                   <div className="text-[14px] font-black text-gray-900 leading-tight">Lapor Gangguan</div>
-                  <div className="text-xs text-gray-600 mt-0.5 leading-tight font-medium truncate">
+                  <div className="text-[11px] sm:text-xs text-gray-600 mt-0.5 leading-tight font-medium line-clamp-1 sm:line-clamp-none">
                     Tiket diteruskan langsung ke Teknisi Lapangan
                   </div>
                 </div>
@@ -154,7 +154,7 @@ export function PortalTicketsTab({ customer, dashboardData }) {
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-white font-bold text-xs shadow-md active:scale-[0.98] transition cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-white portal-body-bold shadow-md active:scale-[0.98] transition cursor-pointer shrink-0"
                 style={{ background: '#2563eb' }}
               >
                 <Plus className="w-4 h-4" />
@@ -220,7 +220,7 @@ export function PortalTicketsTab({ customer, dashboardData }) {
                 paginatedTickets.map((t) => (
                   <article key={t.id_tiket} className="p-3.5 bg-slate-50/70 hover:bg-blue-50/40 rounded-xl border border-slate-200/80 space-y-2 transition">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-bold text-blue-800 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs">
+                      <span className="portal-caption font-mono font-bold text-blue-800 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs">
                         {t.id_tiket}
                       </span>
                       <div className="flex items-center gap-2">
@@ -245,8 +245,8 @@ export function PortalTicketsTab({ customer, dashboardData }) {
                         </button>
                       </div>
                     </div>
-                    <div className="text-xs font-bold text-gray-900">{t.kategori}</div>
-                    <p className="text-xs text-gray-700 leading-relaxed font-normal">{t.deskripsi}</p>
+                    <div className="portal-body-bold text-gray-900">{t.kategori}</div>
+                    <p className="portal-body-normal text-gray-700 leading-relaxed">{t.deskripsi}</p>
                     <div className="pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-gray-500 font-mono">
                       <span className="flex items-center gap-1 text-[11px]">
                         <Clock className="w-3.5 h-3.5 text-gray-400" />
@@ -329,7 +329,7 @@ export function PortalTicketsTab({ customer, dashboardData }) {
       {/* Modal Buat Tiket */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white rounded-2xl p-5 sm:p-6 border border-gray-200 shadow-2xl space-y-4">
+          <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">

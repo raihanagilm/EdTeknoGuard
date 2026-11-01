@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 /**
  * PortalSemanticSkeleton
@@ -14,7 +14,7 @@ export function PortalSemanticSkeleton({ tab = 'beranda' }) {
   // Skeleton Khusus Inisialisasi Aplikasi (App Shell)
   if (tab === 'app') {
     return (
-      <div className="w-full max-w-md mx-auto min-h-screen bg-[#f3f4f6] flex flex-col justify-between shadow-2xl relative animate-pulse">
+      <div className="w-full max-w-[440px] mx-auto min-h-screen bg-[#f3f4f6] flex flex-col justify-between shadow-2xl relative animate-pulse">
         {/* Header Skeleton */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-700 px-5 pt-6 pb-12 rounded-b-[2rem]">
           <div className="flex items-center justify-between">

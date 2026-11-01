@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   BarChart3,
   Infinity,
@@ -107,7 +107,7 @@ export function PortalQuotaTab({ customer, dashboardData }) {
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) PERSIS TAB LAIN ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
-        <div className="pb-6 space-y-4">
+        <div className="pb-24 space-y-3">
 
           {/* ═══ SECTION 1: PEMAKAIAN BULAN INI ═══ */}
           <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 overflow-hidden">
@@ -173,7 +173,7 @@ export function PortalQuotaTab({ customer, dashboardData }) {
             </div>
             <p className="text-xs text-gray-600 mb-4 font-medium">Rata-rata pemakaian data harian</p>
 
-            <div className="flex items-end justify-between gap-2 h-36 px-1">
+            <div className="flex items-end justify-between gap-1 sm:gap-2 h-36 px-0.5 sm:px-1">
               {history.map((item, idx) => {
                 const val = Number(item.pemakaian_gb || 0);
                 const heightPercent = maxGB > 0 ? Math.max(18, Math.round((val / maxGB) * 100)) : 50;
@@ -181,7 +181,7 @@ export function PortalQuotaTab({ customer, dashboardData }) {
 
                 return (
                   <div key={idx} className="flex-1 h-full flex flex-col items-center justify-end gap-1.5">
-                    <span className="text-[11px] font-bold text-gray-800 font-mono leading-none">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-gray-800 font-mono leading-none">
                       {val}
                     </span>
                     <div className="w-full flex-1 max-h-[86px] flex items-end justify-center">
@@ -193,7 +193,7 @@ export function PortalQuotaTab({ customer, dashboardData }) {
                         }}
                       />
                     </div>
-                    <span className="text-[11px] font-semibold text-gray-600 font-mono leading-none">
+                    <span className="text-[10px] sm:text-[11px] font-semibold text-gray-600 font-mono leading-none">
                       {dayLabel}
                     </span>
                   </div>
