@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Users,
   Smartphone,
@@ -110,23 +111,37 @@ export function ConnectedDevicesModal({
     if (tipe === 'LAN') {
       return <Network className="w-4 h-4 text-emerald-600" />;
     }
-    if (host.includes('laptop') || host.includes('pc') || host.includes('macbook') || host.includes('desktop')) {
+    if (
+      host.includes('laptop') ||
+      host.includes('pc') ||
+      host.includes('macbook') ||
+      host.includes('desktop') ||
+      host.includes('thinkpad') ||
+      host.includes('computer')
+    ) {
       return <Laptop className="w-4 h-4 text-blue-600" />;
     }
     return <Smartphone className="w-4 h-4 text-blue-600" />;
   };
 
-  return (
+  const getDeviceDisplayName = (dev) => {
+    if (dev.hostname && dev.hostname.trim() && dev.hostname !== 'Perangkat N/A') {
+      return dev.hostname;
+    }
+    return 'Perangkat Terhubung';
+  };
+
+  const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 pb-24 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150 max-h-[85vh]"
+        className="w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150 max-h-[calc(100dvh-7.5rem)] sm:max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/70 to-indigo-50/50 gap-2">
+        <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/70 to-indigo-50/50 gap-2 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
               <Users className="w-5 h-5" />
@@ -141,7 +156,7 @@ export function ConnectedDevicesModal({
                 </span>
               </div>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 leading-tight">
-                Siapa saja yang memakai WiFi modem Anda
+                Daftar perangkat dalam 1 jaringan modem Anda
               </p>
             </div>
           </div>
@@ -155,9 +170,9 @@ export function ConnectedDevicesModal({
         </div>
 
         {/* Modal Action Bar (Refresh / Scan) */}
-        <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-xs">
+        <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-xs shrink-0">
           <span className="text-[11px] text-slate-500 font-medium">
-            {lastUpdated ? `Diperbarui: ${lastUpdated}` : 'Memuat data modem...'}
+            {lastUpdated ? `Diperbarui: ${lastUpdated}` : 'Memuat data jaringan...'}
           </span>
           <button
             type="button"
@@ -166,14 +181,14 @@ export function ConnectedDevicesModal({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white font-bold text-[11px] hover:bg-blue-700 active:scale-95 transition disabled:opacity-50 cursor-pointer shadow-xs"
           >
             <RefreshCw className={`w-3 h-3 ${scanning ? 'animate-spin' : ''}`} />
-            <span>{scanning ? 'Memindai ONT...' : 'Pindai Ulang'}</span>
+            <span>{scanning ? 'Memindai...' : 'Pindai Ulang'}</span>
           </button>
         </div>
 
         {/* Feedback Alert jika berhasil blokir/unblokir */}
         {feedbackMsg && (
           <div
-            className={`mx-4 mt-3 p-3 rounded-xl flex items-center gap-2.5 text-xs font-semibold animate-in fade-in slide-in-from-top-1 ${
+            className={`mx-4 mt-3 p-3 rounded-xl flex items-center gap-2.5 text-xs font-semibold animate-in fade-in slide-in-from-top-1 shrink-0 ${
               feedbackMsg.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                 : 'bg-red-50 text-red-800 border border-red-200'
@@ -189,11 +204,11 @@ export function ConnectedDevicesModal({
         )}
 
         {/* Modal Body / Device List */}
-        <div className="p-4 overflow-y-auto space-y-4 flex-1">
+        <div className="p-3 sm:p-4 overflow-y-auto space-y-3.5 flex-1">
           {loading && devices.length === 0 ? (
             <div className="py-12 flex flex-col items-center justify-center text-center">
               <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mb-3" />
-              <p className="text-xs font-bold text-slate-700">Memeriksa sambungan modem ONT...</p>
+              <p className="text-xs font-bold text-slate-700">Memeriksa sambungan jaringan...</p>
               <p className="text-[11px] text-slate-400 mt-0.5">Mengambil daftar perangkat terhubung</p>
             </div>
           ) : devices.length === 0 ? (
@@ -203,7 +218,7 @@ export function ConnectedDevicesModal({
               </div>
               <h4 className="text-sm font-bold text-slate-800">Belum Ada Perangkat Terdeteksi</h4>
               <p className="text-xs text-slate-500 max-w-xs mt-1 leading-relaxed">
-                Tekan tombol <b>Pindai Ulang</b> di atas untuk menarik data perangkat yang sedang tersambung ke modem Anda.
+                Tekan tombol <b>Pindai Ulang</b> di atas untuk menarik data perangkat yang sedang tersambung di jaringan Anda.
               </p>
             </div>
           ) : (
@@ -225,57 +240,64 @@ export function ConnectedDevicesModal({
                     Tidak ada perangkat aktif saat ini
                   </div>
                 ) : (
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {onlineDevices.map((dev) => (
                       <div
                         key={dev.id || dev.mac_address}
-                        className="p-2.5 sm:p-3 rounded-xl bg-white border border-slate-100 shadow-2xs flex items-center justify-between gap-2 sm:gap-3 hover:border-blue-200 transition"
+                        className="p-3 rounded-xl bg-white border border-slate-100 shadow-2xs hover:border-blue-200 transition"
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                            {getDeviceIcon(dev)}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1.5">
-                              <span>{dev.hostname || 'Perangkat Tanpa Nama'}</span>
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 uppercase">
-                                {dev.tipe_koneksi || 'WIFI'}
-                              </span>
+                        <div className="flex items-start justify-between gap-2.5">
+                          {/* Sisi Kiri: Ikon & Identitas Perangkat */}
+                          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 mt-0.5">
+                              {getDeviceIcon(dev)}
                             </div>
-                            <div className="text-[11px] text-slate-500 font-mono flex items-center gap-2 mt-0.5">
-                              {dev.ip_address && <span>{dev.ip_address}</span>}
-                              <span className="text-[10px] text-slate-400 font-mono tracking-tight">{dev.mac_address}</span>
-                            </div>
-                          </div>
-                        </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-xs font-bold text-slate-900 truncate max-w-[140px] sm:max-w-[180px]">
+                                  {getDeviceDisplayName(dev)}
+                                </span>
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 uppercase shrink-0">
+                                  {dev.tipe_koneksi || 'WIFI'}
+                                </span>
+                              </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
-                          {dev.rssi !== null && dev.rssi !== undefined && (
-                            <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-md bg-slate-50 text-slate-600 text-[10px] font-mono font-semibold">
-                              <Signal className="w-3 h-3 text-blue-500" />
-                              <span>{dev.rssi} dBm</span>
+                              {/* Hanya IP Address (fallback ke MAC jika IP belum teralokasi) */}
+                              <div className="mt-1 text-[11px] text-slate-500 font-mono">
+                                <span className="text-slate-600 font-medium">{dev.ip_address || dev.mac_address}</span>
+                              </div>
                             </div>
-                          )}
+                          </div>
 
-                          <button
-                            type="button"
-                            onClick={() => handleRequestConfirm(dev)}
-                            disabled={blockingMac === dev.mac_address}
-                            title="Blokir akses internet perangkat ini"
-                            className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[68px] sm:min-w-[76px] justify-center shrink-0"
-                          >
-                            {blockingMac === dev.mac_address ? (
-                              <>
-                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                <span>Proses...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Ban className="w-3.5 h-3.5" />
-                                <span>Blokir</span>
-                              </>
+                          {/* Sisi Kanan: Tombol Aksi & Indikator Sinyal */}
+                          <div className="flex flex-col items-end gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleRequestConfirm(dev)}
+                              disabled={blockingMac === dev.mac_address}
+                              title="Blokir akses internet perangkat ini"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[66px] justify-center"
+                            >
+                              {blockingMac === dev.mac_address ? (
+                                <>
+                                  <RefreshCw className="w-3 h-3 animate-spin" />
+                                  <span>Proses...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Ban className="w-3.5 h-3.5" />
+                                  <span>Blokir</span>
+                                </>
+                              )}
+                            </button>
+
+                            {dev.rssi !== null && dev.rssi !== undefined && (
+                              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-50 text-slate-500 text-[9px] font-mono font-medium">
+                                <Signal className="w-2.5 h-2.5 text-blue-500" />
+                                <span>{dev.rssi} dBm</span>
+                              </div>
                             )}
-                          </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -294,49 +316,54 @@ export function ConnectedDevicesModal({
                     <span className="text-[10px] text-red-500 font-semibold">Akses Terputus</span>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {blockedDevices.map((dev) => (
                       <div
                         key={dev.id || dev.mac_address}
-                        className="p-2.5 sm:p-3 rounded-xl bg-red-50/40 border border-red-100 shadow-2xs flex items-center justify-between gap-2 sm:gap-3"
+                        className="p-3 rounded-xl bg-red-50/40 border border-red-100 shadow-2xs"
                       >
-                        <div className="flex items-center gap-2.5 min-w-0 opacity-75">
-                          <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                            <Ban className="w-4 h-4" />
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="flex items-start gap-2.5 min-w-0 flex-1 opacity-80">
+                            <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0 mt-0.5">
+                              <Ban className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-xs font-bold text-slate-800 line-through decoration-red-400 truncate max-w-[140px] sm:max-w-[180px]">
+                                  {getDeviceDisplayName(dev)}
+                                </span>
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-red-100 text-red-700 uppercase shrink-0">
+                                  Diblokir
+                                </span>
+                              </div>
+                              <div className="mt-1 text-[11px] text-slate-500 font-mono">
+                                <span className="text-slate-600 font-medium">{dev.ip_address || dev.mac_address}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-slate-800 truncate flex items-center gap-1.5">
-                              <span className="line-through decoration-red-400">{dev.hostname || 'Perangkat Tanpa Nama'}</span>
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-red-100 text-red-700 uppercase">
-                                Diblokir
-                              </span>
-                            </div>
-                            <div className="text-[11px] text-slate-500 font-mono flex items-center gap-2 mt-0.5">
-                              {dev.ip_address && <span>{dev.ip_address}</span>}
-                              <span className="text-[10px] text-slate-400 font-mono tracking-tight">{dev.mac_address}</span>
-                            </div>
+
+                          <div className="flex flex-col items-end gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleRequestConfirm(dev)}
+                              disabled={blockingMac === dev.mac_address}
+                              title="Buka blokir perangkat ini agar dapat mengakses internet kembali"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold active:scale-95 transition cursor-pointer shadow-xs disabled:opacity-50 min-w-[84px] justify-center"
+                            >
+                              {blockingMac === dev.mac_address ? (
+                                <>
+                                  <RefreshCw className="w-3 h-3 animate-spin" />
+                                  <span>Proses...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Unlock className="w-3.5 h-3.5" />
+                                  <span>Buka Blokir</span>
+                                </>
+                              )}
+                            </button>
                           </div>
                         </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleRequestConfirm(dev)}
-                          disabled={blockingMac === dev.mac_address}
-                          title="Buka blokir perangkat ini agar dapat mengakses internet kembali"
-                          className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold active:scale-95 transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0 min-w-[84px] sm:min-w-[94px] justify-center"
-                        >
-                          {blockingMac === dev.mac_address ? (
-                            <>
-                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                              <span>Proses...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Unlock className="w-3.5 h-3.5" />
-                              <span>Buka Blokir</span>
-                            </>
-                          )}
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -353,45 +380,49 @@ export function ConnectedDevicesModal({
                     <span className="text-[10px] text-slate-400">Pernah Tersambung</span>
                   </div>
 
-                  <div className="space-y-1.5 opacity-75">
+                  <div className="space-y-2 opacity-75">
                     {offlineDevices.map((dev) => (
                       <div
                         key={dev.id || dev.mac_address}
-                        className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center justify-between gap-3 text-xs"
+                        className="p-3 rounded-xl bg-slate-50/80 border border-slate-100"
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 text-slate-400">
-                            {getDeviceIcon(dev)}
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                            <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 text-slate-400 mt-0.5">
+                              {getDeviceIcon(dev)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-semibold text-slate-600 truncate max-w-[140px] sm:max-w-[180px]">
+                                {getDeviceDisplayName(dev)}
+                              </div>
+                              <div className="mt-1 text-[11px] text-slate-400 font-mono">
+                                <span>{dev.ip_address || dev.mac_address}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-semibold text-slate-600 truncate">
-                              {dev.hostname || 'Perangkat N/A'}
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-mono">
-                              {dev.mac_address}
-                            </div>
+
+                          <div className="shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleRequestConfirm(dev)}
+                              disabled={blockingMac === dev.mac_address}
+                              title="Blokir perangkat ini"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 text-[10px] font-bold transition cursor-pointer disabled:opacity-50 min-w-[66px] justify-center"
+                            >
+                              {blockingMac === dev.mac_address ? (
+                                <>
+                                  <RefreshCw className="w-3 h-3 animate-spin" />
+                                  <span>Proses...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Ban className="w-3 h-3" />
+                                  <span>Blokir</span>
+                                </>
+                              )}
+                            </button>
                           </div>
                         </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleRequestConfirm(dev)}
-                          disabled={blockingMac === dev.mac_address}
-                          title="Blokir perangkat ini"
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 text-[10px] font-bold transition cursor-pointer disabled:opacity-50 min-w-[70px] justify-center"
-                        >
-                          {blockingMac === dev.mac_address ? (
-                            <>
-                              <RefreshCw className="w-3 h-3 animate-spin" />
-                              <span>Proses...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Ban className="w-3 h-3" />
-                              <span>Blokir</span>
-                            </>
-                          )}
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -428,7 +459,7 @@ export function ConnectedDevicesModal({
                     {confirmModal.isBlocking ? 'Blokir Akses Perangkat?' : 'Buka Blokir Perangkat?'}
                   </h4>
                   <p className="text-[11px] text-slate-500 font-medium">
-                    {confirmModal.device.hostname || confirmModal.device.mac_address}
+                    {getDeviceDisplayName(confirmModal.device)}
                   </p>
                 </div>
               </div>
@@ -436,11 +467,11 @@ export function ConnectedDevicesModal({
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 mb-4 text-xs text-slate-600 leading-relaxed">
                 {confirmModal.isBlocking ? (
                   <>
-                    Akses internet untuk perangkat <strong className="text-slate-800">{confirmModal.device.hostname || 'ini'}</strong> (<span className="font-mono text-[11px]">{confirmModal.device.mac_address}</span>) akan diputus secara langsung di modem.
+                    Akses internet untuk perangkat <strong className="text-slate-800">{getDeviceDisplayName(confirmModal.device)}</strong> (<span className="font-mono text-[11px]">{confirmModal.device.mac_address}</span>) akan diputus secara langsung di modem.
                   </>
                 ) : (
                   <>
-                    Perangkat <strong className="text-slate-800">{confirmModal.device.hostname || 'ini'}</strong> (<span className="font-mono text-[11px]">{confirmModal.device.mac_address}</span>) akan diizinkan kembali terhubung ke jaringan internet WiFi.
+                    Perangkat <strong className="text-slate-800">{getDeviceDisplayName(confirmModal.device)}</strong> (<span className="font-mono text-[11px]">{confirmModal.device.mac_address}</span>) akan diizinkan kembali terhubung ke jaringan internet WiFi.
                   </>
                 )}
               </div>
@@ -479,7 +510,10 @@ export function ConnectedDevicesModal({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 }
 
 export default ConnectedDevicesModal;
-

@@ -26,7 +26,7 @@ import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
 import { PortalToastNotification } from './PortalToastNotification';
 
-export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdate, onLogout }) {
+export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdate, onLogout, onOpenNotifications , hasUnreadNotifications}) {
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
@@ -305,6 +305,8 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827] relative">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
+        showNotificationDot={hasUnreadNotifications}
+        onNotificationClick={onOpenNotifications}
         title="Profil & Akun Pelanggan"
         subtitle="Informasi Layanan & Keamanan Kata Sandi"
         dashboardData={dashboardData}

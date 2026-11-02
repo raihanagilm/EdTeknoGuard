@@ -2,11 +2,13 @@ import React from 'react';
 import { CreditCard, Clock, CheckCircle2, ChevronLeft, ShieldCheck, ArrowRight } from 'lucide-react';
 import { PortalHeader } from './PortalHeader';
 
-export function PortalPaymentTab({ customer, dashboardData, onBack }) {
+export function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications , hasUnreadNotifications}) {
   return (
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
       {/* ═══ HEADER BIRU TERPADU ═══ */}
       <PortalHeader
+        showNotificationDot={hasUnreadNotifications}
+        onNotificationClick={onOpenNotifications}
         title="Pembayaran & Tagihan"
         subtitle="Informasi Status Iuran & Pembayaran Mandiri"
         dashboardData={dashboardData}
@@ -41,7 +43,7 @@ export function PortalPaymentTab({ customer, dashboardData, onBack }) {
               <div className="my-4 border border-blue-100 bg-blue-50/50 rounded-xl p-3.5 text-left space-y-2">
                 <div className="flex justify-between items-center text-xs pb-1.5 border-b border-blue-100/80">
                   <span className="text-gray-600 font-medium">Status Tagihan:</span>
-                  {customer?.status_pembayaran === 'BELUM_BAYAR' || customer?.status_isolir ? (
+                  {customer?.status_pembayaran === 'BELUM_BAYAR' ? (
                     <span className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md text-[11px]">
                       Belum Dibayar
                     </span>

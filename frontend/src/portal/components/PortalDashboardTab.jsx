@@ -24,7 +24,7 @@ import { SpeedTestModal } from './SpeedTestModal';
 import { Gauge, Play } from 'lucide-react';
 import { PortalDashboardService, PortalWifiService } from '../services/portalApi';
 
-export function PortalDashboardTab({ data, onNavigate }) {
+export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , hasUnreadNotifications}) {
   const signal = data?.signal || {
     rx_power: null,
     status_koneksi: 'NORMAL',
@@ -169,6 +169,8 @@ export function PortalDashboardTab({ data, onNavigate }) {
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
       {/* ═══ HEADER BIRU TERPADU DENGAN GREETING & LONCENG NOTIFIKASI KONSISTEN ═══ */}
       <PortalHeader
+        showNotificationDot={hasUnreadNotifications}
+        onNotificationClick={onOpenNotifications}
         greeting="Selamat Datang,"
         title={customer.nama || '-'}
         avatarInitials={customerInitials}

@@ -1,6 +1,8 @@
-﻿import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { PortalActiveMascot } from './PortalActiveMascot';
+import { checkHasUnreadNotifications } from '../utils/notificationUtils';
+import { PortalKendalaService } from '../services/portalApi';
 
 export function PortalHeader({
   title = 'TeknoCust',
@@ -9,9 +11,37 @@ export function PortalHeader({
   customer = null,
   avatarInitials = null,
   greeting = null,
-  showNotificationDot = true,
+  showNotificationDot = null, // Jika null, otomatis dihitung dari unread
   onNotificationClick = null
 }) {
+  const pel = customer || dashboardData?.customer || null;
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    // Panggil service kendala untuk mengecek tiket aktif dan menghitung status unread
+    PortalKendalaService.list()
+      .then((res) => {
+        if (!isMounted) return;
+        const tickets = res.ok && res.data?.tickets ? res.data.tickets : [];
+        const unread = checkHasUnreadNotifications(pel, tickets);
+        setHasUnread(unread);
+      })
+      .catch(() => {
+        if (isMounted) {
+          const unread = checkHasUnreadNotifications(pel, []);
+          setHasUnread(unread);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [pel?.id_pelanggan, pel?.status_pembayaran]);
+
+  // Dot tampil jika showNotificationDot dioper manual boolean, atau otomatis jika hasUnread == true
+  const isDotVisible = showNotificationDot !== null ? showNotificationDot : hasUnread;
+
   return (
     <div className="shrink-0 relative z-0" style={{ background: '#2563eb' }}>
       {/* Ornamen Lingkaran Header Terkapsulasi */}
@@ -81,7 +111,7 @@ export function PortalHeader({
           className="relative w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition cursor-pointer shrink-0"
         >
           <Bell className="w-4 h-4 stroke-[2.2]" />
-          {showNotificationDot && (
+          {isDotVisible && (
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border border-blue-600" />
           )}
         </button>

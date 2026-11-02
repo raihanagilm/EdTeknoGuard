@@ -26,7 +26,7 @@ import { PortalToastNotification } from './PortalToastNotification';
 import { Users } from 'lucide-react';
 import { ConnectedDevicesModal } from './ConnectedDevicesModal';
 
-export function PortalWifiTab({ customer, dashboardData }) {
+export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , hasUnreadNotifications}) {
   // Current WiFi Info
   const [currentWifi, setCurrentWifi] = useState({
     nama_wifi: customer?.nama_wifi || '',
@@ -198,6 +198,8 @@ export function PortalWifiTab({ customer, dashboardData }) {
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827] relative">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
+        showNotificationDot={hasUnreadNotifications}
+        onNotificationClick={onOpenNotifications}
         title="Kelola WiFi Rumah"
         subtitle="Ubah Nama & Kata Sandi SSID Mandiri"
         dashboardData={dashboardData}

@@ -5,6 +5,7 @@ import {
 } from './components/PortalNavigation';
 import { PortalLoginView } from './components/PortalAuthView';
 import { PortalResetPasswordView } from './components/PortalResetPasswordView';
+import { PortalNotificationsPage } from './components/PortalNotificationsPage';
 import { PortalDashboardTab } from './components/PortalDashboardTab';
 import { PortalTicketsTab } from './components/PortalTicketsTab';
 import { PortalWifiTab } from './components/PortalWifiTab';
@@ -17,6 +18,8 @@ import {
 } from './services/portalApi';
 import { PortalErrorView } from './components/PortalErrorView';
 import { PortalSemanticSkeleton } from './components/PortalSemanticSkeleton';
+import { checkHasUnreadNotifications } from './utils/notificationUtils';
+import { PortalKendalaService } from './services/portalApi';
 import { RefreshCw } from 'lucide-react';
 
 export function PortalCustomerApp() {
@@ -28,7 +31,7 @@ export function PortalCustomerApp() {
     if (parts.length === 1 && (parts[0] === 'teknocust' || parts[0] === 'portal')) return 'beranda';
     if (parts.length >= 2 && (parts[0] === 'teknocust' || parts[0] === 'portal')) {
       const sub = parts[1];
-      if (['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran'].includes(sub)) {
+      if (['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran', 'notifikasi'].includes(sub)) {
         return sub;
       }
       if (['login', 'masuk', 'auth', 'daftar'].includes(sub)) {
@@ -43,6 +46,7 @@ export function PortalCustomerApp() {
   const [customer, setCustomer] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   const switchTab = (tab, updateUrl = true) => {
     setActiveTab(tab);
@@ -103,6 +107,27 @@ export function PortalCustomerApp() {
     }
   };
 
+  const refreshUnreadStatus = () => {
+    const pel = customer || dashboardData?.customer;
+    if (!pel) return;
+    PortalKendalaService.list()
+      .then((res) => {
+        const tickets = res.ok && res.data?.tickets ? res.data.tickets : [];
+        const unread = checkHasUnreadNotifications(pel, tickets);
+        setHasUnreadNotifications(unread);
+      })
+      .catch(() => {
+        const unread = checkHasUnreadNotifications(pel, []);
+        setHasUnreadNotifications(unread);
+      });
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshUnreadStatus();
+    }
+  }, [isAuthenticated, customer?.id_pelanggan, customer?.status_pembayaran, activeTab]);
+
   useEffect(() => {
     fetchSession();
   }, []);
@@ -160,7 +185,7 @@ export function PortalCustomerApp() {
     );
   }
 
-  const validPortalTabs = ['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran'];
+  const validPortalTabs = ['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran', 'notifikasi'];
   if (!validPortalTabs.includes(activeTab)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 text-slate-900 font-sans antialiased">
@@ -189,44 +214,66 @@ export function PortalCustomerApp() {
           {activeTab === 'beranda' && (
             <PortalDashboardTab
               data={dashboardData}
+              hasUnreadNotifications={hasUnreadNotifications}
               onNavigate={(tab) => switchTab(tab)}
+              onOpenNotifications={() => switchTab('notifikasi')}
             />
           )}
           {activeTab === 'kendala' && (
             <PortalTicketsTab
               customer={customer}
               dashboardData={dashboardData}
+              hasUnreadNotifications={hasUnreadNotifications}
+              onOpenNotifications={() => switchTab('notifikasi')}
             />
           )}
           {activeTab === 'wifi' && (
             <PortalWifiTab
               customer={customer}
               dashboardData={dashboardData}
+              hasUnreadNotifications={hasUnreadNotifications}
+              onOpenNotifications={() => switchTab('notifikasi')}
             />
           )}
           {activeTab === 'kuota' && (
             <PortalQuotaTab
               customer={customer}
               dashboardData={dashboardData}
+              hasUnreadNotifications={hasUnreadNotifications}
+              onOpenNotifications={() => switchTab('notifikasi')}
             />
           )}
           {activeTab === 'profil' && (
             <PortalProfileTab
               customer={customer}
               dashboardData={dashboardData}
+              hasUnreadNotifications={hasUnreadNotifications}
               onNavigate={(tab) => switchTab(tab)}
               onCustomerUpdate={(updated) => setCustomer((prev) => ({ ...prev, ...updated }))}
               onLogout={handleLogout}
+              onOpenNotifications={() => switchTab('notifikasi')}
             />
           )}
           {activeTab === 'pembayaran' && (
             <PortalPaymentTab
               customer={customer}
               dashboardData={dashboardData}
+              hasUnreadNotifications={hasUnreadNotifications}
               onBack={() => switchTab('beranda')}
+              onOpenNotifications={() => switchTab('notifikasi')}
+            />
+          )}
+          {activeTab === 'notifikasi' && (
+            <PortalNotificationsPage
+              customer={customer}
+              dashboardData={dashboardData}
+              onBack={() => switchTab('beranda')}
+              onNavigate={(tab) => switchTab(tab)}
             />
           )}
         </div>
+
+        
 
         {/* Bottom Navigation Bar di Dalam Shell */}
         <PortalBottomNav activeTab={activeTab} onTabChange={(tab) => switchTab(tab)} />

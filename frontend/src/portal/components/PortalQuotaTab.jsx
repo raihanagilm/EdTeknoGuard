@@ -10,7 +10,7 @@ import {
 import { PortalKuotaService } from '../services/portalApi';
 import { PortalHeader } from './PortalHeader';
 
-export function PortalQuotaTab({ customer, dashboardData }) {
+export function PortalQuotaTab({ customer, dashboardData, onOpenNotifications , hasUnreadNotifications}) {
   const [kuotaData, setKuotaData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -99,6 +99,8 @@ export function PortalQuotaTab({ customer, dashboardData }) {
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
+        showNotificationDot={hasUnreadNotifications}
+        onNotificationClick={onOpenNotifications}
         title="Pemakaian Kuota"
         subtitle="Monitoring Penggunaan Data & FUP Internet"
         dashboardData={dashboardData}

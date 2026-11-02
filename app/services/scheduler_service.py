@@ -75,6 +75,16 @@ class ONTSchedulerService:
             replace_existing=True
         )
 
+        # Job Pengingat Tagihan Harian Tiap Jam 10:00 WIB
+        self.scheduler.add_job(
+            self.daily_billing_reminder_job_wrapper,
+            "cron",
+            hour=10,
+            minute=0,
+            id="daily_billing_reminder",
+            replace_existing=True
+        )
+
         self.scheduler.start()
         self.is_running = True
         logger.info(f"[SCHEDULER] Engine APScheduler berhasil diaktifkan (Interval: {interval_mins} menit).")
@@ -130,6 +140,27 @@ class ONTSchedulerService:
                             t_db.close()
                     except Exception as e:
                         logger.debug(f"[MIKROTIK_SYNC] Gagal auto-sync kantor {k.nama}: {e}")
+        finally:
+            m_db.close()
+
+    def daily_billing_reminder_job_wrapper(self):
+        """Menjalankan pemeriksaan pengingat harian tagihan yang belum lunas (jam 10:00 WIB)"""
+        m_db = TenantDatabaseManager.get_tenant_session(None)
+        try:
+            kantors = m_db.query(Kantor).filter(Kantor.is_active == True).all()
+            for k in kantors:
+                try:
+                    t_db = TenantDatabaseManager.get_tenant_session(k.kode)
+                    try:
+                        from app.models.models import Pelanggan
+                        unpaid_customers = t_db.query(Pelanggan).filter(
+                            (Pelanggan.status_pembayaran == 'BELUM_BAYAR')
+                        ).all()
+                        logger.info(f"[BILLING_REMINDER] Kantor {k.nama}: {len(unpaid_customers)} pelanggan belum lunas tercatat pada audit harian.")
+                    finally:
+                        t_db.close()
+                except Exception as e:
+                    logger.debug(f"[BILLING_REMINDER] Error periksa tagihan kantor {k.nama}: {e}")
         finally:
             m_db.close()
 

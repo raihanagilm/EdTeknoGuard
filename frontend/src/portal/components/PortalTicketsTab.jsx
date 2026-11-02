@@ -18,7 +18,7 @@ import { PortalActiveMascot } from './PortalActiveMascot';
 import { PortalHeader } from './PortalHeader';
 import { PortalToastNotification } from './PortalToastNotification';
 
-export function PortalTicketsTab({ customer, dashboardData }) {
+export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications , hasUnreadNotifications}) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -124,6 +124,8 @@ export function PortalTicketsTab({ customer, dashboardData }) {
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
+        showNotificationDot={hasUnreadNotifications}
+        onNotificationClick={onOpenNotifications}
         title="Pusat Kendala & Keluhan"
         subtitle="Lapor Gangguan Internet Cepat & Tanggap"
         dashboardData={dashboardData}
@@ -220,17 +222,17 @@ export function PortalTicketsTab({ customer, dashboardData }) {
                 paginatedTickets.map((t) => (
                   <article key={t.id_tiket} className="p-3.5 bg-slate-50/70 hover:bg-blue-50/40 rounded-xl border border-slate-200/80 space-y-2 transition">
                     <div className="flex items-center justify-between">
-                      <span className="portal-caption font-mono font-bold text-blue-800 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs">
+                      <span className="text-[12px] font-mono font-bold text-slate-800">
                         {t.id_tiket}
                       </span>
                       <div className="flex items-center gap-2">
                         <span
-                          className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold font-mono ${
+                          className={`text-[11px] font-bold tracking-wide ${
                             t.status === 'SELESAI'
-                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                              ? 'text-emerald-600'
                               : t.status === 'DIPROSES' || t.status === 'DICEK_ADMIN'
-                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                              : 'bg-rose-50 text-rose-800 border border-rose-200'
+                              ? 'text-amber-600'
+                              : 'text-rose-600'
                           }`}
                         >
                           {t.status}

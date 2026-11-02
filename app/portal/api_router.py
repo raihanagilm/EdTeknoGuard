@@ -304,8 +304,8 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_portal_db)
     
     is_home_wifi = check_is_home_wifi(request, pel)
     
-    # Status pembayaran riil dari DB: jika status_isolir == True maka BELUM_BAYAR (terisolir), jika False maka LUNAS
-    status_bayar = "BELUM_BAYAR" if (pel and getattr(pel, "status_isolir", False)) else "LUNAS"
+        # Status pembayaran riil dari kolom status_pembayaran DB ("LUNAS" atau "BELUM_BAYAR")
+    status_bayar = (pel.status_pembayaran if pel and getattr(pel, "status_pembayaran", None) else "LUNAS")
     harga_paket = float(pel.paket_ref.harga) if (pel and pel.paket_ref and pel.paket_ref.harga is not None) else None
     
     # Format nama bulan Indonesia (misal: "Oktober 2026")
@@ -330,7 +330,7 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_portal_db)
             "pop": pel.pop if (pel and pel.pop) else "",
             "is_active": pel.is_active if pel else True,
             "status_pembayaran": status_bayar,
-            "status_isolir": bool(getattr(pel, "status_isolir", False)),
+            # status_isolir removed (tidak ada isolir di TeknoGuard)
             "periode_tagihan": periode_teks,
             "status_verifikasi": pel.status_verifikasi if (pel and pel.status_verifikasi) else cust.get("status_verifikasi", ""),
             "foto_profil": pel.foto_profil if (pel and pel.foto_profil) else "",
@@ -399,7 +399,8 @@ def portal_kendala_list(request: Request, db: Session = Depends(get_portal_db)):
                 "status": t.status,
                 "no_wa_pelapor": t.no_wa_pelapor,
                 "redaman_saat_lapor": float(t.redaman_saat_lapor) if t.redaman_saat_lapor is not None else None,
-                "created_at": str(t.created_at) if t.created_at else ""
+                "created_at": str(t.created_at) if t.created_at else "",
+                "updated_at": str(t.updated_at) if getattr(t, "updated_at", None) else str(t.created_at or "")
             }
             for t in tickets
         ]

@@ -94,7 +94,7 @@ class Pelanggan(TenantBase):
     is_monitored = Column(Boolean, default=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
     status_lease = Column(String(20), default="bound", nullable=False, index=True) # bound (online), waiting (offline)
-    status_isolir = Column(Boolean, default=False, nullable=False, index=True) # True jika diisolir di MikroTik
+    status_pembayaran = Column(String(20), default="LUNAS", nullable=True, index=True) # LUNAS, BELUM_BAYAR
     queue_name = Column(String(150), nullable=True, index=True) # Nama rule di Simple Queues MikroTik
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
