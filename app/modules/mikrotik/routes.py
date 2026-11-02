@@ -4,7 +4,6 @@ Menyediakan REST endpoint untuk:
 - /api/mikrotik/health: Metrik router gateway (CPU, RAM, Uptime, RouterOS 7.x)
 - /api/mikrotik/queues: Live Simple Queues, limits, byte kuota & korelasi pelanggan
 - /api/mikrotik/sync-quota: Trigger sinkronisasi kuota dari Simple Queues ke database
-- /api/mikrotik/toggle-isolir: Mengubah status isolir pelanggan (Firewall Address List / Queue)
 """
 
 from typing import Optional
@@ -115,40 +114,6 @@ def sync_mikrotik_quota(
             action="SYNC_MIKROTIK_ALL",
             status="SUCCESS",
             keterangan=f"Sinkronisasi MikroTik kantor {kantor or 'semua'}: {res.get('added_customers', 0)} pelanggan baru, {res.get('total_synced', 0)} kuota diperbarui.",
-            user=user_sess
-        )
-    except Exception:
-        pass
-
-    return res
-
-@router.post("/toggle-isolir")
-def toggle_customer_isolir(
-    request: Request,
-    payload: dict = Body(...),
-    db: Session = Depends(get_db)
-):
-    """Mengaktifkan atau menonaktifkan isolir akses internet pelanggan"""
-    user_sess = require_admin(request)
-    id_pelanggan = payload.get("id_pelanggan")
-    isolir = bool(payload.get("isolir", True))
-
-    if not id_pelanggan:
-        raise HTTPException(status_code=400, detail="id_pelanggan wajib disertakan.")
-
-    res = MikroTikSyncService.toggle_customer_isolation(db, id_pelanggan=id_pelanggan, isolir=isolir)
-    if not res.get("success"):
-        raise HTTPException(status_code=400, detail=res.get("message"))
-
-    # Catat audit log aktivitas
-    try:
-        act = "ISOLIR_PELANGGAN" if isolir else "UNBLOCK_PELANGGAN"
-        ActivityLogService.log_from_request(
-            db=db,
-            request=request,
-            action=act,
-            status="SUCCESS",
-            keterangan=res.get("message"),
             user=user_sess
         )
     except Exception:

@@ -96,13 +96,15 @@ class LogsMgmtService:
         critical_count = summary_stats[3] if summary_stats and summary_stats[3] else 0
         los_count = summary_stats[4] if summary_stats and summary_stats[4] else 0
 
+        effective_ip = func.coalesce(PerangkatONT.ip_router, PerangkatONT.ip_ont)
+
         # Sorting logic
         sort_column_map = {
             "waktu_cek": LogPerformaONT.waktu_cek,
             "id_pelanggan": Pelanggan.id_pelanggan,
             "nama": Pelanggan.nama,
             "pop": Pelanggan.pop,
-            "ip_router": PerangkatONT.ip_router,
+            "ip_router": effective_ip,
             "jenis_modem": PerangkatONT.jenis_modem,
             "rx_power": LogPerformaONT.rx_power,
             "suhu_ont": LogPerformaONT.suhu_ont,
@@ -120,13 +122,15 @@ class LogsMgmtService:
 
         data = []
         for log_entry, cust in rows:
+            ip_val = cust.ip_router or cust.ip_ont or (cust.perangkat.ip_ont if cust.perangkat else None)
             data.append({
                 "id": log_entry.id,
                 "waktu_cek": log_entry.waktu_cek.strftime("%Y-%m-%d %H:%M:%S"),
                 "id_pelanggan": cust.id_pelanggan,
                 "nama": cust.nama,
                 "pop": cust.pop,
-                "ip_router": cust.ip_router,
+                "ip_router": ip_val,
+                "ip_ont": cust.ip_ont,
                 "jenis_modem": cust.jenis_modem,
                 "rx_power": float(log_entry.rx_power) if log_entry.rx_power is not None else None,
                 "suhu_ont": float(log_entry.suhu_ont) if log_entry.suhu_ont is not None else None,

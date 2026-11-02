@@ -18,7 +18,7 @@ export function DashboardQuickShortcuts({
   const isSuperAdmin = currentUser?.role === 'super admin'
 
   return (
-    <section id="dashboardQuickShortcuts" className="bg-white p-3 sm:p-4 rounded-2xl border border-sky-100 shadow-xs mb-3">
+    <section id="dashboardQuickShortcuts" className="lg:hidden bg-white p-3 sm:p-4 rounded-2xl border border-sky-100 shadow-xs mb-3">
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <h3 className="font-mono text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-cyan-700" />

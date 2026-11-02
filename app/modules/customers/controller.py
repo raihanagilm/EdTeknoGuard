@@ -182,7 +182,6 @@ class CustomerController:
                 "status_kredensial": getattr(cust, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(cust, "is_monitored", True)),
                 "snmp_community": cust.snmp_community,
-                "status_isolir": bool(getattr(cust, "status_isolir", False)),
                 "queue_name": getattr(cust, "queue_name", None) or cust.nama,
                 "kuota_terpakai_gb": kuota_gb,
                 "upload_bytes": up_bytes,

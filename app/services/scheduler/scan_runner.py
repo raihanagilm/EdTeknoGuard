@@ -149,6 +149,7 @@ class ScanRunner:
             state.is_scanning = True
             state.is_paused = False
             state.is_stopped = False
+            state.scan_start_time = time.time()
 
             db = TenantDatabaseManager.get_tenant_session(k_code)
             try:
@@ -312,9 +313,23 @@ class ScanRunner:
 
                     SchedulerStateManager.save_scan_state(state.current_scan_index, total_cust, kantor=k_code)
 
-            state.last_scan_time = get_now_wib()
+            if state.scan_start_time > 0:
+                state.last_scan_duration = round(time.time() - state.scan_start_time, 1)
+
+            finished_time = get_now_wib()
+            state.last_scan_time = finished_time
             state.last_sync_stats = stats
             SchedulerStateManager.delete_scan_state(k_code)
+
+            # Persist last_scan_time dan last_scan_duration ke database
+            t_db_finish = TenantDatabaseManager.get_tenant_session(k_code)
+            try:
+                SchedulerRecoveryManager.set_setting_in_db(t_db_finish, "last_scan_time", finished_time.strftime("%Y-%m-%d %H:%M:%S"), kantor=k_code)
+                SchedulerRecoveryManager.set_setting_in_db(t_db_finish, "last_scan_duration", str(state.last_scan_duration), kantor=k_code)
+            except Exception as e:
+                logger.error(f"[SCAN] Gagal menyimpan last_scan_time ke database: {e}")
+            finally:
+                t_db_finish.close()
 
             # Pembersihan log lama otomatis
             SchedulerStateManager.cleanup_alert_logs(days=7)

@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Wifi,
   Activity,
-  ShieldAlert,
   Edit2,
   X,
   FileText,
@@ -22,8 +21,6 @@ export function CustomerDetailModal({
   onClose,
   activeOffice = 'cabang',
   onOpenEdit,
-  onToggleIsolir,
-  isolirLoadingId,
   onResetPassword,
   resetPasswordLoadingId
 }) {
@@ -32,7 +29,6 @@ export function CustomerDetailModal({
   if (!customer) return null
 
   const cId = customer.id_pelanggan || customer.id
-  const isIsolirLoading = isolirLoadingId === cId
   const rawWa = customer.no_wa || customer.no_hp || ''
   const hasValidWa = rawWa && rawWa !== '-'
 
@@ -273,13 +269,6 @@ export function CustomerDetailModal({
                     <Activity className="w-3.5 h-3.5 text-indigo-600" />
                     <span>Status Jaringan &amp; Kuota MikroTik</span>
                   </span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                    customer.status_isolir
-                      ? 'bg-rose-100 text-rose-700 border border-rose-300'
-                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                  }`}>
-                    {customer.status_isolir ? 'TERISOLIR (SUSPENDED)' : 'AKTIF NORMAL'}
-                  </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
                   <div>
@@ -310,25 +299,6 @@ export function CustomerDetailModal({
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-sky-100 shrink-0">
-          <button
-            type="button"
-            onClick={() => onToggleIsolir && onToggleIsolir(customer)}
-            disabled={isIsolirLoading}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-bold font-mono transition flex items-center gap-1.5 ${
-              customer.status_isolir
-                ? 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-                : 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
-            }`}
-          >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>
-              {isIsolirLoading
-                ? 'Memproses...'
-                : customer.status_isolir
-                ? 'Buka Isolir'
-                : 'Isolir Akses'}
-            </span>
-          </button>
 
           <div className="flex items-center gap-2">
             <button

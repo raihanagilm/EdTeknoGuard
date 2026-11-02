@@ -18,7 +18,7 @@ export function ToastNotification({
   type = 'success',
   title,
   message,
-  duration = 4000
+  duration = 2500
 }) {
   useEffect(() => {
     if (!show || !duration || duration <= 0) return
@@ -32,7 +32,7 @@ export function ToastNotification({
 
   const config = {
     success: {
-      defaultTitle: 'Pemeriksaan Berhasil',
+      defaultTitle: 'Berhasil',
       cardClass: 'bg-emerald-900/95 text-emerald-100 border-emerald-500/50',
       iconClass: 'text-emerald-300',
       Icon: CheckCircle2

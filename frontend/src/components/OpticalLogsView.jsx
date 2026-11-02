@@ -454,7 +454,7 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">{item.ip_router || '-'}</td>
+                    <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap font-mono text-xs">{item.ip_router || item.ip_ont || item.ip || '-'}</td>
                     <td className="py-2.5 px-3 text-right whitespace-nowrap">
                       {item.rx_power != null ? (
                         <span

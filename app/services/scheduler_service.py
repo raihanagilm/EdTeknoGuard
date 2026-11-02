@@ -9,8 +9,11 @@ Arsitektur Modular:
 - app.services.scheduler.scan_runner: Eksekutor batch scanning multi-threading & single probe
 """
 
+import time
 import logging
 from typing import Dict, Any, Optional
+from datetime import datetime
+import dateutil.parser
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
@@ -236,10 +239,39 @@ class ONTSchedulerService:
         state = SchedulerStateManager.get_office_state(k_code)
 
         db = TenantDatabaseManager.get_tenant_session(k_code)
+        is_office_active = True
+        last_scan_dt: Optional[datetime] = None
         try:
             cfg = SchedulerRecoveryManager.check_office_configuration(db, kantor=k_code)
-            job = self.scheduler.get_job("ont_monitoring_scan")
-            next_run = job.next_run_time.isoformat() if (job and job.next_run_time) else None
+
+            # 1. Tentukan waktu selesai pemantauan terakhir:
+            # Prioritas 1: State in-memory (jika pemindaian baru saja berjalan di sesi server ini)
+            if state.last_scan_time:
+                last_scan_dt = state.last_scan_time
+            else:
+                # Prioritas 2: Baca setting 'last_scan_time' dari tabel system_settings
+                db_last_scan = SchedulerRecoveryManager.get_setting_from_db(db, "last_scan_time", kantor=k_code)
+                if db_last_scan and db_last_scan != "-":
+                    try:
+                        last_scan_dt = dateutil.parser.parse(db_last_scan)
+                    except Exception:
+                        pass
+                # Prioritas 3: Fallback ke timestamp waktu_cek log_performa_ont terakhir di DB
+                if not last_scan_dt:
+                    from app.db.models import LogPerformaONT
+                    latest_log = db.query(LogPerformaONT.waktu_cek).order_by(LogPerformaONT.waktu_cek.desc()).first()
+                    if latest_log and latest_log[0]:
+                        last_scan_dt = latest_log[0]
+
+            # 2. Cek status aktif kantor di master DB
+            from app.db.models import Kantor
+            m_db = TenantDatabaseManager.get_tenant_session(None)
+            try:
+                k_obj = m_db.query(Kantor).filter(Kantor.kode == k_code).first()
+                if k_obj is not None:
+                    is_office_active = bool(k_obj.is_active)
+            finally:
+                m_db.close()
         finally:
             db.close()
 
@@ -247,16 +279,75 @@ class ONTSchedulerService:
         if state.is_paused:
             status_str = "PAUSED"
 
+        interval_mins = cfg.get("polling_interval_minutes", settings.POLLING_INTERVAL_MINUTES)
+        try:
+            interval_mins = int(interval_mins)
+        except Exception:
+            interval_mins = settings.POLLING_INTERVAL_MINUTES
+
+        # Format tanggal tampilan
+        last_scan_formatted = last_scan_dt.strftime("%d/%m/%Y %H:%M:%S") if last_scan_dt else "-"
+
+        # 3. Hitung Jadwal Berikutnya = waktu selesai pemantauan terakhir + interval pemantauan (menit)
+        if status_str == "RUNNING" and is_office_active and not state.is_paused:
+            if last_scan_dt:
+                from datetime import timedelta
+                next_dt = last_scan_dt + timedelta(minutes=interval_mins)
+                now_curr = get_now_wib()
+                # Jika sudah melewati next_dt tetapi belum giliran dieksekusi atau baru dimulai
+                if state.is_scanning:
+                    next_run_formatted = "Sedang Memindai..."
+                else:
+                    next_run_formatted = next_dt.strftime("%d/%m/%Y %H:%M:%S")
+            else:
+                next_run_formatted = "Segera"
+        elif status_str == "STOPPED":
+            next_run_formatted = "Jadwal Dijeda"
+        elif not is_office_active:
+            next_run_formatted = "Kantor Nonaktif"
+        else:
+            next_run_formatted = "-"
+
+        # Hitung durasi berjalan & estimasi sisa waktu
+        elapsed = round(time.time() - state.scan_start_time, 1) if (state.is_scanning and state.scan_start_time > 0) else 0.0
+        if state.is_scanning and state.current_scan_index > 0 and state.total_customers_in_scan > 0:
+            avg_per_ont = elapsed / state.current_scan_index
+            est_total = round(avg_per_ont * state.total_customers_in_scan, 1)
+        else:
+            est_total = state.last_scan_duration if state.last_scan_duration > 0 else 0.0
+
+        percent = int((state.current_scan_index / state.total_customers_in_scan) * 100) if state.total_customers_in_scan > 0 else 0
+
+        scan_progress = {
+            "current": state.current_scan_index,
+            "total": state.total_customers_in_scan,
+            "percent": percent,
+            "is_scanning": state.is_scanning,
+            "is_paused": state.is_paused,
+            "elapsed_seconds": int(elapsed),
+            "estimated_total_seconds": int(est_total),
+            "last_scan_duration": int(state.last_scan_duration),
+            "target_kantor": k_code
+        }
+
         return {
             "status": status_str,
+            "scheduler_status": status_str,
+            "interval_minutes": interval_mins,
+            "is_office_active": is_office_active,
+            "is_configured": cfg.get("is_configured", True),
+            "missing_fields": cfg.get("missing_fields", []),
+            "config_error": cfg.get("error_message"),
             "is_running": self.is_running,
             "is_scanning": state.is_scanning,
             "is_paused": state.is_paused,
             "current_index": state.current_scan_index,
             "total_customers": state.total_customers_in_scan,
-            "last_scan_time": state.last_scan_time.isoformat() if state.last_scan_time else None,
-            "next_run_time": next_run,
+            "last_scan_time": last_scan_formatted,
+            "next_run_time": next_run_formatted,
             "last_sync_stats": state.last_sync_stats,
+            "scan_progress": scan_progress,
+            "unread_tickets_count": 0,
             "kantor": k_code
         }
 

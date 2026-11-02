@@ -25,6 +25,8 @@ class OfficeScanState:
         self.is_scanning: bool = False
         self.is_paused: bool = False
         self.is_stopped: bool = False
+        self.scan_start_time: float = 0.0
+        self.last_scan_duration: float = 0.0
         self.last_scan_time = None
         self.last_scan_result: Dict[str, Any] = {}
         self.lock = threading.Lock()

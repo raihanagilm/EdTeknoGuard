@@ -309,7 +309,6 @@ class CustomerService:
                 "is_monitored": bool(getattr(c, "is_monitored", True)),
                 "status_lease": getattr(c, "status_lease", "bound") or "bound",
                 "kantor": getattr(c, "kantor", "cabang") or "cabang",
-                "status_isolir": bool(getattr(c, "status_isolir", False)),
                 "queue_name": getattr(c, "queue_name", None) or c.nama,
                 "kuota_terpakai_gb": kuota_gb,
                 "upload_bytes": up_bytes,

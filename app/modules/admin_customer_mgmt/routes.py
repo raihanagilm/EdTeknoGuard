@@ -145,6 +145,7 @@ def get_quota_json(request: Request, db: Session = Depends(get_db)):
         paket_name = item["paket"] or "-"
         if paket_name not in paket_list:
             paket_list.append(paket_name)
+        ip_val = p.ip_router or p.ip_ont or (p.perangkat.ip_ont if p.perangkat else None)
         serialized_quota.append({
             "id_pelanggan": p.id_pelanggan,
             "nama": p.nama,
@@ -153,7 +154,9 @@ def get_quota_json(request: Request, db: Session = Depends(get_db)):
             "terpakai_gb": float(item["terpakai_gb"]) if item["terpakai_gb"] is not None else 0.0,
             "periode": item["periode"],
             "kantor": p.kantor or "cabang",
-            "ip_router": p.ip_router or "-"
+            "ip_router": ip_val or "-",
+            "ip_ont": p.ip_ont,
+            "ip": ip_val or "-"
         })
 
     return {

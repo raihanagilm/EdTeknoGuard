@@ -31,7 +31,6 @@ import {
   Info,
   Check,
   Activity,
-  ShieldAlert,
   MoreVertical,
   ExternalLink
 } from 'lucide-react'
@@ -484,9 +483,7 @@ export function CustomersView({
 
 
 
-  // MikroTik sync & isolir action states
   const [mikrotikSyncing, setMikrotikSyncing] = useState(false)
-  const [isolirLoadingId, setIsolirLoadingId] = useState(null)
 
   // Trigger manual sync kuota Simple Queues MikroTik ke database
   const handleSyncMikrotik = async () => {
@@ -515,63 +512,6 @@ export function CustomersView({
     } finally {
       setMikrotikSyncing(false)
     }
-  }
-
-  // Toggle isolir pelanggan on-demand (Firewall Address List)
-  const handleToggleIsolir = (c) => {
-    const cId = c.id_pelanggan || c.id
-    const currentIsolir = Boolean(c.status_isolir)
-    const newStatus = !currentIsolir
-    const actionTitle = newStatus ? 'Isolir Akses Pelanggan?' : 'Buka Isolir Pelanggan?'
-    const actionDesc = newStatus ? 'Memutus akses internet' : 'Memulihkan koneksi internet'
-
-    setConfirmModal({
-      isOpen: true,
-      title: actionTitle,
-      message: (
-        <div className="space-y-1.5">
-          <p>
-            Apakah Anda yakin ingin <strong>{actionDesc}</strong> untuk pelanggan{' '}
-            <strong className="text-slate-900">{c.nama}</strong> (ID: {cId})?
-          </p>
-          <p className="text-xs text-slate-500">
-            Perubahan firewall akan langsung diterapkan ke router MikroTik aktif.
-          </p>
-        </div>
-      ),
-      confirmText: newStatus ? 'Ya, Isolir Pelanggan' : 'Ya, Buka Isolir',
-      variant: newStatus ? 'warning' : 'success',
-      isLoading: false,
-      loadingText: 'Menyinkronkan MikroTik...',
-      onConfirm: async () => {
-        setConfirmModal(prev => ({ ...prev, isLoading: true }))
-        setIsolirLoadingId(cId)
-        try {
-          const res = await fetch('/api/mikrotik/toggle-isolir', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id_pelanggan: cId,
-              isolir: newStatus
-            })
-          })
-
-          if (res.ok) {
-            await fetchCustomers()
-            showToast(`Status pelanggan ${c.nama} berhasil diperbarui di MikroTik.`, 'success')
-          } else {
-            const errJson = await res.json().catch(() => ({}))
-            showToast(errJson.detail || 'Gagal mengubah status isolir pelanggan di MikroTik.', 'error')
-          }
-        } catch (err) {
-          console.error('Toggle isolir error:', err)
-          showToast('Terjadi kesalahan koneksi ke router MikroTik.', 'error')
-        } finally {
-          setIsolirLoadingId(null)
-          setConfirmModal(prev => ({ ...prev, isOpen: false, isLoading: false }))
-        }
-      }
-    })
   }
 
   // Reset kata sandi aplikasi TeknoCust pelanggan ke default '123456'
@@ -1455,23 +1395,6 @@ export function CustomersView({
                                       <span>Hubungi WA</span>
                                     </a>
                                   )}
-
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setActiveMenuId(null)
-                                      handleToggleIsolir(c)
-                                    }}
-                                    className={`w-full text-left px-3 py-1.5 font-bold flex items-center gap-2 transition ${
-                                      c.status_isolir
-                                        ? 'text-emerald-700 hover:bg-emerald-50'
-                                        : 'text-amber-700 hover:bg-amber-50'
-                                    }`}
-                                  >
-                                    <ShieldAlert className="w-3.5 h-3.5" />
-                                    <span>{c.status_isolir ? 'Buka Isolir' : 'Isolir Akses'}</span>
-                                  </button>
                                 </div>
 
                                 <div className="py-1">
@@ -1735,8 +1658,6 @@ export function CustomersView({
           setDetailCustomer(null)
           handleOpenEdit(targetToEdit, targetToEdit)
         }}
-        onToggleIsolir={handleToggleIsolir}
-        isolirLoadingId={isolirLoadingId}
         onResetPassword={handleResetPortalPassword}
         resetPasswordLoadingId={resetPasswordLoadingId}
       />

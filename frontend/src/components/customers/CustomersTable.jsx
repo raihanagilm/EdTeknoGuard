@@ -12,7 +12,6 @@ import {
   MoreVertical,
   Info,
   Phone,
-  ShieldAlert,
   Edit2,
   Trash2,
   ExternalLink
@@ -42,7 +41,6 @@ export function CustomersTable({
   activeMenuId,
   setActiveMenuId,
   handleOpenDetail,
-  handleToggleIsolir,
   handleOpenEdit,
   handleDeleteCustomer,
   isOfficeActive
@@ -374,23 +372,6 @@ export function CustomersTable({
                                     <span>Hubungi WA</span>
                                   </a>
                                 )}
-
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setActiveMenuId(null)
-                                    handleToggleIsolir(c)
-                                  }}
-                                  className={`w-full text-left px-3 py-1.5 font-bold flex items-center gap-2 transition ${
-                                    c.status_isolir
-                                      ? 'text-emerald-700 hover:bg-emerald-50'
-                                      : 'text-amber-700 hover:bg-amber-50'
-                                  }`}
-                                >
-                                  <ShieldAlert className="w-3.5 h-3.5" />
-                                  <span>{c.status_isolir ? 'Buka Isolir' : 'Isolir Akses'}</span>
-                                </button>
                               </div>
 
                               <div className="py-1">

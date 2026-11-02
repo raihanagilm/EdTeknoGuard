@@ -756,7 +756,6 @@ class MikroTikSyncService:
         - Limit Upload/Download Max Limit
         - Bytes counter (Upload/Download)
         - Hubungan ke Pelanggan TeknoGuard (Linked vs Unlinked vs Office Device)
-        - Status Isolir
         """
         from app.db.models import Kantor
         if not kantor:
@@ -864,7 +863,6 @@ class MikroTikSyncService:
                     "is_linked": cust is not None,
                     "id_pelanggan": cust.id_pelanggan if cust else None,
                     "nama_pelanggan": cust.nama if cust else name,
-                    "status_isolir": cust.status_isolir if cust else False,
                     "redaman": c_rx,
                     "status_koneksi": c_status
                 })
@@ -884,72 +882,6 @@ class MikroTikSyncService:
                 return f"{round(val_int / 1000)}K"
         return rate_val
 
-    @classmethod
-    def toggle_customer_isolation(cls, db: Session, id_pelanggan: str, isolir: bool) -> Dict[str, Any]:
-        """
-        Mengubah status isolir pelanggan:
-        1. Di database TeknoGuard: update `status_isolir`
-        2. Di MikroTik RouterOS: tambahkan/hapus dari Address List 'ISOLIR_PELANGGAN'
-           dan disable/enable rule di Simple Queues.
-        """
-        p = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
-        if not p:
-            return {"success": False, "message": f"Pelanggan {id_pelanggan} tidak ditemukan."}
-
-        p.status_isolir = isolir
-        p.updated_at = get_now_wib()
-        db.commit()
-
-        # Eksekusi ke router jika terhubung
-        kantor = p.kantor
-        from app.db.models import Kantor
-        k = db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-        if not k or not k.mikrotik_host:
-            try:
-                from app.core.database import SessionLocal as MasterSessionLocal
-                m_db = MasterSessionLocal()
-                try:
-                    k_m = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-                    if k_m and k_m.mikrotik_host:
-                        k = k_m
-                finally:
-                    m_db.close()
-            except Exception:
-                pass
-
-        if k and k.mikrotik_host and k.mikrotik_user and k.mikrotik_port:
-            try:
-                connection = routeros_api.RouterOsApiPool(
-                    k.mikrotik_host,
-                    username=k.mikrotik_user,
-                    password=k.mikrotik_pass or "",
-                    port=int(k.mikrotik_port),
-                    use_ssl=False,
-                    plaintext_login=True
-                )
-                api = connection.get_api()
-                ip_target = p.ip_router or p.ip_ont
-                if ip_target:
-                    addr_list = api.get_resource("/ip/firewall/address-list")
-                    existing = addr_list.get(address=ip_target, list="ISOLIR_PELANGGAN")
-                    if isolir:
-                        if not existing:
-                            addr_list.add(address=ip_target, list="ISOLIR_PELANGGAN", comment=f"Isolir TeknoGuard {p.nama}")
-                    else:
-                        for entry in existing:
-                            addr_list.remove(id=entry["id"])
-
-                connection.disconnect()
-            except Exception as e:
-                logger.warning(f"[ISOLIR] Tidak dapat mengupdate RouterOS ({e}), status disimpan di database.")
-
-        status_text = "DIISOLIR" if isolir else "DIPULIHKAN / NORMAL"
-        logger.info(f"[ISOLIR] Pelanggan {p.nama} ({p.id_pelanggan}) berhasil {status_text}.")
-        return {
-            "success": True,
-            "status_isolir": isolir,
-            "message": f"Akses internet pelanggan {p.nama} berhasil {status_text}!"
-        }
 
     @classmethod
     def sync_traffic_quota_to_db(cls, db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:

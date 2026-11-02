@@ -89,7 +89,9 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
       return (
         (item.nama && item.nama.toLowerCase().includes(q)) ||
         (item.id_pelanggan && item.id_pelanggan.toLowerCase().includes(q)) ||
-        (item.ip_router && item.ip_router.toLowerCase().includes(q))
+        (item.ip_router && item.ip_router.toLowerCase().includes(q)) ||
+        (item.ip_ont && item.ip_ont.toLowerCase().includes(q)) ||
+        (item.ip && item.ip.toLowerCase().includes(q))
       );
     }
     return true;
@@ -391,20 +393,19 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3 text-center w-32">Status Bandwidth</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
               <tr>
-                <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
                   <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
                   <div>Memuat data pemakaian kuota...</div>
                 </td>
               </tr>
             ) : filteredQuota.length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
+                <td colSpan="6" className="text-center py-10 text-slate-400 font-mono">
                   Tidak ada data kuota ditemukan.
                 </td>
               </tr>
@@ -431,9 +432,7 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
                       <div className="text-xs text-slate-600 mt-0.5">{item.alamat || '-'}</div>
                     </td>
                     <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[11px] font-bold">
-                        {item.paket}
-                      </span>
+                      <span className="text-xs font-semibold text-slate-800">{item.paket || '-'}</span>
                     </td>
                     <td className="py-2.5 px-3 text-slate-600 font-mono text-xs">{item.ip_ont || item.ip_router || '-'}</td>
                     <td className="py-2.5 px-3 text-center">
@@ -448,11 +447,6 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
                           style={{ width: `${Math.min(100, ((item.terpakai_gb || 0) / 200) * 100)}%` }}
                         ></div>
                       </div>
-                    </td>
-                    <td className="py-2.5 px-3 text-center">
-                      <span className="px-2 py-0.5 rounded text-[11px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
-                        UNLIMITED
-                      </span>
                     </td>
                   </tr>
                 );
