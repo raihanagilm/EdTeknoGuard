@@ -363,7 +363,7 @@ export function ActivityLogsView({ activeOffice }) {
                       {item.created_at || item.waktu || '-'}
                     </td>
                     <td className="py-2.5 px-3 whitespace-nowrap">
-                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-50 text-purple-800 border border-purple-200">
+                      <span className="inline-block text-[11px] font-mono font-bold uppercase text-purple-700">
                         {item.kantor || 'SEMUA'}
                       </span>
                     </td>
@@ -374,7 +374,7 @@ export function ActivityLogsView({ activeOffice }) {
                       )}
                     </td>
                     <td className="py-2.5 px-3 whitespace-nowrap">
-                      <span className="inline-block px-2.5 py-1 rounded bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold font-mono">
+                      <span className="inline-block text-xs font-bold font-mono text-slate-700">
                         {item.action || item.aksi || 'ACTIVITY'}
                       </span>
                     </td>
@@ -384,11 +384,7 @@ export function ActivityLogsView({ activeOffice }) {
                     <td className="py-2.5 px-3 text-slate-600 text-xs font-mono whitespace-nowrap">{item.ip_address || '-'}</td>
                     <td className="py-2.5 px-3 text-center whitespace-nowrap">
                       <span
-                        className={`inline-block px-2.5 py-1 rounded text-[11px] font-black uppercase ${
-                          item.status === 'SUCCESS' || item.status === 'BERHASIL'
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
-                            : 'bg-rose-50 text-rose-800 border border-rose-300'
-                        }`}
+                        className={`inline-block text-[11px] font-mono font-bold uppercase ${item.status === "SUCCESS" || item.status === "BERHASIL" ? "text-emerald-700" : "text-rose-700"}`}
                       >
                         {item.status || 'OK'}
                       </span>

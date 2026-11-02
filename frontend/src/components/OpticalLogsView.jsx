@@ -479,16 +479,16 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
                     <td className="py-2.5 px-3 text-center whitespace-nowrap">
                       {(() => {
                         const statusVal = (item.status_koneksi || 'NORMAL').toUpperCase();
-                        let badgeClass = 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                        let badgeClass = 'text-emerald-700';
                         if (statusVal === 'WARNING') {
-                          badgeClass = 'bg-amber-50 text-amber-700 border border-amber-200';
+                          badgeClass = 'text-amber-700';
                         } else if (statusVal === 'CRITICAL' || statusVal === 'INVALID') {
-                          badgeClass = 'bg-rose-50 text-rose-700 border border-rose-200';
+                          badgeClass = 'text-rose-700';
                         } else if (statusVal === 'LOS') {
-                          badgeClass = 'bg-purple-50 text-purple-700 border border-purple-200';
+                          badgeClass = 'text-purple-700';
                         }
                         return (
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${badgeClass}`}>
+                          <span className={`text-xs font-bold uppercase ${badgeClass}`}>
                             {statusVal}
                           </span>
                         );

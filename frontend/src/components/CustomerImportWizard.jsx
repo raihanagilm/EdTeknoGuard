@@ -517,7 +517,7 @@ export function CustomerImportWizard({
                   <h3 className="text-base font-bold text-slate-900 font-sans">
                     Lengkapi Data Pelanggan
                   </h3>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-cyan-800 bg-cyan-100/90 px-2 py-0.5 rounded-lg uppercase tracking-tight border border-cyan-200">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-cyan-800 bg-cyan-100/90 px-2 py-0.5 rounded-lg uppercase tracking-tight ">
                     <Building2 className="w-3 h-3 text-cyan-700 shrink-0" />
                     <span>Kantor {activeOffice}</span>
                   </span>

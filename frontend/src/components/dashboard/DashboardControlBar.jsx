@@ -51,8 +51,8 @@ export function DashboardControlBar({
                 : isScanning && isCurrentOfficeScan
                 ? 'bg-cyan-50 text-cyan-700 border-cyan-200 ring-2 ring-cyan-200/50'
                 : engineStatus === 'RUNNING'
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-amber-50 text-amber-700 border-amber-200'
+                ? 'text-emerald-700'
+                : 'text-amber-700'
             }`}
           >
             {isNetworkError ? (
@@ -70,16 +70,16 @@ export function DashboardControlBar({
                 Status Sistem Pemantauan
               </span>
               <span
-                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                className={`text-[10px] font-mono font-bold  ${
                   isNetworkError
-                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                    ? 'text-rose-700'
                     : !isOfficeActive
-                    ? 'bg-slate-100 text-slate-600 border-slate-200'
+                    ? 'text-slate-500'
                     : isScanning && isCurrentOfficeScan
-                    ? 'bg-cyan-100 text-cyan-800 border-cyan-300 animate-pulse'
+                    ? 'text-cyan-800 animate-pulse'
                     : engineStatus === 'RUNNING'
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                    ? 'text-emerald-700'
+                    : 'text-amber-700'
                 }`}
               >
                 {isNetworkError
@@ -124,7 +124,7 @@ export function DashboardControlBar({
         {isAdminOrSuper && (
           <div className="flex items-center justify-between sm:justify-end gap-2 flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-sky-100">
             {isToggling && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-900 text-xs font-mono font-bold shrink-0">
+              <div className="flex items-center gap-1.5 text-cyan-900 text-xs font-mono font-bold shrink-0">
                 <RefreshCw className="animate-spin h-3.5 w-3.5 text-cyan-700" />
                 <span>Menyimpan...</span>
               </div>

@@ -66,7 +66,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = { rol
             <div className="text-[11px] text-slate-500 font-mono font-bold mt-0.5 tracking-tight">NOC RESMI NOC</div>
           </div>
         </div>
-        <span className="px-2 py-0.5 rounded bg-cyan-100 border border-cyan-300 text-[11px] font-mono text-cyan-900 font-bold">
+        <span className="text-[11px] font-mono text-cyan-800 font-bold tracking-wider">
           AKTIF
         </span>
       </div>

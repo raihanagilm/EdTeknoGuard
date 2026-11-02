@@ -84,7 +84,7 @@ export function ErrorView({
         </div>
 
         {/* Badge Error Code */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-mono font-bold mb-3">
+        <div className="inline-flex items-center gap-1.5 text-rose-700 text-xs font-mono font-bold mb-3">
           <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
           <span>STATUS CODE: {errorCode}</span>
         </div>

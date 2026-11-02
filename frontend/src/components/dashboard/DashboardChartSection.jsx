@@ -492,7 +492,7 @@ const toggleDataset = (idx) => {
                 <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-700" />
                 <span>Tren Kualitas Redaman</span>
               </h3>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300">
+              <span className="inline-flex items-center text-[11px] font-mono font-bold text-amber-900 ">
                 Batas: {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm
               </span>
             </div>

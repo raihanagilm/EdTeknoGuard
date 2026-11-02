@@ -203,7 +203,7 @@ export function CustomersTable({
                     {(page - 1) * limit + idx + 1}
                   </td>
                   <td className="py-2.5 px-3 font-bold text-slate-800">
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700">
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
                       {c.id_pelanggan || c.id}
                     </span>
                   </td>

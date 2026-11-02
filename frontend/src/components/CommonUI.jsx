@@ -16,7 +16,7 @@ export function ModuleHeader({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             {badge && (
-              <span className="px-2 py-0.5 rounded-md bg-cyan-100/80 border border-cyan-300 text-cyan-900 font-mono text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-cyan-100/80 text-cyan-900 font-mono text-[10px] font-bold">
                 {badge}
               </span>
             )}

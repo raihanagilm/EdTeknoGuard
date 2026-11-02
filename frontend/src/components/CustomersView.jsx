@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   UserPlus,
   Phone,
@@ -343,7 +343,7 @@ export function CustomersView({
             <strong className="text-slate-900">{selectedIds.length} data pelanggan terpilih</strong>?
           </p>
           <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-1">
-            <p className="font-bold">⚠️ PERINGATAN CASCADE DATABASE:</p>
+            <p className="font-bold">?? PERINGATAN CASCADE DATABASE:</p>
             <p>Seluruh relasi data anak (log performa, riwayat redaman, tiket kendala, dan rekaman kuota) akan dihapus secara fisik dan permanen.</p>
           </div>
         </div>
@@ -634,7 +634,7 @@ export function CustomersView({
             Yakin ingin menghapus pelanggan <strong className="text-slate-900">{id_pelanggan}</strong>?
           </p>
           <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800">
-            <strong>⚠️ CASCADE DELETE:</strong> Seluruh riwayat log redaman, tiket gangguan, dan data kuota pelanggan ini akan dibersihkan permanen dari database.
+            <strong>?? CASCADE DELETE:</strong> Seluruh riwayat log redaman, tiket gangguan, dan data kuota pelanggan ini akan dibersihkan permanen dari database.
           </div>
         </div>
       ),
@@ -692,7 +692,7 @@ export function CustomersView({
             colorScheme: 'amber',
             isActive: filterStatus === 'WARNING',
             onClick: () => setFilterStatus('WARNING'),
-            subLabel: `≤ ${warnThreshold !== undefined ? Number(warnThreshold).toFixed(1) : '-26.0'} dBm`
+            subLabel: `= ${warnThreshold !== undefined ? Number(warnThreshold).toFixed(1) : '-26.0'} dBm`
           },
           {
             label: 'Kritis',
@@ -700,7 +700,7 @@ export function CustomersView({
             colorScheme: 'rose',
             isActive: filterStatus === 'CRITICAL',
             onClick: () => setFilterStatus('CRITICAL'),
-            subLabel: `≤ ${critThreshold !== undefined ? Number(critThreshold).toFixed(1) : '-27.0'} dBm`
+            subLabel: `= ${critThreshold !== undefined ? Number(critThreshold).toFixed(1) : '-27.0'} dBm`
           },
           {
             label: 'LOS',
@@ -865,25 +865,25 @@ export function CustomersView({
               const rawStatus = (c.status_koneksi || c.status || 'NORMAL').toUpperCase();
 
               let statusBadge = 'NORMAL';
-              let badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+              let badgeClass = 'text-emerald-700';
 
               if (rawStatus === 'UNTESTED' || rawStatus === 'LOCKOUT' || (!isNumeric && rawStatus !== 'LOS')) {
                 statusBadge = 'UNTESTED';
-                badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
+                badgeClass = 'text-slate-500';
               } else if (rawStatus === 'LOS' || !isNumeric) {
                 statusBadge = 'LOS';
-                badgeClass = 'bg-purple-50 text-purple-800 border-purple-300';
+                badgeClass = 'text-purple-700';
               } else {
                 const num = Number(rxVal);
                 if (num <= critThreshold || rawStatus === 'CRITICAL') {
                   statusBadge = 'CRITICAL';
-                  badgeClass = 'bg-rose-50 text-rose-800 border-rose-300';
+                  badgeClass = 'text-rose-700';
                 } else if (num <= warnThreshold || rawStatus === 'WARNING') {
                   statusBadge = 'WARNING';
-                  badgeClass = 'bg-amber-50 text-amber-800 border-amber-300';
+                  badgeClass = 'text-amber-700';
                 } else {
                   statusBadge = 'NORMAL';
-                  badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+                  badgeClass = 'text-emerald-700';
                 }
               }
 
@@ -911,14 +911,14 @@ export function CustomersView({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${badgeClass}`}>
+                      <span className={`text-xs font-bold uppercase ${badgeClass}`}>
                         {statusBadge === 'UNTESTED' ? 'BELUM CEK' : statusBadge}
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${
+                        className={`text-xs font-bold uppercase ${
                           isOnline
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                            : 'bg-slate-100 text-slate-600 border-slate-300'
+                            ? 'text-emerald-700'
+                            : 'text-slate-500'
                         }`}
                       >
                         {isOnline ? 'ONLINE' : 'OFFLINE'}
@@ -1051,7 +1051,7 @@ export function CustomersView({
                   <span>ID Pelanggan</span>
                   <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'id' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
                   {sortField === 'id' && (
-                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '?' : '?'}</span>
                   )}
                 </div>
               </th>
@@ -1063,7 +1063,7 @@ export function CustomersView({
                   <span>Nama Pelanggan</span>
                   <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'nama' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
                   {sortField === 'nama' && (
-                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '?' : '?'}</span>
                   )}
                 </div>
               </th>
@@ -1078,7 +1078,7 @@ export function CustomersView({
                   </span>
                   <ArrowUpDown className={`w-3.5 h-3.5 ${['ip_router', 'ip_ont', 'jenis_modem'].includes(sortField) ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
                   {['ip_router', 'ip_ont', 'jenis_modem'].includes(sortField) && (
-                    <span className="text-[10px] text-cyan-800 font-black">▲</span>
+                    <span className="text-[10px] text-cyan-800 font-black">?</span>
                   )}
                 </div>
               </th>
@@ -1090,7 +1090,7 @@ export function CustomersView({
                   <span>WiFi &amp; Admin ONT</span>
                   <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'status_kredensial' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
                   {sortField === 'status_kredensial' && (
-                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '?' : '?'}</span>
                   )}
                 </div>
               </th>
@@ -1102,7 +1102,7 @@ export function CustomersView({
                   <span>Redaman (dBm)</span>
                   <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'rx_power' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
                   {sortField === 'rx_power' && (
-                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '?' : '?'}</span>
                   )}
                 </div>
               </th>
@@ -1114,7 +1114,7 @@ export function CustomersView({
                   <span>Status</span>
                   <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'status_koneksi' ? 'text-cyan-800 font-bold' : 'text-slate-400'}`} />
                   {sortField === 'status_koneksi' && (
-                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                    <span className="text-[10px] text-cyan-800 font-black">{sortDir === 'asc' ? '?' : '?'}</span>
                   )}
                 </div>
               </th>
@@ -1172,13 +1172,13 @@ export function CustomersView({
                       <div className="space-y-1">
                         {c.ip_ont && (
                           <div className="text-slate-900 font-bold font-mono text-[11px] flex items-center gap-1.5">
-                            <span className="text-[9px] text-cyan-800 bg-cyan-100/80 px-1 py-0.2 rounded font-black tracking-tight uppercase">ONT</span>
+                            <span className="text-[9px] text-cyan-800 font-black tracking-tight uppercase">ONT</span>
                             <span>{c.ip_ont}</span>
                           </div>
                         )}
                         {(c.ip_router && c.ip_router !== c.ip_ont) && (
                           <div className="text-slate-700 font-mono text-[11px] flex items-center gap-1.5">
-                            <span className="text-[9px] text-slate-600 bg-slate-100 px-1 py-0.2 rounded font-black tracking-tight uppercase">Router</span>
+                            <span className="text-[9px] text-slate-600 font-black tracking-tight uppercase">Router</span>
                             <span>{c.ip_router}</span>
                           </div>
                         )}
@@ -1187,16 +1187,16 @@ export function CustomersView({
                         )}
                         <div className="flex items-center gap-1 pt-0.5">
                           {c.jenis_modem ? (
-                            <span className="text-[9px] font-black uppercase tracking-tight bg-sky-50 text-sky-800 border border-sky-200 px-1.5 py-0.2 rounded font-mono">
+                            <span className="text-[10px] font-mono text-slate-600 uppercase tracking-tight">
                               {c.jenis_modem}
                             </span>
                           ) : (
-                            <span className="text-[9px] font-bold text-slate-400 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded font-mono">
+                            <span className="text-[10px] font-mono text-slate-400">
                               -
                             </span>
                           )}
                           {c.mac_address && (
-                            <span className="text-[9px] font-mono text-slate-500 bg-slate-50 border border-slate-200 px-1 py-0.2 rounded truncate max-w-[110px]" title={`MAC: ${c.mac_address}`}>
+                            <span className="text-[10px] font-mono text-slate-500 truncate max-w-[110px]" title={`MAC: ${c.mac_address}`}>
                               {c.mac_address}
                             </span>
                           )}
@@ -1214,13 +1214,13 @@ export function CustomersView({
                           const kStatus = (c.status_kredensial || '').toUpperCase();
                           if (kStatus === 'VALID') {
                             return (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0" title="Kredensial modem terverifikasi cocok">
+                              <span className="text-[10px] font-bold uppercase tracking-tight text-emerald-700 shrink-0" title="Kredensial modem terverifikasi cocok">
                                 VALID
                               </span>
                             );
                           }
                           return (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-tight bg-rose-100 text-rose-800 border border-rose-300 shrink-0" title="Kredensial modem belum valid / ditolak">
+                            <span className="text-[10px] font-bold uppercase tracking-tight text-rose-700 shrink-0" title="Kredensial modem belum valid / ditolak">
                               INVALID
                             </span>
                           );
@@ -1234,48 +1234,52 @@ export function CustomersView({
                         const rawStatus = (c.status_koneksi || c.status || 'NORMAL').toUpperCase();
                         
                         let statusBadge = 'NORMAL';
-                        let badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+                        let badgeClass = 'text-emerald-700';
 
                         if (rawStatus === 'UNTESTED' || rawStatus === 'LOCKOUT' || (!isNumeric && rawStatus !== 'LOS')) {
                           statusBadge = 'UNTESTED';
-                          badgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
+                          badgeClass = 'text-slate-500';
                         } else if (rawStatus === 'LOS' || !isNumeric) {
                           statusBadge = 'LOS';
-                          badgeClass = 'bg-purple-50 text-purple-800 border-purple-300';
+                          badgeClass = 'text-purple-700';
                         } else {
                           const num = Number(rxVal);
                           if (num <= critThreshold || rawStatus === 'CRITICAL') {
                             statusBadge = 'CRITICAL';
-                            badgeClass = 'bg-rose-50 text-rose-800 border-rose-300';
+                            badgeClass = 'text-rose-700';
                           } else if (num <= warnThreshold || rawStatus === 'WARNING') {
                             statusBadge = 'WARNING';
-                            badgeClass = 'bg-amber-50 text-amber-800 border-amber-300';
+                            badgeClass = 'text-amber-700';
                           } else {
                             statusBadge = 'NORMAL';
-                            badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+                            badgeClass = 'text-emerald-700';
                           }
                         }
 
                         return (
-                          <div className="flex flex-col items-end gap-1">
-                            <span
-                              className={`font-black font-mono ${
-                                statusBadge === 'UNTESTED'
-                                  ? 'text-slate-400'
-                                  : statusBadge === 'CRITICAL'
-                                  ? 'text-rose-600'
-                                  : statusBadge === 'WARNING'
-                                  ? 'text-amber-600'
-                                  : statusBadge === 'LOS'
-                                  ? 'text-purple-700'
-                                  : 'text-emerald-600'
-                              }`}
-                            >
-                              {statusBadge === 'UNTESTED' ? '-' : isNumeric ? `${Number(rxVal).toFixed(1)} dBm` : 'LOS'}
-                            </span>
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${badgeClass}`}>
-                              {statusBadge === 'UNTESTED' ? 'BELUM CEK' : statusBadge}
-                            </span>
+                          <div className="flex flex-col items-end gap-0.5">
+                            {statusBadge === 'LOS' ? (
+                              <span className="font-black font-mono text-xs text-purple-700">LOS</span>
+                            ) : (
+                              <>
+                                <span
+                                  className={`font-black font-mono ${
+                                    statusBadge === 'UNTESTED'
+                                      ? 'text-slate-400'
+                                      : statusBadge === 'CRITICAL'
+                                      ? 'text-rose-600'
+                                      : statusBadge === 'WARNING'
+                                      ? 'text-amber-600'
+                                      : 'text-emerald-600'
+                                  }`}
+                                >
+                                  {statusBadge === 'UNTESTED' ? '-' : isNumeric ? `${Number(rxVal).toFixed(1)} dBm` : '-'}
+                                </span>
+                                <span className={`text-xs font-bold uppercase ${badgeClass}`}>
+                                  {statusBadge === 'UNTESTED' ? 'BELUM CEK' : statusBadge}
+                                </span>
+                              </>
+                            )}
                           </div>
                         );
                       })()}
@@ -1285,13 +1289,13 @@ export function CustomersView({
                         const isOnline = (c.status_lease === 'bound') && (c.status_koneksi !== 'OFFLINE') && (c.status !== 'OFFLINE') && Boolean(c.is_monitored !== false);
                         if (isOnline) {
                           return (
-                            <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-300 tracking-wider">
+                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
                               ONLINE
                             </span>
                           );
                         }
                         return (
-                          <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase bg-slate-100 text-slate-600 border border-slate-300 tracking-wider">
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                             OFFLINE
                           </span>
                         );
@@ -1473,7 +1477,7 @@ export function CustomersView({
                 className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
                 title="Tutup Modal"
               >
-                ✕
+                ?
               </button>
             </div>
 

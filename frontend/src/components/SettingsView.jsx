@@ -564,7 +564,7 @@ export function SettingsView({
                   <button
                     type="button"
                     onClick={addModemCredentialRow}
-                    className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs font-bold flex items-center gap-1.5 transition min-h-[36px] cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900  text-xs font-bold flex items-center gap-1.5 transition min-h-[36px] cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Tambah Baris</span>
@@ -650,7 +650,7 @@ export function SettingsView({
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-800">Sinkronkan ke seluruh pelanggan berstatus INVALID</span>
                       {applyToInvalid && (
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-cyan-100 text-cyan-800 rounded-full border border-cyan-200">
+                        <span className="text-[11px] font-mono font-bold text-cyan-700">
                           Aktif Tersimpan
                         </span>
                       )}
@@ -683,7 +683,7 @@ export function SettingsView({
                 <ol className="list-decimal list-inside space-y-1.5 text-xs text-slate-600 leading-relaxed font-sans pl-1">
                   <li>Sistem mencoba kredensial tersimpan milik pelanggan terlebih dahulu.</li>
                   <li>Jika ditolak, sistem mencoba semua username/password default di atas satu per satu.</li>
-                  <li>Jika berhasil, status kredensial pelanggan otomatis diperbarui menjadi <code className="bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800 font-mono text-[11px] font-bold">VALID</code>.</li>
+                  <li>Jika berhasil, status kredensial pelanggan otomatis diperbarui menjadi <code className="text-emerald-700 font-mono text-[11px] font-bold">VALID</code>.</li>
                 </ol>
               </div>
             </form>
@@ -817,7 +817,7 @@ export function SettingsView({
                   <button
                     type="button"
                     onClick={() => setIsEditProfile(!isEditProfile)}
-                    className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800  text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>{isEditProfile ? 'Batal' : 'Edit Data'}</span>
                   </button>
@@ -837,7 +837,7 @@ export function SettingsView({
                         value={editNama}
                         onChange={(e) => setEditNama(e.target.value)}
                         placeholder="Contoh: Raihan Agil / Teknisi NOC"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-semibold focus:outline-none focus:border-cyan-600 min-h-[42px]"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50  text-xs text-slate-900 font-semibold focus:outline-none focus:border-cyan-600 min-h-[42px]"
                       />
                     </div>
 
@@ -851,7 +851,7 @@ export function SettingsView({
                         value={editNoWa}
                         onChange={(e) => setEditNoWa(e.target.value)}
                         placeholder="Contoh: 08888015154142"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50  text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
                       />
                     </div>
 
@@ -952,7 +952,7 @@ export function SettingsView({
                             value={passwordBaru}
                             onChange={(e) => setPasswordBaru(e.target.value)}
                             placeholder="Minimal 6 karakter"
-                            className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
+                            className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-cyan-50/50  text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
                           />
                           <button
                             type="button"
@@ -974,7 +974,7 @@ export function SettingsView({
                             value={konfirmPasswordBaru}
                             onChange={(e) => setKonfirmPasswordBaru(e.target.value)}
                             placeholder="Ulangi kata sandi baru"
-                            className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
+                            className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-cyan-50/50  text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
                           />
                           <button
                             type="button"

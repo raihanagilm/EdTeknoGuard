@@ -104,18 +104,18 @@ export function NotificationsView({
 
   const getBadgeClass = (item) => {
     if (item.level === 'los' || item.badge?.includes('LOS')) {
-      return 'bg-purple-50 border-purple-200 text-purple-800';
+      return 'text-purple-700';
     }
     if (item.level === 'critical' || item.is_critical) {
-      return 'bg-rose-50 border-rose-200 text-rose-800';
+      return 'text-rose-700';
     }
     if (item.level === 'invalid' || item.badge?.includes('INVALID')) {
-      return 'bg-orange-50 border-orange-200 text-orange-800';
+      return 'text-orange-700';
     }
     if (item.level === 'warning') {
-      return 'bg-amber-50 border-amber-200 text-amber-800';
+      return 'text-amber-700';
     }
-    return 'bg-cyan-50 border-cyan-200 text-cyan-800';
+    return 'text-cyan-800';
   };
 
   return createPortal(
@@ -206,11 +206,11 @@ export function NotificationsView({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1.5 mb-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-black font-mono uppercase tracking-wide border ${getBadgeClass(item)}`}>
+                    <span className={`text-[11px] font-bold font-mono uppercase tracking-wide ${getBadgeClass(item)}`}>
                       {item.badge || 'INFO'}
                     </span>
                     {item.kantor && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                      <span className="text-[10px] font-mono font-bold text-slate-500">
                         {item.kantor.toUpperCase()}
                       </span>
                     )}
@@ -244,7 +244,7 @@ export function NotificationsView({
                   </span>
 
                   {item.level === 'critical' || item.is_critical ? (
-                    <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
+                    <span className="text-[10px] font-bold text-rose-600">
                       Perlu Tindakan
                     </span>
                   ) : (

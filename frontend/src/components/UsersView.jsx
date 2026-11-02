@@ -613,12 +613,12 @@ export function UsersView() {
                     <td className="py-2.5 px-3">
                       <div className="flex flex-wrap gap-1">
                         {u.role === 'super admin' ? (
-                          <span className="inline-block px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[11px] font-medium border border-purple-300">
+                          <span className="inline-block px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[11px] font-medium ">
                             Semua Kantor
                           </span>
                         ) : (
                           (u.allowed_kantor || []).map((k) => (
-                            <span key={k} className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px] font-medium uppercase border border-slate-200">
+                            <span key={k} className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px] font-medium uppercase ">
                               {k}
                             </span>
                           ))

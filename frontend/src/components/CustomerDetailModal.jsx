@@ -178,7 +178,7 @@ export function CustomerDetailModal({
                     <span>Akses Aplikasi TeknoCust Warga</span>
                   </span>
                   <div className="text-[11px] text-slate-600 font-sans">
-                    Login via ID Pelanggan / WhatsApp. Kata sandi default: <span className="font-mono font-bold text-sky-800 bg-sky-100/70 px-1.5 py-0.5 rounded">123456</span>
+                    Login via ID Pelanggan / WhatsApp. Kata sandi default: <span className="font-mono font-bold text-sky-800">123456</span>
                   </div>
                 </div>
 

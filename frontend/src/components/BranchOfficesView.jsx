@@ -339,7 +339,7 @@ export function BranchOfficesView() {
                     <tr key={k.id || idx} className="hover:bg-cyan-50/40 transition">
                       <td className="py-3 px-3 text-center text-slate-500 font-bold">{(page - 1) * limit + idx + 1}</td>
                       <td className="py-3 px-3">
-                        <span className="font-mono font-black text-cyan-900 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200 uppercase text-[11px]">
+                        <span className="font-mono font-black text-cyan-900 uppercase text-[11px]">
                           {k.kode}
                         </span>
                       </td>
@@ -351,10 +351,10 @@ export function BranchOfficesView() {
                       </td>
                       <td className="py-3 px-3 text-center">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase tracking-wider border ${
+                          className={`inline-flex items-center gap-1 text-[11px] font-mono font-bold uppercase tracking-wider ${
                             isActive
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-300'
+                              ? 'text-emerald-700'
+                              : 'text-slate-500'
                           }`}
                         >
                           {isActive ? (
@@ -382,7 +382,7 @@ export function BranchOfficesView() {
                               <span>user: <strong>{k.mikrotik_user || '-'}</strong></span>
                             </div>
                             <div className="flex items-center gap-1.5 pt-0.5">
-                              <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
+                              <span className="text-[10px] font-mono font-medium text-slate-600">
                                 Sync {k.mikrotik_sync_interval || 3}m
                               </span>
                               {k.last_mikrotik_sync && (
