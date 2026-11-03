@@ -124,7 +124,7 @@ export function CustomersFilterBar({
               className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>{bulkDeleting ? 'Menghapus...' : 'Hapus Terpilih'}</span>
+              <span>{bulkDeleting ? 'Menghapus...' : `Hapus Terpilih (${selectedIds.length})`}</span>
             </button>
           </div>
         </div>

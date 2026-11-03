@@ -239,7 +239,7 @@ EdTeknoGuard/
 
 11. **Portal Pelanggan Mandiri (Self-Service Mobile Web App di `/portal`)**:
     - **Arsitektur Satu Proyek & Satu Server**:
-      - Terintegrasi di dalam repositori pada folder `portal_pelanggan/` dan di-mount langsung pada aplikasi utama di endpoint `/portal` (dapat juga dijalankan mandiri di port terpisah jika diinginkan).
+      - Terintegrasi di dalam repositori pada folder `app/portal/` dan di-mount langsung pada aplikasi utama di endpoint `/portal` (dapat juga dijalankan mandiri di port terpisah jika diinginkan).
       - Menggunakan basis data terpadu (MySQL Local) langsung pada tabel master `pelanggan` serta tabel anak `tiket_kendala` dan `kuota_pelanggan`.
     - **Pemberian Akun & Kredensial Langsung oleh Petugas (Bebas Pendaftaran Mandiri)**:
       - Alur pendaftaran mandiri warga desa ditiadakan demi kemudahan warga dan kepastian otentikasi data ISP.
@@ -362,7 +362,7 @@ EdTeknoGuard/
    - **Cakupan Pengujian Komprehensif**: Suite pengujian 	ests/ wajib mencakup:
      1. Integritas model MasterBase dan TenantBase beserta aturan non-cross-database foreign key di [app/db/models.py](app/db/models.py).
      2. Modul domain admin baru: tiket ([app/modules/tickets](app/modules/tickets)), kuota ([app/modules/quota](app/modules/quota)), notifikasi ([app/modules/notifications](app/modules/notifications)), dan log optik ([app/modules/optical_logs](app/modules/optical_logs)).
-     3. Endpoint REST API portal pelanggan ([app/portal/api_router.py](app/portal/api_router.py)) untuk 7 domain modular (auth, dashboard, quota, tickets, wifi, profile, speedtest).
+     3. Router aggregator REST API portal pelanggan ([app/portal/api_router.py](app/portal/api_router.py)) yang mendaftarkan endpoint 7 domain modular ([app/portal/modules](app/portal/modules): auth, dashboard, quota, tickets, wifi, profile, speedtest).
      4. Logika validasi bisnis krusial (ambang batas redaman optik SOP -26.0 dBm warning dan -27.0 dBm kritis, keamanan strict IP check WiFi rumah, dan cascade deletion).
 
 

@@ -27,6 +27,16 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Changed
+- **Penyelesaian Modularisasi Modul Data Pelanggan & Eliminasi Kode Menggantung ([CustomersView.jsx](frontend/src/components/customers/CustomersView.jsx), [CustomersTable.jsx](frontend/src/components/customers/CustomersTable.jsx), [CustomersFilterBar.jsx](frontend/src/components/customers/CustomersFilterBar.jsx))**:
+  - Menyambungkan komponen pecahan `CustomersFilterBar` dan `CustomersTable` yang sebelumnya telah dibuat namun berstatus kode mati (tidak pernah di-import oleh `CustomersView.jsx`).
+  - Memutakhirkan `CustomersTable.jsx` agar memiliki paritas fitur 100% lengkap: mempertahankan tampilan **Mobile Card Stack Responsif (P8-03 Pola #1)**, logika evaluasi redaman optik dinamis (`warnThreshold` & `critThreshold`), penanganan jeda probe per pelanggan (`probeCooldowns`), kalkulasi status lease online/offline, dan menu aksi popover.
+  - Mengurangi ukuran `CustomersView.jsx` dari **1.703 baris menjadi 1.028 baris** (berkurang 675 baris kode duplikat).
+  - Mengonfigurasi `frontend/vite.config.js` untuk build produksi tanpa native OXC panic pada chunk besar.
+  - Memperbarui 2 rujukan dokumentasi usang di [AGENTS.md](AGENTS.md) (relokasi `portal_pelanggan/` ke `app/portal/` dan penegasan peran `app/portal/api_router.py` sebagai aggregator 7 modul domain).
+  - Terverifikasi: `npm run build` sukses (810ms) dan seluruh 30 unit & integration test pytest lulus 100%.
+
+
+### Changed
 - **Penyelesaian Modularisasi Modul Pengaturan & Eliminasi Kode Duplikat ([SettingsView.jsx](frontend/src/components/settings/SettingsView.jsx))**:
   - Komponen pecahan `SettingsThresholdTab`, `SettingsCredentialsTab`, `SettingsNotificationsTab`, dan `SettingsProfileTab` sebelumnya sudah dibuat namun **tidak pernah di-import** oleh `SettingsView.jsx`, sehingga seluruh markup 4 tab tetap tertulis inline dan terdapat dua salinan logika yang sama (risiko perbaikan bug dikerjakan di berkas yang salah).
   - `SettingsView.jsx` kini menjadi shell murni (navigasi mobile segmented, desktop tree menu, toast, dan routing sub-tab) yang merender keempat komponen tab tersebut: **1.020 baris menjadi 383 baris**.
