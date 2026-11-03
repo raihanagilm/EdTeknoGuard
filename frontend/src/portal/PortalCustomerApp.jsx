@@ -2,22 +2,22 @@
 import {
   PortalNavbar,
   PortalBottomNav
-} from './components/PortalNavigation';
-import { PortalLoginView } from './components/PortalAuthView';
-import { PortalResetPasswordView } from './components/PortalResetPasswordView';
-import { PortalNotificationsPage } from './components/PortalNotificationsPage';
-import { PortalDashboardTab } from './components/PortalDashboardTab';
-import { PortalTicketsTab } from './components/PortalTicketsTab';
-import { PortalWifiTab } from './components/PortalWifiTab';
-import { PortalQuotaTab } from './components/PortalQuotaTab';
-import { PortalProfileTab } from './components/PortalProfileTab';
-import { PortalPaymentTab } from './components/PortalPaymentTab';
+} from './components/layout/PortalNavigation';
+import { PortalLoginView } from './components/auth/PortalAuthView';
+import { PortalResetPasswordView } from './components/auth/PortalResetPasswordView';
+import { PortalNotificationsPage } from './components/notifications/PortalNotificationsPage';
+import { PortalDashboardTab } from './components/dashboard/PortalDashboardTab';
+import { PortalTicketsTab } from './components/tickets/PortalTicketsTab';
+import { PortalWifiTab } from './components/wifi/PortalWifiTab';
+import { PortalQuotaTab } from './components/quota/PortalQuotaTab';
+import { PortalProfileTab } from './components/profile/PortalProfileTab';
+import { PortalPaymentTab } from './components/payment/PortalPaymentTab';
 import {
   PortalAuthService,
   PortalDashboardService
 } from './services/portalApi';
-import { PortalErrorView } from './components/PortalErrorView';
-import { PortalSemanticSkeleton } from './components/PortalSemanticSkeleton';
+import { PortalErrorView } from './components/common/PortalErrorView';
+import { PortalSemanticSkeleton } from './components/common/PortalSemanticSkeleton';
 import { checkHasUnreadNotifications } from './utils/notificationUtils';
 import { PortalKendalaService } from './services/portalApi';
 import { RefreshCw } from 'lucide-react';

@@ -16,7 +16,7 @@ import {
   Trash2,
   ExternalLink
 } from 'lucide-react'
-import { DataTableContainer } from '../CommonUI'
+import { DataTableContainer } from '../common/CommonUI'
 
 export function CustomersTable({
   customers,

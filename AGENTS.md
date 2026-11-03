@@ -130,11 +130,37 @@ EdTeknoGuard/
 │   └── mockups/
 ├── frontend/                  # Single Page Application React 18 (NOC & Portal Warga)
 │   ├── src/
-│   │   ├── components/        # Komponen UI NOC (DashboardView, CustomersView, OpticalLogsView, dsb.)
-│   │   │   ├── customers/     # Komponen tabel & filter pelanggan
-│   │   │   ├── dashboard/     # Komponen visualisasi & kontrol scan dashboard
-│   │   │   └── import_wizard/ # Komponen wizard import data
-│   │   ├── portal/            # Komponen sub-aplikasi TeknoCust untuk warga pelanggan mandiri
+│   │   ├── components/        # Modular per Menu/Domain (Co-location: View + Subkomponen)
+│   │   │   ├── dashboard/     # DashboardView, ControlBar, ChartSection, QuickShortcuts
+│   │   │   ├── customers/     # CustomersView, CustomersTable, FilterBar, DetailModal, ImportWizard
+│   │   │   ├── settings/      # SettingsView, ThresholdTab, CredentialsTab, NotificationsTab, ProfileTab
+│   │   │   ├── tickets/       # TicketsView (Manajemen tiket gangguan NOC)
+│   │   │   ├── quota/         # QuotaView (Monitoring kuota pelanggan)
+│   │   │   ├── optical_logs/  # OpticalLogsView (Histori time-series redaman optik)
+│   │   │   ├── notifications/ # NotificationsView (Notifikasi alert NOC)
+│   │   │   ├── offices/       # OfficeManagementView & BranchOfficesView (Manajemen kantor cabang)
+│   │   │   ├── users/         # UsersView (Manajemen pengguna & hak akses)
+│   │   │   ├── activity_logs/ # ActivityLogsView (Audit trail aktivitas sistem)
+│   │   │   ├── auth/          # LoginView (Autentikasi login admin NOC)
+│   │   │   ├── layout/        # AppHeader & Navigation (Sidebar desktop & dock mobile)
+│   │   │   ├── common/        # CommonUI, ToastNotification, ConfirmDialogModal, Modals, ErrorView
+│   │   │   └── import_wizard/ # Step wizard upload, mapping, & preview import
+│   │   ├── portal/            # Sub-aplikasi TeknoCust untuk warga pelanggan mandiri
+│   │   │   ├── components/    # Modular per Domain Portal Warga (Co-location)
+│   │   │   │   ├── dashboard/ # Tab Beranda (PortalDashboardTab)
+│   │   │   │   ├── payment/   # Tab Bayar Tagihan (PortalPaymentTab)
+│   │   │   │   ├── tickets/   # Tab Tiket Kendala (PortalTicketsTab)
+│   │   │   │   ├── quota/     # Tab Kuota (PortalQuotaTab)
+│   │   │   │   ├── wifi/      # Tab Kelola WiFi (PortalWifiTab)
+│   │   │   │   ├── profile/   # Tab Profil (PortalProfileTab)
+│   │   │   │   ├── notifications/ # Tab Notifikasi (PortalNotificationsPage)
+│   │   │   │   ├── auth/      # Login & Reset Password (PortalAuthView, PortalResetPasswordView)
+│   │   │   │   ├── layout/    # PortalHeader & PortalNavigation (BottomNav)
+│   │   │   │   ├── modals/    # ConnectedDevicesModal & SpeedTestModal
+│   │   │   │   └── common/    # PortalActiveMascot, PortalSemanticSkeleton, PortalToastNotification, PortalErrorView
+│   │   │   ├── services/      # REST API client portal (portalApi.js)
+│   │   │   ├── utils/         # Helper notifikasi (notificationUtils.js)
+│   │   │   └── PortalCustomerApp.jsx # Shell utama portal warga
 │   │   ├── services/          # HTTP API client layer terpusat (api.js & portalApi.js)
 │   │   ├── App.jsx            # Shell aplikasi utama NOC & navigasi tab
 │   │   └── main.jsx

@@ -5,7 +5,7 @@ import {
   MoreVertical,
   LogOut
 } from 'lucide-react'
-import { NotificationsView } from '../NotificationsView'
+import { NotificationsView } from '../notifications/NotificationsView'
 
 export function AppHeader({
   activeTab,

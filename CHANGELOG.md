@@ -48,6 +48,42 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - Menambahkan [requirements-dev.txt](requirements-dev.txt) berisi `pytest` dan `pytest-asyncio`.
     - Menambahkan [pytest.ini](pytest.ini) dengan `pythonpath = .` untuk menjalankan pengujian langsung via `pytest`.
     - Seluruh 15 unit test (`test_customers_module.py`, `test_models_and_thresholds.py`, `test_scheduler_modules.py`, `test_scraper_modules.py`) lolos 100%.
+  - **Restrukturisasi Frontend SPA NOC Berbasis Fitur / Domain (Feature Co-location)**:
+    - Menghapus folder buatan rontend/src/views/ yang menyatukan menu-menu berbeda dalam satu tumpukan flat.
+    - Menata ulang arsitektur rontend/src/components/ menjadi 100% modular berbasis menu/domain (1 Menu = 1 Folder Utuh):
+      - dashboard/: DashboardView.jsx beserta subkomponen kontrol bar, chart, shortcuts, dan utils.
+      - customers/: CustomersView.jsx beserta CustomersTable.jsx, CustomersFilterBar.jsx, CustomerDetailModal.jsx, dan CustomerImportWizard.jsx.
+      - settings/: SettingsView.jsx beserta tab modular (SettingsThresholdTab.jsx, SettingsCredentialsTab.jsx, SettingsNotificationsTab.jsx, SettingsProfileTab.jsx).
+      - 	ickets/: TicketsView.jsx (halaman manajemen tiket kendala NOC).
+      - quota/: QuotaView.jsx (halaman monitoring kuota bulanan).
+      - optical_logs/: OpticalLogsView.jsx (halaman log redaman optik).
+      - 
+otifications/: NotificationsView.jsx (halaman alert darurat NOC).
+      - offices/: OfficeManagementView.jsx dan BranchOfficesView.jsx.
+      - users/: UsersView.jsx (halaman kelola user & role).
+      - ctivity_logs/: ActivityLogsView.jsx (halaman audit trail).
+      - uth/: LoginView.jsx (halaman autentikasi login NOC).
+      - layout/: AppHeader.jsx dan Navigation.jsx (sidebar & mobile dock).
+      - common/: CommonUI.jsx, ToastNotification.jsx, ConfirmDialogModal.jsx, Modals.jsx, ErrorView.jsx.
+      - import_wizard/: ImportStepUpload.jsx, ImportStepMapping.jsx, ImportStepPreview.jsx.
+    - Membersihkan root rontend/src/components/ hingga bebas dari file tercecer (0 loose files).
+  - **Restrukturisasi Sub-Aplikasi Portal Pelanggan TeknoCust (rontend/src/portal/)**:
+    - Menata ulang 17 file flat di rontend/src/portal/components/ menjadi terorganisir per domain fungsional:
+      - dashboard/: PortalDashboardTab.jsx (tab beranda pelanggan).
+      - payment/: PortalPaymentTab.jsx (tab pembayaran tagihan).
+      - 	ickets/: PortalTicketsTab.jsx (tab lapor gangguan).
+      - quota/: PortalQuotaTab.jsx (tab akumulasi kuota).
+      - wifi/: PortalWifiTab.jsx (tab kelola WiFi rumah).
+      - profile/: PortalProfileTab.jsx (tab profil pelanggan).
+      - 
+otifications/: PortalNotificationsPage.jsx (halaman notifikasi pelanggan).
+      - uth/: PortalAuthView.jsx dan PortalResetPasswordView.jsx.
+      - layout/: PortalHeader.jsx dan PortalNavigation.jsx (bottom navigation).
+      - modals/: ConnectedDevicesModal.jsx dan SpeedTestModal.jsx.
+      - common/: PortalActiveMascot.jsx, PortalSemanticSkeleton.jsx, PortalToastNotification.jsx, PortalErrorView.jsx.
+    - Mengeliminasi seluruh file tercecer di root portal/components/ (0 loose files).
+    - Memverifikasi build frontend via 
+pm run build (1.955 modul ter-compile bersih dalam 1.35 detik).
 
 
 - **Standar Skeleton Loading Semantik & Larangan Full-Page Spinner Global ([AGENTS.md](AGENTS.md), [PortalSemanticSkeleton.jsx](frontend/src/portal/components/PortalSemanticSkeleton.jsx), [PortalPelangganApp.jsx](frontend/src/portal/PortalPelangganApp.jsx), [TabKendalaPelanggan.jsx](frontend/src/portal/components/TabKendalaPelanggan.jsx))**:

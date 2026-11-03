@@ -7,7 +7,7 @@ import {
   RefreshCw,
   Trash2
 } from 'lucide-react'
-import { FilterContainer } from '../CommonUI'
+import { FilterContainer } from '../common/CommonUI'
 
 export function CustomersFilterBar({
   searchQuery,
