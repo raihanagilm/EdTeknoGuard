@@ -10,7 +10,7 @@ import { CheckCircle2, AlertTriangle, Info, AlertCircle, X } from 'lucide-react'
  * - type: 'success' | 'warning' | 'info' | 'error' (default: 'success')
  * - title: string (opsional, jika kosong otomatis sesuai type)
  * - message: string | ReactNode
- * - duration: number (milidetik, default: 4000. Set 0 untuk non-auto-dismiss)
+ * - duration: number (milidetik, default: 5000. Set 0 untuk non-auto-dismiss)
  */
 export function ToastNotification({
   show,
@@ -18,15 +18,20 @@ export function ToastNotification({
   type = 'success',
   title,
   message,
-  duration = 2500
+  duration = 5000
 }) {
+  const onCloseRef = React.useRef(onClose);
   useEffect(() => {
-    if (!show || !duration || duration <= 0) return
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!show || !duration || duration <= 0) return;
     const timer = setTimeout(() => {
-      if (onClose) onClose()
-    }, duration)
-    return () => clearTimeout(timer)
-  }, [show, duration, onClose])
+      if (onCloseRef.current) onCloseRef.current();
+    }, duration);
+    return () => clearTimeout(timer);
+  }, [show, message, duration]);
 
   if (!show || !message) return null
 

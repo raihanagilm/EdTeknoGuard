@@ -26,6 +26,30 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Refactoring Arsitektur Dualisme, Unifikasi Model & Pembersihan Folder ([AGENTS.md](AGENTS.md), [requirements-dev.txt](requirements-dev.txt), [pytest.ini](pytest.ini))**:
+  - **Pembersihan Arsitektur "Gaya Laravel" yang Redundan**:
+    - Menghapus folder shim re-export yang tidak dipakai: `app/controllers/`, `app/services/admin/`, dan `app/services/portal/`.
+    - Menghapus stub mati `app/portal/services/telegram_service.py` serta folder kosong/temporary `data/` dan `scratch/`.
+    - Menghapus berkas usang `PROJECT_STATE.md`, `docs/project_ont_monitoring.docx`, dan `docs/prompt_android_studio.txt`.
+    - Menghapus controller SSR lama berbasis Jinja di portal (`app/portal/modules/*/controller.py`) dan admin (`app/modules/admin_customer_mgmt/controller.py`).
+  - **Unifikasi Lokasi Model ORM & Inisialisasi Database**:
+    - Seluruh definisi model SQLAlchemy kini bertempat di satu lokasi kanonik [app/db/models.py](app/db/models.py) dan folder `app/models/` dihapus bersih.
+    - Script inisialisasi basis data disatukan di [app/db/init_db.py](app/db/init_db.py).
+  - **Modularisasi Backend Portal Pelanggan TeknoCust**:
+    - Memecah 24 endpoint REST API dari [app/portal/api_router.py](app/portal/api_router.py) (1.084 baris) ke 7 domain module: `auth`, `dashboard`, `quota`, `tickets`, `wifi`, `profile`, dan modul baru `speedtest`.
+    - Mengubah `api_router.py` menjadi aggregator router ramping (26 baris) dengan prefix `/api`.
+    - Memindahkan validasi keamanan WiFi `check_is_home_wifi` ke [app/portal/core/security.py](app/portal/core/security.py).
+  - **Penataan Modul Admin NOC**:
+    - Mengubah nama modul `logs_mgmt` menjadi [app/modules/optical_logs/](app/modules/optical_logs/) selaras dengan `OpticalLogsView.jsx`.
+    - Memecah modul multi-tanggung jawab `admin_customer_mgmt` menjadi tiga modul independen: [app/modules/tickets/](app/modules/tickets/), [app/modules/quota/](app/modules/quota/), dan [app/modules/notifications/](app/modules/notifications/).
+    - Menjadikan `admin_customer_mgmt` sebagai facade backward-compatibility.
+    - Menghapus mount statis ganda, duplikasi import, dan 63 baris fungsi pembungkus alias redundan di [app/main.py](app/main.py).
+  - **Infrastruktur Pengujian & Development**:
+    - Menambahkan [requirements-dev.txt](requirements-dev.txt) berisi `pytest` dan `pytest-asyncio`.
+    - Menambahkan [pytest.ini](pytest.ini) dengan `pythonpath = .` untuk menjalankan pengujian langsung via `pytest`.
+    - Seluruh 15 unit test (`test_customers_module.py`, `test_models_and_thresholds.py`, `test_scheduler_modules.py`, `test_scraper_modules.py`) lolos 100%.
+
+
 - **Standar Skeleton Loading Semantik & Larangan Full-Page Spinner Global ([AGENTS.md](AGENTS.md), [PortalSemanticSkeleton.jsx](frontend/src/portal/components/PortalSemanticSkeleton.jsx), [PortalPelangganApp.jsx](frontend/src/portal/PortalPelangganApp.jsx), [TabKendalaPelanggan.jsx](frontend/src/portal/components/TabKendalaPelanggan.jsx))**:
   - **Larangan Full-Page Spinner**: Menghapus penggunaan spinner blocking kosong di tengah layar (`RefreshCw animate-spin` full-screen) saat inisialisasi aplikasi maupun navigasi halaman/tab.
   - **Komponen Baru `PortalSemanticSkeleton`**: Menyediakan kerangka shimmer semantik (`animate-pulse`) yang presisi merefleksikan geometri layout asli (kartu status, metrik, daftar tiket, bar kuota, form WiFi, dan data profil) untuk meniadakan lonjakan visual (*Cumulative Layout Shift / CLS*).

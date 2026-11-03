@@ -10,12 +10,6 @@ from app.portal.core.security import (
     CUSTOMER_SESSION_COOKIE,
     MAX_SESSION_AGE
 )
-from app.portal.modules.auth.routes import router as auth_router
-from app.portal.modules.dashboard.routes import router as dashboard_router
-from app.portal.modules.tickets.routes import router as kendala_router
-from app.portal.modules.quota.routes import router as kuota_router
-from app.portal.modules.profile.routes import router as profil_router
-from app.portal.modules.wifi.routes import router as wifi_router
 
 app = FastAPI(
     title="EdTeknoGuard - Portal Pelanggan",

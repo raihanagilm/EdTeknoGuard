@@ -13,7 +13,7 @@ import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react'
  * - message: string (pesan notifikasi)
  * - type: 'success' | 'error' | 'warning' | 'info' (default: 'success')
  * - title: string (opsional)
- * - duration: number (milidetik, default: 3500)
+ * - duration: number (milidetik, default: 5000)
  * - onClose: () => void (fungsi saat ditutup / timeout)
  */
 export function PortalToastNotification({
@@ -21,16 +21,21 @@ export function PortalToastNotification({
   message,
   type = 'success',
   title,
-  duration = 3500,
+  duration = 5000,
   onClose
 }) {
+  const onCloseRef = React.useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!show || !duration || duration <= 0) return;
     const timer = setTimeout(() => {
-      if (onClose) onClose();
+      if (onCloseRef.current) onCloseRef.current();
     }, duration);
     return () => clearTimeout(timer);
-  }, [show, duration, onClose]);
+  }, [show, message, duration]);
 
   if (!show || !message) return null;
 

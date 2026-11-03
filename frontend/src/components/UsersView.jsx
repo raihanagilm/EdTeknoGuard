@@ -64,7 +64,7 @@ export function UsersView() {
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 5000);
   };
 
   // Fetch Users
@@ -600,12 +600,12 @@ export function UsersView() {
                       {u.no_wa || '-'}
                     </td>
                     <td className="py-2.5 px-3">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
+                      <span className={`inline-block text-[11px] font-mono font-bold uppercase ${
                         u.role === 'super admin'
-                          ? 'bg-purple-100 text-purple-900 border border-purple-200'
+                          ? 'text-purple-700'
                           : u.role === 'admin'
-                          ? 'bg-cyan-100 text-cyan-900 border border-cyan-200'
-                          : 'bg-amber-100 text-amber-900 border border-amber-200'
+                          ? 'text-cyan-800'
+                          : 'text-amber-700'
                       }`}>
                         {u.role}
                       </span>
@@ -613,12 +613,12 @@ export function UsersView() {
                     <td className="py-2.5 px-3">
                       <div className="flex flex-wrap gap-1">
                         {u.role === 'super admin' ? (
-                          <span className="inline-block px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[11px] font-medium ">
+                          <span className="inline-block text-[11px] font-mono font-bold text-purple-700">
                             Semua Kantor
                           </span>
                         ) : (
                           (u.allowed_kantor || []).map((k) => (
-                            <span key={k} className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[11px] font-medium uppercase ">
+                            <span key={k} className="inline-block text-[11px] font-mono font-bold uppercase text-slate-700">
                               {k}
                             </span>
                           ))
@@ -627,13 +627,15 @@ export function UsersView() {
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <button
+                        type="button"
                         onClick={() => handleToggleActive(u)}
                         disabled={u.username === 'admin'}
-                        className={`inline-block px-2.5 py-1 rounded text-[11px] font-black uppercase transition cursor-pointer ${
+                        className={`inline-block text-[11px] font-mono font-bold uppercase transition cursor-pointer ${
                           u.is_active
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
-                            : 'bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100'
+                            ? 'text-emerald-700 hover:text-emerald-800'
+                            : 'text-rose-700 hover:text-rose-800'
                         } ${u.username === 'admin' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        title={u.username === 'admin' ? 'Akun admin master tidak dapat dinonaktifkan' : 'Klik untuk mengubah status'}
                       >
                         {u.is_active ? 'AKTIF' : 'NONAKTIF'}
                       </button>

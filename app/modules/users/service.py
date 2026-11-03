@@ -264,11 +264,23 @@ class UsersService:
         if not kantor:
             return False, "Kantor tidak ditemukan.", None
 
-        pelanggan_count = db.query(Pelanggan).filter(
-            (Pelanggan.id_kantor == kantor.id_kantor) | (Pelanggan.kantor == kantor.kode)
-        ).count()
+        pelanggan_count = 0
+        try:
+            from app.core.tenant_database import TenantDatabaseManager
+            t_session = TenantDatabaseManager.get_tenant_session(kantor.kode)
+            try:
+                pelanggan_count = t_session.query(Pelanggan).count()
+            except Exception as e:
+                logger.warning(f"[KANTOR] Tidak dapat mengecek pelanggan di database tenant {kantor.kode}: {e}")
+                pelanggan_count = 0
+            finally:
+                t_session.close()
+        except Exception as e:
+            logger.warning(f"[KANTOR] Gagal membuka tenant session untuk {kantor.kode}: {e}")
+            pelanggan_count = 0
+
         if pelanggan_count > 0:
-            return False, f"Kantor '{kantor.nama}' masih memiliki {pelanggan_count} pelanggan terdaftar. Pindahkan atau hapus pelanggan terlebih dahulu.", None
+            return False, f"Kantor '{kantor.nama}' masih memiliki {pelanggan_count} pelanggan terdaftar di database fisiknya. Pindahkan atau hapus pelanggan terlebih dahulu.", None
 
         deleted_nama = kantor.nama
         deleted_kode = kantor.kode

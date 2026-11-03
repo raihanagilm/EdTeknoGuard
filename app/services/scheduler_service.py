@@ -155,7 +155,7 @@ class ONTSchedulerService:
                 try:
                     t_db = TenantDatabaseManager.get_tenant_session(k.kode)
                     try:
-                        from app.models.models import Pelanggan
+                        from app.db.models import Pelanggan
                         unpaid_customers = t_db.query(Pelanggan).filter(
                             (Pelanggan.status_pembayaran == 'BELUM_BAYAR')
                         ).all()

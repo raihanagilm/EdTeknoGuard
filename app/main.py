@@ -163,8 +163,10 @@ async def switch_kantor(request: Request, kantor: str = "cabang"):
         
     return response
 
-# Mount folder static dan frontend dist (jika telah dibuild)
-Path("static").mkdir(exist_ok=True)
+# Mount Static Files (Uploads, Profil Pelanggan, Aset Statis) & Frontend dist
+static_dir = Path("static")
+static_dir.mkdir(parents=True, exist_ok=True)
+(static_dir / "uploads" / "profil").mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 frontend_dist = Path("frontend/dist")
@@ -183,8 +185,7 @@ def serve_frontend_dist_root_files(request: Request):
         return FileResponse(str(target))
     return JSONResponse(status_code=404, content={"detail": f"{filename} not found"})
 
-# Registrasi Router via Gerbang Rute Resmi routes/api.py (Standar Laravel Routes)
-from routes.api import register_api_routes
+# Registrasi Router via Gerbang Rute routes/api.py
 register_api_routes(app)
 
 # Route Halaman SPA Dashboard NOC (Support Direct URL & Refresh)
@@ -199,78 +200,8 @@ def serve_management_kantor_page(request: Request):
         return FileResponse(str(dist_index))
     return RedirectResponse("/", status_code=303)
 
-# Mount Static Files (Uploads, Profil Pelanggan, Aset Statis)
-static_dir = Path("static")
-static_dir.mkdir(parents=True, exist_ok=True)
-(static_dir / "uploads" / "profil").mkdir(parents=True, exist_ok=True)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Mount Portal Pelanggan via Gerbang Rute routes/portal.py (Standar Laravel Route)
-from routes.portal import register_portal_routes
+# Mount Portal Pelanggan via Gerbang Rute routes/portal.py
 register_portal_routes(app)
-
-@app.get("/api/notifications/poll")
-def poll_notifications_alias(request: Request, kantor: Optional[str] = None):
-    from app.core.database import get_db
-    from app.core.security import get_current_user_optional, get_active_kantor
-    from app.modules.admin_customer_mgmt.service import AdminCustomerMgmtService
-    from app.core.tenant_database import TenantDatabaseManager
-    
-    user = get_current_user_optional(request)
-    target_kantor = kantor or (get_active_kantor(request, user) if user else "all")
-    
-    if target_kantor and target_kantor.lower() not in ["master", "global", "all"]:
-        db = TenantDatabaseManager.get_tenant_session(target_kantor)
-    else:
-        # Fallback kantor aktif pertama jika target_kantor bernilai all/master
-        default_k = get_active_kantor(request, user)
-        db = TenantDatabaseManager.get_tenant_session(default_k)
-        target_kantor = default_k
-
-    try:
-        return AdminCustomerMgmtService.get_realtime_notifications(db=db, kantor=target_kantor, user=user)
-    finally:
-        db.close()
-
-@app.post("/api/notifications/read")
-async def read_notification_alias(request: Request):
-    from app.core.database import get_db
-    from app.modules.admin_customer_mgmt.routes import mark_single_notification_read
-    db = next(get_db(request))
-    try:
-        return await mark_single_notification_read(request=request, db=db)
-    finally:
-        db.close()
-
-@app.post("/api/notifications/read-all")
-async def read_all_notifications_alias(request: Request):
-    from app.core.database import get_db
-    from app.modules.admin_customer_mgmt.routes import mark_all_notifications_read
-    db = next(get_db(request))
-    try:
-        return await mark_all_notifications_read(request=request, db=db)
-    finally:
-        db.close()
-
-@app.get("/api/tiket")
-def get_tickets_alias(request: Request, status: str = "SEMUA"):
-    from app.core.database import get_db
-    from app.modules.admin_customer_mgmt.routes import get_tickets_json
-    db = next(get_db(request))
-    try:
-        return get_tickets_json(request=request, status=status, db=db)
-    finally:
-        db.close()
-
-@app.get("/api/kuota")
-def get_quota_alias(request: Request):
-    from app.core.database import get_db
-    from app.modules.admin_customer_mgmt.routes import get_quota_json
-    db = next(get_db(request))
-    try:
-        return get_quota_json(request=request, db=db)
-    finally:
-        db.close()
 
 @app.get("/api/pengguna/list")
 @app.get("/api/users/list")

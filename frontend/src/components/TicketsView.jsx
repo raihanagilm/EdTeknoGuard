@@ -26,7 +26,7 @@ import {
 } from './CommonUI';
 import { ToastNotification } from './ToastNotification';
 
-export function TicketsView({ activeOffice = 'cabang', onNavigateCustomer, initialSearch = '', onClearInitialSearch }) {
+export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'super admin' }, onNavigateCustomer, initialSearch = '', onClearInitialSearch }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('SEMUA');
@@ -60,7 +60,7 @@ export function TicketsView({ activeOffice = 'cabang', onNavigateCustomer, initi
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 5000);
   };
 
   const fetchTickets = async () => {
@@ -87,6 +87,42 @@ export function TicketsView({ activeOffice = 'cabang', onNavigateCustomer, initi
     setSelectedTicket(ticket);
     setNewStatus(ticket.status || 'MENUNGGU');
     setCatatan(ticket.catatan_teknisi || '');
+  };
+
+
+  const isSuperAdminOrAdmin = currentUser?.role === 'super admin' || currentUser?.role === 'admin';
+
+  const handleSendResetPasswordWA = async (t) => {
+    const cleanWa = t.no_wa ? t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62') : '';
+    const match = t.deskripsi?.match(/(?:Kata Sandi Baru.*?|password.*?):?\s*(\d{6})/i);
+    const newPass = match ? match[1] : null;
+
+    if (!cleanWa || !newPass) {
+      showToast('Nomor WhatsApp atau kata sandi baru tidak valid', 'error');
+      return;
+    }
+
+    const waText = `Halo Bapak/Ibu ${t.nama_pelanggan || 'Pelanggan'} (${t.id_pelanggan || '-'}),\n\nPermintaan reset kata sandi akun TeknoCust Anda telah diproses oleh Tim Admin NOC.\n\nKata Sandi Baru Anda: *${newPass}*\n\nSilakan masuk ke aplikasi menggunakan Nomor WhatsApp dan kata sandi baru tersebut. Terima kasih.`;
+    const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`;
+
+    // Buka WhatsApp di tab baru
+    window.open(waUrl, '_blank');
+
+    // Jika status saat ini MENUNGGU atau belum SELESAI, otomatis update status tiket jadi SELESAI
+    if (t.status !== 'SELESAI') {
+      try {
+        const res = await TicketsService.updateStatus(t.id_tiket, 'SELESAI', 'Kata sandi baru telah dikirimkan ke WhatsApp pelanggan.');
+        if (res.ok && res.data && res.data.status === 'success') {
+          showToast('Kata sandi dikirim & status tiket selesai!', 'success');
+          if (selectedTicket && selectedTicket.id_tiket === t.id_tiket) {
+            setSelectedTicket(null);
+          }
+          fetchTickets();
+        }
+      } catch (err) {
+        console.error('Gagal update status tiket selesai otomatis:', err);
+      }
+    }
   };
 
   const handleUpdateStatus = async (e) => {
@@ -352,30 +388,28 @@ export function TicketsView({ activeOffice = 'cabang', onNavigateCustomer, initi
                       {t.kategori}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 font-sans text-slate-600 max-w-xs">
-                    <div className="line-clamp-2 text-xs">{t.deskripsi || '-'}</div>
-                    {t.kategori === 'RESET_PASSWORD' && (() => {
-                      const match = t.deskripsi?.match(/(?:Kata Sandi Baru.*?:\s*|password.*?:\s*)(\d{6})/i);
-                      const newPass = match ? match[1] : null;
-                      if (!newPass || !t.no_wa) return null;
-                      const cleanWa = t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62');
-                      const waText = `Halo Bapak/Ibu ${t.nama_pelanggan || 'Pelanggan'} (${t.id_pelanggan || '-'}),\n\nPermintaan reset kata sandi akun TeknoCust Anda telah diproses oleh Tim Admin NOC.\n\nKata Sandi Baru Anda: *${newPass}*\n\nSilakan masuk ke aplikasi menggunakan Nomor WhatsApp dan kata sandi baru tersebut. Terima kasih.`;
-                      const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`;
-                      return (
-                        <div className="mt-1.5">
-                          <a
-                            href={waUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-[11px] font-bold shadow-xs transition cursor-pointer"
-                            title="Kirim Kata Sandi Baru langsung ke WhatsApp Pelanggan"
+                                    <td className="py-2.5 px-3 font-sans text-slate-600 max-w-xs">
+                    {t.kategori === 'RESET_PASSWORD' ? (
+                      <div>
+                        {isSuperAdminOrAdmin ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSendResetPasswordWA(t)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold shadow-xs transition cursor-pointer"
+                            title="Kirim Kata Sandi Baru langsung ke WhatsApp Pelanggan dan selesaikan tiket"
                           >
-                            <Phone className="w-3 h-3 shrink-0" />
-                            <span>Kirim Sandi Baru ke WA</span>
-                          </a>
-                        </div>
-                      );
-                    })()}
+                            <Phone className="w-3.5 h-3.5 shrink-0" />
+                            <span>Kirim Sandi Baru</span>
+                          </button>
+                        ) : (
+                          <span className="text-xs font-semibold text-slate-500 italic">
+                            Hanya Admin / Super Admin
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="line-clamp-2 text-xs">{t.deskripsi || '-'}</div>
+                    )}
                   </td>
                   <td className="py-2.5 px-3 text-right font-black">
                     <span className={t.redaman_saat_lapor <= -27 ? 'text-rose-600' : 'text-slate-700'}>
@@ -383,66 +417,63 @@ export function TicketsView({ activeOffice = 'cabang', onNavigateCustomer, initi
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-center">
-                    <span
-                      className={`inline-block px-2.5 py-1 rounded text-[11px] font-black uppercase ${
-                        t.status === 'MENUNGGU'
-                          ? 'bg-amber-50 text-amber-800 border border-amber-300'
-                          : t.status === 'DICEK_ADMIN'
-                          ? 'bg-purple-50 text-purple-800 border border-purple-300'
-                          : t.status === 'DIPROSES'
-                          ? 'bg-cyan-50 text-cyan-800 border border-cyan-300'
-                          : 'bg-emerald-50 text-emerald-800 border border-emerald-300'
-                      }`}
-                    >
-                      {t.status}
-                    </span>
+                    <span className={`text-xs font-bold uppercase tracking-tight ${
+    t.status === 'MENUNGGU'
+      ? 'text-amber-700'
+      : t.status === 'DICEK_ADMIN'
+      ? 'text-purple-700'
+      : t.status === 'DIPROSES'
+      ? 'text-cyan-700'
+      : 'text-emerald-700'
+  }`}>
+    {t.status}
+  </span>
                   </td>
-                  <td className="py-2.5 px-3 text-right">
-                    {/* Menu Titik Tiga / Aksi Kelola */}
-                    <div className="relative inline-block text-left">
-                      <div className="relative group">
-                        <button
-                          type="button"
-                          className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
-                          title="Pilihan Aksi"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                        </button>
+                                    <td className="py-2.5 px-3 text-right">
+                    {/* Menu Titik Tiga / Aksi Kelola (Khusus kategori selain RESET_PASSWORD) */}
+                    {t.kategori === 'RESET_PASSWORD' ? (
+                      <span className="text-slate-400 font-mono text-xs">-</span>
+                    ) : (
+                      <div className="relative inline-block text-left">
+                        <div className="relative group">
+                          <button
+                            type="button"
+                            className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+                            title="Pilihan Aksi"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                          </button>
 
-                        <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[170px]">
-                          <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
-                            <button
-                              onClick={() => handleOpenModal(t)}
-                              className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition"
-                            >
-                              <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                              <span>Kelola Status</span>
-                            </button>
-                            {t.no_wa && (() => {
-                              const cleanWa = t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62');
-                              const match = t.deskripsi?.match(/(?:Kata Sandi Baru.*?:\s*|password.*?:\s*)(\d{6})/i);
-                              const newPass = match ? match[1] : null;
+                          <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[170px]">
+                            <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
+                              <button
+                                onClick={() => handleOpenModal(t)}
+                                className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition"
+                              >
+                                <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                <span>Kelola Status</span>
+                              </button>
+                              {t.no_wa && (() => {
+                                const cleanWa = t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62');
+                                const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`;
 
-                              const waText = (t.kategori === 'RESET_PASSWORD' && newPass)
-                                ? `Halo Bapak/Ibu ${t.nama_pelanggan || 'Pelanggan'} (${t.id_pelanggan || '-'}),\n\nPermintaan reset kata sandi akun TeknoCust Anda telah diproses oleh Tim Admin NOC.\n\nKata Sandi Baru Anda: *${newPass}*\n\nSilakan masuk ke aplikasi menggunakan Nomor WhatsApp dan kata sandi baru tersebut. Terima kasih.`
-                                : `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`;
-
-                              return (
-                                <a
-                                  href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold"
-                                >
-                                  <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span>{t.kategori === 'RESET_PASSWORD' ? 'Kirim Sandi ke WA' : 'Hubungi WA'}</span>
-                                </a>
-                              );
-                            })()}
+                                return (
+                                  <a
+                                    href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold"
+                                  >
+                                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>Hubungi WA</span>
+                                  </a>
+                                );
+                              })()}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </td>
                 </tr>
               ))
@@ -469,32 +500,6 @@ export function TicketsView({ activeOffice = 'cabang', onNavigateCustomer, initi
             </div>
 
             <form onSubmit={handleUpdateStatus} className="space-y-3">
-              {selectedTicket.kategori === 'RESET_PASSWORD' && (() => {
-                const match = selectedTicket.deskripsi?.match(/(?:Kata Sandi Baru.*?:\s*|password.*?:\s*)(\d{6})/i);
-                const newPass = match ? match[1] : null;
-                if (!newPass || !selectedTicket.no_wa) return null;
-                const cleanWa = selectedTicket.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62');
-                const waText = `Halo Bapak/Ibu ${selectedTicket.nama_pelanggan || 'Pelanggan'} (${selectedTicket.id_pelanggan || '-'}),\n\nPermintaan reset kata sandi akun TeknoCust Anda telah diproses oleh Tim Admin NOC.\n\nKata Sandi Baru Anda: *${newPass}*\n\nSilakan masuk ke aplikasi menggunakan Nomor WhatsApp dan kata sandi baru tersebut. Terima kasih.`;
-                const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`;
-                return (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-emerald-800">Permintaan Reset Sandi:</span>
-                      <span className="font-mono font-black text-xs text-emerald-900">{newPass}</span>
-                    </div>
-                    <a
-                      href={waUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition"
-                    >
-                      <Phone className="w-3.5 h-3.5 shrink-0" />
-                      <span>Kirim Kata Sandi Baru ke WA Pelanggan</span>
-                    </a>
-                  </div>
-                );
-              })()}
-
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Status Penanganan</label>
                 <select

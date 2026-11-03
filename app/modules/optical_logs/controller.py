@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.modules.logs_mgmt.service import LogsMgmtService
+from app.modules.optical_logs.service import LogsMgmtService
 
 templates = Jinja2Templates(directory="templates")
 

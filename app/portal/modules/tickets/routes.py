@@ -1,60 +1,84 @@
-from fastapi import APIRouter, Depends, Request, Form
-from sqlalchemy.orm import Session
-from app.core.database import get_portal_db
-from app.portal.modules.tickets.controller import KendalaController
-
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+
+from app.core.database import get_portal_db
 from app.portal.core.security import get_current_customer_optional
 from app.portal.modules.tickets.service import KendalaService
 
-router = APIRouter(prefix="/kendala", tags=["Lapor Kendala Pelanggan"])
+router = APIRouter(prefix="/kendala", tags=["Portal Tickets"])
+
 
 @router.get("")
-def list_tickets(request: Request, db: Session = Depends(get_portal_db)):
-    return KendalaController.render_tickets_page(request, db)
-
-@router.get("/buat")
-def create_ticket_page(request: Request, db: Session = Depends(get_portal_db)):
-    return KendalaController.render_create_page(request, db)
-
-@router.post("/buat")
-def submit_ticket(
-    request: Request,
-    kategori: str = Form(...),
-    deskripsi: str = Form(...),
-    no_wa: str = Form(...),
-    db: Session = Depends(get_portal_db)
-):
-    return KendalaController.submit_ticket(request, db, kategori, deskripsi, no_wa)
-
-@router.post("/{id_tiket}/selesai")
-def resolve_ticket(id_tiket: str, request: Request, db: Session = Depends(get_portal_db)):
-    return KendalaController.resolve_ticket(request, db, id_tiket)
-
-@router.post("/{id_tiket}/hapus")
-def delete_ticket(id_tiket: str, request: Request, db: Session = Depends(get_portal_db)):
-    return KendalaController.delete_ticket(request, db, id_tiket)
-
-@router.get("/status-api")
-@router.get("/api/ticket-status")
-def get_customer_ticket_status(request: Request, db: Session = Depends(get_portal_db)):
-    """API endpoint untuk pengecekan status tiket pelanggan aktif"""
+@router.get("/")
+def portal_kendala_list(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if not cust:
-        return JSONResponse(status_code=401, content={"status": "unauthorized", "message": "Belum login"})
-    tickets = KendalaService.get_customer_tickets(db, cust["id_pelanggan"])
+        return JSONResponse(status_code=401, content={"authenticated": False})
+        
+    tickets = KendalaService.get_customer_tickets(db, cust.get("id_pelanggan"))
     return {
-        "status": "success",
-        "id_pelanggan": cust["id_pelanggan"],
-        "total": len(tickets),
+        "ok": True,
         "tickets": [
             {
                 "id_tiket": t.id_tiket,
                 "kategori": t.kategori,
-                "status": t.status,
                 "deskripsi": t.deskripsi,
-                "created_at": str(t.created_at) if t.created_at else None
+                "status": t.status,
+                "no_wa_pelapor": t.no_wa_pelapor,
+                "redaman_saat_lapor": float(t.redaman_saat_lapor) if t.redaman_saat_lapor is not None else None,
+                "created_at": str(t.created_at) if t.created_at else "",
+                "updated_at": str(t.updated_at) if getattr(t, "updated_at", None) else str(t.created_at or "")
             }
             for t in tickets
         ]
+    }
+
+
+@router.post("/buat")
+async def portal_kendala_create(request: Request, db: Session = Depends(get_portal_db)):
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"authenticated": False})
+        
+    body = await request.json()
+    kategori = body.get("kategori", "").strip()
+    deskripsi = body.get("deskripsi", "").strip()
+    no_wa = body.get("no_wa", "").strip()
+    
+    if not kategori or not deskripsi or not no_wa:
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Semua bidang formulir wajib diisi!"})
+        
+    ticket = KendalaService.create_ticket(
+        db=db,
+        id_pelanggan=cust.get("id_pelanggan"),
+        kategori=kategori,
+        deskripsi=deskripsi,
+        no_wa=no_wa
+    )
+    
+    return {
+        "ok": True,
+        "message": "Tiket keluhan berhasil dikirim ke tim teknisi NOC!",
+        "id_tiket": ticket.id_tiket
+    }
+
+
+@router.delete("/{ticket_id}")
+async def portal_kendala_delete(ticket_id: str, request: Request, db: Session = Depends(get_portal_db)):
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"authenticated": False})
+        
+    success = KendalaService.delete_customer_ticket(
+        db=db,
+        id_tiket=ticket_id,
+        id_pelanggan=cust.get("id_pelanggan")
+    )
+    if not success:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Tiket tidak ditemukan atau sudah dihapus!"})
+        
+    return {
+        "ok": True,
+        "message": f"Tiket keluhan '{ticket_id}' berhasil dihapus."
     }

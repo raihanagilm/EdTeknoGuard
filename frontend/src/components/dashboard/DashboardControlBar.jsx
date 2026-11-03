@@ -131,7 +131,7 @@ export function DashboardControlBar({
             )}
 
             {/* Kondisi 1: Standby / Idle */}
-            {(!isScanning || !isCurrentOfficeScan || !scanProgress || scanProgress.total === 0) && (!scanProgress || !scanProgress.is_paused || !isCurrentOfficeScan) && (
+            {(!isScanning || !isCurrentOfficeScan) && (
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleStartScan}
@@ -245,7 +245,7 @@ export function DashboardControlBar({
             )}
 
             {/* Kondisi 3: Pemindaian Dijeda */}
-            {!isScanning && scanProgress && scanProgress.is_paused && isCurrentOfficeScan && canControlCurrentScan && (
+            {isScanning && scanProgress && scanProgress.is_paused && isCurrentOfficeScan && canControlCurrentScan && (
               <div className="flex items-center gap-2 w-full sm:w-auto font-mono">
                 <button
                   onClick={handleResumeScan}
@@ -279,7 +279,7 @@ export function DashboardControlBar({
       </div>
 
       {/* Progress Bar Jika Sedang Memindai */}
-      {((isScanning && isCurrentOfficeScan) || (scanProgress?.is_paused && isCurrentOfficeScan)) && (
+      {(isScanning && isCurrentOfficeScan && scanProgress?.total > 0) && (
         <div className="pt-2 border-t border-sky-100 flex flex-col gap-2">
           <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-600">
             <span className="flex items-center gap-1.5">

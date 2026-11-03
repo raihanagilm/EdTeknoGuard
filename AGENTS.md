@@ -88,48 +88,67 @@ EdTeknoGuard/
 │   ├── db/
 │   │   ├── models.py          # SQLAlchemy models: MasterBase (Kantor, User, UserKantor, UserActivityLog)
 │   │   │                      # & TenantBase (Pelanggan, PerangkatONT, LogPerformaONT, SystemSetting, dsb.)
-│   │   └── init_db.py         # Skrip bootstrap inisialisasi tabel master & tenant
-│   ├── modules/               # Modular berbasis domain (MVC Architecture)
+│   │   └── init_db.py         # Skrip bootstrap inisialisasi tabel master & tenant (lokasi tunggal)
+│   ├── middleware/            # Middleware sesi pengguna (SlidingSessionMiddleware)
+│   ├── modules/               # Modular berbasis domain FastAPI
 │   │   ├── auth/              # REST endpoint autentikasi admin NOC
 │   │   ├── dashboard/         # Dashboard KPI & visualisasi
 │   │   ├── customers/         # CRUD master pelanggan, live check, import Excel/CSV
-│   │   ├── admin_customer_mgmt/ # Manajemen tiket kendala, monitoring kuota, & notification polling
 │   │   ├── monitoring/        # Engine trigger full scan, single probe, status, & chart-data
-│   │   ├── logs_mgmt/         # Histori time-series pembacaan redaman optik
+│   │   ├── optical_logs/      # Histori time-series pembacaan redaman optik ONT
+│   │   ├── tickets/           # Manajemen tiket kendala pelanggan NOC
+│   │   ├── quota/             # Pemantauan akumulasi kuota bulanan pelanggan
+│   │   ├── notifications/     # Real-time polling & penandaan notifikasi NOC
 │   │   ├── settings/          # Pengaturan sistem: parameter interval, threshold redaman, & kredensial ONT
 │   │   ├── mikrotik/          # Integrasi RouterOS MikroTik: test koneksi & sinkronisasi DHCP Leases
 │   │   ├── users/             # Manajemen pengguna NOC & kantor cabang (Super Admin)
 │   │   └── activity_logs/     # Audit trail histori aktivitas pengguna NOC
+│   ├── portal/                # Sub-aplikasi backend Portal Pelanggan TeknoCust (/portal)
+│   │   ├── main.py            # Bootstrap sub-app FastAPI portal
+│   │   ├── core/              # Security, session token, & helper validasi wifi_check
+│   │   ├── modules/           # Modul REST API: auth, dashboard, quota, tickets, wifi, profile, speedtest
+│   │   └── api_router.py      # Aggregator router portal (/portal/api)
 │   ├── services/              # External service layer
-│   │   ├── ont_scraper_service.py   # Live HTTP Web Scraper ONT ZTE GM220-S & XPON
-│   │   ├── scheduler_service.py     # Background worker interval (APScheduler)
+│   │   ├── scraper/           # Scraper modular: credential_chain, optical_parser, zte, xpon
+│   │   ├── scheduler/         # Scheduler modular: state_manager, recovery_manager, scan_runner
+│   │   ├── ont_scraper_service.py   # Gateway HTTP Scraper ONT
+│   │   ├── scheduler_service.py     # Gateway APScheduler Background Daemon
 │   │   ├── mikrotik_service.py      # RouterOS API client & sinkronisasi otomatis
 │   │   ├── connected_device_service.py # Scanner perangkat terhubung WiFi/LAN
 │   │   └── snmp_service.py          # Engine SNMP polling
-│   └── main.py                # FastAPI app bootstrap, middleware sesi, & router registry
+│   └── main.py                # FastAPI app bootstrap, middleware sesi, & static mount
+├── database/                  # Migrasi skema & seeder basis data
+│   ├── migrations/            # DDL SQL (001_init_schema.sql)
+│   ├── seeders/               # Python database seeder (database_seeder.py)
+│   └── schema.md              # Dokumentasi ERD & skema tabel
 ├── docs/                      # Dokumentasi sistem, panduan teknis, dan mockups
-│   ├── arsitektur.md
+│   ├── architecture.md
 │   ├── prd.md
 │   ├── designsystempro.md
-│   ├── desain.md
+│   ├── design.md
 │   ├── DEPLOY_VPS.md
 │   └── mockups/
 ├── frontend/                  # Single Page Application React 18 (NOC & Portal Warga)
 │   ├── src/
-│   │   ├── components/        # Komponen UI NOC: ModulBeranda, ModulPelanggan, ModulPengaturan, dsb.
+│   │   ├── components/        # Komponen UI NOC (DashboardView, CustomersView, OpticalLogsView, dsb.)
+│   │   │   ├── customers/     # Komponen tabel & filter pelanggan
+│   │   │   ├── dashboard/     # Komponen visualisasi & kontrol scan dashboard
+│   │   │   └── import_wizard/ # Komponen wizard import data
 │   │   ├── portal/            # Komponen sub-aplikasi TeknoCust untuk warga pelanggan mandiri
-│   │   ├── services/          # HTTP API client layer terpusat
+│   │   ├── services/          # HTTP API client layer terpusat (api.js & portalApi.js)
 │   │   ├── App.jsx            # Shell aplikasi utama NOC & navigasi tab
 │   │   └── main.jsx
 │   └── package.json
-├── portal_pelanggan/          # Backend endpoint mandiri Portal Pelanggan (/portal & /teknocust)
-│   ├── modules/               # Modul auth pelanggan, dashboard warga, kuota, kendala, wifi, profil
-│   └── api_router.py          # Sub-router FastAPI portal pelanggan
+├── routes/                    # Gerbang rute aplikasi
+│   ├── api.py                 # Pendaftaran router modul admin NOC
+│   └── portal.py              # Pendaftaran mount portal pelanggan
 ├── tests/                     # Automated unit & integration tests (pytest)
 ├── AGENTS.md                  # Pedoman arsitektur agen AI (dokumen ini)
 ├── CHANGELOG.md               # Catatan riwayat perubahan & perlindungan fitur sistem
 ├── README.md
-├── requirements.txt
+├── requirements.txt           # Dependensi produksi
+├── requirements-dev.txt       # Dependensi development & testing (pytest)
+├── pytest.ini                 # Konfigurasi pythonpath & asyncio pytest
 └── .env.example
 ```
 
@@ -263,7 +282,7 @@ EdTeknoGuard/
    - Setiap AI Agent **WAJIB** membaca dan memahami file markdown (`.md`) seperti `AGENTS.md`, `CHANGELOG.md`, `README.md`, `designsystempro.md`, `prd.md`, dan dokumen lainnya di proyek untuk menjaga konteks tetap konsisten antar sesi.
    - Jika ada perubahan arsitektur, fitur, atau aturan baru, agen **WAJIB** memperbarui dokumen `.md` ini agar saling terhubung dan selalu *up-to-date*.
 2. **Kepatuhan Mutlak Design System Pro (`designsystempro.md`)**:
-   - File [`designsystempro.md`](designsystempro.md) adalah **Sumber Kebenaran Tunggal (*Single Source of Truth* / SSOT)** untuk seluruh antarmuka, tata letak, komponen, dan interaktivitas UI/UX di proyek EdTeknoGuard (baik aplikasi admin NOC maupun portal pelanggan).
+   - File [`designsystempro.md`](docs/designsystempro.md) adalah **Sumber Kebenaran Tunggal (*Single Source of Truth* / SSOT)** untuk seluruh antarmuka, tata letak, komponen, dan interaktivitas UI/UX di proyek EdTeknoGuard (baik aplikasi admin NOC maupun portal pelanggan).
    - Setiap AI Agent **WAJIB SELALU MENGECEK DAN MEMATUHI** seluruh aturan di `designsystempro.md` sebelum dan saat merancang, membuat, memodifikasi, atau mereview UI/UX (termasuk spacing 8pt/4pt, color ratio 60-30-10, kontras WCAG 4.5:1, touch target minimal 44x44 px, button hierarchy, form patterns, modal/drawer, dan UX principles).
    - Prinsip dasar yang wajib dipegang: *"Terlihat rapi" ≠ "Terstruktur dengan benar."* Setiap angka padding/margin, warna, elevasi, dan komponen harus memiliki landasan aturan dari rulebook tersebut.
 3. **Implementasi Mobile-First**:

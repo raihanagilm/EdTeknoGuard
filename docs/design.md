@@ -4,10 +4,10 @@ Dokumen ini merupakan acuan resmi standar visual, palet warna, tipografi, dan ko
 
 > 🔗 **Tautan Dokumen Terkait:**
 > - 📐 [Design System Pro — Master Rulebook UI/UX (designsystempro.md)](designsystempro.md) — **Sumber Kebenaran Tunggal (*Single Source of Truth*)** untuk seluruh komponen, spacing 8pt/4pt, tipografi, warna, dan pola interaksi UI/UX.
-> - 📖 [README Utama Proyek](README.md)
+> - 📖 [README Utama Proyek](../README.md)
 > - 📋 [Alur Kerja Sistem & Logika Bisnis (prd.md)](prd.md)
-> - 🏗️ [Struktur File/Folder & Database (arsitektur.md)](arsitektur.md)
-> - 🤖 [Pedoman AI Agent (AGENTS.md)](AGENTS.md)
+> - 🏗️ [Struktur File/Folder & Database (architecture.md)](architecture.md)
+> - 🤖 [Pedoman AI Agent (../AGENTS.md)](../AGENTS.md)
 
 ---
 
@@ -116,5 +116,5 @@ Panel kontrol di atas daftar pelanggan:
 
 Untuk alur fungsional sistem dan detail backend:
 - 📋 Alur Kerja & Logika Bisnis: [prd.md](prd.md)
-- 🏗️ Struktur Folder & Skema Database: [arsitektur.md](arsitektur.md)
-- 📖 Panduan Menjalankan Sistem: [README.md](README.md)
+- 🏗️ Struktur Folder & Skema Database: [arsitektur.md](architecture.md)
+- 📖 Panduan Menjalankan Sistem: [README.md](../README.md)

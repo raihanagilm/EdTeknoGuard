@@ -852,6 +852,7 @@ export default function App() {
           {activeTab === 'tiket' && (
             <TicketsView
               activeOffice={activeOffice}
+              currentUser={currentUser}
               onNavigateCustomer={handleNavigateCustomer}
               initialSearch={ticketInitialSearch}
               onClearInitialSearch={() => setTicketInitialSearch('')}

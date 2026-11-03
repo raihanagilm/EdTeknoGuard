@@ -5,9 +5,9 @@ Dokumen ini mendefinisikan **alur kerja sistem, logika bisnis, dan kebutuhan fun
 > 🔗 **Tautan Dokumen Terkait:**
 > - 📐 [Design System Pro — Rulebook UI/UX (designsystempro.md)](designsystempro.md) — **Sumber Kebenaran Tunggal (*Single Source of Truth*)** untuk seluruh komponen, spacing, tipografi, warna, dan pola interaksi UI/UX.
 > - 🎨 [Pedoman Desain & Tampilan (desain.md)](desain.md) — Mengatur warna tampilan, komponen visual, dan mobile-first.
-> - 🏗️ [Struktur File/Folder & Database (arsitektur.md)](arsitektur.md) — Mengatur struktur direktori proyek dan skema tabel TiDB.
-> - 📖 [README Utama Proyek](README.md) — Gambaran umum dan panduan menjalankan sistem.
-> - 🤖 [Pedoman AI Agent (AGENTS.md)](AGENTS.md) — Aturan sistem dan instruksi AI Agent.
+> - 🏗️ [Struktur File/Folder & Database (architecture.md)](architecture.md) — Mengatur struktur direktori proyek dan skema tabel TiDB.
+> - 📖 [README Utama Proyek](../README.md) — Gambaran umum dan panduan menjalankan sistem.
+> - 🤖 [Pedoman AI Agent (../AGENTS.md)](../AGENTS.md) — Aturan sistem dan instruksi AI Agent.
 > - 📜 [Riwayat Perubahan & Changelog (CHANGELOG.md)](CHANGELOG.md) — Riwayat perubahan, rilis versi, dan perlindungan stabilitas fitur.
 
 ---

@@ -89,3 +89,64 @@ def require_customer_login(request: Request) -> Dict[str, Any]:
         )
     return cust
 
+
+def check_is_home_wifi(request: Request, pelanggan) -> bool:
+    """
+    Validasi ketat apakah perangkat klien saat ini benar-benar terhubung ke WiFi modem pelanggan:
+    1. Jika akses via IP publik/WAN router (client_ip == ip_target), cocok 100%.
+    2. Jika akses dari localhost / development:
+       - Memeriksa SSID aktif yang terhubung pada adaptor WiFi (misal via netsh di Windows).
+       - Jika SSID aktif cocok dengan nama_wifi pelanggan -> True.
+       - Jika SSID aktif adalah WiFi lain -> False.
+       - Memeriksa MAC Gateway lokal (192.168.1.1) via ARP. Jika cocok -> True, jika beda -> False.
+    3. Jika klien di belakang NAT/LAN tapi subnet berbeda atau bukan modem pelanggan -> False.
+    """
+    if not pelanggan:
+        return False
+
+    client_ip = request.headers.get("x-forwarded-for")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else ""
+
+    ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
+    cust_mac = (pelanggan.mac_address or (pelanggan.perangkat.mac_address if pelanggan.perangkat else "") or "").strip().upper()
+    cust_ssid = (pelanggan.nama_wifi or "").strip().lower()
+
+    # 1. Kecocokan IP WAN/Router persis
+    if ip_target and client_ip and client_ip == ip_target:
+        return True
+
+    # 2. Pengecekan perangkat lokal (Localhost / Development)
+    if client_ip in ["127.0.0.1", "::1", "localhost"]:
+        import subprocess, re
+        
+        # A. Cocokkan SSID aktif adaptor Wi-Fi
+        try:
+            out_wlan = subprocess.check_output("netsh wlan show interfaces", text=True, timeout=2)
+            m_ssid = re.search(r"^\s*SSID\s*:\s*(.+)$", out_wlan, re.MULTILINE)
+            if m_ssid:
+                active_ssid = m_ssid.group(1).strip().lower()
+                if cust_ssid:
+                    if active_ssid == cust_ssid:
+                        return True
+                    else:
+                        return False
+        except Exception:
+            pass
+
+        # B. Cocokkan Physical Address / MAC Gateway Modem Default
+        try:
+            out_arp = subprocess.check_output("arp -a 192.168.1.1", text=True, timeout=2)
+            m_mac = re.search(r"([0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2})", out_arp)
+            if m_mac and cust_mac:
+                active_gateway_mac = m_mac.group(1).replace("-", ":").upper()
+                if active_gateway_mac == cust_mac:
+                    return True
+                else:
+                    return False
+        except Exception:
+            pass
+
+    return False

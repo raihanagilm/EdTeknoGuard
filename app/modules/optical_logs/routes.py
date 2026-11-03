@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import require_admin
-from app.modules.logs_mgmt.controller import LogsMgmtController
+from app.modules.optical_logs.controller import LogsMgmtController
 
 router = APIRouter(tags=["logs"])
 
