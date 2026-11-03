@@ -1,4 +1,5 @@
 import unittest
+from sqlalchemy import inspect
 from app.db import models
 from app.core.tenant_database import sanitize_db_name, TENANT_TABLE_NAMES
 
@@ -31,6 +32,32 @@ class TestModelsAndThresholds(unittest.TestCase):
         self.assertIn("pakets", tenant_tables)
         self.assertNotIn("kantors", tenant_tables)
         self.assertNotIn("users", tenant_tables)
+
+    def test_pelanggan_normalized_portal_fields(self):
+        """Memastikan normalisasi akun portal langsung menyatu pada tabel Pelanggan tanpa tabel redundan akun_pelanggan"""
+        pelanggan_cols = {c.name for c in models.Pelanggan.__table__.columns}
+        self.assertIn("password_hash", pelanggan_cols)
+        self.assertIn("status_verifikasi", pelanggan_cols)
+        self.assertIn("lokasi_gps", pelanggan_cols)
+        self.assertIn("last_login", pelanggan_cols)
+
+        # Memastikan tabel usang akun_pelanggan sudah tidak ada di metadata model
+        all_tables = set(models.MasterBase.metadata.tables.keys()) | set(models.TenantBase.metadata.tables.keys())
+        self.assertNotIn("akun_pelanggan", all_tables)
+
+    def test_pelanggan_cascade_relationships(self):
+        """
+        Memastikan seluruh tabel anakan Pelanggan memiliki konfigurasi
+        cascade='all, delete-orphan' dan passive_deletes=True pada ORM
+        sehingga penghapusan pelanggan tidak meninggalkan orphaned records.
+        """
+        pelanggan_relationships = inspect(models.Pelanggan).relationships
+        for rel_name in ["perangkat", "logs", "alerts", "tiket_list", "kuota_list"]:
+            self.assertIn(rel_name, pelanggan_relationships, f"Relasi {rel_name} tidak ditemukan pada model Pelanggan")
+            prop = pelanggan_relationships[rel_name]
+            self.assertTrue(prop.cascade.delete, f"Relasi {rel_name} harus mengaktifkan cascade delete")
+            self.assertTrue(prop.cascade.delete_orphan, f"Relasi {rel_name} harus mengaktifkan cascade delete-orphan")
+            self.assertTrue(prop.passive_deletes, f"Relasi {rel_name} harus mengaktifkan passive_deletes=True untuk efisiensi DB FK")
 
     def test_no_cross_database_foreign_keys(self):
         """

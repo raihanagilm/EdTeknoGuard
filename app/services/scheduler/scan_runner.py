@@ -79,6 +79,7 @@ class ScanRunner:
                 db_creds = db.query(ModemCredential).filter(ModemCredential.kantor_kode == k_code).order_by(ModemCredential.urutan.asc()).all()
                 default_creds = [(c.username, c.password) for c in db_creds]
 
+            is_valid_modem = (cust.status_kredensial == "VALID")
             scrape_res = ONTScraperService.scrape_ont(
                 ip=ip_target,
                 customer_user=cust.user_admin,
@@ -87,7 +88,8 @@ class ScanRunner:
                 default_credentials=default_creds,
                 warn_threshold=cfg.get("warning_threshold_dbm"),
                 crit_threshold=cfg.get("critical_threshold_dbm"),
-                exhaustive_first_scan=True
+                exhaustive_first_scan=True,
+                is_valid_modem=is_valid_modem
             )
 
             # Catat log hasil scan
@@ -122,6 +124,10 @@ class ScanRunner:
                     cust.password_wifi = scrape_res.get("password_wifi")
                 if scrape_res.get("jenis_modem"):
                     cust.jenis_modem = scrape_res.get("jenis_modem")
+                if cust.perangkat:
+                    cust.perangkat.failed_credentials = None
+            elif scrape_res.get("status_kredensial") == "INVALID":
+                cust.status_kredensial = "INVALID"
 
             db.commit()
             return scrape_res
@@ -222,6 +228,7 @@ class ScanRunner:
                         except Exception:
                             pass
 
+                    is_valid_modem = (p.status_kredensial == "VALID")
                     scrape_res = ONTScraperService.scrape_ont(
                         ip=ip_target,
                         customer_user=p.user_admin,
@@ -231,7 +238,8 @@ class ScanRunner:
                         warn_threshold=cfg.get("warning_threshold_dbm"),
                         crit_threshold=cfg.get("critical_threshold_dbm"),
                         is_mass_scan=True,
-                        failed_credentials_history=failed_history
+                        failed_credentials_history=failed_history,
+                        is_valid_modem=is_valid_modem
                     )
 
                     now = get_now_wib()
@@ -266,6 +274,17 @@ class ScanRunner:
                             p.jenis_modem = scrape_res.get("jenis_modem")
                         if p.perangkat:
                             p.perangkat.failed_credentials = None
+
+                    elif scrape_res.get("status_kredensial") == "INVALID":
+                        p.status_kredensial = "INVALID"
+                        if scrape_res.get("failed_credentials"):
+                            new_fails = scrape_res.get("failed_credentials", [])
+                            current_fails = list(failed_history)
+                            for nf in new_fails:
+                                if nf not in current_fails:
+                                    current_fails.append(nf)
+                            if p.perangkat:
+                                p.perangkat.failed_credentials = json.dumps(current_fails)
 
                     elif scrape_res.get("failed_credentials"):
                         # Simpan tambahan kredensial yang gagal

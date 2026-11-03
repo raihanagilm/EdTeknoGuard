@@ -26,6 +26,20 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Sinkronisasi & Perbaikan Filter/Card INVALID Kredensial Pelanggan ([app/modules/customers/service.py](app/modules/customers/service.py), [app/modules/monitoring/service.py](app/modules/monitoring/service.py))**:
+  - Memperbaiki kalkulasi statistik KPI card "INVALID" dan filter tabel pada Data Pelanggan agar tidak hanya memeriksa `PerangkatONT.status_kredensial == "INVALID"`, melainkan juga mencakup `LogPerformaONT.status_koneksi == "INVALID"` menggunakan klausul `or_`.
+  - Memperbaiki sinkronisasi data pada kantor Tengaran (dan kantor lainnya) sehingga 17 pelanggan dengan status koneksi INVALID tampil secara presisi di KPI card dan tabel daftar pelanggan tanpa hasil kosong (0 data).
+  - Memperbaiki penentuan `current_status` pada baris pelanggan agar langsung mencerminkan `INVALID` saat kredensial modem atau hasil scan terakhir ditolak.
+- **Logika Retry Adaptif & Preservasi Kredensial VALID pada Modem ONT ZTE GM220-S ([app/services/ont_scraper_service.py](app/services/ont_scraper_service.py), [app/services/scheduler/scan_runner.py](app/services/scheduler/scan_runner.py))**:
+  - Menghilangkan `break` prematur pada perulangan login attempt di `ONTScraperService.scrape_ont`.
+  - Menambahkan toleransi retry adaptif (hingga 3 kali percobaan dengan jeda 1.5 detik dan penyegaran token `Frm_Logintoken`) khusus untuk kredensial `CUSTOMER` atau modem yang sudah berstatus `VALID`, guna mengatasi penolakan transient (*reconnect lag*) yang lazim terjadi pada modem ZTE GM220-S saat baru pulih dari status LOS / restart.
+  - Memastikan kegagalan jangkauan jaringan / timeout (`UNREACHABLE` / `LOS`) tetap mempertahankan `status_kredensial = "VALID"` pada modem yang sudah terverifikasi sebelumnya, sehingga tidak salah ditandai sebagai `UNTESTED` atau `INVALID`.
+  - Menyimpan status `status_kredensial = "INVALID"` ke database pada modem yang benar-benar ditolak oleh seluruh kombinasi kredensial.
+- **Penyelarasan Protokol Anti-Asumsi & Update Suite Pengujian ([AGENTS.md](AGENTS.md), [tests/test_customers_module.py](tests/test_customers_module.py), [tests/test_scraper_modules.py](tests/test_scraper_modules.py))**:
+  - Memasukkan seluruh 14 butir aturan *Discovery & Input Evaluation Protocol (Anti-Assumption)* ke dalam [AGENTS.md](AGENTS.md) sebagai Bagian 8.
+  - Menambahkan pengujian `test_invalid_status_filter_and_stats_calculation` di [tests/test_customers_module.py](tests/test_customers_module.py) serta `test_unreachable_preserves_valid_status_kredensial` dan `test_adaptive_retry_on_valid_or_customer_credentials` di [tests/test_scraper_modules.py](tests/test_scraper_modules.py).
+  - Seluruh 28 unit test lolos 100% (28 passed in 3.15s).
+
 - **Refactoring Arsitektur Dualisme, Unifikasi Model & Pembersihan Folder ([AGENTS.md](AGENTS.md), [requirements-dev.txt](requirements-dev.txt), [pytest.ini](pytest.ini))**:
   - **Pembersihan Arsitektur "Gaya Laravel" yang Redundan**:
     - Menghapus folder shim re-export yang tidak dipakai: `app/controllers/`, `app/services/admin/`, dan `app/services/portal/`.
@@ -47,37 +61,42 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - **Infrastruktur Pengujian & Development**:
     - Menambahkan [requirements-dev.txt](requirements-dev.txt) berisi `pytest` dan `pytest-asyncio`.
     - Menambahkan [pytest.ini](pytest.ini) dengan `pythonpath = .` untuk menjalankan pengujian langsung via `pytest`.
-    - Seluruh 15 unit test (`test_customers_module.py`, `test_models_and_thresholds.py`, `test_scheduler_modules.py`, `test_scraper_modules.py`) lolos 100%.
+    - Seluruh 25 unit test lolos 100% (test_admin_domain_modules.py, test_customers_module.py, test_models_and_thresholds.py, test_portal_api_modules.py, test_scheduler_modules.py, test_scraper_modules.py).
+  - **Pembaruan Aturan Global & Penjaminan Relevansi Test (Test Relevancy Protocol)**:
+    - Menambahkan Aturan No. 14 ke panduan global [GEMINI.md](../../.gemini/GEMINI.md) dan Aturan No. 9 ke [AGENTS.md](AGENTS.md) mengenai kewajiban menjaga relevansi pengujian otomatis terhadap data & arsitektur terbaru.
+    - Menambahkan berkas pengujian baru 	ests/test_portal_api_modules.py (pengujian rute REST portal, respons teks ping speedtest, verifikasi token kriptografis, dan strict security check WiFi rumah).
+    - Menambahkan berkas pengujian baru 	ests/test_admin_domain_modules.py (pengujian proteksi sesi endpoint admin baru: tiket, kuota, riwayat redaman, dan format polling notifikasi).
+    - Memperbarui 	ests/test_models_and_thresholds.py dengan pengujian normalisasi field akun portal pada tabel Pelanggan dan verifikasi integritas 5 relasi CASCADE delete-orphan.
   - **Restrukturisasi Frontend SPA NOC Berbasis Fitur / Domain (Feature Co-location)**:
-    - Menghapus folder buatan rontend/src/views/ yang menyatukan menu-menu berbeda dalam satu tumpukan flat.
-    - Menata ulang arsitektur rontend/src/components/ menjadi 100% modular berbasis menu/domain (1 Menu = 1 Folder Utuh):
+    - Menghapus folder buatan frontend/src/views/ yang menyatukan menu-menu berbeda dalam satu tumpukan flat.
+    - Menata ulang arsitektur frontend/src/components/ menjadi 100% modular berbasis menu/domain (1 Menu = 1 Folder Utuh):
       - dashboard/: DashboardView.jsx beserta subkomponen kontrol bar, chart, shortcuts, dan utils.
       - customers/: CustomersView.jsx beserta CustomersTable.jsx, CustomersFilterBar.jsx, CustomerDetailModal.jsx, dan CustomerImportWizard.jsx.
       - settings/: SettingsView.jsx beserta tab modular (SettingsThresholdTab.jsx, SettingsCredentialsTab.jsx, SettingsNotificationsTab.jsx, SettingsProfileTab.jsx).
-      - 	ickets/: TicketsView.jsx (halaman manajemen tiket kendala NOC).
+      - tickets/: TicketsView.jsx (halaman manajemen tiket kendala NOC).
       - quota/: QuotaView.jsx (halaman monitoring kuota bulanan).
       - optical_logs/: OpticalLogsView.jsx (halaman log redaman optik).
       - 
 otifications/: NotificationsView.jsx (halaman alert darurat NOC).
       - offices/: OfficeManagementView.jsx dan BranchOfficesView.jsx.
       - users/: UsersView.jsx (halaman kelola user & role).
-      - ctivity_logs/: ActivityLogsView.jsx (halaman audit trail).
-      - uth/: LoginView.jsx (halaman autentikasi login NOC).
+      - activity_logs/: ActivityLogsView.jsx (halaman audit trail).
+      - auth/: LoginView.jsx (halaman autentikasi login NOC).
       - layout/: AppHeader.jsx dan Navigation.jsx (sidebar & mobile dock).
       - common/: CommonUI.jsx, ToastNotification.jsx, ConfirmDialogModal.jsx, Modals.jsx, ErrorView.jsx.
       - import_wizard/: ImportStepUpload.jsx, ImportStepMapping.jsx, ImportStepPreview.jsx.
-    - Membersihkan root rontend/src/components/ hingga bebas dari file tercecer (0 loose files).
-  - **Restrukturisasi Sub-Aplikasi Portal Pelanggan TeknoCust (rontend/src/portal/)**:
-    - Menata ulang 17 file flat di rontend/src/portal/components/ menjadi terorganisir per domain fungsional:
+    - Membersihkan root frontend/src/components/ hingga bebas dari file tercecer (0 loose files).
+  - **Restrukturisasi Sub-Aplikasi Portal Pelanggan TeknoCust (frontend/src/portal/)**:
+    - Menata ulang 17 file flat di frontend/src/portal/components/ menjadi terorganisir per domain fungsional:
       - dashboard/: PortalDashboardTab.jsx (tab beranda pelanggan).
       - payment/: PortalPaymentTab.jsx (tab pembayaran tagihan).
-      - 	ickets/: PortalTicketsTab.jsx (tab lapor gangguan).
+      - tickets/: PortalTicketsTab.jsx (tab lapor gangguan).
       - quota/: PortalQuotaTab.jsx (tab akumulasi kuota).
       - wifi/: PortalWifiTab.jsx (tab kelola WiFi rumah).
       - profile/: PortalProfileTab.jsx (tab profil pelanggan).
       - 
 otifications/: PortalNotificationsPage.jsx (halaman notifikasi pelanggan).
-      - uth/: PortalAuthView.jsx dan PortalResetPasswordView.jsx.
+      - auth/: PortalAuthView.jsx dan PortalResetPasswordView.jsx.
       - layout/: PortalHeader.jsx dan PortalNavigation.jsx (bottom navigation).
       - modals/: ConnectedDevicesModal.jsx dan SpeedTestModal.jsx.
       - common/: PortalActiveMascot.jsx, PortalSemanticSkeleton.jsx, PortalToastNotification.jsx, PortalErrorView.jsx.

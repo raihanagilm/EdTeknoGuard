@@ -88,12 +88,18 @@ class MonitoringService:
             elif l.status_koneksi == "LOS":
                 los_count += 1
         from app.db.models import PerangkatONT
+        from sqlalchemy import or_
         invalid_q = (
             db.query(func.count(Pelanggan.id))
-            .join(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(LogPerformaONT, LogPerformaONT.id == subq.c.max_id)
             .filter(
                 Pelanggan.is_active == True,
-                PerangkatONT.status_kredensial == "INVALID"
+                or_(
+                    PerangkatONT.status_kredensial == "INVALID",
+                    LogPerformaONT.status_koneksi == "INVALID"
+                )
             )
         )
         if kantor and kantor != "all":

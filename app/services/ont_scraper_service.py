@@ -76,7 +76,8 @@ class ONTScraperService:
         max_attempts_per_call: Optional[int] = None,
         is_mass_scan: bool = False,
         failed_credentials_history: Optional[List[Tuple[str, str]]] = None,
-        exhaustive_first_scan: bool = False
+        exhaustive_first_scan: bool = False,
+        is_valid_modem: bool = False
     ) -> Dict[str, Any]:
         """
         Melakukan scraping lengkap ke satu perangkat modem ONT.
@@ -101,7 +102,7 @@ class ONTScraperService:
                 "success": False,
                 "error_type": "UNREACHABLE",
                 "message": "Host tidak terjangkau (Periksa koneksi jaringan lokal/VLAN)",
-                "status_kredensial": "UNTESTED",
+                "status_kredensial": "VALID" if is_valid_modem else "UNTESTED",
                 "status_koneksi": "LOS",
                 "rx_power": None,
                 "suhu_ont": None,
@@ -185,7 +186,11 @@ class ONTScraperService:
 
         for u, p, source in active_candidate_list:
             cred_ok = False
-            for attempt_num in range(1, 4):
+            # Jika kredensial berasal dari CUSTOMER atau modem sudah VALID:
+            # Berikan toleransi retry 2-3 kali secara adaptif dengan jeda 1.5 detik
+            # karena modem ZTE GM220 seringkali menolak login pertama saat reconnecting/transient state
+            max_attempts = 3 if (source == "CUSTOMER" or is_valid_modem) else 1
+            for attempt_num in range(1, max_attempts + 1):
                 ok, resp = ZTEScraper.attempt_login(session, base_url, host, u, p, probe_text=probe_html)
                 last_resp = resp
                 probe_html = ""
@@ -230,7 +235,15 @@ class ONTScraperService:
                         pass
                     break
 
-                break
+                # Jika login gagal dan masih ada sisa kesempatan retry adaptif
+                if attempt_num < max_attempts:
+                    print(f"[!] [RETRY_LOGIN] ONT {host} ({customer_name}): Login percobaan #{attempt_num} ditolak sementara, mencoba ulang (#{attempt_num + 1}/{max_attempts}) setelah jeda 1.5s...")
+                    time.sleep(1.5)
+                    try:
+                        r_refresh = session.get(f"{base_url}/", timeout=6, headers={"Connection": "keep-alive"})
+                        probe_html = r_refresh.text
+                    except Exception:
+                        probe_html = ""
 
             if not cred_ok:
                 newly_failed_credentials.append((u, p))

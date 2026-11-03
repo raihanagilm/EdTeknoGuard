@@ -163,7 +163,10 @@ class CustomerService:
                 )
             elif status == "INVALID":
                 query = query.filter(
-                    PerangkatONT.status_kredensial == "INVALID"
+                    or_(
+                        PerangkatONT.status_kredensial == "INVALID",
+                        LogPerformaONT.status_koneksi == "INVALID"
+                    )
                 )
             else:
                 query = query.filter(LogPerformaONT.status_koneksi == status)
@@ -265,6 +268,8 @@ class CustomerService:
                 current_status = "LOS"
             elif lease_status == "waiting":
                 current_status = "OFFLINE"
+            elif (latest_log and latest_log.status_koneksi == "INVALID") or getattr(c, "status_kredensial", None) == "INVALID":
+                current_status = "INVALID"
             else:
                 current_status = latest_log.status_koneksi if (latest_log and latest_log.status_koneksi) else "UNTESTED"
             current_rx = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else None
@@ -439,13 +444,18 @@ class CustomerService:
         critical_count = status_dict.get("CRITICAL", 0)
         los_count = status_dict.get("LOS", 0)
 
-        # Hitung jumlah modem dengan kredensial INVALID murni
+        # Hitung jumlah modem dengan kredensial INVALID (status_kredensial INVALID atau log koneksi terakhir INVALID)
         invalid_q = (
             db.query(func.count(Pelanggan.id))
-            .join(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
             .filter(
                 Pelanggan.is_active == True,
-                PerangkatONT.status_kredensial == "INVALID"
+                or_(
+                    PerangkatONT.status_kredensial == "INVALID",
+                    LogPerformaONT.status_koneksi == "INVALID"
+                )
             )
         )
         if kantor and kantor != "all":

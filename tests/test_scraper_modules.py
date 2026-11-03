@@ -1,7 +1,10 @@
 import unittest
+from unittest.mock import patch, MagicMock
+import requests
 from app.services.scraper.credential_chain import CredentialChainManager
 from app.services.scraper.optical_parser import OpticalParser
 from app.services.scraper.zte_scraper import ZTEScraper
+from app.services.ont_scraper_service import ONTScraperService
 
 class TestScraperModules(unittest.TestCase):
 
@@ -59,6 +62,80 @@ class TestScraperModules(unittest.TestCase):
         clean = ZTEScraper.decode_hex_string(raw_ssid)
         self.assertEqual(clean, "My WiFi-Home")
 
+    @patch("requests.Session.get")
+    def test_unreachable_preserves_valid_status_kredensial(self, mock_get):
+        """Memastikan modem yang berstatus VALID tetap mempertahankan status_kredensial VALID saat tidak terjangkau (LOS)"""
+        mock_get.side_effect = requests.exceptions.ConnectTimeout("Connection timed out")
+
+        # Kasus 1: Modem yang sudah VALID
+        res_valid = ONTScraperService.scrape_ont(
+            ip="10.10.2.100",
+            customer_user="admin",
+            customer_pass="tekno2024",
+            is_valid_modem=True
+        )
+        self.assertEqual(res_valid["status_koneksi"], "LOS")
+        self.assertEqual(res_valid["status_kredensial"], "VALID")
+        self.assertEqual(res_valid["error_type"], "UNREACHABLE")
+
+        # Kasus 2: Modem baru / belum terverifikasi
+        res_untested = ONTScraperService.scrape_ont(
+            ip="10.10.2.100",
+            customer_user="admin",
+            customer_pass="tekno2024",
+            is_valid_modem=False
+        )
+        self.assertEqual(res_untested["status_koneksi"], "LOS")
+        self.assertEqual(res_untested["status_kredensial"], "UNTESTED")
+
+    @patch("time.sleep", return_value=None)
+    @patch("requests.Session.get")
+    @patch("app.services.scraper.optical_parser.OpticalParser.extract_optical_data")
+    @patch("app.services.scraper.zte_scraper.ZTEScraper.extract_device_and_wifi_data")
+    @patch("app.services.scraper.zte_scraper.ZTEScraper.attempt_login")
+    def test_adaptive_retry_on_valid_or_customer_credentials(self, mock_login, mock_device_wifi, mock_optical, mock_get, mock_sleep):
+        """Memastikan percobaan login kedua berhasil ketika percobaan pertama ditolak sementara (ZTE reconnect lag)"""
+        mock_resp_probe = MagicMock()
+        mock_resp_probe.text = "<html><body>ZTE GM220</body></html>"
+        mock_get.return_value = mock_resp_probe
+
+        mock_fail_resp = MagicMock()
+        mock_fail_resp.text = "<html><body>Login Failed</body></html>"
+        mock_fail_resp.url = "http://10.10.2.100/"
+
+        mock_success_resp = MagicMock()
+        mock_success_resp.text = "<html><body>template.gch</body></html>"
+        mock_success_resp.url = "http://10.10.2.100/template.gch"
+
+        # Panggilan 1 gagal, Panggilan 2 sukses
+        mock_login.side_effect = [
+            (False, mock_fail_resp),
+            (True, mock_success_resp)
+        ]
+
+        mock_optical.return_value = {
+            "rx_power": -21.4,
+            "tx_power": 2.1,
+            "suhu_ont": 42.0,
+            "is_los": False
+        }
+        mock_device_wifi.return_value = {
+            "mac_address": "AA:BB:CC:DD:EE:FF"
+        }
+
+        res = ONTScraperService.scrape_ont(
+            ip="10.10.2.100",
+            customer_user="admin",
+            customer_pass="admin",
+            is_valid_modem=True
+        )
+
+        self.assertTrue(res["success"])
+        self.assertEqual(res["status_kredensial"], "VALID")
+        self.assertEqual(res["status_koneksi"], "NORMAL")
+        self.assertEqual(res["rx_power"], -21.4)
+        # Login dicoba 2 kali (berhasil di percobaan kedua)
+        self.assertEqual(mock_login.call_count, 2)
+
 if __name__ == "__main__":
     unittest.main()
-

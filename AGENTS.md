@@ -354,3 +354,63 @@ EdTeknoGuard/
    - **Aturan Eksekusi Inisialisasi (python -m app.db.init_db)**:
      - DILARANG KERAS mengeksekusi Base.metadata.create_all(bind=engine) tanpa filter tabel master di database master.
      - Script inisialisasi wajib membatasi pembuatan tabel master hanya pada 4 tabel tersebut dan mendelegasikan pembuatan tabel operasional ke masing-masing database tenant via TenantDatabaseManager.init_tenant_schema.
+
+
+9. **Standar Pengujian Otomatis & Relevansi Test terhadap Data Baru (Test Relevancy & Freshness Protocol)**:
+   - **Kewajiban Sinkronisasi Test**: Setiap kali terjadi penambahan fitur baru, perombakan modul/arsitektur, atau pembaruan skema data, seluruh berkas pengujian otomatis di direktori 	ests/ **WAJIB** diperbarui dan diselaraskan agar tetap relevan, akurat, dan mencerminkan logika bisnis nyata terkini.
+   - **Larangan Test Usang & Mock Dummy Asal Hijau**: DILARANG KERAS mempertahankan pengujian yang sudah usang (*obsolete*), pengujian dengan data/struktur lama yang sudah tidak dipakai, atau sekadar membuat tes 'asal hijau/pass' menggunakan mock kosong yang tidak menguji alur kerja nyata.
+   - **Cakupan Pengujian Komprehensif**: Suite pengujian 	ests/ wajib mencakup:
+     1. Integritas model MasterBase dan TenantBase beserta aturan non-cross-database foreign key di [app/db/models.py](app/db/models.py).
+     2. Modul domain admin baru: tiket ([app/modules/tickets](app/modules/tickets)), kuota ([app/modules/quota](app/modules/quota)), notifikasi ([app/modules/notifications](app/modules/notifications)), dan log optik ([app/modules/optical_logs](app/modules/optical_logs)).
+     3. Endpoint REST API portal pelanggan ([app/portal/api_router.py](app/portal/api_router.py)) untuk 7 domain modular (auth, dashboard, quota, tickets, wifi, profile, speedtest).
+     4. Logika validasi bisnis krusial (ambang batas redaman optik SOP -26.0 dBm warning dan -27.0 dBm kritis, keamanan strict IP check WiFi rumah, dan cascade deletion).
+
+
+---
+
+## 8. Discovery & Input Evaluation Protocol (Anti-Assumption)
+
+Seluruh AI Agent yang bekerja pada repositori ini **WAJIB MEMATUHI PROTOKOL ANTI-ASUMSI** berikut sebelum merancang, memodifikasi kode, atau mengeksekusi instruksi:
+
+1. **Evaluasi Prompt:** Cek apakah permintaan pengguna singkat, ambigu, umum, atau kurang spesifik (contoh: *"buatkan tampilan kasir cafe"*).
+2. **Dilarang Langsung Eksekusi:** Jangan pernah menebak-nebak asumsi sendiri atau langsung membuat kode/desain dari prompt yang belum jelas konteksnya.
+3. **Wajib Riset Rujukan Nyata & Bedah Alur Lengkap (End-to-End Workflow Mapping):**
+   - Rujuk standar industri produk nyata (contoh: *Square/Toast untuk kasir, Linear/Stripe untuk SaaS dashboard, Shopify untuk toko online*).
+   - Bedah tahapan alur operasional end-to-end secara komprehensif dari awal interaksi hingga transaksi/proses selesai.
+   - Buat **pemetaan zonasi layar (*screen zone mapping*)** yang jelas sebelum eksekusi visual atau kode.
+4. **Antisipasi Celah & Future-Proof Layout:**
+   - Wajib menganalisa potensi celah operasional atau kebutuhan masa depan yang relevan dengan domain aplikasi yang sedang dibangun (misal: metadata tambahan, aksi sekunder, filter lanjutan, status transisi).
+   - Pastikan wadah dan tata letak memiliki fleksibilitas ruang (*slot-based elasticity*) sehingga penambahan fitur baru di masa depan tidak merusak atau membongkar layout dasar.
+5. **Larangan Elemen Dekoratif Khas AI (Anti-AI Clichés):**
+   - Dilarang keras menggunakan bullet dekoratif (`●`, `■`), badge hiasan tanpa fungsi interaksi, atau emoji keyboard berlebihan di setiap baris teks. Gunakan kontras warna yang natural, teks lugas, dan tipografi hierarkis.
+6. **Sistem 1 Warna Monokromatik & Shade Ramp (Anti-Rainbow Slop):**
+   - Dilarang keras mewarnai kartu atau tombol dengan warna-warni pelangi pastel yang berbeda-beda (kuning, pink, mint, ungu dalam satu layar) — ini adalah ciri khas AI slop paling kentara.
+   - Wajib memilih **HANYA 1 warna identitas utama (Hue)** dengan netral (slate/zinc) sebagai fondasi, lalu turunkan menjadi **skala shade ramp** (50 tint s/d 900 shade) untuk seluruh komponen. Semua kartu produk wajib memiliki warna permukaan yang seragam dan konsisten.
+7. **Larangan Pembungkusan Kotak Berlebihan (Anti Box-in-Box):**
+   - Dilarang membungkus setiap teks status/keterangan dengan border pill bertingkat di dalam kartu yang sudah memiliki border. Biarkan teks bernapas dengan tipografi bersih (*Let Content Be the Interface*).
+8. **Konsistensi Kapitalisasi Teks (Strict Text Casing):**
+   - Wajib konsisten dalam penggunaan huruf kapital/kecil pada elemen selevel. Dilarang mencampuradukkan gaya (contoh: satu Title case `Tersedia` tetapi lainnya ALL CAPS `HABIS TERJUAL`). Gunakan format konsisten (Sentence case / Title case) di seluruh keterangan status.
+9. **Isolasi Warna Semantik Khusus Status/Notifikasi:**
+   - Warna kromatik (hijau, merah, amber) DILARANG dijadikan pewarna bodi kartu atau background komponen utama. Warna-warna ini HANYA boleh digunakan secara hemat untuk status fungsional, badge notifikasi, atau toast (hijau = sukses/berhasil, merah = gagal/error/habis, kuning/amber = peringatan).
+10. **Struktur Direktori Baku FigCraft:**
+   - Direktori utama: `C:\Users\agil\Documents\FigCraft\`.
+   - File `.figcraft` WAJIB berada di luar (root) direktori tersebut dan DILARANG dimasukkan ke dalam subfolder.
+   - Berkas pendukung WAJIB dikelompokkan rapi ke dalam subfolder: `renders/` untuk hasil render grafis (`.png`), dan `scripts/` untuk generator/skrip (`.js`, `.json`).
+11. **Prinsip 1 Proyek = 1 Canvas Tunggal (Single .figcraft File):**
+   - Seluruh layar ekosistem, perbaikan, dan pembaruan fitur WAJIB dikerjakan di dalam **1 FILE `.figcraft` TUNGGAL** pada kanvas yang sama.
+   - Dilarang keras membuat banyak file `.figcraft` baru yang terfragmentasi (seperti versi v1, v2, v3, atau memecah fitur ke file berbeda).
+12. **Live Visual Canvas & Cursor Interaction (Figma CLI Experience):**
+   - Setiap ada permintaan desain visual, aplikasi desktop FigCraft WAJIB dibuka langsung di layar pengguna dengan file kanvas aktif.
+   - Eksekusi desain wajib menampilkan interaktivitas visual bertahap (pergerakan pointer/seleksi node layaknya Figma CLI), sehingga pengguna dapat menyaksikan proses pembentukan dan pengubahan elemen secara langsung di kanvas desktop.
+13. **Hierarki Penataan Kanvas Figma Berdasarkan Prosedur & Perangkat (Sequential Procedural Flow):**
+   - Desain antarmuka di kanvas Figma WAJIB diorganisir berurutan mengikuti **alur prosedur operasional nyata (User Journey)** per perangkat dari kiri ke kanan.
+   - Dilarang menempatkan modal/state pendukung secara acak atau terlempar di baris terpisah tanpa konteks alur.
+   - Susunan baku baris (Row-based Storyboard):
+     - **Jalur Utama 1 (Row 1)**: Layar Tablet / Desktop (Input -> Tahan Pesanan/State Transisi -> Verifikasi/Guard Pembayaran -> Transaksi Sukses & Struk Fisik).
+     - **Jalur Utama 2 (Row 2)**: Layar Mobile tepat di bawah jalur tablet dengan urutan tahapan yang identik.
+     - **Jalur Pengelola (Row 3)**: Layar Admin / Back-Office (Laporan Omzet/Analitik & Pengelolaan Produk/Stok).
+   - **Pemisahan Konfirmasi & Struk (Payment Guard)**: Aksi penyelesaian transaksi dan cetak struk WAJIB dipisah; harus ada tahap verifikasi pembayaran (tunai/QRIS) serta tombol pembatalan sebelum transaksi final dan cetak struk dieksekusi.
+14. **Kesesuaian & Pembaruan Pengujian Otomatis Terhadap Data Baru (*Test Relevancy & Data Freshness*):**
+   - Setiap kali terjadi penambahan fitur baru, pembaruan modul/arsitektur, atau perubahan skema data, seluruh pengujian otomatis di direktori `tests/` WAJIB diperbarui agar tetap relevan, akurat, dan mencerminkan logika bisnis nyata terkini.
+   - DILARANG KERAS mempertahankan tes yang sudah usang (*obsolete*), tes dengan data/struktur lama, atau sekadar membuat tes 'asal hijau/pass' menggunakan mock kosong yang tidak menguji alur kerja nyata.
+   - Suite test wajib mencakup pengujian regresi untuk endpoint API aktif, model database, service bisnis, dan alur otentikasi/otorisasi yang benar-benar digunakan sistem.

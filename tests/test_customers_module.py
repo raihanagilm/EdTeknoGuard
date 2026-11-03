@@ -2,6 +2,9 @@ import unittest
 from unittest.mock import MagicMock
 import io
 import pandas as pd
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.db import models
 from app.modules.customers.service import CustomerService
 from app.modules.customers.importer import CustomerImporter
 from app.modules.customers.exporter import CustomerExporter
@@ -28,6 +31,43 @@ class TestCustomerModules(unittest.TestCase):
         csv_str = CustomerService.generate_csv_template()
         self.assertIn("Nama", csv_str)
         self.assertIn("IP Router", csv_str)
+
+    def test_invalid_status_filter_and_stats_calculation(self):
+        """Memastikan pelanggan berstatus INVALID dihitung akurat pada KPI card dan filter tabel"""
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+
+        try:
+            # Customer 1: status_kredensial INVALID
+            p1 = models.Pelanggan(id_pelanggan="CUST-1", nama="Pelanggan 1", kantor="cabang", is_active=True, is_monitored=True)
+            per1 = models.PerangkatONT(id_perangkat=1, id_pelanggan="CUST-1", status_kredensial="INVALID")
+            l1 = models.LogPerformaONT(id_log=1, id_pelanggan="CUST-1", status_koneksi="NORMAL")
+
+            # Customer 2: status_koneksi log INVALID
+            p2 = models.Pelanggan(id_pelanggan="CUST-2", nama="Pelanggan 2", kantor="cabang", is_active=True, is_monitored=True)
+            per2 = models.PerangkatONT(id_perangkat=2, id_pelanggan="CUST-2", status_kredensial="VALID")
+            l2 = models.LogPerformaONT(id_log=2, id_pelanggan="CUST-2", status_koneksi="INVALID")
+
+            # Customer 3: status NORMAL
+            p3 = models.Pelanggan(id_pelanggan="CUST-3", nama="Pelanggan 3", kantor="cabang", is_active=True, is_monitored=True)
+            per3 = models.PerangkatONT(id_perangkat=3, id_pelanggan="CUST-3", status_kredensial="VALID")
+            l3 = models.LogPerformaONT(id_log=3, id_pelanggan="CUST-3", status_koneksi="NORMAL", rx_power=-20.5)
+
+            db.add_all([p1, per1, l1, p2, per2, l2, p3, per3, l3])
+            db.commit()
+
+            stats = CustomerService.get_customer_stats(db, kantor="cabang")
+            self.assertEqual(stats.get("invalid"), 2)
+
+            total, items = CustomerService.get_customers(db, kantor="cabang", status="INVALID")
+            self.assertEqual(total, 2)
+            self.assertEqual(len(items), 2)
+            matched_ids = {it["id_pelanggan"] for it in items}
+            self.assertEqual(matched_ids, {"CUST-1", "CUST-2"})
+        finally:
+            db.close()
 
 if __name__ == "__main__":
     unittest.main()
