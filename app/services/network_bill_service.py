@@ -247,6 +247,7 @@ class NetworkBillService:
                 "data": mapped_row,
                 "old_data": old_data,
                 "has_conflicts": has_conflicts,
+                "conflicts": conflicts if has_conflicts else [],
                 "selected_version": "new",
                 "_status": _status,
                 "_action": _action,

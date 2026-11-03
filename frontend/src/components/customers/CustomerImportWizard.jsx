@@ -228,6 +228,16 @@ export function CustomerImportWizard({
     }
   }
 
+  const handleSheetChange = (sheetName) => {
+    setImportSelectedSheet(sheetName)
+    const targetSheet = importSheets.find((s) => s.name === sheetName)
+    if (targetSheet) {
+      const cols = targetSheet.columns || []
+      setImportColumns(cols)
+      autoMapColumns(cols)
+    }
+  }
+
   const loadNetworkBillPops = async () => {
     setNetworkBillLoadingPops(true)
     setImportError('')

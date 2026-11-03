@@ -26,6 +26,28 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+- **Penyempurnaan Visual Diff Data Baru vs Data Lama pada Modal Lengkapi Data / Import Pelanggan ([frontend/src/components/import_wizard/ImportStepPreview.jsx](frontend/src/components/import_wizard/ImportStepPreview.jsx), [app/modules/customers/importer.py](app/modules/customers/importer.py), [app/services/network_bill_service.py](app/services/network_bill_service.py))**:
+  - Menyelesaikan masalah tidak tampilnya data lama pada tabel Langkah 3 Pratinjau & Simpan saat terdeteksi status "Ada Perbedaan Data".
+  - Mengimplementasikan komparasi visual sebelum dan sesudah (*Visual Diff*) secara elegan per kolom (Nama Pelanggan, No WhatsApp, Alamat Pemasangan, dan WiFi):
+    - **Data Baru**: Disorot dengan badge `BARU` (cyan background) dan font tebal jika tombol `Pakai Baru` aktif.
+    - **Data Lama**: Disorot dengan badge `LAMA` (slate background) dan font tebal jika tombol `Pakai Lama` aktif, atau dicoret halus (*line-through*) jika versi baru yang dipilih.
+  - Menampilkan ringkasan field yang berbeda secara dinamis pada kolom Status & Aksi (contoh: `Beda: Nama, Alamat`).
+  - Memperbaiki `CustomerImporter.preview_import_file` dan `NetworkBillService` agar menyertakan deteksi perbedaan `Nama` serta mengembalikan array `conflicts` ke frontend.
+  - Memperbaiki pemanggilan fungsi internal `CustomerImporter.read_csv_safely` dan `CustomerImporter.generate_structured_customer_id` di `importer.py`.
+  - Menambahkan pengujian otomatis `test_preview_import_file_conflict_detection` di [tests/test_customers_module.py](tests/test_customers_module.py) (30 tests passing 100%).
+
+
+- **Perbaikan ReferenceError Modal Import Data Pelanggan ([frontend/src/components/customers/CustomerImportWizard.jsx](frontend/src/components/customers/CustomerImportWizard.jsx))**:
+  - Memperbaiki `ReferenceError: handleSheetChange is not defined` yang terjadi saat membuka modal Lengkapi Data / Import Data Pelanggan.
+  - Mengimplementasikan fungsi `handleSheetChange(sheetName)` untuk menangani pergantian sheet pada berkas Excel multi-sheet, memperbarui `importSelectedSheet`, dan memetakan ulang kolom secara otomatis (`autoMapColumns`).
+
+- **Perbaikan Data Pemantauan Kuota Pelanggan ([app/modules/quota/routes.py](app/modules/quota/routes.py), [app/modules/quota/service.py](app/modules/quota/service.py), [frontend/src/components/quota/QuotaView.jsx](frontend/src/components/quota/QuotaView.jsx), [frontend/src/services/api.js](frontend/src/services/api.js))**:
+  - Memperbaiki kontrak data API `/api/kuota` agar mengembalikan kunci `quota`, `paket_options`, `current_period`, dan `active_kantor` yang diharapkan oleh `QuotaView.jsx`, serta menyediakan field `terpakai_gb`, `alamat`, `ip_ont`, dan `ip`.
+  - Mengoptimasi kueri `QuotaService.get_quota_overview` dari N+1 query menjadi 1 bulk query `KuotaPelanggan` untuk periode bulan berjalan.
+  - Memperbaiki `QuotaService.getOverview(activeOffice)` pada frontend agar mengirimkan parameter kantor aktif secara deterministik.
+  - Menghubungkan 143 data pelanggan kantor Tengaran dengan total pemakaian trafik 71.059,2 GB bulan berjalan sehingga KPI bar dan tabel kuota tampil utuh dan interaktif.
+  - Menambahkan pengujian integrasi `test_quota_endpoint_authenticated_structure` di [tests/test_admin_domain_modules.py](tests/test_admin_domain_modules.py) (29 passed in 2.91s).
+
 - **Sinkronisasi & Perbaikan Filter/Card INVALID Kredensial Pelanggan ([app/modules/customers/service.py](app/modules/customers/service.py), [app/modules/monitoring/service.py](app/modules/monitoring/service.py))**:
   - Memperbaiki kalkulasi statistik KPI card "INVALID" dan filter tabel pada Data Pelanggan agar tidak hanya memeriksa `PerangkatONT.status_kredensial == "INVALID"`, melainkan juga mencakup `LogPerformaONT.status_koneksi == "INVALID"` menggunakan klausul `or_`.
   - Memperbaiki sinkronisasi data pada kantor Tengaran (dan kantor lainnya) sehingga 17 pelanggan dengan status koneksi INVALID tampil secara presisi di KPI card dan tabel daftar pelanggan tanpa hasil kosong (0 data).

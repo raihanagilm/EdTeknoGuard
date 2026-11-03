@@ -193,8 +193,8 @@ export class TicketsService {
 }
 
 export class QuotaService {
-  static async getOverview() {
-    return new ApiService().get('/api/kuota');
+  static async getOverview(kantor) {
+    return new ApiService().get('/api/kuota', kantor ? { kantor } : {});
   }
 }
 

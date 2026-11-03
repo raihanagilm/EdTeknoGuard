@@ -283,10 +283,36 @@ export function ImportStepPreview({
               if (!row) return null
 
               const isSelected = selectedImportIndices.includes(idx)
-              const isConflict = row._status === 'conflict'
+              const isConflict = row._status === 'conflict' || row.has_conflicts
               const isUnreg = row._status === 'unregistered'
               const isSkip = row._action === 'skip'
               const isNewVersion = row.selected_version === 'new'
+
+              // Deteksi komparasi data lama vs data baru
+              const hasOld = Boolean(row.old_data)
+              const oldNama = row.old_data?.nama || ''
+              const newNama = (row.data?.nama || '').trim()
+              const isNamaDiff = hasOld && oldNama && newNama && oldNama.trim().toLowerCase() !== newNama.toLowerCase()
+
+              const oldWa = row.old_data?.no_wa || ''
+              const newWa = (row.data?.no_wa || row.data?.no_hp || '').trim()
+              const isWaDiff = hasOld && oldWa && newWa && oldWa !== newWa
+
+              const oldAlamat = row.old_data?.alamat || ''
+              const newAlamat = (row.data?.alamat || '').trim()
+              const isAlamatDiff = hasOld && oldAlamat && newAlamat && oldAlamat !== newAlamat
+
+              const oldWifi = row.old_data?.nama_wifi || ''
+              const newWifi = (row.data?.wifi_ssid || row.data?.nama_wifi || '').trim()
+              const isWifiDiff = hasOld && oldWifi && newWifi && oldWifi !== newWifi
+
+              // Daftar field yang berbeda untuk status badge
+              const detectedConflicts = []
+              if (isNamaDiff) detectedConflicts.push('Nama')
+              if (isWaDiff) detectedConflicts.push('No. WA')
+              if (isAlamatDiff) detectedConflicts.push('Alamat')
+              if (isWifiDiff) detectedConflicts.push('WiFi')
+              const conflictList = row.conflicts && row.conflicts.length > 0 ? row.conflicts : detectedConflicts
 
               return (
                 <tr
@@ -307,53 +333,196 @@ export function ImportStepPreview({
                     {rowNo + 1}
                   </td>
                   <td className="py-2 px-2.5">
-                    <span className="font-bold text-slate-900">{row.data?.ip_router || '-'}</span>
-                  </td>
-                  <td className="py-2 px-2.5 font-sans">
-                    <span className="font-bold text-slate-800">{row.data?.nama || '-'}</span>
-                  </td>
-                  <td className="py-2 px-2.5 font-sans">
-                    {isConflict && row.conflict_details?.no_wa ? (
-                      <div className="flex flex-col gap-0.5">
-                        <span className={`text-[10px] ${isNewVersion ? 'font-bold text-cyan-800' : 'text-slate-400 line-through'}`}>
-                          Baru: {row.data?.no_wa || '-'}
-                        </span>
-                        <span className={`text-[10px] ${!isNewVersion ? 'font-bold text-slate-800' : 'text-slate-400 line-through'}`}>
-                          Lama: {row.conflict_details.no_wa.old || '-'}
-                        </span>
-                      </div>
-                    ) : (
-                      <span>{row.data?.no_wa || '-'}</span>
+                    <span className="font-bold text-slate-900 block">{row.data?.ip_router || '-'}</span>
+                    {(row.data?.id_pelanggan || row.old_data?.id_pelanggan) && (
+                      <span className="text-[10px] text-slate-500 font-mono">
+                        {row.data?.id_pelanggan || row.old_data?.id_pelanggan}
+                      </span>
                     )}
                   </td>
-                  <td className="py-2 px-2.5 font-sans max-w-[180px] truncate" title={row.data?.alamat || '-'}>
-                    {row.data?.alamat || '-'}
+                  <td className="py-2 px-2.5 font-sans">
+                    {isNamaDiff ? (
+                      <div className="flex flex-col gap-1 min-w-[130px] py-0.5">
+                        <div
+                          className={`text-[11px] flex items-center gap-1.5 transition-all ${
+                            isNewVersion ? 'font-bold text-cyan-950' : 'text-slate-400 line-through'
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 ${
+                              isNewVersion ? 'bg-cyan-100 text-cyan-800' : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            Baru
+                          </span>
+                          <span className="truncate max-w-[160px]" title={`Data Baru: ${newNama}`}>
+                            {newNama}
+                          </span>
+                        </div>
+                        <div
+                          className={`text-[11px] flex items-center gap-1.5 transition-all ${
+                            !isNewVersion ? 'font-bold text-slate-800' : 'text-slate-400 line-through'
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 ${
+                              !isNewVersion ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400'
+                            }`}
+                          >
+                            Lama
+                          </span>
+                          <span className="truncate max-w-[160px]" title={`Data Database: ${oldNama}`}>
+                            {oldNama}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="font-bold text-slate-800">{newNama || oldNama || '-'}</span>
+                    )}
+                  </td>
+                  <td className="py-2 px-2.5 font-sans">
+                    {isWaDiff ? (
+                      <div className="flex flex-col gap-1 min-w-[110px] py-0.5">
+                        <div
+                          className={`text-[11px] flex items-center gap-1.5 transition-all ${
+                            isNewVersion ? 'font-bold text-cyan-950' : 'text-slate-400 line-through'
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 ${
+                              isNewVersion ? 'bg-cyan-100 text-cyan-800' : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            Baru
+                          </span>
+                          <span className="font-mono text-[10px]">{newWa}</span>
+                        </div>
+                        <div
+                          className={`text-[11px] flex items-center gap-1.5 transition-all ${
+                            !isNewVersion ? 'font-bold text-slate-800' : 'text-slate-400 line-through'
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 ${
+                              !isNewVersion ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400'
+                            }`}
+                          >
+                            Lama
+                          </span>
+                          <span className="font-mono text-[10px]">{oldWa}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="font-mono text-[11px] text-slate-700">{newWa || oldWa || '-'}</span>
+                    )}
+                  </td>
+                  <td className="py-2 px-2.5 font-sans max-w-[200px]">
+                    {isAlamatDiff ? (
+                      <div className="flex flex-col gap-1 py-0.5">
+                        <div
+                          className={`text-[11px] flex items-center gap-1.5 transition-all ${
+                            isNewVersion ? 'font-bold text-cyan-950' : 'text-slate-400 line-through'
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 ${
+                              isNewVersion ? 'bg-cyan-100 text-cyan-800' : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            Baru
+                          </span>
+                          <span className="truncate max-w-[160px]" title={`Alamat Baru: ${newAlamat}`}>
+                            {newAlamat}
+                          </span>
+                        </div>
+                        <div
+                          className={`text-[11px] flex items-center gap-1.5 transition-all ${
+                            !isNewVersion ? 'font-bold text-slate-800' : 'text-slate-400 line-through'
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 ${
+                              !isNewVersion ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400'
+                            }`}
+                          >
+                            Lama
+                          </span>
+                          <span className="truncate max-w-[160px]" title={`Alamat Database: ${oldAlamat}`}>
+                            {oldAlamat}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span
+                        className="truncate block max-w-[180px] text-slate-700"
+                        title={newAlamat || oldAlamat || '-'}
+                      >
+                        {newAlamat || oldAlamat || '-'}
+                      </span>
+                    )}
                   </td>
                   <td className="py-2 px-2.5 font-mono text-[10px]">
-                    {row.data?.wifi_ssid ? (
-                      <span>{row.data.wifi_ssid}</span>
+                    {isWifiDiff ? (
+                      <div className="flex flex-col gap-1 py-0.5">
+                        <div
+                          className={`flex items-center gap-1.5 transition-all ${
+                            isNewVersion ? 'font-bold text-cyan-950' : 'text-slate-400 line-through'
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 font-sans ${
+                              isNewVersion ? 'bg-cyan-100 text-cyan-800' : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            Baru
+                          </span>
+                          <span className="truncate max-w-[90px]">{newWifi}</span>
+                        </div>
+                        <div
+                          className={`flex items-center gap-1.5 transition-all ${
+                            !isNewVersion ? 'font-bold text-slate-800' : 'text-slate-400 line-through'
+                          }`}
+                        >
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 font-sans ${
+                              !isNewVersion ? 'bg-slate-200 text-slate-800' : 'bg-slate-100 text-slate-400'
+                            }`}
+                          >
+                            Lama
+                          </span>
+                          <span className="truncate max-w-[90px]">{oldWifi}</span>
+                        </div>
+                      </div>
                     ) : (
-                      <span className="text-slate-400">-</span>
+                      <span className="text-slate-600">{newWifi || oldWifi || '-'}</span>
                     )}
                   </td>
                   <td className="py-2 px-2.5 text-right font-sans">
                     {isConflict ? (
                       <div className="space-y-1">
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">
-                          Ada Perbedaan Data
-                        </span>
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">
+                            Ada Perbedaan Data
+                          </span>
+                        </div>
+                        {conflictList.length > 0 && (
+                          <div className="text-[9px] text-amber-900/80 font-medium text-right">
+                            Beda: {conflictList.join(', ')}
+                          </div>
+                        )}
                         <div className="flex items-center justify-end gap-1 text-[10px]">
                           <button
                             type="button"
+                            title="Gunakan versi data baru dari file/API untuk memperbarui database"
                             onClick={() => {
                               const updated = [...importPreviewData]
                               updated[idx].selected_version = 'new'
                               updated[idx]._action = 'update'
                               setImportPreviewData(updated)
                             }}
-                            className={`px-1.5 py-0.5 rounded border transition cursor-pointer ${
+                            className={`px-2 py-0.5 rounded-lg border transition cursor-pointer font-bold ${
                               isNewVersion
-                                ? 'bg-cyan-700 text-white border-cyan-800 font-bold'
+                                ? 'bg-cyan-700 text-white border-cyan-800 shadow-2xs'
                                 : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
                             }`}
                           >
@@ -361,15 +530,16 @@ export function ImportStepPreview({
                           </button>
                           <button
                             type="button"
+                            title="Pertahankan data lama yang ada di database saat ini, hanya isi field kosong"
                             onClick={() => {
                               const updated = [...importPreviewData]
                               updated[idx].selected_version = 'old'
                               updated[idx]._action = 'update'
                               setImportPreviewData(updated)
                             }}
-                            className={`px-1.5 py-0.5 rounded border transition cursor-pointer ${
+                            className={`px-2 py-0.5 rounded-lg border transition cursor-pointer font-bold ${
                               !isNewVersion
-                                ? 'bg-slate-700 text-white border-slate-800 font-bold'
+                                ? 'bg-slate-700 text-white border-slate-800 shadow-2xs'
                                 : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
                             }`}
                           >

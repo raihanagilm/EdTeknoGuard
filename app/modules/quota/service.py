@@ -19,18 +19,23 @@ class QuotaService:
             query = query.filter(Pelanggan.kantor == kantor)
         
         pelanggan_list = query.order_by(Pelanggan.nama.asc()).all()
+        if not pelanggan_list:
+            return []
+
+        # Bulk query data kuota untuk periode berjalan (1 query efisien menggantikan N+1)
+        kuota_rows = db.query(KuotaPelanggan).filter(
+            KuotaPelanggan.periode_bulan == current_period
+        ).all()
+        kuota_map = {k.id_pelanggan: k for k in kuota_rows}
+
         result = []
         for p in pelanggan_list:
-            kuota = db.query(KuotaPelanggan).filter(
-                KuotaPelanggan.id_pelanggan == p.id_pelanggan,
-                KuotaPelanggan.periode_bulan == current_period
-            ).first()
+            kuota = kuota_map.get(p.id_pelanggan)
             
             result.append({
                 "pelanggan": p,
                 "periode": current_period,
-                "terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota else 0.0,
+                "terpakai_gb": float(kuota.kuota_terpakai_gb) if kuota and kuota.kuota_terpakai_gb is not None else 0.0,
                 "paket": p.paket or (kuota.kecepatan_paket if kuota and kuota.kecepatan_paket else "-")
             })
         return result
-

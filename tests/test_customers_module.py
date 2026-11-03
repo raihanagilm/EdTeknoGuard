@@ -69,5 +69,53 @@ class TestCustomerModules(unittest.TestCase):
         finally:
             db.close()
 
+    def test_preview_import_file_conflict_detection(self):
+        """Memastikan preview_import_file mendeteksi perbedaan data nama, no_wa, alamat dan menyertakan list conflicts"""
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+        try:
+            p = models.Pelanggan(
+                id_pelanggan="CUST-101",
+                nama="Rudy Prasetyo Soko Jlarem",
+                no_hp="628111111111",
+                alamat="Wilayah Jlarem",
+                kantor="cabang"
+            )
+            ont = models.PerangkatONT(
+                id_perangkat=101,
+                id_pelanggan="CUST-101",
+                ip_router="10.10.2.96",
+                ip_ont="10.10.2.96"
+            )
+            db.add_all([p, ont])
+            db.commit()
+
+            csv_content = (
+                "IP,Nama,WhatsApp,Alamat\n"
+                "10.10.2.96,Rudy Prasetyo,6287822440908,Soko Desa Jlarem\n"
+            ).encode("utf-8")
+
+            mapping = {
+                "ip_router": "IP",
+                "nama": "Nama",
+                "no_wa": "WhatsApp",
+                "alamat": "Alamat"
+            }
+
+            res = CustomerImporter.preview_import_file(csv_content, "test.csv", "", mapping, db)
+            self.assertEqual(res["conflict_count"], 1)
+            row = res["preview_data"][0]
+            self.assertTrue(row["has_conflicts"])
+            self.assertEqual(row["_status"], "conflict")
+            self.assertIn("Nama", row["conflicts"])
+            self.assertIn("No. WA", row["conflicts"])
+            self.assertIn("Alamat", row["conflicts"])
+            self.assertIsNotNone(row["old_data"])
+            self.assertEqual(row["old_data"]["nama"], "Rudy Prasetyo Soko Jlarem")
+        finally:
+            db.close()
+
 if __name__ == "__main__":
     unittest.main()

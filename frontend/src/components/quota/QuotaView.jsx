@@ -56,9 +56,10 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
   const fetchQuota = async () => {
     setLoading(true);
     try {
-      const res = await QuotaService.getOverview();
+      const res = await QuotaService.getOverview(activeOffice);
       if (res.ok && res.data) {
-        setQuotaList(res.data.quota || []);
+        const list = res.data.quota || res.data.data || [];
+        setQuotaList(list);
         setPaketOptions(res.data.paket_options || []);
         setCurrentPeriod(res.data.current_period || '');
         setActiveKantor(res.data.active_kantor || activeOffice);

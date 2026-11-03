@@ -65,14 +65,14 @@ class CustomerImporter:
     @staticmethod
     def generate_customer_id_from_ip(ip: str, sequence: int = 1) -> str:
         """Fallback generator ID pelanggan berbasis format DB-05"""
-        return CustomerService.generate_structured_customer_id()
+        return CustomerImporter.generate_structured_customer_id()
 
     @staticmethod
     def analyze_import_file(file_content: bytes, filename: str) -> dict:
         filename_lower = filename.lower()
         if filename_lower.endswith('.csv'):
             try:
-                df = CustomerService.read_csv_safely(file_content)
+                df = CustomerImporter.read_csv_safely(file_content)
                 cols = [str(c).strip() for c in df.columns if str(c).strip() and not str(c).startswith('Unnamed:')]
                 
                 return {
@@ -146,7 +146,7 @@ class CustomerImporter:
         filename_lower = filename.lower()
         try:
             if filename_lower.endswith('.csv'):
-                df = CustomerService.read_csv_safely(file_content)
+                df = CustomerImporter.read_csv_safely(file_content)
             else:
                 excel = pd.ExcelFile(io.BytesIO(file_content))
                 target_sheet = sheet_name if sheet_name in excel.sheet_names else excel.sheet_names[0]
@@ -265,6 +265,8 @@ class CustomerImporter:
 
                         # Cek apakah ada konflik field yang sudah ada isinya di DB
                         conflicts = []
+                        if old_data.get('nama') and mapped_row.get('nama') and old_data['nama'].strip().lower() != mapped_row['nama'].strip().lower():
+                            conflicts.append('Nama')
                         new_wa = mapped_row.get('no_wa', '') or mapped_row.get('no_hp', '')
                         if old_data.get('no_wa') and new_wa and old_data['no_wa'] != new_wa:
                             conflicts.append("No. WA")
@@ -288,13 +290,14 @@ class CustomerImporter:
                         _action = "skip" # default skip, atau simpan baru offline jika admin memilih
                         _message = f"IP '{ip_router}' belum terdaftar dari MikroTik. Admin dapat melewati atau menyimpan sebagai baru (Offline)."
                         if not mapped_row.get('id_pelanggan'):
-                            mapped_row['id_pelanggan'] = CustomerService.generate_structured_customer_id(existing_ids)
+                            mapped_row['id_pelanggan'] = CustomerImporter.generate_structured_customer_id(existing_ids)
 
                 mapped_data.append({
                     "original_row": index + 1,
                     "data": mapped_row,
                     "old_data": old_data,
                     "has_conflicts": has_conflicts,
+                    "conflicts": conflicts if has_conflicts else [],
                     "selected_version": "new", # "new" atau "old"
                     "_status": _status,
                     "_action": _action,
