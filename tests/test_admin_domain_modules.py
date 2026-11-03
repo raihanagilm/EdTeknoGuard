@@ -17,6 +17,8 @@ class TestAdminDomainModules(unittest.TestCase):
             "/api/tiket",
             "/api/kuota",
             "/api/riwayat",
+            "/api/notifications/poll",
+            "/admin/api/notifications/poll",
         ]
         for ep in protected_admin_routes:
             r = self.client.get(ep)
@@ -27,8 +29,12 @@ class TestAdminDomainModules(unittest.TestCase):
             )
 
     def test_notifications_polling_format(self):
-        """Memastikan endpoint /api/notifications/poll mengembalikan struktur data polling notifikasi yang valid"""
-        r = self.client.get("/api/notifications/poll")
+        """Memastikan endpoint /api/notifications/poll mengembalikan struktur data polling notifikasi yang valid bagi pengguna yang sudah login"""
+        token = create_session_token("admin", role="super admin")
+        self.client.cookies.set("edteknoguard_session", token)
+        self.client.cookies.set("active_kantor", "tengaran")
+
+        r = self.client.get("/api/notifications/poll?kantor=tengaran")
         self.assertEqual(r.status_code, 200)
         data = r.json()
         self.assertEqual(data.get("status"), "success")

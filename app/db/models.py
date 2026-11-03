@@ -377,7 +377,8 @@ class User(MasterBase):
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 
     activity_logs = relationship("UserActivityLog", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
-    notification_reads = relationship("UserNotificationRead", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    # UserNotificationRead berada di database tenant (per kantor), sehingga tidak dapat
+    # direlasikan secara ORM lintas database dari sini.
     kantor_assignments = relationship("UserKantor", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
 
     @property
@@ -473,16 +474,17 @@ class LogKuotaHarian(TenantBase):
     )
 
 
-class UserNotificationRead(MasterBase):
+class UserNotificationRead(TenantBase):
+    """Penanda notifikasi yang sudah dibaca, disimpan per kantor (tenant) agar
+    reference_id antar kantor tidak saling bertabrakan. Kolom user_id merujuk
+    users di database master, sehingga sengaja tanpa ForeignKey lintas database."""
     __tablename__ = "user_notification_reads"
 
     id_read = Column(BigInteger, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
     notification_type = Column(String(50), nullable=False, index=True) # "alert_log", "tiket_batch", "alert_batch", dll
     reference_id = Column(String(100), nullable=False, index=True) # id_alert, id_tiket, atau batch key
     read_at = Column(DateTime, default=get_now_wib, nullable=False, index=True)
-
-    user = relationship("User", back_populates="notification_reads")
 
     id = synonym("id_read")
 

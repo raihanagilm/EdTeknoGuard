@@ -16,14 +16,12 @@ router = APIRouter(tags=["notifications"])
 @router.get("/admin/api/notifications/poll")
 def poll_realtime_notifications(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db)):
     user = get_current_user_optional(request)
-    target_kantor = kantor or (get_active_kantor(request, user) if user else "all")
-    
-    if target_kantor and target_kantor.lower() not in ["master", "global", "all"]:
-        active_db = TenantDatabaseManager.get_tenant_session(target_kantor)
-    else:
-        default_k = get_active_kantor(request, user)
-        active_db = TenantDatabaseManager.get_tenant_session(default_k)
-        target_kantor = default_k
+    if not user:
+        raise HTTPException(status_code=401, detail="Belum login")
+    # get_active_kantor membaca ?kantor= lalu memvalidasinya terhadap allowed_kantor user,
+    # sehingga pengguna tidak dapat mengintip notifikasi kantor di luar haknya.
+    target_kantor = get_active_kantor(request, user)
+    active_db = TenantDatabaseManager.get_tenant_session(target_kantor)
 
     try:
         return NotificationService.get_realtime_notifications(db=active_db, kantor=target_kantor, user=user)
@@ -45,7 +43,13 @@ async def mark_single_notification_read(request: Request, db: Session = Depends(
     ref_id = body.get("reference_id") or body.get("id")
     if not ref_id:
         raise HTTPException(status_code=400, detail="reference_id wajib diisi")
-    return NotificationService.mark_notification_read(db=db, user=user, notification_type=n_type, reference_id=str(ref_id))
+
+    # user_notification_reads berada di database tenant, jadi sesi kantor aktif wajib dipakai.
+    active_db = TenantDatabaseManager.get_tenant_session(get_active_kantor(request, user))
+    try:
+        return NotificationService.mark_notification_read(db=active_db, user=user, notification_type=n_type, reference_id=str(ref_id))
+    finally:
+        active_db.close()
 
 
 @router.post("/api/notifications/read-all")
@@ -59,7 +63,13 @@ async def mark_all_notifications_read(request: Request, db: Session = Depends(ge
     except Exception:
         body = {}
     items = body.get("items", [])
-    return NotificationService.mark_all_notifications_read(db=db, user=user, items=items)
+
+    # user_notification_reads berada di database tenant, jadi sesi kantor aktif wajib dipakai.
+    active_db = TenantDatabaseManager.get_tenant_session(get_active_kantor(request, user))
+    try:
+        return NotificationService.mark_all_notifications_read(db=active_db, user=user, items=items)
+    finally:
+        active_db.close()
 
 
 @router.post("/api/monitoring/snooze-pause-reminder")

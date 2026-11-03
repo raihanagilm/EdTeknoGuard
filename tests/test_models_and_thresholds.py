@@ -12,9 +12,10 @@ class TestModelsAndThresholds(unittest.TestCase):
         self.assertIn("users", master_tables)
         self.assertIn("user_kantors", master_tables)
         self.assertIn("user_activity_logs", master_tables)
-        self.assertIn("user_notification_reads", master_tables)
         self.assertNotIn("pelanggan", master_tables)
         self.assertNotIn("perangkat_ont", master_tables)
+        # SOP AGENTS.md poin 8: database master HANYA memuat 4 tabel master.
+        self.assertEqual(len(master_tables), 4, f"Database master wajib hanya 4 tabel, ditemukan: {sorted(master_tables)}")
 
     def test_tenant_base_models_registration(self):
         """Memastikan seluruh tabel operasional per kantor terdaftar di TenantBase"""
@@ -30,6 +31,8 @@ class TestModelsAndThresholds(unittest.TestCase):
         self.assertIn("system_settings", tenant_tables)
         self.assertIn("modem_credentials", tenant_tables)
         self.assertIn("pakets", tenant_tables)
+        # Penanda baca notifikasi diisolasi per kantor agar reference_id antar kantor tidak bertabrakan.
+        self.assertIn("user_notification_reads", tenant_tables)
         self.assertNotIn("kantors", tenant_tables)
         self.assertNotIn("users", tenant_tables)
 

@@ -26,6 +26,42 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Changed
+- **Penyelesaian Modularisasi Modul Pengaturan & Eliminasi Kode Duplikat ([SettingsView.jsx](frontend/src/components/settings/SettingsView.jsx))**:
+  - Komponen pecahan `SettingsThresholdTab`, `SettingsCredentialsTab`, `SettingsNotificationsTab`, dan `SettingsProfileTab` sebelumnya sudah dibuat namun **tidak pernah di-import** oleh `SettingsView.jsx`, sehingga seluruh markup 4 tab tetap tertulis inline dan terdapat dua salinan logika yang sama (risiko perbaikan bug dikerjakan di berkas yang salah).
+  - `SettingsView.jsx` kini menjadi shell murni (navigasi mobile segmented, desktop tree menu, toast, dan routing sub-tab) yang merender keempat komponen tab tersebut: **1.020 baris menjadi 383 baris**.
+  - State & handler profil (`handleSaveDataDiri`, `handleChangePassword`, state form nama/no WA/kata sandi) dihapus dari shell karena sudah dimiliki `SettingsProfileTab`; shell hanya menyimpan pesan `profileSuccess`/`profileError` untuk toast.
+  - Import ikon dibersihkan dari 24 menjadi 6 ikon yang benar-benar dipakai (termasuk membuang `CheckCircle2` & `ShieldCheck` yang tidak pernah terpakai sama sekali).
+  - Terverifikasi tanpa regresi UI: perbandingan teks antarmuka tab lama versus komponen menunjukkan **identik 100%** pada keempat tab, `npm run lint` tanpa error baru, dan `npm run build` sukses.
+
+### Security
+- **Proteksi Otentikasi & Isolasi Kantor Endpoint Polling Notifikasi ([app/modules/notifications/routes.py](app/modules/notifications/routes.py))**:
+  - `GET /api/notifications/poll` dan `/admin/api/notifications/poll` sebelumnya dapat diakses **tanpa login** dan mengembalikan HTTP 200 berisi daftar tiket kendala serta notifikasi gangguan satu kantor. Kini menolak dengan HTTP 401 `Belum login`, konsisten dengan endpoint `/read` dan `/read-all`.
+  - Parameter `?kantor=` sebelumnya dipakai mentah tanpa validasi sehingga pengguna dapat mengintip notifikasi kantor di luar `allowed_kantor` miliknya. Kini seluruh resolusi kantor dilewatkan `get_active_kantor()` yang memvalidasi terhadap hak akses pengguna.
+  - Otentikasi tetap mendukung session cookie maupun header `Authorization: Bearer` sehingga Notifikasi Native APK Android tetap berfungsi selama melakukan login.
+  - Terverifikasi: poll tanpa login HTTP 401, poll setelah login HTTP 200, dan teknisi ber-`allowed_kantor` Tengaran yang meminta `?kantor=slawi` tetap dilayani data Tengaran.
+
+### Changed
+- **Relokasi Tabel `user_notification_reads` dari Database Master ke Database Tenant ([app/db/models.py](app/db/models.py), [app/modules/notifications/routes.py](app/modules/notifications/routes.py))**:
+  - Model `UserNotificationRead` dipindahkan dari `MasterBase` ke `TenantBase` agar selaras dengan SOP AGENTS.md poin 8 (database master HANYA memuat 4 tabel master) dan dengan `NotificationService` yang memang menanyakannya melalui sesi tenant.
+  - Memperbaiki error `Table 'edtekno_{kantor}.user_notification_reads' doesn't exist` (HTTP 500) pada endpoint polling notifikasi di setiap kantor yang skemanya dibuat setelah pemisahan `MasterBase`/`TenantBase`.
+  - Menghilangkan tabrakan `reference_id` antar kantor: tiket nomor 1 di Tengaran dan Slawi sebelumnya dianggap notifikasi yang sama sehingga menandai baca di satu kantor ikut membungkam kantor lain.
+  - Kolom `user_id` kini tanpa `ForeignKey` karena tabel `users` berada di database master (dilarang foreign key lintas database); relasi ORM `User.notification_reads` dihapus dan kueri tabel `users` tetap memakai sesi master terpisah (`m_db`).
+  - Endpoint `/api/notifications/read` dan `/read-all` kini memakai sesi tenant kantor aktif secara eksplisit, tidak lagi bergantung pada fallback `get_db` yang dapat jatuh ke database master.
+  - Pengujian [tests/test_models_and_thresholds.py](tests/test_models_and_thresholds.py) diperbarui dan diperketat dengan asersi jumlah tabel master tepat 4 sebagai pengaman regresi SOP.
+
+### Fixed
+- **Inisialisasi Database Gagal pada Instalasi Baru ([app/db/init_db.py](app/db/init_db.py))**:
+  - Pembuatan Super Admin default gagal dengan `TypeError: 'kantor_kode' is an invalid keyword argument for UserKantor` sehingga setup dari database kosong (server baru / VPS / container baru) selalu berhenti di tengah jalan.
+  - Model `UserKantor` ([app/db/models.py](app/db/models.py)) tidak memiliki kolom `kantor_kode` (kolom tersebut milik `SystemSetting` dan `ModemCredential`), sehingga argumen berlebih tersebut dihapus dari pemanggilan konstruktor.
+  - Terverifikasi: `python -m app.db.init_db` pada database kosong kini sukses penuh (master + 4 database tenant).
+
+### Removed
+- **Pembersihan Sisa Modul Lama Pasca Modularisasi Domain**:
+  - Menghapus `app/modules/admin_customer_mgmt/` (facade backward compatibility) yang sudah tidak dirujuk oleh [routes/api.py](routes/api.py) maupun modul lain, karena fungsinya telah digantikan penuh oleh modul `tickets`, `quota`, dan `notifications`.
+  - Menghapus direktori sisa yang telah kosong: `app/modules/logs_mgmt/` (digantikan `optical_logs`), `portal_pelanggan/` (dipindah ke `app/portal/`), dan `data/`.
+  - Terverifikasi: aplikasi tetap termuat normal (36 rute) dan seluruh 30 pengujian otomatis lulus.
+
 - **Penyempurnaan Visual Diff Data Baru vs Data Lama pada Modal Lengkapi Data / Import Pelanggan ([frontend/src/components/import_wizard/ImportStepPreview.jsx](frontend/src/components/import_wizard/ImportStepPreview.jsx), [app/modules/customers/importer.py](app/modules/customers/importer.py), [app/services/network_bill_service.py](app/services/network_bill_service.py))**:
   - Menyelesaikan masalah tidak tampilnya data lama pada tabel Langkah 3 Pratinjau & Simpan saat terdeteksi status "Ada Perbedaan Data".
   - Mengimplementasikan komparasi visual sebelum dan sesudah (*Visual Diff*) secara elegan per kolom (Nama Pelanggan, No WhatsApp, Alamat Pemasangan, dan WiFi):

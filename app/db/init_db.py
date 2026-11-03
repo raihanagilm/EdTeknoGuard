@@ -67,7 +67,7 @@ def init_db():
 
             all_kantors = db.query(Kantor).all()
             for kt in all_kantors:
-                db.add(UserKantor(user_id=admin_user.id, id_kantor=kt.id_kantor, kantor_kode=kt.nama.lower()))
+                db.add(UserKantor(user_id=admin_user.id, id_kantor=kt.id_kantor))
             db.commit()
             print("  -> [OK] Super Admin & hak akses kantor berhasil dibuat.")
 
