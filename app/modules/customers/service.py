@@ -581,12 +581,8 @@ class CustomerService:
 
         if "no_wa" in update_dict and update_dict["no_wa"] is not None:
             new_wa_val = str(update_dict["no_wa"]).strip()
-            from app.core.security import verify_password, get_password_hash, DEFAULT_CUSTOMER_PASSWORD
-            is_still_default = (
-                not cust.password_hash
-                or verify_password(DEFAULT_CUSTOMER_PASSWORD, cust.password_hash)
-                or (cust.no_hp and verify_password(cust.no_hp.strip(), cust.password_hash))
-            )
+            from app.core.security import verify_password, get_password_hash, DEFAULT_CUSTOMER_PASSWORD, is_default_customer_password
+            is_still_default = is_default_customer_password(cust, candidate_phones=[new_wa_val])
             cust.no_hp = new_wa_val
             if is_still_default and new_wa_val and new_wa_val != "-":
                 cust.password_hash = get_password_hash(new_wa_val)

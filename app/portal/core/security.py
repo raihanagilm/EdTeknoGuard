@@ -3,6 +3,7 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from fastapi import Request, HTTPException
 from fastapi.responses import RedirectResponse
 from app.core.config import settings
+from app.core.security import is_default_customer_password
 import bcrypt
 
 CUSTOMER_SESSION_COOKIE = "edtekno_pelanggan_session"

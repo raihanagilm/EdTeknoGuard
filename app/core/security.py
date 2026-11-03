@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Optional, Dict, Any, List
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from fastapi import Request, HTTPException, status
@@ -48,7 +49,92 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         return False
 
 def get_password_hash(password: str) -> str:
+
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+
+
+def is_default_customer_password(cust: Any, candidate_phones: Optional[List[str]] = None) -> bool:
+
+    """
+
+    Memeriksa apakah kata sandi pelanggan masih kata sandi bawaan sistem:
+
+    1. Belum ada password_hash
+
+    2. Cocok dengan default '123456'
+
+    3. Cocok dengan variasi format nomor WhatsApp terdaftar (08..., 628..., 8..., +628...)
+
+    Jika pelanggan sudah mengubah sandi kustom sendiri (misal: 'rahasia123'), fungsi ini mengembalikan False.
+
+    """
+
+    if not cust or not getattr(cust, "password_hash", None):
+
+        return True
+
+
+
+    # 1. Cek default '123456'
+
+    if verify_password(DEFAULT_CUSTOMER_PASSWORD, cust.password_hash):
+
+        return True
+
+
+
+    # 2. Cek seluruh variasi format nomor WhatsApp
+
+    phones_to_check = []
+
+    cust_no_hp = getattr(cust, "no_hp", None)
+
+    if cust_no_hp:
+
+        phones_to_check.append(str(cust_no_hp))
+
+    if candidate_phones:
+
+        phones_to_check.extend([str(p) for p in candidate_phones if p])
+
+
+
+    for raw_phone in phones_to_check:
+
+        clean = re.sub(r'[^0-9]', '', str(raw_phone).strip())
+
+        if not clean:
+
+            continue
+
+        core = clean
+
+        if core.startswith("62"):
+
+            core = core[2:]
+
+        elif core.startswith("0"):
+
+            core = core[1:]
+
+
+
+        if len(core) >= 8:
+
+            variants = [clean, core, f"0{core}", f"62{core}"]
+
+            for v in variants:
+
+                if verify_password(v, cust.password_hash):
+
+                    return True
+
+
+
+    return False
+
+
 
 def parse_allowed_kantor(allowed_kantor_val, valid_kantors: Optional[List[str]] = None) -> List[str]:
     valid_list = [k.lower().strip() for k in (valid_kantors or get_all_kantor_codes())]

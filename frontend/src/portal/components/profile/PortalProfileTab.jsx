@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   User,
   ShieldCheck,
@@ -29,6 +30,7 @@ import { PortalToastNotification } from '../common/PortalToastNotification';
 export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdate, onLogout, onOpenNotifications , hasUnreadNotifications}) {
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   
   // Floating Toast State (Pengganti banner inline)
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
@@ -530,8 +532,9 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
           {/* ═══ TOMBOL LOGOUT DARI AKUN PORTAL ═══ */}
           <div className="mx-3">
             <button
-              onClick={onLogout}
-              className="w-full py-3.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 portal-body-bold flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer"
+              type="button"
+              onClick={() => setIsLogoutConfirmOpen(true)}
+              className="w-full py-3.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 portal-body-bold flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer active:scale-98"
             >
               <LogOut className="w-4 h-4" />
               <span>Keluar dari Akun Portal</span>
@@ -541,8 +544,13 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
       </main>
 
       {/* ═══ MODAL POPUP EDIT DATA DIRI (NAMA, NO WA, ALAMAT) ═══ */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn">
+      {isEditModalOpen && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !profileSaving) setIsEditModalOpen(false);
+          }}
+        >
           <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-scaleUp">
             <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -625,7 +633,61 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ═══ MODAL KONFIRMASI LOGOUT DENGAN MASKOT SEDIH (PORTAL BODY Z-9999) ═══ */}
+      {isLogoutConfirmOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsLogoutConfirmOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="w-full max-w-xs sm:max-w-sm bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden p-5 space-y-4 animate-scaleUp text-center"
+          >
+            {/* Maskot Router Sedih */}
+            <div className="flex justify-center pt-2">
+              <PortalActiveMascot mascotKey="sedih" className="w-28 h-20" />
+            </div>
+
+            <div className="space-y-1.5 px-2">
+              <h3 className="text-base font-black text-gray-900 leading-tight">
+                Keluar dari Akun?
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed font-medium">
+                Apakah Anda yakin ingin keluar dari akun portal TeknoCust?
+              </p>
+            </div>
+
+            {/* Tombol Aksi Berdampingan */}
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsLogoutConfirmOpen(false)}
+                className="flex-1 min-h-[44px] py-2.5 px-3 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-bold transition active:scale-95 cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogoutConfirmOpen(false);
+                  onLogout();
+                }}
+                className="flex-1 min-h-[44px] py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Ya, Keluar</span>
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* ═══ TOAST NOTIFIKASI MELAYANG (DI ATAS BOTTOM NAV) ═══ */}

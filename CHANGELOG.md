@@ -27,6 +27,15 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Modal Pop-up Konfirmasi Logout Interaktif dengan Maskot Sedih ([PortalProfileTab.jsx](frontend/src/portal/components/profile/PortalProfileTab.jsx))**:
+  - Menambahkan pop-up konfirmasi dialog saat tombol *"Keluar dari Akun Portal"* ditekan untuk mencegah pengguna ter-logout secara tidak sengaja.
+  - Memuat maskot router sedih animasi resmi (`PortalActiveMascot mascotKey="sedih"`), pesan konfirmasi ramah *"Apakah Anda yakin ingin keluar dari akun portal TeknoCust?"*, serta sepasang tombol aksi berdampingan (*Batal* dan *Ya, Keluar*) dengan tap-target nyaman $\ge 44\text{px}$.
+  - **Isolasi Stacking Context Modal via React Portal**: Memindahkan render modal langsung ke `document.body` menggunakan `createPortal` dengan `z-[9999]` dan backdrop blur penuh sehingga bilah navigasi bawah (*Bottom Navigation*) otomatis tertutup lapisan gelap dan tidak dapat diklik selama pop-up konfirmasi terbuka.
+
+- **Ekspor Data Pembayaran Pelanggan Kantor Tengaran ke Excel ([Data_Pembayaran_Kantor_Tengaran.xlsx](Data_Pembayaran_Kantor_Tengaran.xlsx))**:
+  - Menyediakan berkas rekapitulasi data pembayaran khusus Kantor Tengaran (145 pelanggan) mencakup ID Pelanggan, Nomor Pelanggan, Nama Lengkap, Nomor WhatsApp, Paket Internet, Biaya Bulanan, Status Pembayaran, Metode Pembayaran, Tanggal Tagihan, dan Catatan Akun.
+  - Berkas diformat secara profesional dengan header navy gelap, border sel, conditional fill status (LUNAS hijau / BELUM BAYAR merah), dan pemformatan mata uang rupiah.
+
 - **Fitur Tagihan & Pembayaran Virtual Account Portal Pelanggan TeknoCust ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
   - Mengganti banner statis "Fitur Segera Hadir" dengan halaman tagihan nyata yang membaca Network Bill API v1 (lihat [api-v1.md](api-v1.md)) secara **live** tiap halaman dibuka. Tagihan dan nomor VA DILARANG ditampilkan dari salinan database lokal: pelanggan yang baru membayar di kasir akan tetap melihat "belum bayar".
   - **Dua sub-tab**: `Tagihan` (daftar belum lunas, kartu bayar, kanal bank) dan `Riwayat` (pembayaran lunas beserta label metode ramah warga: Tunai ke Petugas, Transfer Bank, Virtual Account).
@@ -43,7 +52,60 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 - **Method Billing pada [NetworkBillService](app/services/network_bill_service.py)**: `fetch_invoices`, `fetch_virtual_account`, dan `fetch_connection_status` (hak akses `billing:read` dan `network:read`, keduanya sudah aktif pada klien API). Seluruhnya mengembalikan amplop seragam `{ok, status, data, message, retry_after}` tanpa melempar exception, supaya portal dapat membedakan 404, `channels: []`, dan 429.
 - **Suite Pengujian Modul Pembayaran ([tests/test_portal_payment_module.py](tests/test_portal_payment_module.py))**: 31 pengujian atas logika bisnis nyata, meliputi penautan identitas, penolakan kode pelanggan sebagai id, pembedaan empat keadaan VA, perapian nominal dan kecepatan paket, mesin keputusan "sudah bayar", perilaku cache, dan proteksi endpoint tanpa sesi.
 
+### Fixed
+- **Sinkronisasi Properti Tagihan Belum Lunas (`tagihan.unpaid`) ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
+  - Memperbaiki pembacaan properti tagihan belum lunas dari backend `PaymentService.build_billing_page` yang mengembalikan kunci `unpaid`, bukan `unpaid_invoices`.
+  - Mengeliminasi bug tampilan di mana akun pelanggan yang menunggak (seperti akun Bpk. Hariyanto dengan tunggakan 2 bulan senilai Rp 250.000) keliru menampilkan banner hijau *"Semua Tagihan Lunas!"*.
+  - Sekarang kartu tagihan aktif langsung merender rincian invoice tertunggak (nominal, periode, badge telat, dan peringatan tagihan lain) secara presisi.
+
+- **Penyempurnaan Resolusi Tagihan Aktif & Integrasi Kanal VA ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
+  - Memperbaiki logika `activeBill` agar memprioritaskan `tagihan.next_bill`, dengan fallback otomatis ke invoice belum lunas pertama (`unpaidInvoices[0]`) bila API PoP kantor lokal berstatus `inactive` (VA gateway belum terbit dari server pusat).
+  - Mencegah kartu tagihan salah menampilkan status "Semua Tagihan Lunas!" pada pelanggan yang masih memiliki tagihan tertunggak.
+  - Memisahkan tagihan aktif di Kartu 1 dengan tagihan belum lunas lainnya di Kartu 2 (`otherUnpaidInvoices`) sehingga tidak terjadi tampilan data ganda.
+
+- **Fleksibilitas Format Nomor WhatsApp Kata Sandi Awal Pelanggan ([app/core/security.py](app/core/security.py), [app/portal/modules/auth/service.py](app/portal/modules/auth/service.py))**:
+  - Menyediakan helper terpusat `is_default_customer_password` yang mengenali seluruh permutasi format nomor WhatsApp (`08...`, `628...`, `8...`) serta nilai bawaan `123456`.
+  - Pelanggan kini dapat masuk menggunakan format nomor WhatsApp apa pun pada input nomor maupun kata sandi awal (misal: input `6285640301078` dengan kata sandi `6285640301078` maupun `085640301078`) tanpa terblokir pesan 'Kata sandi salah'.
+  - Proteksi keamanan tetap terjaga 100%: jika pelanggan telah mengubah kata sandi kustom sendiri di aplikasi, fungsi secara ketat mengembalikan `False` sehingga nomor WhatsApp tidak dapat digunakan untuk masuk ke akun tersebut.
+
 ### Changed
+- **Pembersihan Antarmuka Tab Riwayat & Pengendalian Kartu Tagihan ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx), [PaymentRiwayatList.jsx](frontend/src/portal/components/payment/PaymentRiwayatList.jsx))**:
+  - **Isolasi Kartu Tagihan**: Membatasi Kartu 2 ("Tagihan Periode Berikutnya") hanya aktif saat `subTab === 'tagihan'`, sehingga tab Riwayat bersih 100% dari kartu tagihan tertunggak.
+  - **Penyederhanaan Header Riwayat**: Menghapus baris KPI mini `Total Terbayar: Rp ... (X Transaksi)` dari tab Riwayat agar antarmuka lebih lega, rapi, dan langsung menampilkan filter tahun serta daftar struk pembayaran lunas.
+
+- **Penerapan Prioritas Tagihan Tertua (FIFO) & Otomasi Verifikasi Pembayaran ([service.py](app/portal/modules/payment/service.py), [PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
+  - **Prinsip FIFO (First-In, First-Out)**: Tagihan belum lunas diurutkan secara kronologis menaik (`due_date`/`billing_period`). Kartu 1 (Aktif) selalu memprioritaskan tagihan tertua (seperti September 2026 yang terlambat), sedangkan tagihan bulan berjalan (Oktober 2026) masuk antrean di Kartu 2 ("Tagihan Periode Berikutnya").
+  - Begitu tagihan tertua terbayar lunas, sistem secara otomatis menggeser tagihan berikutnya naik ke Kartu 1 untuk dilunasi.
+  - **Eliminasi Tombol Manual & Verifikasi Sepenuhnya Otomatis**: Menghapus tombol konfirmasi manual *"Saya Sudah Bayar"* yang menimbulkan kebingungan klaim manual sepihak pada pembayaran Virtual Account bank.
+  - **Fitur Cerdas Auto-Refresh Tab (`visibilitychange`)**: Menambahkan listener visibilitas browser di mana saat warga berpindah dari aplikasi m-Banking/ATM kembali ke tab portal, sistem secara otomatis melakukan pembaruan senyap (*silent refresh*) ke Network Bill API sehingga status tagihan seketika berubah menjadi Lunas tanpa perlu menekan tombol apa pun.
+  - Menyematkan strip informasi tenang pada footer kartu: *"Transfer via menu Virtual Account bank pilihan Anda. Pembayaran diverifikasi otomatis dalam 1–5 menit tanpa perlu kirim konfirmasi manual."*
+
+- **Pemisahan Komponen Riwayat Pembayaran & Fitur Pengendalian Data Panjang ([PaymentRiwayatList.jsx](frontend/src/portal/components/payment/PaymentRiwayatList.jsx))**:
+  - Mengekstrak sub-tab riwayat menjadi komponen mandiri `PaymentRiwayatList.jsx` untuk menjaga modularitas domain `components/payment/`.
+  - Menambahkan **Mini KPI Akumulasi**: Menampilkan total uang yang telah dibayarkan dan jumlah transaksi lunas di header riwayat.
+  - Menambahkan **Filter Tahun Dinamis**: Otomatis mengekstrak tahun unik dari riwayat (misal: *Semua*, *2026*, *2025*) dalam bentuk pill tab horizontal ramah mobile.
+  - Menambahkan **Paginasi Bersih Ramah Mobile (5 Transaksi per Halaman)**: Mencegah scroll panjang tak terbatas saat data langganan pelanggan terakumulasi bertahun-tahun, lengkap dengan navigasi tombol *Sebelumnya / Selanjutnya*.
+  - Menyajikan label dan ikon metode pembayaran resmi (*Virtual Account*, *Transfer Bank*, *Tunai Petugas*) pada setiap baris struk riwayat.
+
+- **Modularisasi Modul Tagihan & Optimasi Kecepatan SWR In-Memory ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx), [PaymentKanalBank.jsx](frontend/src/portal/components/payment/PaymentKanalBank.jsx), [PaymentCheckModal.jsx](frontend/src/portal/components/payment/PaymentCheckModal.jsx), [paymentUtils.js](frontend/src/portal/components/payment/paymentUtils.js))**:
+  - Memecah berkas monolitik `PortalPaymentTab.jsx` (807 baris) menjadi 4 unit modular berbasis domain (*Co-location*):
+    - `PortalPaymentTab.jsx`: Shell utama manajemen tab, nominal utama, dan kartu tagihan.
+    - `PaymentKanalBank.jsx`: Komponen accordion bank Virtual Account dengan logika clipboard salin 16 digit.
+    - `PaymentCheckModal.jsx`: Pop-up dialog melayang konfirmasi pembayaran dan manajemen timer polling 120 detik.
+    - `paymentUtils.js`: Kumpulan fungsi pembantu murni (*pure helper*) format rupiah, periode, dan tanggal.
+  - Mengimplementasikan pola **SWR (Stale-While-Revalidate)** di level modul frontend (`_cachedTagihanData` & `_cachedRiwayatData`) sehingga saat pelanggan berpindah ke menu Bayar, data langsung terbuka **seketika (0 ms)** tanpa jeda loading atau kedip skeleton, dengan *silent background refresh* otomatis.
+
+- **Pembersihan Border Berlebihan (Anti Box-in-Box) & Monokromatik Biru Halaman Tagihan ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
+  - Menghilangkan seluruh kotak-dalam-kotak abu-abu bertingkat pada rincian periode, batas jatuh tempo, dan nomor Virtual Account; menggantinya dengan baris tipografi bersih bergaris pembatas tipis (`divide-y divide-gray-100`).
+  - Menghapus kotak peringatan kuning amber pada accordion bank dan menyelaraskan teks pengingat nominal dengan ikon `Info` biru tenang (`text-slate-500 font-medium`).
+  - Menghilangkan kartu ketiga yang terisolasi di bagian bawah dan menyatukannya sebagai strip bantuan terpadu di dasar kartu utama (`bg-blue-50/60 border-t border-gray-100`), seragam dengan pola strip *Unlimited* pada menu Kuota.
+  - Menstandarisasi warna tombol aksi utama *"Saya Sudah Bayar"* menjadi warna primer **Blue 600** (`bg-blue-600 hover:bg-blue-700`) serta mengisolasi warna hijau murni hanya untuk penanda status pelunasan (*Lunas*).
+  - Merapikan daftar riwayat pembayaran menjadi tabel baris bersih ber-divider tanpa membungkus setiap item dalam kotak ber-border.
+
+- **Penyelarasan Modal Status Pembayaran ke Pola Pop-Up Melayang ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
+  - Menggantikan pola bottom sheet (`rounded-t-3xl`) dengan pop-up dialog melayang di tengah layar (*centered floating modal*) identik dengan `ConnectedDevicesModal`.
+  - Menggunakan `createPortal(..., document.body)` dengan backdrop gelap blur `fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs`, header bergradien lembut, badge ikon `ReceiptText`, tombol close melingkar `<X />`, info card `ShieldCheck`, serta tombol tutup responsif.
+
 - **Penyelarasan Tampilan Halaman Tagihan & Pembayaran ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
   - Menyamakan tata letak dan elevasi visual dengan menu **Kendala (Gambar 1)** dan **Kuota (Gambar 2)**:
     - **Kartu Utama 1**: Menggunakan shell `rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100` yang menimpa lengkungan header biru (`-mt-3`), lengkap dengan card header standar badge ikon `ReceiptText` (`w-10 h-10 rounded-xl bg-blue-100 text-blue-700`), judul tebal *"Total Tagihan Bulan Ini"*, serta sub-tab switcher terpadu di sisi kanan header.

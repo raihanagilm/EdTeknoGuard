@@ -224,18 +224,14 @@ class AuthService:
         if cust.password_hash:
             is_valid = verify_password(pwd, cust.password_hash)
 
-        # Jika verifikasi hash langsung belum cocok (misal hash masih default '123456' dari sync awal atau format nomor WA 08 vs 62):
-        if not is_valid and AuthService._is_matching_default_phone_password(cust, pwd):
+        # Jika verifikasi hash langsung belum cocok (misal format nomor WA 08 vs 62 atau hash '123456'):
+        from app.core.security import is_default_customer_password
+        if not is_valid and (AuthService._is_matching_default_phone_password(cust, pwd) or pwd == DEFAULT_CUSTOMER_PASSWORD):
             # Periksa apakah kata sandi saat ini masih default (belum diubah kustom sendiri oleh pelanggan)
-            is_still_default = (
-                not cust.password_hash
-                or verify_password(DEFAULT_CUSTOMER_PASSWORD, cust.password_hash)
-                or (cust.no_hp and verify_password(cust.no_hp.strip(), cust.password_hash))
-            )
-            if is_still_default:
+            if is_default_customer_password(cust, candidate_phones=[pwd]):
                 is_valid = True
                 # Mutakhirkan password_hash ke input Nomor WhatsApp agar tersinkronisasi rapi
-                cust.password_hash = get_password_hash(pwd)
+                cust.password_hash = get_password_hash(pwd if pwd != DEFAULT_CUSTOMER_PASSWORD else (cust.no_hp.strip() if cust.no_hp else DEFAULT_CUSTOMER_PASSWORD))
 
         if not is_valid:
             if is_tenant_db_opened:

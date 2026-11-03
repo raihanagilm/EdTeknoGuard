@@ -459,13 +459,9 @@ class CustomerImporter:
 
                     # 1. Update No. WhatsApp & Kata Sandi Default
                     if new_wa:
-                        from app.core.security import verify_password, get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+                        from app.core.security import verify_password, get_password_hash, DEFAULT_CUSTOMER_PASSWORD, is_default_customer_password
                         # Periksa apakah user belum mengganti kata sandi kustom sendiri di aplikasi
-                        is_still_default_pwd = (
-                            not existing_pel.password_hash
-                            or verify_password(DEFAULT_CUSTOMER_PASSWORD, existing_pel.password_hash)
-                            or (existing_pel.no_hp and verify_password(existing_pel.no_hp.strip(), existing_pel.password_hash))
-                        )
+                        is_still_default_pwd = is_default_customer_password(existing_pel, candidate_phones=[new_wa])
                         if not existing_pel.no_hp:
                             # Jika kosong, langsung isi
                             existing_pel.no_hp = new_wa
@@ -478,10 +474,11 @@ class CustomerImporter:
                             if is_still_default_pwd:
                                 existing_pel.password_hash = get_password_hash(new_wa.strip())
                             has_change = True
-                        elif is_still_default_pwd and verify_password(DEFAULT_CUSTOMER_PASSWORD, existing_pel.password_hash):
-                            # Jika nomor WA sudah cocok tetapi hash masih '123456', sinkronkan kata sandi ke nomor WA
-                            existing_pel.password_hash = get_password_hash(new_wa.strip())
-                            has_change = True
+                        elif is_still_default_pwd:
+                            # Jika nomor WA cocok atau diperbarui dan sandi masih default, sinkronkan kata sandi ke nomor WA
+                            if not verify_password(new_wa.strip(), existing_pel.password_hash):
+                                existing_pel.password_hash = get_password_hash(new_wa.strip())
+                                has_change = True
 
                     # 2. Update Alamat
                     if new_alamat:

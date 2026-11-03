@@ -237,7 +237,13 @@ class PaymentService:
                 "unpaid": [], "next_bill": None, "channels": [], "other_unpaid": [],
             }
 
-        unpaid = [cls.shape_invoice(r) for r in (inv_res.get("data") or [])]
+        raw_invoices = inv_res.get("data") or []
+        # Urutkan tagihan belum lunas dari yang paling lama/jatuh tempo awal (FIFO)
+        raw_invoices = sorted(
+            raw_invoices,
+            key=lambda x: (str(x.get("due_date") or x.get("billing_period") or ""), int(x.get("id") or 0))
+        )
+        unpaid = [cls.shape_invoice(r) for r in raw_invoices]
 
         # Keadaan VA
         va_state = "payable"
