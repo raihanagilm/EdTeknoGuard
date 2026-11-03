@@ -164,4 +164,24 @@ export class PortalProfilService {
   }
 }
 
+export class PortalPembayaranService {
+  /** Halaman Tagihan: daftar belum lunas, kartu bayar, dan kanal bank. Dibaca live. */
+  static async getTagihan() {
+    return new PortalApiService().get('/pembayaran');
+  }
+
+  /** Riwayat tagihan yang sudah lunas, termasuk pembayaran tunai ke petugas. */
+  static async getRiwayat(limit = 24) {
+    return new PortalApiService().get('/pembayaran/riwayat', { limit });
+  }
+
+  /**
+   * Satu kali pemeriksaan sesudah pelanggan menekan "Saya sudah bayar".
+   * Jeda 10 detik, batas 2 menit, dan penghentian saat 429 diatur pemanggil.
+   */
+  static async periksaPembayaran(invoiceId) {
+    return new PortalApiService().get('/pembayaran/periksa', { invoice_id: invoiceId });
+  }
+}
+
 export const portalApi = new PortalApiService();

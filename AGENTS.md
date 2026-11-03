@@ -106,7 +106,7 @@ EdTeknoGuard/
 │   ├── portal/                # Sub-aplikasi backend Portal Pelanggan TeknoCust (/portal)
 │   │   ├── main.py            # Bootstrap sub-app FastAPI portal
 │   │   ├── core/              # Security, session token, & helper validasi wifi_check
-│   │   ├── modules/           # Modul REST API: auth, dashboard, quota, tickets, wifi, profile, speedtest
+│   │   ├── modules/           # Modul REST API: auth, dashboard, quota, tickets, wifi, profile, speedtest, payment
 │   │   └── api_router.py      # Aggregator router portal (/portal/api)
 │   ├── services/              # External service layer
 │   │   ├── scraper/           # Scraper modular: credential_chain, optical_parser, zte, xpon
@@ -262,6 +262,16 @@ EdTeknoGuard/
     - **Cek Penggunaan Kuota & Larangan Menampilkan Sisa Kuota**:
       - Menampilkan pemakaian kuota bulan berjalan (GB), nama paket, kecepatan (Mbps), dan histori pemakaian 7 hari terakhir.
       - **KEBIJAKAN MUTLAK SOP**: DILARANG KERAS menampilkan kata atau angka "Sisa Kuota" di seluruh antarmuka pelanggan (layanan bersifat unlimited).
+    - **Tagihan & Pembayaran Virtual Account (`/portal/pembayaran`)**:
+      - Sumber data tunggal: **Network Bill API v1** ([api-v1.md](api-v1.md)), dibaca **live** tiap halaman dibuka. DILARANG KERAS menyalin tagihan atau nomor VA ke database lokal lalu menampilkannya dari salinan: pelanggan yang baru membayar di kasir akan tetap melihat "belum bayar".
+      - **Portal tidak berada di jalur uang**: pelanggan membayar ke bank, Faspay meneruskan ke Network Bill, Network Bill melunasi tagihan. Portal hanya menampilkan nomor dan nominal lalu membaca ulang hasilnya. Portal DILARANG memanggil Faspay, dan tidak ada webhook masuk ke portal.
+      - **Identitas pelanggan = slug PoP (kolom `kantor`) + `id` numerik (kolom `id_pelanggan`)**. Kode pelanggan (`PLG-0012` / `BMS-0001`) DILARANG dipakai sebagai kunci API: kode bisa berulang antar-PoP, bisa berganti, dan angkanya tidak selalu sama dengan `id`.
+      - **Satu bayar, satu tagihan, selalu yang tertua**. Tidak ada cicilan dan pelanggan DILARANG diberi pilihan tagihan mana yang dibayar atau input nominal bebas.
+      - **Nominal tertutup**: `amount_to_pay` ditampilkan apa adanya dari API dan DILARANG dihitung ulang di portal. Nomor VA wajib tersalin sebagai 16 digit bersih walau tampilannya dikelompokkan 4-4-4-4.
+      - **Empat keadaan wajib dibedakan**: `not_linked` (belum tertaut), `inactive` (HTTP 404, VA belum aktif di PoP, bayar lewat petugas), `not_issued` (`channels: []`, nomor VA belum diterbitkan admin), dan `no_bill` (`next_bill: null`).
+      - **Sesudah bayar**: baca ulang tiap 10 detik maksimal 2 menit lalu BERHENTI total, berhenti juga saat HTTP 429 (batas 120 request per menit berlaku untuk SELURUH portal). Belum lunas sesudah 2 menit WAJIB disebut *sedang diproses*, DILARANG disebut gagal; ajakan menghubungi petugas baru muncul sesudah 15 menit.
+      - **Lunas bukan berarti internet menyala**: selama `router_isolated` pada `/connections/status` masih `true`, tampilkan bahwa koneksi menunggu dibuka petugas. Sistem ini hanya membaca status tersebut; isolir dikerjakan di aplikasi Network Bill.
+      - **QRIS belum tersedia** dan DILARANG ditampilkan (termasuk sebagai placeholder) sampai endpoint resminya terbit.
     - **Menu Kelola WiFi Rumah (`/portal/wifi`)**:
       - Menu khusus bagi pelanggan terverifikasi untuk melihat nama WiFi sekarang, kata sandi sekarang, dan mengganti Nama WiFi (SSID) serta Kata Sandi WiFi baru (minimal 8 karakter).
       - Dilengkapi tutorial edukasi warga desa bahwa perangkat wajib tersambung ke WiFi rumah sendiri.
@@ -362,7 +372,7 @@ EdTeknoGuard/
    - **Cakupan Pengujian Komprehensif**: Suite pengujian 	ests/ wajib mencakup:
      1. Integritas model MasterBase dan TenantBase beserta aturan non-cross-database foreign key di [app/db/models.py](app/db/models.py).
      2. Modul domain admin baru: tiket ([app/modules/tickets](app/modules/tickets)), kuota ([app/modules/quota](app/modules/quota)), notifikasi ([app/modules/notifications](app/modules/notifications)), dan log optik ([app/modules/optical_logs](app/modules/optical_logs)).
-     3. Router aggregator REST API portal pelanggan ([app/portal/api_router.py](app/portal/api_router.py)) yang mendaftarkan endpoint 7 domain modular ([app/portal/modules](app/portal/modules): auth, dashboard, quota, tickets, wifi, profile, speedtest).
+     3. Router aggregator REST API portal pelanggan ([app/portal/api_router.py](app/portal/api_router.py)) yang mendaftarkan endpoint 8 domain modular ([app/portal/modules](app/portal/modules): auth, dashboard, quota, tickets, wifi, profile, speedtest, payment).
      4. Logika validasi bisnis krusial (ambang batas redaman optik SOP -26.0 dBm warning dan -27.0 dBm kritis, keamanan strict IP check WiFi rumah, dan cascade deletion).
 
 

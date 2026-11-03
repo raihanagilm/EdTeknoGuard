@@ -103,6 +103,8 @@ CREATE TABLE IF NOT EXISTS `pelanggan` (
     `pop` VARCHAR(100) DEFAULT 'Server Cabang',
     `id_kantor` INT NULL,
     `kantor` VARCHAR(50) DEFAULT 'cabang',
+    `nb_pop_slug` VARCHAR(50) NULL,
+    `nb_customer_id` INT NULL,
     `paket` VARCHAR(50) NULL,
     `is_monitored` BOOLEAN NOT NULL DEFAULT TRUE,
     `is_active` BOOLEAN NOT NULL DEFAULT TRUE,
@@ -125,6 +127,7 @@ CREATE TABLE IF NOT EXISTS `pelanggan` (
     INDEX `idx_pelanggan_kantor` (`kantor`),
     INDEX `idx_pelanggan_monitored` (`is_monitored`),
     INDEX `idx_pelanggan_verif` (`status_verifikasi`),
+    INDEX `idx_pelanggan_nb` (`nb_pop_slug`, `nb_customer_id`),
     CONSTRAINT `fk_pelanggan_paket` FOREIGN KEY (`paket`) REFERENCES `pakets` (`nama`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -83,13 +83,17 @@ class PerangkatONT(TenantBase):
 class Pelanggan(TenantBase):
     __tablename__ = "pelanggan"
 
+    # Identitas pelanggan di Network Bill = kantor (slug PoP) + id_pelanggan (id numerik NB).
+    # Alur Lengkapi Data menimpa kolom ini dengan `id` numerik dari API (mis. "337"),
+    # BUKAN dengan `code` (mis. "BMS-0001"): keduanya berbeda dan hanya `id` yang
+    # diterima endpoint tagihan/VA. FK tabel anakan ON UPDATE CASCADE, jadi ikut berpindah.
     id_pelanggan = Column(String(64), primary_key=True, nullable=False, index=True)
     nama = Column(String(150), nullable=False, index=True)
     alamat = Column(Text, nullable=True)
     no_hp = Column(String(50), nullable=True)
     pop = Column(String(100), nullable=True, default="Server Cabang", index=True)
     id_kantor = Column(Integer, nullable=True, index=True)
-    kantor = Column(String(50), nullable=True, default="cabang", index=True) # cabang, pusat, banyumas
+    kantor = Column(String(50), nullable=True, default="cabang", index=True) # slug PoP Network Bill: slawi, banyumas, karanggede, tengaran
     paket = Column(String(50), ForeignKey("pakets.nama", onupdate="CASCADE", ondelete="SET NULL"), nullable=True)
     is_monitored = Column(Boolean, default=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False)

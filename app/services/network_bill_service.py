@@ -21,12 +21,118 @@ class NetworkBillService:
     @classmethod
     def get_headers(cls, is_billing: bool = False) -> Dict[str, str]:
         token = settings.NETWORK_BILL_BILLING_TOKEN if is_billing else settings.NETWORK_BILL_API_TOKEN
-        if not token and not is_billing:
+        if not token:
+            # Hak akses melekat ke klien API, bukan ke token: satu token yang sudah
+            # diberi billing:read melayani keduanya. Fallback ini agar deployment
+            # dengan token tunggal tetap jalan.
             token = settings.NETWORK_BILL_API_TOKEN
         return {
             "Authorization": f"Bearer {token}",
             "Accept": "application/json"
         }
+
+    # ══════════════════════════════════════════════════════════════════
+    # TAGIHAN & PEMBAYARAN (hak akses billing:read)
+    # Dibaca LIVE tiap pelanggan membuka halaman. DILARANG disalin ke
+    # database lokal lalu ditampilkan dari salinan: pelanggan yang baru
+    # membayar di kasir akan tetap melihat "belum bayar".
+    # ══════════════════════════════════════════════════════════════════
+
+    @classmethod
+    def _billing_get(cls, path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Pemanggil mentah endpoint billing. Mengembalikan amplop seragam
+        {ok, status, data, message, retry_after} tanpa pernah melempar exception,
+        supaya portal bisa membedakan 404, channels kosong, dan 429.
+        """
+        token = settings.NETWORK_BILL_BILLING_TOKEN or settings.NETWORK_BILL_API_TOKEN
+        if not token:
+            return {
+                "ok": False, "status": 0, "data": None, "retry_after": None,
+                "message": "Token Network Bill belum diisi di file .env (NETWORK_BILL_BILLING_TOKEN atau NETWORK_BILL_API_TOKEN).",
+            }
+
+        url = f"{cls.get_base_url()}{path}"
+        try:
+            resp = requests.get(url, headers=cls.get_headers(is_billing=True), params=params or {}, timeout=15)
+        except Exception as e:
+            logger.error(f"Network Bill billing request gagal {path}: {e}")
+            return {
+                "ok": False, "status": 0, "data": None, "retry_after": None,
+                "message": "Tidak dapat menghubungi server tagihan. Periksa koneksi internet server.",
+            }
+
+        try:
+            body = resp.json()
+        except Exception:
+            body = {}
+
+        if resp.status_code == 200:
+            return {"ok": True, "status": 200, "data": body.get("data"), "message": None, "retry_after": None}
+
+        retry_after = None
+        if resp.status_code == 429:
+            try:
+                retry_after = int(resp.headers.get("Retry-After") or 0) or None
+            except (TypeError, ValueError):
+                retry_after = None
+
+        message = body.get("message") if isinstance(body, dict) else None
+        if not message:
+            message = {
+                401: "Token Network Bill tidak valid atau kedaluwarsa.",
+                403: "Klien API belum diberi hak akses 'billing:read'.",
+                404: "Data tagihan tidak ditemukan.",
+                422: "Parameter permintaan tidak valid.",
+                429: "Permintaan ke server tagihan sedang padat.",
+            }.get(resp.status_code, f"Server tagihan menjawab {resp.status_code}.")
+
+        if resp.status_code >= 500 or resp.status_code in (401, 403, 429):
+            logger.warning(f"Network Bill billing {resp.status_code} on {path}: {message}")
+
+        return {
+            "ok": False, "status": resp.status_code, "data": None,
+            "message": message, "retry_after": retry_after,
+        }
+
+    @classmethod
+    def fetch_invoices(
+        cls,
+        pop_slug: str,
+        customer_id: Any,
+        status: Optional[str] = None,
+        limit: int = 24,
+    ) -> Dict[str, Any]:
+        """
+        GET /pops/{pop}/customers/{id}/invoices
+        `status` boleh 'unpaid', 'paid', 'cancelled', atau gabungan dipisah koma.
+        Urut periode terbaru dulu. `limit` dibatasi API pada 1-120.
+        """
+        params: Dict[str, Any] = {"limit": max(1, min(int(limit or 24), 120))}
+        if status:
+            params["status"] = status
+        return cls._billing_get(f"/pops/{pop_slug}/customers/{customer_id}/invoices", params)
+
+    @classmethod
+    def fetch_virtual_account(cls, pop_slug: str, customer_id: Any) -> Dict[str, Any]:
+        """
+        GET /pops/{pop}/customers/{id}/virtual-account
+
+        Dua keadaan gagal yang WAJIB dibedakan portal:
+        - status 404  -> pembayaran VA belum aktif di PoP itu (bayar lewat petugas).
+        - channels [] -> nomor VA pelanggan belum diterbitkan admin.
+        """
+        return cls._billing_get(f"/pops/{pop_slug}/customers/{customer_id}/virtual-account")
+
+    @classmethod
+    def fetch_connection_status(cls, pop_slug: str) -> Dict[str, Any]:
+        """
+        GET /pops/{pop}/connections/status (hak akses network:read, modul Integrasi Router).
+        Hanya baca. Dipakai portal untuk satu hal: memberitahu pelanggan yang baru
+        melunasi bahwa koneksinya masih menunggu dibuka petugas selama
+        `router_isolated` masih True. Isolir dikerjakan di aplikasi Network Bill.
+        """
+        return cls._billing_get(f"/pops/{pop_slug}/connections/status")
 
     @classmethod
     def fetch_pops(cls) -> List[Dict[str, Any]]:
@@ -185,10 +291,15 @@ class NetworkBillService:
             long = conn.get("longitude")
             lokasi_gps = f"{lat},{long}" if lat is not None and long is not None else ""
 
-            # Gunakan code PLG (contoh: PLG-0002) sebagai ID Pelanggan resmi yang valid dari Network Bill
-            official_code = str(item.get("code") or "").strip()
+            # ID Pelanggan = `id` numerik Network Bill (identitas resmi = slug PoP + id).
+            # DILARANG memakai `code` (PLG-0002 / BMS-0001) sebagai kunci: kode bisa berulang
+            # antar-PoP, bisa berganti, dan angkanya tidak selalu sama dengan `id`
+            # (contoh nyata: PoP banyumas punya id 337 dengan code BMS-0001).
+            # Hanya `id` yang diterima endpoint tagihan dan Virtual Account.
+            nb_id = item.get("id")
+            official_code = str(nb_id).strip() if nb_id is not None else ""
             if not official_code:
-                official_code = f"PLG-{str(item.get('id', '')).zfill(4)}" if item.get("id") else str(index)
+                official_code = str(index)
 
             # Standard row data untuk EdTeknoGuard
             mapped_row = {
@@ -202,8 +313,10 @@ class NetworkBillService:
                 "paket": active_pkg_name,
                 "lokasi_gps": lokasi_gps,
                 "pop": pop_slug.upper(),
-                "network_bill_id": item.get("id"),
-                "network_bill_code": item.get("code") or official_code,
+                "kantor": pop_slug.lower(),
+                "network_bill_id": nb_id,
+                "network_bill_code": official_code,
+                "network_bill_display_code": item.get("code") or "",
                 "status_langganan": item.get("status")
             }
 

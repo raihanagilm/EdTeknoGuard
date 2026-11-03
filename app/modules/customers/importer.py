@@ -438,7 +438,9 @@ class CustomerImporter:
                     # MODE LENGKAPI DATA (Enrichment Update)
                     has_change = False
 
-                    # 0. Update ID Pelanggan ke Kode Resmi API (misal: CUST-SLA-xxx -> PLG-0002)
+                    # 0. Update ID Pelanggan ke id numerik resmi Network Bill (misal: CUST-SLA-xxx -> 337).
+                    #    Identitas pelanggan di Network Bill = slug PoP (kolom kantor) + id numerik ini.
+                    #    FK tabel anakan ON UPDATE CASCADE, jadi log/tiket/kuota ikut berpindah.
                     target_id_pel = str(row_data.get("network_bill_code") or id_pel or "").strip()
                     if target_id_pel and existing_pel.id_pelanggan != target_id_pel:
                         # Cek apakah target ID baru belum dipakai pelanggan lain
@@ -446,6 +448,14 @@ class CustomerImporter:
                         if not conflict_pel:
                             existing_pel.id_pelanggan = target_id_pel
                             has_change = True
+
+                    # 0b. Selaraskan kantor dengan slug PoP sumber data.
+                    #     Tanpa ini, pasangan (kantor, id_pelanggan) tidak menunjuk ke pelanggan
+                    #     yang benar di Network Bill dan tagihannya tidak bisa dibaca portal.
+                    nb_kantor = str(row_data.get("kantor") or "").strip().lower()
+                    if nb_kantor and (existing_pel.kantor or "").strip().lower() != nb_kantor:
+                        existing_pel.kantor = nb_kantor
+                        has_change = True
 
                     # 1. Update No. WhatsApp
                     if new_wa:

@@ -26,6 +26,23 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Added
+- **Fitur Tagihan & Pembayaran Virtual Account Portal Pelanggan TeknoCust ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
+  - Mengganti banner statis "Fitur Segera Hadir" dengan halaman tagihan nyata yang membaca Network Bill API v1 (lihat [api-v1.md](api-v1.md)) secara **live** tiap halaman dibuka. Tagihan dan nomor VA DILARANG ditampilkan dari salinan database lokal: pelanggan yang baru membayar di kasir akan tetap melihat "belum bayar".
+  - **Dua sub-tab**: `Tagihan` (daftar belum lunas, kartu bayar, kanal bank) dan `Riwayat` (pembayaran lunas beserta label metode ramah warga: Tunai ke Petugas, Transfer Bank, Virtual Account).
+  - **Kartu bayar `next_bill`**: nomor tagihan, jenis tagihan dari field `type` (Iuran Langganan / Biaya Pemasangan), periode, nominal, jatuh tempo, dan badge telat dari field `overdue` API (bukan dihitung dari tanggal, karena `issue_date` bisa lebih baru dari `due_date` pada data historis).
+  - **Accordion kanal bank**: satu blok per bank yang dibuka PoP, dirender berapa pun jumlahnya termasuk kode kanal yang belum dikenal portal (memakai label `bank` dari API). Nomor VA tampil berkelompok 4-4-4-4 sementara tombol salin menyalin **16 digit bersih tanpa spasi**. `amount_to_pay` ditampilkan apa adanya tanpa dihitung ulang.
+  - **Lembar "Saya Sudah Bayar"** (bottom sheet) dengan 5 keadaan: `checking` (baca ulang tiap 10 detik, berhenti total sesudah 2 menit), `success`, `pending` (belum lunas sesudah 2 menit disebut *sedang diproses*, bukan gagal), `stale` (ajakan menghubungi petugas baru muncul sesudah 15 menit), dan `limited` (berhenti saat HTTP 429).
+  - **Peringatan koneksi belum tersambung**: selama `router_isolated` pada `/connections/status` masih `true`, pelanggan yang baru melunasi diberi tahu koneksinya menunggu dibuka petugas. Sistem ini hanya membaca status tersebut; isolir dan pembukaannya tetap dikerjakan di aplikasi Network Bill.
+  - **Empat keadaan tanpa kartu bayar dibedakan tegas**: `not_linked` (belum tertaut), `inactive` (HTTP 404, pembayaran VA belum aktif di PoP itu, dilayani petugas), `not_issued` (`channels: []`, nomor VA belum diterbitkan admin), dan `no_bill` (`next_bill: null`).
+  - Seluruh pemuatan memakai **skeleton semantik** berbentuk kartu bayar dan daftar kanal, tanpa spinner layar penuh, dengan *silent refresh* saat data sudah ada. Ikon murni Lucide/SVG, tanpa emoji dan tanpa dot indikator kosong.
+  - **QRIS tidak ditampilkan** karena endpoint-nya belum tersedia di API.
+- **Modul Backend Proxy Pembayaran Portal ([app/portal/modules/payment](app/portal/modules/payment))**:
+  - `GET /portal/api/pembayaran`, `/pembayaran/riwayat`, dan `/pembayaran/periksa` dibaca lewat server agar token billing tidak menyentuh browser warga dan batas **120 request per menit untuk seluruh portal** terkendali di satu pintu. HTTP 429 diteruskan beserta header `Retry-After`.
+  - Dedupe pembacaan 8 detik per pasangan (PoP, pelanggan) untuk menahan lonjakan saat banyak warga membuka halaman serentak. Kegagalan sementara (429, gangguan jaringan) tidak ikut tersimpan agar pelanggan tidak terkunci pada galat.
+- **Method Billing pada [NetworkBillService](app/services/network_bill_service.py)**: `fetch_invoices`, `fetch_virtual_account`, dan `fetch_connection_status` (hak akses `billing:read` dan `network:read`, keduanya sudah aktif pada klien API). Seluruhnya mengembalikan amplop seragam `{ok, status, data, message, retry_after}` tanpa melempar exception, supaya portal dapat membedakan 404, `channels: []`, dan 429.
+- **Suite Pengujian Modul Pembayaran ([tests/test_portal_payment_module.py](tests/test_portal_payment_module.py))**: 31 pengujian atas logika bisnis nyata, meliputi penautan identitas, penolakan kode pelanggan sebagai id, pembedaan empat keadaan VA, perapian nominal dan kecepatan paket, mesin keputusan "sudah bayar", perilaku cache, dan proteksi endpoint tanpa sesi.
+
 ### Changed
 - **Penyelesaian Modularisasi Modul Data Pelanggan & Eliminasi Kode Menggantung ([CustomersView.jsx](frontend/src/components/customers/CustomersView.jsx), [CustomersTable.jsx](frontend/src/components/customers/CustomersTable.jsx), [CustomersFilterBar.jsx](frontend/src/components/customers/CustomersFilterBar.jsx))**:
   - Menyambungkan komponen pecahan `CustomersFilterBar` dan `CustomersTable` yang sebelumnya telah dibuat namun berstatus kode mati (tidak pernah di-import oleh `CustomersView.jsx`).
@@ -34,9 +51,10 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - Mengonfigurasi `frontend/vite.config.js` untuk build produksi tanpa native OXC panic pada chunk besar.
   - Memperbarui 2 rujukan dokumentasi usang di [AGENTS.md](AGENTS.md) (relokasi `portal_pelanggan/` ke `app/portal/` dan penegasan peran `app/portal/api_router.py` sebagai aggregator 7 modul domain).
   - Terverifikasi: `npm run build` sukses (810ms) dan seluruh 30 unit & integration test pytest lulus 100%.
-
-
-### Changed
+- **Penautan Identitas Pelanggan ke Network Bill ([importer.py](app/modules/customers/importer.py), [network_bill_service.py](app/services/network_bill_service.py))**:
+  - Identitas pelanggan di Network Bill adalah **slug PoP + `id` numerik**. Alur Lengkapi Data kini menimpa `id_pelanggan` dengan `id` numerik dari API (misal `337`), **bukan** dengan `code` (misal `BMS-0001`): keduanya berbeda nyata di lapangan (PoP banyumas memiliki pelanggan ber-`id` 337 dengan `code` BMS-0001) dan hanya `id` yang diterima endpoint tagihan serta Virtual Account. FK seluruh tabel anakan sudah `ON UPDATE CASCADE`, sehingga log redaman, tiket, kuota, dan alert ikut berpindah tanpa data yatim.
+  - Kolom `kantor` diselaraskan dengan slug PoP sumber data saat Lengkapi Data dijalankan, karena pasangan (kantor, id_pelanggan) itulah yang dipakai memanggil API tagihan.
+  - Pelanggan yang `id_pelanggan`-nya masih berupa kode lama otomatis dianggap **belum tertaut** dan portal menampilkan ajakan menghubungi petugas, bukan tagihan yang salah.
 - **Penyelesaian Modularisasi Modul Pengaturan & Eliminasi Kode Duplikat ([SettingsView.jsx](frontend/src/components/settings/SettingsView.jsx))**:
   - Komponen pecahan `SettingsThresholdTab`, `SettingsCredentialsTab`, `SettingsNotificationsTab`, dan `SettingsProfileTab` sebelumnya sudah dibuat namun **tidak pernah di-import** oleh `SettingsView.jsx`, sehingga seluruh markup 4 tab tetap tertulis inline dan terdapat dua salinan logika yang sama (risiko perbaikan bug dikerjakan di berkas yang salah).
   - `SettingsView.jsx` kini menjadi shell murni (navigasi mobile segmented, desktop tree menu, toast, dan routing sub-tab) yang merender keempat komponen tab tersebut: **1.020 baris menjadi 383 baris**.
