@@ -207,7 +207,11 @@ class CustomerController:
             
         from app.modules.activity_logs.service import ActivityLogService
         try:
-            new_cust = CustomerService.create_customer(db=db, data=data)
+            target_kantor = getattr(data, "kantor", None)
+            if not target_kantor and request:
+                from app.core.security import get_active_kantor
+                target_kantor = getattr(request.state, "active_kantor", None) or get_active_kantor(request, user)
+            new_cust = CustomerService.create_customer(db=db, data=data, kantor=target_kantor)
             if request:
                 ActivityLogService.log_from_request(
                     db=db,

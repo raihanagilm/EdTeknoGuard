@@ -218,14 +218,24 @@ class AuthService:
             return False, "Layanan akun dinonaktifkan. Silakan hubungi admin kantor.", None
 
         # 3. Verifikasi kata sandi:
-        # - Jika pelanggan sudah mengatur kata sandi kustom sendiri (password_hash terisi), cocokkan via bcrypt saja.
-        # - Jika belum mengatur kata sandi kustom (password_hash kosong/None), default awal adalah Nomor WhatsApp terdaftar mereka (format 08/62).
+        # - Jika pelanggan sudah mengatur kata sandi kustom sendiri (password_hash terisi), cocokkan via bcrypt.
+        # - Fallback awal jika belum diubah sendiri: kata sandi awal adalah Nomor WhatsApp terdaftar mereka (format 08/62).
         is_valid = False
         if cust.password_hash:
             is_valid = verify_password(pwd, cust.password_hash)
-        elif AuthService._is_matching_default_phone_password(cust, pwd):
-            # Login pertama kali dengan default Nomor WA
-            is_valid = True
+
+        # Jika verifikasi hash langsung belum cocok (misal hash masih default '123456' dari sync awal atau format nomor WA 08 vs 62):
+        if not is_valid and AuthService._is_matching_default_phone_password(cust, pwd):
+            # Periksa apakah kata sandi saat ini masih default (belum diubah kustom sendiri oleh pelanggan)
+            is_still_default = (
+                not cust.password_hash
+                or verify_password(DEFAULT_CUSTOMER_PASSWORD, cust.password_hash)
+                or (cust.no_hp and verify_password(cust.no_hp.strip(), cust.password_hash))
+            )
+            if is_still_default:
+                is_valid = True
+                # Mutakhirkan password_hash ke input Nomor WhatsApp agar tersinkronisasi rapi
+                cust.password_hash = get_password_hash(pwd)
 
         if not is_valid:
             if is_tenant_db_opened:

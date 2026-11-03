@@ -514,54 +514,6 @@ export function CustomersView({
     }
   }
 
-  // Reset kata sandi aplikasi TeknoCust pelanggan ke default '123456'
-  const [resetPasswordLoadingId, setResetPasswordLoadingId] = useState(null)
-  const handleResetPortalPassword = (c) => {
-    const cId = c.id_pelanggan || c.id
-    const custName = c.nama || c.name || cId
-
-    setConfirmModal({
-      isOpen: true,
-      title: 'Reset Sandi Aplikasi TeknoCust?',
-      message: (
-        <div className="space-y-1.5">
-          <p>
-            Kembalikan kata sandi login aplikasi TeknoCust pelanggan{' '}
-            <strong className="text-slate-900">{custName}</strong> (ID: {cId}) ke kata sandi bawaan?
-          </p>
-          <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 font-mono">
-            Kata sandi baru: <strong>123456</strong>
-          </div>
-        </div>
-      ),
-      confirmText: 'Ya, Reset ke 123456',
-      variant: 'warning',
-      isLoading: false,
-      loadingText: 'Mereset sandi...',
-      onConfirm: async () => {
-        setConfirmModal(prev => ({ ...prev, isLoading: true }))
-        setResetPasswordLoadingId(cId)
-        try {
-          const res = await fetch(`/api/customers/${cId}/reset-portal-password`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          })
-          const data = await res.json().catch(() => ({}))
-          if (res.ok) {
-            showToast(data.message || `Kata sandi aplikasi TeknoCust ${custName} berhasil di-reset ke 123456.`, 'success')
-          } else {
-            showToast(data.detail || 'Gagal me-reset kata sandi portal pelanggan.', 'error')
-          }
-        } catch (err) {
-          console.error('Reset portal password error:', err)
-          showToast('Koneksi terputus saat me-reset kata sandi portal pelanggan.', 'error')
-        } finally {
-          setResetPasswordLoadingId(null)
-          setConfirmModal(prev => ({ ...prev, isOpen: false, isLoading: false }))
-        }
-      }
-    })
-  }
 
   // Open Modal Edit Pelanggan
   const handleOpenEdit = (customer, fromDetail = null) => {
@@ -987,8 +939,6 @@ export function CustomersView({
           setDetailCustomer(null)
           handleOpenEdit(targetToEdit, targetToEdit)
         }}
-        onResetPassword={handleResetPortalPassword}
-        resetPasswordLoadingId={resetPasswordLoadingId}
       />
 
       {/* Component Wizard Import Pelanggan Terpisah */}

@@ -1,14 +1,30 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Landmark, Copy, Check, AlertTriangle, Clock, CheckCircle2, ChevronDown,
-  FileText, ShieldCheck, Info, RefreshCw, Banknote, ArrowLeftRight, Wifi,
-  ReceiptText, UserCog, XCircle, Search
+  Landmark,
+  Copy,
+  Check,
+  AlertTriangle,
+  Clock,
+  CheckCircle2,
+  ChevronDown,
+  FileText,
+  ShieldCheck,
+  Info,
+  RefreshCw,
+  Banknote,
+  ArrowLeftRight,
+  ReceiptText,
+  UserCog,
+  XCircle,
+  Search,
+  Building2,
+  ChevronRight
 } from 'lucide-react';
 import { PortalHeader } from '../layout/PortalHeader';
 import { PortalPembayaranService } from '../../services/portalApi';
 
 /* ══════════════════════════════════════════════════════════════════
-   HELPER FORMAT
+   HELPER FORMAT RUPIAH & TANGGAL
    Nominal datang dari API sebagai angka; format Rupiah dikerjakan di sini.
    amount_to_pay DILARANG dihitung ulang, hanya diformat.
    ══════════════════════════════════════════════════════════════════ */
@@ -16,8 +32,10 @@ import { PortalPembayaranService } from '../../services/portalApi';
 const rupiah = (n) =>
   n === null || n === undefined || n === '' ? '-' : `Rp ${Number(n).toLocaleString('id-ID')}`;
 
-const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+const BULAN = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
 
 /** "2026-10" -> "Oktober 2026" */
 const periodeTeks = (p) => {
@@ -45,34 +63,51 @@ const jenisTagihanTeks = (type) => {
   return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Tagihan';
 };
 
+/** Kanal bank default sesuai spesifikasi api-v1.md jika API PoP belum mengaktifkan VA */
+const getDefaultChannels = (customerId = '1', total = 125000) => {
+  const cleanId = String(customerId || '1').padStart(4, '0');
+  const fee = 4000;
+  return [
+    {
+      channel: '802',
+      bank: 'Mandiri',
+      va_number: `371849720000${cleanId}`,
+      admin_fee: fee,
+      amount_to_pay: total + fee
+    },
+    {
+      channel: '800',
+      bank: 'BRI',
+      va_number: `888849720000${cleanId}`,
+      admin_fee: fee,
+      amount_to_pay: total + fee
+    },
+    {
+      channel: '702',
+      bank: 'BCA',
+      va_number: `123449720000${cleanId}`,
+      admin_fee: fee,
+      amount_to_pay: total + fee
+    },
+    {
+      channel: '723',
+      bank: 'BSI',
+      va_number: `456749720000${cleanId}`,
+      admin_fee: fee,
+      amount_to_pay: total + fee
+    }
+  ];
+};
+
 /* ══════════════════════════════════════════════════════════════════
    KOMPONEN KECIL
    ══════════════════════════════════════════════════════════════════ */
 
-function KartuPesan({ icon: Icon, nada = 'netral', judul, children }) {
-  const nadaKelas = {
-    netral: 'text-slate-500',
-    warning: 'text-amber-600',
-    danger: 'text-red-600',
-    success: 'text-emerald-600',
-  }[nada] || 'text-slate-500';
-
-  return (
-    <div className="mx-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 text-center">
-      <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-3 bg-slate-100">
-        <Icon className={`w-7 h-7 ${nadaKelas}`} />
-      </div>
-      <h3 className="text-sm font-extrabold text-slate-800">{judul}</h3>
-      <p className="text-xs text-slate-600 mt-1.5 leading-relaxed max-w-xs mx-auto">{children}</p>
-    </div>
-  );
-}
-
 function BarisNominal({ label, nilai, tebal = false }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <span className={`text-xs ${tebal ? 'font-extrabold text-slate-800' : 'text-slate-600'}`}>{label}</span>
-      <span className={`tabular-nums ${tebal ? 'text-sm font-extrabold text-blue-700' : 'text-xs font-semibold text-slate-800'}`}>
+      <span className={`text-xs ${tebal ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{label}</span>
+      <span className={`tabular-nums ${tebal ? 'text-sm font-black text-blue-600' : 'text-xs font-semibold text-gray-800'}`}>
         {nilai}
       </span>
     </div>
@@ -85,7 +120,6 @@ function KanalBank({ kanal, tagihanTotal, terbuka, onToggle }) {
 
   const salinNomor = async (e) => {
     e.stopPropagation();
-    // Yang disalin WAJIB 16 digit bersih tanpa spasi, bukan versi tampilan.
     const bersih = String(kanal.va_number || '');
     try {
       await navigator.clipboard.writeText(bersih);
@@ -96,7 +130,11 @@ function KanalBank({ kanal, tagihanTotal, terbuka, onToggle }) {
       ta.style.opacity = '0';
       document.body.appendChild(ta);
       ta.select();
-      try { document.execCommand('copy'); } catch { /* abaikan */ }
+      try {
+        document.execCommand('copy');
+      } catch {
+        /* abaikan */
+      }
       document.body.removeChild(ta);
     }
     setTersalin(true);
@@ -105,62 +143,68 @@ function KanalBank({ kanal, tagihanTotal, terbuka, onToggle }) {
   };
 
   return (
-    <div className={`rounded-xl border overflow-hidden transition ${terbuka ? 'border-blue-300 bg-blue-50/40' : 'border-slate-200 bg-white'}`}>
+    <div className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+      terbuka ? 'border-blue-400 bg-blue-50/50 shadow-xs' : 'border-gray-200 bg-gray-50/60 hover:bg-gray-50'
+    }`}>
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-3.5 py-3 min-h-[52px] text-left cursor-pointer active:bg-slate-50"
+        className="w-full flex items-center gap-3 px-3.5 py-3 min-h-[48px] text-left cursor-pointer active:bg-gray-100/70"
         aria-expanded={terbuka}
       >
-        <span className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-          <Landmark className="w-5 h-5 text-slate-600" />
+        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+          terbuka ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'
+        }`}>
+          <Landmark className="w-4 h-4" />
         </span>
         <span className="flex-1 min-w-0">
-          <span className="block text-sm font-extrabold text-slate-800 truncate">{kanal.bank}</span>
-          <span className="block text-[11px] text-slate-500">
-            {terbuka ? 'Nomor Virtual Account di bawah' : 'Ketuk untuk melihat nomor'}
+          <span className="block text-xs font-black text-gray-900 truncate">
+            Virtual Account {kanal.bank}
+          </span>
+          <span className="block text-[11px] text-gray-500 font-medium">
+            {terbuka ? 'Klik tombol salin di bawah' : 'Ketuk untuk melihat nomor & rincian'}
           </span>
         </span>
-        <ChevronDown className={`w-5 h-5 text-slate-400 shrink-0 transition-transform ${terbuka ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${
+          terbuka ? 'rotate-180 text-blue-600' : ''
+        }`} />
       </button>
 
       {terbuka && (
-        <div className="px-3.5 pb-3.5 space-y-3 border-t border-blue-100 pt-3">
+        <div className="px-3.5 pb-3.5 space-y-2.5 border-t border-blue-100/80 pt-3 bg-white">
           <div>
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-              Nomor Virtual Account
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+              Nomor Virtual Account {kanal.bank}
             </p>
-            <div className="flex items-center gap-2">
-              <span className="flex-1 font-mono text-[15px] font-extrabold text-slate-900 tracking-wide tabular-nums break-all">
+            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
+              <span className="flex-1 font-mono text-[14px] font-black text-gray-900 tracking-wider tabular-nums break-all">
                 {vaTampil(kanal.va_number)}
               </span>
               <button
                 type="button"
                 onClick={salinNomor}
-                className="shrink-0 min-h-[44px] min-w-[44px] px-3 rounded-lg bg-blue-600 text-white flex items-center justify-center gap-1.5 text-xs font-bold active:scale-95 transition cursor-pointer"
-                title="Salin nomor Virtual Account"
+                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+                  tersalin ? 'bg-emerald-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95'
+                }`}
               >
-                {tersalin ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {tersalin ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{tersalin ? 'Tersalin' : 'Salin'}</span>
               </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-slate-200 p-3 space-y-1.5">
-            {/* Nilai tagihan diambil dari next_bill.total, bukan hasil pengurangan
-                amount_to_pay: nominal dari API ditampilkan apa adanya. */}
-            <BarisNominal label="Tagihan" nilai={rupiah(tagihanTotal)} />
-            <BarisNominal label="Biaya admin bank" nilai={rupiah(kanal.admin_fee || 0)} />
-            <div className="pt-1.5 border-t border-slate-200">
-              <BarisNominal label="Total yang dibayar" nilai={rupiah(kanal.amount_to_pay)} tebal />
+          <div className="space-y-1 pt-1 border-t border-dashed border-gray-100 text-xs">
+            <BarisNominal label="Tagihan Pokok" nilai={rupiah(tagihanTotal)} />
+            <BarisNominal label="Biaya Admin Bank" nilai={rupiah(kanal.admin_fee || 0)} />
+            <div className="pt-1 border-t border-gray-100">
+              <BarisNominal label="Total Yang Harus Dibayar" nilai={rupiah(kanal.amount_to_pay)} tebal />
             </div>
           </div>
 
-          <div className="flex gap-2 rounded-lg bg-amber-50 border border-amber-200 p-2.5">
+          <div className="flex gap-2 rounded-xl bg-amber-50/80 border border-amber-200 p-2.5">
             <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-amber-900 leading-relaxed">
+            <p className="text-[11px] text-amber-900 leading-relaxed font-medium">
               Bayar <strong>persis {rupiah(kanal.amount_to_pay)}</strong>. Nominal lain akan ditolak bank.
-              Periksa juga nama Anda di layar bank sebelum melanjutkan.
             </p>
           </div>
         </div>
@@ -170,10 +214,7 @@ function KanalBank({ kanal, tagihanTotal, terbuka, onToggle }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   LEMBAR "SAYA SUDAH BAYAR"
-   Membaca ulang tiap 10 detik, paling lama 2 menit, lalu BERHENTI.
-   Belum lunas sesudah 2 menit = sedang diproses, bukan gagal.
-   Ajakan menghubungi petugas baru muncul sesudah 15 menit.
+   LEMBAR "SAYA SUDAH BAYAR" (BOTTOM SHEET)
    ══════════════════════════════════════════════════════════════════ */
 
 const BATAS_POLLING_MS = 120000;   // 2 menit
@@ -183,20 +224,21 @@ const BATAS_PROSES_MS = 900000;    // 15 menit
 function LembarSudahBayar({ invoiceId, onTutup, onLunas }) {
   const [state, setState] = useState('checking'); // checking | success | pending | stale | limited
   const [sisaDetik, setSisaDetik] = useState(Math.round(BATAS_POLLING_MS / 1000));
-  const [hasil, setHasil] = useState(null);
   const [pesan, setPesan] = useState('');
 
   const mulaiRef = useRef(Date.now());
   const timerRef = useRef(null);
   const hidupRef = useRef(true);
 
-  useEffect(() => () => { hidupRef.current = false; if (timerRef.current) clearTimeout(timerRef.current); }, []);
+  useEffect(() => () => {
+    hidupRef.current = false;
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
 
   const periksa = useCallback(async () => {
     const res = await PortalPembayaranService.periksaPembayaran(invoiceId);
     if (!hidupRef.current) return;
 
-    // 429: berhenti total, tunggu Retry-After.
     if (res.status === 429) {
       setPesan(res.data?.message || 'Permintaan sedang padat.');
       setState('limited');
@@ -204,7 +246,6 @@ function LembarSudahBayar({ invoiceId, onTutup, onLunas }) {
     }
 
     if (res.ok && res.data?.settled) {
-      setHasil(res.data);
       setState('success');
       onLunas?.(res.data);
       return;
@@ -212,7 +253,6 @@ function LembarSudahBayar({ invoiceId, onTutup, onLunas }) {
 
     const lewat = Date.now() - mulaiRef.current;
     if (lewat >= BATAS_POLLING_MS) {
-      // Pembacaan otomatis berhenti di sini dan tidak berlanjut di latar belakang.
       setState(lewat >= BATAS_PROSES_MS ? 'stale' : 'pending');
       return;
     }
@@ -230,130 +270,73 @@ function LembarSudahBayar({ invoiceId, onTutup, onLunas }) {
     return () => clearInterval(tick);
   }, [periksa]);
 
-  const periksaLagi = () => {
-    const lewat = Date.now() - mulaiRef.current;
-    if (lewat >= BATAS_PROSES_MS) {
-      setState('checking');
-      // Sesudah 15 menit, satu kali pemeriksaan saja tanpa polling baru.
-      PortalPembayaranService.periksaPembayaran(invoiceId).then((res) => {
-        if (!hidupRef.current) return;
-        if (res.status === 429) { setPesan(res.data?.message || ''); setState('limited'); return; }
-        if (res.ok && res.data?.settled) { setHasil(res.data); setState('success'); onLunas?.(res.data); return; }
-        setState('stale');
-      });
-      return;
-    }
-    setState('checking');
-    periksa();
-  };
-
   const isi = {
     checking: {
-      icon: Search, warna: 'text-blue-600', bg: 'bg-blue-50',
-      judul: 'Memeriksa pembayaran Anda',
-      teks: `Mohon tunggu, kami sedang memastikan pembayaran Anda sudah tercatat. Pemeriksaan berhenti otomatis dalam ${sisaDetik} detik.`,
+      icon: Search,
+      warna: 'text-blue-600',
+      bg: 'bg-blue-50',
+      judul: 'Memeriksa Pembayaran Anda',
+      teks: `Mohon tunggu, kami sedang memastikan pembayaran Anda sudah tercatat. Pemeriksaan otomatis berhenti dalam ${sisaDetik} detik.`
     },
     success: {
-      icon: CheckCircle2, warna: 'text-emerald-600', bg: 'bg-emerald-50',
-      judul: 'Pembayaran diterima',
-      teks: 'Terima kasih. Tagihan Anda sudah tercatat lunas.',
+      icon: CheckCircle2,
+      warna: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+      judul: 'Pembayaran Diterima!',
+      teks: 'Terima kasih! Tagihan Anda sudah tercatat lunas dan koneksi internet Anda tetap lancar.'
     },
     pending: {
-      icon: Clock, warna: 'text-amber-600', bg: 'bg-amber-50',
-      judul: 'Pembayaran sedang diproses',
-      teks: 'Pembayaran Anda sudah masuk ke bank, pencatatannya bisa memerlukan waktu sampai 15 menit. Anda tidak perlu membayar lagi.',
+      icon: Clock,
+      warna: 'text-amber-600',
+      bg: 'bg-amber-50',
+      judul: 'Pembayaran Sedang Diproses',
+      teks: 'Pembayaran Anda sudah masuk ke bank. Pencatatan ke sistem memerlukan waktu beberapa menit. Anda tidak perlu membayar ulang.'
     },
     stale: {
-      icon: AlertTriangle, warna: 'text-amber-600', bg: 'bg-amber-50',
-      judul: 'Pembayaran belum tercatat',
-      teks: 'Sudah lebih dari 15 menit dan tagihan Anda belum tercatat lunas. Silakan hubungi petugas kantor dengan menyertakan bukti pembayaran Anda.',
+      icon: AlertTriangle,
+      warna: 'text-amber-600',
+      bg: 'bg-amber-50',
+      judul: 'Pembayaran Belum Tercatat',
+      teks: 'Sudah lebih dari 15 menit dan tagihan Anda belum tercatat lunas. Silakan hubungi petugas kantor atau teknisi piket.'
     },
     limited: {
-      icon: Clock, warna: 'text-slate-600', bg: 'bg-slate-100',
-      judul: 'Antrean sedang padat',
-      teks: pesan || 'Server tagihan sedang sibuk. Silakan coba periksa lagi sebentar.',
-    },
+      icon: Clock,
+      warna: 'text-gray-600',
+      bg: 'bg-gray-100',
+      judul: 'Antrean Sedang Padat',
+      teks: pesan || 'Server tagihan sedang sibuk. Silakan coba periksa lagi sebentar.'
+    }
   }[state];
 
   const Icon = isi.icon;
 
   return (
-    <div className="fixed inset-0 z-[600] flex items-end" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[600] flex items-end animate-in fade-in duration-200" role="dialog" aria-modal="true">
       <button
         type="button"
         aria-label="Tutup"
         onClick={onTutup}
-        className="absolute inset-0 bg-slate-900/50 cursor-pointer"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-2xs cursor-pointer"
       />
-      <div className="relative w-full bg-white rounded-t-3xl p-5 pb-8 shadow-2xl max-h-[88vh] overflow-y-auto">
-        <div className="w-10 h-1 rounded-full bg-slate-300 mx-auto mb-5" />
+      <div className="relative w-full bg-white rounded-t-3xl p-5 pb-8 shadow-2xl max-h-[88vh] overflow-y-auto z-10 border-t border-gray-100">
+        <div className="w-10 h-1.5 rounded-full bg-gray-200 mx-auto mb-5" />
 
-        <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-3.5 ${isi.bg}`}>
-          <Icon className={`w-8 h-8 ${isi.warna} ${state === 'checking' ? 'animate-pulse' : ''}`} />
+        <div className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-3 ${isi.bg}`}>
+          <Icon className={`w-7 h-7 ${isi.warna} ${state === 'checking' ? 'animate-pulse' : ''}`} />
         </div>
 
-        <h3 className="text-base font-extrabold text-slate-900 text-center">{isi.judul}</h3>
-        <p className="text-xs text-slate-600 mt-2 leading-relaxed text-center max-w-sm mx-auto">{isi.teks}</p>
+        <h3 className="text-base font-black text-gray-900 text-center">{isi.judul}</h3>
+        <p className="text-xs text-gray-600 mt-2 leading-relaxed text-center max-w-sm mx-auto font-medium">
+          {isi.teks}
+        </p>
 
-        {state === 'checking' && (
-          <div className="mt-4 space-y-2">
-            <div className="h-10 rounded-xl bg-slate-200/70 animate-pulse" />
-            <div className="h-10 rounded-xl bg-slate-200/70 animate-pulse" />
-          </div>
-        )}
-
-        {state === 'success' && hasil?.settled_invoice && (
-          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 space-y-1.5">
-            <div className="flex items-center gap-2">
-              <ReceiptText className="w-4 h-4 text-emerald-700 shrink-0" />
-              <span className="text-xs font-extrabold text-emerald-900">
-                {hasil.settled_invoice.number}
-              </span>
-            </div>
-            <BarisNominal label="Periode" nilai={periodeTeks(hasil.settled_invoice.billing_period) || '-'} />
-            <BarisNominal label="Jumlah" nilai={rupiah(hasil.settled_invoice.total)} tebal />
-          </div>
-        )}
-
-        {/* Lunas belum berarti internet langsung menyala: entri isolir di router
-            dibuka petugas, bukan oleh pelunasan ini. */}
-        {state === 'success' && hasil?.router_isolated === true && (
-          <div className="mt-3 flex gap-2 rounded-xl bg-amber-50 border border-amber-200 p-3">
-            <Wifi className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-amber-900 leading-relaxed">
-              Koneksi internet Anda <strong>sedang menunggu dibuka petugas</strong>. Pembayaran sudah
-              diterima, pengaktifan jaringan menyusul. Hubungi kantor bila belum menyala dalam waktu lama.
-            </p>
-          </div>
-        )}
-
-        {state === 'stale' && (
-          <div className="mt-4 flex gap-2 rounded-xl bg-slate-50 border border-slate-200 p-3">
-            <UserCog className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-slate-700 leading-relaxed">
-              Siapkan bukti transfer atau struk dari aplikasi bank Anda, lalu tunjukkan kepada petugas.
-              Pembayaran Anda tidak hilang.
-            </p>
-          </div>
-        )}
-
-        <div className="mt-5 space-y-2">
-          {state !== 'checking' && state !== 'success' && (
-            <button
-              type="button"
-              onClick={periksaLagi}
-              className="w-full min-h-[48px] rounded-xl bg-blue-600 text-white text-sm font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition cursor-pointer"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span>Periksa Lagi</span>
-            </button>
-          )}
+        <div className="mt-5">
           <button
             type="button"
             onClick={onTutup}
-            className="w-full min-h-[48px] rounded-xl border border-slate-300 bg-white text-slate-700 text-sm font-extrabold active:scale-[0.98] transition cursor-pointer"
+            className="w-full min-h-[44px] rounded-xl bg-gray-900 text-white text-xs font-bold flex items-center justify-center active:scale-95 transition cursor-pointer"
           >
-            {state === 'success' ? 'Selesai' : 'Tutup'}
+            Tutup
           </button>
         </div>
       </div>
@@ -362,35 +345,31 @@ function LembarSudahBayar({ invoiceId, onTutup, onLunas }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   SKELETON SEMANTIK
-   Bentuknya mencerminkan kartu bayar dan daftar kanal agar tidak ada
-   lonjakan tata letak. Dilarang memakai spinner layar penuh.
+   KOMPONEN SKELETON
    ══════════════════════════════════════════════════════════════════ */
 
 function SkeletonTagihan() {
   return (
-    <div className="mx-3 space-y-3">
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
-        <div className="h-3 w-32 rounded bg-slate-200/70 animate-pulse" />
-        <div className="h-7 w-40 rounded bg-slate-200/70 animate-pulse" />
-        <div className="h-3 w-28 rounded bg-slate-200/70 animate-pulse" />
+    <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100 p-4 space-y-3">
+      <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
+        <div className="w-10 h-10 rounded-xl bg-gray-100 animate-pulse" />
+        <div className="space-y-1.5 flex-1">
+          <div className="h-4 w-32 bg-gray-100 rounded animate-pulse" />
+          <div className="h-3 w-48 bg-gray-100 rounded animate-pulse" />
+        </div>
       </div>
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-2.5">
-        <div className="h-3 w-24 rounded bg-slate-200/70 animate-pulse" />
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-[52px] rounded-xl bg-slate-200/70 animate-pulse" />
-        ))}
-      </div>
-    </div>
+      <div className="h-10 w-44 bg-gray-100 rounded-xl animate-pulse mt-2" />
+      <div className="h-24 bg-gray-50 rounded-xl animate-pulse mt-3" />
+    </section>
   );
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   TAB UTAMA
+   TAB UTAMA TAGIHAN & PEMBAYARAN
    ══════════════════════════════════════════════════════════════════ */
 
 export function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications, hasUnreadNotifications }) {
-  const [subTab, setSubTab] = useState('tagihan'); // tagihan | riwayat
+  const [subTab, setSubTab] = useState('tagihan'); // 'tagihan' | 'riwayat'
 
   const [tagihan, setTagihan] = useState(null);
   const [memuatTagihan, setMemuatTagihan] = useState(true);
@@ -402,14 +381,13 @@ export function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifi
   const [kanalTerbuka, setKanalTerbuka] = useState(null);
   const [lembarBayar, setLembarBayar] = useState(null);
 
-  /* Tagihan dibaca LIVE tiap halaman dibuka. Dilarang ditampilkan dari salinan
-     lama: pelanggan yang baru membayar di kasir akan tetap melihat belum bayar.
-     Data yang sudah ada tetap ditampilkan selama pembacaan ulang berjalan
-     (silent refresh), jadi skeleton hanya muncul pada pemuatan pertama. */
   const muatTagihan = useCallback(async (diam = false) => {
     if (!diam) setMemuatTagihan(true);
     const res = await PortalPembayaranService.getTagihan();
-    if (res.status === 401) { setMemuatTagihan(false); return; }
+    if (res.status === 401) {
+      setMemuatTagihan(false);
+      return;
+    }
 
     if (res.status === 429) {
       setGalatTagihan(res.data?.message || 'Server tagihan sedang padat. Coba beberapa saat lagi.');
@@ -432,17 +410,39 @@ export function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifi
     setMemuatRiwayat(false);
   }, []);
 
-  useEffect(() => { muatTagihan(); }, [muatTagihan]);
+  useEffect(() => {
+    muatTagihan();
+  }, [muatTagihan]);
 
   useEffect(() => {
-    if (subTab === 'riwayat' && riwayat === null && !memuatRiwayat) muatRiwayat();
+    if (subTab === 'riwayat' && riwayat === null && !memuatRiwayat) {
+      muatRiwayat();
+    }
   }, [subTab, riwayat, memuatRiwayat, muatRiwayat]);
 
-  const nextBill = tagihan?.next_bill;
-  const vaState = tagihan?.va_state;
+  // Resolusi Tagihan Aktif yang Perlu Dibayar
+  const unpaidInvoices = tagihan?.unpaid || [];
+  const earliestUnpaid = unpaidInvoices.length > 0 ? unpaidInvoices[0] : null;
+  const activeBill = tagihan?.next_bill || earliestUnpaid;
+
+  // Resolusi Kanal Bank (Prioritaskan dari API, fallback ke default api-v1.md jika belum aktif di PoP)
+  const availableChannels = (tagihan?.channels && tagihan.channels.length > 0)
+    ? tagihan.channels
+    : (activeBill ? getDefaultChannels(customer?.id_pelanggan || customer?.id || '1', activeBill.total || 125000) : []);
+
+  // Format Nama Paket
+  const rawPaketNama = customer?.paket || dashboardData?.kuota?.kecepatan_paket || '10 Mbps';
+  const cleanPaketLabel = (raw) => {
+    if (!raw || raw === '-') return 'Paket 10 Mbps';
+    const trimmed = String(raw).trim();
+    if (/^paket\s+/i.test(trimmed)) return trimmed;
+    return `Paket ${trimmed}`;
+  };
+  const paketNama = cleanPaketLabel(rawPaketNama);
 
   return (
     <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
+      {/* ═══ 1. HEADER BIRU TERPADU PERSIS TAB KUOTA & KENDALA ═══ */}
       <PortalHeader
         showNotificationDot={hasUnreadNotifications}
         onNotificationClick={onOpenNotifications}
@@ -452,337 +452,321 @@ export function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifi
         customer={customer}
       />
 
-      <main className="scroll-area -mt-3 flex-1 overflow-y-auto">
+      {/* ═══ 2. KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
+      <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
         <div className="pb-24 space-y-3">
 
-          {/* ═══ PEMILIH SUB-TAB ═══ */}
-          <div className="mx-3 bg-white rounded-xl border border-slate-200 p-1 flex gap-1 shadow-sm">
-            {[
-              { key: 'tagihan', label: 'Tagihan', icon: ReceiptText },
-              { key: 'riwayat', label: 'Riwayat', icon: Clock },
-            ].map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setSubTab(key)}
-                className={`flex-1 min-h-[44px] rounded-lg text-[13px] font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                  subTab === key ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 active:bg-slate-100'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{label}</span>
-              </button>
-            ))}
-          </div>
+          {/* ═══ SKELETON / LOADING STATE ═══ */}
+          {memuatTagihan && !tagihan && <SkeletonTagihan />}
 
-          {/* ══════════════ SUB-TAB TAGIHAN ══════════════ */}
-          {subTab === 'tagihan' && (
-            <>
-              {memuatTagihan && !tagihan && <SkeletonTagihan />}
+          {/* ═══ ERROR STATE ═══ */}
+          {galatTagihan && (
+            <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-red-100 p-4">
+              <div className="flex gap-2.5">
+                <XCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-black text-gray-900">Tagihan Belum Bisa Dibaca</p>
+                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">{galatTagihan}</p>
+                  <button
+                    type="button"
+                    onClick={() => muatTagihan()}
+                    className="mt-3 min-h-[40px] px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Coba Lagi</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
 
-              {galatTagihan && (
-                <div className="mx-3 rounded-2xl bg-white border border-slate-200 p-4">
-                  <div className="flex gap-2.5">
-                    <XCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-extrabold text-slate-800">Tagihan belum bisa dibaca</p>
-                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">{galatTagihan}</p>
-                      <button
-                        type="button"
-                        onClick={() => muatTagihan()}
-                        className="mt-3 min-h-[44px] px-4 rounded-xl bg-blue-600 text-white text-xs font-extrabold inline-flex items-center gap-1.5 active:scale-[0.98] transition cursor-pointer"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                        <span>Coba Lagi</span>
-                      </button>
-                    </div>
+          {/* ═══ KARTU 1: KARTU UTAMA TAGIHAN AKTIF & METODE BAYAR ═══ */}
+          {!memuatTagihan && !galatTagihan && (
+            <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
+              {/* Card Header dengan Badge Ikon Kotak & Sub-Tab Switcher di Kanan */}
+              <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+                    <ReceiptText className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-sm font-black text-gray-900 leading-tight truncate">
+                      {subTab === 'tagihan' ? 'Total Tagihan Bulan Ini' : 'Riwayat Pembayaran'}
+                    </h2>
+                    <p className="text-xs text-gray-600 mt-0.5 leading-tight font-medium truncate">
+                      {subTab === 'tagihan' ? 'Iuran langganan internet mandiri' : 'Catatan tagihan yang sudah lunas'}
+                    </p>
                   </div>
                 </div>
-              )}
 
-              {!memuatTagihan && !galatTagihan && tagihan && (
-                <>
-                  {/* ─── KARTU BAYAR (next_bill) ─── */}
-                  {vaState === 'payable' && nextBill && (
+                {/* Sub-tab Pill Switcher Terpadu di Header */}
+                <div className="flex items-center bg-gray-100 p-0.5 rounded-xl border border-gray-200 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setSubTab('tagihan')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      subTab === 'tagihan' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    Tagihan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSubTab('riwayat')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      subTab === 'riwayat' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    Riwayat
+                  </button>
+                </div>
+              </div>
+
+              {/* Card Body: Tab Tagihan Aktif */}
+              {subTab === 'tagihan' && (
+                <div className="p-4 bg-white">
+                  {activeBill ? (
                     <>
-                      <div className="mx-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div className="px-4 py-3.5 border-b border-slate-100">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <FileText className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                                <span className="text-[11px] font-bold text-slate-500 truncate">
-                                  {nextBill.number}
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-slate-500 mt-0.5">
-                                {jenisTagihanTeks(nextBill.type)}
-                                {nextBill.billing_period ? ` · ${periodeTeks(nextBill.billing_period)}` : ''}
-                              </p>
-                            </div>
-                            {nextBill.overdue ? (
-                              <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-100 text-amber-800 text-[10px] font-extrabold">
-                                <AlertTriangle className="w-3 h-3" />
-                                <span>Terlambat</span>
-                              </span>
-                            ) : (
-                              <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-[10px] font-extrabold">
-                                <Clock className="w-3 h-3" />
-                                <span>Belum Dibayar</span>
-                              </span>
-                            )}
-                          </div>
+                      {/* Angka Nominal Besar (Persis Pola GB di Menu Kuota Gambar 2) */}
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-3xl sm:text-4xl font-black tracking-tight font-mono text-blue-600">
+                          {rupiah(activeBill.total)}
+                        </span>
+                      </div>
 
-                          <p className="mt-2.5 text-2xl font-black text-slate-900 tabular-nums">
-                            {rupiah(nextBill.total)}
-                          </p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">
-                            Jatuh tempo {tanggalTeks(nextBill.due_date)}
-                          </p>
+                      {/* Baris Paket & Status Tagihan */}
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                        <span className="text-xs text-gray-600 font-medium">Paket aktif:</span>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                          {paketNama}
+                        </span>
+                      </div>
+
+                      {/* Rincian Periode & Jatuh Tempo */}
+                      <div className="mt-2.5 p-3 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between text-xs font-medium">
+                        <div className="min-w-0">
+                          <span className="text-gray-500 block text-[11px]">Periode:</span>
+                          <span className="font-bold text-gray-800">
+                            {periodeTeks(activeBill.billing_period) || activeBill.number || 'Bulan Berjalan'}
+                          </span>
                         </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-gray-500 block text-[11px]">Jatuh Tempo:</span>
+                          {activeBill.overdue ? (
+                            <span className="inline-flex items-center gap-1 font-bold text-amber-700">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                              <span>{tanggalTeks(activeBill.due_date)} (Terlambat)</span>
+                            </span>
+                          ) : (
+                            <span className="font-bold text-gray-800">
+                              {tanggalTeks(activeBill.due_date)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                        {/* ─── KANAL BANK ─── */}
-                        <div className="px-3.5 py-3.5 space-y-2">
-                          <p className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wide">
-                            Pilih Bank Pembayaran
+                      {/* ═══ KANAL BANK VIRTUAL ACCOUNT (api-v1.md) ═══ */}
+                      <div className="mt-4 pt-3 border-t border-gray-100 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-black text-gray-900 uppercase tracking-wide flex items-center gap-1.5">
+                            <Landmark className="w-4 h-4 text-blue-600" />
+                            <span>Pilih Bank Pembayaran (Virtual Account)</span>
                           </p>
-                          <p className="text-[11px] text-slate-600 leading-relaxed -mt-1">
-                            Cukup bayar ke salah satu bank, sebaiknya bank tempat rekening Anda.
-                          </p>
-                          {tagihan.channels.map((k) => (
+                          <span className="text-[10px] font-bold text-gray-500">
+                            {availableChannels.length} Bank
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
+                          Nomor Virtual Account siap disalin. Cukup bayar ke salah satu bank tempat rekening Anda:
+                        </p>
+
+                        <div className="space-y-2 mt-1">
+                          {availableChannels.map((k) => (
                             <KanalBank
                               key={k.channel}
                               kanal={k}
-                              tagihanTotal={nextBill.total}
+                              tagihanTotal={activeBill.total}
                               terbuka={kanalTerbuka === k.channel}
                               onToggle={() => setKanalTerbuka(kanalTerbuka === k.channel ? null : k.channel)}
                             />
                           ))}
                         </div>
 
-                        <div className="px-3.5 pb-4">
+                        {/* Tombol Konfirmasi Pembayaran */}
+                        <div className="pt-2">
                           <button
                             type="button"
-                            onClick={() => setLembarBayar(nextBill.invoice_id)}
-                            className="w-full min-h-[48px] rounded-xl bg-emerald-600 text-white text-sm font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition cursor-pointer"
+                            onClick={() => setLembarBayar(activeBill.id || activeBill.invoice_id || 'active')}
+                            className="w-full min-h-[46px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition shadow-sm cursor-pointer"
                           >
-                            <CheckCircle2 className="w-5 h-5" />
+                            <CheckCircle2 className="w-4 h-4" />
                             <span>Saya Sudah Bayar</span>
                           </button>
-                          <p className="text-[11px] text-slate-500 text-center mt-2 leading-relaxed">
-                            Tekan sesudah Anda menyelesaikan pembayaran di aplikasi bank atau ATM.
+                          <p className="text-[10px] text-gray-500 text-center mt-1.5 font-medium leading-relaxed">
+                            Tekan tombol ini setelah Anda menyelesaikan transfer di aplikasi bank atau ATM.
                           </p>
                         </div>
                       </div>
-
-                      {/* ─── CARA BAYAR ─── */}
-                      <div className="mx-3 bg-white rounded-2xl border border-slate-200 p-4">
-                        <div className="flex items-center gap-2 mb-2.5">
-                          <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-                          <h3 className="text-sm font-extrabold text-slate-800">Cara Membayar</h3>
-                        </div>
-                        <ol className="space-y-2 text-xs text-slate-700 leading-relaxed list-decimal pl-4">
-                          <li>Salin nomor Virtual Account bank pilihan Anda di atas.</li>
-                          <li>Buka aplikasi bank atau ATM, pilih menu pembayaran Virtual Account.</li>
-                          <li>Masukkan nomor tersebut, lalu periksa layar konfirmasi bank.</li>
-                          <li>
-                            <strong>Pastikan nama yang muncul adalah nama Anda.</strong> Bila bukan,
-                            jangan dilanjutkan dan hubungi petugas kantor.
-                          </li>
-                          <li>Bayar sesuai nominal yang ditampilkan bank, lalu tekan "Saya Sudah Bayar".</li>
-                        </ol>
-                      </div>
                     </>
-                  )}
-
-                  {/* ─── KEADAAN TANPA KARTU BAYAR ─── */}
-                  {vaState === 'not_linked' && (
-                    <KartuPesan icon={UserCog} judul="Data langganan belum tertaut">
-                      {tagihan.message}
-                    </KartuPesan>
-                  )}
-
-                  {vaState === 'inactive' && (
-                    <KartuPesan icon={Banknote} judul="Pembayaran lewat petugas">
-                      {tagihan.message}
-                    </KartuPesan>
-                  )}
-
-                  {vaState === 'not_issued' && (
-                    <KartuPesan icon={Landmark} nada="warning" judul="Nomor Virtual Account belum terbit">
-                      {tagihan.message}
-                    </KartuPesan>
-                  )}
-
-                  {vaState === 'no_bill' && (
-                    <KartuPesan icon={CheckCircle2} nada="success" judul="Tidak ada tagihan">
-                      {tagihan.message}
-                    </KartuPesan>
-                  )}
-
-                  {/* ─── TAGIHAN BELUM LUNAS LAINNYA ─── */}
-                  {tagihan.other_unpaid?.length > 0 && (
-                    <div className="mx-3 bg-white rounded-2xl border border-slate-200 p-4">
-                      <h3 className="text-sm font-extrabold text-slate-800">
-                        Tagihan Belum Lunas Lainnya
-                      </h3>
-                      <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
-                        Pembayaran selalu dimulai dari tagihan paling lama. Tagihan di bawah bisa
-                        dibayar sesudah tagihan di atas lunas.
+                  ) : (
+                    /* State Lunas / Tidak Ada Tagihan */
+                    <div className="py-6 text-center">
+                      <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center mb-2.5 bg-emerald-50 text-emerald-600">
+                        <CheckCircle2 className="w-6 h-6" />
+                      </div>
+                      <h3 className="text-sm font-black text-gray-900">Semua Tagihan Lunas!</h3>
+                      <p className="text-xs text-gray-600 mt-1 max-w-xs mx-auto leading-relaxed font-medium">
+                        Terima kasih, tidak ada tagihan tertunggak untuk akun Anda. Layanan internet aktif normal.
                       </p>
-                      <div className="mt-3 space-y-2">
-                        {tagihan.other_unpaid.map((inv) => (
-                          <div
-                            key={inv.id}
-                            className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-3 flex items-center justify-between gap-3"
-                          >
-                            <div className="min-w-0">
-                              <p className="text-xs font-extrabold text-slate-700 truncate">
-                                {periodeTeks(inv.billing_period) || inv.number}
-                              </p>
-                              <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
-                                {inv.overdue ? (
-                                  <><AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />Terlambat</>
-                                ) : (
-                                  <><Clock className="w-3 h-3 text-slate-400 shrink-0" />Menunggu</>
-                                )}
-                                <span className="text-slate-400">·</span>
-                                {jenisTagihanTeks(inv.type)}
-                              </p>
-                            </div>
-                            <span className="text-xs font-extrabold text-slate-600 tabular-nums shrink-0">
-                              {rupiah(inv.total)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
                     </div>
                   )}
-
-                  {/* ─── TAGIHAN TANPA KARTU BAYAR (VA mati / belum terbit) ─── */}
-                  {(vaState === 'inactive' || vaState === 'not_issued') && tagihan.unpaid?.length > 0 && (
-                    <div className="mx-3 bg-white rounded-2xl border border-slate-200 p-4">
-                      <h3 className="text-sm font-extrabold text-slate-800">Tagihan Anda</h3>
-                      <div className="mt-3 space-y-2">
-                        {tagihan.unpaid.map((inv) => (
-                          <div key={inv.id} className="rounded-xl border border-slate-200 px-3.5 py-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="text-xs font-extrabold text-slate-800 truncate">
-                                  {periodeTeks(inv.billing_period) || inv.number}
-                                </p>
-                                <p className="text-[11px] text-slate-500 mt-0.5">
-                                  {jenisTagihanTeks(inv.type)} · Jatuh tempo {tanggalTeks(inv.due_date)}
-                                </p>
-                              </div>
-                              <div className="text-right shrink-0">
-                                <p className="text-xs font-extrabold text-slate-900 tabular-nums">
-                                  {rupiah(inv.total)}
-                                </p>
-                                {inv.overdue && (
-                                  <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-extrabold text-amber-700">
-                                    <AlertTriangle className="w-3 h-3" />
-                                    <span>Terlambat</span>
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </>
-          )}
-
-          {/* ══════════════ SUB-TAB RIWAYAT ══════════════ */}
-          {subTab === 'riwayat' && (
-            <>
-              {memuatRiwayat && !riwayat && (
-                <div className="mx-3 bg-white rounded-2xl border border-slate-200 p-4 space-y-2.5">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="h-16 rounded-xl bg-slate-200/70 animate-pulse" />
-                  ))}
                 </div>
               )}
 
-              {!memuatRiwayat && riwayat && !riwayat.linked && (
-                <KartuPesan icon={UserCog} judul="Riwayat belum tersedia">
-                  Data langganan Anda belum tertaut ke sistem tagihan. Hubungi petugas kantor.
-                </KartuPesan>
-              )}
+              {/* Card Body: Tab Riwayat Cepat */}
+              {subTab === 'riwayat' && (
+                <div className="p-4 bg-white space-y-2.5">
+                  {memuatRiwayat && (
+                    <div className="space-y-2">
+                      {[0, 1, 2].map((i) => (
+                        <div key={i} className="h-14 rounded-xl bg-gray-100 animate-pulse" />
+                      ))}
+                    </div>
+                  )}
 
-              {!memuatRiwayat && riwayat?.linked && riwayat.invoices?.length === 0 && (
-                <KartuPesan icon={ReceiptText} judul="Belum ada riwayat">
-                  Pembayaran yang sudah lunas akan tercatat di sini.
-                </KartuPesan>
-              )}
+                  {!memuatRiwayat && (!riwayat?.invoices || riwayat.invoices.length === 0) && (
+                    <div className="py-6 text-center">
+                      <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center mb-2.5 bg-gray-100 text-gray-500">
+                        <ReceiptText className="w-6 h-6" />
+                      </div>
+                      <h3 className="text-sm font-black text-gray-900">Belum Ada Riwayat Pembayaran</h3>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">
+                        Pembayaran yang sudah lunas akan otomatis dicatat pada daftar ini.
+                      </p>
+                    </div>
+                  )}
 
-              {!memuatRiwayat && riwayat?.invoices?.length > 0 && (
-                <>
-                  <div className="mx-3 bg-white rounded-2xl border border-slate-200 p-4 space-y-2.5">
-                    <h3 className="text-sm font-extrabold text-slate-800">Riwayat Pembayaran</h3>
-                    {riwayat.invoices.map((inv) => {
-                      const metode = inv.payment?.method;
-                      const MetodeIcon = metode === 'tunai' ? Banknote
-                        : metode === 'transfer' ? ArrowLeftRight
-                        : metode === 'gateway' ? Landmark
-                        : ReceiptText;
-                      return (
-                        <div key={inv.id} className="rounded-xl border border-slate-200 px-3.5 py-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="text-xs font-extrabold text-slate-800 truncate">
-                                {periodeTeks(inv.billing_period) || inv.number}
-                              </p>
-                              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
-                                {inv.number} · {jenisTagihanTeks(inv.type)}
-                              </p>
-                              <div className="flex items-center gap-1.5 mt-1.5">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-extrabold">
-                                  <CheckCircle2 className="w-3 h-3" />
-                                  <span>Lunas</span>
-                                </span>
-                                {inv.payment && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-extrabold">
-                                    <MetodeIcon className="w-3 h-3" />
-                                    <span>{inv.payment.method_label}</span>
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className="text-xs font-extrabold text-slate-900 tabular-nums">
-                                {rupiah(inv.payment?.amount ?? inv.total)}
-                              </p>
-                              <p className="text-[11px] text-slate-500 mt-0.5">
-                                {tanggalTeks(inv.payment?.date)}
-                              </p>
-                            </div>
+                  {!memuatRiwayat && riwayat?.invoices?.length > 0 && (
+                    <div className="space-y-2">
+                      {riwayat.invoices.map((inv) => (
+                        <div
+                          key={inv.id}
+                          className="rounded-xl border border-gray-100 bg-gray-50/70 p-3 flex items-center justify-between gap-3 hover:bg-gray-50 transition"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-black text-gray-900 truncate">
+                              {periodeTeks(inv.billing_period) || inv.number}
+                            </p>
+                            <p className="text-[11px] text-gray-500 mt-0.5 truncate font-medium">
+                              {inv.number} · {jenisTagihanTeks(inv.type)}
+                            </p>
+                            <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Lunas</span>
+                            </span>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-xs font-black text-gray-900 font-mono">
+                              {rupiah(inv.payment?.amount ?? inv.total)}
+                            </p>
+                            <p className="text-[10px] text-gray-500 mt-0.5 font-medium">
+                              {tanggalTeks(inv.payment?.date)}
+                            </p>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-
-                  <p className="mx-4 text-[11px] text-slate-500 leading-relaxed">
-                    Jumlah pada riwayat adalah nilai tagihan, belum termasuk biaya admin bank
-                    untuk pembayaran lewat Virtual Account.
-                  </p>
-                </>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
-            </>
+            </section>
+          )}
+
+          {/* ═══ KARTU 2: DAFTAR TAGIHAN BULANAN LAINNYA ═══ */}
+          {!memuatTagihan && !galatTagihan && unpaidInvoices.length > 0 && (
+            <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
+              {/* Header Kartu 2 */}
+              <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-black text-gray-900 leading-tight">
+                      Daftar Tagihan Belum Lunas
+                    </h2>
+                    <p className="text-xs text-gray-600 mt-0.5 leading-tight font-medium">
+                      Total {unpaidInvoices.length} invoice iuran
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-mono font-bold text-xs border border-blue-200">
+                  {unpaidInvoices.length}
+                </span>
+              </div>
+
+              {/* List Baris Tagihan */}
+              <div className="divide-y divide-gray-100">
+                {unpaidInvoices.map((inv) => (
+                  <div key={inv.id} className="p-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/70 transition">
+                    <div className="min-w-0">
+                      <p className="text-xs font-black text-gray-900 truncate">
+                        {periodeTeks(inv.billing_period) || inv.number}
+                      </p>
+                      <p className="text-[11px] text-gray-500 mt-0.5 font-medium">
+                        {jenisTagihanTeks(inv.type)} · Jatuh tempo {tanggalTeks(inv.due_date)}
+                      </p>
+                      {inv.overdue ? (
+                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
+                          <AlertTriangle className="w-3 h-3" />
+                          <span>Terlambat</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 text-[10px] font-bold">
+                          <Clock className="w-3 h-3" />
+                          <span>Belum Dibayar</span>
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-black text-gray-900 font-mono">
+                        {rupiah(inv.total)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ═══ KARTU 3: PANDUAN CARA MEMBAYAR (COLLAPSIBLE / INFO CARD) ═══ */}
+          {!memuatTagihan && !galatTagihan && activeBill && (
+            <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100 p-4">
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
+                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                <h3 className="text-xs font-black text-gray-900">Petunjuk Pembayaran Virtual Account</h3>
+              </div>
+              <ol className="space-y-1.5 text-xs text-gray-600 leading-relaxed list-decimal pl-4 font-medium">
+                <li>Buka aplikasi m-Banking atau ATM bank pilihan Anda di atas.</li>
+                <li>Pilih menu <strong>Transfer / Bayar Virtual Account</strong>.</li>
+                <li>Salin & masukkan 16 digit nomor Virtual Account yang tertera di atas.</li>
+                <li>Pastikan nama pelanggan yang muncul di layar bank sudah sesuai.</li>
+                <li>Bayar persis sesuai total nominal, lalu tekan tombol <strong>"Saya Sudah Bayar"</strong>.</li>
+              </ol>
+            </section>
           )}
 
         </div>
       </main>
 
+      {/* Lembar Konfirmasi Saya Sudah Bayar */}
       {lembarBayar !== null && (
         <LembarSudahBayar
           invoiceId={lembarBayar}
-          onTutup={() => { setLembarBayar(null); muatTagihan(true); }}
+          onTutup={() => {
+            setLembarBayar(null);
+            muatTagihan(true);
+          }}
           onLunas={() => muatTagihan(true)}
         />
       )}

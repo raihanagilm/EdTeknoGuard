@@ -457,15 +457,30 @@ class CustomerImporter:
                         existing_pel.kantor = nb_kantor
                         has_change = True
 
-                    # 1. Update No. WhatsApp
+                    # 1. Update No. WhatsApp & Kata Sandi Default
                     if new_wa:
+                        from app.core.security import verify_password, get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+                        # Periksa apakah user belum mengganti kata sandi kustom sendiri di aplikasi
+                        is_still_default_pwd = (
+                            not existing_pel.password_hash
+                            or verify_password(DEFAULT_CUSTOMER_PASSWORD, existing_pel.password_hash)
+                            or (existing_pel.no_hp and verify_password(existing_pel.no_hp.strip(), existing_pel.password_hash))
+                        )
                         if not existing_pel.no_hp:
                             # Jika kosong, langsung isi
                             existing_pel.no_hp = new_wa
+                            if is_still_default_pwd:
+                                existing_pel.password_hash = get_password_hash(new_wa.strip())
                             has_change = True
                         elif selected_version == "new" and existing_pel.no_hp != new_wa:
                             # Jika ada konflik dan admin memilih 'new'
                             existing_pel.no_hp = new_wa
+                            if is_still_default_pwd:
+                                existing_pel.password_hash = get_password_hash(new_wa.strip())
+                            has_change = True
+                        elif is_still_default_pwd and verify_password(DEFAULT_CUSTOMER_PASSWORD, existing_pel.password_hash):
+                            # Jika nomor WA sudah cocok tetapi hash masih '123456', sinkronkan kata sandi ke nomor WA
+                            existing_pel.password_hash = get_password_hash(new_wa.strip())
                             has_change = True
 
                     # 2. Update Alamat
@@ -533,6 +548,7 @@ class CustomerImporter:
                             raw_paket = None
                             
                     from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+                    init_pwd = new_wa.strip() if new_wa else DEFAULT_CUSTOMER_PASSWORD
                     # Simpan sebagai pelanggan baru offline (tidak aktif dipantau dulu sampai bound di MikroTik)
                     new_pelanggan = Pelanggan(
                         id_pelanggan=id_pel,
@@ -545,7 +561,7 @@ class CustomerImporter:
                         is_monitored=False, # Sesuai Q5: jadikan offline
                         is_active=True,
                         status_lease="waiting",
-                        password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
+                        password_hash=get_password_hash(init_pwd)
                     )
                     db.add(new_pelanggan)
                     db.flush()

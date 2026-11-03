@@ -10,8 +10,6 @@ import {
   X,
   FileText,
   Server,
-  KeyRound,
-  RotateCcw,
   Thermometer,
   Gauge
 } from 'lucide-react'
@@ -21,8 +19,6 @@ export function CustomerDetailModal({
   onClose,
   activeOffice = 'cabang',
   onOpenEdit,
-  onResetPassword,
-  resetPasswordLoadingId
 }) {
   const [activeTab, setActiveTab] = useState('profil') // 'profil' | 'jaringan'
 
@@ -170,29 +166,6 @@ export function CustomerDetailModal({
                 </p>
               </div>
 
-              {/* Akun Aplikasi TeknoCust Warga & Reset Sandi */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3">
-                <div className="space-y-1">
-                  <span className="text-[11px] font-bold text-sky-950 flex items-center gap-1.5 font-sans">
-                    <KeyRound className="w-4 h-4 text-sky-600 shrink-0" />
-                    <span>Akses Aplikasi TeknoCust Warga</span>
-                  </span>
-                  <div className="text-[11px] text-slate-600 font-sans">
-                    Login via ID Pelanggan / WhatsApp. Kata sandi default: <span className="font-mono font-bold text-sky-800">123456</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => onResetPassword && onResetPassword(customer)}
-                  disabled={resetPasswordLoadingId === cId}
-                  className="w-full sm:w-auto px-3 py-1.5 rounded-xl border border-sky-300 bg-white hover:bg-sky-100/80 text-sky-800 font-bold text-xs font-mono flex items-center justify-center gap-1.5 transition shadow-2xs shrink-0 cursor-pointer disabled:opacity-50"
-                  title="Kembalikan kata sandi aplikasi TeknoCust pelanggan ke 123456"
-                >
-                  <RotateCcw className={`w-3.5 h-3.5 text-sky-600 ${resetPasswordLoadingId === cId ? 'animate-spin' : ''}`} />
-                  <span>{resetPasswordLoadingId === cId ? 'Mereset...' : 'Reset ke 123456'}</span>
-                </button>
-              </div>
             </div>
           )}
 

@@ -44,6 +44,12 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 - **Suite Pengujian Modul Pembayaran ([tests/test_portal_payment_module.py](tests/test_portal_payment_module.py))**: 31 pengujian atas logika bisnis nyata, meliputi penautan identitas, penolakan kode pelanggan sebagai id, pembedaan empat keadaan VA, perapian nominal dan kecepatan paket, mesin keputusan "sudah bayar", perilaku cache, dan proteksi endpoint tanpa sesi.
 
 ### Changed
+- **Penyelarasan Tampilan Halaman Tagihan & Pembayaran ([PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
+  - Menyamakan tata letak dan elevasi visual dengan menu **Kendala (Gambar 1)** dan **Kuota (Gambar 2)**:
+    - **Kartu Utama 1**: Menggunakan shell `rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100` yang menimpa lengkungan header biru (`-mt-3`), lengkap dengan card header standar badge ikon `ReceiptText` (`w-10 h-10 rounded-xl bg-blue-100 text-blue-700`), judul tebal *"Total Tagihan Bulan Ini"*, serta sub-tab switcher terpadu di sisi kanan header.
+    - **Metrik & Pilihan Bank (Virtual Account)**: Menampilkan angka nominal besar tebal (`text-3xl sm:text-4xl font-black font-mono text-blue-600`), badge paket aktif, rincian jatuh tempo, serta kanal pembayaran Virtual Account (Mandiri, BRI, BCA, BSI) dengan tombol salin 16 digit dan tombol hijau konfirmasi *"Saya Sudah Bayar"* sesuai spesifikasi [api-v1.md](api-v1.md).
+    - **Kartu Utama 2**: Daftar riwayat tagihan bulanan dengan badge semantik rapi (*Terlambat* amber, *Belum Dibayar* slate, *Lunas* emerald) dan petunjuk cara pembayaran yang terintegrasi rapi tanpa kotak abu-abu terpisah.
+
 - **Penyelesaian Modularisasi Modul Data Pelanggan & Eliminasi Kode Menggantung ([CustomersView.jsx](frontend/src/components/customers/CustomersView.jsx), [CustomersTable.jsx](frontend/src/components/customers/CustomersTable.jsx), [CustomersFilterBar.jsx](frontend/src/components/customers/CustomersFilterBar.jsx))**:
   - Menyambungkan komponen pecahan `CustomersFilterBar` dan `CustomersTable` yang sebelumnya telah dibuat namun berstatus kode mati (tidak pernah di-import oleh `CustomersView.jsx`).
   - Memutakhirkan `CustomersTable.jsx` agar memiliki paritas fitur 100% lengkap: mempertahankan tampilan **Mobile Card Stack Responsif (P8-03 Pola #1)**, logika evaluasi redaman optik dinamis (`warnThreshold` & `critThreshold`), penanganan jeda probe per pelanggan (`probeCooldowns`), kalkulasi status lease online/offline, dan menu aksi popover.
@@ -85,6 +91,11 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - Terverifikasi: `python -m app.db.init_db` pada database kosong kini sukses penuh (master + 4 database tenant).
 
 ### Removed
+- **Penghapusan Fitur Reset Kata Sandi TeknoCust Warga dari NOC Admin ([CustomerDetailModal.jsx](frontend/src/components/customers/CustomerDetailModal.jsx), [CustomersView.jsx](frontend/src/components/customers/CustomersView.jsx), [routes.py](app/modules/customers/routes.py))**:
+  - Menghapus blok kartu *"Akses Aplikasi TeknoCust Warga"* dan tombol *"Reset ke 123456"* dari modal detail pelanggan ([CustomerDetailModal.jsx](frontend/src/components/customers/CustomerDetailModal.jsx)).
+  - Menghapus state `resetPasswordLoadingId`, modal konfirmasi, dan handler `handleResetPortalPassword` dari view pelanggan ([CustomersView.jsx](frontend/src/components/customers/CustomersView.jsx)).
+  - Menghapus endpoint backend `POST /api/customers/{id_pelanggan}/reset-portal-password` dari [app/modules/customers/routes.py](app/modules/customers/routes.py).
+
 - **Pembersihan Sisa Modul Lama Pasca Modularisasi Domain**:
   - Menghapus `app/modules/admin_customer_mgmt/` (facade backward compatibility) yang sudah tidak dirujuk oleh [routes/api.py](routes/api.py) maupun modul lain, karena fungsinya telah digantikan penuh oleh modul `tickets`, `quota`, dan `notifications`.
   - Menghapus direktori sisa yang telah kosong: `app/modules/logs_mgmt/` (digantikan `optical_logs`), `portal_pelanggan/` (dipindah ke `app/portal/`), dan `data/`.

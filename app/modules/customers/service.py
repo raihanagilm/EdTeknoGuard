@@ -45,7 +45,7 @@ class CustomerService:
         return CustomerImporter.preview_import_file(file_content, filename, sheet_name, column_mapping)
 
     @staticmethod
-    def execute_json_import(db: Session, data_list: list, default_kantor: str = 'cabang') -> dict:
+    def execute_json_import(db: Session, data_list: list, default_kantor: Optional[str] = None) -> dict:
         return CustomerImporter.execute_json_import(db, data_list, default_kantor)
 
     @staticmethod
@@ -313,7 +313,7 @@ class CustomerService:
                 "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(c, "is_monitored", True)),
                 "status_lease": getattr(c, "status_lease", "bound") or "bound",
-                "kantor": getattr(c, "kantor", "cabang") or "cabang",
+                "kantor": getattr(c, "kantor", None) or (db.bind.url.database.replace("edtekno_", "") if (hasattr(db, "bind") and db.bind and hasattr(db.bind, "url") and db.bind.url and db.bind.url.database and db.bind.url.database.startswith("edtekno_")) else None),
                 "queue_name": getattr(c, "queue_name", None) or c.nama,
                 "kuota_terpakai_gb": kuota_gb,
                 "upload_bytes": up_bytes,
@@ -479,14 +479,18 @@ class CustomerService:
         }
 
     @staticmethod
-    def create_customer(db: Session, data: CustomerCreate) -> Pelanggan:
+    def create_customer(db: Session, data: CustomerCreate, kantor: Optional[str] = None) -> Pelanggan:
         from app.db.models import PerangkatONT
 
+        # Resolusi kantor secara dinamis tanpa hardcode
+        db_name = db.bind.url.database if (hasattr(db, "bind") and db.bind and hasattr(db.bind, "url") and db.bind.url and db.bind.url.database) else ""
+        extracted_kantor = db_name.replace("edtekno_", "") if db_name.startswith("edtekno_") else None
+        target_kantor = (kantor or getattr(data, "kantor", None) or extracted_kantor or "").strip().lower() or None
+
         if not data.id_pelanggan or not str(data.id_pelanggan).strip():
-            # Cari urutan sequence untuk IP router terkait jika sudah ada di DB
             clean_ip = "".join(filter(str.isdigit, str(data.ip_router or "0")))
             existing_count = db.query(Pelanggan).filter(Pelanggan.id_pelanggan.like(f"P{clean_ip}%")).count()
-            data.id_pelanggan = CustomerService.generate_customer_id_from_ip(data.ip_router or "10.10.0.1", existing_count + 1)
+            data.id_pelanggan = CustomerService.generate_customer_id_from_ip(data.ip_router, existing_count + 1)
 
         # Validasi duplikasi ID Pelanggan
         existing_id = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == data.id_pelanggan).first()
@@ -509,18 +513,22 @@ class CustomerService:
             raise ValueError(f"IP Router '{data.ip_router}' sudah digunakan oleh pelanggan '{pel_name}'")
 
         from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+        init_pwd = data.no_hp.strip() if (data.no_hp and data.no_hp.strip() and data.no_hp.strip() != "-") else DEFAULT_CUSTOMER_PASSWORD
+
+        # Resolusi POP dinamis jika tidak diisi
+        target_pop = data.pop or (f"POP {target_kantor.capitalize()}" if target_kantor else None)
 
         new_cust = Pelanggan(
             id_pelanggan=data.id_pelanggan,
             nama=data.nama,
             alamat=data.alamat,
             no_hp=data.no_hp,
-            pop=data.pop,
-            kantor=getattr(data, "kantor", "cabang") or "cabang",
+            pop=target_pop,
+            kantor=target_kantor,
             paket=data.paket,
             is_monitored=getattr(data, "is_monitored", True) if getattr(data, "is_monitored", None) is not None else True,
             is_active=True,
-            password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
+            password_hash=get_password_hash(init_pwd)
         )
         db.add(new_cust)
         db.flush()
@@ -572,7 +580,16 @@ class CustomerService:
                 raise ValueError(f"IP Router '{new_ip}' sudah digunakan oleh pelanggan '{pel_name}' (ID: {existing_ip.id_pelanggan})")
 
         if "no_wa" in update_dict and update_dict["no_wa"] is not None:
-            cust.no_hp = str(update_dict["no_wa"]).strip()
+            new_wa_val = str(update_dict["no_wa"]).strip()
+            from app.core.security import verify_password, get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+            is_still_default = (
+                not cust.password_hash
+                or verify_password(DEFAULT_CUSTOMER_PASSWORD, cust.password_hash)
+                or (cust.no_hp and verify_password(cust.no_hp.strip(), cust.password_hash))
+            )
+            cust.no_hp = new_wa_val
+            if is_still_default and new_wa_val and new_wa_val != "-":
+                cust.password_hash = get_password_hash(new_wa_val)
 
         for field, val in update_dict.items():
             if hasattr(cust, field) and val is not None:
