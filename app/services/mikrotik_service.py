@@ -7,6 +7,7 @@ lalu melakukan sinkronisasi otomatis/realtime ke database pelanggan TeknoGuard.
 import logging
 import re
 import socket
+import ipaddress
 from typing import Dict, Any, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
@@ -361,7 +362,11 @@ class MikroTikSyncService:
                         clean_ip = target.split("/")[0].strip()
                         # Hanya proses target yang berupa format IP Address valid (10.x, 192.168.x, 172.x, dsb)
                         # Abaikan interface / dynamic binding seperti <pppoe-xxx@teknoindo.net>
-                        is_valid_ip = bool(re.match(r'^(?:10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[0-1])\.)\d{1,3}\.\d{1,3}$', clean_ip))
+                        try:
+                            _pip = ipaddress.ip_address(clean_ip)
+                            is_valid_ip = _pip.is_private and not _pip.is_loopback
+                        except Exception:
+                            is_valid_ip = False
 
                         if is_valid_ip:
                             ip_to_rate[clean_ip] = max_limit
