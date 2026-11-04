@@ -20,6 +20,7 @@ from app.services.scraper.credential_chain import CredentialChainManager
 from app.services.scraper.optical_parser import OpticalParser
 from app.services.scraper.zte_scraper import ZTEScraper
 from app.services.scraper.xpon_scraper import XPONScraper
+from app.services.scraper.driver_registry import ONTDriverRegistry
 
 logger = logging.getLogger("ont_scraper_service")
 
@@ -115,6 +116,11 @@ class ONTScraperService:
         probe_html = r_probe.text if r_probe is not None else ""
         setattr(session, "probe_html", probe_html)
 
+        # Resolusi ONT Driver secara otomatis via Plug-and-Play Registry
+        probe_hdrs = dict(r_probe.headers) if r_probe is not None else None
+        driver_cls = ONTDriverRegistry.resolve_driver(probe_html=probe_html, headers=probe_hdrs)
+        print(f"[*] [ONT_DRIVER] Host {host}: Menggunakan driver '{driver_cls.display_name}'")
+
         # Deteksi profil vendor modem
         vendor_info = CredentialChainManager.detect_ont_vendor_behavior(probe_html)
         default_lock_sec = vendor_info.get("default_lock_seconds", 60)
@@ -191,7 +197,7 @@ class ONTScraperService:
             # karena modem ZTE GM220 seringkali menolak login pertama saat reconnecting/transient state
             max_attempts = 3 if (source == "CUSTOMER" or is_valid_modem) else 1
             for attempt_num in range(1, max_attempts + 1):
-                ok, resp = ZTEScraper.attempt_login(session, base_url, host, u, p, probe_text=probe_html)
+                ok, resp = driver_cls.attempt_login(session, base_url, host, u, p, probe_text=probe_html)
                 last_resp = resp
                 probe_html = ""
 
@@ -292,7 +298,7 @@ class ONTScraperService:
                 }
 
         # Kasus B: Autentikasi Berhasil -> Ambil Data Optik via OpticalParser
-        opt_data = OpticalParser.extract_optical_data(session, base_url, host)
+        opt_data = driver_cls.extract_optical_data(session, base_url, host)
 
         if not opt_data or opt_data.get("rx_power") is None:
             print(f"[!] [OPTICAL_FAILED] ONT {host} ({customer_name}): Login OK, namun parameter optik kosong.")
@@ -323,7 +329,7 @@ class ONTScraperService:
         else:
             status_koneksi = "NORMAL"
 
-        device_wifi = ZTEScraper.extract_device_and_wifi_data(session, base_url, host)
+        device_wifi = driver_cls.extract_device_and_wifi_data(session, base_url, host)
 
         print(f"[+] [SUCCESS] ONT {host} ({customer_name}): Rx {rx} dBm | Tx {opt_data.get('tx_power')} dBm | Suhu {suhu}°C | MAC: {device_wifi.get('mac_address')} | Status: {status_koneksi} | Auth: {active_user} ({auth_source})")
 
