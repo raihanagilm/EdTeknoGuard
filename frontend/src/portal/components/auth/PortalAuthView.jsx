@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Phone,
   Lock,
@@ -193,17 +193,17 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
           <div className="absolute -top-14 -right-14 w-48 h-48 bg-white/10 rounded-full pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 w-52 h-52 bg-cyan-300/10 rounded-full pointer-events-none" />
 
-          {/* Header Brand Atas: Logo Frame 36 lebih besar + TeknoCust + Teks Layanan Mandiri */}
+          {/* Header Brand Atas: Logo Baru Tekno Indo + MyTekno + Teks Layanan Mandiri */}
           <div className="relative z-10 pt-4 px-5">
             <div className="flex items-center gap-3">
               <img
-                src="/frame-36.png"
+                src="/tekno-indo-logo.png"
                 alt="TeknoIndonet Logo"
                 className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-md shrink-0"
               />
               <div className="min-w-0">
                 <div className="text-white text-xl sm:text-2xl font-black tracking-tight leading-none drop-shadow-xs">
-                  Tekno<span className="text-cyan-200 font-extrabold">Cust</span>
+                  My<span className="text-cyan-200 font-extrabold">Tekno</span>
                 </div>
                 <div className="text-blue-100/90 text-[11px] sm:text-xs mt-1 font-medium leading-tight">
                   Layanan Mandiri Khusus Pelanggan TeknoIndonet
@@ -356,7 +356,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 
             {/* Footer copyright */}
             <div className="pt-3 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0">
-              &copy; 2026 TeknoCust &bull; Portal Layanan Mandiri Pelanggan TeknoIndonet
+              &copy; 2026 MyTekno &bull; Portal Layanan Mandiri Pelanggan TeknoIndonet
             </div>
           </div>
         </div>

@@ -1,5 +1,18 @@
-# EdTeknoGuard - Production image
-# Base: Python 3.10-slim (ringan & stabil untuk FastAPI + MySQL Local/PyMySQL)
+# ════════════════════════════════════════════════════════════════════
+# Stage 1: Build Frontend SPA (React + Vite)
+# ════════════════════════════════════════════════════════════════════
+FROM node:20-alpine AS frontend-builder
+WORKDIR /build
+
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm install
+
+COPY frontend/ ./
+RUN npm run build
+
+# ════════════════════════════════════════════════════════════════════
+# Stage 2: Production Backend (FastAPI + Python 3.10-slim)
+# ════════════════════════════════════════════════════════════════════
 FROM python:3.10-slim
 
 # - PYTHONDONTWRITEBYTECODE: cegah file .pyc dalam image
@@ -17,7 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends tzdata \
     && echo $TZ > /etc/timezone \
     && rm -rf /var/lib/apt/lists/*
 
-# Salin & install dependensi lebih dulu untuk memanfaatkan layer cache
+# Salin & install dependensi backend Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
@@ -25,14 +38,17 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Jalankan sebagai user non-root (best practice keamanan)
 RUN addgroup --system app && adduser --system --ingroup app app
 
-# Salin kode aplikasi (pemilik: app)
+# Salin kode aplikasi backend (pemilik: app)
 COPY --chown=app:app app ./app
 COPY --chown=app:app database ./database
 COPY --chown=app:app routes ./routes
 COPY --chown=app:app static ./static
 
-# Folder runtime untuk scan_state.json (untuk hasil volume mount docker-compose)
-RUN mkdir -p /app/data && chown -R app:app /app
+# Salin hasil build produksi frontend dari Stage 1
+COPY --from=frontend-builder --chown=app:app /build/dist ./frontend/dist
+
+# Folder runtime untuk persistensi data & upload foto
+RUN mkdir -p /app/data /app/static/uploads/profil && chown -R app:app /app
 
 USER app
 

@@ -549,6 +549,8 @@ export default function App() {
     if (
       clean === 'portal' ||
       clean.startsWith('portal/') ||
+      clean === 'mytekno' ||
+      clean.startsWith('mytekno/') ||
       clean === 'teknocust' ||
       clean.startsWith('teknocust/')
     ) {
@@ -688,11 +690,12 @@ export default function App() {
   }, [])
 
   // =========================================================================
-  // VIEW A: PORTAL PELANGGAN MANDIRI (TeknoCust)
+  // VIEW A: PORTAL PELANGGAN MANDIRI (MyTekno / TeknoCust)
   // =========================================================================
   if (
     activeTab === 'portal' ||
     window.location.pathname.startsWith('/portal') ||
+    window.location.pathname.startsWith('/mytekno') ||
     window.location.pathname.startsWith('/teknocust')
   ) {
     return <PortalPelangganApp />

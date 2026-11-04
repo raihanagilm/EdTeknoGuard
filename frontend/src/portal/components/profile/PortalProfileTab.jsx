@@ -27,14 +27,14 @@ import { PortalActiveMascot } from '../common/PortalActiveMascot';
 import { PortalHeader } from '../layout/PortalHeader';
 import { PortalToastNotification } from '../common/PortalToastNotification';
 
-export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdate, onLogout, onOpenNotifications , hasUnreadNotifications}) {
+export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdate, onLogout, onOpenNotifications, hasUnreadNotifications }) {
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  
+
   // Floating Toast State (Pengganti banner inline)
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
-  
+
   // Profile Data Edit State
   const [nama, setNama] = useState(customer?.nama || '');
   const [noHp, setNoHp] = useState(customer?.no_hp || '');
@@ -86,7 +86,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
           canvas.width = maxDim;
           canvas.height = maxDim;
           const ctx = canvas.getContext('2d');
-          
+
           // Gambar avatar persegi terpusat
           ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, maxDim, maxDim);
 
@@ -545,7 +545,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
 
       {/* ═══ MODAL POPUP EDIT DATA DIRI (NAMA, NO WA, ALAMAT) ═══ */}
       {isEditModalOpen && typeof document !== 'undefined' && createPortal(
-        <div 
+        <div
           className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn"
           onClick={(e) => {
             if (e.target === e.currentTarget && !profileSaving) setIsEditModalOpen(false);
@@ -660,7 +660,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                 Keluar dari Akun?
               </h3>
               <p className="text-xs text-gray-600 leading-relaxed font-medium">
-                Apakah Anda yakin ingin keluar dari akun portal TeknoCust?
+                Apakah Anda yakin ingin keluar dari akun aplikasi MyTekno?
               </p>
             </div>
 

@@ -1,7 +1,7 @@
 # Panduan Lengkap Deployment Server Linux (Produksi) 🛡️
 ## Domain: https://portal.teknoindo.net/
 
-Panduan langkah demi langkah (*end-to-end*) untuk memasang dan menjalankan sistem **EdTeknoGuard & Portal Pelanggan TeknoCust** dari awal (*fresh install*) pada server Linux mandiri (Ubuntu 22.04 / 24.04 LTS / Debian 12).
+Panduan langkah demi langkah (*end-to-end*) untuk memasang dan menjalankan sistem **EdTeknoGuard & Portal Pelanggan MyTekno** dari awal (*fresh install*) pada server Linux mandiri (Ubuntu 22.04 / 24.04 LTS / Debian 12).
 
 ---
 
@@ -178,9 +178,9 @@ Sesuaikan isinya dengan konfigurasi produksi domain **`https://portal.teknoindo.
 # ════════════════════════════════════════════════════════════════
 # KONFIGURASI APLIKASI PRODUKSI
 # ════════════════════════════════════════════════════════════════
-APP_NAME="EdTeknoGuard & TeknoCust Portal"
+APP_NAME="EdTeknoGuard & MyTekno Portal"
 APP_ENV="production"
-APP_PORT=8000
+APP_PORT=7890
 APP_URL="https://portal.teknoindo.net"
 
 # Buat SECRET_KEY acak yang aman (lihat petunjuk generator di bawah)
@@ -263,7 +263,7 @@ Wants=mysql.service
 User=root
 WorkingDirectory=/var/www/edteknoguard
 Environment="PATH=/var/www/edteknoguard/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
-ExecStart=/var/www/edteknoguard/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2 --proxy-headers --forwarded-allow-ips='*'
+ExecStart=/var/www/edteknoguard/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 7890 --workers 2 --proxy-headers --forwarded-allow-ips='*'
 Restart=always
 RestartSec=5s
 KillMode=process
@@ -313,7 +313,7 @@ server {
 
     # Reverse Proxy Utama ke Backend Uvicorn / Static Vite
     location / {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:7890;
         proxy_http_version 1.1;
 
         # Mendukung WebSocket & Server-Sent Events (SSE)
@@ -334,7 +334,7 @@ server {
 
     # Optimasi Caching Aset Frontend Statis (JS, CSS, Font, Gambar Maskot)
     location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|ttf|svg|webp)$ {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:7890;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
         expires 7d;
@@ -402,7 +402,7 @@ Buka peramban web (*browser*) Anda dan uji seluruh endpoint:
   * Masuk ke menu `/pelanggan` dan uji Single Probe redaman ONT.
   * Masuk ke menu `/settings` untuk mengatur ambang batas (`-26.0 dBm` warning, `-27.0 dBm` kritis).
 
-### 2. Portal Pelanggan Mandiri TeknoCust
+### 2. Portal Pelanggan Mandiri MyTekno
 * Buka: **`https://portal.teknoindo.net/portal`**
 * **Kredensial Masuk Warga**:
   * **Nomor WhatsApp**: Nomor terdaftar pelanggan (misal: `085640236236`).
@@ -495,5 +495,5 @@ sudo systemctl status edteknoguard
 
 ---
 
-🛡️ **EdTeknoGuard & TeknoCust Portal siap beroperasi 24/7 di https://portal.teknoindo.net/**.
+🛡️ **EdTeknoGuard & MyTekno Portal siap beroperasi 24/7 di https://portal.teknoindo.net/**.
 

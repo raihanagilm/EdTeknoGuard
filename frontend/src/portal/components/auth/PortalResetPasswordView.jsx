@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   AlertCircle,
   ArrowLeft,
@@ -190,13 +190,13 @@ export function PortalResetPasswordView({ onBackToLogin }) {
           <div className="relative z-10 pt-4 px-5">
             <div className="flex items-center gap-3">
               <img
-                src="/frame-36.png"
+                src="/tekno-indo-logo.png"
                 alt="TeknoIndonet Logo"
                 className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-md shrink-0"
               />
               <div className="min-w-0">
                 <div className="text-white text-xl sm:text-2xl font-black tracking-tight leading-none drop-shadow-xs">
-                  Tekno<span className="text-cyan-200 font-extrabold">Cust</span>
+                  My<span className="text-cyan-200 font-extrabold">Tekno</span>
                 </div>
                 <div className="text-blue-100/90 text-[11px] sm:text-xs mt-1 font-medium leading-tight">
                   Layanan Mandiri Khusus Pelanggan TeknoIndonet
@@ -223,7 +223,7 @@ export function PortalResetPasswordView({ onBackToLogin }) {
                 <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
                   {step === 'submitted_success'
                     ? 'Permintaan reset telah terkirim ke Tim Admin NOC'
-                    : 'Pemulihan kata sandi akun pelanggan TeknoCust'}
+                    : 'Pemulihan kata sandi akun pelanggan MyTekno'}
                 </p>
               </div>
 
@@ -334,7 +334,7 @@ export function PortalResetPasswordView({ onBackToLogin }) {
 
             {/* Footer copyright */}
             <div className="pt-3 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0">
-              &copy; 2026 TeknoCust &bull; Layanan Mandiri Pelanggan TeknoIndonet
+              &copy; 2026 MyTekno &bull; Layanan Mandiri Pelanggan TeknoIndonet
             </div>
           </div>
         </div>

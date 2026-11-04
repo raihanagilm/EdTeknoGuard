@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   HelpCircle,
   Clock,
@@ -102,7 +102,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
       return;
     }
 
-    const waText = `Halo Bapak/Ibu ${t.nama_pelanggan || 'Pelanggan'} (${t.id_pelanggan || '-'}),\n\nPermintaan reset kata sandi akun TeknoCust Anda telah diproses oleh Tim Admin NOC.\n\nKata Sandi Baru Anda: *${newPass}*\n\nSilakan masuk ke aplikasi menggunakan Nomor WhatsApp dan kata sandi baru tersebut. Terima kasih.`;
+    const waText = `Halo Bapak/Ibu ${t.nama_pelanggan || 'Pelanggan'} (${t.id_pelanggan || '-'}),\n\nPermintaan reset kata sandi akun MyTekno Anda telah diproses oleh Tim Admin NOC.\n\nKata Sandi Baru Anda: *${newPass}*\n\nSilakan masuk ke aplikasi menggunakan Nomor WhatsApp dan kata sandi baru tersebut. Terima kasih.`;
     const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`;
 
     // Buka WhatsApp di tab baru

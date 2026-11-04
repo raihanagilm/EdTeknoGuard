@@ -29,8 +29,8 @@ export function PortalCustomerApp() {
   const getPortalTabFromPath = (path) => {
     const clean = path.replace(/^\/+|\/+$/g, '').toLowerCase();
     const parts = clean.split('/');
-    if (parts.length === 1 && (parts[0] === 'teknocust' || parts[0] === 'portal')) return 'beranda';
-    if (parts.length >= 2 && (parts[0] === 'teknocust' || parts[0] === 'portal')) {
+    if (parts.length === 1 && (parts[0] === 'mytekno' || parts[0] === 'teknocust' || parts[0] === 'portal')) return 'beranda';
+    if (parts.length >= 2 && (parts[0] === 'mytekno' || parts[0] === 'teknocust' || parts[0] === 'portal')) {
       const sub = parts[1];
       if (['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran', 'notifikasi'].includes(sub)) {
         return sub;
@@ -53,7 +53,9 @@ export function PortalCustomerApp() {
   const switchTab = (tab, updateUrl = true) => {
     setActiveTab(tab);
     if (updateUrl && tab !== '404_not_found') {
-      const prefix = window.location.pathname.startsWith('/portal') ? '/portal' : '/teknocust';
+      const prefix = window.location.pathname.startsWith('/mytekno')
+        ? '/mytekno'
+        : (window.location.pathname.startsWith('/portal') ? '/portal' : '/teknocust');
       const newUrl = tab === 'beranda' ? prefix : `${prefix}/${tab}`;
       if (window.location.pathname !== newUrl) {
         window.history.pushState({}, '', newUrl);
@@ -200,14 +202,14 @@ export function PortalCustomerApp() {
         <div className="flex-1 flex items-center justify-center">
           <PortalErrorView
             errorCode={404}
-            title="Halaman TeknoCust Tidak Ditemukan"
+            title="Halaman MyTekno Tidak Ditemukan"
             description={`Menu atau rute "${window.location.pathname}" tidak tersedia pada portal mandiri pelanggan.`}
             primaryActionLabel="Beranda"
             onBackToHome={() => switchTab('beranda')}
           />
         </div>
         <div className="py-4 text-center text-[11px] text-slate-500 font-mono">
-          &copy; 2026 TeknoCust &bull; Layanan Mandiri Pelanggan Internet
+          &copy; 2026 MyTekno &bull; Layanan Mandiri Pelanggan Internet
         </div>
       </div>
     );

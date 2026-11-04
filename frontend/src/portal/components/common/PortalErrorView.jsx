@@ -12,7 +12,7 @@ import { PortalActiveMascot } from './PortalActiveMascot';
 export function PortalErrorView({
   errorCode = 404,
   title = "Halaman Tidak Ditemukan",
-  description = "Tautan yang Anda tuju tidak tersedia atau rute di TeknoCust telah diperbarui.",
+  description = "Tautan yang Anda tuju tidak tersedia atau rute di MyTekno telah diperbarui.",
   primaryActionLabel = "Beranda",
   onRetry,
   onBackToHome

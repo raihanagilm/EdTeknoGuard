@@ -47,8 +47,8 @@ Isi `.env` dengan nilai **produksi**:
 | `APP_ENV` | `production` |
 | `APP_URL` | `https://app.<domain-kamu>` |
 | `SECRET_KEY` | **Wajib dirotasi** — generate `python -c "import secrets;print(secrets.token_urlsafe(48))"` |
-| `DB_*` | kredensial TiDB Cloud (tetap) |
-| `TELEGRAM_*` | token bot & chat ID teknisi |
+| `DB_*` | Kredensial MySQL Lokal (`DB_HOST=mysql`, `DB_PORT=3306`, `DB_NAME=edteknoguard`) |
+| `APP_PORT` | `7890` (Port default aplikasi) |
 | `POLLING_*` / `WARNING_THRESHOLD_DBM` / `CRITICAL_THRESHOLD_DBM` | `-26.0` / `-27.0` (lihat AGENTS.md) |
 | `SNMP_SIMULATION_MODE` | `false` di produksi jika scraping asli |
 
@@ -59,7 +59,7 @@ Isi `.env` dengan nilai **produksi**:
 ```bash
 sudo docker compose up -d --build
 sudo docker compose ps                 # pastikan status healthy
-curl -sS http://127.0.0.1:8000/login | head -5   # cek root app
+curl -sS http://127.0.0.1:7890/login | head -5   # cek root app
 sudo docker compose logs -f edteknoguard         # lihat log
 ```
 
@@ -79,7 +79,7 @@ sudo docker compose logs -f           # ikuti log
 
 > Sudah harus ada **domain di akun Cloudflare** (tambah di dashboard Cloudflare,
 > arahkan nameserver). Untuk trial tanpa domain cukup pakai Quick Tunnel:
-> `cloudflared tunnel --url http://127.0.0.1:8000`
+> `cloudflared tunnel --url http://127.0.0.1:7890`
 
 ```bash
 # Login & buat tunnel (setelah domain ada di Cloudflare)
@@ -96,7 +96,7 @@ credentials-file: /home/<user>/.cloudflared/<TUNNEL_ID>.json
 
 ingress:
   - hostname: app.<domain-kamu>
-    service: http://127.0.0.1:8000
+    service: http://127.0.0.1:7890
   - service: http_status:404
 ```
 

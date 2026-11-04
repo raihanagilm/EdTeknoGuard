@@ -35,6 +35,11 @@ template_test.xlsx
 
 # Runtime data (di-mount via volume)
 data/
+static/uploads/
+
+# Frontend dependencies (dibangun di Stage 1 Dockerfile)
+frontend/node_modules/
+frontend/dist/
 
 # Build artifacts (image dibangun dari Dockerfile ini)
 Dockerfile

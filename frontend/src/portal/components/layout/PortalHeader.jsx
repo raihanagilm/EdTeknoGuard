@@ -5,7 +5,7 @@ import { checkHasUnreadNotifications } from '../../utils/notificationUtils';
 import { PortalKendalaService, PortalPembayaranService } from '../../services/portalApi';
 
 export function PortalHeader({
-  title = 'TeknoCust',
+  title = 'MyTekno',
   subtitle = 'Portal Layanan Mandiri Pelanggan TeknoIndonet',
   dashboardData = null,
   customer = null,
