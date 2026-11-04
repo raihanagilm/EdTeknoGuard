@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { PortalActiveMascot } from '../common/PortalActiveMascot';
 import { checkHasUnreadNotifications } from '../../utils/notificationUtils';
-import { PortalKendalaService } from '../../services/portalApi';
+import { PortalKendalaService, PortalPembayaranService } from '../../services/portalApi';
 
 export function PortalHeader({
   title = 'TeknoCust',
@@ -19,17 +19,22 @@ export function PortalHeader({
 
   useEffect(() => {
     let isMounted = true;
-    // Panggil service kendala untuk mengecek tiket aktif dan menghitung status unread
-    PortalKendalaService.list()
-      .then((res) => {
+    Promise.allSettled([
+      PortalKendalaService.list(),
+      PortalPembayaranService.getRiwayat(5)
+    ])
+      .then(([ticketRes, paymentRes]) => {
         if (!isMounted) return;
-        const tickets = res.ok && res.data?.tickets ? res.data.tickets : [];
-        const unread = checkHasUnreadNotifications(pel, tickets);
+        const tickets = ticketRes.status === 'fulfilled' && ticketRes.value?.ok && ticketRes.value.data?.tickets
+          ? ticketRes.value.data.tickets : [];
+        const payments = paymentRes.status === 'fulfilled' && paymentRes.value?.ok && paymentRes.value.data?.invoices
+          ? paymentRes.value.data.invoices : [];
+        const unread = checkHasUnreadNotifications(pel, tickets, payments);
         setHasUnread(unread);
       })
       .catch(() => {
         if (isMounted) {
-          const unread = checkHasUnreadNotifications(pel, []);
+          const unread = checkHasUnreadNotifications(pel, [], []);
           setHasUnread(unread);
         }
       });

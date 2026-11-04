@@ -27,6 +27,10 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Panduan Lengkap Deployment Server Linux Mandiri ([docs/DEPLOY_SERVER_LINUX.md](docs/DEPLOY_SERVER_LINUX.md))**:
+  - Menyediakan panduan operasional teknis menyeluruh (*fresh install*) untuk deployment sistem produksi ke server Linux (Ubuntu/Debian) pada domain `https://portal.teknoindo.net/`.
+  - Mencakup konfigurasi DNS A Record, instalasi paket (Python 3.10+, Node.js 20 LTS, Nginx, MySQL Server, Certbot), setup database master & multi-tenant, konfigurasi `.env`, inisialisasi tabel otomatis (`python -m app.db.init_db`), daemon systemd 24/7, reverse proxy Nginx, penerbitan SSL gratis Let's Encrypt (Certbot), skrip cron backup harian otomatis, serta alur update kode Git.
+
 - **Modal Pop-up Konfirmasi Logout Interaktif dengan Maskot Sedih ([PortalProfileTab.jsx](frontend/src/portal/components/profile/PortalProfileTab.jsx))**:
   - Menambahkan pop-up konfirmasi dialog saat tombol *"Keluar dari Akun Portal"* ditekan untuk mencegah pengguna ter-logout secara tidak sengaja.
   - Memuat maskot router sedih animasi resmi (`PortalActiveMascot mascotKey="sedih"`), pesan konfirmasi ramah *"Apakah Anda yakin ingin keluar dari akun portal TeknoCust?"*, serta sepasang tombol aksi berdampingan (*Batal* dan *Ya, Keluar*) dengan tap-target nyaman $\ge 44\text{px}$.

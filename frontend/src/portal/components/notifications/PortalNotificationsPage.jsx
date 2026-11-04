@@ -5,9 +5,11 @@ import {
   ChevronRight,
   ChevronLeft,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  ReceiptText
 } from 'lucide-react';
-import { PortalKendalaService } from '../../services/portalApi';
+import { PortalKendalaService, PortalPembayaranService } from '../../services/portalApi';
+import { rupiah, periodeTeks } from '../payment/paymentUtils';
 
 function formatRelativeTime(dateString) {
   if (!dateString) return 'Baru saja';
@@ -46,7 +48,8 @@ export function PortalNotificationsPage({
   onNavigate
 }) {
   const [tickets, setTickets] = useState([]);
-  const [loadingTickets, setLoadingTickets] = useState(true);
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [readIds, setReadIds] = useState(() => {
     try {
       const saved = localStorage.getItem('teknocust_read_notifications');
@@ -68,17 +71,26 @@ export function PortalNotificationsPage({
 
   useEffect(() => {
     let isMounted = true;
-    setLoadingTickets(true);
-    PortalKendalaService.list()
-      .then((res) => {
-        if (isMounted && res.ok && res.data?.tickets) {
-          setTickets(res.data.tickets);
+    setLoading(true);
+
+    Promise.allSettled([
+      PortalKendalaService.list(),
+      PortalPembayaranService.getRiwayat(5)
+    ])
+      .then(([ticketRes, paymentRes]) => {
+        if (!isMounted) return;
+        if (ticketRes.status === 'fulfilled' && ticketRes.value?.ok && ticketRes.value.data?.tickets) {
+          setTickets(ticketRes.value.data.tickets);
+        }
+        if (paymentRes.status === 'fulfilled' && paymentRes.value?.ok && paymentRes.value.data?.invoices) {
+          setPayments(paymentRes.value.data.invoices);
         }
       })
-      .catch((err) => console.error('Gagal mengambil tiket untuk notifikasi:', err))
+      .catch((err) => console.error('Gagal mengambil data notifikasi:', err))
       .finally(() => {
-        if (isMounted) setLoadingTickets(false);
+        if (isMounted) setLoading(false);
       });
+
     return () => {
       isMounted = false;
     };
@@ -112,6 +124,7 @@ export function PortalNotificationsPage({
         timestamp: reminderTimeLabel,
         actionText: 'Bayar Sekarang',
         actionTab: 'pembayaran',
+        actionSubTab: 'tagihan',
         statusText: 'BELUM BAYAR',
         statusType: 'danger'
       });
@@ -124,12 +137,34 @@ export function PortalNotificationsPage({
         timestamp: 'Periode aktif',
         actionText: 'Lihat Detail',
         actionTab: 'pembayaran',
+        actionSubTab: 'tagihan',
         statusText: 'LUNAS',
         statusType: 'success'
       });
     }
 
-    // 2. Tiket Kendala Pelanggan
+    // 2. Struk Riwayat Transaksi Pembayaran Berhasil
+    payments.forEach((inv) => {
+      const timeStr = formatRelativeTime(inv.payment?.date || inv.issue_date);
+      const periodeLabel = inv.billing_period ? periodeTeks(inv.billing_period) : (inv.number || 'Bulan Ini');
+      const nominalStr = rupiah(inv.total);
+      const metodeStr = inv.payment?.method_label || 'Lunas';
+
+      items.push({
+        id: `payment-invoice-${inv.id}`,
+        category: 'PAYMENT',
+        title: `Pembayaran Berhasil: ${periodeLabel}`,
+        desc: `Pembayaran iuran internet sebesar ${nominalStr} (${metodeStr}) telah berhasil diverifikasi dan tercatat lunas.`,
+        timestamp: timeStr,
+        actionText: 'Lihat Struk',
+        actionTab: 'pembayaran',
+        actionSubTab: 'riwayat',
+        statusText: 'LUNAS',
+        statusType: 'success'
+      });
+    });
+
+    // 3. Tiket Kendala Pelanggan
     tickets.forEach((t) => {
       const timeStr = formatRelativeTime(t.updated_at || t.created_at);
       const isSelesai = t.status === 'SELESAI';
@@ -160,7 +195,7 @@ export function PortalNotificationsPage({
     });
 
     return items.filter((item) => !deletedIds.includes(item.id));
-  }, [isBelumBayar, pel, tickets, deletedIds]);
+  }, [isBelumBayar, pel, tickets, payments, deletedIds]);
 
 // Saat halaman notifikasi dibuka, tandai semua notifikasi aktif sebagai sudah dibaca
   useEffect(() => {
@@ -207,7 +242,7 @@ export function PortalNotificationsPage({
       }
     }
     if (onNavigate && item.actionTab) {
-      onNavigate(item.actionTab);
+      onNavigate(item.actionTab, item.actionSubTab);
     }
   };
 
@@ -241,7 +276,7 @@ export function PortalNotificationsPage({
                 Pusat Notifikasi
               </h1>
               <p className="portal-subheading text-white/95 mt-0.5 sm:mt-1 leading-tight truncate">
-                Pemberitahuan tiket kendala &amp; status tagihan
+                Pemberitahuan tiket kendala, tagihan &amp; pembayaran
               </p>
             </div>
           </div>
@@ -276,7 +311,7 @@ export function PortalNotificationsPage({
 
             {/* List Notifikasi */}
             <div className="p-4 space-y-3">
-              {loadingTickets && tickets.length === 0 ? (
+              {loading && notificationList.length === 0 ? (
                 <div className="space-y-2.5 animate-pulse">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80 space-y-2">
@@ -316,7 +351,7 @@ export function PortalNotificationsPage({
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 min-w-0">
                           {!isRead && (
-                            <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 animate-pulse" title="Belum dibaca" />
+                            <Bell className="w-3 h-3 text-blue-600 shrink-0" title="Belum dibaca" />
                           )}
                           <span className="text-[12px] font-bold text-slate-800 truncate">
                             {item.title}

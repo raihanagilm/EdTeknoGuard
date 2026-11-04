@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   PortalNavbar,
   PortalBottomNav
@@ -14,12 +14,13 @@ import { PortalProfileTab } from './components/profile/PortalProfileTab';
 import { PortalPaymentTab } from './components/payment/PortalPaymentTab';
 import {
   PortalAuthService,
-  PortalDashboardService
+  PortalDashboardService,
+  PortalKendalaService,
+  PortalPembayaranService
 } from './services/portalApi';
 import { PortalErrorView } from './components/common/PortalErrorView';
 import { PortalSemanticSkeleton } from './components/common/PortalSemanticSkeleton';
 import { checkHasUnreadNotifications } from './utils/notificationUtils';
-import { PortalKendalaService } from './services/portalApi';
 import { RefreshCw } from 'lucide-react';
 
 export function PortalCustomerApp() {
@@ -47,6 +48,7 @@ export function PortalCustomerApp() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const [paymentSubTab, setPaymentSubTab] = useState('tagihan');
 
   const switchTab = (tab, updateUrl = true) => {
     setActiveTab(tab);
@@ -110,14 +112,20 @@ export function PortalCustomerApp() {
   const refreshUnreadStatus = () => {
     const pel = customer || dashboardData?.customer;
     if (!pel) return;
-    PortalKendalaService.list()
-      .then((res) => {
-        const tickets = res.ok && res.data?.tickets ? res.data.tickets : [];
-        const unread = checkHasUnreadNotifications(pel, tickets);
+    Promise.allSettled([
+      PortalKendalaService.list(),
+      PortalPembayaranService.getRiwayat(5)
+    ])
+      .then(([ticketRes, paymentRes]) => {
+        const tickets = ticketRes.status === 'fulfilled' && ticketRes.value?.ok && ticketRes.value.data?.tickets
+          ? ticketRes.value.data.tickets : [];
+        const payments = paymentRes.status === 'fulfilled' && paymentRes.value?.ok && paymentRes.value.data?.invoices
+          ? paymentRes.value.data.invoices : [];
+        const unread = checkHasUnreadNotifications(pel, tickets, payments);
         setHasUnreadNotifications(unread);
       })
       .catch(() => {
-        const unread = checkHasUnreadNotifications(pel, []);
+        const unread = checkHasUnreadNotifications(pel, [], []);
         setHasUnreadNotifications(unread);
       });
   };
@@ -259,6 +267,7 @@ export function PortalCustomerApp() {
               customer={customer}
               dashboardData={dashboardData}
               hasUnreadNotifications={hasUnreadNotifications}
+              initialSubTab={paymentSubTab}
               onBack={() => switchTab('beranda')}
               onOpenNotifications={() => switchTab('notifikasi')}
             />
@@ -268,7 +277,10 @@ export function PortalCustomerApp() {
               customer={customer}
               dashboardData={dashboardData}
               onBack={() => switchTab('beranda')}
-              onNavigate={(tab) => switchTab(tab)}
+              onNavigate={(tab, subTab) => {
+                if (subTab) setPaymentSubTab(subTab);
+                switchTab(tab);
+              }}
             />
           )}
         </div>

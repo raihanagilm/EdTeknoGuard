@@ -1,0 +1,499 @@
+# Panduan Lengkap Deployment Server Linux (Produksi) 🛡️
+## Domain: https://portal.teknoindo.net/
+
+Panduan langkah demi langkah (*end-to-end*) untuk memasang dan menjalankan sistem **EdTeknoGuard & Portal Pelanggan TeknoCust** dari awal (*fresh install*) pada server Linux mandiri (Ubuntu 22.04 / 24.04 LTS / Debian 12).
+
+---
+
+## 📑 Daftar Isi
+1. [Spesifikasi & Prasyarat Sistem](#1-spesifikasi--prasyarat-sistem)
+2. [Konfigurasi DNS Domain](#2-konfigurasi-dns-domain)
+3. [Update Server & Instalasi Dependensi Inti](#3-update-server--instalasi-dependensi-inti)
+4. [Instalasi & Konfigurasi Basis Data MySQL](#4-instalasi--konfigurasi-basis-data-mysql)
+5. [Clone Repositori & Setup Proyek](#5-clone-repositori--setup-proyek)
+6. [Konfigurasi Variabel Lingkungan (.env)](#6-konfigurasi-variabel-lingkungan-env)
+7. [Inisialisasi Skema Database & Super Admin](#7-inisialisasi-skema-database--super-admin)
+8. [Konfigurasi Service Daemon 24/7 (Systemd)](#8-konfigurasi-service-daemon-247-systemd)
+9. [Konfigurasi Web Server Nginx (Reverse Proxy)](#9-konfigurasi-web-server-nginx-reverse-proxy)
+10. [Pendaftaran Sertifikat SSL HTTPS (Certbot Let's Encrypt)](#10-pendaftaran-sertifikat-ssl-https-certbot-lets-encrypt)
+11. [Verifikasi Akses & Pengujian Fitur](#11-verifikasi-akses--pengujian-fitur)
+12. [Pemeliharaan, Backup Otomatis & Alur Update Git](#12-pemeliharaan-backup-otomatis--alur-update-git)
+
+---
+
+## 1. Spesifikasi & Prasyarat Sistem
+
+### Rekomendasi Hardware Server:
+* **Sistem Operasi**: Ubuntu 22.04 LTS / Ubuntu 24.04 LTS / Debian 12 (64-bit).
+* **CPU**: Minimal 2 vCPU Core.
+* **RAM**: Minimal 2 GB (Disarankan 4 GB agar lancar saat build frontend dan kompilasi).
+* **Storage**: Minimal 20 GB SSD / NVMe.
+* **Akses Jaringan**:
+  * Port Publik: `80` (HTTP) dan `443` (HTTPS) terbuka.
+  * **Jalur IP Privat ONT**: Server Linux harus memiliki jalur routing ke IP modem pelanggan (`10.10.x.x` atau `192.168.x.x`) melalui VPN WireGuard/OpenVPN atau terhubung langsung ke router core NOC ISP agar fitur pemantauan redaman optik berjalan nyata.
+
+---
+
+## 2. Konfigurasi DNS Domain
+
+Sebelum mendaftarkan SSL, arahkan subdomain Anda ke IP publik server:
+
+1. Buka dashboard DNS manajemen domain Anda (misal: Cloudflare, Niagahoster, Domainesia, dsb.).
+2. Tambahkan **DNS A Record**:
+   * **Type**: `A`
+   * **Name / Host**: `portal` (atau `portal.teknoindo.net`)
+   * **IPv4 Address**: `[IP_PUBLIK_SERVER_LINUX_ANDA]`
+   * **TTL**: `Auto` / `300 seconds`
+   * *(Jika menggunakan Cloudflare, matikan Proxy sementara / set ke DNS Only / awan abu-abu saat pendaftaran Certbot)*.
+3. Uji propagasi DNS di komputer lokal Anda:
+   ```bash
+   ping portal.teknoindo.net
+   ```
+   Pastikan IP yang merespons adalah IP server Linux Anda.
+
+---
+
+## 3. Update Server & Instalasi Dependensi Inti
+
+Masuk ke server Linux Anda via SSH:
+```bash
+ssh root@IP_SERVER_ANDA
+```
+
+### A. Perbarui Repositori OS
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+### B. Pasang Paket-Paket Pendukung
+```bash
+sudo apt install -y curl wget git build-essential ufw \
+  python3 python3-pip python3-venv python3-dev \
+  pkg-config default-libmysqlclient-dev \
+  nginx certbot python3-certbot-nginx
+```
+
+### C. Pasang Node.js (v20 LTS) & NPM
+Node.js dibutuhkan untuk mengompilasi aplikasi frontend React 18:
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Verifikasi versi terpasang
+node -v   # Output: v20.x.x
+npm -v    # Output: 10.x.x
+python3 --version # Output: Python 3.10+ / 3.12+
+```
+
+---
+
+## 4. Instalasi & Konfigurasi Basis Data MySQL
+
+### A. Pasang MySQL Server
+```bash
+sudo apt install -y mysql-server
+sudo systemctl enable --now mysql
+```
+
+### B. Amankan MySQL
+Jalankan wizard pengamanan:
+```bash
+sudo mysql_secure_installation
+```
+*(Ikuti petunjuk di layar: set password root yang kuat, hapus anonymous user, larang remote root login, dan hapus test database).*
+
+### C. Buat User & Database Produksi
+Masuk ke konsol MySQL:
+```bash
+sudo mysql -u root -p
+```
+
+Jalankan perintah SQL berikut untuk membuat database master dan user khusus dengan hak akses multi-tenant:
+```sql
+-- 1. Buat Database Master Utama
+CREATE DATABASE IF NOT EXISTS edteknoguard CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 2. Buat User Khusus Aplikasi
+-- Ganti 'SandiKuatEdTekno2026!' dengan kata sandi acak yang kuat
+CREATE USER 'edtekno_user'@'localhost' IDENTIFIED BY 'SandiKuatEdTekno2026!';
+
+-- 3. Berikan Hak Akses ke Database Master dan Seluruh Database Tenant (edtekno_*)
+GRANT ALL PRIVILEGES ON edteknoguard.* TO 'edtekno_user'@'localhost';
+GRANT ALL PRIVILEGES ON `edtekno\_%`.* TO 'edtekno_user'@'localhost';
+
+-- 4. Terapkan Hak Akses
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+---
+
+## 5. Clone Repositori & Setup Proyek
+
+### A. Siapkan Direktori Produksi
+Disarankan menempatkan aplikasi pada `/var/www/edteknoguard`:
+```bash
+sudo mkdir -p /var/www/edteknoguard
+sudo chown -R $USER:$USER /var/www/edteknoguard
+```
+
+### B. Clone Repositori Git
+```bash
+git clone https://github.com/raihanagilm/EdTeknoGuard.git /var/www/edteknoguard
+cd /var/www/edteknoguard
+```
+
+### C. Setup Virtual Environment Python & Dependensi
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Upgrade pip & install dependensi backend
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### D. Kompilasi Aset Frontend (React 18 + Vite)
+```bash
+cd /var/www/edteknoguard/frontend
+npm install
+npm run build
+cd /var/www/edteknoguard
+```
+> **Catatan**: Hasil kompilasi frontend akan berada di folder `/var/www/edteknoguard/frontend/dist`. FastAPI secara otomatis menyajikan direktori ini untuk Dashboard Admin NOC dan Portal Pelanggan TeknoCust.
+
+---
+
+## 6. Konfigurasi Variabel Lingkungan (.env)
+
+Buat berkas `.env` dari contoh `.env.example`:
+```bash
+cp .env.example .env
+nano .env
+```
+
+Sesuaikan isinya dengan konfigurasi produksi domain **`https://portal.teknoindo.net`**:
+
+```env
+# ════════════════════════════════════════════════════════════════
+# KONFIGURASI APLIKASI PRODUKSI
+# ════════════════════════════════════════════════════════════════
+APP_NAME="EdTeknoGuard & TeknoCust Portal"
+APP_ENV="production"
+APP_PORT=8000
+APP_URL="https://portal.teknoindo.net"
+
+# Buat SECRET_KEY acak yang aman (lihat petunjuk generator di bawah)
+SECRET_KEY="GANTI_DENGAN_TOKEN_ACAK_PANJANG_HASIL_GENERATOR"
+
+# ════════════════════════════════════════════════════════════════
+# BASIS DATA MYSQL LOKAL PRODUKSI
+# ════════════════════════════════════════════════════════════════
+DB_HOST="127.0.0.1"
+DB_PORT=3306
+DB_USER="edtekno_user"
+DB_PASSWORD="SandiKuatEdTekno2026!"
+DB_NAME="edteknoguard"
+
+# ════════════════════════════════════════════════════════════════
+# INTEGRASI API NETWORK BILL (SISTEM BILLING ISP)
+# ════════════════════════════════════════════════════════════════
+NETWORK_BILL_BASE_URL="https://billing.isp-anda.com/api/v1"
+NETWORK_BILL_API_TOKEN="token_api_network_read_anda"
+NETWORK_BILL_BILLING_TOKEN="token_api_billing_read_anda"
+```
+
+> 💡 **Cara Menghasilkan SECRET_KEY Acak yang Sangat Kuat:**
+> Jalankan perintah berikut di terminal Linux untuk mencetak token acak 48-byte:
+> ```bash
+> python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+> ```
+> Salin hasilnya dan tempel pada kolom `SECRET_KEY` di file `.env`. Simpan file dengan menekan `Ctrl + O`, lalu keluar dengan `Ctrl + X`.
+
+---
+
+## 7. Inisialisasi Skema Database & Super Admin
+
+Setelah file `.env` selesai dikonfigurasi, jalankan skrip bootstrap terpadu untuk membuat seluruh tabel master, kantor default, skema tenant, dan akun Super Admin awal:
+
+```bash
+cd /var/www/edteknoguard
+source .venv/bin/activate
+python -m app.db.init_db
+```
+
+Output terminal yang sukses akan menampilkan:
+```text
+=================================================================
+ 🛡️  EdTeknoGuard - Inisialisasi Database Multi-Tenant
+=================================================================
+[1/3] Memastikan 4 Tabel Master di Database Utama (edteknoguard)...
+  -> Tabel Master terdaftar: kantors, users, user_kantors, user_activity_logs
+  -> [OK] Database master bersih dari tabel operasional/pelanggan.
+[INFO] Menambahkan kantor default...
+  -> [OK] Kantor default dibuat.
+[INFO] Membuat Super Admin default (admin / agiltampan)...
+  -> [OK] Super Admin & hak akses kantor berhasil dibuat.
+[2/3] Memastikan skema seluruh database tenant aktif...
+  -> [OK] Skema tenant 'Karang Gede' siap.
+  -> [OK] Skema tenant 'Banyumas' siap.
+  -> [OK] Skema tenant 'Tengaran' siap.
+  -> [OK] Skema tenant 'Slawi' siap.
+[3/3] Selesai. Seluruh database master & tenant siap digunakan!
+```
+
+---
+
+## 8. Konfigurasi Service Daemon 24/7 (Systemd)
+
+Agar aplikasi otomatis berjalan di latar belakang, memuat scheduler monitoring redaman berkala, dan hidup kembali secara otomatis saat server restart/reboot, buat service systemd:
+
+```bash
+sudo nano /etc/systemd/system/edteknoguard.service
+```
+
+Isi dengan konfigurasi berikut:
+```ini
+[Unit]
+Description=EdTeknoGuard FastAPI & Background Monitoring Daemon
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+User=root
+WorkingDirectory=/var/www/edteknoguard
+Environment="PATH=/var/www/edteknoguard/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+ExecStart=/var/www/edteknoguard/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2 --proxy-headers --forwarded-allow-ips='*'
+Restart=always
+RestartSec=5s
+KillMode=process
+
+# Batas file terbuka untuk konkurensi scraping tinggi
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Simpan file, kemudian aktifkan dan jalankan servicenya:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable edteknoguard
+sudo systemctl start edteknoguard
+
+# Periksa status layanan
+sudo systemctl status edteknoguard
+```
+*(Pastikan status berwarna hijau bertuliskan `active (running)`).*
+
+---
+
+## 9. Konfigurasi Web Server Nginx (Reverse Proxy)
+
+Nginx bertindak sebagai gerbang terdepan yang menangani SSL HTTPS, kompresi Gzip, caching file statis, dan meneruskan permintaan API ke backend FastAPI/Uvicorn.
+
+### A. Buat Konfigurasi Server Block
+```bash
+sudo nano /etc/nginx/sites-available/portal.teknoindo.net
+```
+
+Tempel konfigurasi siap pakai berikut:
+```nginx
+server {
+    server_name portal.teknoindo.net;
+
+    # Batas ukuran upload berkas (misal import massal pelanggan via Excel/CSV)
+    client_max_body_size 50M;
+
+    # Pengaturan Header Keamanan
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
+    # Reverse Proxy Utama ke Backend Uvicorn / Static Vite
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+
+        # Mendukung WebSocket & Server-Sent Events (SSE)
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # Teruskan IP Asli Klien & Protokol HTTPS
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Timeout untuk proses scraping on-demand pelanggan
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # Optimasi Caching Aset Frontend Statis (JS, CSS, Font, Gambar Maskot)
+    location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|ttf|svg|webp)$ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800, immutable";
+    }
+
+    # Logging Akses & Error
+    access_log /var/log/nginx/portal_teknoindo_access.log;
+    error_log /var/log/nginx/portal_teknoindo_error.log;
+}
+```
+
+### B. Aktifkan Konfigurasi & Uji Nginx
+```bash
+# Buat symlink ke sites-enabled
+sudo ln -s /etc/nginx/sites-available/portal.teknoindo.net /etc/nginx/sites-enabled/
+
+# Uji sintaks Nginx
+sudo nginx -t
+```
+*(Pastikan muncul pesan: `syntax is ok` dan `test is successful`).*
+
+Muat ulang Nginx:
+```bash
+sudo systemctl reload nginx
+```
+
+---
+
+## 10. Pendaftaran Sertifikat SSL HTTPS (Certbot Let's Encrypt)
+
+Daftarkan sertifikat SSL resmi gratis dari Let's Encrypt untuk domain Anda:
+
+```bash
+sudo certbot --nginx -d portal.teknoindo.net
+```
+
+### Langkah Interaktif Certbot:
+1. Masukkan **Alamat Email** Anda (untuk peringatan masa berlaku sertifikat).
+2. Setujui Ketentuan Layanan (*Terms of Service*): ketik `Y` lalu Enter.
+3. Berbagi email dengan EFF (opsional): ketik `N` lalu Enter.
+4. Certbot akan otomatis memverifikasi DNS domain, memasang sertifikat SSL, dan mengonfigurasi pengalihan otomatis (*Redirect HTTP to HTTPS*).
+
+### Verifikasi Auto-Renewal SSL:
+Sertifikat Let's Encrypt berlaku selama 90 hari dan diperpanjang otomatis oleh timer systemd Linux. Uji proses perpanjangannya:
+```bash
+sudo certbot renew --dry-run
+```
+*(Jika muncul `Congratulations, all simulated renewals succeeded`, SSL Anda aman selamanya).*
+
+---
+
+## 11. Verifikasi Akses & Pengujian Fitur
+
+Buka peramban web (*browser*) Anda dan uji seluruh endpoint:
+
+### 1. Dashboard Admin NOC EdTeknoGuard
+* Buka: **`https://portal.teknoindo.net/login`** atau **`https://portal.teknoindo.net/`**
+* **Kredensial Default**:
+  * **Username**: `admin`
+  * **Password**: `agiltampan`
+* **Pengecekan Fitur**:
+  * Cek indikator gembok hijau HTTPS di browser.
+  * Pastikan masa aktif sesi 30 hari aktif (*Sliding Expiration*).
+  * Masuk ke menu `/pelanggan` dan uji Single Probe redaman ONT.
+  * Masuk ke menu `/settings` untuk mengatur ambang batas (`-26.0 dBm` warning, `-27.0 dBm` kritis).
+
+### 2. Portal Pelanggan Mandiri TeknoCust
+* Buka: **`https://portal.teknoindo.net/portal`**
+* **Kredensial Masuk Warga**:
+  * **Nomor WhatsApp**: Nomor terdaftar pelanggan (misal: `085640236236`).
+  * **Kata Sandi Awal**: `123456` (atau format nomor WA tanpa 0/62).
+* **Pengecekan Fitur**:
+  * Tab Tagihan & Virtual Account berjalan live.
+  * Tab Riwayat Pembayaran bersih dan rapi.
+  * Modal konfirmasi logout dengan maskot sedih berfungsi penuh dan mengunci seluruh layar.
+
+---
+
+## 12. Pemeliharaan, Backup Otomatis & Alur Update Git
+
+### A. Perintah Cepat Pengelolaan Layanan
+```bash
+# Melihat log aktivitas sistem secara langsung (live follow)
+sudo journalctl -u edteknoguard -f
+
+# Memeriksa status service
+sudo systemctl status edteknoguard
+
+# Me-restart aplikasi (misal setelah ubah .env)
+sudo systemctl restart edteknoguard
+
+# Menghentikan / Menjalankan aplikasi
+sudo systemctl stop edteknoguard
+sudo systemctl start edteknoguard
+```
+
+### B. Otomasi Backup Basis Data MySQL (Cron Job Harian)
+Amankan data pelanggan dan riwayat log dengan backup otomatis setiap pukul 02:00 dini hari:
+
+1. Buat folder backup:
+   ```bash
+   sudo mkdir -p /var/backups/edteknoguard
+   sudo chown -R root:root /var/backups/edteknoguard
+   ```
+2. Buat skrip backup:
+   ```bash
+   sudo nano /usr/local/bin/backup_edtekno.sh
+   ```
+   Isi skrip:
+   ```bash
+   #!/bin/bash
+   BACKUP_DIR="/var/backups/edteknoguard"
+   DATE=$(date +"%Y%m%d_%H%M%S")
+   mysqldump -u edtekno_user -p'SandiKuatEdTekno2026!' --databases edteknoguard edtekno_karang_gede edtekno_banyumas edtekno_tengaran edtekno_slawi | gzip > "$BACKUP_DIR/backup_edtekno_$DATE.sql.gz"
+   # Hapus backup yang lebih lama dari 30 hari
+   find $BACKUP_DIR -type f -name "*.sql.gz" -mtime +30 -exec rm {} \;
+   ```
+3. Beri izin eksekusi:
+   ```bash
+   sudo chmod +x /usr/local/bin/backup_edtekno.sh
+   ```
+4. Pasang di crontab sistem:
+   ```bash
+   sudo crontab -e
+   ```
+   Tambahkan baris berikut di baris paling bawah:
+   ```cron
+   0 2 * * * /usr/local/bin/backup_edtekno.sh > /dev/null 2>&1
+   ```
+
+### C. Alur Pembaruan Kode dari Git (Update Deployment)
+Setiap kali ada pembaruan fitur baru di repositori GitHub, jalankan alur pembaruan ini di server:
+
+```bash
+cd /var/www/edteknoguard
+
+# 1. Ambil kode terbaru dari GitHub
+git pull origin main
+
+# 2. Perbarui dependensi backend jika ada perubahan
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Jalankan migrasi/update database jika ada skema baru
+python -m app.db.init_db
+
+# 4. Kompilasi ulang frontend React jika ada perubahan UI
+cd frontend
+npm install
+npm run build
+cd ..
+
+# 5. Restart service agar memuat kode terbaru
+sudo systemctl restart edteknoguard
+sudo systemctl status edteknoguard
+```
+
+---
+
+🛡️ **EdTeknoGuard & TeknoCust Portal siap beroperasi 24/7 di https://portal.teknoindo.net/**.
+

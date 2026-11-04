@@ -51,8 +51,21 @@ function SkeletonTagihan() {
 /* ══════════════════════════════════════════════════════════════════
    TAB UTAMA TAGIHAN & PEMBAYARAN (SHELL MODULAR)
    ══════════════════════════════════════════════════════════════════ */
-export function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications, hasUnreadNotifications }) {
-  const [subTab, setSubTab] = useState('tagihan'); // 'tagihan' | 'riwayat'
+export function PortalPaymentTab({
+  customer,
+  dashboardData,
+  onBack,
+  onOpenNotifications,
+  hasUnreadNotifications,
+  initialSubTab = 'tagihan'
+}) {
+  const [subTab, setSubTab] = useState(initialSubTab); // 'tagihan' | 'riwayat'
+
+  useEffect(() => {
+    if (initialSubTab) {
+      setSubTab(initialSubTab);
+    }
+  }, [initialSubTab]);
 
   // Instant SWR state: buka seketika dari cache jika sudah pernah dimuat
   const [tagihan, setTagihan] = useState(() => _cachedTagihanData);

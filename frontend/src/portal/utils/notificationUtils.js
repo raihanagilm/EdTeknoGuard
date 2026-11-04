@@ -3,7 +3,7 @@ import { PortalKendalaService } from '../services/portalApi';
 /**
  * Menghitung daftar ID notifikasi aktif
  */
-export function getActiveNotificationList(customer, tickets = []) {
+export function getActiveNotificationList(customer, tickets = [], payments = []) {
   const pel = customer || {};
   const isBelumBayar = pel.status_pembayaran === 'BELUM_BAYAR';
   const items = [];
@@ -21,11 +21,20 @@ export function getActiveNotificationList(customer, tickets = []) {
     });
   }
 
-  // 2. Tiket
+  // 2. Tiket Kendala
   tickets.forEach((t) => {
     items.push({
       id: `ticket-${t.id_tiket}-${t.status}`
     });
+  });
+
+  // 3. Riwayat Pembayaran Berhasil (Invoices Lunas)
+  payments.forEach((p) => {
+    if (p.id) {
+      items.push({
+        id: `payment-invoice-${p.id}`
+      });
+    }
   });
 
   return items;
@@ -34,7 +43,7 @@ export function getActiveNotificationList(customer, tickets = []) {
 /**
  * Mengecek apakah ada notifikasi baru yang belum dibaca (dan belum dihapus)
  */
-export function checkHasUnreadNotifications(customer, tickets = []) {
+export function checkHasUnreadNotifications(customer, tickets = [], payments = []) {
   try {
     const savedDeleted = localStorage.getItem('teknocust_deleted_notifications');
     const deletedIds = savedDeleted ? JSON.parse(savedDeleted) : [];
@@ -42,7 +51,7 @@ export function checkHasUnreadNotifications(customer, tickets = []) {
     const savedRead = localStorage.getItem('teknocust_read_notifications');
     const readIds = savedRead ? JSON.parse(savedRead) : [];
 
-    const activeItems = getActiveNotificationList(customer, tickets);
+    const activeItems = getActiveNotificationList(customer, tickets, payments);
     const visibleItems = activeItems.filter((item) => !deletedIds.includes(item.id));
 
     // Jika ada notifikasi aktif yang belum ada di daftar readIds, kembalikan true
