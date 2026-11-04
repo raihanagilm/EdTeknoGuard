@@ -374,6 +374,32 @@ class CustomerImporter:
         failed_count = 0
         errors = []
 
+        # Batch Pre-fetch: optimasi query dalam 2 SQL call untuk seluruh baris
+        all_ips = set()
+        all_ids = set()
+        for it in data_list:
+            rd = it.get("data", it)
+            if rd.get("ip_router"):
+                all_ips.add(str(rd["ip_router"]).strip())
+            if rd.get("id_pelanggan"):
+                all_ids.add(str(rd["id_pelanggan"]).strip())
+
+        from sqlalchemy import or_
+        existing_onts = db.query(PerangkatONT).filter(
+            or_(PerangkatONT.ip_router.in_(all_ips), PerangkatONT.ip_ont.in_(all_ips))
+        ).all() if all_ips else []
+
+        ont_by_ip = {}
+        for ont in existing_onts:
+            if ont.ip_router:
+                ont_by_ip[ont.ip_router.strip()] = ont
+            if ont.ip_ont:
+                ont_by_ip[ont.ip_ont.strip()] = ont
+
+        ont_pel_ids = {ont.id_pelanggan for ont in existing_onts} | all_ids
+        existing_pels = db.query(Pelanggan).filter(Pelanggan.id_pelanggan.in_(ont_pel_ids)).all() if ont_pel_ids else []
+        pel_by_id = {p.id_pelanggan: p for p in existing_pels}
+
         for item in data_list:
             try:
                 # Dukung format payload langsung maupun terbungkus {data: ...}
@@ -414,18 +440,15 @@ class CustomerImporter:
                     else:
                         row_kantor = "cabang"
 
-                # Cari pelanggan existing berdasarkan IP Router atau IP ONT atau ID Pelanggan
-                from sqlalchemy import or_
-                existing_ont = db.query(PerangkatONT).filter(
-                    or_(PerangkatONT.ip_router == ip_router, PerangkatONT.ip_ont == ip_router)
-                ).first()
+                # Cari pelanggan existing dari cache batch
+                existing_ont = ont_by_ip.get(ip_router)
                 existing_pel = None
                 if existing_ont:
-                    existing_pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == existing_ont.id_pelanggan).first()
+                    existing_pel = pel_by_id.get(existing_ont.id_pelanggan)
                 elif id_pel:
-                    existing_pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pel).first()
-                    if existing_pel:
-                        existing_ont = db.query(PerangkatONT).filter(PerangkatONT.id_pelanggan == existing_pel.id_pelanggan).first()
+                    existing_pel = pel_by_id.get(id_pel)
+                    if existing_pel and not existing_ont:
+                        existing_ont = getattr(existing_pel, "perangkat", None)
 
                 # Pilihan versi data jika terjadi konflik (default "new")
                 selected_version = item.get("selected_version", "new")
@@ -457,28 +480,22 @@ class CustomerImporter:
                         existing_pel.kantor = nb_kantor
                         has_change = True
 
-                    # 1. Update No. WhatsApp & Kata Sandi Default
+                    # 1. Update No. WhatsApp & Kata Sandi Portal (Murni dari Nomor WA)
                     if new_wa:
-                        from app.core.security import verify_password, get_password_hash, DEFAULT_CUSTOMER_PASSWORD, is_default_customer_password
-                        # Periksa apakah user belum mengganti kata sandi kustom sendiri di aplikasi
-                        is_still_default_pwd = is_default_customer_password(existing_pel, candidate_phones=[new_wa])
+                        from app.core.security import get_password_hash
+                        clean_wa = new_wa.strip()
                         if not existing_pel.no_hp:
-                            # Jika kosong, langsung isi
-                            existing_pel.no_hp = new_wa
-                            if is_still_default_pwd:
-                                existing_pel.password_hash = get_password_hash(new_wa.strip())
+                            existing_pel.no_hp = clean_wa
+                            existing_pel.password_hash = get_password_hash(clean_wa)
                             has_change = True
-                        elif selected_version == "new" and existing_pel.no_hp != new_wa:
-                            # Jika ada konflik dan admin memilih 'new'
-                            existing_pel.no_hp = new_wa
-                            if is_still_default_pwd:
-                                existing_pel.password_hash = get_password_hash(new_wa.strip())
+                        elif selected_version == "new" and existing_pel.no_hp != clean_wa:
+                            existing_pel.no_hp = clean_wa
+                            existing_pel.password_hash = get_password_hash(clean_wa)
                             has_change = True
-                        elif is_still_default_pwd:
-                            # Jika nomor WA cocok atau diperbarui dan sandi masih default, sinkronkan kata sandi ke nomor WA
-                            if not verify_password(new_wa.strip(), existing_pel.password_hash):
-                                existing_pel.password_hash = get_password_hash(new_wa.strip())
-                                has_change = True
+                        elif not existing_pel.password_hash:
+                            # Jika nomor WA sudah ada tapi password_hash masih NULL (asal MikroTik)
+                            existing_pel.password_hash = get_password_hash(clean_wa)
+                            has_change = True
 
                     # 2. Update Alamat
                     if new_alamat:
@@ -544,9 +561,9 @@ class CustomerImporter:
                             db.rollback()
                             raw_paket = None
                             
-                    from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
-                    init_pwd = new_wa.strip() if new_wa else DEFAULT_CUSTOMER_PASSWORD
-                    # Simpan sebagai pelanggan baru offline (tidak aktif dipantau dulu sampai bound di MikroTik)
+                    from app.core.security import get_password_hash
+                    # Password portal pelanggan murni dari Nomor WA jika tersedia, NULL jika belum ada WA
+                    init_hash = get_password_hash(new_wa.strip()) if new_wa else None
                     new_pelanggan = Pelanggan(
                         id_pelanggan=id_pel,
                         nama=nama,
@@ -558,7 +575,7 @@ class CustomerImporter:
                         is_monitored=False, # Sesuai Q5: jadikan offline
                         is_active=True,
                         status_lease="waiting",
-                        password_hash=get_password_hash(init_pwd)
+                        password_hash=init_hash
                     )
                     db.add(new_pelanggan)
                     db.flush()

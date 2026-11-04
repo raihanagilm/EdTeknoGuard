@@ -6,7 +6,7 @@ from app.db.models import Pelanggan
 from app.portal.core.security import get_password_hash, verify_password, create_customer_session_token
 from app.core.timezone import get_now_wib
 
-DEFAULT_CUSTOMER_PASSWORD = "123456"
+# Tidak ada password default 123456, murni dari nomor WA
 
 class AuthService:
 
@@ -226,12 +226,13 @@ class AuthService:
 
         # Jika verifikasi hash langsung belum cocok (misal format nomor WA 08 vs 62 atau hash '123456'):
         from app.core.security import is_default_customer_password
-        if not is_valid and (AuthService._is_matching_default_phone_password(cust, pwd) or pwd == DEFAULT_CUSTOMER_PASSWORD):
-            # Periksa apakah kata sandi saat ini masih default (belum diubah kustom sendiri oleh pelanggan)
-            if is_default_customer_password(cust, candidate_phones=[pwd]):
+        if not is_valid and AuthService._is_matching_default_phone_password(cust, pwd):
+            # Periksa apakah kata sandi saat ini masih default nomor WA (belum diubah kustom sendiri oleh pelanggan)
+            if not cust.password_hash or is_default_customer_password(cust, candidate_phones=[pwd]):
                 is_valid = True
-                # Mutakhirkan password_hash ke input Nomor WhatsApp agar tersinkronisasi rapi
-                cust.password_hash = get_password_hash(pwd if pwd != DEFAULT_CUSTOMER_PASSWORD else (cust.no_hp.strip() if cust.no_hp else DEFAULT_CUSTOMER_PASSWORD))
+                # Mutakhirkan password_hash ke Nomor WhatsApp terdaftar agar tersimpan rapi
+                target_phone = cust.no_hp.strip() if cust.no_hp else pwd
+                cust.password_hash = get_password_hash(target_phone)
 
         if not is_valid:
             if is_tenant_db_opened:

@@ -22,7 +22,8 @@ export function ImportStepPreview({
   toggleSelectRow,
   setImportStep,
   importLoading,
-  handleExecuteImport
+  handleExecuteImport,
+  handleCloseModal
 }) {
   const readyToSaveCount = importPreviewData.filter((r) => r._action !== 'skip').length
 
@@ -594,6 +595,16 @@ export function ImportStepPreview({
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Kembali ke Pemetaan</span>
         </button>
+        {importLoading && handleCloseModal && (
+          <button
+            type="button"
+            onClick={handleCloseModal}
+            className="px-3 py-2 rounded-xl border border-cyan-300 text-cyan-700 hover:bg-cyan-50 text-xs font-semibold transition cursor-pointer"
+            title="Tutup modal dan biarkan proses penyimpanan selesai di latar belakang"
+          >
+            Lanjutkan di Latar Belakang
+          </button>
+        )}
         <button
           type="button"
           disabled={importLoading || readyToSaveCount === 0}

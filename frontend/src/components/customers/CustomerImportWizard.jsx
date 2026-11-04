@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   X,
   Check,
@@ -13,8 +13,10 @@ export function CustomerImportWizard({
   isOpen,
   onClose,
   activeOffice = 'cabang',
-  onSuccess
+  onSuccess,
+  onNotify
 }) {
+  const isBackgroundRef = useRef(false)
   const [importStep, setImportStep] = useState(1) // 1: Upload & Analisis, 2: Pemetaan Kolom, 3: Pratinjau & Eksekusi
   const [showAdvancedFields, setShowAdvancedFields] = useState(false)
   const [importFile, setImportFile] = useState(null)
@@ -462,6 +464,18 @@ export function CustomerImportWizard({
     setImportPreviewData(updated)
   }
 
+  const handleCloseModal = () => {
+    if (importLoading) {
+      isBackgroundRef.current = true
+      if (onNotify) {
+        onNotify('Proses penyimpanan data pelanggan tetap berjalan di latar belakang...', 'info')
+      }
+      onClose()
+      return
+    }
+    onClose()
+  }
+
   const handleExecuteImport = async () => {
     const validRows = importPreviewData.filter((r) => r._status !== 'error' && r._action !== 'skip')
     if (validRows.length === 0) {
@@ -469,6 +483,7 @@ export function CustomerImportWizard({
       return
     }
 
+    isBackgroundRef.current = false
     setImportLoading(true)
     setImportError('')
     setImportSuccess('')
@@ -485,17 +500,32 @@ export function CustomerImportWizard({
 
       const data = await res.json()
       if (res.ok && data.status === 'success') {
-        setImportSuccess(data.message || 'Import data pelanggan berhasil disimpan ke database!')
-        setTimeout(() => {
-          resetWizardState()
-          onClose()
+        const msg = data.message || 'Data pelanggan berhasil disimpan ke database!'
+        setImportSuccess(msg)
+        if (isBackgroundRef.current) {
+          if (onNotify) onNotify(`✅ ${msg}`, 'success')
           if (onSuccess) onSuccess()
-        }, 1200)
+        } else {
+          setTimeout(() => {
+            resetWizardState()
+            onClose()
+            if (onSuccess) onSuccess()
+            if (onNotify) onNotify(`✅ ${msg}`, 'success')
+          }, 800)
+        }
       } else {
-        setImportError(data.detail || data.message || 'Gagal menyimpan data import ke database.')
+        const errMsg = data.detail || data.message || 'Gagal menyimpan data import ke database.'
+        setImportError(errMsg)
+        if (isBackgroundRef.current && onNotify) {
+          onNotify(`❌ ${errMsg}`, 'error')
+        }
       }
     } catch (err) {
-      setImportError('Gagal menghubungkan ke backend untuk eksekusi import.')
+      const errMsg = 'Gagal menghubungkan ke backend untuk eksekusi import.'
+      setImportError(errMsg)
+      if (isBackgroundRef.current && onNotify) {
+        onNotify(`❌ ${errMsg}`, 'error')
+      }
     } finally {
       setImportLoading(false)
     }
@@ -538,9 +568,9 @@ export function CustomerImportWizard({
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleCloseModal}
               className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-              title="Tutup Modal"
+              title={importLoading ? "Tutup & Jalankan di Latar Belakang" : "Tutup Modal"}
             >
               <X className="w-5 h-5" />
             </button>
@@ -686,6 +716,7 @@ export function CustomerImportWizard({
             setImportStep={setImportStep}
             importLoading={importLoading}
             handleExecuteImport={handleExecuteImport}
+            handleCloseModal={handleCloseModal}
           />
         )}
       </div>

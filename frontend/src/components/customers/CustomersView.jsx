@@ -947,6 +947,7 @@ export function CustomersView({
         onClose={() => setImportModalOpen(false)}
         activeOffice={activeOffice}
         onSuccess={fetchCustomers}
+        onNotify={showToast}
       />
       {/* Floating Toast Notification (Pojok Kanan Bawah) */}
       <ToastNotification

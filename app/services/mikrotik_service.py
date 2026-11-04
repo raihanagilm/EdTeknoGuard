@@ -622,7 +622,7 @@ class MikroTikSyncService:
                 if clean_name:
                     clean_name = re.sub(rf'\s+{kantor}$', '', clean_name, flags=re.I).strip()
 
-                from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+                # Sandi awal dari MikroTik diset None (NULL)
                 new_cust = Pelanggan(
                     id_pelanggan=id_pelanggan,
                     nama=clean_name or f"Pelanggan {ip}",
@@ -634,7 +634,7 @@ class MikroTikSyncService:
                     is_active=True,
                     status_lease=lease_status,
                     status_verifikasi="TERVERIFIKASI",
-                    password_hash=get_password_hash(DEFAULT_CUSTOMER_PASSWORD)
+                    password_hash=None
                 )
                 db.add(new_cust)
                 db.flush()
