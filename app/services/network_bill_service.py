@@ -151,6 +151,23 @@ class NetworkBillService:
             return []
 
     @classmethod
+    def fetch_customer(cls, pop_slug: str, customer_id: Any) -> Dict[str, Any]:
+        """
+        Mengambil data detail satu pelanggan dari Network Bill (termasuk due_date_day).
+        GET /pops/{pop}/customers/{id} (hanya butuh hak akses customers:read)
+        """
+        headers = cls.get_headers(is_billing=False)
+        url = f"{cls.get_base_url()}/pops/{pop_slug}/customers/{customer_id}"
+        try:
+            resp = requests.get(url, headers=headers, timeout=12)
+            if resp.status_code == 200:
+                return resp.json()
+            return {"ok": False, "status": resp.status_code, "data": None}
+        except Exception as e:
+            logger.error(f"Error fetching customer {customer_id} in {pop_slug}: {e}")
+            return {"ok": False, "error": str(e), "data": None}
+
+    @classmethod
     def fetch_customers(
         cls, 
         pop_slug: str, 

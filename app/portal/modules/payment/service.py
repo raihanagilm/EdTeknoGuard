@@ -110,6 +110,11 @@ class PaymentService:
         return _cached(key, lambda: NetworkBillService.fetch_virtual_account(pop, cid))
 
     @classmethod
+    def read_customer_profile(cls, pop: str, cid: str) -> Dict[str, Any]:
+        key = f"cust_profile:{pop}:{cid}"
+        return _cached(key, lambda: NetworkBillService.fetch_customer(pop, cid))
+
+    @classmethod
     def read_router_isolated(cls, pop: str, cid: str) -> Optional[bool]:
         """
         True bila entri isolir pelanggan di router masih terpasang, False bila

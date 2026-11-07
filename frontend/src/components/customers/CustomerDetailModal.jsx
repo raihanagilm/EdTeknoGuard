@@ -488,7 +488,7 @@ export function CustomerDetailModal({
                   })()}
 
                   {/* Rincian Paket & Info Langganan */}
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
                     <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-0.5">
                       <span className="text-[10px] text-slate-400 font-bold uppercase">Paket Layanan</span>
                       <div className="font-bold text-slate-800 font-sans truncate">
@@ -502,6 +502,24 @@ export function CustomerDetailModal({
                           ? `Rp ${Number(billingData.paket_info.harga).toLocaleString('id-ID')} / bln`
                           : '-'}
                       </div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-0.5 col-span-2 sm:col-span-1">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                        <Calendar className="w-2.5 h-2.5 text-indigo-600" />
+                        <span>Jatuh Tempo</span>
+                      </span>
+                      <div className="font-bold text-indigo-900 font-sans truncate" title={billingData.due_date_day ? `Siklus tanggal ${billingData.due_date_day} tiap bulan` : ''}>
+                        {billingData.due_date_day 
+                          ? `Tgl ${billingData.due_date_day} tiap bulan` 
+                          : (billingData.active_due_date 
+                              ? billingData.active_due_date 
+                              : '-')}
+                      </div>
+                      {billingData.billing_mode && (
+                        <div className="text-[9px] text-slate-400 uppercase font-bold">
+                          Mode: {billingData.billing_mode}
+                        </div>
+                      )}
                     </div>
                   </div>
 

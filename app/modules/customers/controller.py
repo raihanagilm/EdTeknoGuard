@@ -549,6 +549,22 @@ class CustomerController:
         linked = ident is not None
         pop_slug, nb_id = ident if ident else (None, None)
 
+        due_date_day = None
+        billing_mode = None
+        if linked and pop_slug and nb_id:
+            cust_prof = PaymentService.read_customer_profile(pop_slug, nb_id)
+            if cust_prof and isinstance(cust_prof.get("data"), dict):
+                cdata = cust_prof["data"]
+                due_date_day = cdata.get("due_date_day")
+                billing_mode = cdata.get("billing_mode")
+
+        active_due_date = None
+        unpaid_list = billing_page.get("unpaid") or []
+        if unpaid_list:
+            active_due_date = unpaid_list[0].get("due_date")
+        elif billing_page.get("next_bill"):
+            active_due_date = billing_page["next_bill"].get("due_date")
+
         return {
             "ok": True,
             "id_pelanggan": cust.id_pelanggan,
@@ -559,6 +575,9 @@ class CustomerController:
             "status_pembayaran_lokal": getattr(cust, "status_pembayaran", "LUNAS") or "LUNAS",
             "paket": cust.paket,
             "paket_info": paket_info,
+            "due_date_day": due_date_day,
+            "billing_mode": billing_mode,
+            "active_due_date": active_due_date,
             "billing": billing_page,
             "history": history_page.get("invoices") or []
         }
