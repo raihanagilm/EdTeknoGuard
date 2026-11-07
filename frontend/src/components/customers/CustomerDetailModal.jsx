@@ -37,11 +37,9 @@ export function CustomerDetailModal({
   const [copiedVa, setCopiedVa] = useState(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
 
-  if (!customer) return null
-
-  const cId = customer.id_pelanggan || customer.id
-  const rawWa = customer.no_wa || customer.no_hp || ''
-  const hasValidWa = rawWa && rawWa !== '-'
+  const cId = customer?.id_pelanggan || customer?.id || ''
+  const rawWa = customer?.no_wa || customer?.no_hp || ''
+  const hasValidWa = Boolean(rawWa && rawWa !== '-')
 
   const fetchBilling = async () => {
     if (!cId) return
@@ -62,11 +60,22 @@ export function CustomerDetailModal({
     }
   }
 
+  // Hook 7: Reset state saat customer berganti
   useEffect(() => {
+    setBillingData(null)
+    setBillingError(null)
+    setActiveTab('profil')
+  }, [cId])
+
+  // Hook 8: Fetch billing saat tab pembayaran dibuka
+  useEffect(() => {
+    if (!customer || !cId) return
     if (activeTab === 'pembayaran' && !billingData && !loadingBilling) {
       fetchBilling()
     }
-  }, [activeTab, cId])
+  }, [activeTab, cId, customer, billingData, loadingBilling])
+
+  if (!customer) return null
 
   const handleCopyVa = (vaNumber, channelKey) => {
     if (!vaNumber) return
