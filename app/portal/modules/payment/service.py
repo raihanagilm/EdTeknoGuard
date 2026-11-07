@@ -88,6 +88,9 @@ class PaymentService:
             return None
 
         pop_slug = (getattr(pelanggan, "kantor", "") or "").strip().lower()
+        if pop_slug == "cabang":
+            pop_slug = "slawi"
+
         raw_id = str(getattr(pelanggan, "id_pelanggan", "") or "").strip()
 
         if not pop_slug or not raw_id.isdigit():

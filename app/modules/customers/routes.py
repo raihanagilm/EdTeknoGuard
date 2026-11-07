@@ -87,6 +87,28 @@ def get_customer_detail(
         db=db, id_pelanggan=id_pelanggan
     )
 
+@router.get("/api/customers/{id_pelanggan}/billing")
+def get_customer_billing(
+    id_pelanggan: str,
+    db: Session = Depends(get_db)
+):
+    """Route untuk mendapatkan data tagihan live & nomor Virtual Account dari Network Bill API v1"""
+    return CustomerController.get_customer_billing(
+        db=db, id_pelanggan=id_pelanggan
+    )
+
+@router.put("/api/customers/{id_pelanggan}/status-pembayaran")
+def update_customer_payment_status(
+    id_pelanggan: str,
+    status_pembayaran: str = Query(..., description="Status pembayaran baru: LUNAS, BELUM_BAYAR, ISOLIR"),
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Route untuk mengubah status pembayaran lokal pelanggan"""
+    return CustomerController.update_payment_status(
+        db=db, id_pelanggan=id_pelanggan, status_pembayaran=status_pembayaran
+    )
+
 
 @router.post("/api/customers")
 def create_customer(

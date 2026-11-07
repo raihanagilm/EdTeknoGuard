@@ -181,6 +181,7 @@ class CustomerController:
                 "pass_admin": cust.pass_admin or "-",
                 "status_kredensial": getattr(cust, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(cust, "is_monitored", True)),
+                "status_pembayaran": getattr(cust, "status_pembayaran", "LUNAS") or "LUNAS",
                 "snmp_community": cust.snmp_community,
                 "queue_name": getattr(cust, "queue_name", None) or cust.nama,
                 "kuota_terpakai_gb": kuota_gb,
@@ -521,6 +522,66 @@ class CustomerController:
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Gagal memproses preview: {e}")
+
+    @staticmethod
+    def get_customer_billing(db: Session, id_pelanggan: str) -> Dict[str, Any]:
+        """Ambil data tagihan live & nomor VA dari Network Bill API v1 (api-v1.md)"""
+        from app.db.models import Pelanggan
+        from app.portal.modules.payment.service import PaymentService
+
+        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+        if not cust:
+            raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+
+        paket_info = None
+        if cust.paket_ref:
+            paket_info = {
+                "nama": cust.paket_ref.nama,
+                "harga": float(cust.paket_ref.harga) if cust.paket_ref.harga else None,
+                "kecepatan_mbps": cust.paket_ref.kecepatan_mbps,
+                "deskripsi": cust.paket_ref.deskripsi
+            }
+
+        billing_page = PaymentService.build_billing_page(cust)
+        history_page = PaymentService.build_history(cust, limit=12)
+
+        ident = PaymentService.resolve_identity(cust)
+        linked = ident is not None
+        pop_slug, nb_id = ident if ident else (None, None)
+
+        return {
+            "ok": True,
+            "id_pelanggan": cust.id_pelanggan,
+            "nama": cust.nama,
+            "pop": pop_slug or getattr(cust, "kantor", None) or "slawi",
+            "network_bill_id": nb_id,
+            "linked": linked,
+            "status_pembayaran_lokal": getattr(cust, "status_pembayaran", "LUNAS") or "LUNAS",
+            "paket": cust.paket,
+            "paket_info": paket_info,
+            "billing": billing_page,
+            "history": history_page.get("invoices") or []
+        }
+
+    @staticmethod
+    def update_payment_status(db: Session, id_pelanggan: str, status_pembayaran: str) -> Dict[str, Any]:
+        """Ubah status pembayaran lokal pelanggan (LUNAS, BELUM_BAYAR, ISOLIR)"""
+        from app.db.models import Pelanggan
+        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+        if not cust:
+            raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+        valid_status = ("LUNAS", "BELUM_BAYAR", "ISOLIR")
+        status_clean = status_pembayaran.strip().upper()
+        if status_clean not in valid_status:
+            raise HTTPException(status_code=400, detail=f"Status harus salah satu dari: {', '.join(valid_status)}")
+        cust.status_pembayaran = status_clean
+        db.commit()
+        db.refresh(cust)
+        return {
+            "status": "success",
+            "message": f"Status pembayaran berhasil diubah menjadi {status_clean}",
+            "status_pembayaran": cust.status_pembayaran
+        }
 
     @staticmethod
     def network_bill_get_pops() -> Dict[str, Any]:

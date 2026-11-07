@@ -313,6 +313,7 @@ class CustomerService:
                 "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(c, "is_monitored", True)),
                 "status_lease": getattr(c, "status_lease", "bound") or "bound",
+                "status_pembayaran": getattr(c, "status_pembayaran", "LUNAS") or "LUNAS",
                 "kantor": getattr(c, "kantor", None) or (db.bind.url.database.replace("edtekno_", "") if (hasattr(db, "bind") and db.bind and hasattr(db.bind, "url") and db.bind.url and db.bind.url.database and db.bind.url.database.startswith("edtekno_")) else None),
                 "queue_name": getattr(c, "queue_name", None) or c.nama,
                 "kuota_terpakai_gb": kuota_gb,

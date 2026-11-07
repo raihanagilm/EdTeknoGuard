@@ -117,5 +117,49 @@ class TestCustomerModules(unittest.TestCase):
         finally:
             db.close()
 
+    def test_customer_billing_and_payment_status(self):
+        """Memastikan endpoint get_customer_billing dan update_payment_status bekerja sesuai spesifikasi api-v1.md"""
+        from app.modules.customers.controller import CustomerController
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+        try:
+            # Buat pelanggan test
+            p = models.Pelanggan(
+                id_pelanggan="337",
+                nama="Ahmad Subagyo",
+                kantor="slawi",
+                paket="Home 20",
+                status_pembayaran="LUNAS"
+            )
+            pkt = models.Paket(
+                nama="Home 20",
+                kecepatan_mbps=20,
+                harga=150000
+            )
+            db.add_all([p, pkt])
+            db.commit()
+
+            # 1. Test get_customer_billing
+            billing_res = CustomerController.get_customer_billing(db, "337")
+            self.assertTrue(billing_res["ok"])
+            self.assertEqual(billing_res["id_pelanggan"], "337")
+            self.assertEqual(billing_res["status_pembayaran_lokal"], "LUNAS")
+            self.assertEqual(billing_res["pop"], "slawi")
+            self.assertIsNotNone(billing_res["paket_info"])
+            self.assertEqual(billing_res["paket_info"]["harga"], 150000.0)
+
+            # 2. Test update_payment_status ke BELUM_BAYAR
+            up_res = CustomerController.update_payment_status(db, "337", "BELUM_BAYAR")
+            self.assertEqual(up_res["status"], "success")
+            self.assertEqual(up_res["status_pembayaran"], "BELUM_BAYAR")
+
+            # Cek tersimpan di DB
+            db.refresh(p)
+            self.assertEqual(p.status_pembayaran, "BELUM_BAYAR")
+        finally:
+            db.close()
+
 if __name__ == "__main__":
     unittest.main()
