@@ -18,7 +18,9 @@ import { TICK_DBM_LIST, transformDbm, inverseTransformDbm } from './dashboardUti
 
 export function DashboardChartSection({
   activeOffice,
-  kpi
+  kpi,
+  isScanning = false,
+  lastScanTime = '-'
 }) {
   const getLocalDateStr = (d = new Date()) => {
     const year = d.getFullYear()
@@ -360,6 +362,40 @@ const loadChartData = useCallback(async () => {
       console.warn('Gagal memuat data grafik:', err)
     }
   }, [chartRange, selectedDate, activeOffice])
+
+  // Ref untuk melacak transisi pemindaian & scan time
+  const prevScanningRef = useRef(isScanning)
+  const prevScanTimeRef = useRef(lastScanTime)
+
+  // Otomatis memuat data grafik ketika filter (range, tanggal, kantor) berubah
+  useEffect(() => {
+    if (chartInstanceRef.current) {
+      loadChartData()
+    }
+  }, [loadChartData])
+
+  // Deteksi ketika pemindaian baru saja selesai (isScanning: true -> false) atau lastScanTime diperbarui
+  useEffect(() => {
+    const justFinishedScan = prevScanningRef.current && !isScanning
+    const scanTimeUpdated = lastScanTime && lastScanTime !== '-' && lastScanTime !== prevScanTimeRef.current
+
+    if (justFinishedScan || scanTimeUpdated) {
+      if (chartInstanceRef.current) {
+        loadChartData()
+      }
+      // Perbarui juga ketersediaan tanggal
+      MonitoringService.getAvailableDates({ kantor: activeOffice })
+        .then((res) => {
+          if (res?.ok && res.data) {
+            setAvailableDates(res.data.available_dates || res.data.dates || [])
+          }
+        })
+        .catch(() => {})
+    }
+
+    prevScanningRef.current = isScanning
+    prevScanTimeRef.current = lastScanTime
+  }, [isScanning, lastScanTime, activeOffice, loadChartData])
 
   // Inisialisasi Chart.js
   useEffect(() => {

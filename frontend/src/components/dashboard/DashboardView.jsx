@@ -465,6 +465,8 @@ export function DashboardView({
       <DashboardChartSection
         activeOffice={activeOffice}
         kpi={kpi}
+        isScanning={isScanning}
+        lastScanTime={lastScanTime}
       />
 
       {/* 5. QUICK SHORTCUT NAVIGATION (2 ACTION CARDS DESKTOP/TABLET) */}
