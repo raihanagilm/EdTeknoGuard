@@ -21,7 +21,9 @@ class ActivityLogService:
         status: str = "SUCCESS",
         keterangan: Optional[str] = None
     ) -> Optional[UserActivityLog]:
-        """Mencatat entri aktivitas pengguna ke dalam database"""
+        """Mencatat entri aktivitas pengguna ke dalam database Master (user_activity_logs)"""
+        from app.core.database import SessionLocal as MasterSessionLocal
+        m_session = MasterSessionLocal()
         try:
             clean_username = username.strip() if username else "unknown"
             resolved_nama = nama_karyawan.strip() if nama_karyawan else ("Administrator NOC" if clean_username == "admin" else clean_username.title())
@@ -39,14 +41,16 @@ class ActivityLogService:
                 keterangan=keterangan,
                 created_at=get_now_wib()
             )
-            db.add(log_entry)
-            db.commit()
-            db.refresh(log_entry)
+            m_session.add(log_entry)
+            m_session.commit()
+            m_session.refresh(log_entry)
             return log_entry
         except Exception as e:
-            db.rollback()
+            m_session.rollback()
             print(f"[ActivityLogService] Gagal mencatat log aktivitas: {e}")
             return None
+        finally:
+            m_session.close()
 
     @staticmethod
     def extract_client_info(request: Any, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

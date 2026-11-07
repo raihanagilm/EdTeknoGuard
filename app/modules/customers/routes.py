@@ -253,12 +253,20 @@ async def execute_import(
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
-    """Eksekusi import ke database dari data preview"""
+    """Eksekusi import ke database dari data preview secara non-blocking di threadpool"""
     data = await request.json()
     if not data or "data" not in data:
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="Data import tidak valid")
         
     target_kantor = data.get("target_kantor")
-    return CustomerController.execute_import(db=db, data_list=data["data"], target_kantor=target_kantor, request=request, user=user)
+    from starlette.concurrency import run_in_threadpool
+    return await run_in_threadpool(
+        CustomerController.execute_import,
+        db=db,
+        data_list=data["data"],
+        target_kantor=target_kantor,
+        request=request,
+        user=user
+    )
 

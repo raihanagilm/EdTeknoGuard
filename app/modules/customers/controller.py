@@ -554,9 +554,10 @@ class CustomerController:
             
         from app.modules.activity_logs.service import ActivityLogService
         try:
-            from app.db.models import Kantor
-            # Ambil semua kode kantor valid dari database
-            db_kantor_codes = [k.kode for k in db.query(Kantor.kode).all()]
+            from app.core.security import get_all_kantor_codes
+            from app.core.tenant_database import TenantDatabaseManager
+            # Ambil semua kode kantor valid dari database master
+            db_kantor_codes = get_all_kantor_codes()
             
             # Tentukan default kantor berdasarkan hak akses user dan target_kantor
             user_allowed = user.get("allowed_kantor", []) if user else []
@@ -580,7 +581,13 @@ class CustomerController:
                 else:
                     effective_kantor = fallback_kantor
 
-            res = CustomerService.execute_json_import(db=db, data_list=data_list, default_kantor=effective_kantor)
+            # Pastikan sesi database mengarah ke database tenant kantor yang dituju
+            target_tenant_db = TenantDatabaseManager.get_tenant_session(effective_kantor)
+            try:
+                res = CustomerService.execute_json_import(db=target_tenant_db, data_list=data_list, default_kantor=effective_kantor)
+            finally:
+                target_tenant_db.close()
+
             if request:
                 ActivityLogService.log_from_request(
                     db=db,

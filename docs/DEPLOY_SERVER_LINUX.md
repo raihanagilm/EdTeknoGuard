@@ -131,19 +131,27 @@ EXIT;
 ## 5. Clone Repositori & Setup Proyek
 
 ### A. Siapkan Direktori Produksi
-Disarankan menempatkan aplikasi pada `/var/www/edteknoguard`:
+Disarankan menempatkan aplikasi pada direktori user **`/home/tekno/edteknoguard`** (karena partisi `/home` memiliki kapasitas penyimpanan paling besar dan lega):
 ```bash
-sudo mkdir -p /var/www/edteknoguard
-sudo chown -R $USER:$USER /var/www/edteknoguard
+# 1. Pastikan cache sistem dibersihkan terlebih dahulu agar partisi tidak penuh
+sudo apt clean
+
+# 2. Pindah ke direktori /home/tekno
+cd /home/tekno
+
+# 3. Clone repositori ke direktori edteknoguard
+git clone https://github.com/raihanagilm/EdTeknoGuard.git edteknoguard
+
+# 4. Atur kepemilikan dan izin akses (krusial agar web server Nginx dapat membaca file frontend)
+sudo chown -R tekno:tekno /home/tekno/edteknoguard
+sudo chmod 755 /home/tekno
+sudo chmod -R 755 /home/tekno/edteknoguard
+
+# 5. Masuk ke direktori proyek
+cd /home/tekno/edteknoguard
 ```
 
-### B. Clone Repositori Git
-```bash
-git clone https://github.com/raihanagilm/EdTeknoGuard.git /var/www/edteknoguard
-cd /var/www/edteknoguard
-```
-
-### C. Setup Virtual Environment Python & Dependensi
+### B. Setup Virtual Environment Python & Dependensi
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -153,14 +161,14 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### D. Kompilasi Aset Frontend (React 18 + Vite)
+### C. Kompilasi Aset Frontend (React 18 + Vite)
 ```bash
-cd /var/www/edteknoguard/frontend
+cd /home/tekno/edteknoguard/frontend
 npm install
 npm run build
-cd /var/www/edteknoguard
+cd /home/tekno/edteknoguard
 ```
-> **Catatan**: Hasil kompilasi frontend akan berada di folder `/var/www/edteknoguard/frontend/dist`. FastAPI secara otomatis menyajikan direktori ini untuk Dashboard Admin NOC dan Portal Pelanggan TeknoCust.
+> **Catatan**: Hasil kompilasi frontend akan berada di folder `/home/tekno/edteknoguard/frontend/dist`. FastAPI secara otomatis menyajikan direktori ini untuk Dashboard Admin NOC dan Portal Pelanggan TeknoCust.
 
 ---
 
@@ -191,8 +199,8 @@ SECRET_KEY="GANTI_DENGAN_TOKEN_ACAK_PANJANG_HASIL_GENERATOR"
 # ════════════════════════════════════════════════════════════════
 DB_HOST="127.0.0.1"
 DB_PORT=3306
-DB_USER="edtekno_user"
-DB_PASSWORD="SandiKuatEdTekno2026!"
+DB_USER="tekno"
+DB_PASSWORD="tekno2025"
 DB_NAME="edteknoguard"
 
 # ════════════════════════════════════════════════════════════════
@@ -217,7 +225,7 @@ NETWORK_BILL_BILLING_TOKEN="token_api_billing_read_anda"
 Setelah file `.env` selesai dikonfigurasi, jalankan skrip bootstrap terpadu untuk membuat seluruh tabel master, kantor default, skema tenant, dan akun Super Admin awal:
 
 ```bash
-cd /var/www/edteknoguard
+cd /home/tekno/edteknoguard
 source .venv/bin/activate
 python -m app.db.init_db
 ```
@@ -256,14 +264,16 @@ Isi dengan konfigurasi berikut:
 ```ini
 [Unit]
 Description=EdTeknoGuard FastAPI & Background Monitoring Daemon
-After=network.target mysql.service
-Wants=mysql.service
+After=network.target mysql.service mariadb.service
+Wants=mysql.service mariadb.service
 
 [Service]
-User=root
-WorkingDirectory=/var/www/edteknoguard
-Environment="PATH=/var/www/edteknoguard/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
-ExecStart=/var/www/edteknoguard/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 7890 --workers 2 --proxy-headers --forwarded-allow-ips='*'
+User=tekno
+Group=tekno
+WorkingDirectory=/home/tekno/edteknoguard
+Environment="PATH=/home/tekno/edteknoguard/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+# Catatan penting: Gunakan --workers 1 agar state pemindaian in-memory & APScheduler background daemon sinkron (tidak duplikasi/kedip)
+ExecStart=/home/tekno/edteknoguard/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 7890 --workers 1 --proxy-headers --forwarded-allow-ips='*'
 Restart=always
 RestartSec=5s
 KillMode=process
@@ -326,10 +336,10 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # Timeout untuk proses scraping on-demand pelanggan
+        # Timeout untuk proses import massal & scraping on-demand pelanggan
         proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
     }
 
     # Optimasi Caching Aset Frontend Statis (JS, CSS, Font, Gambar Maskot)
@@ -470,7 +480,7 @@ Amankan data pelanggan dan riwayat log dengan backup otomatis setiap pukul 02:00
 Setiap kali ada pembaruan fitur baru di repositori GitHub, jalankan alur pembaruan ini di server:
 
 ```bash
-cd /var/www/edteknoguard
+cd /home/tekno/edteknoguard
 
 # 1. Ambil kode terbaru dari GitHub
 git pull origin main
@@ -491,6 +501,22 @@ cd ..
 # 5. Restart service agar memuat kode terbaru
 sudo systemctl restart edteknoguard
 sudo systemctl status edteknoguard
+```
+
+### D. 🚀 Cara Cepat Menerapkan Pembaruan di Server Produksi (VPS)
+Untuk pembaruan rutin backend / perbaikan bug cepat, di terminal server Linux Anda cukup lakukan pull kode terbaru dan restart service:
+
+```bash
+cd /home/tekno/edteknoguard
+
+# 1. Tarik pembaruan kode
+git pull origin main
+
+# 2. Restart service backend
+sudo systemctl restart edteknoguard
+
+# 3. (Opsional) Jika memperbarui Nginx timeout atau konfigurasi reverse proxy:
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ---

@@ -342,9 +342,9 @@ class CustomerImporter:
                 db_ips[row[1].strip()] = row[2]
 
         # Cache master referensi untuk validasi FK
-        from app.db.models import Kantor
+        from app.core.security import get_all_kantor_codes
         valid_pakets = {pk.nama for pk in db.query(Paket).all()}
-        valid_kantors = {k.kode.lower() for k in db.query(Kantor).all()}
+        valid_kantors = set(get_all_kantor_codes())
 
         for idx, item in enumerate(active_items, start=1):
             row_data = item.get("data", item)

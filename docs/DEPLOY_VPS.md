@@ -31,9 +31,9 @@ sudo apt update && sudo apt install -y cloudflared
 ## 2. Clone & Konfigurasi
 
 ```bash
-cd /opt
-sudo git clone https://github.com/raihanagilm/EdTeknoGuard.git
-cd EdTeknoGuard
+cd /home/tekno
+git clone https://github.com/raihanagilm/EdTeknoGuard.git edteknoguard
+cd edteknoguard
 
 # Buat .env dari contoh, lalu isi nilai produksi
 sudo cp .env.example .env
@@ -92,7 +92,7 @@ sudo nano /etc/cloudflared/config.yml
 Isi `config.yml`:
 ```yaml
 tunnel: <TUNNEL_ID_ATAU_NAMA>
-credentials-file: /home/<user>/.cloudflared/<TUNNEL_ID>.json
+credentials-file: /home/tekno/.cloudflared/<TUNNEL_ID>.json
 
 ingress:
   - hostname: app.<domain-kamu>
