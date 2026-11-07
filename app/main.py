@@ -173,14 +173,28 @@ frontend_dist = Path("frontend/dist")
 if frontend_dist.exists() and (frontend_dist / "assets").exists():
     app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="frontend_assets")
 
-# Sajikan file root frontend/dist (seperti frame-36.png, favicon.svg, icons.svg)
+# Mount folder /mascots untuk maskot SVG interaktif Portal Pelanggan
+mascots_dir = (frontend_dist / "mascots") if (frontend_dist / "mascots").exists() else Path("frontend/public/mascots")
+if mascots_dir.exists():
+    app.mount("/mascots", StaticFiles(directory=str(mascots_dir)), name="frontend_mascots")
+
+# Sajikan file root frontend/dist (seperti frame-36.png, favicon.svg, icons.svg, logo)
 @app.get("/frame-36.png")
 @app.get("/favicon.svg")
+@app.get("/favicon.png")
 @app.get("/icons.svg")
+@app.get("/tekno-indo-logo.png")
+@app.get("/tekno_indo_logo.png")
 @app.get("/teknocust-mascot.png")
 def serve_frontend_dist_root_files(request: Request):
     filename = request.url.path.lstrip("/")
     target = frontend_dist / filename
+    if not target.exists() and filename == "tekno_indo_logo.png":
+        target = frontend_dist / "tekno-indo-logo.png"
+    if not target.exists():
+        target = Path("frontend/public") / filename
+        if not target.exists() and filename == "tekno_indo_logo.png":
+            target = Path("frontend/public/tekno-indo-logo.png")
     if target.exists() and target.is_file():
         return FileResponse(str(target))
     return JSONResponse(status_code=404, content={"detail": f"{filename} not found"})
