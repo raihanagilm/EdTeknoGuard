@@ -42,7 +42,7 @@ Sebelum mendaftarkan SSL, arahkan subdomain Anda ke IP publik server:
 2. Tambahkan **DNS A Record**:
    * **Type**: `A`
    * **Name / Host**: `portal` (atau `portal.teknoindo.net`)
-   * **IPv4 Address**: `[IP_PUBLIK_SERVER_LINUX_ANDA]`
+   * **IPv4 Address**: `163.223.112.238`
    * **TTL**: `Auto` / `300 seconds`
    * *(Jika menggunakan Cloudflare, matikan Proxy sementara / set ke DNS Only / awan abu-abu saat pendaftaran Certbot)*.
 3. Uji propagasi DNS di komputer lokal Anda:
@@ -57,15 +57,38 @@ Sebelum mendaftarkan SSL, arahkan subdomain Anda ke IP publik server:
 
 Masuk ke server Linux Anda via SSH:
 ```bash
-ssh root@IP_SERVER_ANDA
+ssh tekno@163.223.112.238
 ```
 
-### A. Perbarui Repositori OS
+### A. Pengerasan Keamanan Port SSH (Port 2024)
+Demi keamanan server produksi dari serangan otomatis *brute-force*, ubah port default SSH `22` menjadi port kustom **`2024`**:
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+1. Cari baris `#Port 22` atau `Port 22`, ubah menjadi:
+   ```text
+   Port 2024
+   ```
+2. Simpan (`Ctrl + O`, Enter, lalu `Ctrl + X`).
+3. Muat ulang layanan SSH:
+   ```bash
+   sudo systemctl restart ssh
+   ```
+4. Verifikasi port mendengarkan:
+   ```bash
+   ss -tulpn | grep 2024
+   ```
+5. Selanjutnya, gunakan port `2024` saat remote via SSH:
+   ```bash
+   ssh -p 2024 tekno@163.223.112.238
+   ```
+
+### B. Perbarui Repositori OS
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
 
-### B. Pasang Paket-Paket Pendukung
+### C. Pasang Paket-Paket Pendukung
 ```bash
 sudo apt install -y curl wget git build-essential ufw \
   python3 python3-pip python3-venv python3-dev \
@@ -73,7 +96,7 @@ sudo apt install -y curl wget git build-essential ufw \
   nginx certbot python3-certbot-nginx
 ```
 
-### C. Pasang Node.js (v20 LTS) & NPM
+### D. Pasang Node.js (v20 LTS) & NPM
 Node.js dibutuhkan untuk mengompilasi aplikasi frontend React 18:
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
