@@ -10,23 +10,20 @@ from app.core.config import settings
 
 
 def _build_kantor_condition(column, target_kantor: Optional[str]):
-    """Helper filter dinamis untuk fleksibilitas nama kantor (karanggede vs karang gede)."""
+    """Helper filter dinamis generik untuk fleksibilitas nama kantor (dengan atau tanpa spasi)."""
     if not target_kantor or target_kantor == "all":
         return None
     raw = target_kantor.lower().strip()
     no_space = raw.replace(" ", "")
-    variants = [raw, no_space]
-    if no_space == "karanggede":
-        variants.append("karang gede")
-    unique_vars = list(dict.fromkeys(variants))
+    variants = list(dict.fromkeys([raw, no_space]))
     return or_(
-        column.in_(unique_vars),
+        column.in_(variants),
         func.replace(func.lower(column), " ", "") == no_space
     )
 
 
 def _build_allowed_kantor_condition(column, allowed_kantor: Optional[List[str]]):
-    """Helper filter dinamis untuk daftar allowed_kantor dengan normalisasi varian."""
+    """Helper filter dinamis generik untuk daftar allowed_kantor dengan normalisasi varian."""
     if not allowed_kantor:
         return None
     all_variants = []
@@ -38,8 +35,6 @@ def _build_allowed_kantor_condition(column, allowed_kantor: Optional[List[str]])
         no_space = raw.replace(" ", "")
         all_variants.extend([raw, no_space])
         clean_no_spaces.add(no_space)
-        if no_space == "karanggede":
-            all_variants.append("karang gede")
     return or_(
         column.in_(list(dict.fromkeys(all_variants))),
         func.replace(func.lower(column), " ", "").in_(list(clean_no_spaces))
@@ -582,7 +577,7 @@ class MonitoringService:
                 "avg_dbm": avg_dbm,
                 "min_dbm": min_dbm,
                 "max_dbm": max_dbm,
-                "total_points": len(valid_vals),
+                "total_points": len(rows),
                 "date": target_date.strftime("%Y-%m-%d")
             }
 

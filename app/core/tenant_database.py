@@ -27,10 +27,8 @@ import urllib.parse
 
 def sanitize_db_name(kode_kantor: str) -> str:
     unquoted = urllib.parse.unquote_plus(kode_kantor)
-    normalized = unquoted.strip().lower()
-    # Normalisasi kantor Karanggede (dengan atau tanpa spasi) agar merujuk ke database yang sama
-    if normalized.replace(' ', '') == 'karanggede':
-        normalized = 'karanggede'
+    # Hapus spasi dan ubah ke huruf kecil secara generik untuk seluruh nama kantor
+    normalized = unquoted.strip().lower().replace(' ', '')
     cleaned = re.sub(r'[^a-zA-Z0-9_]', '_', normalized)
     return f"edtekno_{cleaned}"
 

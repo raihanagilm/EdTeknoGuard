@@ -81,9 +81,9 @@ class TestModelsAndThresholds(unittest.TestCase):
     def test_tenant_db_sanitization(self):
         """Memastikan generator nama database tenant aman dari injection dan konsisten"""
         self.assertEqual(sanitize_db_name("Cabang"), "edtekno_cabang")
-        self.assertEqual(sanitize_db_name("Karang Gede"), "edtekno_karang_gede")
+        self.assertEqual(sanitize_db_name("Karang Gede"), "edtekno_karanggede")
         self.assertEqual(sanitize_db_name("BMS-01/Pusat!"), "edtekno_bms_01_pusat_")
-        self.assertEqual(sanitize_db_name("kantor+pusat"), "edtekno_kantor_pusat")
+        self.assertEqual(sanitize_db_name("kantor+pusat"), "edtekno_kantorpusat")
 
     def test_optical_rx_power_threshold_evaluation(self):
         """
