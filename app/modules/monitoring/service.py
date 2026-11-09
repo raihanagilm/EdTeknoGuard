@@ -1,12 +1,50 @@
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from app.core.timezone import get_now_wib, get_today_wib
 from app.db.models import Pelanggan, LogPerformaONT
 from app.services.scheduler_service import scheduler
 from app.core.config import settings
+
+
+def _build_kantor_condition(column, target_kantor: Optional[str]):
+    """Helper filter dinamis untuk fleksibilitas nama kantor (karanggede vs karang gede)."""
+    if not target_kantor or target_kantor == "all":
+        return None
+    raw = target_kantor.lower().strip()
+    no_space = raw.replace(" ", "")
+    variants = [raw, no_space]
+    if no_space == "karanggede":
+        variants.append("karang gede")
+    unique_vars = list(dict.fromkeys(variants))
+    return or_(
+        column.in_(unique_vars),
+        func.replace(func.lower(column), " ", "") == no_space
+    )
+
+
+def _build_allowed_kantor_condition(column, allowed_kantor: Optional[List[str]]):
+    """Helper filter dinamis untuk daftar allowed_kantor dengan normalisasi varian."""
+    if not allowed_kantor:
+        return None
+    all_variants = []
+    clean_no_spaces = set()
+    for item in allowed_kantor:
+        if not item:
+            continue
+        raw = item.lower().strip()
+        no_space = raw.replace(" ", "")
+        all_variants.extend([raw, no_space])
+        clean_no_spaces.add(no_space)
+        if no_space == "karanggede":
+            all_variants.append("karang gede")
+    return or_(
+        column.in_(list(dict.fromkeys(all_variants))),
+        func.replace(func.lower(column), " ", "").in_(list(clean_no_spaces))
+    )
+
 
 class MonitoringService:
 
@@ -40,10 +78,13 @@ class MonitoringService:
     ) -> Dict[str, Any]:
         # Hitung seluruh pelanggan yang aktif di kantor terkait
         q_all = db.query(Pelanggan).filter(Pelanggan.is_active == True)
-        if kantor and kantor != "all":
-            q_all = q_all.filter(Pelanggan.kantor == kantor)
+        cond = _build_kantor_condition(Pelanggan.kantor, kantor)
+        if cond is not None:
+            q_all = q_all.filter(cond)
         elif allowed_kantor:
-            q_all = q_all.filter(Pelanggan.kantor.in_(allowed_kantor))
+            allowed_cond = _build_allowed_kantor_condition(Pelanggan.kantor, allowed_kantor)
+            if allowed_cond is not None:
+                q_all = q_all.filter(allowed_cond)
         total_all = q_all.count()
         monitored_active = q_all.filter(Pelanggan.is_monitored == True).count()
         monitored_inactive = total_all - monitored_active
@@ -58,10 +99,12 @@ class MonitoringService:
                 Pelanggan.is_active == True
             )
         )
-        if kantor and kantor != "all":
-            subq_query = subq_query.filter(Pelanggan.kantor == kantor)
+        if cond is not None:
+            subq_query = subq_query.filter(cond)
         elif allowed_kantor:
-            subq_query = subq_query.filter(Pelanggan.kantor.in_(allowed_kantor))
+            allowed_cond = _build_allowed_kantor_condition(Pelanggan.kantor, allowed_kantor)
+            if allowed_cond is not None:
+                subq_query = subq_query.filter(allowed_cond)
         subq = subq_query.group_by(LogPerformaONT.id_pelanggan).subquery()
 
         latest_logs = (
@@ -88,7 +131,6 @@ class MonitoringService:
             elif l.status_koneksi == "LOS":
                 los_count += 1
         from app.db.models import PerangkatONT
-        from sqlalchemy import or_
         invalid_q = (
             db.query(func.count(Pelanggan.id))
             .outerjoin(PerangkatONT, PerangkatONT.id_pelanggan == Pelanggan.id_pelanggan)
@@ -102,10 +144,12 @@ class MonitoringService:
                 )
             )
         )
-        if kantor and kantor != "all":
-            invalid_q = invalid_q.filter(Pelanggan.kantor == kantor)
+        if cond is not None:
+            invalid_q = invalid_q.filter(cond)
         elif allowed_kantor:
-            invalid_q = invalid_q.filter(Pelanggan.kantor.in_(allowed_kantor))
+            allowed_cond = _build_allowed_kantor_condition(Pelanggan.kantor, allowed_kantor)
+            if allowed_cond is not None:
+                invalid_q = invalid_q.filter(allowed_cond)
         invalid_count = invalid_q.scalar() or 0
 
         from app.modules.settings.service import SystemSettingsService
@@ -178,10 +222,13 @@ class MonitoringService:
                 .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
                 .filter(LogPerformaONT.waktu_cek >= d_start, LogPerformaONT.waktu_cek <= d_end)
             )
-            if kantor and kantor != "all":
-                q = q.filter(Pelanggan.kantor == kantor)
+            cond_chart = _build_kantor_condition(Pelanggan.kantor, kantor)
+            if cond_chart is not None:
+                q = q.filter(cond_chart)
             elif allowed_kantor:
-                q = q.filter(Pelanggan.kantor.in_(allowed_kantor))
+                allowed_cond = _build_allowed_kantor_condition(Pelanggan.kantor, allowed_kantor)
+                if allowed_cond is not None:
+                    q = q.filter(allowed_cond)
             if id_pelanggan:
                 q = q.filter(LogPerformaONT.id_pelanggan == id_pelanggan)
             else:
@@ -439,10 +486,13 @@ class MonitoringService:
                 .filter(LogPerformaONT.waktu_cek >= d_start, LogPerformaONT.waktu_cek <= d_end)
             )
 
-            if kantor and kantor != "all":
-                q = q.filter(Pelanggan.kantor == kantor)
+            cond_chart = _build_kantor_condition(Pelanggan.kantor, kantor)
+            if cond_chart is not None:
+                q = q.filter(cond_chart)
             elif allowed_kantor:
-                q = q.filter(Pelanggan.kantor.in_(allowed_kantor))
+                allowed_cond = _build_allowed_kantor_condition(Pelanggan.kantor, allowed_kantor)
+                if allowed_cond is not None:
+                    q = q.filter(allowed_cond)
 
             if id_pelanggan:
                 q = q.filter(LogPerformaONT.id_pelanggan == id_pelanggan)
@@ -547,10 +597,13 @@ class MonitoringService:
         log performa ONT di database, diurutkan descending (terbaru ke terlama).
         """
         q = db.query(func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d').label('tgl'))
-        if kantor and kantor != "all":
-            q = q.join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan).filter(Pelanggan.kantor == kantor)
+        cond_date = _build_kantor_condition(Pelanggan.kantor, kantor)
+        if cond_date is not None:
+            q = q.join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan).filter(cond_date)
         elif allowed_kantor:
-            q = q.join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan).filter(Pelanggan.kantor.in_(allowed_kantor))
+            allowed_cond = _build_allowed_kantor_condition(Pelanggan.kantor, allowed_kantor)
+            if allowed_cond is not None:
+                q = q.join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan).filter(allowed_cond)
         
         rows = q.group_by(func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d')).order_by(
             func.date_format(LogPerformaONT.waktu_cek, '%Y-%m-%d').desc()
