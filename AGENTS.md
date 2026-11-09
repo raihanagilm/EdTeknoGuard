@@ -127,6 +127,7 @@ EdTeknoGuard/
 │   ├── designsystempro.md
 │   ├── design.md
 │   ├── DEPLOY_VPS.md
+│   ├── PROMPT_ANDROID_STUDIO.md # Master prompt & panduan arsitektur Android Studio (TeknoGuard & MyTekno)
 │   └── mockups/
 ├── frontend/                  # Single Page Application React 18 (NOC & Portal Warga)
 │   ├── src/
