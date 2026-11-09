@@ -179,7 +179,7 @@ private fun setupSwipeRefresh() {
     binding.swipeRefreshLayout.setOnRefreshListener {
         binding.webView.reload()
     }
-    // Mencegah SwipeRefreshLayout mencegat scroll balik ke atas
+    // Mencegah SwipeRefreshLayout mencegat scroll konten ke bawah / balik ke atas
     binding.swipeRefreshLayout.setOnChildScrollUpCallback { _, _ ->
         !isWebAtTop || binding.webView.canScrollVertically(-1)
     }
@@ -201,7 +201,23 @@ webView.webViewClient = object : WebViewClient() {
 inner class WebAppInterface(private val activity: Activity, private val webView: WebView) {
     @JavascriptInterface
     fun showNativeNotification(title: String, message: String, isEmergency: Boolean) {
-        // Trigger heads-up notification native
+        val channelId = if (isEmergency) {
+            EdTeknoBackgroundService.CHANNEL_EMERGENCY_ID
+        } else {
+            EdTeknoBackgroundService.CHANNEL_CUSTOMER_ID
+        }
+        val notification = NotificationCompat.Builder(activity as Context, channelId)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .build()
+        val manager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(System.currentTimeMillis().toInt(), notification)
     }
 
     @JavascriptInterface
@@ -214,25 +230,69 @@ inner class WebAppInterface(private val activity: Activity, private val webView:
 }
 ```
 
-Di sisi frontend web React (`frontend/src/main.jsx`), status scroll dipancarkan otomatis:
+Di sisi frontend web React (`frontend/src/main.jsx`), status scroll dipancarkan otomatis dengan pengecekan kontainer aktif `.scroll-area`:
 ```javascript
 if (typeof window !== 'undefined') {
   let lastReportedAtTop = true
+
+  const getScrollTopPosition = () => {
+    const winTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0
+    if (winTop > 4) return winTop
+
+    const scrollContainers = document.querySelectorAll('.scroll-area, [data-scroll-container], main[class*="overflow-y-auto"]')
+    for (const container of scrollContainers) {
+      if (container && container.offsetParent !== null) {
+        if (container.scrollTop > 4) return container.scrollTop
+      }
+    }
+    return 0
+  }
+
   const checkScrollState = () => {
     if (!window.AndroidBridge || typeof window.AndroidBridge.setScrollAtTop !== 'function') return
-    const windowTop = window.scrollY <= 0 && document.documentElement.scrollTop <= 0 && document.body.scrollTop <= 0
-    let subContainerTop = true
-    const activeScrollArea = document.querySelector('.scroll-area, [data-scroll-container]')
-    if (activeScrollArea) {
-      subContainerTop = activeScrollArea.scrollTop <= 0
-    }
-    const isAtTop = windowTop && subContainerTop
+    const currentScroll = getScrollTopPosition()
+    const isAtTop = currentScroll <= 4
+
     if (isAtTop !== lastReportedAtTop) {
       lastReportedAtTop = isAtTop
       window.AndroidBridge.setScrollAtTop(isAtTop)
     }
   }
+
   window.addEventListener('scroll', checkScrollState, { passive: true, capture: true })
+  window.addEventListener('touchmove', checkScrollState, { passive: true, capture: true })
+  window.addEventListener('touchend', checkScrollState, { passive: true, capture: true })
+  setInterval(checkScrollState, 250)
+}
+```
+
+### D. Otentikasi Sesi Pengguna di Background Service (`EdTeknoBackgroundService.kt`)
+Agar background service dapat mengenali **akun siapa yang sedang login** dan tidak ditolak dengan status HTTP `401 Unauthorized`:
+```kotlin
+// 1. Polling Notifikasi NOC & Teknisi
+private fun pollNotificationConfigAndTickets() {
+    val url = "https://portal.teknoindo.net/api/notifications/poll"
+    val cookieString = CookieManager.getInstance().getCookie("https://portal.teknoindo.net")
+
+    val requestBuilder = Request.Builder().url(url)
+    if (!cookieString.isNullOrEmpty()) {
+        requestBuilder.addHeader("Cookie", cookieString) // Injeksi sesi login admin/teknisi
+    }
+    val request = requestBuilder.build()
+    // ...
+}
+
+// 2. Polling Tiket Pelanggan Warga (MyTekno)
+private fun pollCustTicketStatus() {
+    val url = "https://portal.teknoindo.net/portal/api/kendala"
+    val cookieString = CookieManager.getInstance().getCookie("https://portal.teknoindo.net")
+
+    val requestBuilder = Request.Builder().url(url)
+    if (!cookieString.isNullOrEmpty()) {
+        requestBuilder.addHeader("Cookie", cookieString) // Injeksi sesi login pelanggan
+    }
+    val request = requestBuilder.build()
+    // ...
 }
 ```
 
