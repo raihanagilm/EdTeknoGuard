@@ -51,21 +51,26 @@ class MikroTikSyncService:
 
         if db:
             from app.db.models import Kantor
-            if not kantor:
+            from sqlalchemy import func
+            clean_k = kantor.lower().replace(" ", "") if kantor else None
+            k = db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else None
+            if not k and not kantor:
                 first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
                 if first_k:
+                    k = first_k
                     kantor = first_k.kode
 
-            k = db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else None
             # Jika di db tenant belum memiliki host (hanya ada di Master DB), fallback ke Master DB
             if not k or not k.mikrotik_host:
                 try:
                     from app.core.database import SessionLocal as MasterSessionLocal
                     m_db = MasterSessionLocal()
                     try:
-                        k_master = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+                        k_master = m_db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
                         if k_master and k_master.mikrotik_host:
                             k = k_master
+                            if not kantor:
+                                kantor = k_master.kode
                     finally:
                         m_db.close()
                 except Exception:
@@ -678,19 +683,25 @@ class MikroTikSyncService:
     def get_router_health(cls, db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:
         """Mengambil metrik kesehatan router (CPU Load, Free RAM, Total RAM, Uptime, Versi)."""
         from app.db.models import Kantor
-        if not kantor:
+        from sqlalchemy import func
+        clean_k = kantor.lower().replace(" ", "") if kantor else None
+        k = db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else None
+        if not k and not kantor:
             first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-            kantor = first_k.kode if first_k else ""
+            if first_k:
+                k = first_k
+                kantor = first_k.kode
 
-        k = db.query(Kantor).filter(Kantor.kode == kantor).first()
         if not k or not k.mikrotik_host:
             try:
                 from app.core.database import SessionLocal as MasterSessionLocal
                 m_db = MasterSessionLocal()
                 try:
-                    k_m = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+                    k_m = m_db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
                     if k_m and k_m.mikrotik_host:
                         k = k_m
+                        if not kantor:
+                            kantor = k_m.kode
                 finally:
                     m_db.close()
             except Exception:
@@ -763,19 +774,25 @@ class MikroTikSyncService:
         - Hubungan ke Pelanggan TeknoGuard (Linked vs Unlinked vs Office Device)
         """
         from app.db.models import Kantor
-        if not kantor:
+        from sqlalchemy import func
+        clean_k = kantor.lower().replace(" ", "") if kantor else None
+        k = db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else None
+        if not k and not kantor:
             first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-            kantor = first_k.kode if first_k else ""
+            if first_k:
+                k = first_k
+                kantor = first_k.kode
 
-        k = db.query(Kantor).filter(Kantor.kode == kantor).first()
         if not k or not k.mikrotik_host:
             try:
                 from app.core.database import SessionLocal as MasterSessionLocal
                 m_db = MasterSessionLocal()
                 try:
-                    k_m = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
+                    k_m = m_db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
                     if k_m and k_m.mikrotik_host:
                         k = k_m
+                        if not kantor:
+                            kantor = k_m.kode
                 finally:
                     m_db.close()
             except Exception:

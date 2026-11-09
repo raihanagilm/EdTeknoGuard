@@ -66,12 +66,18 @@ def sync_mikrotik_quota(
     try:
         from app.db.models import Kantor
         from app.core.database import SessionLocal
+        from sqlalchemy import func
         # Selalu baca konfigurasi router MikroTik dari Master DB agar kredensial host/port/user akurat
         m_db = SessionLocal()
         m_params = None
         knt_kode = None
         try:
-            knt_obj = m_db.query(Kantor).filter(Kantor.kode == kantor).first() if kantor and kantor != "all" else None
+            if kantor and kantor != "all":
+                clean_k = kantor.lower().replace(" ", "")
+                knt_obj = m_db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first()
+            else:
+                knt_obj = None
+
             if knt_obj and knt_obj.mikrotik_host and knt_obj.mikrotik_user:
                 knt_kode = knt_obj.kode
                 m_params = {

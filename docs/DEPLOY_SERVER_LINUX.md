@@ -544,5 +544,144 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ---
 
+## 13. Konfigurasi VPN WireGuard (Koneksi Server ke Jaringan Modem ONT / MikroTik)
+
+Agar background worker / scraper EdTeknoGuard di server Debian dapat menjangkau modem-modem ONT pelanggan (yang berada di segmen IP privat lokal seperti `10.x.x.x` atau `192.168.x.x` di balik MikroTik ISP), server Debian perlu dihubungkan sebagai **WireGuard Client (Peer)** ke MikroTik ISP (RouterOS v7).
+
+### A. Instalasi WireGuard di Debian
+
+Jalankan perintah berikut di server Debian:
+
+```bash
+# Perbarui repository dan instal paket WireGuard beserta tools
+sudo apt update
+sudo apt install -y wireguard wireguard-tools resolvconf
+```
+
+### B. Membuat Pasangan Kunci (Keypair) di Server Debian
+
+Buat private key dan public key untuk server Debian:
+
+```bash
+# Masuk ke direktori konfigurasi WireGuard dengan hak root
+sudo -i
+cd /etc/wireguard
+umask 077
+
+# Hasilkan private key dan public key
+wg genkey | tee debian_private.key | wg pubkey > debian_public.key
+
+# Lihat isi kedua kunci
+echo "=== PRIVATE KEY DEBIAN ===" && cat debian_private.key
+echo "=== PUBLIC KEY DEBIAN ===" && cat debian_public.key
+exit
+```
+
+> ⚠️ **Catatan Penting**:
+> - Salin isi teks dari `debian_public.key` untuk dimasukkan ke konfigurasi **Peer** di MikroTik ISP.
+> - `debian_private.key` tetap tersimpan rahasia di server Debian.
+
+---
+
+### C. Konfigurasi di Sisi MikroTik ISP (RouterOS v7)
+
+Di Winbox / Terminal MikroTik ISP, pastikan Interface WireGuard sudah ada dan tambahkan Debian sebagai Peer:
+
+```routeros
+# 1. Pastikan interface WireGuard MikroTik aktif (contoh: port 13231)
+# /interface/wireguard/add name=wg-edtekno listen-port=13231
+
+# 2. Tambahkan Peer untuk Server Debian:
+/interface/wireguard/peers/add \
+    interface=wg-edtekno \
+    public-key="PASTE_ISI_DARI_DEBIAN_PUBLIC_KEY_DISINI" \
+    allowed-address=10.200.0.2/32 \
+    comment="Server EdTeknoGuard Debian"
+
+# 3. Pastikan IP address interface WireGuard MikroTik sudah disetel:
+# /ip/address/add address=10.200.0.1/24 interface=wg-edtekno
+```
+
+---
+
+### D. Membuat Berkas Konfigurasi `wg0.conf` di Debian
+
+Buat berkas `/etc/wireguard/wg0.conf`:
+
+```bash
+sudo nano /etc/wireguard/wg0.conf
+```
+
+Isi dengan template berikut (sesuaikan IP dan Public Key MikroTik Anda):
+
+```ini
+[Interface]
+# IP Tunnel WireGuard untuk server Debian
+Address = 10.200.0.2/24
+# Private Key Debian (salin dari debian_private.key)
+PrivateKey = ISI_DARI_DEBIAN_PRIVATE_KEY
+
+[Peer]
+# Public Key milik Interface WireGuard MikroTik ISP
+PublicKey = ISI_PUBLIC_KEY_WIREGUARD_MIKROTIK
+# IP Publik / Domain MikroTik ISP beserta port WireGuard
+Endpoint = ip-publik-atau-domain-mikrotik.com:13231
+# Segmen IP yang boleh dilewatkan ke tunnel:
+# - IP Interface WireGuard MikroTik (10.200.0.1/32)
+# - Subnet IP modem-modem ONT pelanggan (contoh: 10.10.0.0/16, 192.168.100.0/24)
+AllowedIPs = 10.200.0.1/32, 10.10.0.0/16, 192.168.1.0/24, 192.168.100.0/24
+# Keepalive agar tunnel selalu terhubung melewati NAT firewall
+PersistentKeepalive = 25
+```
+
+> 💡 **Tips Routing `AllowedIPs`:**
+> Jangan memasukkan `0.0.0.0/0` pada `AllowedIPs` agar koneksi internet publik dan akses Nginx web server Debian tidak terputus. Hanya cantumkan subnet IP tunnel dan subnet IP lokal modem ONT/MikroTik.
+
+---
+
+### E. Mengaktifkan dan Menguji Koneksi WireGuard
+
+1. **Uji Jalankan Interface WireGuard Secara Manual:**
+   ```bash
+   sudo wg-quick up wg0
+   ```
+
+2. **Periksa Status Handshake & Transfer Data:**
+   ```bash
+   sudo wg show
+   ```
+   *Jika berhasil, Anda akan melihat baris `latest handshake: ... ago` dan statistik `transfer: ... received, ... sent`.*
+
+3. **Uji Ping ke Gateway MikroTik & Salah Satu IP Modem ONT:**
+   ```bash
+   ping -c 4 10.200.0.1
+   ping -c 4 10.10.1.1
+   ```
+
+4. **Uji HTTP Curl ke Salah Satu Modem ONT ZTE:**
+   ```bash
+   curl -I --connect-timeout 5 http://10.10.1.1
+   ```
+
+5. **Aktifkan Autostart Saat Server Booting (Systemd):**
+   ```bash
+   sudo systemctl enable wg-quick@wg0
+   sudo systemctl start wg-quick@wg0
+   ```
+
+6. **Perintah Cepat Kelola WireGuard:**
+   ```bash
+   # Status service
+   sudo systemctl status wg-quick@wg0
+
+   # Restart interface WireGuard
+   sudo systemctl restart wg-quick@wg0
+
+   # Mematikan koneksi WireGuard
+   sudo systemctl stop wg-quick@wg0
+   ```
+
+---
+
 🛡️ **EdTeknoGuard & MyTekno Portal siap beroperasi 24/7 di https://portal.teknoindo.net/**.
 
