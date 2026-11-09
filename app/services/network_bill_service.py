@@ -308,13 +308,12 @@ class NetworkBillService:
             long = conn.get("longitude")
             lokasi_gps = f"{lat},{long}" if lat is not None and long is not None else ""
 
-            # ID Pelanggan = `id` numerik Network Bill (identitas resmi = slug PoP + id).
-            # DILARANG memakai `code` (PLG-0002 / BMS-0001) sebagai kunci: kode bisa berulang
-            # antar-PoP, bisa berganti, dan angkanya tidak selalu sama dengan `id`
-            # (contoh nyata: PoP banyumas punya id 337 dengan code BMS-0001).
-            # Hanya `id` yang diterima endpoint tagihan dan Virtual Account.
+            # Prioritaskan `code` resmi Network Bill (contoh: BMS-0001, PLG-0012)
+            # sebagai ID utama tampilan dan identitas pelanggan di sistem.
+            # Jika `code` tidak tersedia, fallback ke `id` numerik.
             nb_id = item.get("id")
-            official_code = str(nb_id).strip() if nb_id is not None else ""
+            nb_code = (item.get("code") or "").strip()
+            official_code = nb_code if nb_code else (str(nb_id).strip() if nb_id is not None else "")
             if not official_code:
                 official_code = str(index)
 
@@ -333,7 +332,7 @@ class NetworkBillService:
                 "kantor": pop_slug.lower(),
                 "network_bill_id": nb_id,
                 "network_bill_code": official_code,
-                "network_bill_display_code": item.get("code") or "",
+                "network_bill_display_code": nb_code or str(nb_id or ""),
                 "status_langganan": item.get("status")
             }
 
