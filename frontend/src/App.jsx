@@ -256,6 +256,36 @@ export default function App() {
 
         if (Array.isArray(notifRes.notifications)) {
           setNotificationList(notifRes.notifications)
+
+          // Picu notifikasi native Android jika aplikasi berjalan di dalam APK web wrapper
+          if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
+            const alertedStorageKey = 'tekno_web_alerted_notif_ids'
+            let alertedSet = new Set()
+            try {
+              const savedAlerted = sessionStorage.getItem(alertedStorageKey)
+              if (savedAlerted) alertedSet = new Set(JSON.parse(savedAlerted))
+            } catch (_) {}
+
+            notifRes.notifications.forEach(n => {
+              if (n && n.id && !alertedSet.has(n.id)) {
+                alertedSet.add(n.id)
+                const isEmergency = n.level === 'critical' || n.is_critical || n.type === 'ont_los' || n.type === 'redaman_drop'
+                try {
+                  window.AndroidBridge.showNativeNotification(
+                    n.title || 'Notifikasi NOC',
+                    n.message || 'Ada pembaruan status sistem',
+                    Boolean(isEmergency)
+                  )
+                } catch (errBridge) {
+                  console.warn('Gagal memicu showNativeNotification:', errBridge)
+                }
+              }
+            })
+
+            try {
+              sessionStorage.setItem(alertedStorageKey, JSON.stringify([...alertedSet]))
+            } catch (_) {}
+          }
         }
       }
     } catch (e) {

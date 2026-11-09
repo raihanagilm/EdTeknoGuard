@@ -125,6 +125,40 @@ export function PortalCustomerApp() {
           ? paymentRes.value.data.invoices : [];
         const unread = checkHasUnreadNotifications(pel, tickets, payments);
         setHasUnreadNotifications(unread);
+
+        // Picu Notifikasi Native jika status tiket pelanggan berubah
+        if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
+          const alertedTicketStorageKey = 'mytekno_alerted_ticket_status';
+          let lastTicketStatusMap = {};
+          try {
+            const rawMap = localStorage.getItem(alertedTicketStorageKey);
+            if (rawMap) lastTicketStatusMap = JSON.parse(rawMap);
+          } catch (_) {}
+
+          tickets.forEach((t) => {
+            const ticketKey = `${t.id_tiket || t.id}:${t.status}`;
+            if (t.id_tiket && lastTicketStatusMap[t.id_tiket] !== t.status) {
+              lastTicketStatusMap[t.id_tiket] = t.status;
+              const labelStatus = t.status === 'SELESAI'
+                ? 'Laporan kendala WiFi Anda telah selesai ditangani'
+                : t.status === 'DIPROSES'
+                ? 'Teknisi kami sedang menuju lokasi untuk perbaikan'
+                : `Status laporan Anda: ${t.status}`;
+
+              try {
+                window.AndroidBridge.showNativeNotification(
+                  `Tiket ${t.id_tiket}`,
+                  labelStatus,
+                  false
+                );
+              } catch (_) {}
+            }
+          });
+
+          try {
+            localStorage.setItem(alertedTicketStorageKey, JSON.stringify(lastTicketStatusMap));
+          } catch (_) {}
+        }
       })
       .catch(() => {
         const unread = checkHasUnreadNotifications(pel, [], []);
