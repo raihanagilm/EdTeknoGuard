@@ -47,6 +47,12 @@ class TenantDatabaseManager:
 
         db_name = sanitize_db_name(kode_kantor)
         if db_name not in cls._engines:
+            # Pastikan database fisik tenant ada di MySQL sebelum create_engine
+            try:
+                cls.create_database_if_not_exists(kode_kantor)
+            except Exception as db_err:
+                logger.warning(f"[TENANT_DB] Gagal memastikan database '{db_name}': {db_err}")
+
             connect_args = {}
             if settings.DB_HOST not in ["127.0.0.1", "localhost", "::1"]:
                 connect_args["ssl_verify_cert"] = False
@@ -60,6 +66,14 @@ class TenantDatabaseManager:
                 pool_size=15,
                 max_overflow=30
             )
+
+            # Pastikan tabel-tabel TenantBase ada di database tenant ini
+            try:
+                from app.db import models
+                models.TenantBase.metadata.create_all(bind=engine)
+            except Exception as tbl_err:
+                logger.warning(f"[TENANT_DB] Gagal sinkronisasi tabel TenantBase untuk '{db_name}': {tbl_err}")
+
             cls._engines[db_name] = engine
             cls._sessionmakers[db_name] = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

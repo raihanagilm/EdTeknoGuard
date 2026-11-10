@@ -683,6 +683,8 @@ class CustomerController:
                 "result": res
             }
         except ValueError as e:
+            import logging
+            logging.getLogger("customers").warning(f"[IMPORT_VALIDATION_ERROR] {e}")
             if request:
                 ActivityLogService.log_from_request(
                     db=db, request=request, action="IMPORT_PELANGGAN", status="FAILED",
@@ -690,12 +692,14 @@ class CustomerController:
                 )
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
+            import logging
+            logging.getLogger("customers").exception(f"[IMPORT_EXECUTE_CRITICAL_ERROR] {e}")
             if request:
                 ActivityLogService.log_from_request(
                     db=db, request=request, action="IMPORT_PELANGGAN", status="FAILED",
                     keterangan=f"Gagal mengeksekusi import pelanggan: {str(e)}", user=user
                 )
-            raise HTTPException(status_code=500, detail=f"Gagal mengeksekusi import: {e}")
+            raise HTTPException(status_code=500, detail=f"Gagal mengeksekusi import: {str(e)}")
 
     @staticmethod
     def get_connected_devices(db: Session, id_pelanggan: str) -> Dict[str, Any]:

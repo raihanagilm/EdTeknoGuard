@@ -402,203 +402,220 @@ class CustomerImporter:
 
         for item in data_list:
             try:
-                # Dukung format payload langsung maupun terbungkus {data: ...}
-                row_data = item.get("data", item)
-                action = item.get("_action", "insert")
-                status = item.get("_status", "valid")
+                # Isolasi setiap baris import menggunakan SAVEPOINT nested transaction
+                with db.begin_nested():
+                    # Dukung format payload langsung maupun terbungkus {data: ...}
+                    row_data = item.get("data", item)
+                    action = item.get("_action", "insert")
+                    status = item.get("_status", "valid")
 
-                if action == "skip" or status == "error":
-                    skipped_count += 1
-                    continue
-
-                id_pel = str(row_data.get("id_pelanggan", "")).strip()
-                nama = str(row_data.get("nama", "")).strip()
-                ip_router = str(row_data.get("ip_router", "")).strip()
-
-                if not id_pel or not nama or not ip_router:
-                    failed_count += 1
-                    errors.append(f"Baris tidak lengkap: ID='{id_pel}', Nama='{nama}', IP='{ip_router}'")
-                    continue
-
-                # Tentukan kantor untuk baris ini
-                raw_kantor = str(row_data.get("kantor", "")).strip().lower()
-                if raw_kantor in valid_kantors:
-                    row_kantor = raw_kantor
-                else:
-                    pop_val = str(row_data.get("pop", "")).upper()
-                    matched_kantor = None
-                    for k_code in valid_kantors:
-                        if k_code.upper() in pop_val:
-                            matched_kantor = k_code
-                            break
-                    if matched_kantor:
-                        row_kantor = matched_kantor
-                    elif default_kantor and default_kantor.lower().strip() in valid_kantors:
-                        row_kantor = default_kantor.lower().strip()
-                    elif valid_kantors:
-                        row_kantor = next(iter(valid_kantors))
-                    else:
-                        row_kantor = "cabang"
-
-                # Cari pelanggan existing dari cache batch
-                existing_ont = ont_by_ip.get(ip_router)
-                existing_pel = None
-                if existing_ont:
-                    existing_pel = pel_by_id.get(existing_ont.id_pelanggan)
-                elif id_pel:
-                    existing_pel = pel_by_id.get(id_pel)
-                    if existing_pel and not existing_ont:
-                        existing_ont = getattr(existing_pel, "perangkat", None)
-
-                # Pilihan versi data jika terjadi konflik (default "new")
-                selected_version = item.get("selected_version", "new")
-                new_wa = str(row_data.get("no_wa", "") or row_data.get("no_hp", "")).strip()
-                new_alamat = str(row_data.get("alamat", "")).strip()
-                new_wifi_ssid = str(row_data.get("nama_wifi", "")).strip()
-                new_wifi_pass = str(row_data.get("password_wifi", "")).strip()
-
-                if existing_pel and existing_ont:
-                    # MODE LENGKAPI DATA (Enrichment Update)
-                    has_change = False
-
-                    # 0. Update ID Pelanggan ke id numerik resmi Network Bill (misal: CUST-SLA-xxx -> 337).
-                    #    Identitas pelanggan di Network Bill = slug PoP (kolom kantor) + id numerik ini.
-                    #    FK tabel anakan ON UPDATE CASCADE, jadi log/tiket/kuota ikut berpindah.
-                    target_id_pel = str(row_data.get("network_bill_code") or id_pel or "").strip()
-                    if target_id_pel and existing_pel.id_pelanggan != target_id_pel:
-                        # Cek apakah target ID baru belum dipakai pelanggan lain
-                        conflict_pel = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == target_id_pel).first()
-                        if not conflict_pel:
-                            existing_pel.id_pelanggan = target_id_pel
-                            has_change = True
-
-                    # 0b. Selaraskan kantor dengan slug PoP sumber data.
-                    #     Tanpa ini, pasangan (kantor, id_pelanggan) tidak menunjuk ke pelanggan
-                    #     yang benar di Network Bill dan tagihannya tidak bisa dibaca portal.
-                    nb_kantor = str(row_data.get("kantor") or "").strip().lower()
-                    if nb_kantor and (existing_pel.kantor or "").strip().lower() != nb_kantor:
-                        existing_pel.kantor = nb_kantor
-                        has_change = True
-
-                    # 1. Update No. WhatsApp & Kata Sandi Portal (Murni dari Nomor WA)
-                    if new_wa:
-                        from app.core.security import get_password_hash
-                        clean_wa = new_wa.strip()
-                        if not existing_pel.no_hp:
-                            existing_pel.no_hp = clean_wa
-                            existing_pel.password_hash = get_password_hash(clean_wa)
-                            has_change = True
-                        elif selected_version == "new" and existing_pel.no_hp != clean_wa:
-                            existing_pel.no_hp = clean_wa
-                            existing_pel.password_hash = get_password_hash(clean_wa)
-                            has_change = True
-                        elif not existing_pel.password_hash:
-                            # Jika nomor WA sudah ada tapi password_hash masih NULL (asal MikroTik)
-                            existing_pel.password_hash = get_password_hash(clean_wa)
-                            has_change = True
-
-                    # 2. Update Alamat
-                    if new_alamat:
-                        if not existing_pel.alamat or existing_pel.alamat.startswith("Wilayah "):
-                            existing_pel.alamat = new_alamat
-                            has_change = True
-                        elif selected_version == "new" and existing_pel.alamat != new_alamat:
-                            existing_pel.alamat = new_alamat
-                            has_change = True
-
-                    # 3. Update Nama jika di database masih placeholder
-                    if nama and existing_pel.nama in ("Pelanggan", "Customer", "") or (selected_version == "new" and nama and existing_pel.nama != nama):
-                        existing_pel.nama = nama
-                        has_change = True
-
-                    # 4. Update WiFi SSID & Password
-                    if new_wifi_ssid:
-                        if not existing_ont.nama_wifi or selected_version == "new":
-                            existing_ont.nama_wifi = new_wifi_ssid
-                            has_change = True
-                    if new_wifi_pass:
-                        if not existing_ont.password_wifi or selected_version == "new":
-                            existing_ont.password_wifi = new_wifi_pass
-                            has_change = True
-
-                    # 5. Update MAC Address
-                    new_mac = str(row_data.get("mac_address", "")).strip()
-                    if new_mac:
-                        if not existing_ont.mac_address or selected_version == "new":
-                            existing_ont.mac_address = new_mac
-                            has_change = True
-
-                    if has_change:
-                        from app.core.timezone import get_now_wib
-                        existing_pel.updated_at = get_now_wib()
-                        updated_count += 1
-                    else:
-                        skipped_count += 1
-                else:
-                    # MODE SIMPAN BARU (OFFLINE)
-                    if action != "insert":
+                    if action == "skip" or status == "error":
                         skipped_count += 1
                         continue
 
-                    redaman_baseline = None
-                    if row_data.get("redaman_baseline"):
-                        try:
-                            redaman_baseline = float(row_data["redaman_baseline"])
-                        except (ValueError, TypeError):
-                            pass
+                    id_pel = str(row_data.get("id_pelanggan", "")).strip()
+                    nama = str(row_data.get("nama", "")).strip()
+                    ip_router = str(row_data.get("ip_router", "")).strip()
 
-                    raw_pop = str(row_data.get("pop", "")).strip() or "Server Cabang"
+                    if not id_pel or not nama or not ip_router:
+                        failed_count += 1
+                        errors.append(f"Baris tidak lengkap: ID='{id_pel}', Nama='{nama}', IP='{ip_router}'")
+                        continue
 
-                    # Pastikan master referensi Paket ada
-                    raw_paket = str(row_data.get("paket", "")).strip() or None
-                    if raw_paket and raw_paket not in valid_pakets:
-                        try:
-                            new_pkt = Paket(nama=raw_paket)
-                            db.add(new_pkt)
+                    # Tentukan kantor untuk baris ini
+                    raw_kantor = str(row_data.get("kantor", "")).strip().lower()
+                    if raw_kantor in valid_kantors:
+                        row_kantor = raw_kantor
+                    else:
+                        pop_val = str(row_data.get("pop", "")).upper()
+                        matched_kantor = None
+                        for k_code in valid_kantors:
+                            if k_code.upper() in pop_val:
+                                matched_kantor = k_code
+                                break
+                        if matched_kantor:
+                            row_kantor = matched_kantor
+                        elif default_kantor and default_kantor.lower().strip() in valid_kantors:
+                            row_kantor = default_kantor.lower().strip()
+                        elif valid_kantors:
+                            row_kantor = next(iter(valid_kantors))
+                        else:
+                            row_kantor = "cabang"
+
+                    # Cari pelanggan existing dari cache batch (baik via IP router maupun ID Pelanggan)
+                    existing_ont = ont_by_ip.get(ip_router)
+                    existing_pel = None
+                    if existing_ont:
+                        existing_pel = pel_by_id.get(existing_ont.id_pelanggan)
+                    
+                    if not existing_pel and id_pel:
+                        existing_pel = pel_by_id.get(id_pel)
+                        if existing_pel and not existing_ont:
+                            existing_ont = getattr(existing_pel, "perangkat", None)
+
+                    # Pilihan versi data jika terjadi konflik (default "new")
+                    selected_version = item.get("selected_version", "new")
+                    new_wa = str(row_data.get("no_wa", "") or row_data.get("no_hp", "")).strip()
+                    new_alamat = str(row_data.get("alamat", "")).strip()
+                    new_wifi_ssid = str(row_data.get("nama_wifi", "")).strip()
+                    new_wifi_pass = str(row_data.get("password_wifi", "")).strip()
+
+                    if existing_pel:
+                        # MODE LENGKAPI DATA (Enrichment Update)
+                        has_change = False
+
+                        # 0. Update ID Pelanggan ke id numerik resmi Network Bill jika ada
+                        target_id_pel = str(row_data.get("network_bill_code") or id_pel or "").strip()
+                        if target_id_pel and existing_pel.id_pelanggan != target_id_pel:
+                            conflict_pel = pel_by_id.get(target_id_pel) or db.query(Pelanggan).filter(Pelanggan.id_pelanggan == target_id_pel).first()
+                            if not conflict_pel:
+                                existing_pel.id_pelanggan = target_id_pel
+                                has_change = True
+
+                        # 0b. Selaraskan kantor dengan slug PoP sumber data
+                        nb_kantor = str(row_data.get("kantor") or "").strip().lower()
+                        if nb_kantor and (existing_pel.kantor or "").strip().lower() != nb_kantor:
+                            existing_pel.kantor = nb_kantor
+                            has_change = True
+
+                        # 1. Update No. WhatsApp & Kata Sandi Portal
+                        if new_wa:
+                            from app.core.security import get_password_hash
+                            clean_wa = new_wa.strip()
+                            if not existing_pel.no_hp:
+                                existing_pel.no_hp = clean_wa
+                                existing_pel.password_hash = get_password_hash(clean_wa)
+                                has_change = True
+                            elif selected_version == "new" and existing_pel.no_hp != clean_wa:
+                                existing_pel.no_hp = clean_wa
+                                existing_pel.password_hash = get_password_hash(clean_wa)
+                                has_change = True
+                            elif not existing_pel.password_hash:
+                                existing_pel.password_hash = get_password_hash(clean_wa)
+                                has_change = True
+
+                        # 2. Update Alamat
+                        if new_alamat:
+                            if not existing_pel.alamat or existing_pel.alamat.startswith("Wilayah "):
+                                existing_pel.alamat = new_alamat
+                                has_change = True
+                            elif selected_version == "new" and existing_pel.alamat != new_alamat:
+                                existing_pel.alamat = new_alamat
+                                has_change = True
+
+                        # 3. Update Nama jika di database masih placeholder
+                        if nama and (existing_pel.nama in ("Pelanggan", "Customer", "") or (selected_version == "new" and existing_pel.nama != nama)):
+                            existing_pel.nama = nama
+                            has_change = True
+
+                        # 4. Pastikan baris PerangkatONT ada untuk pelanggan existing ini
+                        if not existing_ont:
+                            existing_ont = PerangkatONT(
+                                id_pelanggan=existing_pel.id_pelanggan,
+                                ip_router=ip_router,
+                                jenis_modem=str(row_data.get("jenis_modem", "")).strip() or None,
+                                mac_address=str(row_data.get("mac_address", "")).strip() or None,
+                                nama_wifi=new_wifi_ssid or None,
+                                password_wifi=new_wifi_pass or None,
+                                user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
+                                pass_admin=str(row_data.get("pass_admin", "tekno2024")).strip() or "tekno2024",
+                                status_kredensial="INVALID"
+                            )
+                            db.add(existing_ont)
+                            ont_by_ip[ip_router] = existing_ont
+                            has_change = True
+                        else:
+                            if new_wifi_ssid and (not existing_ont.nama_wifi or selected_version == "new"):
+                                existing_ont.nama_wifi = new_wifi_ssid
+                                has_change = True
+                            if new_wifi_pass and (not existing_ont.password_wifi or selected_version == "new"):
+                                existing_ont.password_wifi = new_wifi_pass
+                                has_change = True
+                            new_mac = str(row_data.get("mac_address", "")).strip()
+                            if new_mac and (not existing_ont.mac_address or selected_version == "new"):
+                                existing_ont.mac_address = new_mac
+                                has_change = True
+
+                        if has_change:
+                            from app.core.timezone import get_now_wib
+                            existing_pel.updated_at = get_now_wib()
                             db.flush()
-                            valid_pakets.add(raw_paket)
-                        except Exception:
-                            db.rollback()
-                            raw_paket = None
-                            
-                    from app.core.security import get_password_hash
-                    # Password portal pelanggan murni dari Nomor WA jika tersedia, NULL jika belum ada WA
-                    init_hash = get_password_hash(new_wa.strip()) if new_wa else None
-                    new_pelanggan = Pelanggan(
-                        id_pelanggan=id_pel,
-                        nama=nama,
-                        alamat=new_alamat or None,
-                        no_hp=new_wa or None,
-                        pop=raw_pop,
-                        kantor=row_kantor,
-                        paket=raw_paket,
-                        is_monitored=False, # Sesuai Q5: jadikan offline
-                        is_active=True,
-                        status_lease="waiting",
-                        password_hash=init_hash
-                    )
-                    db.add(new_pelanggan)
-                    db.flush()
+                            updated_count += 1
+                        else:
+                            skipped_count += 1
+                    else:
+                        # MODE SIMPAN BARU (OFFLINE)
+                        if action != "insert":
+                            skipped_count += 1
+                            continue
 
-                    new_ont = PerangkatONT(
-                        id_pelanggan=id_pel,
-                        ip_router=ip_router,
-                        jenis_modem=str(row_data.get("jenis_modem", "")).strip() or None,
-                        mac_address=str(row_data.get("mac_address", "")).strip() or None,
-                        redaman_baseline=redaman_baseline,
-                        nama_wifi=new_wifi_ssid or None,
-                        password_wifi=new_wifi_pass or None,
-                        user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
-                        pass_admin=str(row_data.get("pass_admin", "tekno2024")).strip() or "tekno2024",
-                        status_kredensial="INVALID"
-                    )
-                    db.add(new_ont)
-                    imported_count += 1
+                        redaman_baseline = None
+                        if row_data.get("redaman_baseline"):
+                            try:
+                                redaman_baseline = float(row_data["redaman_baseline"])
+                            except (ValueError, TypeError):
+                                pass
+
+                        raw_pop = str(row_data.get("pop", "")).strip() or "Server Cabang"
+
+                        # Pastikan master referensi Paket ada secara terisolasi aman
+                        raw_paket = str(row_data.get("paket", "")).strip() or None
+                        if raw_paket and raw_paket not in valid_pakets:
+                            try:
+                                with db.begin_nested():
+                                    new_pkt = Paket(nama=raw_paket)
+                                    db.add(new_pkt)
+                                    db.flush()
+                                valid_pakets.add(raw_paket)
+                            except Exception:
+                                raw_paket = None
+                                
+                        from app.core.security import get_password_hash
+                        init_hash = get_password_hash(new_wa.strip()) if new_wa else None
+                        new_pelanggan = Pelanggan(
+                            id_pelanggan=id_pel,
+                            nama=nama,
+                            alamat=new_alamat or None,
+                            no_hp=new_wa or None,
+                            pop=raw_pop,
+                            kantor=row_kantor,
+                            paket=raw_paket,
+                            is_monitored=False,
+                            is_active=True,
+                            status_lease="waiting",
+                            password_hash=init_hash
+                        )
+                        db.add(new_pelanggan)
+                        db.flush()
+
+                        new_ont = PerangkatONT(
+                            id_pelanggan=id_pel,
+                            ip_router=ip_router,
+                            jenis_modem=str(row_data.get("jenis_modem", "")).strip() or None,
+                            mac_address=str(row_data.get("mac_address", "")).strip() or None,
+                            redaman_baseline=redaman_baseline,
+                            nama_wifi=new_wifi_ssid or None,
+                            password_wifi=new_wifi_pass or None,
+                            user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
+                            pass_admin=str(row_data.get("pass_admin", "tekno2024")).strip() or "tekno2024",
+                            status_kredensial="INVALID"
+                        )
+                        db.add(new_ont)
+                        db.flush()
+
+                        pel_by_id[id_pel] = new_pelanggan
+                        ont_by_ip[ip_router] = new_ont
+                        imported_count += 1
             except Exception as e:
                 failed_count += 1
-                errors.append(f"Gagal memproses IP {row_data.get('ip_router', 'Unknown')}: {str(e)}")
+                row_d = item.get("data", item) if isinstance(item, dict) else {}
+                errors.append(f"Gagal memproses baris IP {row_d.get('ip_router', 'Unknown')}: {str(e)}")
 
-        db.commit()
+        try:
+            db.commit()
+        except Exception as commit_err:
+            db.rollback()
+            raise ValueError(f"Gagal menyimpan komit batch import: {commit_err}")
 
         return {
             "total_processed": imported_count + updated_count + skipped_count + failed_count,
