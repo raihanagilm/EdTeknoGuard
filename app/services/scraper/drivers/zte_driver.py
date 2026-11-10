@@ -156,3 +156,13 @@ class ZTEDriver(BaseONTDriver):
         """Mengirimkan sinyal reboot ke ZTE ONT."""
         return ZTEScraper.reboot_modem(session=session, base_url=base_url, host=host)
 
+    @classmethod
+    def logout(
+        cls,
+        session: requests.Session,
+        base_url: str,
+        host: str
+    ) -> bool:
+        """Mengirimkan sinyal logout resmi ke ZTE ONT."""
+        return ZTEScraper.logout(session=session, base_url=base_url, host=host)
+

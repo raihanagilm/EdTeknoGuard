@@ -138,3 +138,33 @@ class BaseONTDriver(ABC):
         """
         return False
 
+    @classmethod
+    def logout(
+        cls,
+        session: requests.Session,
+        base_url: str,
+        host: str
+    ) -> bool:
+        """
+        Mengakhiri sesi login pada Web GUI modem secara bersih agar teknisi/admin
+        dapat langsung login manual tanpa terhalang sesi menggantung (Single Session Lockout).
+        """
+        try:
+            # Pola endpoint logout universal
+            logout_urls = [
+                f"{base_url}/getpage.gch?pid=1002",
+                f"{base_url}/logout.cgi",
+                f"{base_url}/logout.html",
+                f"{base_url}/asp/logout.asp",
+                f"{base_url}/login.gch?action=logout"
+            ]
+            for u in logout_urls:
+                try:
+                    session.get(u, timeout=2, headers={"Connection": "close"})
+                except Exception:
+                    pass
+            session.cookies.clear()
+            return True
+        except Exception:
+            return False
+

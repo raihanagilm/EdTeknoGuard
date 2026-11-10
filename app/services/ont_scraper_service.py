@@ -302,6 +302,11 @@ class ONTScraperService:
 
         if not opt_data or opt_data.get("rx_power") is None:
             print(f"[!] [OPTICAL_FAILED] ONT {host} ({customer_name}): Login OK, namun parameter optik kosong.")
+            # Tetap logout sesi modem meskipun optik kosong
+            try:
+                driver_cls.logout(session, base_url, host)
+            except Exception:
+                pass
             return {
                 "success": True,
                 "status_kredensial": "VALID",
@@ -330,6 +335,12 @@ class ONTScraperService:
             status_koneksi = "NORMAL"
 
         device_wifi = driver_cls.extract_device_and_wifi_data(session, base_url, host)
+
+        # Logout resmi dari Web GUI modem untuk membebaskan single session lockout bagi admin/teknisi
+        try:
+            driver_cls.logout(session, base_url, host)
+        except Exception:
+            pass
 
         print(f"[+] [SUCCESS] ONT {host} ({customer_name}): Rx {rx} dBm | Tx {opt_data.get('tx_power')} dBm | Suhu {suhu}°C | MAC: {device_wifi.get('mac_address')} | Status: {status_koneksi} | Auth: {active_user} ({auth_source})")
 

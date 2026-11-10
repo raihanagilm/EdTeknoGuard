@@ -646,3 +646,37 @@ class ZTEScraper:
         except Exception as e:
             return {"success": False, "message": f"Gagal mengeksekusi filter MAC modem: {str(e)}"}
 
+    @classmethod
+    def logout(cls, session: requests.Session, base_url: str, host: str) -> bool:
+        """
+        Mengirimkan perintah Logout resmi pada modem ZTE (GM220-S / F609 / F660 / F663 / F670).
+        Membersihkan sesi server-side pada modem agar teknisi/admin NOC tidak terkena Session Lockout.
+        """
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Referer": f"{base_url}/",
+            "Connection": "close"
+        }
+        # Endpoint logout resmi ZTE
+        endpoints = [
+            # 1. ZTE F609 / F660 / GM220 standard logout
+            ("POST", f"{base_url}/getpage.gch?pid=1002&nextpage=login.gch", {"logout": "1", "IF_ACTION": "logout"}),
+            # 2. ZTE logout via root action
+            ("POST", f"{base_url}/", {"action": "logout"}),
+            # 3. ZTE template logout
+            ("GET", f"{base_url}/getpage.gch?pid=1002", None),
+            # 4. ZTE direct logout url
+            ("GET", f"{base_url}/login.gch?action=logout", None)
+        ]
+        for method, url, data in endpoints:
+            try:
+                if method == "POST":
+                    session.post(url, data=data, headers=headers, timeout=2)
+                else:
+                    session.get(url, headers=headers, timeout=2)
+            except Exception:
+                pass
+
+        session.cookies.clear()
+        return True
+
