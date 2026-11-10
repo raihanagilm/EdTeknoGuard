@@ -499,48 +499,93 @@ Amankan data pelanggan dan riwayat log dengan backup otomatis setiap pukul 02:00
    0 2 * * * /usr/local/bin/backup_edtekno.sh > /dev/null 2>&1
    ```
 
-### C. Alur Pembaruan Kode dari Git (Update Deployment)
-Setiap kali ada pembaruan fitur baru di repositori GitHub, jalankan alur pembaruan ini di server:
+### C. 🔄 Alur Lengkap Update: Dari Komputer Lokal (Laptop/PC) Sampai Server Produksi (VPS)
+
+Banyak pengguna bingung mengenai alur push dan pull. Prinsip dasarnya adalah: **Kompilasi/koding di lokal $\rightarrow$ Push ke GitHub $\rightarrow$ Tarik (Pull) di Server Linux $\rightarrow$ Restart Service.**
+
+Berikut alur lengkap langkah-demi-langkahnya:
+
+---
+
+#### 📌 TAHAP 1: Di Komputer Lokal (Laptop / PC Anda)
+
+Jalankan perintah ini di terminal proyek laptop Anda sebelum pindah ke server:
+
+1. **Periksa status perubahan lokal:**
+   ```bash
+   git status
+   ```
+   - Jika muncul pesan **`Your branch is up to date with 'origin/main'`** dan **`nothing to commit, working tree clean`**, artinya semua kode lokal Anda **sudah ada di GitHub**. Anda bisa langsung lanjut ke **Tahap 2**.
+   - Jika ada file yang telah diedit/berwarna merah atau belum di-commit, lakukan langkah 2 dan 3.
+
+2. **Simpan & Commit perubahan:**
+   ```bash
+   git add .
+   git commit -m "feat/fix: deskripsi pembaruan fitur atau bug"
+   ```
+
+3. **Kirim (Push) ke GitHub:**
+   ```bash
+   git push origin main
+   ```
+   *(Tunggu sampai proses push selesai 100% dan tidak ada pesan error).*
+
+---
+
+#### 📌 TAHAP 2: Di Server Linux (VPS Produksi)
+
+Setelah kode berhasil terkirim ke GitHub pada Tahap 1, buka terminal SSH server Anda:
+
+1. **Masuk ke direktori proyek:**
+   ```bash
+   cd /home/tekno/edteknoguard
+   ```
+
+2. **Tarik kode terbaru dari GitHub:**
+   ```bash
+   git pull origin main
+   ```
+
+3. **(Wajib jika ada perubahan UI / Tampilan Web) Kompilasi ulang Frontend React:**
+   ```bash
+   cd frontend
+   npm run build
+   cd ..
+   ```
+   *(Jika hanya perubahan kode Python backend atau scheduler, langkah kompilasi frontend ini bisa dilewati).*
+
+4. **(Opsional jika ada pustaka Python baru / skema DB baru):**
+   ```bash
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   python -m app.db.init_db
+   ```
+
+5. **Restart Layanan Aplikasi:**
+   ```bash
+   sudo systemctl restart edteknoguard
+   ```
+
+6. **Verifikasi Layanan Berjalan Normal:**
+   ```bash
+   sudo systemctl status edteknoguard
+   ```
+   *(Pastikan status berwarna hijau **`active (running)`**. Tekan tombol `q` untuk keluar).*
+
+---
+
+### D. 🚀 Cheat Sheet: Perintah Cepat 1-Baris di Server VPS (One-Liner)
+
+Untuk pembaruan rutin backend atau perbaikan kode harian di server Linux, Anda cukup menjalankan perintah singkat satu baris ini di terminal server:
 
 ```bash
-cd /home/tekno/edteknoguard
-
-# 1. Ambil kode terbaru dari GitHub
-git pull origin main
-
-# 2. Perbarui dependensi backend jika ada perubahan
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# 3. Jalankan migrasi/update database jika ada skema baru
-python -m app.db.init_db
-
-# 4. Kompilasi ulang frontend React jika ada perubahan UI
-cd frontend
-npm install
-npm run build
-cd ..
-
-# 5. Restart service agar memuat kode terbaru
-sudo systemctl restart edteknoguard
-sudo systemctl status edteknoguard
+cd /home/tekno/edteknoguard && git pull origin main && sudo systemctl restart edteknoguard
 ```
 
-### D. 🚀 Cara Cepat Menerapkan Pembaruan di Server Produksi (VPS)
-Untuk pembaruan rutin backend / perbaikan bug cepat, di terminal server Linux Anda cukup lakukan pull kode terbaru dan restart service:
-
-```bash
-cd /home/tekno/edteknoguard
-
-# 1. Tarik pembaruan kode
-git pull origin main
-
-# 2. Restart service backend
-sudo systemctl restart edteknoguard
-
-# 3. (Opsional) Jika memperbarui Nginx timeout atau konfigurasi reverse proxy:
-sudo nginx -t && sudo systemctl reload nginx
-```
+> 💡 **Jika ada perubahan tampilan frontend (Web UI), tambahkan build frontend:**
+> ```bash
+> cd /home/tekno/edteknoguard && git pull origin main && cd frontend && npm run build && cd .. && sudo systemctl restart edteknoguard
+> ```
 
 ---
 
