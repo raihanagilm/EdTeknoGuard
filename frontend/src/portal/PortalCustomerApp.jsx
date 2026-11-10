@@ -126,8 +126,29 @@ export function PortalCustomerApp() {
         const unread = checkHasUnreadNotifications(pel, tickets, payments);
         setHasUnreadNotifications(unread);
 
-        // Picu Notifikasi Native jika status tiket pelanggan berubah
+        // Picu Notifikasi Native (Android Bridge)
         if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
+          // 1. Notifikasi Khusus LOS (Kabel Putus / Gangguan Jaringan) kepada Pelanggan
+          const lastLogConn = dashboardData?.last_log?.status_koneksi?.toUpperCase?.();
+          const alertedLosKey = 'mytekno_alerted_los_status';
+          const lastAlertedLos = sessionStorage.getItem(alertedLosKey);
+
+          if (lastLogConn === 'LOS') {
+            if (lastAlertedLos !== 'LOS') {
+              sessionStorage.setItem(alertedLosKey, 'LOS');
+              try {
+                window.AndroidBridge.showNativeNotification(
+                  'Pemberitahuan Gangguan Jaringan',
+                  'Mohon maaf atas ketidaknyamanannya, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.',
+                  false
+                );
+              } catch (_) {}
+            }
+          } else if (lastLogConn && lastLogConn !== 'LOS') {
+            sessionStorage.removeItem(alertedLosKey);
+          }
+
+          // 2. Notifikasi jika status tiket pelanggan berubah
           const alertedTicketStorageKey = 'mytekno_alerted_ticket_status';
           let lastTicketStatusMap = {};
           try {

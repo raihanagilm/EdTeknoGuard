@@ -269,15 +269,24 @@ export default function App() {
             notifRes.notifications.forEach(n => {
               if (n && n.id && !alertedSet.has(n.id)) {
                 alertedSet.add(n.id)
-                const isEmergency = n.level === 'critical' || n.is_critical || n.type === 'ont_los' || n.type === 'redaman_drop'
-                try {
-                  window.AndroidBridge.showNativeNotification(
-                    n.title || 'Notifikasi NOC',
-                    n.message || 'Ada pembaruan status sistem',
-                    Boolean(isEmergency)
-                  )
-                } catch (errBridge) {
-                  console.warn('Gagal memicu showNativeNotification:', errBridge)
+
+                // Filter Push Notifikasi untuk Teknisi / Admin:
+                // HANYA push notifikasi untuk status KRITIS (<= -27 dBm) dan LOS (Putus), serta Tiket Masuk
+                // WARNING dan OPTIMAL tidak dipush sebagai heads-up alert
+                const isEmergency = n.level === 'critical' || n.is_critical || n.level === 'los' || n.target_status === 'LOS' || n.type === 'ont_los' || n.type === 'redaman_drop'
+                const isTicket = n.type === 'tiket' || n.type === 'tiket_batch'
+                const shouldPush = isEmergency || isTicket
+
+                if (shouldPush) {
+                  try {
+                    window.AndroidBridge.showNativeNotification(
+                      n.title || 'Notifikasi NOC',
+                      n.message || 'Ada pembaruan status sistem',
+                      Boolean(isEmergency)
+                    )
+                  } catch (errBridge) {
+                    console.warn('Gagal memicu showNativeNotification:', errBridge)
+                  }
                 }
               }
             })

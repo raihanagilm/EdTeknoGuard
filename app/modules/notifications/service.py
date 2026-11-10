@@ -34,6 +34,14 @@ class NotificationService:
                 m_db.close()
 
         user_role = user.get("role") if user else "teknisi"
+        user_allowed_kantors = user.get("allowed_kantor", []) if user else []
+        if isinstance(user_allowed_kantors, str):
+            try:
+                import json
+                user_allowed_kantors = json.loads(user_allowed_kantors)
+            except Exception:
+                user_allowed_kantors = [user_allowed_kantors]
+        is_multi_kantor = (user_role == "super admin") or (len(user_allowed_kantors) > 1)
 
         # Ambil set reference_id yang sudah dibaca user
         read_ref_ids = set()
@@ -138,12 +146,13 @@ class NotificationService:
             if not is_critical and ref_key in read_ref_ids:
                 continue
 
+            office_prefix = f"[{cust.kantor.upper()}] " if is_multi_kantor and cust.kantor else ""
             item_data = {
                 "id": ref_key,
                 "reference_id": ref_key,
                 "type": "monitoring",
-                "title": f"ONT {status_conn}: {cust.nama}",
-                "message": f"IP: {cust.ip_router or '-'} | Redaman: {log_entry.rx_power if log_entry.rx_power is not None else 'N/A'} dBm ({log_entry.keterangan or status_conn})",
+                "title": f"{office_prefix}ONT {status_conn}: {cust.nama}",
+                "message": f"Kantor: {cust.kantor.upper() if cust.kantor else '-'} | IP: {cust.ip_router or '-'} | Redaman: {log_entry.rx_power if log_entry.rx_power is not None else 'N/A'} dBm ({log_entry.keterangan or status_conn})",
                 "target_tab": "pelanggan",
                 "target_filter": cust.id_pelanggan,
                 "target_status": status_conn,
@@ -170,11 +179,12 @@ class NotificationService:
             first_los = los_items[0]
             batch_key = f"batch_los_{len(los_items)}_{first_los['id']}"
             if batch_key not in read_ref_ids:
+                b_office_prefix = f"[{first_los['kantor'].upper()}] " if is_multi_kantor and first_los.get('kantor') else ""
                 items_list.append({
                     "id": batch_key,
                     "reference_id": batch_key,
                     "type": "monitoring_batch",
-                    "title": f"{len(los_items)} Modem ONT Terputus (LOS)",
+                    "title": f"{b_office_prefix}{len(los_items)} Modem ONT Terputus (LOS)",
                     "message": f"Terdeteksi {len(los_items)} pelanggan mengalami LOS (Kabel Putus / No Signal) pada kantor {first_los['kantor'].upper()}.",
                     "target_tab": "pelanggan",
                     "target_filter": "",
@@ -193,11 +203,12 @@ class NotificationService:
         if len(critical_items) >= 5:
             first_crit = critical_items[0]
             batch_key = f"batch_critical_{len(critical_items)}_{first_crit['kantor']}"
+            b_crit_prefix = f"[{first_crit['kantor'].upper()}] " if is_multi_kantor and first_crit.get('kantor') else ""
             items_list.append({
                 "id": batch_key,
                 "reference_id": batch_key,
                 "type": "monitoring_batch",
-                "title": f"{len(critical_items)} Modem Sinyal Kritis (<= -27 dBm)",
+                "title": f"{b_crit_prefix}{len(critical_items)} Modem Sinyal Kritis (<= -27 dBm)",
                 "message": f"Terdeteksi {len(critical_items)} pelanggan mendekati/melebihi batas kritis redaman pada kantor {first_crit['kantor'].upper()}. Wajib segera ditindaklanjuti!",
                 "target_tab": "pelanggan",
                 "target_filter": "",

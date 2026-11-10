@@ -92,10 +92,13 @@ class ScanRunner:
                 is_valid_modem=is_valid_modem
             )
 
-            # Catat log hasil scan
+            # Catat log hasil scan on-demand mandiri (dikecualikan dari grafik monitoring massal)
             now = get_now_wib()
             rx = scrape_res.get("rx_power")
             status_koneksi = scrape_res.get("status_koneksi", "LOS")
+
+            raw_msg = scrape_res.get("message") or status_koneksi
+            keterangan_single = f"Single Check: {raw_msg}"
 
             log_entry = LogPerformaONT(
                 id_pelanggan=cust.id_pelanggan,
@@ -105,7 +108,7 @@ class ScanRunner:
                 uptime=scrape_res.get("uptime"),
                 status_koneksi=status_koneksi,
                 latency_ms=scrape_res.get("latency_ms"),
-                keterangan=scrape_res.get("message")
+                keterangan=keterangan_single
             )
             db.add(log_entry)
 
@@ -156,6 +159,8 @@ class ScanRunner:
             state.is_paused = False
             state.is_stopped = False
             state.scan_start_time = time.time()
+            # Catat waktu awal pemindaian batch agar seluruh pelanggan dalam 1 siklus memiliki timestamp identik
+            scan_batch_time = get_now_wib()
 
             db = TenantDatabaseManager.get_tenant_session(k_code)
             try:
@@ -242,13 +247,13 @@ class ScanRunner:
                         is_valid_modem=is_valid_modem
                     )
 
-                    now = get_now_wib()
                     rx = scrape_res.get("rx_power")
                     status_koneksi = scrape_res.get("status_koneksi", "LOS")
 
+                    # Gunakan scan_batch_time seragam untuk seluruh pelanggan dalam 1 siklus pemindaian
                     log_entry = LogPerformaONT(
                         id_pelanggan=p.id_pelanggan,
-                        waktu_cek=now,
+                        waktu_cek=scan_batch_time,
                         rx_power=rx,
                         suhu_ont=scrape_res.get("suhu_ont"),
                         uptime=scrape_res.get("uptime"),
