@@ -186,6 +186,7 @@ export class TicketsService {
 
   static async updateStatus(ticketId, newStatus, catatan = '') {
     return new ApiService().post(`/admin/api/tiket/${ticketId}/status`, {
+      status: newStatus,
       new_status: newStatus,
       catatan,
     });

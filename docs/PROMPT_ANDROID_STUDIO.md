@@ -1,4 +1,4 @@
-# 🚀 MASTER PROMPT & ARSITEKTUR ANDROID STUDIO — TEKNOGUARD & MYTEKNO
+`# 🚀 MASTER PROMPT & ARSITEKTUR ANDROID STUDIO — TEKNOGUARD & MYTEKNO
 
 Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk membangun 2 aplikasi Android Native berbasis Kotlin di **Android Studio**:
 1. **TeknoGuard** (Aplikasi NOC & Teknisi Lapangan) $\rightarrow$ Menghasilkan `TeknoGuard.apk`
@@ -367,3 +367,4 @@ Sistem operasi Android modern (MIUI/HyperOS, ColorOS, OneUI) memiliki fitur agre
 ---
 *Dokumen ini dirancang khusus untuk memandu developer atau AI Agent dalam memelihara dan mengompilasi aplikasi Android EdTeknoGuard & MyTekno secara mandiri.*
 
+`

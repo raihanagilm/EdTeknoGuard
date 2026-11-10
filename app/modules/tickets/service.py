@@ -39,7 +39,29 @@ class TicketService:
         new_status: str,
         catatan: Optional[str] = None
     ) -> Dict[str, Any]:
+        target_db = db
         t = db.query(TiketKendala).filter(TiketKendala.id_tiket == ticket_id).first()
+
+        # Fallback multi-tenant jika tiket berada di database tenant kantor lain
+        if not t:
+            try:
+                from app.core.tenant_database import TenantDatabaseManager
+                from app.core.security import get_all_kantor_codes
+                for k_code in get_all_kantor_codes():
+                    try:
+                        s = TenantDatabaseManager.get_tenant_session(k_code)
+                        found = s.query(TiketKendala).filter(TiketKendala.id_tiket == ticket_id).first()
+                        if found:
+                            t = found
+                            target_db = s
+                            break
+                        else:
+                            s.close()
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
         if not t:
             return {"status": "error", "message": "Tiket tidak ditemukan."}
 
@@ -47,7 +69,10 @@ class TicketService:
         if catatan is not None:
             t.catatan_teknisi = catatan
         t.updated_at = get_now_wib()
-        db.commit()
+        target_db.commit()
+
+        if target_db != db:
+            target_db.close()
 
         return {
             "status": "success",

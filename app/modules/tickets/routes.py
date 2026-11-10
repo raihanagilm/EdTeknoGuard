@@ -90,8 +90,8 @@ async def update_ticket_status_json(
 ):
     user = require_login(request)
     body = await request.json()
-    new_status = body.get("status")
-    catatan = body.get("catatan")
+    new_status = body.get("status") or body.get("new_status")
+    catatan = body.get("catatan") or body.get("catatan_teknisi") or ""
     
     if not new_status:
         return {"status": "error", "message": "Parameter status wajib disertakan."}
