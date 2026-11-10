@@ -628,7 +628,7 @@ export function CustomersView({
             colorScheme: 'cyan',
             isActive: filterStatus === 'ALL',
             onClick: () => setFilterStatus('ALL'),
-            subLabel: 'Semua ONT'
+            subLabel: stats.offline !== undefined && stats.offline !== null ? `${stats.offline} Offline` : 'Semua ONT'
           },
           {
             label: 'Optimal',

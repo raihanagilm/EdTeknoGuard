@@ -203,12 +203,29 @@ def serve_frontend_dist_root_files(request: Request):
 register_api_routes(app)
 
 # Route Halaman SPA Dashboard NOC (Support Direct URL & Refresh)
+@app.get("/login")
+@app.get("/dashboard")
+@app.get("/beranda")
+@app.get("/tiket")
+@app.get("/tickets")
+@app.get("/pelanggan")
+@app.get("/customers")
+@app.get("/riwayat")
+@app.get("/logs")
+@app.get("/kuota")
+@app.get("/quota")
+@app.get("/mikrotik")
+@app.get("/routeros")
+@app.get("/pengaturan")
+@app.get("/settings")
+@app.get("/notifikasi")
+@app.get("/log")
+@app.get("/activity-logs")
 @app.get("/manajemen-kantor")
 @app.get("/pengguna")
+@app.get("/users")
 @app.get("/kantor")
-def serve_management_kantor_page(request: Request):
-    from app.core.security import require_admin
-    user = require_admin(request)
+def serve_noc_spa_pages(request: Request):
     dist_index = Path("frontend/dist/index.html")
     if dist_index.exists():
         return FileResponse(str(dist_index))

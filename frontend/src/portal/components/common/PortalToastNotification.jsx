@@ -74,28 +74,28 @@ export function PortalToastNotification({
     <div
       role="alert"
       aria-live="polite"
-      className="absolute bottom-20 left-3 right-3 z-50 pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+      className="absolute bottom-16 left-3 right-3 sm:left-auto sm:right-3 sm:max-w-xs z-50 pointer-events-auto transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
     >
       <div
-        className={`p-3.5 rounded-2xl shadow-xl shadow-slate-950/20 border backdrop-blur-md flex items-start gap-3 ${current.bgClass}`}
+        className={`px-3 py-2 rounded-xl shadow-lg shadow-slate-950/20 border backdrop-blur-md flex items-center gap-2.5 ${current.bgClass}`}
       >
-        <div className="p-1 rounded-lg bg-white/10 shrink-0 mt-0.5">
-          <IconComponent className={`w-4 h-4 ${current.iconClass}`} aria-hidden="true" />
+        <div className="p-1 rounded-md bg-white/10 shrink-0">
+          <IconComponent className={`w-3.5 h-3.5 ${current.iconClass}`} aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0 text-xs">
-          <div className="font-bold tracking-tight mb-0.5 leading-snug">{displayTitle}</div>
-          <div className="text-[11px] leading-relaxed text-white/90 break-words font-normal">
+          <div className="font-bold tracking-tight text-[11px] leading-tight">{displayTitle}</div>
+          <div className="text-[10.5px] leading-tight text-white/90 break-words font-normal">
             {message}
           </div>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
+          className="p-1 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
           title="Tutup Notifikasi"
           aria-label="Tutup Notifikasi"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-3 h-3" />
         </button>
       </div>
     </div>

@@ -144,7 +144,7 @@ export function ConnectedDevicesModal({
         <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/70 to-indigo-50/50 gap-2 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
-              <Users className="w-5 h-5" />
+              <Smartphone className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">

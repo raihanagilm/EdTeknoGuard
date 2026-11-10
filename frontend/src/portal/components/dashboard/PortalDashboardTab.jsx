@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Activity,
   Signal,
@@ -14,11 +14,12 @@ import {
   ChevronRight,
   Receipt,
   CheckCircle2,
-  Clock
+  Clock,
+  User
 } from 'lucide-react';
 import { PortalActiveMascot } from '../common/PortalActiveMascot';
 import { PortalHeader } from '../layout/PortalHeader';
-import { Users } from 'lucide-react';
+import { Smartphone, Laptop, SmartphoneNfc } from 'lucide-react';
 import { ConnectedDevicesModal } from '../modals/ConnectedDevicesModal';
 import { SpeedTestModal } from '../modals/SpeedTestModal';
 import { Gauge, Play } from 'lucide-react';
@@ -242,13 +243,13 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
 
               {/* 3. Hasil Speed Test Terakhir */}
               <div className="px-2 text-center flex flex-col items-center justify-center py-0.5">
-                <div className="flex items-center gap-1 portal-caption text-blue-600 uppercase tracking-tight mb-1 group-hover:text-blue-700">
-                  <Gauge className="w-3 h-3 text-blue-600" />
+                <div className="flex items-center gap-1 portal-caption text-gray-500 uppercase tracking-tight mb-1">
+                  <Gauge className="w-3 h-3 text-cyan-600" />
                   <span>Speed Test</span>
                 </div>
                 {lastSpeedTestData && lastSpeedTestData.download !== null ? (
                   <>
-                    <div className="text-xs sm:text-sm font-black font-mono text-blue-700 leading-none">
+                    <div className="portal-body-bold font-black font-mono text-gray-900 leading-none">
                       ↓{Number(lastSpeedTestData.download).toFixed(1)} <span className="text-[10px] font-bold text-cyan-600">↑{Number(lastSpeedTestData.upload).toFixed(1)}</span>
                     </div>
                     <span className="text-[10px] text-gray-400 font-mono mt-0.5">
@@ -257,11 +258,11 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                   </>
                 ) : (
                   <>
-                    <div className="text-xs font-bold text-gray-400 leading-none">
-                      Belum diuji
+                    <div className="portal-body-bold font-black font-mono text-gray-900 leading-none">
+                      -
                     </div>
-                    <span className="text-[10px] text-blue-600 font-semibold group-hover:underline mt-0.5">
-                      Tes Sekarang
+                    <span className="text-[10px] text-gray-400 font-mono mt-0.5">
+                      Mbps
                     </span>
                   </>
                 )}
@@ -289,7 +290,7 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
                     style={{ background: '#2563eb' }}
                   >
-                    <Users className="w-5 h-5 text-white" />
+                    <Smartphone className="w-5 h-5 text-white" />
                   </div>
                   <span className="portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
                     Perangkat
@@ -365,7 +366,7 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                 </button>
               </div>
 
-              {/* Baris 2: Akun Saya (Sejajar di Kolom 1 Pojok Kiri Persis Bawah Perangkat) */}
+              {/* Baris 2: Profil Pelanggan (Sejajar di Kolom 1 Pojok Kiri Persis Bawah Perangkat) */}
               <div className="grid grid-cols-5 gap-1 sm:gap-2 pt-1">
                 <button
                   type="button"
@@ -376,10 +377,10 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
                     style={{ background: '#2563eb' }}
                   >
-                    <ShieldCheck className="w-5 h-5 text-white" />
+                    <User className="w-5 h-5 text-white" />
                   </div>
                   <span className="portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
-                    Akun
+                    Profil
                   </span>
                 </button>
               </div>

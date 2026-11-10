@@ -421,7 +421,7 @@ export function DashboardView({
             value: kpi.total_monitored,
             colorScheme: 'cyan',
             onClick: () => onNavigate('pelanggan', { status: 'ALL' }),
-            subLabel: kpi.monitored_inactive > 0 ? `(${kpi.monitored_inactive} OFF)` : 'Modem'
+            subLabel: kpi.offline !== undefined && kpi.offline !== null ? `${kpi.offline} Offline` : (kpi.monitored_inactive > 0 ? `(${kpi.monitored_inactive} OFF)` : 'Modem')
           },
           {
             label: 'Optimal',

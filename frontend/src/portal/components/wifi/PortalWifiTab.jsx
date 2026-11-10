@@ -294,7 +294,7 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
               >
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center">
-                    <Users className="w-3.5 h-3.5" />
+                    <Smartphone className="w-3.5 h-3.5" />
                   </div>
                   <span>Lihat Siapa Saja Yang Terhubung</span>
                 </div>

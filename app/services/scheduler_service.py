@@ -39,6 +39,7 @@ class ONTSchedulerService:
     cleanup_old_logs = classmethod(lambda cls, db, days=30: SchedulerStateManager.cleanup_old_logs(db, days))
     cleanup_alert_logs = classmethod(lambda cls, days=7: SchedulerStateManager.cleanup_alert_logs(days))
     cleanup_activity_logs = classmethod(lambda cls, days=60: SchedulerStateManager.cleanup_activity_logs(days))
+    cleanup_old_tickets = classmethod(lambda cls, days=90: SchedulerStateManager.cleanup_old_tickets(days))
     get_setting_from_db = classmethod(lambda cls, db, key, default=None, kantor=None: SchedulerRecoveryManager.get_setting_from_db(db, key, default, kantor))
     set_setting_in_db = classmethod(lambda cls, db, key, val, kantor=None: SchedulerRecoveryManager.set_setting_in_db(db, key, val, kantor))
     check_office_configuration = classmethod(lambda cls, db, kantor=None: SchedulerRecoveryManager.check_office_configuration(db, kantor))
@@ -85,6 +86,16 @@ class ONTSchedulerService:
             hour=10,
             minute=0,
             id="daily_billing_reminder",
+            replace_existing=True
+        )
+
+        # Job Pembersihan Tiket SELESAI (> 90 hari / 3 bulan) & Log Lama Harian Tiap Jam 01:00 WIB
+        self.scheduler.add_job(
+            self.daily_maintenance_cleanup_job_wrapper,
+            "cron",
+            hour=1,
+            minute=0,
+            id="daily_maintenance_cleanup",
             replace_existing=True
         )
 
@@ -166,6 +177,25 @@ class ONTSchedulerService:
                     logger.debug(f"[BILLING_REMINDER] Error periksa tagihan kantor {k.nama}: {e}")
         finally:
             m_db.close()
+
+    def daily_maintenance_cleanup_job_wrapper(self):
+        """Menjalankan pembersihan otomatis berkala: tiket selesai > 90 hari, alert logs > 7 hari, logs ont > 30 hari"""
+        logger.info("[MAINTENANCE_CLEANUP] Memulai pembersihan berkala sistem...")
+        try:
+            # 1. Hapus tiket kendala SELESAI yang berusia lebih dari 90 hari (3 bulan)
+            del_tickets = SchedulerStateManager.cleanup_old_tickets(days=90)
+            # 2. Hapus alert logs yang berusia lebih dari 7 hari
+            del_alerts = SchedulerStateManager.cleanup_alert_logs(days=7)
+            # 3. Hapus user activity logs yang berusia lebih dari 60 hari
+            del_activities = SchedulerStateManager.cleanup_activity_logs(days=60)
+            logger.info(
+                f"[MAINTENANCE_CLEANUP] Pembersihan selesai: "
+                f"{del_tickets} tiket SELESAI (> 90 hari), "
+                f"{del_alerts} alert logs (> 7 hari), "
+                f"{del_activities} audit logs (> 60 hari)."
+            )
+        except Exception as e:
+            logger.error(f"[MAINTENANCE_CLEANUP] Terjadi kendala saat pembersihan berkala: {e}")
 
     def update_interval(self, minutes: int, kantor: Optional[str] = None):
         """Mengubah interval menit scanning"""

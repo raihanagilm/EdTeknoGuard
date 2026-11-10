@@ -13,7 +13,7 @@ from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 
 from app.core.timezone import get_now_wib
-from app.db.models import LogPerformaONT, AlertLog, UserActivityLog, Kantor
+from app.db.models import LogPerformaONT, AlertLog, UserActivityLog, TiketKendala, Kantor
 from app.core.tenant_database import TenantDatabaseManager
 
 logger = logging.getLogger("scheduler_state")
@@ -148,4 +148,33 @@ class SchedulerStateManager:
             return 0
         finally:
             master_db.close()
+
+    @classmethod
+    def cleanup_old_tickets(cls, days: int = 90) -> int:
+        """Menghapus tiket_kendala berstatus SELESAI yang berusia lebih dari X hari (3 bulan) di seluruh tenant DB"""
+        total_deleted = 0
+        cutoff = get_now_wib() - timedelta(days=days)
+        master_db = TenantDatabaseManager.get_tenant_session(None)
+        try:
+            kantors = master_db.query(Kantor).filter(Kantor.is_active == True).all()
+            for k in kantors:
+                try:
+                    t_db = TenantDatabaseManager.get_tenant_session(k.kode)
+                    try:
+                        deleted = t_db.query(TiketKendala).filter(
+                            TiketKendala.status == "SELESAI",
+                            TiketKendala.created_at < cutoff
+                        ).delete(synchronize_session=False)
+                        t_db.commit()
+                        if deleted > 0:
+                            total_deleted += deleted
+                            logger.info(f"[CLEANUP] Berhasil menghapus {deleted} tiket SELESAI (> 90 hari) di kantor {k.nama}.")
+                    finally:
+                        t_db.close()
+                except Exception as e:
+                    logger.error(f"[CLEANUP] Gagal membersihkan tiket lama untuk kantor {k.nama}: {e}")
+        finally:
+            master_db.close()
+        return total_deleted
+
 

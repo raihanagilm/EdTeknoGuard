@@ -730,3 +730,5 @@ PersistentKeepalive = 25
 
 🛡️ **EdTeknoGuard & MyTekno Portal siap beroperasi 24/7 di https://portal.teknoindo.net/**.
 
+#Update sever
+cd /home/tekno/edteknoguard && git pull origin main && cd frontend && npm run build && cd .. && sudo systemctl restart edteknoguard

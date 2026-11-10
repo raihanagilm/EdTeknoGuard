@@ -428,6 +428,15 @@ class CustomerService:
         monitored_inactive = base_q.filter(Pelanggan.is_monitored == False).count()
         total_all = base_q.count()
 
+        # Hitung pelanggan dengan modem OFFLINE (status_lease != 'bound' atau non-monitored)
+        offline_count = base_q.filter(
+            or_(
+                Pelanggan.status_lease != "bound",
+                Pelanggan.status_lease.is_(None),
+                Pelanggan.is_monitored == False
+            )
+        ).count()
+
         total_pelanggan = total_all  # Nilai total harus sesuai dengan jumlah data pelanggan aktual di database
 
         pop_q = (
@@ -512,6 +521,7 @@ class CustomerService:
             "critical_los": critical_count + los_count,
             "monitored_active": monitored_active,
             "monitored_inactive": monitored_inactive,
+            "offline": offline_count,
             "pop_distribution": [{"pop": p[0], "count": p[1]} for p in pop_counts]
         }
 

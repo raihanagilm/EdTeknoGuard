@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Bell,
   Clock,
@@ -10,6 +10,80 @@ import {
 } from 'lucide-react';
 import { PortalKendalaService, PortalPembayaranService } from '../../services/portalApi';
 import { rupiah, periodeTeks } from '../payment/paymentUtils';
+
+function NotificationCardItem({ item, isRead, onClick, onDelete }) {
+  return (
+    <article
+      className={`p-3.5 rounded-xl border border-slate-200/80 space-y-2 shadow-2xs ${
+        isRead ? 'bg-slate-50/70 opacity-50' : 'bg-white'
+      }`}
+    >
+      {/* Baris Atas: Judul Kategori & Status Badge + Tombol Hapus */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          {!isRead && (
+            <Bell className="w-3 h-3 text-blue-600 shrink-0" title="Belum dibaca" />
+          )}
+          <span className="text-[12px] font-bold text-slate-800 truncate">
+            {item.title}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <span
+            className={`text-[11px] font-bold tracking-wide ${
+              item.statusType === 'success'
+                ? 'text-emerald-600'
+                : item.statusType === 'warning'
+                ? 'text-amber-600'
+                : 'text-rose-600'
+            }`}
+          >
+            {item.statusText}
+          </span>
+
+          {/* Tombol Hapus Tunggal per Notifikasi (Hanya Ikon Tong Sampah Bersih) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(item);
+            }}
+            className="p-1 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+            title="Hapus Pemberitahuan Ini"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Isi Pesan Notifikasi */}
+      <p className="portal-body-normal text-gray-700 leading-relaxed">
+        {item.desc}
+      </p>
+
+      {/* Baris Bawah: Waktu & Link Aksi */}
+      <div className="pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-gray-500 font-mono">
+        <span className="flex items-center gap-1 text-[11px]">
+          <Clock className="w-3.5 h-3.5 text-gray-400" />
+          {item.timestamp}
+        </span>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick(item);
+          }}
+          className="font-bold text-blue-600 inline-flex items-center gap-0.5 hover:underline cursor-pointer"
+        >
+          <span>{item.actionText}</span>
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </article>
+  );
+}
 
 function formatRelativeTime(dateString) {
   if (!dateString) return 'Baru saja';
@@ -60,6 +134,7 @@ export function PortalNotificationsPage({
   });
 
   const [notifToDelete, setNotifToDelete] = useState(null);
+  const [showClearAllModal, setShowClearAllModal] = useState(false);
   const [deletedIds, setDeletedIds] = useState(() => {
     try {
       const saved = localStorage.getItem('teknocust_deleted_notifications');
@@ -214,6 +289,25 @@ export function PortalNotificationsPage({
     }
   }, [notificationList]);
 
+  const handleClearReadNotifications = () => {
+    setShowClearAllModal(true);
+  };
+
+  const handleConfirmClearAll = () => {
+    const readItems = notificationList.filter((it) => readIds.includes(it.id));
+    if (readItems.length > 0) {
+      const readItemIds = readItems.map((it) => it.id);
+      const next = Array.from(new Set([...deletedIds, ...readItemIds]));
+      setDeletedIds(next);
+      try {
+        localStorage.setItem('teknocust_deleted_notifications', JSON.stringify(next));
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    setShowClearAllModal(false);
+  };
+
   const handlePromptDelete = (e, item) => {
     e.stopPropagation();
     setNotifToDelete(item);
@@ -302,11 +396,20 @@ export function PortalNotificationsPage({
                 </div>
               </div>
 
-              {notificationList.length > 0 && (
-                <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
+              {notificationList.some((it) => readIds.includes(it.id)) ? (
+                <button
+                  type="button"
+                  onClick={handleClearReadNotifications}
+                  className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition flex items-center justify-center cursor-pointer shrink-0"
+                  title="Hapus seluruh pemberitahuan yang sudah dibaca"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              ) : notificationList.length > 0 ? (
+                <span className="text-xs font-bold text-blue-700 font-mono shrink-0">
                   {notificationList.length} Notif
                 </span>
-              )}
+              ) : null}
             </div>
 
             {/* List Notifikasi */}
@@ -342,73 +445,21 @@ export function PortalNotificationsPage({
                 notificationList.map((item) => {
                   const isRead = readIds.includes(item.id);
                   return (
-                    <article
+                    <NotificationCardItem
                       key={item.id}
-                      onClick={() => handleItemClick(item)}
-                      className="p-3.5 bg-slate-50/70 hover:bg-blue-50/40 rounded-xl border border-slate-200/80 space-y-2 transition cursor-pointer"
-                    >
-                      {/* Baris Atas: Judul Kategori & Status Badge + Status Dibaca + Tombol Hapus */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          {!isRead && (
-                            <Bell className="w-3 h-3 text-blue-600 shrink-0" title="Belum dibaca" />
-                          )}
-                          <span className="text-[12px] font-bold text-slate-800 truncate">
-                            {item.title}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span
-                            className={`text-[10px] font-semibold tracking-wide ${
-                              isRead ? 'text-slate-400' : 'text-blue-600 font-bold'
-                            }`}
-                          >
-                            {isRead ? 'Sudah Dibaca' : 'Baru'}
-                          </span>
-
-                          <span
-                            className={`text-[11px] font-bold tracking-wide ${
-                              item.statusType === 'success'
-                                ? 'text-emerald-600'
-                                : item.statusType === 'warning'
-                                ? 'text-amber-600'
-                                : 'text-rose-600'
-                            }`}
-                          >
-                            {item.statusText}
-                          </span>
-
-                          {/* Tombol Hapus Tunggal per Notifikasi */}
-                          <button
-                            type="button"
-                            onClick={(e) => handlePromptDelete(e, item)}
-                            className="p-1 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
-                            title="Hapus Pemberitahuan Ini"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Isi Pesan Notifikasi */}
-                      <p className="portal-body-normal text-gray-700 leading-relaxed">
-                        {item.desc}
-                      </p>
-
-                      {/* Baris Bawah: Waktu & Link Aksi */}
-                      <div className="pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-gray-500 font-mono">
-                        <span className="flex items-center gap-1 text-[11px]">
-                          <Clock className="w-3.5 h-3.5 text-gray-400" />
-                          {item.timestamp}
-                        </span>
-
-                        <span className="font-bold text-blue-600 inline-flex items-center gap-0.5 hover:underline">
-                          <span>{item.actionText}</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </span>
-                      </div>
-                    </article>
+                      item={item}
+                      isRead={isRead}
+                      onClick={handleItemClick}
+                      onDelete={(it) => {
+                        const next = [...deletedIds, it.id];
+                        setDeletedIds(next);
+                        try {
+                          localStorage.setItem('teknocust_deleted_notifications', JSON.stringify(next));
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                    />
                   );
                 })
               )}
@@ -416,7 +467,7 @@ export function PortalNotificationsPage({
           </section>
         </div>
       </main>
-      {/* Modal Konfirmasi Hapus Notifikasi */}
+      {/* Modal Konfirmasi Hapus Notifikasi Tunggal */}
       {notifToDelete && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
           <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
@@ -443,6 +494,39 @@ export function PortalNotificationsPage({
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <span>Ya, Hapus</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Hapus Semua Notifikasi yang Sudah Dibaca */}
+      {showClearAllModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
+          <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
+            <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-sm font-bold text-gray-900">Hapus Semua Notifikasi?</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Seluruh pemberitahuan yang sudah dibaca akan dihapus dari daftar Anda.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowClearAllModal(false)}
+                className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmClearAll}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <span>Ya, Hapus Semua</span>
               </button>
             </div>
           </div>

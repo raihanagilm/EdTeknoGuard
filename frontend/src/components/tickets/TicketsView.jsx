@@ -271,13 +271,13 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
         onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
         loading={loading}
       >
-        <table className="w-full text-left border-collapse table-auto md:table-fixed">
+        <table className="w-full text-left border-collapse table-auto">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
-              <th className="py-2.5 px-3 w-12 text-center">No</th>
+              <th className="py-2.5 px-3 w-12 text-center whitespace-nowrap">No</th>
               <th
                 onClick={() => handleSort('id_tiket')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-36"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap"
               >
                 <div className="flex items-center gap-1">
                   <span>No. Tiket / Waktu</span>
@@ -290,7 +290,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
               </th>
               <th
                 onClick={() => handleSort('nama_pelanggan')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-44"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap"
               >
                 <div className="flex items-center gap-1">
                   <span>Pelanggan</span>
@@ -303,7 +303,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
               </th>
               <th
                 onClick={() => handleSort('kategori')}
-                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-44"
+                className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap"
               >
                 <div className="flex items-center gap-1">
                   <span>Kategori Kendala</span>
@@ -314,10 +314,10 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3">Deskripsi Keluhan</th>
+              <th className="py-2.5 px-3 whitespace-nowrap min-w-[200px]">Deskripsi Keluhan</th>
               <th
                 onClick={() => handleSort('redaman_saat_lapor')}
-                className="py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none w-32"
+                className="py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap"
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Rx Saat Lapor</span>
@@ -330,7 +330,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
               </th>
               <th
                 onClick={() => handleSort('status')}
-                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none w-32"
+                className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap"
               >
                 <div className="flex items-center justify-center gap-1">
                   <span>Status</span>
@@ -341,7 +341,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3 text-right w-24">Aksi</th>
+              <th className="py-2.5 px-3 text-right whitespace-nowrap w-24">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">

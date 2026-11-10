@@ -83,6 +83,13 @@ class MonitoringService:
         total_all = q_all.count()
         monitored_active = q_all.filter(Pelanggan.is_monitored == True).count()
         monitored_inactive = total_all - monitored_active
+        offline_count = q_all.filter(
+            or_(
+                Pelanggan.status_lease != "bound",
+                Pelanggan.status_lease.is_(None),
+                Pelanggan.is_monitored == False
+            )
+        ).count()
 
         subq_query = (
             db.query(
@@ -157,6 +164,7 @@ class MonitoringService:
             "total_all": total_all,
             "monitored_active": monitored_active,
             "monitored_inactive": monitored_inactive,
+            "offline": offline_count,
             "normal": normal_count,
             "warning": warning_count,
             "critical": critical_count,
