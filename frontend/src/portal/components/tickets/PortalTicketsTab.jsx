@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   AlertCircle,
   Plus,
@@ -61,11 +61,13 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
     e.preventDefault();
     setSubmitting(true);
 
+    const targetWa = customer?.no_hp || customer?.no_wa || noWa || '';
+
     try {
       const res = await PortalKendalaService.create({
         kategori,
         deskripsi,
-        no_wa: noWa
+        no_wa: targetWa
       });
       if (res.ok && res.data.ok) {
         showToast('Keluhan Anda berhasil dikirim ke teknisi piket NOC!', 'success', 'Tiket Terkirim');
@@ -296,7 +298,7 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
 
       {/* Modal Konfirmasi Hapus Tiket */}
       {ticketToDelete && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
           <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
             <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-5 h-5" />
@@ -330,7 +332,7 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
 
       {/* Modal Buat Tiket */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
           <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
               <div className="flex items-center gap-2">
@@ -359,20 +361,9 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                   <option value="Lampu Modem Merah (LOS)">Lampu Modem Merah (LOS)</option>
                   <option value="Modem Mati Total / Tidak Menyala">Modem Mati Total / Tidak Menyala</option>
                   <option value="Jangkauan Sinyal WiFi Lemah">Jangkauan Sinyal WiFi Lemah</option>
-                  <option value="Kendala Tagihan / Lainnya">Kendala Tagihan / Lainnya</option>
+                  <option value="Kendala Tagihan">Kendala Tagihan</option>
+                  <option value="Lainnya">Lainnya</option>
                 </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-slate-700 block">Nomor WhatsApp Pelapor</label>
-                <input
-                  type="text"
-                  required
-                  value={noWa}
-                  onChange={(e) => setNoWa(e.target.value)}
-                  placeholder="08123456789"
-                  className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition"
-                />
               </div>
 
               <div className="space-y-1.5">

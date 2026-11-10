@@ -39,6 +39,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
     }
   }, [initialSearch]);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [activeMenuId, setActiveMenuId] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [catatan, setCatatan] = useState('');
   const [updating, setUpdating] = useState(false);
@@ -81,6 +82,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
   useEffect(() => {
     fetchTickets();
     setPage(1);
+    setActiveMenuId(null);
   }, [filterStatus, activeOffice]);
 
   const handleOpenModal = (ticket) => {
@@ -435,43 +437,71 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                       <span className="text-slate-400 font-mono text-xs">-</span>
                     ) : (
                       <div className="relative inline-block text-left">
-                        <div className="relative group">
-                          <button
-                            type="button"
-                            className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
-                            title="Pilihan Aksi"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                          </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveMenuId(activeMenuId === t.id_tiket ? null : t.id_tiket);
+                          }}
+                          className={`p-1 rounded-lg border transition cursor-pointer ${
+                            activeMenuId === t.id_tiket
+                              ? 'bg-cyan-50 border-cyan-300 text-cyan-700'
+                              : 'hover:bg-slate-100 text-slate-600 border-slate-200'
+                          }`}
+                          title="Pilihan Aksi"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                        </button>
 
-                          <div className="hidden group-hover:block hover:block absolute right-0 top-full pt-1 z-50 min-w-[170px]">
-                            <div className="bg-white rounded-xl shadow-xl border border-sky-200 py-1 font-mono text-xs">
-                              <button
-                                onClick={() => handleOpenModal(t)}
-                                className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition"
-                              >
-                                <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                                <span>Kelola Status</span>
-                              </button>
-                              {t.no_wa && (() => {
-                                const cleanWa = t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62');
-                                const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`;
+                        {activeMenuId === t.id_tiket && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-40"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(null);
+                              }}
+                            />
+                            <div
+                              className={`absolute right-0 z-50 min-w-[170px] ${
+                                idx >= Math.max(0, paginatedTickets.length - 2)
+                                  ? 'bottom-full mb-1.5'
+                                  : 'top-full mt-1.5'
+                              }`}
+                            >
+                              <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    handleOpenModal(t);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                  <span>Kelola Status</span>
+                                </button>
+                                {t.no_wa && (() => {
+                                  const cleanWa = t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62');
+                                  const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`;
 
-                                return (
-                                  <a
-                                    href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold"
-                                  >
-                                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span>Hubungi WA</span>
-                                  </a>
-                                );
-                              })()}
+                                  return (
+                                    <a
+                                      href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={() => setActiveMenuId(null)}
+                                      className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold"
+                                    >
+                                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span>Hubungi WA</span>
+                                    </a>
+                                  );
+                                })()}
+                              </div>
                             </div>
-                          </div>
-                        </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </td>

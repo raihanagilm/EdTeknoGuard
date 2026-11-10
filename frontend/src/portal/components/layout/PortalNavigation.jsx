@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   Home,
   AlertCircle,
@@ -34,7 +34,7 @@ export function PortalNavbar({ customer }) {
 
 export function PortalBottomNav({ activeTab, onTabChange }) {
   return (
-    <nav className="sticky bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 shrink-0 pb-[max(env(safe-area-inset-bottom,0px),12px)] shadow-[0_-4px_12px_rgba(0,0,0,0.05)] overflow-visible overflow-x-clip select-none">
+    <nav className="sticky bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 z-30 shrink-0 pb-[max(env(safe-area-inset-bottom,0px),12px)] shadow-[0_-4px_12px_rgba(0,0,0,0.05)] overflow-visible overflow-x-clip select-none">
       <div className="grid grid-cols-5 h-14 items-center px-1 overflow-visible">
         {/* 1. Kendala */}
         <button

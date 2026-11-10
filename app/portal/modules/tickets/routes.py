@@ -44,10 +44,10 @@ async def portal_kendala_create(request: Request, db: Session = Depends(get_port
     body = await request.json()
     kategori = body.get("kategori", "").strip()
     deskripsi = body.get("deskripsi", "").strip()
-    no_wa = body.get("no_wa", "").strip()
+    no_wa = body.get("no_wa", "").strip() or str(cust.get("no_hp") or "").strip()
     
-    if not kategori or not deskripsi or not no_wa:
-        return JSONResponse(status_code=400, content={"ok": False, "message": "Semua bidang formulir wajib diisi!"})
+    if not kategori or not deskripsi:
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Kategori dan rincian keluhan wajib diisi!"})
         
     ticket = KendalaService.create_ticket(
         db=db,
