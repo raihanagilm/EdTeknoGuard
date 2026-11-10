@@ -128,13 +128,13 @@ export function PortalCustomerApp() {
 
         // Picu Notifikasi Native (Android Bridge)
         if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
-          // 1. Notifikasi Khusus LOS (Kabel Putus / Gangguan Jaringan) kepada Pelanggan
+          // 1. Notifikasi Status Sinyal / Gangguan Jaringan (LOS & Pemulihan Kembali Normal)
           const lastLogConn = dashboardData?.last_log?.status_koneksi?.toUpperCase?.();
           const alertedLosKey = 'mytekno_alerted_los_status';
-          const lastAlertedLos = sessionStorage.getItem(alertedLosKey);
+          const lastAlertedStatus = sessionStorage.getItem(alertedLosKey);
 
           if (lastLogConn === 'LOS') {
-            if (lastAlertedLos !== 'LOS') {
+            if (lastAlertedStatus !== 'LOS') {
               sessionStorage.setItem(alertedLosKey, 'LOS');
               try {
                 window.AndroidBridge.showNativeNotification(
@@ -145,7 +145,19 @@ export function PortalCustomerApp() {
               } catch (_) {}
             }
           } else if (lastLogConn && lastLogConn !== 'LOS') {
-            sessionStorage.removeItem(alertedLosKey);
+            // Jika sebelumnya pernah mengalami LOS dan sekarang sudah kembali pulih/normal
+            if (lastAlertedStatus === 'LOS') {
+              sessionStorage.setItem(alertedLosKey, 'NORMAL');
+              try {
+                window.AndroidBridge.showNativeNotification(
+                  'Koneksi Internet Telah Pulih',
+                  'Koneksi internet Anda telah kembali normal dan aktif. Terima kasih atas kesabaran Anda telah menggunakan layanan kami!',
+                  false
+                );
+              } catch (_) {}
+            } else if (!lastAlertedStatus) {
+              sessionStorage.setItem(alertedLosKey, lastLogConn);
+            }
           }
 
           // 2. Notifikasi jika status tiket pelanggan berubah
