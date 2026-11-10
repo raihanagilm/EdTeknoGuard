@@ -206,7 +206,7 @@ inner class WebAppInterface(private val activity: Activity, private val webView:
         } else {
             EdTeknoBackgroundService.CHANNEL_CUSTOMER_ID
         }
-        val notification = NotificationCompat.Builder(activity as Context, channelId)
+        val builder = NotificationCompat.Builder(activity as Context, channelId)
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -215,7 +215,30 @@ inner class WebAppInterface(private val activity: Activity, private val webView:
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .build()
+
+        // Khusus MyTekno: Avatar Maskot Dinamis (terkejut untuk LOS, berhasil untuk selesai/pulih, teknisi untuk ditangani teknisi, admin untuk ditangani admin, customer untuk menunggu)
+        if (!isEmergency) {
+            try {
+                val textCombined = "$title $message".lowercase()
+                val mascotResId = when {
+                    textCombined.contains("selesai") || textCombined.contains("normal") || textCombined.contains("pulih") || textCombined.contains("kembali lancar") || textCombined.contains("aktif kembali") || textCombined.contains("berhasil") -> R.drawable.mascot_berhasil
+                    textCombined.contains("teknisi") || textCombined.contains("lapangan") || textCombined.contains("diproses") -> R.drawable.mascot_teknisi
+                    textCombined.contains("admin") || textCombined.contains("verifikasi") || textCombined.contains("dicek") || textCombined.contains("cs") || textCombined.contains("layanan") -> R.drawable.mascot_admin
+                    textCombined.contains("kabel") || textCombined.contains("dropcore") || textCombined.contains("patchcord") -> R.drawable.mascot_atur_kabel
+                    textCombined.contains("los") || textCombined.contains("gangguan") || textCombined.contains("terputus") || textCombined.contains("kritis") -> R.drawable.mascot_terkejut
+                    textCombined.contains("menunggu") || textCombined.contains("laporan terkirim") -> R.drawable.mascot_customer
+                    else -> R.drawable.mascot_customer
+                }
+                val mascotBitmap = android.graphics.BitmapFactory.decodeResource(activity.resources, mascotResId)
+                if (mascotBitmap != null) {
+                    builder.setLargeIcon(mascotBitmap)
+                }
+            } catch (e: Exception) {
+                // Ignore decoding error
+            }
+        }
+
+        val notification = builder.build()
         val manager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(System.currentTimeMillis().toInt(), notification)
     }
