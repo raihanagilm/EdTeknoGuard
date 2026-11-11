@@ -52,10 +52,13 @@ class NotificationService:
 
         # -------------------------------------------------------------
         # 1. TIKET KELUHAN PELANGGAN (Persisten jika belum SELESAI/DIBATALKAN)
+        # Sesuai SOP Multi-Kantor: Isolasi tiket mengikuti kantor aktif yang dipilih
         # -------------------------------------------------------------
         tiket_q = db.query(TiketKendala).filter(TiketKendala.status.in_(["MENUNGGU", "DIPROSES"]))
-        if user_role != "super admin" and kantor and kantor != "all":
+        if kantor and kantor != "all":
             tiket_q = tiket_q.filter(TiketKendala.kantor == kantor)
+        elif user_role != "super admin" and user_allowed_kantors:
+            tiket_q = tiket_q.filter(TiketKendala.kantor.in_(user_allowed_kantors))
 
         all_active_tickets = tiket_q.order_by(TiketKendala.created_at.desc()).all()
         # Filter tiket yang sudah dibaca user ini (jika user sudah baca & status belum berubah, tetap bisa di-dismiss)
