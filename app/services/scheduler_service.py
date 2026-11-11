@@ -167,10 +167,30 @@ class ONTSchedulerService:
                     t_db = TenantDatabaseManager.get_tenant_session(k.kode)
                     try:
                         from app.db.models import Pelanggan
+                        from app.services.fcm_service import send_push_notification
+
                         unpaid_customers = t_db.query(Pelanggan).filter(
                             (Pelanggan.status_pembayaran == 'BELUM_BAYAR')
                         ).all()
                         logger.info(f"[BILLING_REMINDER] Kantor {k.nama}: {len(unpaid_customers)} pelanggan belum lunas tercatat pada audit harian.")
+
+                        unpaid_tokens = [p.fcm_token.strip() for p in unpaid_customers if p.fcm_token and p.fcm_token.strip()]
+                        if unpaid_tokens:
+                            try:
+                                send_push_notification(
+                                    tokens=unpaid_tokens,
+                                    title="Pengingat Tagihan Internet",
+                                    body="Tagihan internet bulanan Anda telah jatuh tempo. Mohon lakukan pembayaran agar layanan tetap aktif dan lancar.",
+                                    data={
+                                        "target_tab": "pembayaran",
+                                        "level": "warning",
+                                        "type": "billing_reminder"
+                                    },
+                                    channel_id="tekno_customer_channel"
+                                )
+                                logger.info(f"[BILLING_REMINDER] Berhasil kirim pengingat tagihan ke {len(unpaid_tokens)} pelanggan via FCM.")
+                            except Exception as fcm_err:
+                                logger.warning(f"[BILLING_REMINDER] Gagal push notifikasi tagihan: {fcm_err}")
                     finally:
                         t_db.close()
                 except Exception as e:

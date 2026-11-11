@@ -87,7 +87,25 @@ export function PortalCustomerApp() {
       }
     };
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+
+    // Daftarkan window.navigateToTab untuk navigasi deep-linking notifikasi Android
+    window.navigateToTab = (tab = 'beranda') => {
+      const normalizedTab = String(tab).toLowerCase();
+      if (normalizedTab === 'tiket' || normalizedTab === 'kendala') {
+        switchTab('kendala');
+      } else if (normalizedTab === 'pembayaran' || normalizedTab === 'tagihan' || normalizedTab === 'payment') {
+        switchTab('pembayaran');
+      } else if (['wifi', 'kuota', 'profil', 'notifikasi', 'beranda'].includes(normalizedTab)) {
+        switchTab(normalizedTab);
+      } else {
+        switchTab('beranda');
+      }
+    };
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      delete window.navigateToTab;
+    };
   }, []);
 
   const fetchSession = async () => {
@@ -99,6 +117,25 @@ export function PortalCustomerApp() {
         setCustomer(res.data.customer);
         setViewState('app');
         fetchDashboard();
+
+        // Sinkronisasi Token FCM dari Android Bridge ke Database Pelanggan
+        if (window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === 'function') {
+          try {
+            const token = window.AndroidBridge.getFcmToken();
+            if (token && token.length > 20) {
+              const lastSyncedToken = sessionStorage.getItem('mytekno_synced_fcm_token');
+              if (lastSyncedToken !== token) {
+                fetch('/portal/api/auth/register-fcm', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ fcm_token: token })
+                }).then(r => {
+                  if (r.ok) sessionStorage.setItem('mytekno_synced_fcm_token', token);
+                }).catch(() => {});
+              }
+            }
+          } catch (_) {}
+        }
       } else {
         setIsAuthenticated(false);
         setViewState('login');

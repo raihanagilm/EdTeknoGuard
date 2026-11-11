@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.core.security import get_current_user_optional, get_active_kantor
 from app.core.tenant_database import TenantDatabaseManager
 from app.modules.notifications.service import NotificationService
+from app.db.models import User
 
 router = APIRouter(tags=["notifications"])
 
@@ -147,6 +148,7 @@ def snooze_pause_reminder(request: Request, db: Session = Depends(get_db)):
     return {"status": "success", "message": "Pengingat jeda ditunda 1 jam."}
 
 
+@router.post("/api/notifications/register-fcm")
 @router.post("/register-fcm")
 def register_fcm_token(
     request: Request,

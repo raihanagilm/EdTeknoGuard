@@ -183,9 +183,10 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 transition cursor-pointer"
+                    title="Hapus Pencarian"
                   >
-                    ✕
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
@@ -343,9 +344,10 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-xs font-bold p-1 cursor-pointer"
+                className="text-gray-400 hover:text-gray-600 p-1 transition cursor-pointer"
+                title="Tutup Modal"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 

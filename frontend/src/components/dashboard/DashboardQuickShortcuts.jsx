@@ -6,115 +6,119 @@ import {
   Ticket,
   ScrollText,
   Building2,
-  Sliders,
-  Sparkles
+  Sliders
 } from 'lucide-react'
 
+/**
+ * DashboardQuickShortcuts (Impeccable Refactor)
+ * Mode: Operate (Mission-Control Telemetry Grid)
+ * - Anti-Slop: Zero sparkles/kicker tropes, zero pseudo-monospace on natural copy
+ * - Tactile Feedback: Crisp border definition with subtle hover elevation
+ * - Maintainable: DRY mapped array under 80 lines
+ */
 export function DashboardQuickShortcuts({
   currentUser,
   onNavigate,
   unreadTicketsCount = 0
 }) {
   const isSuperAdmin = currentUser?.role === 'super admin'
+  const isTeknisi = currentUser?.role === 'teknisi'
+
+  const shortcuts = [
+    {
+      id: 'pelanggan',
+      label: 'Pelanggan',
+      icon: Users,
+      show: true,
+      onClick: () => onNavigate('pelanggan')
+    },
+    {
+      id: 'riwayat',
+      label: 'Riwayat',
+      icon: History,
+      show: true,
+      onClick: () => onNavigate('riwayat')
+    },
+    {
+      id: 'kuota',
+      label: 'Kuota',
+      icon: Activity,
+      show: true,
+      onClick: () => onNavigate('kuota')
+    },
+    {
+      id: 'tiket',
+      label: 'Tiket',
+      icon: Ticket,
+      show: true,
+      badge: unreadTicketsCount,
+      onClick: () => onNavigate('tiket')
+    },
+    {
+      id: 'log',
+      label: 'Log Sistem',
+      icon: ScrollText,
+      show: !isTeknisi,
+      onClick: () => onNavigate('log')
+    },
+    {
+      id: 'manajemen-kantor',
+      label: 'Kantor',
+      icon: Building2,
+      show: isSuperAdmin,
+      onClick: () => onNavigate('manajemen-kantor')
+    },
+    {
+      id: 'pengaturan',
+      label: 'Pengaturan',
+      icon: Sliders,
+      show: true,
+      onClick: () => onNavigate('pengaturan', isTeknisi ? 'account' : 'thresholds')
+    }
+  ].filter((item) => item.show)
 
   return (
-    <section id="dashboardQuickShortcuts" className="lg:hidden bg-white p-3 sm:p-4 rounded-2xl border border-sky-100 shadow-xs mb-3">
-      <div className="flex items-center justify-between mb-2 sm:mb-3">
-        <h3 className="font-mono text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-700" />
-          Akses Cepat Modul Utama
+    <section id="dashboardQuickShortcuts" className="lg:hidden bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/90 shadow-xs mb-3">
+      {/* Telemetry Section Header (Pure Semantic Heading - No Decorative Dot/Halo) */}
+      <div className="flex items-center justify-between mb-2.5">
+        <h3 className="text-xs font-semibold text-slate-900 tracking-tight">
+          Modul Operasional
         </h3>
-        <span className="text-[10px] sm:text-xs text-slate-600 font-mono">Pintasan Fitur</span>
+        <span className="text-[11px] text-slate-500 font-medium">
+          Akses Cepat
+        </span>
       </div>
 
-      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-7 gap-1.5 sm:gap-2">
-        {/* 1. Data Pelanggan */}
-        <button
-          onClick={() => onNavigate('pelanggan')}
-          className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
-        >
-          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-            <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Data Pelanggan</span>
-        </button>
+      {/* Tactile Fast-Action Grid */}
+      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-7 gap-2">
+        {shortcuts.map((item) => {
+          const Icon = item.icon
+          return (
+            <button
+              key={item.id}
+              onClick={item.onClick}
+              className="group relative flex flex-col items-center justify-center p-2 rounded-lg bg-slate-50/70 hover:bg-cyan-50/40 active:bg-cyan-100/50 border border-slate-200/70 hover:border-cyan-300 transition-all duration-150 text-center min-h-[62px] active:scale-[0.98] cursor-pointer"
+            >
+              {/* Icon Container with subtle high-taste contrast */}
+              <div className="h-8 w-8 rounded-md bg-white border border-slate-200/60 shadow-2xs flex items-center justify-center mb-1 text-slate-600 group-hover:text-cyan-700 group-hover:border-cyan-200 transition-colors">
+                <Icon className="w-4 h-4" />
+              </div>
 
-        {/* 2. Riwayat Redaman */}
-        <button
-          onClick={() => onNavigate('riwayat')}
-          className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
-        >
-          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-            <History className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Riwayat Redaman</span>
-        </button>
-
-        {/* 3. Pemantauan Kuota */}
-        <button
-          onClick={() => onNavigate('kuota')}
-          className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
-        >
-          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-            <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Pemantauan Kuota</span>
-        </button>
-
-        {/* 4. Tiket Keluhan */}
-        <button
-          onClick={() => onNavigate('tiket')}
-          className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center relative min-h-[58px]"
-        >
-          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition relative">
-            <Ticket className="w-4 h-4 sm:w-5 sm:h-5" />
-            {unreadTicketsCount > 0 && (
-              <span className="absolute -top-1 -right-1 px-1 py-0.2 min-w-[15px] text-center text-[9px] font-black text-white bg-rose-600 rounded-full border border-white shadow-xs">
-                {unreadTicketsCount}
+              {/* Natural Typography (No fake monospace on natural copy) */}
+              <span className="text-[11px] font-medium text-slate-700 group-hover:text-cyan-950 transition-colors tracking-tight truncate max-w-full px-0.5">
+                {item.label}
               </span>
-            )}
-          </div>
-          <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Tiket Keluhan</span>
-        </button>
 
-        {/* 5. Log Aktivitas */}
-        {currentUser?.role !== 'teknisi' && (
-          <button
-            onClick={() => onNavigate('log')}
-            className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
-          >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <ScrollText className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Log Aktivitas</span>
-          </button>
-        )}
-
-        {/* 6. Manajemen Kantor */}
-        {isSuperAdmin && (
-          <button
-            onClick={() => onNavigate('manajemen-kantor')}
-            className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
-          >
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-              <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Manajemen Kantor</span>
-          </button>
-        )}
-
-        {/* 7. Pengaturan Sistem */}
-        <button
-          onClick={() => onNavigate('pengaturan', currentUser?.role === 'teknisi' ? 'account' : 'thresholds')}
-          className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-cyan-50/50 hover:bg-cyan-100/60 border border-sky-200/60 hover:border-cyan-400 transition group text-center min-h-[58px]"
-        >
-          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center mb-1 group-hover:scale-105 transition">
-            <Sliders className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <span className="text-[9.5px] sm:text-[10.5px] font-mono font-bold text-slate-800 leading-tight">Pengaturan Sistem</span>
-        </button>
+              {/* Unread Indicator Badge */}
+              {item.badge > 0 && (
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[16px] text-center text-[9px] font-bold font-mono tabular-nums text-white bg-rose-600 rounded-full ring-2 ring-white shadow-2xs">
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
     </section>
   )
 }
-

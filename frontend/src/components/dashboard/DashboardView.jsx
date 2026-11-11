@@ -469,21 +469,21 @@ export function DashboardView({
         lastScanTime={lastScanTime}
       />
 
-      {/* 5. QUICK SHORTCUT NAVIGATION (2 ACTION CARDS DESKTOP/TABLET) */}
+      {/* 5. QUICK SHORTCUT NAVIGATION (2 ACTION CARDS DESKTOP/TABLET - IMPECCABLE LIGHT) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <button
           onClick={() => onNavigate('pelanggan')}
-          className="rounded-2xl p-4 bg-white hover:bg-sky-50/40 border border-sky-200 transition-colors flex items-center justify-between group text-left cursor-pointer"
+          className="rounded-xl p-4 bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-cyan-300 shadow-xs hover:shadow-xs transition-all duration-150 flex items-center justify-between group text-left cursor-pointer active:scale-[0.99]"
         >
           <div className="flex items-center gap-3.5">
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center group-hover:bg-cyan-700 group-hover:text-white transition-colors shrink-0">
+            <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200/70 text-slate-700 group-hover:text-cyan-700 group-hover:border-cyan-200 flex items-center justify-center transition-colors shrink-0 shadow-2xs">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono group-hover:text-cyan-900 transition-colors">
+              <h3 className="text-sm font-semibold text-slate-900 tracking-tight group-hover:text-cyan-950 transition-colors">
                 Kelola Master Pelanggan
               </h3>
-              <p className="text-xs text-slate-600 font-medium">Tabel seluruh modem ONT, filter POP/Kantor, dan live probe</p>
+              <p className="text-xs text-slate-500 font-normal mt-0.5">Tabel seluruh modem ONT, filter POP/Kantor, dan live probe</p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition-transform shrink-0" />
@@ -491,17 +491,17 @@ export function DashboardView({
 
         <button
           onClick={() => onNavigate('tiket')}
-          className="rounded-2xl p-4 bg-white hover:bg-sky-50/40 border border-sky-200 transition-colors flex items-center justify-between group text-left cursor-pointer"
+          className="rounded-xl p-4 bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-cyan-300 shadow-xs hover:shadow-xs transition-all duration-150 flex items-center justify-between group text-left cursor-pointer active:scale-[0.99]"
         >
           <div className="flex items-center gap-3.5">
-            <div className="h-10 w-10 rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center group-hover:bg-cyan-700 group-hover:text-white transition-colors shrink-0">
+            <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200/70 text-slate-700 group-hover:text-cyan-700 group-hover:border-cyan-200 flex items-center justify-center transition-colors shrink-0 shadow-2xs">
               <Ticket className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono group-hover:text-cyan-900 transition-colors">
+              <h3 className="text-sm font-semibold text-slate-900 tracking-tight group-hover:text-cyan-950 transition-colors">
                 Tiket Keluhan Pelanggan
               </h3>
-              <p className="text-xs text-slate-600 font-medium">Pantau laporan aduan warga desa dan update status penanganan</p>
+              <p className="text-xs text-slate-500 font-normal mt-0.5">Pantau laporan aduan warga desa dan update status penanganan</p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition-transform shrink-0" />

@@ -503,28 +503,28 @@ export function CustomerImportWizard({
         const msg = data.message || 'Data pelanggan berhasil disimpan ke database!'
         setImportSuccess(msg)
         if (isBackgroundRef.current) {
-          if (onNotify) onNotify(`✅ ${msg}`, 'success')
+          if (onNotify) onNotify(msg, 'success')
           if (onSuccess) onSuccess()
         } else {
           setTimeout(() => {
             resetWizardState()
             onClose()
             if (onSuccess) onSuccess()
-            if (onNotify) onNotify(`✅ ${msg}`, 'success')
+            if (onNotify) onNotify(msg, 'success')
           }, 800)
         }
       } else {
         const errMsg = data.detail || data.message || 'Gagal menyimpan data import ke database.'
         setImportError(errMsg)
         if (isBackgroundRef.current && onNotify) {
-          onNotify(`❌ ${errMsg}`, 'error')
+          onNotify(errMsg, 'error')
         }
       }
     } catch (err) {
       const errMsg = 'Gagal menghubungkan ke backend untuk eksekusi import.'
       setImportError(errMsg)
       if (isBackgroundRef.current && onNotify) {
-        onNotify(`❌ ${errMsg}`, 'error')
+        onNotify(errMsg, 'error')
       }
     } finally {
       setImportLoading(false)

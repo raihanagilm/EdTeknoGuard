@@ -712,9 +712,10 @@ export function UsersView() {
               </h3>
               <button
                 onClick={() => setModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 transition cursor-pointer"
+                title="Tutup Modal"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 

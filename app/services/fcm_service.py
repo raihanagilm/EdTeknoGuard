@@ -62,23 +62,19 @@ def send_push_notification(
     if not valid_tokens:
         return 0
 
-    payload_data = data or {}
-    payload_data["title"] = title
-    payload_data["message"] = body
-    payload_data["channel_id"] = channel_id
+    # Seluruh nilai payload data wajib bertipe string untuk kepatuhan FCM specification
+    payload_data = {str(k): str(v) for k, v in (data or {}).items()}
+    payload_data["title"] = str(title)
+    payload_data["message"] = str(body)
+    payload_data["channel_id"] = str(channel_id)
+    payload_data["sound"] = str(sound)
 
+    # Menggunakan High-Priority Data Message agar onMessageReceived di TeknoFirebaseMessagingService
+    # SELALU dipanggil di semua kondisi (Foreground, Background, dan Killed/Layar Terkunci).
+    # Ini memastikan Heads-up banner, custom ringtone (R.raw.tekno_alarm), avatar maskot/logo,
+    # dan stableNotificationId anti-duplikasi berjalan 100% tanpa di-bypass oleh system tray OS.
     android_config = messaging.AndroidConfig(
         priority="high",
-        notification=messaging.AndroidNotification(
-            title=title,
-            body=body,
-            icon="ic_launcher",
-            color="#2563EB",
-            sound=sound,
-            channel_id=channel_id,
-            priority="max",
-            visibility="public"
-        ),
         data=payload_data
     )
 

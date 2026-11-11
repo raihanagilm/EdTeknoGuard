@@ -1,7 +1,5 @@
 import React from 'react'
 import {
-  Activity,
-  AlertTriangle,
   Play,
   Pause,
   Square,
@@ -10,6 +8,13 @@ import {
 } from 'lucide-react'
 import { formatDuration } from './dashboardUtils'
 
+/**
+ * DashboardControlBar (Impeccable Architectural Clean Light)
+ * Mode: Operate (Mission-Control Telemetry Header)
+ * - Strict Light Theme: Architectural white + slate-50 + crisp slate-200 borders
+ * - Precision Typography: Natural sans-serif for labels, font-mono tabular-nums for metrics & time
+ * - Zero AI Slop: No decorative halos, no fake monospace costumes on action buttons
+ */
 export function DashboardControlBar({
   activeOffice,
   getOfficeDisplayName,
@@ -37,100 +42,76 @@ export function DashboardControlBar({
   handleResumeScan,
   handleOpenStopModal
 }) {
+  // Status Visual Mapping (Pure Typography - No Boxes, No Borders, No Dots)
+  const isCurrentlyScanning = isScanning && isCurrentOfficeScan
+  const isRunning = engineStatus === 'RUNNING'
+
+  let statusLabel = 'Terjadwal Aktif'
+  let statusTextColor = 'text-emerald-700'
+
+  if (isNetworkError) {
+    statusLabel = 'Gangguan Jaringan'
+    statusTextColor = 'text-rose-700'
+  } else if (!isOfficeActive) {
+    statusLabel = 'Kantor Nonaktif'
+    statusTextColor = 'text-slate-500'
+  } else if (isCurrentlyScanning) {
+    statusLabel = 'Sedang Memindai'
+    statusTextColor = 'text-cyan-800'
+  } else if (!isRunning) {
+    statusLabel = 'Jadwal Dijeda'
+    statusTextColor = 'text-amber-700'
+  }
+
   return (
-    <div className="bg-white rounded-2xl border border-sky-100 shadow-xs p-4 sm:p-5 flex flex-col gap-4">
+    <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-4 sm:p-5 flex flex-col gap-4 transition-all">
+      {/* Top Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-        {/* Status Engine Indicator */}
-        <div className="flex items-center gap-3">
-          <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
-              isNetworkError
-                ? 'bg-rose-50 text-rose-600 border-rose-200'
-                : !isOfficeActive
-                ? 'bg-slate-100 text-slate-400 border-slate-200'
-                : isScanning && isCurrentOfficeScan
-                ? 'bg-cyan-50 text-cyan-700 border-cyan-200 ring-2 ring-cyan-200/50'
-                : engineStatus === 'RUNNING'
-                ? 'text-emerald-700'
-                : 'text-amber-700'
-            }`}
-          >
-            {isNetworkError ? (
-              <AlertTriangle className="w-5 h-5" />
-            ) : isScanning && isCurrentOfficeScan ? (
-              <RefreshCw className="w-5 h-5 animate-spin" />
-            ) : (
-              <Activity className="w-5 h-5" />
-            )}
+        {/* Left: Office Telemetry & Status (Pure Typography - No Decorative Icon Box, No Dots) */}
+        <div>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h2 className="text-sm font-semibold text-slate-900 tracking-tight">
+              Status Pemantauan
+            </h2>
+            <span className="h-3.5 w-px bg-slate-200 hidden sm:inline-block" />
+            {/* Pure Typography Status - No Box, No Border, No Dot */}
+            <span className={`text-xs font-semibold ${statusTextColor}`}>
+              {statusLabel}
+            </span>
           </div>
 
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-extrabold text-slate-800 text-sm tracking-tight">
-                Status Sistem Pemantauan
-              </span>
-              <span
-                className={`text-[10px] font-mono font-bold  ${
-                  isNetworkError
-                    ? 'text-rose-700'
-                    : !isOfficeActive
-                    ? 'text-slate-500'
-                    : isScanning && isCurrentOfficeScan
-                    ? 'text-cyan-800 animate-pulse'
-                    : engineStatus === 'RUNNING'
-                    ? 'text-emerald-700'
-                    : 'text-amber-700'
-                }`}
-              >
-                {isNetworkError
-                  ? 'GANGGUAN JARINGAN'
-                  : !isOfficeActive
-                  ? 'KANTOR NONAKTIF'
-                  : isScanning && isCurrentOfficeScan
-                  ? 'SEDANG MEMINDAI'
-                  : engineStatus === 'RUNNING'
-                  ? 'TERJADWAL AKTIF'
-                  : 'JADWAL DIJEDA'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-mono mt-0.5 flex-wrap">
-              <span>Kantor: <strong className="text-slate-700">{getOfficeDisplayName(activeOffice)}</strong></span>
-              <span className="text-slate-300 hidden sm:inline">|</span>
-              <span
-                className={`text-[11px] font-bold ${
-                  isNetworkError
-                    ? 'text-rose-600'
-                    : !isOfficeActive
-                    ? 'text-slate-500'
-                    : engineStatus === 'RUNNING'
-                    ? 'text-emerald-800'
-                    : 'text-amber-800'
-                }`}
-              >
-                {isNetworkError
-                  ? 'Gateway tidak merespons'
-                  : !isOfficeActive
-                  ? 'Kantor dinonaktifkan (pemantauan mati)'
-                  : engineStatus === 'RUNNING'
-                  ? `Otomatis tiap ${intervalMinutes}m`
-                  : 'Jadwal dihentikan'}
-              </span>
-            </div>
+          {/* Sub-Telemetry (Natural Indonesian Sans-Serif) */}
+          <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 flex-wrap">
+            <span>
+              Kantor:{' '}
+              <strong className="text-slate-800 font-medium">
+                {getOfficeDisplayName(activeOffice)}
+              </strong>
+            </span>
+            <span className="h-3 w-px bg-slate-200 hidden sm:inline-block" />
+            <span className="text-slate-600 font-normal">
+              {isNetworkError
+                ? 'Gateway jaringan tidak merespons'
+                : !isOfficeActive
+                ? 'Pemantauan dinonaktifkan di wilayah ini'
+                : isRunning
+                ? `Siklus otomatis tiap ${intervalMinutes} menit`
+                : 'Jadwal otomatis sedang dihentikan'}
+            </span>
           </div>
         </div>
 
-        {/* Sisi Kanan: Tombol Kontrol Cerdas */}
+        {/* Right: Tactile Control Buttons */}
         {isAdminOrSuper && (
-          <div className="flex items-center justify-between sm:justify-end gap-2 flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-sky-100">
+          <div className="flex items-center justify-between sm:justify-end gap-2 flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
             {isToggling && (
-              <div className="flex items-center gap-1.5 text-cyan-900 text-xs font-mono font-bold shrink-0">
+              <div className="flex items-center gap-1.5 text-cyan-800 text-xs font-medium shrink-0">
                 <RefreshCw className="animate-spin h-3.5 w-3.5 text-cyan-700" />
                 <span>Menyimpan...</span>
               </div>
             )}
 
-            {/* Kondisi 1: Standby / Idle */}
+            {/* Condition 1: Standby / Idle */}
             {(!isScanning || !isCurrentOfficeScan) && (
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
@@ -138,25 +119,25 @@ export function DashboardControlBar({
                   disabled={isAnyActionLoading || (isScanning && isCurrentOfficeScan) || !isOfficeActive || !isConfigured}
                   title={
                     !isOfficeActive
-                      ? 'Kantor dalam status nonaktif. Aktifkan kantor di menu Kantor Cabang untuk memindai.'
+                      ? 'Kantor dalam status nonaktif. Aktifkan kantor terlebih dahulu.'
                       : !isConfigured
-                      ? (configError || 'Pengaturan sistem kantor belum disetel di database. Buka menu Pengaturan untuk menyimpan.')
+                      ? (configError || 'Pengaturan sistem kantor belum disetel di database.')
                       : isStartingScan
                       ? 'Sedang memproses perintah pemindaian...'
                       : 'Mulai pemindaian sinyal redaman'
                   }
-                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] ${
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-2 shadow-2xs min-h-[38px] active:scale-[0.98] ${
                     !isOfficeActive || !isConfigured
-                      ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed opacity-60'
+                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
                       : isStartingScan
                       ? 'bg-cyan-800 text-white cursor-wait opacity-80'
-                      : 'bg-cyan-700 hover:bg-cyan-800 text-white cursor-pointer disabled:opacity-50'
+                      : 'bg-cyan-700 hover:bg-cyan-800 active:bg-cyan-900 text-white border border-cyan-800/30 cursor-pointer'
                   }`}
                 >
                   {isStartingScan ? (
-                    <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    <RefreshCw className="w-3.5 h-3.5 text-white animate-spin shrink-0" />
                   ) : (
-                    <Play className={`w-4 h-4 ${!isOfficeActive || !isConfigured ? 'fill-slate-400 text-slate-400' : 'fill-white'}`} />
+                    <Play className={`w-3.5 h-3.5 ${!isOfficeActive || !isConfigured ? 'fill-slate-400 text-slate-400' : 'fill-white'}`} />
                   )}
                   <span>
                     {isStartingScan
@@ -175,29 +156,20 @@ export function DashboardControlBar({
                   <button
                     onClick={handleToggleScheduler}
                     disabled={isAnyActionLoading || !isOfficeActive}
-                    className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl font-mono text-xs font-bold border transition flex items-center justify-center gap-1.5 min-h-[38px] ${
+                    className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 min-h-[38px] shadow-2xs active:scale-[0.98] ${
                       !isOfficeActive
-                        ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+                        ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed'
                         : isToggling
-                        ? 'bg-slate-100 text-slate-500 border-slate-300 cursor-wait opacity-75'
-                        : 'bg-white hover:bg-cyan-50/60 text-slate-700 border-sky-200 cursor-pointer disabled:opacity-50'
+                        ? 'bg-slate-50 text-slate-500 border-slate-300 cursor-wait'
+                        : 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 cursor-pointer'
                     }`}
-                    title={
-                      !isOfficeActive
-                        ? 'Kantor nonaktif. Aktifkan kantor terlebih dahulu.'
-                        : isToggling
-                        ? 'Sedang mengubah jadwal pemantauan...'
-                        : engineStatus === 'RUNNING'
-                        ? 'Klik untuk menjeda jadwal pemindaian otomatis (Hanya Super Admin)'
-                        : 'Klik untuk mengaktifkan kembali jadwal pemindaian otomatis (Hanya Super Admin)'
-                    }
                   >
                     {isToggling ? (
                       <>
                         <RefreshCw className="w-3.5 h-3.5 text-cyan-700 animate-spin shrink-0" />
                         <span>Menyimpan...</span>
                       </>
-                    ) : engineStatus === 'RUNNING' ? (
+                    ) : isRunning ? (
                       <>
                         <Pause className="w-3.5 h-3.5 text-amber-600" />
                         <span>Jeda Jadwal</span>
@@ -213,18 +185,18 @@ export function DashboardControlBar({
               </div>
             )}
 
-            {/* Kondisi 2: Sedang Memindai */}
+            {/* Condition 2: Active Scanning */}
             {isScanning && isCurrentOfficeScan && canControlCurrentScan && scanProgress?.total > 0 && (
-              <div className="flex items-center gap-2 w-full sm:w-auto font-mono">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={handlePauseScan}
                   disabled={isAnyActionLoading}
-                  className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-wait text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer"
+                  className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs min-h-[38px] cursor-pointer active:scale-[0.98]"
                 >
                   {scanActionType === 'pause' ? (
-                    <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    <RefreshCw className="w-3.5 h-3.5 text-white animate-spin shrink-0" />
                   ) : (
-                    <Pause className="w-4 h-4 shrink-0" />
+                    <Pause className="w-3.5 h-3.5 shrink-0" />
                   )}
                   <span>{scanActionType === 'pause' ? 'Memproses...' : 'Jeda Pemindaian'}</span>
                 </button>
@@ -232,45 +204,45 @@ export function DashboardControlBar({
                 <button
                   onClick={handleOpenStopModal}
                   disabled={isAnyActionLoading}
-                  className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-60 disabled:cursor-wait text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer"
+                  className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs min-h-[38px] cursor-pointer active:scale-[0.98]"
                 >
                   {scanActionType === 'stop' ? (
-                    <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    <RefreshCw className="w-3.5 h-3.5 text-white animate-spin shrink-0" />
                   ) : (
-                    <Square className="w-4 h-4 fill-white shrink-0" />
+                    <Square className="w-3.5 h-3.5 fill-white shrink-0" />
                   )}
-                  <span>{scanActionType === 'stop' ? 'Memproses...' : 'Hentikan (Stop)'}</span>
+                  <span>{scanActionType === 'stop' ? 'Memproses...' : 'Hentikan'}</span>
                 </button>
               </div>
             )}
 
-            {/* Kondisi 3: Pemindaian Dijeda */}
+            {/* Condition 3: Scan Paused */}
             {isScanning && scanProgress && scanProgress.is_paused && isCurrentOfficeScan && canControlCurrentScan && (
-              <div className="flex items-center gap-2 w-full sm:w-auto font-mono">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleResumeScan}
                   disabled={isAnyActionLoading}
-                  className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-wait text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer"
+                  className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs min-h-[38px] cursor-pointer active:scale-[0.98]"
                 >
                   {scanActionType === 'resume' ? (
-                    <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    <RefreshCw className="w-3.5 h-3.5 text-white animate-spin shrink-0" />
                   ) : (
-                    <Play className="w-4 h-4 fill-white shrink-0" />
+                    <Play className="w-3.5 h-3.5 fill-white shrink-0" />
                   )}
-                  <span>{scanActionType === 'resume' ? 'Melanjutkan...' : 'Lanjutkan Pemindaian'}</span>
+                  <span>{scanActionType === 'resume' ? 'Melanjutkan...' : 'Lanjutkan'}</span>
                 </button>
 
                 <button
                   onClick={handleOpenStopModal}
                   disabled={isAnyActionLoading}
-                  className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-60 disabled:cursor-wait text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs min-h-[38px] cursor-pointer"
+                  className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs min-h-[38px] cursor-pointer active:scale-[0.98]"
                 >
                   {scanActionType === 'stop' ? (
-                    <RefreshCw className="w-4 h-4 text-white animate-spin shrink-0" />
+                    <RefreshCw className="w-3.5 h-3.5 text-white animate-spin shrink-0" />
                   ) : (
-                    <Square className="w-4 h-4 fill-white shrink-0" />
+                    <Square className="w-3.5 h-3.5 fill-white shrink-0" />
                   )}
-                  <span>{scanActionType === 'stop' ? 'Memproses...' : 'Hentikan (Stop)'}</span>
+                  <span>{scanActionType === 'stop' ? 'Memproses...' : 'Hentikan'}</span>
                 </button>
               </div>
             )}
@@ -278,44 +250,46 @@ export function DashboardControlBar({
         )}
       </div>
 
-      {/* Progress Bar Jika Sedang Memindai */}
-      {(isScanning && isCurrentOfficeScan && scanProgress?.total > 0) && (
-        <div className="pt-2 border-t border-sky-100 flex flex-col gap-2">
-          <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-600">
+      {/* Progress Bar (Visible During Active Scan) */}
+      {isScanning && isCurrentOfficeScan && scanProgress?.total > 0 && (
+        <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+          <div className="flex items-center justify-between text-xs text-slate-700 font-medium">
             <span className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${scanProgress.is_paused ? 'bg-amber-500' : 'bg-cyan-600 animate-ping'}`} />
-              {scanProgress.is_paused ? 'Pemindaian Ditunda:' : 'Progres Pemindaian:'} {scanProgress.current} / {scanProgress.total} Modem
+              <span>{scanProgress.is_paused ? 'Pemindaian Ditunda:' : 'Progres Pemindaian:'}</span>
+              <span className="font-mono tabular-nums text-slate-900 font-bold">{scanProgress.current} / {scanProgress.total}</span>
+              <span className="text-slate-500">Modem</span>
             </span>
-            <span className="text-cyan-800 font-extrabold">{scanProgress.percent}%</span>
+            <span className="text-cyan-800 font-mono font-bold tabular-nums text-sm">{scanProgress.percent}%</span>
           </div>
 
-          <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80">
+          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80">
             <div
               className={`h-full transition-all duration-300 rounded-full ${
-                scanProgress.is_paused ? 'bg-amber-500' : 'bg-linear-to-r from-cyan-600 to-sky-500'
+                scanProgress.is_paused ? 'bg-amber-500' : 'bg-cyan-600'
               }`}
               style={{ width: `${Math.min(100, Math.max(0, scanProgress.percent))}%` }}
             />
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-mono text-slate-500">
+          <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-slate-500">
             <span>Berjalan: {formatDuration(scanProgress.elapsed_seconds)}</span>
             <span>Estimasi Sisa: {formatDuration(Math.max(0, (scanProgress.estimated_total_seconds || 0) - (scanProgress.elapsed_seconds || 0)))}</span>
           </div>
         </div>
       )}
 
-      {/* Info Scan Terakhir & Jadwal Berikutnya */}
-      <div className="pt-2 border-t border-sky-50 flex items-center justify-between text-xs font-mono text-slate-500 flex-wrap gap-2">
+      {/* Telemetry Footer Row (Strict Precision Formatting) */}
+      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2">
         <div className="flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5 text-slate-400" />
-          <span>Terakhir: <strong className="text-slate-700">{lastScanTime}</strong></span>
+          <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <span>Terakhir:</span>
+          <strong className="text-slate-800 font-mono tabular-nums font-semibold">{lastScanTime}</strong>
         </div>
         <div className="flex items-center gap-1.5">
-          <span>Jadwal Berikutnya: <strong className="text-cyan-800">{nextRunTime}</strong></span>
+          <span>Jadwal Berikutnya:</span>
+          <strong className="text-cyan-800 font-mono tabular-nums font-semibold">{nextRunTime}</strong>
         </div>
       </div>
     </div>
   )
 }
-

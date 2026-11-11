@@ -172,6 +172,11 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
     try {
       const res = await PortalAuthService.login(identifier, password, rememberMe);
       if (res.ok && res.data?.ok) {
+        if (window.AndroidBridge && typeof window.AndroidBridge.notifyLoginSuccess === 'function') {
+          try {
+            window.AndroidBridge.notifyLoginSuccess();
+          } catch (_) {}
+        }
         onLoginSuccess(res.data.customer);
       } else {
         setError(res.data?.message || 'Nomor WhatsApp atau Kata Sandi salah!');

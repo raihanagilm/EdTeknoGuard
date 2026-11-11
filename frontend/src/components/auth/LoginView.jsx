@@ -45,6 +45,13 @@ export function LoginView({
         localStorage.setItem('edtekno_last_active_time', String(Date.now()))
         localStorage.setItem('edtekno_remember_me', rememberMe ? 'true' : 'false')
 
+        // Picu sinkronisasi token FCM ke Android native jika berjalan di dalam wrapper APK
+        if (window.AndroidBridge && typeof window.AndroidBridge.notifyLoginSuccess === 'function') {
+          try {
+            window.AndroidBridge.notifyLoginSuccess()
+          } catch (_) {}
+        }
+
         if (onLoginSuccess) {
           onLoginSuccess(data.user)
         }

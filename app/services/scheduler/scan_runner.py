@@ -301,6 +301,46 @@ class ScanRunner:
                         if p.perangkat:
                             p.perangkat.failed_credentials = json.dumps(current_fails)
 
+                    # Push notifikasi transisi status koneksi khusus pelanggan yang memiliki FCM token
+                    if p.fcm_token and p.fcm_token.strip():
+                        prev_log = t_db.query(LogPerformaONT).filter(
+                            LogPerformaONT.id_pelanggan == p.id_pelanggan
+                        ).order_by(LogPerformaONT.id.desc()).offset(1).first()
+                        prev_status = prev_log.status_koneksi if prev_log else "NORMAL"
+
+                        if status_koneksi == "LOS" and prev_status != "LOS":
+                            try:
+                                from app.services.fcm_service import send_push_notification
+                                send_push_notification(
+                                    tokens=[p.fcm_token.strip()],
+                                    title="Pemberitahuan Gangguan Jaringan",
+                                    body="Mohon maaf, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.",
+                                    data={
+                                        "target_tab": "beranda",
+                                        "level": "los",
+                                        "type": "cust_los"
+                                    },
+                                    channel_id="tekno_customer_channel"
+                                )
+                            except Exception as fcm_err:
+                                logger.warning(f"[FCM_CUST_LOS] Gagal push notif LOS ke pelanggan {p.id_pelanggan}: {fcm_err}")
+                        elif status_koneksi == "NORMAL" and prev_status == "LOS":
+                            try:
+                                from app.services.fcm_service import send_push_notification
+                                send_push_notification(
+                                    tokens=[p.fcm_token.strip()],
+                                    title="Koneksi Internet Telah Pulih",
+                                    body="Koneksi internet Anda telah kembali normal dan aktif. Terima kasih atas kesabaran Anda telah menggunakan layanan kami!",
+                                    data={
+                                        "target_tab": "beranda",
+                                        "level": "info",
+                                        "type": "cust_recovery"
+                                    },
+                                    channel_id="tekno_customer_channel"
+                                )
+                            except Exception as fcm_err:
+                                logger.warning(f"[FCM_CUST_REC] Gagal push notif pulih ke pelanggan {p.id_pelanggan}: {fcm_err}")
+
                     t_db.commit()
                     return {
                         "id": c_id,

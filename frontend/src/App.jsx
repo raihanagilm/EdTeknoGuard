@@ -370,6 +370,12 @@ export default function App() {
             }
           } catch (_) {}
         }
+
+        if (window.AndroidBridge && typeof window.AndroidBridge.notifyLoginSuccess === 'function') {
+          try {
+            window.AndroidBridge.notifyLoginSuccess()
+          } catch (_) {}
+        }
       }
 
       if (notifRes) {

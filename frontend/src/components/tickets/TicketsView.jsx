@@ -14,7 +14,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  KeyRound
+  KeyRound,
+  X
 } from 'lucide-react';
 import { TicketsService } from '../../services/api';
 import {
@@ -532,9 +533,10 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
               </div>
               <button
                 onClick={() => setSelectedTicket(null)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 transition cursor-pointer"
+                title="Tutup Modal"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
