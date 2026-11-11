@@ -64,25 +64,34 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 5000);
   };
 
-  const fetchTickets = async () => {
-    setLoading(true);
+  const fetchTickets = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const res = await TicketsService.list(filterStatus);
       if (res.ok && res.data) {
         setTickets(res.data.tickets || []);
       }
     } catch (err) {
-      console.error('Gagal mengambil data tiket:', err);
-      showToast('Gagal memuat daftar tiket', 'error');
+      if (!isSilent) {
+        console.error('Gagal mengambil data tiket:', err);
+        showToast('Gagal memuat daftar tiket', 'error');
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTickets();
+    fetchTickets(false);
     setPage(1);
     setActiveMenuId(null);
+
+    // Auto-refresh silent setiap 5 detik agar tiket baru langsung muncul tanpa reload browser
+    const pollInterval = setInterval(() => {
+      fetchTickets(true);
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
   }, [filterStatus, activeOffice]);
 
   const handleOpenModal = (ticket) => {
