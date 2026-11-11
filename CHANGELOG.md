@@ -26,6 +26,13 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Fixed
+- **Penguncian Notifikasi Darurat LOS dari Aksi Baca dan Hapus ([service.py](app/modules/notifications/service.py), [App.jsx](frontend/src/App.jsx), [NotificationsView.jsx](frontend/src/components/notifications/NotificationsView.jsx))**:
+  - Mengunci status `LOS` (Loss of Signal / Sinyal Terputus) sebagai kondisi darurat fisik jaringan permanen yang tidak dapat ditandai sudah dibaca (`mark as read`) maupun dihapus (`dismiss`).
+  - Menghilangkan tombol hapus tong sampah (`Trash2`) pada kartu notifikasi LOS di pusat notifikasi dan menggantinya dengan penanda tegas `Perlu Tindakan`.
+  - Memproteksi endpoint backend `mark_notification_read` dan `mark_all_notifications_read` agar menolak permintaan penandaan baca untuk notifikasi berlevel `los` atau ID `batch_los`.
+  - Membersihkan entri `batch_los%` dari tabel `user_notification_reads` agar notifikasi pelanggan yang sedang mengalami gangguan LOS tetap tampil persisten hingga status modem pulih normal pada siklus pemindaian berikutnya.
+
 ### Added
 - **Matriks & Kebijakan Push Notifikasi Native Operasional ([AGENTS.md](AGENTS.md) & [docs/PROMPT_ANDROID_STUDIO.md](docs/PROMPT_ANDROID_STUDIO.md))**:
   - Menetapkan matriks resmi push notifikasi Android untuk TeknoGuard (NOC & Teknisi) dan MyTekno (Warga & Pelanggan).

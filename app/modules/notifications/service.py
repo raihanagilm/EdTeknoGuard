@@ -145,11 +145,12 @@ class NotificationService:
             status_conn = log_entry.status_koneksi
             is_critical = (status_conn == "CRITICAL")
             is_los = (status_conn == "LOS")
+            is_emergency = is_critical or is_los
 
-            # NOTIFIKASI KRITIS (<= -27.0 dBm) DILARANG DI-READ / DI-DISMISS:
+            # NOTIFIKASI KRITIS (<= -27.0 dBm) DAN LOS (Sinyal Terputus) DILARANG DI-READ / DI-DISMISS:
             # Wajib ditangani segera dan tetap tampil persisten sampai status modem kembali NORMAL di scan berikutnya!
-            # Sedangkan LOS dan WARNING bersifat non-permanen (dapat ditandai baca / di-dismiss oleh pengguna)
-            if not is_critical and ref_key in read_ref_ids:
+            # Hanya WARNING yang bersifat non-permanen (dapat ditandai baca / di-dismiss oleh pengguna)
+            if not is_emergency and ref_key in read_ref_ids:
                 continue
 
             office_prefix = f"{cust.kantor.title()} • " if is_multi_kantor and cust.kantor else ""
@@ -172,7 +173,7 @@ class NotificationService:
                 "nama_pelanggan": cust.nama,
                 "rx_power": float(log_entry.rx_power) if log_entry.rx_power is not None else None,
                 "status_koneksi": status_conn,
-                "is_critical": is_critical
+                "is_critical": is_emergency
             }
 
             if is_los:
@@ -182,29 +183,28 @@ class NotificationService:
             else:
                 warning_items.append(item_data)
 
-        # 1. Grouping LOS (Ungu, non-permanen seperti Warning, >= 5 items digabung jadi 1)
+        # 1. Grouping LOS (Ungu, Persisten Wajib Ditangani, >= 5 items digabung jadi 1)
         if len(los_items) >= 5:
             first_los = los_items[0]
             kantor_slug = (first_los.get('kantor') or 'all').lower()
             batch_key = f"batch_los_{kantor_slug}"
-            if batch_key not in read_ref_ids:
-                b_office_prefix = f"{first_los['kantor'].title()} • " if is_multi_kantor and first_los.get('kantor') else ""
-                items_list.append({
-                    "id": batch_key,
-                    "reference_id": batch_key,
-                    "type": "monitoring_batch",
-                    "title": f"{b_office_prefix}{len(los_items)} Modem Sinyal Terputus",
-                    "message": f"Terdeteksi {len(los_items)} pelanggan mengalami sinyal terputus (kabel lepas / redaman hilang) pada kantor {first_los['kantor'].title()}.",
-                    "target_tab": "pelanggan",
-                    "target_filter": "",
-                    "target_status": "LOS",
-                    "level": "los",
-                    "badge": f"{len(los_items)} TERPUTUS",
-                    "time": first_los["time"],
-                    "count": len(los_items),
-                    "kantor": first_los["kantor"],
-                    "is_critical": False
-                })
+            b_office_prefix = f"{first_los['kantor'].title()} • " if is_multi_kantor and first_los.get('kantor') else ""
+            items_list.append({
+                "id": batch_key,
+                "reference_id": batch_key,
+                "type": "monitoring_batch",
+                "title": f"{b_office_prefix}{len(los_items)} Modem Sinyal Terputus",
+                "message": f"Terdeteksi {len(los_items)} pelanggan mengalami sinyal terputus (kabel lepas / redaman hilang) pada kantor {first_los['kantor'].title()}.",
+                "target_tab": "pelanggan",
+                "target_filter": "",
+                "target_status": "LOS",
+                "level": "los",
+                "badge": f"{len(los_items)} TERPUTUS",
+                "time": first_los["time"],
+                "count": len(los_items),
+                "kantor": first_los["kantor"],
+                "is_critical": True
+            })
         else:
             items_list.extend(los_items)
 
@@ -417,10 +417,10 @@ class NotificationService:
         if not user_id:
             return {"status": "error", "message": "User ID tidak valid"}
 
-        # Proteksi: Hanya notifikasi kritis (<= -27.0 dBm) yang dilarang ditandai read secara manual
+        # Proteksi: Notifikasi kritis (<= -27.0 dBm) dan LOS (Sinyal Terputus) dilarang ditandai read secara manual
         ref_str = str(reference_id)
-        if "batch_critical" in ref_str or notification_type == "monitoring_critical":
-            return {"status": "ignored", "message": "Notifikasi kritis tidak dapat dihapus sebelum status normal"}
+        if "batch_critical" in ref_str or "batch_los" in ref_str or notification_type in ["monitoring_critical", "monitoring_los"]:
+            return {"status": "ignored", "message": "Notifikasi kritis dan LOS tidak dapat dihapus sebelum status normal"}
 
         # Cek apakah sudah pernah ditandai
         existing = db.query(UserNotificationRead).filter(
@@ -464,13 +464,13 @@ class NotificationService:
         now = get_now_wib()
         added_count = 0
         for item in items:
-            # Kecualikan item kritis dari mark all read
-            if item.get("level") == "critical" or item.get("is_critical"):
+            # Kecualikan item kritis dan LOS dari mark all read
+            if item.get("level") in ["critical", "los"] or item.get("is_critical") or item.get("status_koneksi") in ["CRITICAL", "LOS"]:
                 continue
 
             n_type = item.get("type", "general")
             ref_id = item.get("reference_id") or item.get("id")
-            if not ref_id or "batch_critical" in str(ref_id):
+            if not ref_id or "batch_critical" in str(ref_id) or "batch_los" in str(ref_id):
                 continue
 
             existing = db.query(UserNotificationRead).filter(

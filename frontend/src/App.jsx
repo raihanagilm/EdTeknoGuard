@@ -422,7 +422,8 @@ export default function App() {
 
     // Notifikasi KRITIS (LOS / CRITICAL) DILARANG DIHAPUS / DI-READ:
     // Hanya boleh hilang otomatis jika status modem kembali normal di hasil pemantauan
-    if (item.level !== 'critical' && !item.is_critical) {
+    const isEmergency = item.level === 'critical' || item.level === 'los' || item.is_critical || item.status_koneksi === 'LOS' || item.status_koneksi === 'CRITICAL' || item.id?.startsWith('batch_los') || item.id?.startsWith('batch_critical')
+    if (!isEmergency) {
       try {
         await fetch('/api/notifications/read', {
           method: 'POST',
@@ -510,8 +511,9 @@ export default function App() {
   }, [activeOffice])
 
   const handleDismissNotificationItem = async (item) => {
-    // Notifikasi KRITIS dilarang di-dismiss secara manual
-    if (item.level === 'critical' || item.is_critical) return
+    // Notifikasi KRITIS & LOS dilarang di-dismiss secara manual
+    const isEmergency = item.level === 'critical' || item.level === 'los' || item.is_critical || item.status_koneksi === 'LOS' || item.status_koneksi === 'CRITICAL' || item.id?.startsWith('batch_los') || item.id?.startsWith('batch_critical')
+    if (isEmergency) return
 
     try {
       await fetch('/api/notifications/read', {
@@ -535,7 +537,10 @@ export default function App() {
 
   const handleMarkAllNotificationsRead = async () => {
     try {
-      const nonCriticalItems = notificationList.filter(n => n.level !== 'critical' && !n.is_critical)
+      const nonCriticalItems = notificationList.filter(n => {
+        const isEmergency = n.level === 'critical' || n.level === 'los' || n.is_critical || n.status_koneksi === 'LOS' || n.status_koneksi === 'CRITICAL' || n.id?.startsWith('batch_los') || n.id?.startsWith('batch_critical')
+        return !isEmergency
+      })
       if (nonCriticalItems.length === 0) return
 
       await fetch('/api/notifications/read-all', {
@@ -549,12 +554,12 @@ export default function App() {
           }))
         })
       })
-      // Hanya bersihkan yang non-kritis, item kritis tetap dipertahankan
-      const criticalOnly = notificationList.filter(n => n.level === 'critical' || n.is_critical)
-      setNotificationList(criticalOnly)
-      setTotalUnreadNotifications(criticalOnly.length)
-      const criticalTickets = criticalOnly.filter(n => n.type === 'ticket' || n.target_tab === 'tiket')
-      setUnreadTickets(criticalTickets.length)
+      // Hanya bersihkan yang non-kritis, item kritis & LOS tetap dipertahankan
+      const emergencyOnly = notificationList.filter(n => n.level === 'critical' || n.level === 'los' || n.is_critical || n.status_koneksi === 'LOS' || n.status_koneksi === 'CRITICAL' || n.id?.startsWith('batch_los') || n.id?.startsWith('batch_critical'))
+      setNotificationList(emergencyOnly)
+      setTotalUnreadNotifications(emergencyOnly.length)
+      const emergencyTickets = emergencyOnly.filter(n => n.type === 'ticket' || n.target_tab === 'tiket')
+      setUnreadTickets(emergencyTickets.length)
     } catch (e) {
       console.warn('Failed to mark all notifications read:', e)
     }

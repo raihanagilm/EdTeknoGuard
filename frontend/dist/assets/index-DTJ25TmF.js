@@ -37449,7 +37449,7 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 									className: "text-cyan-700 flex items-center gap-0.5 group-hover:translate-x-0.5 transition",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.target_tab === "tiket" ? "Buka Tiket" : item.target_tab === "pelanggan" ? "Buka Data Pelanggan" : item.target_tab === "logs" ? "Cek Riwayat Redaman" : "Lihat Detail" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3 h-3" })]
-								}), item.level === "critical" || item.is_critical ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								}), item.level === "critical" || item.level === "los" || item.is_critical || item.status_koneksi === "LOS" || item.id?.startsWith("batch_los") || item.id?.startsWith("batch_critical") ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "text-[10px] font-bold text-rose-600",
 									children: "Perlu Tindakan"
 								}) : onDismissItem && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -45035,7 +45035,7 @@ function App() {
 	const handleNotificationItemClick = async (item) => {
 		setIsNotificationOpen(false);
 		if (item.kantor && item.kantor.toLowerCase() !== activeOffice.toLowerCase()) handleSwitchOffice(item.kantor);
-		if (item.level !== "critical" && !item.is_critical) try {
+		if (!(item.level === "critical" || item.level === "los" || item.is_critical || item.status_koneksi === "LOS" || item.status_koneksi === "CRITICAL" || item.id?.startsWith("batch_los") || item.id?.startsWith("batch_critical"))) try {
 			await fetch("/api/notifications/read", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -45088,7 +45088,7 @@ function App() {
 		};
 	}, [activeOffice]);
 	const handleDismissNotificationItem = async (item) => {
-		if (item.level === "critical" || item.is_critical) return;
+		if (item.level === "critical" || item.level === "los" || item.is_critical || item.status_koneksi === "LOS" || item.status_koneksi === "CRITICAL" || item.id?.startsWith("batch_los") || item.id?.startsWith("batch_critical")) return;
 		try {
 			await fetch("/api/notifications/read", {
 				method: "POST",
@@ -45108,7 +45108,9 @@ function App() {
 	};
 	const handleMarkAllNotificationsRead = async () => {
 		try {
-			const nonCriticalItems = notificationList.filter((n) => n.level !== "critical" && !n.is_critical);
+			const nonCriticalItems = notificationList.filter((n) => {
+				return !(n.level === "critical" || n.level === "los" || n.is_critical || n.status_koneksi === "LOS" || n.status_koneksi === "CRITICAL" || n.id?.startsWith("batch_los") || n.id?.startsWith("batch_critical"));
+			});
 			if (nonCriticalItems.length === 0) return;
 			await fetch("/api/notifications/read-all", {
 				method: "POST",
@@ -45119,11 +45121,11 @@ function App() {
 					kantor: n.kantor || activeOffice
 				})) })
 			});
-			const criticalOnly = notificationList.filter((n) => n.level === "critical" || n.is_critical);
-			setNotificationList(criticalOnly);
-			setTotalUnreadNotifications(criticalOnly.length);
-			const criticalTickets = criticalOnly.filter((n) => n.type === "ticket" || n.target_tab === "tiket");
-			setUnreadTickets(criticalTickets.length);
+			const emergencyOnly = notificationList.filter((n) => n.level === "critical" || n.level === "los" || n.is_critical || n.status_koneksi === "LOS" || n.status_koneksi === "CRITICAL" || n.id?.startsWith("batch_los") || n.id?.startsWith("batch_critical"));
+			setNotificationList(emergencyOnly);
+			setTotalUnreadNotifications(emergencyOnly.length);
+			const emergencyTickets = emergencyOnly.filter((n) => n.type === "ticket" || n.target_tab === "tiket");
+			setUnreadTickets(emergencyTickets.length);
 		} catch (e) {
 			console.warn("Failed to mark all notifications read:", e);
 		}

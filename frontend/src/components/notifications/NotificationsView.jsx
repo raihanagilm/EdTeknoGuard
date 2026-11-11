@@ -243,7 +243,7 @@ export function NotificationsView({
                     <ChevronRight className="w-3 h-3" />
                   </span>
 
-                  {item.level === 'critical' || item.is_critical ? (
+                  {item.level === 'critical' || item.level === 'los' || item.is_critical || item.status_koneksi === 'LOS' || item.id?.startsWith('batch_los') || item.id?.startsWith('batch_critical') ? (
                     <span className="text-[10px] font-bold text-rose-600">
                       Perlu Tindakan
                     </span>
