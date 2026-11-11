@@ -181,7 +181,23 @@ export default function App() {
   // =========================================================================
   // STATE PENGATURAN SISTEM (3 TAB RESMI LENGKAP)
   // =========================================================================
-  const [settingsActiveSubTab, setSettingsActiveSubTab] = useState('thresholds') // 'thresholds' | 'credentials' | 'notifications' | 'account'
+  const [settingsActiveSubTab, setSettingsActiveSubTab] = useState(() => {
+    try {
+      const savedSubTab = localStorage.getItem('edtekno_settings_subtab')
+      return savedSubTab || 'thresholds'
+    } catch (_) {
+      return 'thresholds'
+    }
+  }) // 'thresholds' | 'credentials' | 'notifications' | 'account'
+
+  const handleSettingsSubTabChange = (newSubTab) => {
+    setSettingsActiveSubTab(newSubTab)
+    try {
+      if (newSubTab) {
+        localStorage.setItem('edtekno_settings_subtab', newSubTab)
+      }
+    } catch (_) {}
+  }
   const [settingsLoading, setSettingsLoading] = useState(false)
   const [settingsSaveSuccess, setSettingsSaveSuccess] = useState(false)
   const [settingsSaveError, setSettingsSaveError] = useState('')
@@ -989,7 +1005,7 @@ export default function App() {
           {activeTab === 'pengaturan' && (
             <SettingsView
               settingsActiveSubTab={settingsActiveSubTab}
-              setSettingsActiveSubTab={setSettingsActiveSubTab}
+              setSettingsActiveSubTab={handleSettingsSubTabChange}
               settingsLoading={settingsLoading}
               settingsSaveSuccess={settingsSaveSuccess}
               settingsSaveError={settingsSaveError}

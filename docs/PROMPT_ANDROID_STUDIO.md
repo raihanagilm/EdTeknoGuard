@@ -352,7 +352,7 @@ private fun pollCustBillingStatus() {
 
 ---
 
-## 🛠️ 5. PANDUAN STEP-BY-STEP BUILD DI ANDROID STUDIO
+## 🛠️ 5. PANDUAN STEP-BY-STEP BUILD & DISTRIBUSI KE FIREBASE
 
 ### Langkah 1: Buka Project
 1. Jalankan **Android Studio**.
@@ -360,20 +360,37 @@ private fun pollCustBillingStatus() {
    `D:\databaru\Magang\EdTeknoGuard-Android`
 3. Tunggu proses **Gradle Sync** selesai mengunduh dependensi (status: *BUILD SUCCESSFUL*).
 
-### Langkah 2: Menyesuaikan Domain Server Backend
+### Langkah 2: Cara Menaikkan / Update Versi Aplikasi (Version Code & Version Name)
+Sebelum melakukan rilis atau distribusi versi baru, perbarui versi di berkas `app/build.gradle.kts`:
+```kotlin
+defaultConfig {
+    minSdk = 24
+    targetSdk = 35
+    // Naikkan versionCode (integer berurutan: 1, 2, 3, dst.)
+    versionCode = 3
+    // Perbarui versionName sesuai rilis (misal 1.2.0 -> 1.3.0)
+    versionName = "1.3.0"
+
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+}
+```
+> [!IMPORTANT]
+> **Aturan Wajib Versi:** Setiap kali mengunggah build baru ke Firebase App Distribution atau Play Store, nilai `versionCode` **WAJIB bertambah lebih besar** dari versi sebelumnya (misal dari `2` menjadi `3`). Jika tidak, Firebase akan menolak build dengan pesan error versi duplikat.
+
+### Langkah 3: Menyesuaikan Domain Server Backend
 Berkas `app/build.gradle.kts` sudah dikonfigurasi secara default ke domain resmi HTTPS:
 * **TeknoGuard (NOC)**: `"https://portal.teknoindo.net/login"`
 * **MyTekno (Pelanggan)**: `"https://portal.teknoindo.net/portal"`
 
 *(Jika suatu saat Anda ingin menguji di server development lokal, cukup sesuaikan nilai `BASE_URL` tersebut lalu klik **Sync Now** di sudut kanan atas Android Studio).*
 
-### Langkah 3: Memilih Build Variant (Dual Flavors)
+### Langkah 4: Memilih Build Variant (Dual Flavors)
 1. Di pojok kiri bawah Android Studio, buka tab **Build Variants**.
 2. Pada kolom **Active Build Variant**:
    - Pilih `guardDebug` atau `guardRelease` $\rightarrow$ Untuk mengompilasi **TeknoGuard**.
    - Pilih `myteknoDebug` atau `myteknoRelease` $\rightarrow$ Untuk mengompilasi **MyTekno**.
 
-### Langkah 4: Generate File APK
+### Langkah 5: Generate File APK Lokal Secara Manual
 1. Pada menu bar atas, klik **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
 2. Tunggu proses kompilasi selesai. Notifikasi pop-up akan muncul: *"Build APK(s): APK(s) generated successfully."*
 3. Klik tautan biru **locate** pada pop-up tersebut, atau temukan file APK di:
@@ -382,7 +399,68 @@ Berkas `app/build.gradle.kts` sudah dikonfigurasi secara default ke domain resmi
 
 ---
 
-## 📱 6. PANDUAN PENGATURAN HP AGAR NOTIFIKASI TIDAK MATI
+## 🚀 6. PERINTAH BUILD & UPLOAD OTOMATIS KE FIREBASE APP DISTRIBUTION
+
+Proyek ini telah terintegrasi dengan plugin `com.google.firebase.appdistribution`. Anda dapat mengompilasi APK sekaligus mendistribusikannya secara otomatis ke tim tester langsung via **Terminal Android Studio / PowerShell**:
+
+### A. Prasyarat Otentikasi Firebase
+Pastikan token Firebase atau file Service Account telah disiapkan:
+1. Simpan token di `local.properties`:
+   ```properties
+   FIREBASE_TOKEN=1//0gxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+   *Atau login langsung via Firebase CLI*:
+   ```bash
+   firebase login:ci
+   ```
+2. Atau letakkan berkas kredensial Google Service Account di `service-account.json`.
+
+---
+
+### B. Perintah Eksekusi Gradle Task (Terminal / PowerShell)
+
+Buka tab **Terminal** di bagian bawah Android Studio (pastikan berada di direktori project `EdTeknoGuard-Android`):
+
+#### 1. Build & Distribusikan TeknoGuard (NOC & Teknisi):
+* **Mode Debug (Pengujian Cepat):**
+  ```powershell
+  ./gradlew appDistributionUploadGuardDebug
+  ```
+* **Mode Release (Rilis Produksi):**
+  ```powershell
+  ./gradlew appDistributionUploadGuardRelease
+  ```
+
+#### 2. Build & Distribusikan MyTekno (Portal Pelanggan / Warga):
+* **Mode Debug (Pengujian Cepat):**
+  ```powershell
+  ./gradlew appDistributionUploadMyteknoDebug
+  ```
+* **Mode Release (Rilis Produksi):**
+  ```powershell
+  ./gradlew appDistributionUploadMyteknoRelease
+  ```
+
+#### 3. Build & Distribusikan Keduanya Sekaligus:
+```powershell
+./gradlew appDistributionUploadGuardRelease appDistributionUploadMyteknoRelease
+```
+
+---
+
+### C. Menambahkan Catatan Rilis (Release Notes) Saat Upload
+Anda dapat menyisipkan catatan update langsung saat menjalankan perintah terminal tanpa mengubah kode:
+```powershell
+./gradlew appDistributionUploadGuardDebug --args="--release-notes='Update perbaikan notifikasi Karanggede & tema splash screen putih'"
+```
+Atau melalui parameter properti Gradle:
+```powershell
+./gradlew appDistributionUploadGuardDebug -PfirebaseAppDistributionReleaseNotes="Perbaikan notifikasi anti-spam Karanggede & header status bar putih"
+```
+
+---
+
+## 📱 7. PANDUAN PENGATURAN HP AGAR NOTIFIKASI TIDAK MATI
 
 Sistem operasi Android modern (MIUI/HyperOS, ColorOS, OneUI) memiliki fitur agresif *Battery Optimization* yang dapat mematikan service latar belakang. Agar notifikasi bekerja 100% andal seperti WhatsApp:
 
