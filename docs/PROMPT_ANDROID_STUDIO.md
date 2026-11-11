@@ -37,8 +37,10 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
     2. Membuka tab modul yang dituju (`pelanggan`, `tiket`, atau `riwayat`).
     3. Menerapkan filter status (`LOS`, `CRITICAL`, `MENUNGGU`) dan kata kunci pencarian pelanggan secara otomatis via `window.navigateToTab(...)`.
   - **TeknoGuard (NOC & Teknisi Lapangan):**
-    - **Pesan Super Ringkas (Zero-Clutter Status Bar):** Isi notifikasi wajib ringkas, padat, dan to the point tanpa kalimat panjang. Contoh: `[REDAMAN] Kantor: CABANG` dengan isi `2 LOS, 1 Kritis. Segera cek fisik.`
-    - **Perilaku Re-Push (Anti-Lupa):** Notifikasi gangguan kritis (LOS, redaman <= -27.0 dBm, tiket status MENUNGGU, atau scheduler PAUSED) **WAJIB dipush berulang di tiap siklus interval pemindaian** selama kondisi belum diselesaikan teknisi. Jika teknisi men-swipe/dismiss notifikasi, notifikasi akan tetap dimunculkan kembali pada siklus scan berikutnya sebagai pengingat darurat.
+    - **Pesan Super Ringkas (Zero-Clutter Status Bar):** Isi notifikasi wajib ringkas, padat, dan to the point tanpa kalimat panjang.
+    - **Pemisahan Notifikasi LOS dan Kritis:** Notifikasi Sinyal Terputus (`[SINYAL TERPUTUS]`) dan Redaman Kritis (`[REDAMAN KRITIS]`) dikirimkan terpisah agar teknisi langsung mengetahui apakah kendala berasal dari kabel fisik terputus atau degradasi redaman optik.
+    - **Perilaku Re-Push (Anti-Lupa):** Notifikasi gangguan kritis (LOS, redaman <= -27.0 dBm, tiket status MENUNGGU) **WAJIB dipush berulang di tiap siklus interval pemindaian** selama kondisi belum diselesaikan teknisi. Khusus pengingat jadwal pemantauan terjeda (PAUSED) dikirimkan berkala **tepat 1 jam sekali saja**.
+    - **Kepatuhan Jam Tenang (Night Mode) & Getar:** Sistem secara otomatis mematuhi preferensi jam tenang malam (senyap tanpa suara & getar) dan preferensi toggle getar di Pengaturan Sistem.
     - Notifikasi multi-kantor diperbarui secara bersih (*in-place update*) menggunakan hash ID stabil format `${batchType}_${kantor}` (contoh: `batch_los_karanggede`) sehingga status redaman terbaru langsung memperbarui notifikasi sebelumnya tanpa duplikasi atau rentetan spam baru.
   - **MyTekno (Pelanggan) Non-Pembayaran:** Notifikasi status tiket kendala (`MENUNGGU`, `DICEK_ADMIN`, `DIPROSES`, `SELESAI`) dan notifikasi sinyal LOS/pulih menggunakan bahasa santun, ramah, dan menenangkan. Disimpan secara persisten di `SharedPreferences` dan **cukup muncul tepat 1 kali saja** saat terjadi perubahan status baru, bebas spam berulang.
   - **MyTekno (Pelanggan) Pembayaran Tagihan:**
@@ -49,10 +51,11 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
 
 | Aplikasi Target | Peristiwa / Pemicu | Suara & Channel | Format Judul & Format Pesan Ringkas | Perilaku Re-Push & Frekuensi |
 | :--- | :--- | :--- | :--- | :--- |
-| **TeknoGuard (NOC)** | Sinyal Terputus (LOS) & Redaman Kritis | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[REDAMAN] Kantor: {KANTOR}`<br>Isi: `{los} LOS, {critical} Kritis. Segera cek fisik.` | Wajib dipush berulang setiap interval scan berkala selama masih ada LOS/Kritis. |
+| **TeknoGuard (NOC)** | Sinyal Terputus (LOS) | `tekno_alarm` (`tekno_emergency_v3_channel` / `tekno_emergency_v3_no_vib_channel` / `tekno_silent_night_channel`) | Judul: `[SINYAL TERPUTUS] Kantor: {KANTOR}`<br>Isi: `{los} modem LOS (terputus). Segera cek kabel fisik.` | Wajib dipush berulang setiap interval scan berkala selama masih ada LOS. |
+| **TeknoGuard (NOC)** | Redaman Kritis | `tekno_alarm` (`tekno_emergency_v3_channel` / `tekno_emergency_v3_no_vib_channel` / `tekno_silent_night_channel`) | Judul: `[REDAMAN KRITIS] Kantor: {KANTOR}`<br>Isi: `{critical} modem Kritis (<= -27.0 dBm). Segera cek redaman.` | Wajib dipush berulang setiap interval scan berkala selama masih ada Kritis. |
 | **TeknoGuard (NOC)** | Tiket Belum Disentuh | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[TIKET] Kantor: {KANTOR}`<br>Isi: `{count} tiket MENUNGGU belum diproses.` | Wajib dipush berulang setiap interval scan berkala jika ada tiket MENUNGGU. |
 | **TeknoGuard (NOC)** | Tiket Baru Masuk | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[TIKET BARU] Kantor: {KANTOR}`<br>Isi: `[{id_tiket}] {nama}: {kategori}` | Tepat 1 kali seketika saat tiket dibuat warga dari MyTekno. |
-| **TeknoGuard (NOC)** | Pemantauan Terjeda | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[SCHEDULER] Kantor: {KANTOR}`<br>Isi: `Status {status}. Segera aktifkan.` | Wajib dipush berkala sebagai pengingat darurat agar segera di-resume. |
+| **TeknoGuard (NOC)** | Pemantauan Terjeda | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[SCHEDULER] Kantor: {KANTOR}`<br>Isi: `Status {status}. Segera aktifkan.` | Wajib dipush berkala **tepat 1 jam sekali saja** sebagai pengingat darurat agar segera di-resume. |
 | **MyTekno (Warga)** | Tiket Terkirim | `default` (`tekno_customer_channel`) | Judul: `Laporan Kendala Diterima`<br>Isi: `Laporan kendala internet Anda telah kami terima dan segera diverifikasi oleh tim teknisi.` | Tepat 1 kali saat tiket dibuat. |
 | **MyTekno (Warga)** | Update Tiket | `default` (`tekno_customer_channel`) | Judul: `Status Tiket #{id_tiket}`<br>Isi: `{status_label}. {catatan}` | Tepat 1 kali per perubahan status (`DICEK_ADMIN`, `DIPROSES`, `SELESAI`). |
 | **MyTekno (Warga)** | Gangguan LOS | `default` (`tekno_customer_channel`) | Judul: `Pemberitahuan Gangguan Jaringan`<br>Isi: `Mohon maaf, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.` | Tepat 1 kali saat status koneksi berubah ke LOS. |
@@ -187,17 +190,22 @@ dependencies {
 Agar notifikasi dapat muncul seperti pesan WhatsApp (Heads-Up Banner melayang di atas layar, menyalakan layar, dan bersuara lantang):
 
 ### A. Konfigurasi Notification Channel (Android 8.0+)
-Di `EdTeknoBackgroundService.kt`:
-1. **Channel Emergency TeknoGuard (`tekno_emergency_v3_channel`)**:
+Di `TeknoFirebaseMessagingService.kt`:
+1. **Channel Emergency Utama TeknoGuard (`tekno_emergency_v3_channel`)**:
    - `importance = NotificationManager.IMPORTANCE_HIGH`
-   - `AudioAttributes.USAGE_NOTIFICATION_RINGTONE` (stream ringtone bersuara lantang, bukan jam weker/alarm).
    - Suara kustom: `R.raw.tekno_alarm`.
-   - Getaran panjang: `longArrayOf(0, 500, 200, 500, 200, 800)`.
-2. **Channel MyTekno (`tekno_customer_channel`)**:
+   - Getaran panjang: `longArrayOf(0, 600, 200, 600, 200, 600, 400, 1000)`.
+2. **Channel Emergency Tanpa Getar (`tekno_emergency_v3_no_vib_channel`)**:
+   - `importance = NotificationManager.IMPORTANCE_HIGH`
+   - Suara kustom: `R.raw.tekno_alarm`.
+   - Getaran dinonaktifkan (`enableVibration(false)`), digunakan saat opsi Getar dimatikan di Pengaturan Sistem.
+3. **Channel Jam Tenang Malam (`tekno_silent_night_channel`)**:
+   - `importance = NotificationManager.IMPORTANCE_LOW`
+   - Senyap total: tanpa suara (`setSound(null, null)`) dan tanpa getar (`enableVibration(false)`), digunakan saat Jam Tenang / Night Mode aktif.
+4. **Channel MyTekno (`tekno_customer_channel`)**:
    - `importance = NotificationManager.IMPORTANCE_HIGH`
    - Suara notifikasi standar sistem Android (`RingtoneManager.TYPE_NOTIFICATION`).
-3. **Channel Silent Service (`tekno_silent_background_channel`)**:
-   - `importance = NotificationManager.IMPORTANCE_NONE` / `IMPORTANCE_MIN` (senyap total, disembunyikan dari status bar & lockscreen agar tidak menampilkan tulisan *"Pemantauan aktif di latar belakang"*).
+   - Getaran santun: `longArrayOf(0, 300, 200, 300)`.
 
 ### B. Properti Notifikasi Heads-Up Banner & Anti-Duplikasi Notifikasi
 Agar notifikasi dari kantor yang sama (misal 20 menit dari Banyumas) **terbaharui langsung di tempat (Now)** dan **tidak menumpuk berulang kali**:

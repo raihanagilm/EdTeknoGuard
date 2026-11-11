@@ -399,30 +399,66 @@ class ScanRunner:
             SchedulerStateManager.cleanup_alert_logs(days=7)
             SchedulerStateManager.cleanup_activity_logs(days=60)
 
-            # Trigger Push Notifikasi FCM ke HP Teknisi/Admin jika ada modem Kritis atau LOS (Format Ringkas)
-            total_emergency = stats.get("los", 0) + stats.get("critical", 0)
-            if total_emergency > 0:
+            # Resolusi pengaturan audio & jam tenang (night mode & getar)
+            from app.services.fcm_service import resolve_notification_audio_settings, send_push_notification
+            audio_settings = resolve_notification_audio_settings(t_db_finish, kantor=k_code, is_emergency=True)
+
+            # 1. Trigger Push Notifikasi FCM Khusus Sinyal Terputus (LOS)
+            los_count = stats.get("los", 0)
+            if los_count > 0:
                 try:
-                    from app.services.fcm_service import send_push_notification
                     from app.core.database import SessionLocal as MasterSessionLocal
                     from app.db.models import User as MasterUser
-                    m_db = MasterSessionLocal()
+                    m_db_los = MasterSessionLocal()
                     try:
-                        users_to_alert = m_db.query(MasterUser).filter(
+                        users_to_alert = m_db_los.query(MasterUser).filter(
                             MasterUser.is_active == True,
                             MasterUser.fcm_token != None,
                             MasterUser.fcm_token != ""
                         ).all()
-                        target_tokens = []
-                        for u in users_to_alert:
-                            if u.role == "super admin" or k_code in u.allowed_kantor_list:
-                                target_tokens.append(u.fcm_token)
-
-                        if target_tokens:
-                            title = f"[REDAMAN] Kantor: {k_code.upper()}"
-                            body = f"{stats.get('los', 0)} LOS, {stats.get('critical', 0)} Kritis. Segera cek fisik."
+                        los_tokens = [u.fcm_token for u in users_to_alert if u.role == "super admin" or k_code in u.allowed_kantor_list]
+                        if los_tokens:
+                            title = f"[SINYAL TERPUTUS] Kantor: {k_code.upper()}"
+                            body = f"{los_count} modem LOS (terputus). Segera cek kabel fisik."
                             send_push_notification(
-                                tokens=target_tokens,
+                                tokens=los_tokens,
+                                title=title,
+                                body=body,
+                                data={
+                                    "target_tab": "pelanggan",
+                                    "target_kantor": k_code,
+                                    "target_status": "LOS",
+                                    "level": "los",
+                                    "type": "monitoring_los",
+                                    "vibration": audio_settings["vibration"]
+                                },
+                                channel_id=audio_settings["channel_id"],
+                                sound=audio_settings["sound"]
+                            )
+                    finally:
+                        m_db_los.close()
+                except Exception as fcm_err:
+                    logger.warning(f"[FCM_ALERT_LOS] Gagal mengirim push notifikasi LOS: {fcm_err}")
+
+            # 2. Trigger Push Notifikasi FCM Khusus Redaman Kritis
+            crit_count = stats.get("critical", 0)
+            if crit_count > 0:
+                try:
+                    from app.core.database import SessionLocal as MasterSessionLocal
+                    from app.db.models import User as MasterUser
+                    m_db_crit = MasterSessionLocal()
+                    try:
+                        users_to_alert = m_db_crit.query(MasterUser).filter(
+                            MasterUser.is_active == True,
+                            MasterUser.fcm_token != None,
+                            MasterUser.fcm_token != ""
+                        ).all()
+                        crit_tokens = [u.fcm_token for u in users_to_alert if u.role == "super admin" or k_code in u.allowed_kantor_list]
+                        if crit_tokens:
+                            title = f"[REDAMAN KRITIS] Kantor: {k_code.upper()}"
+                            body = f"{crit_count} modem Kritis (<= -27.0 dBm). Segera cek redaman."
+                            send_push_notification(
+                                tokens=crit_tokens,
                                 title=title,
                                 body=body,
                                 data={
@@ -430,17 +466,18 @@ class ScanRunner:
                                     "target_kantor": k_code,
                                     "target_status": "CRITICAL",
                                     "level": "critical",
-                                    "type": "monitoring_alert"
+                                    "type": "monitoring_critical",
+                                    "vibration": audio_settings["vibration"]
                                 },
-                                channel_id="tekno_emergency_v3_channel",
-                                sound="tekno_alarm"
+                                channel_id=audio_settings["channel_id"],
+                                sound=audio_settings["sound"]
                             )
                     finally:
-                        m_db.close()
+                        m_db_crit.close()
                 except Exception as fcm_err:
-                    logger.warning(f"[FCM_ALERT] Gagal mengirim push notifikasi redaman: {fcm_err}")
+                    logger.warning(f"[FCM_ALERT_CRIT] Gagal mengirim push notifikasi Kritis: {fcm_err}")
 
-            # Trigger Push Notifikasi FCM berkala jika terdapat tiket kendala MENUNGGU (Format Ringkas)
+            # 3. Trigger Push Notifikasi FCM berkala jika terdapat tiket kendala MENUNGGU (Format Ringkas)
             try:
                 from app.db.models import TiketKendala
                 t_db_ticket = TenantDatabaseManager.get_tenant_session(k_code)
@@ -449,7 +486,6 @@ class ScanRunner:
                         TiketKendala.status == "MENUNGGU"
                     ).count()
                     if pending_count > 0:
-                        from app.services.fcm_service import send_push_notification
                         from app.core.database import SessionLocal as MasterSessionLocal
                         from app.db.models import User as MasterUser
                         m_db_tkt = MasterSessionLocal()
@@ -459,11 +495,7 @@ class ScanRunner:
                                 MasterUser.fcm_token != None,
                                 MasterUser.fcm_token != ""
                             ).all()
-                            tkt_tokens = []
-                            for u in users_to_alert:
-                                if u.role == "super admin" or k_code in u.allowed_kantor_list:
-                                    tkt_tokens.append(u.fcm_token)
-
+                            tkt_tokens = [u.fcm_token for u in users_to_alert if u.role == "super admin" or k_code in u.allowed_kantor_list]
                             if tkt_tokens:
                                 send_push_notification(
                                     tokens=tkt_tokens,
@@ -474,10 +506,11 @@ class ScanRunner:
                                         "target_kantor": k_code,
                                         "target_status": "MENUNGGU",
                                         "level": "warning",
-                                        "type": "ticket_pending_reminder"
+                                        "type": "ticket_pending_reminder",
+                                        "vibration": audio_settings["vibration"]
                                     },
-                                    channel_id="tekno_emergency_v3_channel",
-                                    sound="tekno_alarm"
+                                    channel_id=audio_settings["channel_id"],
+                                    sound=audio_settings["sound"]
                                 )
                         finally:
                             m_db_tkt.close()

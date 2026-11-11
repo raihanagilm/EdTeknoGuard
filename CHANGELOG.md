@@ -34,6 +34,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
   - Membersihkan entri `batch_los%` dari tabel `user_notification_reads` agar notifikasi pelanggan yang sedang mengalami gangguan LOS tetap tampil persisten hingga status modem pulih normal pada siklus pemindaian berikutnya.
 
 ### Added
+- **Pemisahan Notifikasi Push LOS dan Kritis ([scan_runner.py](app/services/scheduler/scan_runner.py))**:
+  - Memisahkan push notifikasi Sinyal Terputus (`[SINYAL TERPUTUS]`) dan Redaman Kritis (`[REDAMAN KRITIS]`) menjadi dua notifikasi push mandiri agar teknisi lapangan dapat membedakan penanganan fisik kabel vs penanganan konektor/redaman optik.
+- **Throttle Pengingat Jadwal Pemantauan Terjeda 1 Jam ([scheduler_service.py](app/services/scheduler_service.py))**:
+  - Mengatur pengingat darurat saat status scheduler kantor bernilai `PAUSED` atau `STOPPED` agar hanya ditembakkan 1 jam sekali (60 menit) menggunakan timestamp pelacak `last_paused_reminder_at`.
+- **Integrasi Jam Tenang & Getar pada Push Notifikasi ([fcm_service.py](app/services/fcm_service.py), [TeknoFirebaseMessagingService.kt](d:/databaru/Magang/EdTeknoGuard-Android/app/src/main/java/com/edtekno/app/TeknoFirebaseMessagingService.kt))**:
+  - Menghubungkan notifikasi push dengan pengaturan `night_mode_enabled` (jam tenang malam) dan `app_vibration_enabled` di database.
+  - Saat Jam Tenang aktif (misal 22:00 - 06:00), push notifikasi dikirimkan dalam mode senyap tanpa suara dan tanpa getar via channel `tekno_silent_night_channel`.
+  - Jika getar dimatikan di Pengaturan Sistem, notifikasi dialihkan ke channel alarm tanpa getar `tekno_emergency_v3_no_vib_channel`.
 - **Matriks & Kebijakan Push Notifikasi Native Operasional ([AGENTS.md](AGENTS.md) & [docs/PROMPT_ANDROID_STUDIO.md](docs/PROMPT_ANDROID_STUDIO.md))**:
   - Menetapkan matriks resmi push notifikasi Android untuk TeknoGuard (NOC & Teknisi) dan MyTekno (Warga & Pelanggan).
   - Format teks khusus kantor disusun super ringkas dan padat tanpa teks panjang di status bar (`[REDAMAN]`, `[TIKET]`, `[SCHEDULER]`).

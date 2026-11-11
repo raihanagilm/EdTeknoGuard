@@ -380,8 +380,13 @@ EdTeknoGuard/
     - **Larangan Karakter Emoji Mutlak**: Seluruh format judul, isi pesan, payload notifikasi, dan antarmuka web DILARANG KERAS memuat karakter emoji apapun. Gunakan penanda semantik teks baku seperti `[REDAMAN]`, `[TIKET]`, `[SCHEDULER]`.
     - **Kebijakan Teks Khusus Kantor (TeknoGuard - NOC & Teknisi)**:
       - Wajib disusun **sangat ringkas, padat, dan langsung pada inti informasi** agar teknisi lapangan dapat membaca status dalam sekejap tanpa terbebani kalimat panjang di status bar perangkat Android.
-      - Saluran / Channel: `tekno_emergency_v3_channel`, nada suara: `tekno_alarm` (Getar + Bunyi Keras), Heads-Up Banner melayang.
-      - **Perilaku Re-Push (Anti-Lupa)**: Wajib dipush berulang setiap siklus interval pemindaian selama kondisi gangguan belum diselesaikan (tidak boleh berhenti hanya karena pengguna men-dismiss / swipe notifikasi).
+      - Saluran / Channel:
+        - `tekno_emergency_v3_channel`: Nada suara `tekno_alarm` (Getar + Bunyi Keras, Heads-Up Banner melayang).
+        - `tekno_emergency_v3_no_vib_channel`: Nada suara `tekno_alarm` tanpa getar (jika `app_vibration_enabled == False`).
+        - `tekno_silent_night_channel`: Senyap tanpa suara dan tanpa getar (khusus saat Jam Tenang / Night Mode aktif).
+      - **Kepatuhan Jam Tenang & Getar**: Sistem backend memeriksa setting `night_mode_enabled` (rentang jam malam misal 22:00 - 06:00) dan `app_vibration_enabled`. Pada jam tenang, notifikasi dialihkan ke mode senyap agar tidak mengganggu istirahat malam.
+      - **Pemisahan Notifikasi LOS dan Kritis**: Notifikasi push untuk Sinyal Terputus (LOS) dan Redaman Kritis dipisahkan secara mandiri agar teknisi dapat membedakan penanganan fisik kabel vs penanganan redaman optik.
+      - **Perilaku Re-Push (Anti-Lupa)**: Wajib dipush berulang setiap siklus interval pemindaian selama kondisi gangguan belum diselesaikan (tidak boleh berhenti hanya karena pengguna men-dismiss / swipe notifikasi). Khusus pengingat jadwal terjeda (PAUSED / STOPPED) dikirimkan berkala **tepat 1 jam sekali saja**.
     - **Kebijakan Teks Pelanggan (MyTekno - Warga & Pelanggan)**:
       - Wajib menggunakan bahasa Indonesia yang santun, ramah, menenangkan, dan beretika tanpa membuat panik.
       - Saluran / Channel: `tekno_customer_channel`, nada suara: `default` sistem Android, ikon media: Maskot Tekno.
@@ -391,10 +396,11 @@ EdTeknoGuard/
 
     | Aplikasi | Kategori / Peristiwa | Pemicu | Suara / Media | Format Judul & Format Pesan | Perilaku & Frekuensi Pengiriman |
     | :--- | :--- | :--- | :--- | :--- | :--- |
-    | **TeknoGuard (NOC)** | Sinyal Terputus (LOS) & Redaman Kritis | Terdeteksi modem pelanggan mati, putus optik, atau redaman <= -27.0 dBm | tekno_alarm | Judul: `[REDAMAN] Kantor: {KANTOR}`<br>Isi: `{los} LOS, {critical} Kritis. Segera cek fisik.` | Wajib dipush berulang setiap siklus interval scan selama status masih LOS/Kritis. |
-    | **TeknoGuard (NOC)** | Tiket Kendala Belum Disentuh | Terdapat tiket kendala berstatus MENUNGGU di database kantor | tekno_alarm | Judul: `[TIKET] Kantor: {KANTOR}`<br>Isi: `{count} tiket MENUNGGU belum diproses.` | Wajib dipush berulang setiap siklus pemindaian berkala selama masih ada tiket MENUNGGU. |
-    | **TeknoGuard (NOC)** | Tiket Baru Masuk | Warga baru saja mengirimkan laporan kendala dari MyTekno | tekno_alarm | Judul: `[TIKET BARU] Kantor: {KANTOR}`<br>Isi: `[{id_tiket}] {nama}: {kategori}` | Tepat 1 kali seketika saat tiket dibuat warga. |
-    | **TeknoGuard (NOC)** | Jadwal Pemantauan Terjeda | Scheduler pemantauan kantor bernilai PAUSED atau STOPPED | tekno_alarm | Judul: `[SCHEDULER] Kantor: {KANTOR}`<br>Isi: `Status {status}. Segera aktifkan.` | Wajib dipush berkala di tiap jadwal interval sebagai pengingat darurat agar tidak lupa diaktifkan kembali. |
+    | **TeknoGuard (NOC)** | Sinyal Terputus (LOS) | Terdeteksi modem pelanggan mati atau serat optik putus | tekno_alarm (atau senyap saat Jam Tenang) | Judul: `[SINYAL TERPUTUS] Kantor: {KANTOR}`<br>Isi: `{los} modem LOS (terputus). Segera cek kabel fisik.` | Wajib dipush berulang setiap siklus interval scan selama status masih LOS. |
+    | **TeknoGuard (NOC)** | Redaman Kritis | Redaman optik menyentuh atau memburuk <= -27.0 dBm | tekno_alarm (atau senyap saat Jam Tenang) | Judul: `[REDAMAN KRITIS] Kantor: {KANTOR}`<br>Isi: `{critical} modem Kritis (<= -27.0 dBm). Segera cek redaman.` | Wajib dipush berulang setiap siklus interval scan selama status masih Kritis. |
+    | **TeknoGuard (NOC)** | Tiket Kendala Belum Disentuh | Terdapat tiket kendala berstatus MENUNGGU di database kantor | tekno_alarm (atau senyap saat Jam Tenang) | Judul: `[TIKET] Kantor: {KANTOR}`<br>Isi: `{count} tiket MENUNGGU belum diproses.` | Wajib dipush berulang setiap siklus pemindaian berkala selama masih ada tiket MENUNGGU. |
+    | **TeknoGuard (NOC)** | Tiket Baru Masuk | Warga baru saja mengirimkan laporan kendala dari MyTekno | tekno_alarm (atau senyap saat Jam Tenang) | Judul: `[TIKET BARU] Kantor: {KANTOR}`<br>Isi: `[{id_tiket}] {nama}: {kategori}` | Tepat 1 kali seketika saat tiket dibuat warga. |
+    | **TeknoGuard (NOC)** | Jadwal Pemantauan Terjeda | Scheduler pemantauan kantor bernilai PAUSED atau STOPPED | tekno_alarm (atau senyap saat Jam Tenang) | Judul: `[SCHEDULER] Kantor: {KANTOR}`<br>Isi: `Status {status}. Segera aktifkan.` | Wajib dipush berkala **tepat 1 jam sekali saja** sebagai pengingat darurat agar tidak lupa diaktifkan kembali. |
     | **MyTekno (Warga)** | Tiket Berhasil Terkirim | Form keluhan berhasil disubmit oleh warga | default / Maskot | Judul: `Laporan Kendala Diterima`<br>Isi: `Laporan kendala internet Anda telah kami terima dan segera diverifikasi oleh tim teknisi.` | Tepat 1 kali saat tiket selesai dibuat. |
     | **MyTekno (Warga)** | Tiket Diverifikasi | Status tiket diubah admin menjadi DICEK_ADMIN | default / Maskot | Judul: `Status Tiket #{id_tiket}`<br>Isi: `Laporan Anda sedang diverifikasi admin NOC. {catatan}` | Tepat 1 kali saat status berubah. |
     | **MyTekno (Warga)** | Teknisi Menuju Lokasi | Status tiket diubah menjadi DIPROSES | default / Maskot | Judul: `Status Tiket #{id_tiket}`<br>Isi: `Teknisi sedang memproses perbaikan tiket Anda. {catatan}` | Tepat 1 kali saat status berubah. |
