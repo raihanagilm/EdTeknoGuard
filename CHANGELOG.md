@@ -27,6 +27,15 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Fixed
+- **Pendaftaran Token FCM Pelanggan & Realtime Push MyTekno ([routes.py](app/portal/modules/auth/routes.py), [portalApi.js](frontend/src/portal/services/portalApi.js), [PortalCustomerApp.jsx](frontend/src/portal/PortalCustomerApp.jsx), [App.jsx](frontend/src/App.jsx))**:
+  - Memperbaiki kegagalan pendaftaran token FCM pelanggan pada endpoint `/portal/api/auth/register-fcm` yang sebelumnya memeriksa `request.state.portal_customer` alih-alih `get_current_customer_optional(request)`.
+  - Menambahkan verifikasi ganda berbasis cookie sesi terproteksi dan fallback identitas `id_pelanggan` serta `kantor` pada payload JSON body.
+  - Memperbarui pencarian pelanggan menggunakan `PortalCustomerService.get_customer_by_id` yang mendukung resolusi multi-tenant database across 4 kantor wilayah.
+  - Menambahkan `PortalAuthService.registerFcm` dengan konfigurasi `credentials: 'include'` pada frontend portal sehingga token FCM pelanggan dari Android Bridge langsung tersimpan di database pelanggan.
+  - Menghubungkan fungsi sinkronisasi token pada saat login dan pemuatan sesi portal mandiri.
+- **Dinamisasi 100% Pengaturan Jam Tenang & Getar ([fcm_service.py](app/services/fcm_service.py))**:
+  - Menghapus inisialisasi default hardcode pada baris 51-54 `fcm_service.py`.
+  - Menambahkan fallback pembukaan sesi database tenant secara dinamis (`TenantDatabaseManager.get_tenant_session(kantor)`) jika parameter `db` tidak diteruskan, sehingga pembacaan konfigurasi `night_mode_enabled`, `night_mode_start`, `night_mode_end`, dan `app_vibration_enabled` murni dan selalu diambil dari database `system_settings`.
 - **Penguncian Notifikasi Darurat LOS dari Aksi Baca dan Hapus ([service.py](app/modules/notifications/service.py), [App.jsx](frontend/src/App.jsx), [NotificationsView.jsx](frontend/src/components/notifications/NotificationsView.jsx))**:
   - Mengunci status `LOS` (Loss of Signal / Sinyal Terputus) sebagai kondisi darurat fisik jaringan permanen yang tidak dapat ditandai sudah dibaca (`mark as read`) maupun dihapus (`dismiss`).
   - Menghilangkan tombol hapus tong sampah (`Trash2`) pada kartu notifikasi LOS di pusat notifikasi dan menggantinya dengan penanda tegas `Perlu Tindakan`.

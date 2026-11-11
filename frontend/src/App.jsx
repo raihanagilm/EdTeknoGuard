@@ -362,6 +362,7 @@ export default function App() {
                 fetch('/api/notifications/register-fcm', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
                   body: JSON.stringify({ fcm_token: token })
                 }).then(r => {
                   if (r.ok) sessionStorage.setItem('edtekno_synced_fcm_token', token)

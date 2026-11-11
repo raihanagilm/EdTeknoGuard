@@ -2,6 +2,10 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
+import logging
+
+logger = logging.getLogger("portal_auth")
+
 from app.core.database import get_portal_db
 from app.portal.services.customer_service import PortalCustomerService
 from app.portal.core.security import (
@@ -224,23 +228,32 @@ async def register_portal_fcm_token(
     """
     Mendaftarkan atau memperbarui token FCM perangkat Android
     ke data pelanggan yang sedang login di Portal MyTekno.
+    Mendukung verifikasi berbasis cookie sesi aktif maupun fallback identitas pelanggan.
     """
     body = await request.json()
     token = body.get("fcm_token", "").strip()
     if not token:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Token FCM tidak boleh kosong."})
 
-    customer_session = getattr(request.state, "portal_customer", None)
-    if not customer_session:
-        return JSONResponse(status_code=401, content={"ok": False, "message": "Sesi pelanggan tidak ditemukan."})
+    customer_session = get_current_customer_optional(request)
+    cust_id = customer_session.get("id_pelanggan") if customer_session else (body.get("id_pelanggan") or "").strip()
+    hint_kantor = customer_session.get("kantor") if customer_session else (body.get("kantor") or "").strip()
 
-    cust_id = customer_session.get("id_pelanggan")
-    if cust_id:
-        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_id).first()
-        if cust:
+    if not cust_id:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Sesi atau identitas pelanggan tidak ditemukan."})
+
+    try:
+        cust, target_db = PortalCustomerService.get_customer_by_id(cust_id, db=db, hint_kantor=hint_kantor)
+        if cust and target_db:
             cust.fcm_token = token
-            db.commit()
+            target_db.commit()
+            logger.info(f"FCM: Token pelanggan {cust_id} ({cust.nama}) berhasil didaftarkan di kantor {cust.kantor or hint_kantor}.")
+            if target_db != db:
+                target_db.close()
             return {"ok": True, "message": "Token FCM pelanggan berhasil didaftarkan."}
+    except Exception as e:
+        logger.error(f"FCM: Gagal mendaftarkan token pelanggan {cust_id}: {e}")
+        return JSONResponse(status_code=500, content={"ok": False, "message": "Gagal menyimpan token ke database."})
 
     return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan."})
 

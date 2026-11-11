@@ -89,6 +89,14 @@ export class PortalAuthService {
   static async resetPassword(payload) {
     return new PortalApiService().post('/auth/konfirmasi-reset-password', payload);
   }
+
+  static async registerFcm(token, idPelanggan = null, kantor = null) {
+    return new PortalApiService().post('/auth/register-fcm', {
+      fcm_token: token,
+      id_pelanggan: idPelanggan,
+      kantor: kantor,
+    });
+  }
 }
 
 export class PortalDashboardService {

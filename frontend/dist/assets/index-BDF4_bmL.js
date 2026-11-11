@@ -38473,6 +38473,13 @@ var PortalAuthService = class {
 	static async resetPassword(payload) {
 		return new PortalApiService().post("/auth/konfirmasi-reset-password", payload);
 	}
+	static async registerFcm(token, idPelanggan = null, kantor = null) {
+		return new PortalApiService().post("/auth/register-fcm", {
+			fcm_token: token,
+			id_pelanggan: idPelanggan,
+			kantor
+		});
+	}
 };
 var PortalDashboardService = class {
 	static async getDashboard() {
@@ -44509,18 +44516,7 @@ function PortalCustomerApp() {
 				setCustomer(res.data.customer);
 				setViewState("app");
 				fetchDashboard();
-				if (window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === "function") try {
-					const token = window.AndroidBridge.getFcmToken();
-					if (token && token.length > 20) {
-						if (sessionStorage.getItem("mytekno_synced_fcm_token") !== token) fetch("/portal/api/auth/register-fcm", {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({ fcm_token: token })
-						}).then((r) => {
-							if (r.ok) sessionStorage.setItem("mytekno_synced_fcm_token", token);
-						}).catch(() => {});
-					}
-				} catch (_) {}
+				syncFcmToken(res.data.customer);
 			} else {
 				setIsAuthenticated(false);
 				setViewState("login");
@@ -44531,6 +44527,18 @@ function PortalCustomerApp() {
 		} finally {
 			setLoading(false);
 		}
+	};
+	const syncFcmToken = async (targetCustomer) => {
+		if (!window.AndroidBridge || typeof window.AndroidBridge.getFcmToken !== "function") return;
+		try {
+			const token = window.AndroidBridge.getFcmToken();
+			if (token && token.length > 20) {
+				if (sessionStorage.getItem("mytekno_synced_fcm_token") !== token) {
+					const res = await PortalAuthService.registerFcm(token, targetCustomer?.id_pelanggan, targetCustomer?.kantor);
+					if (res.ok && res.data?.ok) sessionStorage.setItem("mytekno_synced_fcm_token", token);
+				}
+			}
+		} catch (_) {}
 	};
 	const fetchDashboard = async () => {
 		try {
@@ -44617,6 +44625,7 @@ function PortalCustomerApp() {
 		switchTab("beranda");
 		fetchSession();
 		fetchDashboard();
+		syncFcmToken(custData);
 	};
 	const handleLogout = async () => {
 		try {
@@ -45003,6 +45012,7 @@ function App() {
 						if (sessionStorage.getItem("edtekno_synced_fcm_token") !== token) fetch("/api/notifications/register-fcm", {
 							method: "POST",
 							headers: { "Content-Type": "application/json" },
+							credentials: "include",
 							body: JSON.stringify({ fcm_token: token })
 						}).then((r) => {
 							if (r.ok) sessionStorage.setItem("edtekno_synced_fcm_token", token);

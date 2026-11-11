@@ -119,23 +119,7 @@ export function PortalCustomerApp() {
         fetchDashboard();
 
         // Sinkronisasi Token FCM dari Android Bridge ke Database Pelanggan
-        if (window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === 'function') {
-          try {
-            const token = window.AndroidBridge.getFcmToken();
-            if (token && token.length > 20) {
-              const lastSyncedToken = sessionStorage.getItem('mytekno_synced_fcm_token');
-              if (lastSyncedToken !== token) {
-                fetch('/portal/api/auth/register-fcm', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ fcm_token: token })
-                }).then(r => {
-                  if (r.ok) sessionStorage.setItem('mytekno_synced_fcm_token', token);
-                }).catch(() => {});
-              }
-            }
-          } catch (_) {}
-        }
+        syncFcmToken(res.data.customer);
       } else {
         setIsAuthenticated(false);
         setViewState('login');
@@ -146,6 +130,26 @@ export function PortalCustomerApp() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const syncFcmToken = async (targetCustomer) => {
+    if (!window.AndroidBridge || typeof window.AndroidBridge.getFcmToken !== 'function') return;
+    try {
+      const token = window.AndroidBridge.getFcmToken();
+      if (token && token.length > 20) {
+        const lastSyncedToken = sessionStorage.getItem('mytekno_synced_fcm_token');
+        if (lastSyncedToken !== token) {
+          const res = await PortalAuthService.registerFcm(
+            token,
+            targetCustomer?.id_pelanggan,
+            targetCustomer?.kantor
+          );
+          if (res.ok && res.data?.ok) {
+            sessionStorage.setItem('mytekno_synced_fcm_token', token);
+          }
+        }
+      }
+    } catch (_) {}
   };
 
   const fetchDashboard = async () => {
@@ -275,6 +279,7 @@ export function PortalCustomerApp() {
     switchTab('beranda');
     fetchSession();
     fetchDashboard();
+    syncFcmToken(custData);
   };
 
   const handleLogout = async () => {

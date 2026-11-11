@@ -45,32 +45,47 @@ def resolve_notification_audio_settings(
     is_emergency: bool = True
 ) -> Dict[str, str]:
     """
-    Menentukan channel_id, sound, dan vibration berdasarkan pengaturan Jam Tenang (Night Mode)
+    Menentukan channel_id, sound, dan vibration berdasarkan konfigurasi dinamis Jam Tenang (Night Mode)
     dan Getar (App Vibration) dari database system_settings.
     """
-    night_enabled = False
-    night_start = "22:00"
-    night_end = "06:00"
-    vibration_enabled = True
-
-    if db:
-        try:
-            from app.modules.settings.service import SystemSettingsService
-            cfg = SystemSettingsService.get_settings(db, kantor=kantor)
-            night_enabled = cfg.get("night_mode_enabled", False)
-            night_start = cfg.get("night_mode_start", "22:00") or "22:00"
-            night_end = cfg.get("night_mode_end", "06:00") or "06:00"
-            vibration_enabled = cfg.get("app_vibration_enabled", True)
-        except Exception as e:
-            logger.debug(f"FCM: Gagal membaca setting audio kantor {kantor}: {e}")
-
+    from app.modules.settings.service import SystemSettingsService
     from app.core.timezone import get_now_wib
+    from datetime import datetime
+
+    session_to_close = None
+    target_db = db
+
+    if target_db is None:
+        try:
+            from app.core.tenant_database import TenantDatabaseManager
+            target_db = TenantDatabaseManager.get_tenant_session(kantor)
+            session_to_close = target_db
+        except Exception as e:
+            logger.debug(f"FCM: Tidak dapat membuka sesi tenant untuk kantor {kantor}: {e}")
+
+    cfg: Dict[str, Any] = {}
+    if target_db:
+        try:
+            cfg = SystemSettingsService.get_settings(target_db, kantor=kantor)
+        except Exception as e:
+            logger.debug(f"FCM: Gagal membaca setting audio dari database kantor {kantor}: {e}")
+        finally:
+            if session_to_close:
+                try:
+                    session_to_close.close()
+                except Exception:
+                    pass
+
+    night_enabled = bool(cfg.get("night_mode_enabled", False))
+    night_start = str(cfg.get("night_mode_start") or "22:00")
+    night_end = str(cfg.get("night_mode_end") or "06:00")
+    vibration_enabled = bool(cfg.get("app_vibration_enabled", True))
+
     now_time = get_now_wib().time()
 
     is_night_mode = False
     if night_enabled:
         try:
-            from datetime import datetime
             t_start = datetime.strptime(night_start, "%H:%M").time()
             t_end = datetime.strptime(night_end, "%H:%M").time()
             if t_start <= t_end:
