@@ -4,6 +4,8 @@
 .env.*.local
 *.key
 *.pem
+*service-account*.json
+firebase-service-account.json
 .kilo/
 .github
 # Python

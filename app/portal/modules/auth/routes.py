@@ -213,3 +213,33 @@ async def portal_auth_minta_reset_password(request: Request, db: Session = Depen
         "no_hp": cust_no_hp,
         "id_tiket": id_tiket_created
     }
+
+
+@router.post("/register-fcm")
+async def register_portal_fcm_token(
+    request: Request,
+    db: Session = Depends(get_portal_db)
+):
+    """
+    Mendaftarkan atau memperbarui token FCM perangkat Android
+    ke data pelanggan yang sedang login di Portal MyTekno.
+    """
+    body = await request.json()
+    token = body.get("fcm_token", "").strip()
+    if not token:
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Token FCM tidak boleh kosong."})
+
+    customer_session = getattr(request.state, "portal_customer", None)
+    if not customer_session:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Sesi pelanggan tidak ditemukan."})
+
+    cust_id = customer_session.get("id_pelanggan")
+    if cust_id:
+        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == cust_id).first()
+        if cust:
+            cust.fcm_token = token
+            db.commit()
+            return {"ok": True, "message": "Token FCM pelanggan berhasil didaftarkan."}
+
+    return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan."})
+

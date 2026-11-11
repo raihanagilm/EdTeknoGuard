@@ -13,8 +13,10 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
   Aplikasi memiliki kapabilitas memunculkan notifikasi native dengan suara khusus dan banner mengambang di atas layar (*heads-up notification*) saat ada gangguan redaman kritis (TeknoGuard) atau update tiket/tagihan (MyTekno), **bahkan ketika aplikasi sedang ditutup atau layar HP terkunci**.
 * **Integrasi Web-to-Native (JavaScript Bridge):**
   Halaman web React di dalam WebView dapat memicu notifikasi native perangkat secara langsung melalui `window.AndroidBridge.showNativeNotification(...)`.
-* **Zero Complex Firebase Dependency:**
-  Menggunakan engine **Foreground Service + WakeLock + OkHttp Coroutine Background Polling Engine** lokal yang tangguh, hemat baterai, dan tidak bergantung pada lisensi Google Play Services berbayar / Firebase Cloud Messaging yang rumit di jaringan intranet ISP.
+* **Standar Industri: Firebase Cloud Messaging (FCM) Resmi Google (Ala WhatsApp):**
+  Aplikasi menggunakan **Firebase Cloud Messaging (FCM)** murni. Server backend FastAPI mengirim push notifikasi secara instan melalui Google Play Services saat ada gangguan redaman kritis (TeknoGuard) atau update tiket/tagihan (MyTekno), **bahkan ketika aplikasi sedang ditutup total atau layar HP terkunci**.
+  - **Bebas Notifikasi Persisten Latar Belakang:** Tidak ada lagi foreground service yang memunculkan notifikasi "pemantauan di latar belakang" di status bar pengguna.
+  - **Super Hemat Baterai:** HP tidak perlu melakukan polling berkala, HP tetap dalam kondisi *deep sleep*.
 * **Smart Swipe-to-Refresh & Smooth In-App Scroll:**
   WebView dilengkapi bridge pendeteksi posisi scroll internal web (`AndroidBridge.setScrollAtTop` & `setOnChildScrollUpCallback`). Pengguna dapat bebas scroll ke bawah lalu scroll kembali ke atas tanpa terganggu atau ter-refresh secara tidak sengaja. Refresh hanya aktif jika gestur ditarik saat konten benar-benar berada di puncak paling atas.
 * **Splash Screen Elegan (Logo Besar + Nama Aplikasi):**
@@ -34,6 +36,9 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
     2. Membuka tab modul yang dituju (`pelanggan`, `tiket`, atau `riwayat`).
     3. Menerapkan filter status (`LOS`, `CRITICAL`, `MENUNGGU`) dan kata kunci pencarian pelanggan secara otomatis via `window.navigateToTab(...)`.
   - **TeknoGuard (NOC):** Notifikasi multi-kantor diperbarui secara bersih (*in-place update*) menggunakan hash ID stabil format `${batchType}_${kantor}` (contoh: `batch_los_karanggede`) sehingga status redaman terbaru langsung memperbarui notifikasi sebelumnya tanpa duplikasi atau rentetan spam baru.
+  - **Pelacakan Dismiss (Anti-Spam Swipe & Pembukaan Aplikasi):**
+    - Setiap notifikasi dilengkapi `deletePendingIntent` via `setDeleteIntent`. Saat pengguna men-*swipe* (menghapus) notifikasi dari status bar, waktu dismiss disimpan secara persisten (`KEY_DISMISSED_AT_PREFIX`). Sistem tidak akan memunculkan ulang notifikasi yang sama sebelum interval waktu database tercapai.
+    - Fungsi bridge `showNativeNotification` di `MainActivity.kt` telah dikunci untuk varian `KARYAWAN` (TeknoGuard) agar saat aplikasi/web dimuat ulang, tidak ada penyemburan notifikasi duplikat (*now*).
   - **MyTekno (Pelanggan) Non-Pembayaran:** Notifikasi status tiket kendala (`MENUNGGU`, `DICEK_ADMIN`, `DIPROSES`, `SELESAI`) dan notifikasi sinyal LOS/pulih disimpan secara persisten di `SharedPreferences` dan **cukup muncul tepat 1 kali saja** saat terjadi perubahan status baru, bebas spam berulang.
   - **MyTekno (Pelanggan) Pembayaran Tagihan:**
     - Dikirimkan pengingat **1 hari sebelum jatuh tempo (H-1)** sebanyak 1 kali dalam bulan berjalan.
@@ -152,6 +157,10 @@ dependencies {
     // Jaringan Latar Belakang & Coroutines
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Firebase Cloud Messaging (FCM) Resmi
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
 }
 ```
 
@@ -386,22 +395,11 @@ private fun pollCustBillingStatus() {
    `D:\databaru\Magang\EdTeknoGuard-Android`
 3. Tunggu proses **Gradle Sync** selesai mengunduh dependensi (status: *BUILD SUCCESSFUL*).
 
-### Langkah 2: Cara Menaikkan / Update Versi Aplikasi (Version Code & Version Name)
-Sebelum melakukan rilis atau distribusi versi baru, perbarui versi di berkas `app/build.gradle.kts`:
-```kotlin
-defaultConfig {
-    minSdk = 24
-    targetSdk = 35
-    // Naikkan versionCode (integer berurutan: 1, 2, 3, dst.)
-    versionCode = 3
-    // Perbarui versionName sesuai rilis (misal 1.2.0 -> 1.3.0)
-    versionName = "1.3.0"
-
-    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-}
-```
-> [!IMPORTANT]
-> **Aturan Wajib Versi:** Setiap kali mengunggah build baru ke Firebase App Distribution atau Play Store, nilai `versionCode` **WAJIB bertambah lebih besar** dari versi sebelumnya (misal dari `2` menjadi `3`). Jika tidak, Firebase akan menolak build dengan pesan error versi duplikat.
+### Langkah 2: Sistem Auto-Versioning Dinamis (Tanpa Perlu Edit Manual)
+Proyek ini telah dikonfigurasi dengan **Auto-Versioning Otomatis** di `app/build.gradle.kts`:
+* `versionCode`: Otomatis meningkat setiap menit berdasarkan epoch time (`((System.currentTimeMillis() - 1735689600000L) / 60000L).toInt()`), sehingga setiap build baru dijamin memiliki `versionCode` yang selalu lebih tinggi dan tidak pernah ditolak Firebase.
+* `versionName`: Otomatis menghasilkan penamaan rilis real-time berformat tanggal dan jam: `1.3.<YYMMDD>.<HHmm>` (contoh: `1.3.261111.1330`).
+* Tester di aplikasi App Tester HP akan selalu langsung melihat pembaruan versi baru setiap kali Anda menjalankan upload!
 
 ### Langkah 3: Menyesuaikan Domain Server Backend
 Berkas `app/build.gradle.kts` sudah dikonfigurasi secara default ke domain resmi HTTPS:
@@ -425,63 +423,21 @@ Berkas `app/build.gradle.kts` sudah dikonfigurasi secara default ke domain resmi
 
 ---
 
-## 🚀 6. PERINTAH BUILD & UPLOAD OTOMATIS KE FIREBASE APP DISTRIBUTION
+## 🚀 6. OTOMATISASI BUILD & DISTRIBUSI KE FIREBASE (MANDATORY INSTRUCTION)
 
-Proyek ini telah terintegrasi dengan plugin `com.google.firebase.appdistribution`. Anda dapat mengompilasi APK sekaligus mendistribusikannya secara otomatis ke tim tester langsung via **Terminal Android Studio / PowerShell**:
-
-### A. Prasyarat Otentikasi Firebase
-Pastikan token Firebase atau file Service Account telah disiapkan:
-1. Simpan token di `local.properties`:
-   ```properties
-   FIREBASE_TOKEN=1//0gxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-   ```
-   *Atau login langsung via Firebase CLI*:
-   ```bash
-   firebase login:ci
-   ```
-2. Atau letakkan berkas kredensial Google Service Account di `service-account.json`.
+> [!IMPORTANT]
+> **Instruksi Wajib Agent / Developer:**
+> Setiap kali prompt ini dijalankan untuk merilis atau memperbarui aplikasi ke Firebase App Distribution, sistem/agent **WAJIB mengeksekusi perintah build Gradle berikut secara otomatis**:
+> ```powershell
+> ./gradlew appDistributionUploadGuardDebug appDistributionUploadMyteknoDebug
+> ```
 
 ---
 
-### B. Perintah Eksekusi Gradle Task (Terminal / PowerShell)
-
-Buka tab **Terminal** di bagian bawah Android Studio (pastikan berada di direktori project `EdTeknoGuard-Android`):
-
-#### 1. Build & Distribusikan TeknoGuard (NOC & Teknisi):
-* **Mode Debug (Pengujian Cepat):**
-  ```powershell
-  ./gradlew appDistributionUploadGuardDebug
-  ```
-* **Mode Release (Rilis Produksi):**
-  ```powershell
-  ./gradlew appDistributionUploadGuardRelease
-  ```
-
-#### 2. Build & Distribusikan MyTekno (Portal Pelanggan / Warga):
-* **Mode Debug (Pengujian Cepat):**
-  ```powershell
-  ./gradlew appDistributionUploadMyteknoDebug
-  ```
-* **Mode Release (Rilis Produksi):**
-  ```powershell
-  ./gradlew appDistributionUploadMyteknoRelease
-  ```
-
-#### 3. Build & Distribusikan Keduanya Sekaligus:
+### Menambahkan Catatan Rilis (Release Notes) Saat Upload
+Catatan pembaruan dapat disisipkan langsung melalui argumen Gradle:
 ```powershell
-./gradlew appDistributionUploadGuardRelease appDistributionUploadMyteknoRelease
-```
-
----
-
-### C. Menambahkan Catatan Rilis (Release Notes) Saat Upload
-Anda dapat menyisipkan catatan update langsung saat menjalankan perintah terminal tanpa mengubah kode:
-```powershell
-./gradlew appDistributionUploadGuardDebug --args="--release-notes='Update perbaikan notifikasi Karanggede & tema splash screen putih'"
-```
-Atau melalui parameter properti Gradle:
-```powershell
-./gradlew appDistributionUploadGuardDebug -PfirebaseAppDistributionReleaseNotes="Perbaikan notifikasi anti-spam Karanggede & header status bar putih"
+./gradlew appDistributionUploadGuardDebug appDistributionUploadMyteknoDebug -PfirebaseAppDistributionReleaseNotes="Update perbaikan notifikasi, pembaruan ikon resmi TeknoIndo, dan navigasi multi-kantor"
 ```
 
 ---

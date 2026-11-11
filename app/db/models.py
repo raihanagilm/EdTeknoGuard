@@ -109,6 +109,7 @@ class Pelanggan(TenantBase):
     lokasi_gps = Column(String(100), nullable=True)
     status_verifikasi = Column(String(30), default="TERVERIFIKASI", nullable=False, index=True) # TERVERIFIKASI, PENDING, DITOLAK
     last_login = Column(DateTime, nullable=True)
+    fcm_token = Column(Text, nullable=True) # Token Google FCM untuk push notification native Android MyTekno
 
     # Hasil Speed Test Terakhir Pelanggan
     last_speed_download = Column(Numeric(6, 2), nullable=True)
@@ -377,6 +378,7 @@ class User(MasterBase):
     role = Column(String(50), default="teknisi", nullable=False) # super admin, admin, teknisi
     allowed_kantor = Column(String(255), nullable=False, default='["cabang"]') # JSON array string: ["cabang"], ["pusat"], etc.
     is_active = Column(Boolean, default=True, nullable=False)
+    fcm_token = Column(Text, nullable=True) # Token Google FCM untuk push notification native Android TeknoGuard
     created_at = Column(DateTime, default=get_now_wib, nullable=False)
     updated_at = Column(DateTime, default=get_now_wib, onupdate=get_now_wib, nullable=False)
 

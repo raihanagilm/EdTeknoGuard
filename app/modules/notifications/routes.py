@@ -146,3 +146,33 @@ def snooze_pause_reminder(request: Request, db: Session = Depends(get_db)):
     ont_scheduler.snooze_paused_reminder(db)
     return {"status": "success", "message": "Pengingat jeda ditunda 1 jam."}
 
+
+@router.post("/register-fcm")
+def register_fcm_token(
+    request: Request,
+    payload: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    Mendaftarkan atau memperbarui token FCM perangkat Android
+    ke database users (untuk admin/teknisi NOC).
+    """
+    token = payload.get("fcm_token", "").strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="Token FCM tidak boleh kosong.")
+
+    user = get_current_user_optional(request)
+    if not user:
+        return {"status": "ignored", "message": "Sesi pengguna tidak ditemukan."}
+
+    user_id = user.get("user_id") or user.get("id")
+    if user_id:
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if db_user:
+            db_user.fcm_token = token
+            db.commit()
+            return {"status": "success", "message": "Token FCM berhasil didaftarkan."}
+
+    return {"status": "failed", "message": "Pengguna tidak ditemukan."}
+
+

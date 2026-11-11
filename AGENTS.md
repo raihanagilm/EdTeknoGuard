@@ -425,3 +425,7 @@ Seluruh AI Agent yang bekerja pada repositori ini **WAJIB MEMATUHI PROTOKOL ANTI
    - Setiap kali terjadi penambahan fitur baru, pembaruan modul/arsitektur, atau perubahan skema data, seluruh pengujian otomatis di direktori `tests/` WAJIB diperbarui agar tetap relevan, akurat, dan mencerminkan logika bisnis nyata terkini.
    - DILARANG KERAS mempertahankan tes yang sudah usang (*obsolete*), tes dengan data/struktur lama, atau sekadar membuat tes 'asal hijau/pass' menggunakan mock kosong yang tidak menguji alur kerja nyata.
    - Suite test wajib mencakup pengujian regresi untuk endpoint API aktif, model database, service bisnis, dan alur otentikasi/otorisasi yang benar-benar digunakan sistem.
+15. **Kewajiban Sinkronisasi Master Dokumen Android (`PROMPT_ANDROID_STUDIO.md`):**
+   - File [`docs/PROMPT_ANDROID_STUDIO.md`](docs/PROMPT_ANDROID_STUDIO.md) adalah berkas instruksi dan konteks master yang selalu disalin dan dikirimkan ke AI Agent di **Android Studio**.
+   - Setiap kali ada **perubahan, perbaikan bug, penyesuaian fungsional, penambahan channel notifikasi, perubahan kode Gradle/Kotlin, atau update fitur native di sisi Android**, AI Agent **WAJIB LANGSUNG MEMPERBARUI** berkas `PROMPT_ANDROID_STUDIO.md` ini secara menyeluruh dan terperinci.
+   - Dilarang menunda atau melewatkan pembaruan `PROMPT_ANDROID_STUDIO.md` agar AI di Android Studio selalu menerima instruksi yang 100% sinkron dengan status kode dan arsitektur terbaru.
