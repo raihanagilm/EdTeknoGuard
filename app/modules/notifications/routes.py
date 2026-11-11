@@ -166,12 +166,18 @@ def register_fcm_token(
         return {"status": "ignored", "message": "Sesi pengguna tidak ditemukan."}
 
     user_id = user.get("user_id") or user.get("id")
+    username = user.get("user") or user.get("username")
+
+    db_user = None
     if user_id:
         db_user = db.query(User).filter(User.id == user_id).first()
-        if db_user:
-            db_user.fcm_token = token
-            db.commit()
-            return {"status": "success", "message": "Token FCM berhasil didaftarkan."}
+    if not db_user and username:
+        db_user = db.query(User).filter(User.username == username).first()
+
+    if db_user:
+        db_user.fcm_token = token
+        db.commit()
+        return {"status": "success", "message": f"Token FCM berhasil didaftarkan untuk {db_user.username}."}
 
     return {"status": "failed", "message": "Pengguna tidak ditemukan."}
 
