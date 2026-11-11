@@ -730,8 +730,62 @@ PersistentKeepalive = 25
 
 🛡️ **EdTeknoGuard & MyTekno Portal siap beroperasi 24/7 di https://portal.teknoindo.net/**.
 
-#Update sever
-cd /home/tekno/edteknoguard && git pull origin main && cd frontend && npm run build && cd .. && sudo systemctl restart edteknoguard
+## 13. Prosedur Update Server Produksi (Update VPS) 🚀
 
-#cek pesan error log
-sudo journalctl -u edteknoguard -n 50 --no-pager
+Setiap kali ada pembaruan kode baru dari repositori (termasuk fitur Firebase Cloud Messaging / FCM, pembaruan notifikasi, dan skema database), jalankan langkah berikut di terminal server Linux VPS:
+
+### A. Salin Berkas Kunci Firebase Service Account ke VPS
+Karena berkas `firebase-service-account.json` bersifat rahasia dan tidak di-push ke git publik, unggah sekali ke server VPS ke direktori root proyek:
+```bash
+# Lokasi file di server harus berada tepat di:
+/home/tekno/edteknoguard/firebase-service-account.json
+```
+*(Bisa menggunakan SCP, WinSCP, FileZilla, atau membuat file dengan `nano /home/tekno/edteknoguard/firebase-service-account.json` lalu tempel isi JSON dari file kunci Firebase Admin SDK)*.
+
+---
+
+### B. Perintah Cepat Update Server (One-Liner)
+Jalankan perintah gabungan berikut di terminal VPS:
+
+```bash
+cd /home/tekno/edteknoguard && git pull origin main && source venv/bin/activate && pip install -r requirements.txt && python -c "from app.core.tenant_database import TenantDatabaseManager; from app.core.database import SessionLocal; from app.db.models import Kantor; from sqlalchemy import text; db = SessionLocal(); [db.execute(text('ALTER TABLE users ADD COLUMN fcm_token TEXT NULL;')) if 'fcm_token' not in [c[0] for c in db.execute(text('DESCRIBE users;')).fetchall()] else None]; db.commit(); kantors = db.query(Kantor).filter(Kantor.is_active==True).all(); [(sm := TenantDatabaseManager.get_sessionmaker_for_kantor(k.nama), tdb := sm(), [tdb.execute(text('ALTER TABLE pelanggan ADD COLUMN fcm_token TEXT NULL;')) if 'fcm_token' not in [c[0] for c in tdb.execute(text('DESCRIBE pelanggan;')).fetchall()] else None], tdb.commit(), tdb.close()) for k in kantors]; db.close(); print('Migrasi fcm_token sukses!')" && cd frontend && npm run build && cd .. && sudo systemctl restart edteknoguard
+```
+
+---
+
+### C. Langkah Manual Bertahap (Jika Ingin Dijalankan Satu per Satu)
+
+1. **Masuk ke Direktori Proyek & Tarik Kode Terbaru:**
+   ```bash
+   cd /home/tekno/edteknoguard
+   git pull origin main
+   ```
+
+2. **Aktifkan Virtual Environment & Update Dependensi Python:**
+   ```bash
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+3. **Jalankan Migrasi Kolom Baru Database (`fcm_token`):**
+   ```bash
+   python -c "from app.core.tenant_database import TenantDatabaseManager; from app.core.database import SessionLocal; from app.db.models import Kantor; from sqlalchemy import text; db = SessionLocal(); [db.execute(text('ALTER TABLE users ADD COLUMN fcm_token TEXT NULL;')) if 'fcm_token' not in [c[0] for c in db.execute(text('DESCRIBE users;')).fetchall()] else None]; db.commit(); kantors = db.query(Kantor).filter(Kantor.is_active==True).all(); [(sm := TenantDatabaseManager.get_sessionmaker_for_kantor(k.nama), tdb := sm(), [tdb.execute(text('ALTER TABLE pelanggan ADD COLUMN fcm_token TEXT NULL;')) if 'fcm_token' not in [c[0] for c in tdb.execute(text('DESCRIBE pelanggan;')).fetchall()] else None], tdb.commit(), tdb.close()) for k in kantors]; db.close(); print('Migrasi fcm_token sukses!')"
+   ```
+
+4. **Build Frontend Web Terbaru:**
+   ```bash
+   cd frontend
+   npm run build
+   cd ..
+   ```
+
+5. **Restart Service Backend:**
+   ```bash
+   sudo systemctl restart edteknoguard
+   ```
+
+6. **Periksa Status & Log Server:**
+   ```bash
+   sudo systemctl status edteknoguard
+   sudo journalctl -u edteknoguard -n 50 --no-pager
+   ```

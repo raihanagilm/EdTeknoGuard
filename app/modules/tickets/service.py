@@ -71,6 +71,34 @@ class TicketService:
         t.updated_at = get_now_wib()
         target_db.commit()
 
+        # Kirim push notifikasi ke HP Pelanggan (MyTekno) saat status tiket diperbarui teknisi
+        try:
+            cust = target_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == t.id_pelanggan).first()
+            if cust and cust.fcm_token:
+                from app.services.fcm_service import send_push_notification
+                status_label = {
+                    "DICEK_ADMIN": "Laporan Anda sedang diverifikasi admin NOC",
+                    "DIPROSES": "Teknisi sedang memproses perbaikan tiket Anda",
+                    "SELESAI": "Kendala internet Anda telah selesai ditangani",
+                    "DIBATALKAN": "Laporan kendala telah dibatalkan"
+                }.get(new_status, f"Status laporan: {new_status}")
+
+                send_push_notification(
+                    tokens=[cust.fcm_token],
+                    title=f"Tiket #{t.id_tiket}: {new_status}",
+                    body=f"{status_label}. {catatan or ''}".strip(),
+                    channel_id="tekno_customer_channel",
+                    sound="default",
+                    data={
+                        "target_tab": "tiket",
+                        "target_filter": t.id_tiket,
+                        "type": "ticket_update"
+                    }
+                )
+        except Exception as fcm_err:
+            import logging
+            logging.getLogger("ticket_service").warning(f"[FCM_CUST] Gagal kirim notifikasi update tiket ke warga: {fcm_err}")
+
         if target_db != db:
             target_db.close()
 

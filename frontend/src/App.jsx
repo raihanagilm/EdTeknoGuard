@@ -380,7 +380,8 @@ export default function App() {
 
   useEffect(() => {
     fetchLiveDashboardData()
-    const interval = setInterval(fetchLiveDashboardData, 8000)
+    // Polling cepat setiap 5 detik agar unread badge & notifikasi terupdate otomatis tanpa refresh
+    const interval = setInterval(fetchLiveDashboardData, 5000)
     return () => clearInterval(interval)
   }, [activeOffice])
 

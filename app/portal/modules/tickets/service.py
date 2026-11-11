@@ -50,6 +50,45 @@ class KendalaService:
         db.commit()
         db.refresh(new_ticket)
 
+        # Trigger Push Notifikasi FCM ke seluruh Teknisi & Admin NOC kantor terkait
+        try:
+            from app.services.fcm_service import send_push_notification
+            from app.core.database import SessionLocal as MasterSessionLocal
+            from app.db.models import User as MasterUser
+            m_db = MasterSessionLocal()
+            try:
+                users_to_alert = m_db.query(MasterUser).filter(
+                    MasterUser.is_active == True,
+                    MasterUser.fcm_token != None,
+                    MasterUser.fcm_token != ""
+                ).all()
+                target_tokens = []
+                for u in users_to_alert:
+                    if u.role == "super admin" or (kantor and kantor.lower() in [k.lower() for k in u.allowed_kantor_list]):
+                        target_tokens.append(u.fcm_token)
+
+                if target_tokens:
+                    cust_name = cust.nama if cust else "Pelanggan"
+                    title = f"📩 TIKET KENDALA BARU [{kantor.upper()}]"
+                    body = f"[{ticket_id}] {cust_name} ({kategori}): {deskripsi}"
+                    send_push_notification(
+                        tokens=target_tokens,
+                        title=title,
+                        body=body,
+                        data={
+                            "target_tab": "tiket",
+                            "target_kantor": kantor,
+                            "target_filter": ticket_id,
+                            "level": "critical",
+                            "type": "ticket_new"
+                        }
+                    )
+            finally:
+                m_db.close()
+        except Exception as fcm_err:
+            import logging
+            logging.getLogger("ticket_service").warning(f"[FCM_TICKET] Gagal push notifikasi tiket baru: {fcm_err}")
+
         return new_ticket
 
     @staticmethod

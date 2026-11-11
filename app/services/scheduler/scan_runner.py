@@ -359,6 +359,46 @@ class ScanRunner:
             SchedulerStateManager.cleanup_alert_logs(days=7)
             SchedulerStateManager.cleanup_activity_logs(days=60)
 
+            # Trigger Push Notifikasi FCM ke HP Teknisi/Admin jika ada modem Kritis atau LOS
+            total_emergency = stats.get("los", 0) + stats.get("critical", 0)
+            if total_emergency > 0:
+                try:
+                    from app.services.fcm_service import send_push_notification
+                    from app.core.database import SessionLocal as MasterSessionLocal
+                    from app.db.models import User as MasterUser
+                    m_db = MasterSessionLocal()
+                    try:
+                        # Ambil semua user yang memiliki akses ke kantor ini dan memiliki fcm_token
+                        users_to_alert = m_db.query(MasterUser).filter(
+                            MasterUser.is_active == True,
+                            MasterUser.fcm_token != None,
+                            MasterUser.fcm_token != ""
+                        ).all()
+                        target_tokens = []
+                        for u in users_to_alert:
+                            if u.role == "super admin" or k_code in u.allowed_kantor_list:
+                                target_tokens.append(u.fcm_token)
+
+                        if target_tokens:
+                            title = f"🚨 PERINGATAN REDAMAN [{k_code.upper()}]"
+                            body = f"Terdeteksi {stats.get('los', 0)} modem LOS & {stats.get('critical', 0)} modem Sinyal Kritis. Mohon segera dicek!"
+                            send_push_notification(
+                                tokens=target_tokens,
+                                title=title,
+                                body=body,
+                                data={
+                                    "target_tab": "pelanggan",
+                                    "target_kantor": k_code,
+                                    "target_status": "CRITICAL",
+                                    "level": "critical",
+                                    "type": "monitoring_alert"
+                                }
+                            )
+                    finally:
+                        m_db.close()
+                except Exception as fcm_err:
+                    logger.warning(f"[FCM_ALERT] Gagal mengirim push notifikasi redaman: {fcm_err}")
+
             return {
                 "success": True,
                 "kantor": k_code,
