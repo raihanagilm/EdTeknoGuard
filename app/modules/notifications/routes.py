@@ -4,7 +4,7 @@ app/modules/notifications/routes.py - Notification Routes for NOC Admin
 from typing import Optional
 from fastapi import APIRouter, Depends, Request, Query, HTTPException
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.core.database import get_db, get_master_db
 from app.core.security import get_current_user_optional, get_active_kantor
 from app.core.tenant_database import TenantDatabaseManager
 from app.modules.notifications.service import NotificationService
@@ -153,7 +153,7 @@ def snooze_pause_reminder(request: Request, db: Session = Depends(get_db)):
 def register_fcm_token(
     request: Request,
     payload: dict,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_master_db)
 ):
     """
     Mendaftarkan atau memperbarui token FCM perangkat Android

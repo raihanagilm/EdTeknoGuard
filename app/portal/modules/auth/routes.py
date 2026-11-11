@@ -12,6 +12,7 @@ from app.portal.core.security import (
     check_is_home_wifi
 )
 from app.portal.modules.auth.service import AuthService
+from app.db.models import Pelanggan
 
 router = APIRouter(prefix="/auth", tags=["Portal Auth"])
 

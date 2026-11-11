@@ -40,6 +40,7 @@ def migrate():
             try:
                 t_engine = TenantDatabaseManager.get_engine_for_kantor(target)
                 with t_engine.connect() as t_conn:
+                    # Tambahkan ke pelanggan
                     try:
                         t_conn.execute(text("ALTER TABLE pelanggan ADD COLUMN fcm_token TEXT NULL;"))
                         t_conn.commit()
@@ -49,6 +50,19 @@ def migrate():
                             print(f"ℹ️  [TENANT: {target}] Kolom 'fcm_token' sudah ada di tabel 'pelanggan'.")
                         else:
                             print(f"⚠️  [TENANT: {target}] Gagal tambah kolom di 'pelanggan': {e}")
+
+                    # Defensif: Tambahkan juga ke users jika tabel users ada di tenant
+                    try:
+                        t_conn.execute(text("ALTER TABLE users ADD COLUMN fcm_token TEXT NULL;"))
+                        t_conn.commit()
+                        print(f"✅ [TENANT: {target}] Kolom 'fcm_token' berhasil ditambahkan ke tabel cadangan 'users'.")
+                    except Exception as e:
+                        if "Duplicate column name" in str(e) or "1060" in str(e):
+                            print(f"ℹ️  [TENANT: {target}] Kolom 'fcm_token' sudah ada di tabel 'users'.")
+                        elif "doesn't exist" in str(e) or "1146" in str(e):
+                            pass  # Normal, tabel users hanya wajib di database master
+                        else:
+                            pass
             except Exception as e:
                 print(f"❌ [TENANT: {target}] Gagal terhubung ke database: {e}")
     finally:
