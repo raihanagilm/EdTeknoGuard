@@ -201,10 +201,27 @@ export default function App() {
     }
   })
 
-  const handleUpdateAppVibration = (enabled) => {
+  const handleUpdateAppVibration = async (enabled) => {
     setAppVibration(enabled)
     try {
       localStorage.setItem('tekno_personal_vibration_enabled', String(enabled))
+      // Sinkronkan langsung ke backend agar background service APK menerima perubahan real-time
+      await fetch('/api/pengaturan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          polling_interval_minutes: parseInt(pollingInterval, 10) || 20,
+          warning_threshold_dbm: parseFloat(warnThreshold) || -26.0,
+          critical_threshold_dbm: parseFloat(critThreshold) || -27.0,
+          scheduler_status: isScanningActive ? 'RUNNING' : 'STOPPED',
+          default_modem_credentials: modemCredentials,
+          night_mode_enabled: Boolean(nightModeEnabled),
+          night_mode_start: nightModeStart || '22:00',
+          night_mode_end: nightModeEnd || '06:00',
+          app_vibration_enabled: Boolean(enabled),
+          alert_waiting_interval_minutes: parseInt(alertWaitingInterval, 10) || 5
+        })
+      })
     } catch (_) {}
   }
   const [alertWaitingInterval, setAlertWaitingInterval] = useState(5)
@@ -253,6 +270,12 @@ export default function App() {
         if (data.night_mode_enabled !== undefined) setNightModeEnabled(data.night_mode_enabled)
         if (data.night_mode_start) setNightModeStart(data.night_mode_start)
         if (data.night_mode_end) setNightModeEnd(data.night_mode_end)
+        if (data.app_vibration_enabled !== undefined) {
+          setAppVibration(Boolean(data.app_vibration_enabled))
+          try {
+            localStorage.setItem('tekno_personal_vibration_enabled', String(data.app_vibration_enabled))
+          } catch (_) {}
+        }
         if (data.default_modem_credentials !== undefined) {
           setModemCredentials(Array.isArray(data.default_modem_credentials) ? data.default_modem_credentials : [])
         }

@@ -18,9 +18,13 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
 * **Smart Swipe-to-Refresh & Smooth In-App Scroll:**
   WebView dilengkapi bridge pendeteksi posisi scroll internal web (`AndroidBridge.setScrollAtTop` & `setOnChildScrollUpCallback`). Pengguna dapat bebas scroll ke bawah lalu scroll kembali ke atas tanpa terganggu atau ter-refresh secara tidak sengaja. Refresh hanya aktif jika gestur ditarik saat konten benar-benar berada di puncak paling atas.
 * **Splash Screen Elegan (Logo Besar + Nama Aplikasi):**
-  Saat aplikasi dibuka pertama kali, antarmuka tidak kosong melainkan menampilkan Splash Screen animasi berlatar biru `#2563EB` dengan logo besar router optik (`@drawable/app_splash_logo`), nama aplikasi dinamis (**TeknoGuard** atau **MyTekno**), subtitle layanan, dan spinner pemuatan halus hingga konten WebView selesai dimuat (*fade out* mulus).
+  Saat aplikasi dibuka pertama kali, antarmuka tidak kosong melainkan menampilkan Splash Screen animasi halus:
+  - **Khusus TeknoGuard:** Berlatar belakang **putih bersih (`#FFFFFF`)** dengan teks gelap (`#0F172A`) dan spinner biru agar selaras dengan tema terang dashboard NOC.
+  - **Khusus MyTekno:** Berlatar belakang **biru primer (`#2563EB`)** dengan teks putih dan spinner putih.
+  Dilengkapi logo router optik (`@drawable/app_splash_logo`), nama aplikasi dinamis, subtitle layanan, dan spinner pemuatan halus hingga konten WebView selesai dimuat (*fade out* mulus).
 * **Status Bar Header Konsisten & Rapi:**
-  Bagian status bar atas aplikasi Android dibuat berwarna biru gelap / primary (`#2563EB`) serasi dengan header navigasi portal pelanggan dan NOC (`windowLightStatusBar = false`), sehingga tidak ada bilah putih yang kontras atau aneh di bagian atas layar.
+  - **Khusus TeknoGuard (NOC & Teknisi):** Bagian status bar atas aplikasi Android dibuat berwarna **putih (`#FFFFFF`)** dengan ikon gelap (`windowLightStatusBar = true`) sehingga menyatu sempurna dan bersih dengan header putih antarmuka dashboard NOC tanpa garis biru kontras di bagian atas layar.
+  - **Khusus MyTekno (Portal Pelanggan):** Status bar atas berwarna biru primer (`#2563EB`) dengan ikon terang (`windowLightStatusBar = false`) serasi dengan nuansa portal warga.
 * **Kebijakan Push Notifikasi Anti-Spam (MyTekno & TeknoGuard):**
   - **Notifikasi Latar Belakang Senyap:** Notifikasi "Pemantauan aktif di latar belakang" dibungkam dengan `IMPORTANCE_NONE` / `PRIORITY_MIN` (`VISIBILITY_SECRET`) sehingga tidak pernah mengotori status bar pengguna.
   - **TeknoGuard (NOC):** Notifikasi multi-kantor diperbarui secara bersih (*in-place update*) menggunakan hash ID stabil tanpa tanda kurung siku `[]` (contoh: `Banyumas • Redaman Kritis`) sehingga status redaman terbaru langsung memperbarui notifikasi sebelumnya (anti-duplikasi).

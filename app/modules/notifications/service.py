@@ -182,7 +182,8 @@ class NotificationService:
         # 1. Grouping LOS (Ungu, non-permanen seperti Warning, >= 5 items digabung jadi 1)
         if len(los_items) >= 5:
             first_los = los_items[0]
-            batch_key = f"batch_los_{len(los_items)}_{first_los['id']}"
+            kantor_slug = (first_los.get('kantor') or 'all').lower()
+            batch_key = f"batch_los_{kantor_slug}"
             if batch_key not in read_ref_ids:
                 b_office_prefix = f"{first_los['kantor'].title()} • " if is_multi_kantor and first_los.get('kantor') else ""
                 items_list.append({
@@ -207,7 +208,8 @@ class NotificationService:
         # 2. Grouping KRITIS (Merah, Persisten Wajib Ditangani, >= 5 items digabung jadi 1)
         if len(critical_items) >= 5:
             first_crit = critical_items[0]
-            batch_key = f"batch_critical_{len(critical_items)}_{first_crit['kantor']}"
+            kantor_slug = (first_crit.get('kantor') or 'all').lower()
+            batch_key = f"batch_critical_{kantor_slug}"
             b_crit_prefix = f"{first_crit['kantor'].title()} • " if is_multi_kantor and first_crit.get('kantor') else ""
             items_list.append({
                 "id": batch_key,
@@ -231,7 +233,8 @@ class NotificationService:
         # 3. Grouping WARNING (Kuning/Amber, Waspada, >= 5 items digabung jadi 1)
         if len(warning_items) >= 5:
             first_warn = warning_items[0]
-            batch_key = f"batch_warning_{len(warning_items)}_{first_warn['id']}"
+            kantor_slug = (first_warn.get('kantor') or 'all').lower()
+            batch_key = f"batch_warning_{kantor_slug}"
             if batch_key not in read_ref_ids:
                 b_warn_prefix = f"{first_warn['kantor'].title()} • " if is_multi_kantor and first_warn.get('kantor') else ""
                 items_list.append({
@@ -299,8 +302,9 @@ class NotificationService:
                 # Jika 5 atau lebih, gabungkan menjadi 1 notifikasi batch
                 if len(invalid_items) >= 5:
                     first_inv = invalid_items[0]
+                    kantor_slug = (kantor or first_inv.get("kantor") or "all").lower()
                     target_k_label = (kantor or first_inv.get("kantor") or "SEMUA").title()
-                    batch_inv_key = f"batch_invalid_{len(invalid_items)}_{first_inv['id']}"
+                    batch_inv_key = f"batch_invalid_{kantor_slug}"
                     if batch_inv_key not in read_ref_ids:
                         b_inv_prefix = f"{target_k_label} • " if is_multi_kantor else ""
                         items_list.append({
