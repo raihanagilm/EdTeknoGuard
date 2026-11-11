@@ -351,6 +351,25 @@ export default function App() {
       if (meRes && meRes.authenticated && meRes.user) {
         setIsAuthenticated(true)
         setCurrentUser(meRes.user)
+
+        // Sinkronisasi Token FCM dari Android Bridge ke Database
+        if (window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === 'function') {
+          try {
+            const token = window.AndroidBridge.getFcmToken()
+            if (token && token.length > 20) {
+              const lastSyncedToken = sessionStorage.getItem('edtekno_synced_fcm_token')
+              if (lastSyncedToken !== token) {
+                fetch('/api/notifications/register-fcm', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ fcm_token: token })
+                }).then(r => {
+                  if (r.ok) sessionStorage.setItem('edtekno_synced_fcm_token', token)
+                }).catch(() => {})
+              }
+            }
+          } catch (_) {}
+        }
       }
 
       if (notifRes) {
