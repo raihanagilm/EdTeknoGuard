@@ -102,28 +102,28 @@ export function CustomerDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-sky-200 space-y-3 sm:space-y-4 font-mono max-h-[92vh] flex flex-col">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-xl border border-slate-200/90 space-y-3 sm:space-y-4 font-sans max-h-[92vh] flex flex-col">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-sky-100 pb-2.5 sm:pb-3 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 to-sky-600 flex items-center justify-center text-white shadow-md shadow-cyan-600/20 shrink-0">
-              <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 sm:pb-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <UserPlus className="w-5 h-5 text-cyan-700 shrink-0" />
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-black text-slate-900 font-sans truncate">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
                 {customer.nama || customer.name}
               </h3>
-              <p className="text-[11px] sm:text-xs text-cyan-700 font-bold truncate">
-                ID: {cId} • Wilayah: <span className="uppercase">{customer.kantor || activeOffice || 'cabang'}</span>
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium truncate">
+                ID: <span className="font-mono text-slate-700 font-semibold">{cId}</span>
+                <span className="inline-block mx-1.5 h-3 w-px bg-slate-200 align-middle" />
+                Wilayah: <span className="uppercase font-semibold text-slate-700">{customer.kantor || activeOffice || 'cabang'}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition shrink-0 cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition shrink-0 cursor-pointer"
             title="Tutup Modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -419,7 +419,7 @@ export function CustomerDetailModal({
                               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                               <span>Status Pembayaran Lokal</span>
                             </span>
-                            <span className="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[10px]">
+                            <span className="text-xs font-bold text-amber-900">
                               {billingData.status_pembayaran_lokal || 'LUNAS'}
                             </span>
                           </div>
@@ -450,7 +450,7 @@ export function CustomerDetailModal({
                               {isOverdue ? <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" /> : <Clock className="w-4 h-4 text-amber-600 shrink-0" />}
                               <span>{isOverdue ? 'JATUH TEMPO / OVERDUE' : 'MENUNGGU PEMBAYARAN'}</span>
                             </span>
-                            <span className={`px-2 py-0.5 rounded-lg font-bold text-[10px] border ${isOverdue ? 'bg-rose-100 text-rose-900 border-rose-300' : 'bg-amber-100 text-amber-900 border-amber-300'}`}>
+                            <span className={`text-xs font-bold ${isOverdue ? 'text-rose-800' : 'text-amber-900'}`}>
                               {unpaidList.length} Tagihan Tertunggak
                             </span>
                           </div>
@@ -476,7 +476,7 @@ export function CustomerDetailModal({
                             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                             <span>TAGIHAN LUNAS (KONEKSI PRIMA)</span>
                           </span>
-                          <span className="px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-[10px]">
+                          <span className="text-xs font-bold text-emerald-800">
                             LUNAS
                           </span>
                         </div>
@@ -642,12 +642,12 @@ export function CustomerDetailModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-sky-100 shrink-0">
+        <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 shrink-0">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => onOpenEdit && onOpenEdit(customer)}
-              className="px-3.5 py-1.5 rounded-xl border border-sky-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100 text-xs font-bold font-mono transition flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-cyan-800 text-xs font-semibold font-sans transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Edit2 className="w-3.5 h-3.5" />
               <span>Edit Informasi</span>
@@ -655,7 +655,7 @@ export function CustomerDetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold font-mono transition cursor-pointer"
+              className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold font-sans transition cursor-pointer shadow-2xs"
             >
               Tutup
             </button>

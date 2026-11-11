@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  Play,
-  Pause,
-  Square,
-  RefreshCw,
-  Clock
-} from 'lucide-react'
+import { Play, Pause, Square, RefreshCw, Clock } from 'lucide-react'
 import { formatDuration } from './dashboardUtils'
 
 /**
@@ -46,20 +40,20 @@ export function DashboardControlBar({
   const isCurrentlyScanning = isScanning && isCurrentOfficeScan
   const isRunning = engineStatus === 'RUNNING'
 
-  let statusLabel = 'Terjadwal Aktif'
+  let statusLabel = 'Aktif'
   let statusTextColor = 'text-emerald-700'
 
   if (isNetworkError) {
-    statusLabel = 'Gangguan Jaringan'
+    statusLabel = 'Gangguan'
     statusTextColor = 'text-rose-700'
   } else if (!isOfficeActive) {
-    statusLabel = 'Kantor Nonaktif'
+    statusLabel = 'Nonaktif'
     statusTextColor = 'text-slate-500'
   } else if (isCurrentlyScanning) {
-    statusLabel = 'Sedang Memindai'
+    statusLabel = 'Memindai'
     statusTextColor = 'text-cyan-800'
   } else if (!isRunning) {
-    statusLabel = 'Jadwal Dijeda'
+    statusLabel = 'Dihentikan'
     statusTextColor = 'text-amber-700'
   }
 
@@ -73,14 +67,14 @@ export function DashboardControlBar({
             <h2 className="text-sm font-semibold text-slate-900 tracking-tight">
               Status Pemantauan
             </h2>
-            <span className="h-3.5 w-px bg-slate-200 hidden sm:inline-block" />
+            <span className="h-3.5 w-px bg-slate-200 inline-block" />
             {/* Pure Typography Status - No Box, No Border, No Dot */}
             <span className={`text-xs font-semibold ${statusTextColor}`}>
               {statusLabel}
             </span>
           </div>
 
-          {/* Sub-Telemetry (Natural Indonesian Sans-Serif) */}
+          {/* Sub-Telemetry (Natural Indonesian Sans-Serif - Zero Tautology) */}
           <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 flex-wrap">
             <span>
               Kantor:{' '}
@@ -88,16 +82,22 @@ export function DashboardControlBar({
                 {getOfficeDisplayName(activeOffice)}
               </strong>
             </span>
-            <span className="h-3 w-px bg-slate-200 hidden sm:inline-block" />
-            <span className="text-slate-600 font-normal">
-              {isNetworkError
-                ? 'Gateway jaringan tidak merespons'
-                : !isOfficeActive
-                ? 'Pemantauan dinonaktifkan di wilayah ini'
-                : isRunning
-                ? `Siklus otomatis tiap ${intervalMinutes} menit`
-                : 'Jadwal otomatis sedang dihentikan'}
-            </span>
+            {isRunning && (
+              <>
+                <span className="h-3 w-px bg-slate-200 inline-block" />
+                <span className="text-slate-500 font-normal">
+                  Siklus {intervalMinutes} menit
+                </span>
+              </>
+            )}
+            {isNetworkError && (
+              <>
+                <span className="h-3 w-px bg-slate-200 inline-block" />
+                <span className="text-rose-600 font-medium">
+                  Gateway tidak merespons
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -172,7 +172,7 @@ export function DashboardControlBar({
                     ) : isRunning ? (
                       <>
                         <Pause className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Jeda Jadwal</span>
+                        <span>Hentikan Jadwal</span>
                       </>
                     ) : (
                       <>
@@ -287,7 +287,9 @@ export function DashboardControlBar({
         </div>
         <div className="flex items-center gap-1.5">
           <span>Jadwal Berikutnya:</span>
-          <strong className="text-cyan-800 font-mono tabular-nums font-semibold">{nextRunTime}</strong>
+          <strong className="text-cyan-800 font-mono tabular-nums font-semibold">
+            {isRunning && nextRunTime && nextRunTime !== '-' && nextRunTime !== 'Jadwal Dijeda' && nextRunTime !== 'Kantor Nonaktif' ? nextRunTime : '-'}
+          </strong>
         </div>
       </div>
     </div>

@@ -610,7 +610,7 @@ const toggleDataset = (idx) => {
                   {/* Footer Keterangan */}
                   <div className="mt-2.5 pt-2 border-t border-sky-100 flex items-center justify-between text-[10px] text-slate-500 font-sans">
                     <div className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 inline-block" />
+                      <span className="h-0.5 w-3 bg-cyan-600 inline-block rounded-xs" />
                       <span>Data tersedia</span>
                     </div>
                     <button
@@ -748,9 +748,7 @@ const toggleDataset = (idx) => {
           {/* Empty State Overlay jika tidak ada data riil sama sekali */}
           {chartStats.total_points === 0 && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-50/90 backdrop-blur-xs p-4 text-center">
-              <div className="w-10 h-10 rounded-full bg-sky-100 text-cyan-700 flex items-center justify-center mb-2 shadow-xs">
-                <Activity className="w-5 h-5 opacity-70" />
-              </div>
+              <Activity className="w-8 h-8 text-slate-300 mb-2 stroke-[1.5]" />
               <p className="text-xs sm:text-sm font-extrabold text-slate-800 font-mono">
                 Belum Ada Riwayat Log Redaman
               </p>
@@ -807,7 +805,7 @@ const toggleDataset = (idx) => {
                   title={`Klik untuk toggle ${ds.label}`}
                 >
                   <span
-                    className="h-2.5 w-2.5 rounded-full inline-block shrink-0"
+                    className="h-0.5 w-3 rounded-xs inline-block shrink-0"
                     style={{ backgroundColor: ds.color }}
                   />
                   <span

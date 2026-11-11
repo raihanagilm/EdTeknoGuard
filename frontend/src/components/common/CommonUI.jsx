@@ -16,7 +16,7 @@ export function ModuleHeader({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             {badge && (
-              <span className="px-2 py-0.5 rounded-md bg-cyan-100/80 text-cyan-900 font-mono text-[10px] font-bold">
+              <span className="text-xs font-semibold text-cyan-800 tracking-tight">
                 {badge}
               </span>
             )}
@@ -147,7 +147,7 @@ export function SegmentedStatusBar({ items = [] }) {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-sky-200/80 shadow-2xs p-1.5 flex items-center divide-x divide-sky-100">
+    <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs p-1.5 flex items-center divide-x divide-slate-100">
       {items.map((it, idx) => {
         const sc = schemes[it.colorScheme || 'cyan'] || schemes.cyan;
         const isActive = Boolean(it.isActive);
@@ -157,21 +157,21 @@ export function SegmentedStatusBar({ items = [] }) {
             key={idx}
             type="button"
             onClick={it.onClick}
-            className={`flex-1 py-1.5 px-1 sm:py-2.5 sm:px-2 rounded-xl transition-all flex flex-col items-center justify-center text-center cursor-pointer select-none ${it.className || ''} ${
+            className={`flex-1 py-1.5 px-1 sm:py-2 sm:px-2 rounded-lg transition-all flex flex-col items-center justify-center text-center cursor-pointer select-none ${it.className || ''} ${
               isActive
                 ? `${sc.active} ring-1 ring-black/5`
                 : 'hover:bg-cyan-50/50 text-slate-700'
             }`}
           >
             <span
-              className={`text-[11px] font-mono font-bold uppercase tracking-wider truncate max-w-full ${
+              className={`text-[11px] font-sans font-semibold uppercase tracking-wider truncate max-w-full ${
                 isActive ? 'text-white' : sc.label
               }`}
             >
               {it.label}
             </span>
             <span
-              className={`text-sm sm:text-base font-black font-mono tracking-tight leading-none mt-0.5 ${
+              className={`text-sm sm:text-base font-bold font-mono tabular-nums tracking-tight leading-none mt-0.5 ${
                 isActive ? 'text-white' : sc.textNum
               }`}
             >
@@ -179,7 +179,7 @@ export function SegmentedStatusBar({ items = [] }) {
             </span>
             {it.subLabel && (
               <span
-                className={`hidden md:block text-[11px] font-mono truncate mt-0.5 ${
+                className={`hidden md:block text-[11px] font-sans font-normal truncate mt-0.5 ${
                   isActive ? 'text-white/90' : 'text-slate-500'
                 }`}
               >

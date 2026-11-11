@@ -352,9 +352,9 @@ class ONTSchedulerService:
             else:
                 next_run_formatted = "Segera"
         elif status_str == "STOPPED":
-            next_run_formatted = "Jadwal Dijeda"
+            next_run_formatted = "-"
         elif not is_office_active:
-            next_run_formatted = "Kantor Nonaktif"
+            next_run_formatted = "-"
         else:
             next_run_formatted = "-"
 

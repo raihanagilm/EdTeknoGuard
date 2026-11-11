@@ -476,9 +476,7 @@ export function DashboardView({
           className="rounded-xl p-4 bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-cyan-300 shadow-xs hover:shadow-xs transition-all duration-150 flex items-center justify-between group text-left cursor-pointer active:scale-[0.99]"
         >
           <div className="flex items-center gap-3.5">
-            <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200/70 text-slate-700 group-hover:text-cyan-700 group-hover:border-cyan-200 flex items-center justify-center transition-colors shrink-0 shadow-2xs">
-              <Users className="w-5 h-5" />
-            </div>
+            <Users className="w-5 h-5 text-slate-500 group-hover:text-cyan-700 transition-colors shrink-0" />
             <div>
               <h3 className="text-sm font-semibold text-slate-900 tracking-tight group-hover:text-cyan-950 transition-colors">
                 Kelola Master Pelanggan
@@ -494,9 +492,7 @@ export function DashboardView({
           className="rounded-xl p-4 bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-cyan-300 shadow-xs hover:shadow-xs transition-all duration-150 flex items-center justify-between group text-left cursor-pointer active:scale-[0.99]"
         >
           <div className="flex items-center gap-3.5">
-            <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200/70 text-slate-700 group-hover:text-cyan-700 group-hover:border-cyan-200 flex items-center justify-center transition-colors shrink-0 shadow-2xs">
-              <Ticket className="w-5 h-5" />
-            </div>
+            <Ticket className="w-5 h-5 text-slate-500 group-hover:text-cyan-700 transition-colors shrink-0" />
             <div>
               <h3 className="text-sm font-semibold text-slate-900 tracking-tight group-hover:text-cyan-950 transition-colors">
                 Tiket Keluhan Pelanggan
