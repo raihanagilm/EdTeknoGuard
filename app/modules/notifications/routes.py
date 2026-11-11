@@ -22,18 +22,31 @@ def poll_realtime_notifications(request: Request, kantor: Optional[str] = Query(
     from app.core.security import get_user_allowed_kantor
     allowed = get_user_allowed_kantor(user)
 
-    # Jika user berhak atas lebih dari 1 kantor (Super Admin, Admin/Teknisi multi-kantor),
+    # Jika parameter query ?kantor= spesifik dikirim (misal dari frontend web saat memilih kantor di switcher),
+    # fokuskan pembacaan notifikasi & tiket HANYA untuk kantor aktif tersebut agar badge dan list tersinkronisasi 100%!
+    if kantor and kantor != "all":
+        target_k = kantor.lower()
+        if not allowed or target_k in allowed:
+            active_db = TenantDatabaseManager.get_tenant_session(target_k)
+            try:
+                return NotificationService.get_realtime_notifications(db=active_db, kantor=target_k, user=user)
+            finally:
+                active_db.close()
+
+    # Jika user berhak atas lebih dari 1 kantor (misal background polling Android tanpa filter kantor),
     # kumpulkan notifikasi dari seluruh database tenant yang menjadi hak aksesnya.
     if len(allowed) > 1:
         merged_notifications = []
         seen_ids = set()
         paused_reminder = None
         notif_config = None
+        total_unread_tickets = 0
 
         for k in allowed:
             t_sess = TenantDatabaseManager.get_tenant_session(k)
             try:
                 res = NotificationService.get_realtime_notifications(db=t_sess, kantor=k, user=user)
+                total_unread_tickets += res.get("unread_tickets_count", 0)
                 for item in res.get("notifications", []):
                     item_id = item.get("id")
                     if item_id not in seen_ids:
@@ -53,6 +66,7 @@ def poll_realtime_notifications(request: Request, kantor: Optional[str] = Query(
         return {
             "status": "success",
             "total_unread": len(merged_notifications),
+            "unread_tickets_count": total_unread_tickets,
             "notifications": merged_notifications,
             "paused_reminder": paused_reminder,
             "notification_config": notif_config

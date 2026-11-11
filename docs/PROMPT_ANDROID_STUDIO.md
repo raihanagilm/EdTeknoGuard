@@ -26,8 +26,14 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
   - **Khusus TeknoGuard (NOC & Teknisi):** Bagian status bar atas aplikasi Android dibuat berwarna **putih (`#FFFFFF`)** dengan ikon gelap (`windowLightStatusBar = true`) sehingga menyatu sempurna dan bersih dengan header putih antarmuka dashboard NOC tanpa garis biru kontras di bagian atas layar.
   - **Khusus MyTekno (Portal Pelanggan):** Status bar atas berwarna biru primer (`#2563EB`) dengan ikon terang (`windowLightStatusBar = false`) serasi dengan nuansa portal warga.
 * **Kebijakan Push Notifikasi Anti-Spam (MyTekno & TeknoGuard):**
-  - **Notifikasi Latar Belakang Senyap:** Notifikasi "Pemantauan aktif di latar belakang" dibungkam dengan `IMPORTANCE_NONE` / `PRIORITY_MIN` (`VISIBILITY_SECRET`) sehingga tidak pernah mengotori status bar pengguna.
-  - **TeknoGuard (NOC):** Notifikasi multi-kantor diperbarui secara bersih (*in-place update*) menggunakan hash ID stabil tanpa tanda kurung siku `[]` (contoh: `Banyumas • Redaman Kritis`) sehingga status redaman terbaru langsung memperbarui notifikasi sebelumnya (anti-duplikasi).
+  - **Notifikasi Latar Belakang Senyap:** Notifikasi "Pemantauan aktif di latar belakang" dibungkam total dengan `NotificationManager.IMPORTANCE_MIN` pada channel `tekno_silent_bg_v4_channel`, tanpa suara, tanpa getar, dan berstatus `.setSilent(true)` (`VISIBILITY_SECRET`) sehingga tidak pernah mengotori atau menyalakan notifikasi status bar pengguna.
+  - **Logo Resmi Router TeknoIndo (`setLargeIcon`):** Notifikasi TeknoGuard menyematkan logo resmi router/fiber optic `@drawable/app_splash_logo` di sisi kanan kartu notifikasi agar memiliki identitas visual resmi TeknoIndo dan tidak berupa bulatan kosong.
+  - **Deep Linking Akurat (Navigasi Langsung Saat Diklik):**
+    Saat notifikasi diklik, Intent membawa `target_tab`, `target_filter`, `target_kantor`, dan `target_status`. Aplikasi secara otomatis:
+    1. Memindahkan kantor aktif ke kantor tempat insiden terjadi.
+    2. Membuka tab modul yang dituju (`pelanggan`, `tiket`, atau `riwayat`).
+    3. Menerapkan filter status (`LOS`, `CRITICAL`, `MENUNGGU`) dan kata kunci pencarian pelanggan secara otomatis via `window.navigateToTab(...)`.
+  - **TeknoGuard (NOC):** Notifikasi multi-kantor diperbarui secara bersih (*in-place update*) menggunakan hash ID stabil format `${batchType}_${kantor}` (contoh: `batch_los_karanggede`) sehingga status redaman terbaru langsung memperbarui notifikasi sebelumnya tanpa duplikasi atau rentetan spam baru.
   - **MyTekno (Pelanggan) Non-Pembayaran:** Notifikasi status tiket kendala (`MENUNGGU`, `DICEK_ADMIN`, `DIPROSES`, `SELESAI`) dan notifikasi sinyal LOS/pulih disimpan secara persisten di `SharedPreferences` dan **cukup muncul tepat 1 kali saja** saat terjadi perubahan status baru, bebas spam berulang.
   - **MyTekno (Pelanggan) Pembayaran Tagihan:**
     - Dikirimkan pengingat **1 hari sebelum jatuh tempo (H-1)** sebanyak 1 kali dalam bulan berjalan.
@@ -172,17 +178,37 @@ Di `EdTeknoBackgroundService.kt`:
 Agar notifikasi dari kantor yang sama (misal 20 menit dari Banyumas) **terbaharui langsung di tempat (Now)** dan **tidak menumpuk berulang kali**:
 - Gunakan **Notification ID deterministik berbasis jenis dan kantor** (bukan `System.currentTimeMillis()`):
   ```kotlin
-  // Untuk notifikasi batch (misal batch_critical_banyumas):
+  // Untuk notifikasi batch (misal batch_los_karanggede / batch_critical_karanggede):
   val stableNotifId = if (id.startsWith("batch_")) {
-      id.substringBeforeLast('_').hashCode()
+      val kantorField = item.optString("kantor", "")
+      val batchType = if (id.contains("los")) "batch_los" else if (id.contains("critical")) "batch_critical" else if (id.contains("invalid")) "batch_invalid" else "batch_warning"
+      "${batchType}_${kantorField.lowercase()}".hashCode()
   } else if (id.startsWith("log_")) {
-      "cust_signal_${item.optString("id_pelanggan", id)}".hashCode()
+      val itemPelanggan = item.optString("id_pelanggan", id)
+      "cust_signal_$itemPelanggan".hashCode()
   } else {
-      title.hashCode()
+      id.hashCode()
   }
   manager.notify(stableNotifId, builder.build())
   ```
-- Saat scan berikutnya (misal setelah 20 menit) menghasilkan status pembaruan kantor Banyumas, notifikasi baru otomatis me-replace notifikasi lama dengan waktu *Now* tanpa membuat tumpukan notifikasi berulang.
+- **Sertakan Logo Resmi TeknoIndo (`setLargeIcon`):**
+  ```kotlin
+  val logoBitmap = BitmapFactory.decodeResource(resources, R.drawable.app_splash_logo)
+  if (logoBitmap != null) {
+      builder.setLargeIcon(logoBitmap)
+  }
+  ```
+- **Kirimkan Metadata Lengkap untuk Deep Linking:**
+  ```kotlin
+  val clickIntent = Intent(this, MainActivity::class.java).apply {
+      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+      putExtra("target_tab", targetTab)
+      putExtra("target_filter", targetFilter)
+      putExtra("target_kantor", targetOffice)
+      putExtra("target_status", targetStatus)
+  }
+  ```
+- Saat scan berikutnya menghasilkan status pembaruan kantor Karanggede, notifikasi baru otomatis me-replace notifikasi lama dengan waktu *Now* tanpa membuat tumpukan notifikasi berulang.
 
 ### C. Penyesuaian Ikon Aplikasi Agar Proporsional (Anti-Terpotong / Terlalu Besar)
 Untuk mencegah logo foreground melebar atau terpotong pada launcher Android modern (Adaptive Icon `v26+`), gunakan wrapper `<inset>` dengan padding aman `20% - 22%`:

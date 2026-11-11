@@ -221,11 +221,12 @@ export default function App() {
     setAppVibration(enabled)
     try {
       localStorage.setItem('tekno_personal_vibration_enabled', String(enabled))
-      // Sinkronkan langsung ke backend agar background service APK menerima perubahan real-time
+      // Sinkronkan langsung ke backend agar background service APK menerima perubahan real-time per kantor aktif
       await fetch('/api/pengaturan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          kantor: activeOffice || 'banyumas',
           polling_interval_minutes: parseInt(pollingInterval, 10) || 20,
           warning_threshold_dbm: parseFloat(warnThreshold) || -26.0,
           critical_threshold_dbm: parseFloat(critThreshold) || -27.0,
@@ -370,45 +371,6 @@ export default function App() {
 
         if (Array.isArray(notifRes.notifications)) {
           setNotificationList(notifRes.notifications)
-
-          // Picu notifikasi native Android jika aplikasi berjalan di dalam APK web wrapper
-          if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
-            const alertedStorageKey = 'tekno_web_alerted_notif_ids'
-            let alertedSet = new Set()
-            try {
-              const savedAlerted = sessionStorage.getItem(alertedStorageKey)
-              if (savedAlerted) alertedSet = new Set(JSON.parse(savedAlerted))
-            } catch (_) {}
-
-            notifRes.notifications.forEach(n => {
-              if (n && n.id && !alertedSet.has(n.id)) {
-                alertedSet.add(n.id)
-
-                // Filter Push Notifikasi untuk Teknisi / Admin:
-                // HANYA push notifikasi untuk status KRITIS (<= -27 dBm) dan LOS (Putus), serta Tiket Masuk
-                // WARNING dan OPTIMAL tidak dipush sebagai heads-up alert
-                const isEmergency = n.level === 'critical' || n.is_critical || n.level === 'los' || n.target_status === 'LOS' || n.type === 'ont_los' || n.type === 'redaman_drop'
-                const isTicket = n.type === 'tiket' || n.type === 'tiket_batch'
-                const shouldPush = isEmergency || isTicket
-
-                if (shouldPush) {
-                  try {
-                    window.AndroidBridge.showNativeNotification(
-                      n.title || 'Notifikasi NOC',
-                      n.message || 'Ada pembaruan status sistem',
-                      Boolean(isEmergency)
-                    )
-                  } catch (errBridge) {
-                    console.warn('Gagal memicu showNativeNotification:', errBridge)
-                  }
-                }
-              }
-            })
-
-            try {
-              sessionStorage.setItem(alertedStorageKey, JSON.stringify([...alertedSet]))
-            } catch (_) {}
-          }
         }
       }
     } catch (e) {
@@ -461,7 +423,7 @@ export default function App() {
         setTicketInitialSearch(item.target_filter)
       }
       handleTabChange('tiket')
-    } else if (item.target_tab === 'logs') {
+    } else if (item.target_tab === 'logs' || item.target_tab === 'riwayat') {
       if (item.target_filter) {
         setLogsInitialSearch(item.target_filter)
       }
@@ -484,6 +446,41 @@ export default function App() {
       handleTabChange(item.target_tab || 'beranda')
     }
   }
+
+  // Daftarkan window.navigateToTab agar Intent Klik Notifikasi APK Android langsung mengarahkan ke tab, filter, dan kantor yang tepat
+  useEffect(() => {
+    window.navigateToTab = (tab, filter = '', targetKantor = '', targetStatus = '') => {
+      if (targetKantor && targetKantor.toLowerCase() !== activeOffice.toLowerCase()) {
+        handleSwitchOffice(targetKantor.toLowerCase())
+      }
+
+      if (tab === 'tiket') {
+        if (filter) setTicketInitialSearch(filter)
+        handleTabChange('tiket')
+      } else if (tab === 'riwayat' || tab === 'logs') {
+        if (filter) setLogsInitialSearch(filter)
+        handleTabChange('riwayat')
+      } else if (tab === 'pelanggan') {
+        if (targetStatus) {
+          setCustomerStatusFilter(targetStatus.toUpperCase())
+        } else {
+          setCustomerStatusFilter('ALL')
+        }
+        if (filter) {
+          setCustomerSearchQuery(filter)
+        } else {
+          setCustomerSearchQuery('')
+        }
+        handleTabChange('pelanggan')
+      } else {
+        handleTabChange(tab || 'beranda')
+      }
+    }
+
+    return () => {
+      delete window.navigateToTab
+    }
+  }, [activeOffice])
 
   const handleDismissNotificationItem = async (item) => {
     // Notifikasi KRITIS dilarang di-dismiss secara manual
