@@ -420,8 +420,11 @@ class ScanRunner:
                                 target_tokens.append(u.fcm_token)
 
                         if target_tokens:
-                            title = f"🚨 PERINGATAN REDAMAN [{k_code.upper()}]"
-                            body = f"Terdeteksi {stats.get('los', 0)} modem LOS & {stats.get('critical', 0)} modem Sinyal Kritis. Mohon segera dicek!"
+                            title = f"[PERINGATAN REDAMAN] Kantor: {k_code.upper()}"
+                            body = (
+                                f"Terdeteksi {stats.get('los', 0)} modem LOS dan {stats.get('critical', 0)} modem Sinyal Kritis. "
+                                "Mohon teknisi piket lapangan untuk SEGERA melakukan pengecekan fisik kabel dropcore, sambungan fusion/fast connector, dan patchcord pelanggan!"
+                            )
                             send_push_notification(
                                 tokens=target_tokens,
                                 title=title,
@@ -432,7 +435,9 @@ class ScanRunner:
                                     "target_status": "CRITICAL",
                                     "level": "critical",
                                     "type": "monitoring_alert"
-                                }
+                                },
+                                channel_id="tekno_emergency_v3_channel",
+                                sound="tekno_alarm"
                             )
                     finally:
                         m_db.close()

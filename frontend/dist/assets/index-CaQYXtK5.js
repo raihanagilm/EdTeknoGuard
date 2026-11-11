@@ -11709,7 +11709,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$96 = {
+var __iconData$93 = {
 	name: "activity",
 	size: 24,
 	node: [["path", {
@@ -11717,8 +11717,8 @@ var __iconData$96 = {
 		key: "169zse"
 	}]]
 };
-__iconData$96.node;
-var Activity = createLucideIcon(__iconData$96);
+__iconData$93.node;
+var Activity = createLucideIcon(__iconData$93);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-down.mjs
 /**
@@ -11727,7 +11727,7 @@ var Activity = createLucideIcon(__iconData$96);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$95 = {
+var __iconData$92 = {
 	name: "arrow-down",
 	size: 24,
 	node: [["path", {
@@ -11738,8 +11738,8 @@ var __iconData$95 = {
 		key: "1idqje"
 	}]]
 };
-__iconData$95.node;
-var ArrowDown = createLucideIcon(__iconData$95);
+__iconData$92.node;
+var ArrowDown = createLucideIcon(__iconData$92);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left.mjs
 /**
@@ -11748,7 +11748,7 @@ var ArrowDown = createLucideIcon(__iconData$95);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$94 = {
+var __iconData$91 = {
 	name: "arrow-left",
 	size: 24,
 	node: [["path", {
@@ -11759,8 +11759,8 @@ var __iconData$94 = {
 		key: "x3x0zl"
 	}]]
 };
-__iconData$94.node;
-var ArrowLeft = createLucideIcon(__iconData$94);
+__iconData$91.node;
+var ArrowLeft = createLucideIcon(__iconData$91);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left-right.mjs
 /**
@@ -11769,7 +11769,7 @@ var ArrowLeft = createLucideIcon(__iconData$94);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$93 = {
+var __iconData$90 = {
 	name: "arrow-left-right",
 	size: 24,
 	node: [
@@ -11791,8 +11791,8 @@ var __iconData$93 = {
 		}]
 	]
 };
-__iconData$93.node;
-var ArrowLeftRight = createLucideIcon(__iconData$93);
+__iconData$90.node;
+var ArrowLeftRight = createLucideIcon(__iconData$90);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up-down.mjs
 /**
@@ -11801,7 +11801,7 @@ var ArrowLeftRight = createLucideIcon(__iconData$93);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$92 = {
+var __iconData$89 = {
 	name: "arrow-up-down",
 	size: 24,
 	node: [
@@ -11823,8 +11823,8 @@ var __iconData$92 = {
 		}]
 	]
 };
-__iconData$92.node;
-var ArrowUpDown = createLucideIcon(__iconData$92);
+__iconData$89.node;
+var ArrowUpDown = createLucideIcon(__iconData$89);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up.mjs
 /**
@@ -11833,7 +11833,7 @@ var ArrowUpDown = createLucideIcon(__iconData$92);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$91 = {
+var __iconData$88 = {
 	name: "arrow-up",
 	size: 24,
 	node: [["path", {
@@ -11844,8 +11844,8 @@ var __iconData$91 = {
 		key: "x0mq9r"
 	}]]
 };
-__iconData$91.node;
-var ArrowUp = createLucideIcon(__iconData$91);
+__iconData$88.node;
+var ArrowUp = createLucideIcon(__iconData$88);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/ban.mjs
 /**
@@ -11854,7 +11854,7 @@ var ArrowUp = createLucideIcon(__iconData$91);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$90 = {
+var __iconData$87 = {
 	name: "ban",
 	size: 24,
 	node: [["circle", {
@@ -11867,8 +11867,8 @@ var __iconData$90 = {
 		key: "196cmz"
 	}]]
 };
-__iconData$90.node;
-var Ban = createLucideIcon(__iconData$90);
+__iconData$87.node;
+var Ban = createLucideIcon(__iconData$87);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/banknote.mjs
 /**
@@ -11877,7 +11877,7 @@ var Ban = createLucideIcon(__iconData$90);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$89 = {
+var __iconData$86 = {
 	name: "banknote",
 	size: 24,
 	node: [
@@ -11901,8 +11901,8 @@ var __iconData$89 = {
 		}]
 	]
 };
-__iconData$89.node;
-var Banknote = createLucideIcon(__iconData$89);
+__iconData$86.node;
+var Banknote = createLucideIcon(__iconData$86);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/bell.mjs
 /**
@@ -11911,7 +11911,7 @@ var Banknote = createLucideIcon(__iconData$89);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$88 = {
+var __iconData$85 = {
 	name: "bell",
 	size: 24,
 	node: [["path", {
@@ -11922,8 +11922,8 @@ var __iconData$88 = {
 		key: "11g9vi"
 	}]]
 };
-__iconData$88.node;
-var Bell = createLucideIcon(__iconData$88);
+__iconData$85.node;
+var Bell = createLucideIcon(__iconData$85);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/building-complex.mjs
 /**
@@ -11932,7 +11932,7 @@ var Bell = createLucideIcon(__iconData$88);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$87 = {
+var __iconData$84 = {
 	name: "building-complex",
 	size: 24,
 	node: [
@@ -11959,8 +11959,8 @@ var __iconData$87 = {
 	],
 	aliases: ["building-2"]
 };
-__iconData$87.node;
-var BuildingComplex = createLucideIcon(__iconData$87);
+__iconData$84.node;
+var BuildingComplex = createLucideIcon(__iconData$84);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/camera.mjs
 /**
@@ -11969,7 +11969,7 @@ var BuildingComplex = createLucideIcon(__iconData$87);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$86 = {
+var __iconData$83 = {
 	name: "camera",
 	size: 24,
 	node: [["path", {
@@ -11982,8 +11982,8 @@ var __iconData$86 = {
 		key: "1vg3eu"
 	}]]
 };
-__iconData$86.node;
-var Camera = createLucideIcon(__iconData$86);
+__iconData$83.node;
+var Camera = createLucideIcon(__iconData$83);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/calendar.mjs
 /**
@@ -11992,7 +11992,7 @@ var Camera = createLucideIcon(__iconData$86);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$85 = {
+var __iconData$82 = {
 	name: "calendar",
 	size: 24,
 	node: [
@@ -12018,8 +12018,8 @@ var __iconData$85 = {
 		}]
 	]
 };
-__iconData$85.node;
-var Calendar = createLucideIcon(__iconData$85);
+__iconData$82.node;
+var Calendar = createLucideIcon(__iconData$82);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chart-column.mjs
 /**
@@ -12028,7 +12028,7 @@ var Calendar = createLucideIcon(__iconData$85);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$84 = {
+var __iconData$81 = {
 	name: "chart-column",
 	size: 24,
 	node: [
@@ -12051,37 +12051,8 @@ var __iconData$84 = {
 	],
 	aliases: ["bar-chart-3"]
 };
-__iconData$84.node;
-var ChartColumn = createLucideIcon(__iconData$84);
-//#endregion
-//#region node_modules/lucide-react/dist/esm/icons/chart-no-axes-column.mjs
-/**
-* @license lucide-react v1.53.0 - ISC
-*
-* This source code is licensed under the ISC license.
-* See the LICENSE file in the root directory of this source tree.
-*/
-var __iconData$83 = {
-	name: "chart-no-axes-column",
-	size: 24,
-	node: [
-		["path", {
-			d: "M5 21v-6",
-			key: "1hz6c0"
-		}],
-		["path", {
-			d: "M12 21V3",
-			key: "1lcnhd"
-		}],
-		["path", {
-			d: "M19 21V9",
-			key: "unv183"
-		}]
-	],
-	aliases: ["bar-chart-2"]
-};
-__iconData$83.node;
-var ChartNoAxesColumn = createLucideIcon(__iconData$83);
+__iconData$81.node;
+var ChartColumn = createLucideIcon(__iconData$81);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chart-pie.mjs
 /**
@@ -12090,7 +12061,7 @@ var ChartNoAxesColumn = createLucideIcon(__iconData$83);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$82 = {
+var __iconData$80 = {
 	name: "chart-pie",
 	size: 24,
 	node: [["path", {
@@ -12102,8 +12073,8 @@ var __iconData$82 = {
 	}]],
 	aliases: ["pie-chart"]
 };
-__iconData$82.node;
-var ChartPie = createLucideIcon(__iconData$82);
+__iconData$80.node;
+var ChartPie = createLucideIcon(__iconData$80);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/check-check.mjs
 /**
@@ -12112,7 +12083,7 @@ var ChartPie = createLucideIcon(__iconData$82);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$81 = {
+var __iconData$79 = {
 	name: "check-check",
 	size: 24,
 	node: [["path", {
@@ -12123,8 +12094,8 @@ var __iconData$81 = {
 		key: "ke71qq"
 	}]]
 };
-__iconData$81.node;
-var CheckCheck = createLucideIcon(__iconData$81);
+__iconData$79.node;
+var CheckCheck = createLucideIcon(__iconData$79);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/check.mjs
 /**
@@ -12133,7 +12104,7 @@ var CheckCheck = createLucideIcon(__iconData$81);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$80 = {
+var __iconData$78 = {
 	name: "check",
 	size: 24,
 	node: [["path", {
@@ -12141,8 +12112,8 @@ var __iconData$80 = {
 		key: "1gmf2c"
 	}]]
 };
-__iconData$80.node;
-var Check = createLucideIcon(__iconData$80);
+__iconData$78.node;
+var Check = createLucideIcon(__iconData$78);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-down.mjs
 /**
@@ -12151,7 +12122,7 @@ var Check = createLucideIcon(__iconData$80);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$79 = {
+var __iconData$77 = {
 	name: "chevron-down",
 	size: 24,
 	node: [["path", {
@@ -12159,8 +12130,8 @@ var __iconData$79 = {
 		key: "qrunsl"
 	}]]
 };
-__iconData$79.node;
-var ChevronDown = createLucideIcon(__iconData$79);
+__iconData$77.node;
+var ChevronDown = createLucideIcon(__iconData$77);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-left.mjs
 /**
@@ -12169,7 +12140,7 @@ var ChevronDown = createLucideIcon(__iconData$79);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$78 = {
+var __iconData$76 = {
 	name: "chevron-left",
 	size: 24,
 	node: [["path", {
@@ -12177,8 +12148,8 @@ var __iconData$78 = {
 		key: "1wnfg3"
 	}]]
 };
-__iconData$78.node;
-var ChevronLeft = createLucideIcon(__iconData$78);
+__iconData$76.node;
+var ChevronLeft = createLucideIcon(__iconData$76);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-up.mjs
 /**
@@ -12187,7 +12158,7 @@ var ChevronLeft = createLucideIcon(__iconData$78);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$77 = {
+var __iconData$75 = {
 	name: "chevron-up",
 	size: 24,
 	node: [["path", {
@@ -12195,8 +12166,8 @@ var __iconData$77 = {
 		key: "153udz"
 	}]]
 };
-__iconData$77.node;
-var ChevronUp = createLucideIcon(__iconData$77);
+__iconData$75.node;
+var ChevronUp = createLucideIcon(__iconData$75);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-right.mjs
 /**
@@ -12205,7 +12176,7 @@ var ChevronUp = createLucideIcon(__iconData$77);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$76 = {
+var __iconData$74 = {
 	name: "chevron-right",
 	size: 24,
 	node: [["path", {
@@ -12213,8 +12184,8 @@ var __iconData$76 = {
 		key: "mthhwq"
 	}]]
 };
-__iconData$76.node;
-var ChevronRight = createLucideIcon(__iconData$76);
+__iconData$74.node;
+var ChevronRight = createLucideIcon(__iconData$74);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-alert.mjs
 /**
@@ -12223,7 +12194,7 @@ var ChevronRight = createLucideIcon(__iconData$76);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$75 = {
+var __iconData$73 = {
 	name: "circle-alert",
 	size: 24,
 	node: [
@@ -12250,70 +12221,8 @@ var __iconData$75 = {
 	],
 	aliases: ["alert-circle"]
 };
-__iconData$75.node;
-var CircleAlert = createLucideIcon(__iconData$75);
-//#endregion
-//#region node_modules/lucide-react/dist/esm/icons/circle-arrow-down.mjs
-/**
-* @license lucide-react v1.53.0 - ISC
-*
-* This source code is licensed under the ISC license.
-* See the LICENSE file in the root directory of this source tree.
-*/
-var __iconData$74 = {
-	name: "circle-arrow-down",
-	size: 24,
-	node: [
-		["circle", {
-			cx: "12",
-			cy: "12",
-			r: "10",
-			key: "1mglay"
-		}],
-		["path", {
-			d: "M12 8v8",
-			key: "napkw2"
-		}],
-		["path", {
-			d: "m8 12 4 4 4-4",
-			key: "k98ssh"
-		}]
-	],
-	aliases: ["arrow-down-circle"]
-};
-__iconData$74.node;
-var CircleArrowDown = createLucideIcon(__iconData$74);
-//#endregion
-//#region node_modules/lucide-react/dist/esm/icons/circle-arrow-up.mjs
-/**
-* @license lucide-react v1.53.0 - ISC
-*
-* This source code is licensed under the ISC license.
-* See the LICENSE file in the root directory of this source tree.
-*/
-var __iconData$73 = {
-	name: "circle-arrow-up",
-	size: 24,
-	node: [
-		["circle", {
-			cx: "12",
-			cy: "12",
-			r: "10",
-			key: "1mglay"
-		}],
-		["path", {
-			d: "m16 12-4-4-4 4",
-			key: "177agl"
-		}],
-		["path", {
-			d: "M12 16V8",
-			key: "1sbj14"
-		}]
-	],
-	aliases: ["arrow-up-circle"]
-};
 __iconData$73.node;
-var CircleArrowUp = createLucideIcon(__iconData$73);
+var CircleAlert = createLucideIcon(__iconData$73);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-check.mjs
 /**
@@ -28674,31 +28583,35 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 		setZoomScale(1);
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "bg-white/90 backdrop-blur-md rounded-2xl p-3.5 sm:p-5 border border-sky-200/80 shadow-xs relative overflow-hidden space-y-3 sm:space-y-3.5",
+		className: "bg-white rounded-xl p-4 sm:p-5 border border-slate-200/90 shadow-xs relative overflow-hidden space-y-4",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3.5",
+				className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "min-w-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1.5 sm:gap-2 flex-wrap",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-							className: "text-xs sm:text-sm font-black text-slate-900 font-mono uppercase tracking-wider flex items-center gap-1.5",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tren Kualitas Redaman" })]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "inline-flex items-center text-[11px] font-mono font-bold text-amber-900 ",
-							children: [
-								"Batas: ",
-								Number(chartStats.threshold ?? kpi.warning_threshold ?? -26).toFixed(1),
-								" dBm"
-							]
-						})]
+						className: "flex items-center gap-2.5 flex-wrap",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								className: "text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-4 h-4 text-cyan-700 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tren Kualitas Redaman" })]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3.5 w-px bg-slate-200 hidden sm:inline-block" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "text-xs font-mono tabular-nums text-slate-500 font-medium",
+								children: [
+									"Ambang Batas: ",
+									Number(chartStats.threshold ?? kpi.warning_threshold ?? -26).toFixed(1),
+									" dBm"
+								]
+							})
+						]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-[11px] sm:text-xs text-slate-600 mt-0.5 font-medium line-clamp-1 sm:line-clamp-none",
-						children: "Fluktuasi sinyal optik rata-rata jaringan ISP"
+						className: "text-xs text-slate-500 mt-1 font-normal line-clamp-1 sm:line-clamp-none",
+						children: "Fluktuasi sinyal optik rata-rata jaringan ISP per siklus pemindaian"
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto font-mono relative",
+					className: "flex items-center gap-2 w-full sm:w-auto relative",
 					ref: calendarRef,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "relative flex-1 sm:flex-none",
@@ -28706,10 +28619,10 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 							type: "button",
 							onClick: () => setIsCalendarOpen(!isCalendarOpen),
 							title: "Pilih tanggal dari riwayat rekaman database",
-							className: `w-full sm:w-auto px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs rounded-lg border min-h-[34px] sm:min-h-[36px] font-bold transition flex items-center justify-between sm:justify-start gap-1.5 cursor-pointer select-none ${chartRange === "custom" ? "bg-cyan-700 text-white border-cyan-800 shadow-xs" : "bg-sky-50/70 hover:bg-sky-100/70 text-slate-800 border-sky-200"}`,
+							className: `w-full sm:w-auto px-3 py-1.5 text-xs rounded-lg border min-h-[36px] font-semibold transition flex items-center justify-between sm:justify-start gap-2 cursor-pointer select-none shadow-2xs ${chartRange === "custom" ? "bg-cyan-700 text-white border-cyan-800 shadow-xs" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"}`,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-1.5",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { className: `w-3.5 h-3.5 ${chartRange === "custom" ? "text-white" : "text-cyan-700"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatDisplayDate(selectedDate) })]
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { className: `w-3.5 h-3.5 ${chartRange === "custom" ? "text-white" : "text-slate-500"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatDisplayDate(selectedDate) })]
 							})
 						}), isCalendarOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "absolute top-full left-0 sm:left-auto sm:right-0 mt-2 z-50 bg-white rounded-xl shadow-xl border border-sky-200 p-3 w-[275px] sm:w-[290px] animate-in fade-in zoom-in-95 duration-150",
@@ -28776,7 +28689,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 							]
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1 text-[11px] sm:text-xs font-bold shrink-0",
+						className: "flex items-center gap-1.5 text-xs font-medium shrink-0",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
@@ -28785,7 +28698,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 									setSelectedDate(todayStr);
 									setIsCalendarOpen(false);
 								},
-								className: `px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono cursor-pointer ${chartRange === "today" ? "bg-cyan-700 text-white shadow-xs" : "bg-sky-50/70 text-slate-700 hover:bg-sky-100/70"}`,
+								className: `px-3 py-1.5 rounded-lg transition font-sans cursor-pointer shadow-2xs ${chartRange === "today" ? "bg-cyan-700 text-white font-semibold" : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"}`,
 								children: "Hari Ini"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -28798,7 +28711,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 									setIsCalendarOpen(false);
 								},
 								title: hasYesterdayData ? "Bandingkan dengan hari kemarin" : "Data kemarin belum ada di database",
-								className: `px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${!hasYesterdayData ? "opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200" : chartRange === "yesterday" ? "bg-cyan-700 text-white shadow-xs cursor-pointer" : "bg-sky-50/70 text-slate-700 hover:bg-sky-100/70 cursor-pointer"}`,
+								className: `px-3 py-1.5 rounded-lg transition font-sans shadow-2xs ${!hasYesterdayData ? "opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200" : chartRange === "yesterday" ? "bg-cyan-700 text-white font-semibold cursor-pointer" : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 cursor-pointer"}`,
 								children: "Kemarin"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -28811,7 +28724,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 									setIsCalendarOpen(false);
 								},
 								title: hasWeekData ? "Bandingkan tren 7 hari terakhir" : "Riwayat 7 hari sebelumnya belum ada di database",
-								className: `px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${!hasWeekData ? "opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200" : chartRange === "week" ? "bg-cyan-700 text-white shadow-xs cursor-pointer" : "bg-sky-50/70 text-slate-700 hover:bg-sky-100/70 cursor-pointer"}`,
+								className: `px-3 py-1.5 rounded-lg transition font-sans shadow-2xs ${!hasWeekData ? "opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200" : chartRange === "week" ? "bg-cyan-700 text-white font-semibold cursor-pointer" : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 cursor-pointer"}`,
 								children: "7 Hari"
 							})
 						]
@@ -28819,60 +28732,36 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 p-2 sm:p-2.5 bg-sky-50/60 rounded-xl border border-sky-100 text-xs text-slate-700 font-mono",
+				className: "grid grid-cols-2 sm:grid-cols-4 gap-3 py-2.5 px-3.5 rounded-lg bg-slate-50/70 border border-slate-200/80 text-xs",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1.5 sm:gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "p-1 sm:p-1.5 rounded-lg bg-cyan-100 text-cyan-800 shrink-0",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TrendingUp, { className: "w-3.5 h-3.5 sm:w-4 sm:h-4" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] text-slate-600 font-bold uppercase tracking-wider block",
-							children: "Rata-rata:"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "font-extrabold text-slate-900 text-xs sm:text-sm",
-							children: chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : "-"
-						})] })]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1.5 sm:gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "p-1 sm:p-1.5 rounded-lg bg-emerald-100 text-emerald-800 shrink-0",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleArrowUp, { className: "w-3.5 h-3.5 sm:w-4 sm:h-4" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] text-emerald-800 font-bold uppercase tracking-wider block",
-							children: "Terbaik:"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "font-extrabold text-emerald-800 text-xs sm:text-sm",
-							children: chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : "-"
-						})] })]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1.5 sm:gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "p-1 sm:p-1.5 rounded-lg bg-rose-100 text-rose-800 shrink-0",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleArrowDown, { className: "w-3.5 h-3.5 sm:w-4 sm:h-4" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] text-rose-800 font-bold uppercase tracking-wider block",
-							children: "Terendah:"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "font-extrabold text-rose-800 text-xs sm:text-sm",
-							children: chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : "-"
-						})] })]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1.5 sm:gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "p-1 sm:p-1.5 rounded-lg bg-slate-200 text-slate-800 shrink-0",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartNoAxesColumn, { className: "w-3.5 h-3.5 sm:w-4 sm:h-4" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] text-slate-600 font-bold uppercase tracking-wider block",
-							children: "Total Sampel:"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "font-extrabold text-slate-900 text-xs sm:text-sm",
-							children: [chartStats.total_points, " Scan"]
-						})] })]
-					})
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[11px] font-sans font-medium text-slate-500 block",
+						children: "Rata-rata Redaman"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-sm font-bold font-mono tabular-nums text-slate-900 mt-0.5 block",
+						children: chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : "-"
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[11px] font-sans font-medium text-slate-500 block",
+						children: "Sinyal Terbaik"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-sm font-bold font-mono tabular-nums text-emerald-700 mt-0.5 block",
+						children: chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : "-"
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[11px] font-sans font-medium text-slate-500 block",
+						children: "Sinyal Terendah"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-sm font-bold font-mono tabular-nums text-rose-700 mt-0.5 block",
+						children: chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : "-"
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[11px] font-sans font-medium text-slate-500 block",
+						children: "Total Titik Scan"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "text-sm font-bold font-mono tabular-nums text-slate-900 mt-0.5 block",
+						children: [chartStats.total_points, " Titik"]
+					})] })
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -28926,49 +28815,49 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "pt-2 sm:pt-3 border-t border-sky-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] font-mono text-slate-600",
+				className: "pt-2 sm:pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-sans text-slate-600",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex flex-wrap items-center gap-2 sm:gap-3",
 					children: [
 						activeDatasets.filter((d) => !d.isThreshold).map((ds, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: () => toggleDataset(ds.index),
-							className: "flex items-center gap-1 hover:opacity-80 transition select-none cursor-pointer",
+							className: "flex items-center gap-1.5 hover:opacity-80 transition select-none cursor-pointer",
 							title: `Klik untuk toggle ${ds.label}`,
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "h-0.5 w-3 rounded-xs inline-block shrink-0",
 								style: { backgroundColor: ds.color }
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: `font-bold text-slate-800 ${ds.hidden ? "line-through opacity-40" : ""}`,
+								className: `font-semibold text-slate-700 ${ds.hidden ? "line-through opacity-40" : ""}`,
 								children: ds.label
 							})]
 						}, idx)),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-1 ml-0.5 pl-1.5 border-l border-sky-200",
+							className: "flex items-center gap-1.5 ml-0.5 pl-2 border-l border-slate-200",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-0.5 w-2 sm:w-3 bg-amber-500 inline-block" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-amber-800 font-bold",
+								className: "text-amber-800 font-semibold font-mono tabular-nums",
 								children: [
-									"Warning (",
+									"Waspada (",
 									Number(chartStats.threshold ?? kpi.warning_threshold ?? -26).toFixed(1),
-									"dBm)"
+									" dBm)"
 								]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-1",
+							className: "flex items-center gap-1.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-0.5 w-2 sm:w-3 bg-rose-500 inline-block" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-rose-800 font-bold",
+								className: "text-rose-800 font-semibold font-mono tabular-nums",
 								children: [
 									"Kritis (",
 									Number(chartStats.critical_threshold ?? kpi.critical_threshold ?? -27).toFixed(1),
-									"dBm)"
+									" dBm)"
 								]
 							})]
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-slate-600 text-[11px]",
+					className: "text-slate-500 text-xs font-mono tabular-nums",
 					children: ["Optimal: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: "font-extrabold text-emerald-800",
+						className: "font-bold text-emerald-700",
 						children: [
 							"> ",
 							Number(chartStats.threshold ?? kpi.warning_threshold ?? -26).toFixed(1),

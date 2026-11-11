@@ -69,7 +69,7 @@ class KendalaService:
 
                 if target_tokens:
                     cust_name = cust.nama if cust else "Pelanggan"
-                    title = f"📩 TIKET KENDALA BARU [{kantor.upper()}]"
+                    title = f"[TIKET KENDALA BARU] Kantor: {kantor.upper()}"
                     body = f"[{ticket_id}] {cust_name} ({kategori}): {deskripsi}"
                     send_push_notification(
                         tokens=target_tokens,

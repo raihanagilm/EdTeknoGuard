@@ -520,39 +520,40 @@ const toggleDataset = (idx) => {
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-md rounded-2xl p-3.5 sm:p-5 border border-sky-200/80 shadow-xs relative overflow-hidden space-y-3 sm:space-y-3.5">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3.5">
+    <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/90 shadow-xs relative overflow-hidden space-y-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              <h3 className="text-xs sm:text-sm font-black text-slate-900 font-mono uppercase tracking-wider flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-700" />
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                <Activity className="w-4 h-4 text-cyan-700 shrink-0" />
                 <span>Tren Kualitas Redaman</span>
               </h3>
-              <span className="inline-flex items-center text-[11px] font-mono font-bold text-amber-900 ">
-                Batas: {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm
+              <span className="h-3.5 w-px bg-slate-200 hidden sm:inline-block" />
+              <span className="text-xs font-mono tabular-nums text-slate-500 font-medium">
+                Ambang Batas: {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm
               </span>
             </div>
-            <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5 font-medium line-clamp-1 sm:line-clamp-none">
-              Fluktuasi sinyal optik rata-rata jaringan ISP
+            <p className="text-xs text-slate-500 mt-1 font-normal line-clamp-1 sm:line-clamp-none">
+              Fluktuasi sinyal optik rata-rata jaringan ISP per siklus pemindaian
             </p>
           </div>
 
           {/* Filter Tanggal & Segmented Control */}
-          <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto font-mono relative" ref={calendarRef}>
+          <div className="flex items-center gap-2 w-full sm:w-auto relative" ref={calendarRef}>
             {/* Tombol Pemilih Kalender Popover */}
             <div className="relative flex-1 sm:flex-none">
               <button
                 type="button"
                 onClick={() => setIsCalendarOpen(!isCalendarOpen)}
                 title="Pilih tanggal dari riwayat rekaman database"
-                className={`w-full sm:w-auto px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs rounded-lg border min-h-[34px] sm:min-h-[36px] font-bold transition flex items-center justify-between sm:justify-start gap-1.5 cursor-pointer select-none ${
+                className={`w-full sm:w-auto px-3 py-1.5 text-xs rounded-lg border min-h-[36px] font-semibold transition flex items-center justify-between sm:justify-start gap-2 cursor-pointer select-none shadow-2xs ${
                   chartRange === 'custom'
                     ? 'bg-cyan-700 text-white border-cyan-800 shadow-xs'
-                    : 'bg-sky-50/70 hover:bg-sky-100/70 text-slate-800 border-sky-200'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-1.5">
-                  <Calendar className={`w-3.5 h-3.5 ${chartRange === 'custom' ? 'text-white' : 'text-cyan-700'}`} />
+                  <Calendar className={`w-3.5 h-3.5 ${chartRange === 'custom' ? 'text-white' : 'text-slate-500'}`} />
                   <span>{formatDisplayDate(selectedDate)}</span>
                 </div>
               </button>
@@ -626,7 +627,7 @@ const toggleDataset = (idx) => {
             </div>
 
             {/* Tombol Filter Cepat */}
-            <div className="flex items-center gap-1 text-[11px] sm:text-xs font-bold shrink-0">
+            <div className="flex items-center gap-1.5 text-xs font-medium shrink-0">
               <button
                 type="button"
                 onClick={() => {
@@ -634,10 +635,10 @@ const toggleDataset = (idx) => {
                   setSelectedDate(todayStr)
                   setIsCalendarOpen(false)
                 }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg transition font-sans cursor-pointer shadow-2xs ${
                   chartRange === 'today'
-                    ? 'bg-cyan-700 text-white shadow-xs'
-                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70'
+                    ? 'bg-cyan-700 text-white font-semibold'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
                 }`}
               >
                 Hari Ini
@@ -652,12 +653,12 @@ const toggleDataset = (idx) => {
                   setIsCalendarOpen(false)
                 }}
                 title={hasYesterdayData ? 'Bandingkan dengan hari kemarin' : 'Data kemarin belum ada di database'}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                className={`px-3 py-1.5 rounded-lg transition font-sans shadow-2xs ${
                   !hasYesterdayData
                     ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
                     : chartRange === 'yesterday'
-                    ? 'bg-cyan-700 text-white shadow-xs cursor-pointer'
-                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70 cursor-pointer'
+                    ? 'bg-cyan-700 text-white font-semibold cursor-pointer'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 cursor-pointer'
                 }`}
               >
                 Kemarin
@@ -672,12 +673,12 @@ const toggleDataset = (idx) => {
                   setIsCalendarOpen(false)
                 }}
                 title={hasWeekData ? 'Bandingkan tren 7 hari terakhir' : 'Riwayat 7 hari sebelumnya belum ada di database'}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition font-mono ${
+                className={`px-3 py-1.5 rounded-lg transition font-sans shadow-2xs ${
                   !hasWeekData
                     ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
                     : chartRange === 'week'
-                    ? 'bg-cyan-700 text-white shadow-xs cursor-pointer'
-                    : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100/70 cursor-pointer'
+                    ? 'bg-cyan-700 text-white font-semibold cursor-pointer'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 cursor-pointer'
                 }`}
               >
                 7 Hari
@@ -686,60 +687,42 @@ const toggleDataset = (idx) => {
           </div>
         </div>
 
-        {/* Data Summary Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 p-2 sm:p-2.5 bg-sky-50/60 rounded-xl border border-sky-100 text-xs text-slate-700 font-mono">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-cyan-100 text-cyan-800 shrink-0">
-              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <div>
-              <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider block">
-                Rata-rata:
-              </span>
-              <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                {chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : '-'}
-              </span>
-            </div>
+        {/* Telemetry Stat Bar (Clean Architectural Strip - Zero Box-in-Box, Zero Colored Icon Tiles) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-2.5 px-3.5 rounded-lg bg-slate-50/70 border border-slate-200/80 text-xs">
+          <div>
+            <span className="text-[11px] font-sans font-medium text-slate-500 block">
+              Rata-rata Redaman
+            </span>
+            <span className="text-sm font-bold font-mono tabular-nums text-slate-900 mt-0.5 block">
+              {chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : '-'}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-emerald-100 text-emerald-800 shrink-0">
-              <ArrowUpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <div>
-              <span className="text-[11px] text-emerald-800 font-bold uppercase tracking-wider block">
-                Terbaik:
-              </span>
-              <span className="font-extrabold text-emerald-800 text-xs sm:text-sm">
-                {chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : '-'}
-              </span>
-            </div>
+          <div>
+            <span className="text-[11px] font-sans font-medium text-slate-500 block">
+              Sinyal Terbaik
+            </span>
+            <span className="text-sm font-bold font-mono tabular-nums text-emerald-700 mt-0.5 block">
+              {chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : '-'}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-rose-100 text-rose-800 shrink-0">
-              <ArrowDownCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <div>
-              <span className="text-[11px] text-rose-800 font-bold uppercase tracking-wider block">
-                Terendah:
-              </span>
-              <span className="font-extrabold text-rose-800 text-xs sm:text-sm">
-                {chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : '-'}
-              </span>
-            </div>
+          <div>
+            <span className="text-[11px] font-sans font-medium text-slate-500 block">
+              Sinyal Terendah
+            </span>
+            <span className="text-sm font-bold font-mono tabular-nums text-rose-700 mt-0.5 block">
+              {chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : '-'}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1 sm:p-1.5 rounded-lg bg-slate-200 text-slate-800 shrink-0">
-              <BarChart2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </div>
-            <div>
-              <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider block">
-                Total Sampel:
-              </span>
-              <span className="font-extrabold text-slate-900 text-xs sm:text-sm">{chartStats.total_points} Scan</span>
-            </div>
+          <div>
+            <span className="text-[11px] font-sans font-medium text-slate-500 block">
+              Total Titik Scan
+            </span>
+            <span className="text-sm font-bold font-mono tabular-nums text-slate-900 mt-0.5 block">
+              {chartStats.total_points} Titik
+            </span>
           </div>
         </div>
 
@@ -793,7 +776,7 @@ const toggleDataset = (idx) => {
         </div>
 
         {/* Legend Footer */}
-        <div className="pt-2 sm:pt-3 border-t border-sky-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] font-mono text-slate-600">
+        <div className="pt-2 sm:pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-sans text-slate-600">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {activeDatasets
               .filter((d) => !d.isThreshold)
@@ -801,7 +784,7 @@ const toggleDataset = (idx) => {
                 <button
                   key={idx}
                   onClick={() => toggleDataset(ds.index)}
-                  className="flex items-center gap-1 hover:opacity-80 transition select-none cursor-pointer"
+                  className="flex items-center gap-1.5 hover:opacity-80 transition select-none cursor-pointer"
                   title={`Klik untuk toggle ${ds.label}`}
                 >
                   <span
@@ -809,7 +792,7 @@ const toggleDataset = (idx) => {
                     style={{ backgroundColor: ds.color }}
                   />
                   <span
-                    className={`font-bold text-slate-800 ${
+                    className={`font-semibold text-slate-700 ${
                       ds.hidden ? 'line-through opacity-40' : ''
                     }`}
                   >
@@ -818,21 +801,21 @@ const toggleDataset = (idx) => {
                 </button>
               ))}
 
-            <div className="flex items-center gap-1 ml-0.5 pl-1.5 border-l border-sky-200">
+            <div className="flex items-center gap-1.5 ml-0.5 pl-2 border-l border-slate-200">
               <span className="h-0.5 w-2 sm:w-3 bg-amber-500 inline-block" />
-              <span className="text-amber-800 font-bold">
-                Warning ({Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)}dBm)
+              <span className="text-amber-800 font-semibold font-mono tabular-nums">
+                Waspada ({Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm)
               </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <span className="h-0.5 w-2 sm:w-3 bg-rose-500 inline-block" />
-              <span className="text-rose-800 font-bold">
-                Kritis ({Number(chartStats.critical_threshold ?? kpi.critical_threshold ?? -27.0).toFixed(1)}dBm)
+              <span className="text-rose-800 font-semibold font-mono tabular-nums">
+                Kritis ({Number(chartStats.critical_threshold ?? kpi.critical_threshold ?? -27.0).toFixed(1)} dBm)
               </span>
             </div>
           </div>
-          <div className="text-slate-600 text-[11px]">
-            Optimal: <span className="font-extrabold text-emerald-800">&gt; {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm</span>
+          <div className="text-slate-500 text-xs font-mono tabular-nums">
+            Optimal: <span className="font-bold text-emerald-700">&gt; {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm</span>
           </div>
         </div>
       </div>
