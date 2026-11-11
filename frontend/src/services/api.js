@@ -12,6 +12,8 @@ class ApiService {
     const url = `${this.baseUrl}${endpoint}`;
     const defaultHeaders = {
       'Accept': 'application/json',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
     };
 
     if (options.body && !(options.body instanceof FormData)) {
@@ -20,6 +22,7 @@ class ApiService {
 
     const config = {
       ...options,
+      cache: 'no-store',
       credentials: 'include',
       headers: {
         ...defaultHeaders,
