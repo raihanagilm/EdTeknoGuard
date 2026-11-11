@@ -13,10 +13,11 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
   Aplikasi memiliki kapabilitas memunculkan notifikasi native dengan suara khusus dan banner mengambang di atas layar (*heads-up notification*) saat ada gangguan redaman kritis (TeknoGuard) atau update tiket/tagihan (MyTekno), **bahkan ketika aplikasi sedang ditutup atau layar HP terkunci**.
 * **Integrasi Web-to-Native (JavaScript Bridge):**
   Halaman web React di dalam WebView dapat memicu notifikasi native perangkat secara langsung melalui `window.AndroidBridge.showNativeNotification(...)`.
-* **Dual Engine Pemantauan Real-Time (FCM + Background Service Cadangan):**
-  Aplikasi menggabungkan **Firebase Cloud Messaging (FCM)** untuk push instan dari server, dan **Background Polling Service** lokal yang membaca konfigurasi interval dari database (`polling_interval_minutes` dan `alert_waiting_interval_minutes`).
-  - Menjamin notifikasi redaman kritis & tiket kendala **100% PASTI MASUK** ke HP teknisi TeknoGuard sesuai aturan pengaturan database.
-  - Notifikasi persisten latar belakang dibungkam secara senyap (`IMPORTANCE_MIN` & `VISIBILITY_SECRET`) sehingga tidak pernah mengganggu status bar pengguna.
+* **Arsitektur Murni Ala WhatsApp & Telegram: Google Firebase Cloud Messaging (FCM):**
+  Aplikasi menggunakan **Firebase Cloud Messaging (FCM)** 100% pasif seperti WhatsApp dan Telegram:
+  - **Sama Sekali Tanpa Notifikasi Persisten Latar Belakang:** Service latar belakang lokal lama (`EdTeknoBackgroundService`) telah dihentikan total dan dibuang dari manifes. Tidak ada lagi notifikasi "pemantauan di latar belakang" di status bar pengguna saat HP mati maupun saat HP hidup!
+  - **Super Hemat Baterai (Zero Battery Drain):** HP tidak membuka koneksi polling berkala, HP tetap dalam kondisi *deep sleep*.
+  - **Instant Push:** Push notifikasi ditembakkan langsung dari server Google ke HP saat ada insiden redaman kritis atau tiket kendala.
 * **Smart Swipe-to-Refresh & Smooth In-App Scroll:**
   WebView dilengkapi bridge pendeteksi posisi scroll internal web (`AndroidBridge.setScrollAtTop` & `setOnChildScrollUpCallback`). Pengguna dapat bebas scroll ke bawah lalu scroll kembali ke atas tanpa terganggu atau ter-refresh secara tidak sengaja. Refresh hanya aktif jika gestur ditarik saat konten benar-benar berada di puncak paling atas.
 * **Splash Screen Elegan (Logo Besar + Nama Aplikasi):**
