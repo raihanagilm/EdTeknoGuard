@@ -34,6 +34,53 @@ import { ConfirmSaveModal } from './components/common/Modals'
 import { LoginView } from './components/auth/LoginView'
 import { PortalCustomerApp as PortalPelangganApp } from './portal/PortalCustomerApp'
 
+// URL Path to Module Tab Mapping Helper (Tersedia secara global di atas komponen App)
+function getTabFromPath(path) {
+  const clean = (path || '').replace(/^\/+|\/+$/g, '').toLowerCase()
+  if (
+    clean === 'portal' ||
+    clean.startsWith('portal/') ||
+    clean === 'mytekno' ||
+    clean.startsWith('mytekno/') ||
+    clean === 'teknocust' ||
+    clean.startsWith('teknocust/')
+  ) {
+    return 'portal'
+  }
+  if (!clean || clean === 'teknoguard' || clean === 'dashboard' || clean === 'beranda') return 'beranda'
+  if (clean === 'login') return 'login'
+  if (clean === 'logs' || clean === 'riwayat') return 'riwayat'
+  if (clean === 'kuota' || clean === 'admin/kuota') return 'kuota'
+  if (clean === 'pelanggan') return 'pelanggan'
+  if (clean === 'tiket' || clean === 'admin/tiket') return 'tiket'
+  if (clean === 'log' || clean === 'activity-logs') return 'log'
+  if (clean === 'manajemen-kantor') return 'manajemen-kantor'
+  if (clean === 'pengguna' || clean === 'users') return 'pengguna'
+  if (clean === 'kantor') return 'kantor'
+  if (clean === 'mikrotik' || clean === 'routeros') return 'mikrotik'
+  if (clean === 'pengaturan' || clean === 'settings') return 'pengaturan'
+  return '404_not_found'
+}
+
+// Path to URL path string mapper (Diselaraskan persis dengan nama navigasi)
+function getPathFromTab(tab) {
+  switch (tab) {
+    case 'beranda': return '/'
+    case 'portal': return '/portal'
+    case 'riwayat': return '/riwayat'
+    case 'kuota': return '/kuota'
+    case 'pelanggan': return '/pelanggan'
+    case 'tiket': return '/tiket'
+    case 'log': return '/log'
+    case 'manajemen-kantor': return '/manajemen-kantor'
+    case 'pengguna': return '/pengguna'
+    case 'kantor': return '/kantor'
+    case 'mikrotik': return '/mikrotik'
+    case 'pengaturan': return '/pengaturan'
+    default: return `/${tab}`
+  }
+}
+
 export default function App() {
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -41,7 +88,21 @@ export default function App() {
   })
 
   // Navigation & Office Scope State (SOP Multi-Kantor)
-  const [activeTab, setActiveTab] = useState('beranda')
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const pathTab = getTabFromPath(window.location.pathname)
+      if (pathTab && pathTab !== 'login' && pathTab !== '404_not_found') {
+        return pathTab
+      }
+      const savedTab = localStorage.getItem('edtekno_active_tab')
+      if (savedTab && savedTab !== 'login' && savedTab !== '404_not_found') {
+        return savedTab
+      }
+      return 'beranda'
+    } catch (_) {
+      return 'beranda'
+    }
+  })
   const [officeSubTab, setOfficeSubTab] = useState('kantor')
   const [customerSearchQuery, setCustomerSearchQuery] = useState('')
   const [customerStatusFilter, setCustomerStatusFilter] = useState('ALL')
@@ -130,7 +191,22 @@ export default function App() {
   const [pollingInterval, setPollingInterval] = useState(5)
   const [warnThreshold, setWarnThreshold] = useState(-26.0)
   const [critThreshold, setCritThreshold] = useState(-27.0)
-  const [appVibration, setAppVibration] = useState(true)
+  // Preferensi getaran aplikasi personal (Tersimpan di localStorage perangkat pengguna)
+  const [appVibration, setAppVibration] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tekno_personal_vibration_enabled')
+      return saved !== null ? saved === 'true' : true
+    } catch (_) {
+      return true
+    }
+  })
+
+  const handleUpdateAppVibration = (enabled) => {
+    setAppVibration(enabled)
+    try {
+      localStorage.setItem('tekno_personal_vibration_enabled', String(enabled))
+    } catch (_) {}
+  }
   const [alertWaitingInterval, setAlertWaitingInterval] = useState(5)
   const [nightModeEnabled, setNightModeEnabled] = useState(false)
   const [nightModeStart, setNightModeStart] = useState('22:00')
@@ -173,7 +249,6 @@ export default function App() {
         if (data.critical_threshold_dbm !== undefined && data.critical_threshold_dbm !== null) {
           setCritThreshold(data.critical_threshold_dbm)
         }
-        if (data.app_vibration_enabled !== undefined) setAppVibration(data.app_vibration_enabled)
         if (data.alert_waiting_interval_minutes) setAlertWaitingInterval(data.alert_waiting_interval_minutes)
         if (data.night_mode_enabled !== undefined) setNightModeEnabled(data.night_mode_enabled)
         if (data.night_mode_start) setNightModeStart(data.night_mode_start)
@@ -312,6 +387,11 @@ export default function App() {
   const handleNotificationItemClick = async (item) => {
     setIsNotificationOpen(false)
 
+    // Jika notifikasi berasal dari kantor berbeda, alihkan activeOffice terlebih dahulu
+    if (item.kantor && item.kantor.toLowerCase() !== activeOffice.toLowerCase()) {
+      handleSwitchOffice(item.kantor)
+    }
+
     // Notifikasi KRITIS (LOS / CRITICAL) DILARANG DIHAPUS / DI-READ:
     // Hanya boleh hilang otomatis jika status modem kembali normal di hasil pemantauan
     if (item.level !== 'critical' && !item.is_critical) {
@@ -321,7 +401,8 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             type: item.type,
-            reference_id: item.reference_id || item.id
+            reference_id: item.reference_id || item.id,
+            kantor: item.kantor || activeOffice
           })
         })
         // Update local state hanya untuk notifikasi non-kritis
@@ -375,7 +456,8 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: item.type,
-          reference_id: item.reference_id || item.id
+          reference_id: item.reference_id || item.id,
+          kantor: item.kantor || activeOffice
         })
       })
       setNotificationList(prev => prev.filter(n => n.id !== item.id))
@@ -399,7 +481,8 @@ export default function App() {
         body: JSON.stringify({
           items: nonCriticalItems.map(n => ({
             type: n.type,
-            reference_id: n.reference_id || n.id
+            reference_id: n.reference_id || n.id,
+            kantor: n.kantor || activeOffice
           }))
         })
       })
@@ -577,61 +660,20 @@ export default function App() {
       setIsAuthenticated(false)
       localStorage.removeItem('edtekno_auth_status')
       localStorage.removeItem('edtekno_last_active_time')
+      localStorage.removeItem('edtekno_active_tab')
       document.cookie = "edteknoguard_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT"
       window.history.pushState({}, '', '/login')
-    }
-  }
-
-  // URL Path to Module Tab Mapping Helper
-  const getTabFromPath = (path) => {
-    const clean = path.replace(/^\/+|\/+$/g, '').toLowerCase()
-    if (
-      clean === 'portal' ||
-      clean.startsWith('portal/') ||
-      clean === 'mytekno' ||
-      clean.startsWith('mytekno/') ||
-      clean === 'teknocust' ||
-      clean.startsWith('teknocust/')
-    ) {
-      return 'portal'
-    }
-    if (!clean || clean === 'teknoguard' || clean === 'dashboard' || clean === 'beranda') return 'beranda'
-    if (clean === 'login') return 'login'
-    if (clean === 'logs' || clean === 'riwayat') return 'riwayat'
-    if (clean === 'kuota' || clean === 'admin/kuota') return 'kuota'
-    if (clean === 'pelanggan') return 'pelanggan'
-    if (clean === 'tiket' || clean === 'admin/tiket') return 'tiket'
-    if (clean === 'log' || clean === 'activity-logs') return 'log'
-    if (clean === 'manajemen-kantor') return 'manajemen-kantor'
-    if (clean === 'pengguna' || clean === 'users') return 'pengguna'
-    if (clean === 'kantor') return 'kantor'
-    if (clean === 'mikrotik' || clean === 'routeros') return 'mikrotik'
-    if (clean === 'pengaturan' || clean === 'settings') return 'pengaturan'
-    return '404_not_found'
-  }
-
-  // Path to URL path string mapper (Diselaraskan persis dengan nama navigasi)
-  const getPathFromTab = (tab) => {
-    switch (tab) {
-      case 'beranda': return '/'
-      case 'portal': return '/portal'
-      case 'riwayat': return '/riwayat'
-      case 'kuota': return '/kuota'
-      case 'pelanggan': return '/pelanggan'
-      case 'tiket': return '/tiket'
-      case 'log': return '/log'
-      case 'manajemen-kantor': return '/manajemen-kantor'
-      case 'pengguna': return '/pengguna'
-      case 'kantor': return '/kantor'
-      case 'mikrotik': return '/mikrotik'
-      case 'pengaturan': return '/pengaturan'
-      default: return `/${tab}`
     }
   }
 
   // Handle Tab Switch with URL PushState
   const handleTabChange = (newTab) => {
     setActiveTab(newTab)
+    try {
+      if (newTab && newTab !== 'login' && newTab !== '404_not_found') {
+        localStorage.setItem('edtekno_active_tab', newTab)
+      }
+    } catch (_) {}
     const newPath = getPathFromTab(newTab)
     if (window.location.pathname !== newPath) {
       window.history.pushState({}, '', newPath)
@@ -648,11 +690,22 @@ export default function App() {
       const auth = authOverride !== null ? authOverride : isAuthenticated
       const currentPath = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase()
 
-      // Jika user sudah login dan mengakses /login, alihkan otomatis ke beranda
+      // Jika user sudah login dan mengakses /login, alihkan otomatis ke tab terakhir atau beranda
       if (auth && currentPath === 'login') {
-        window.history.replaceState({}, '', '/')
-        setActiveTab('beranda')
+        const savedTab = localStorage.getItem('edtekno_active_tab') || 'beranda'
+        const targetPath = getPathFromTab(savedTab)
+        window.history.replaceState({}, '', targetPath)
+        setActiveTab(savedTab)
         return
+      }
+
+      // Jika berada di root path '/' dan ada tab terakhir tersimpan, pulihkan tab tersebut
+      if (auth && !currentPath) {
+        const savedTab = localStorage.getItem('edtekno_active_tab')
+        if (savedTab && savedTab !== 'beranda' && savedTab !== 'login') {
+          setActiveTab(savedTab)
+          return
+        }
       }
 
       const initialTab = getTabFromPath(window.location.pathname)
@@ -924,7 +977,7 @@ export default function App() {
               critThreshold={critThreshold}
               setCritThreshold={setCritThreshold}
               appVibration={appVibration}
-              setAppVibration={setAppVibration}
+              setAppVibration={handleUpdateAppVibration}
               alertWaitingInterval={alertWaitingInterval}
               setAlertWaitingInterval={setAlertWaitingInterval}
               nightModeEnabled={nightModeEnabled}

@@ -29,7 +29,13 @@ export function PortalCustomerApp() {
   const getPortalTabFromPath = (path) => {
     const clean = path.replace(/^\/+|\/+$/g, '').toLowerCase();
     const parts = clean.split('/');
-    if (parts.length === 1 && (parts[0] === 'mytekno' || parts[0] === 'teknocust' || parts[0] === 'portal')) return 'beranda';
+    if (parts.length === 1 && (parts[0] === 'mytekno' || parts[0] === 'teknocust' || parts[0] === 'portal')) {
+      const saved = localStorage.getItem('mytekno_active_tab');
+      if (saved && ['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran', 'notifikasi'].includes(saved)) {
+        return saved;
+      }
+      return 'beranda';
+    }
     if (parts.length >= 2 && (parts[0] === 'mytekno' || parts[0] === 'teknocust' || parts[0] === 'portal')) {
       const sub = parts[1];
       if (['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran', 'notifikasi'].includes(sub)) {
@@ -52,6 +58,11 @@ export function PortalCustomerApp() {
 
   const switchTab = (tab, updateUrl = true) => {
     setActiveTab(tab);
+    if (tab && tab !== '404_not_found') {
+      try {
+        localStorage.setItem('mytekno_active_tab', tab);
+      } catch (_) {}
+    }
     if (updateUrl && tab !== '404_not_found') {
       const prefix = window.location.pathname.startsWith('/mytekno')
         ? '/mytekno'

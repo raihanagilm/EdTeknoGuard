@@ -17,6 +17,17 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
   Menggunakan engine **Foreground Service + WakeLock + OkHttp Coroutine Background Polling Engine** lokal yang tangguh, hemat baterai, dan tidak bergantung pada lisensi Google Play Services berbayar / Firebase Cloud Messaging yang rumit di jaringan intranet ISP.
 * **Smart Swipe-to-Refresh & Smooth In-App Scroll:**
   WebView dilengkapi bridge pendeteksi posisi scroll internal web (`AndroidBridge.setScrollAtTop` & `setOnChildScrollUpCallback`). Pengguna dapat bebas scroll ke bawah lalu scroll kembali ke atas tanpa terganggu atau ter-refresh secara tidak sengaja. Refresh hanya aktif jika gestur ditarik saat konten benar-benar berada di puncak paling atas.
+* **Splash Screen Elegan (Logo Besar + Nama Aplikasi):**
+  Saat aplikasi dibuka pertama kali, antarmuka tidak kosong melainkan menampilkan Splash Screen animasi berlatar biru `#2563EB` dengan logo besar router optik (`@drawable/app_splash_logo`), nama aplikasi dinamis (**TeknoGuard** atau **MyTekno**), subtitle layanan, dan spinner pemuatan halus hingga konten WebView selesai dimuat (*fade out* mulus).
+* **Status Bar Header Konsisten & Rapi:**
+  Bagian status bar atas aplikasi Android dibuat berwarna biru gelap / primary (`#2563EB`) serasi dengan header navigasi portal pelanggan dan NOC (`windowLightStatusBar = false`), sehingga tidak ada bilah putih yang kontras atau aneh di bagian atas layar.
+* **Kebijakan Push Notifikasi Anti-Spam (MyTekno & TeknoGuard):**
+  - **Notifikasi Latar Belakang Senyap:** Notifikasi "Pemantauan aktif di latar belakang" dibungkam dengan `IMPORTANCE_NONE` / `PRIORITY_MIN` (`VISIBILITY_SECRET`) sehingga tidak pernah mengotori status bar pengguna.
+  - **TeknoGuard (NOC):** Notifikasi multi-kantor diperbarui secara bersih (*in-place update*) menggunakan hash ID stabil tanpa tanda kurung siku `[]` (contoh: `Banyumas • Redaman Kritis`) sehingga status redaman terbaru langsung memperbarui notifikasi sebelumnya (anti-duplikasi).
+  - **MyTekno (Pelanggan) Non-Pembayaran:** Notifikasi status tiket kendala (`MENUNGGU`, `DICEK_ADMIN`, `DIPROSES`, `SELESAI`) dan notifikasi sinyal LOS/pulih disimpan secara persisten di `SharedPreferences` dan **cukup muncul tepat 1 kali saja** saat terjadi perubahan status baru, bebas spam berulang.
+  - **MyTekno (Pelanggan) Pembayaran Tagihan:**
+    - Dikirimkan pengingat **1 hari sebelum jatuh tempo (H-1)** sebanyak 1 kali dalam bulan berjalan.
+    - Pada **hari jatuh tempo dan setelahnya jika belum lunas**: push notifikasi dikirimkan harian tepat pada **pukul 10:00 WIB** (1 kali per hari) untuk mengingatkan pelanggan tanpa mengganggu di jam-jam lainnya.
 
 ---
 
@@ -151,23 +162,39 @@ Di `EdTeknoBackgroundService.kt`:
    - `importance = NotificationManager.IMPORTANCE_HIGH`
    - Suara notifikasi standar sistem Android (`RingtoneManager.TYPE_NOTIFICATION`).
 3. **Channel Silent Service (`tekno_silent_background_channel`)**:
-   - `importance = NotificationManager.IMPORTANCE_MIN` (senyap tanpa mengganggu pengguna, khusus menjaga service tetap hidup).
+   - `importance = NotificationManager.IMPORTANCE_NONE` / `IMPORTANCE_MIN` (senyap total, disembunyikan dari status bar & lockscreen agar tidak menampilkan tulisan *"Pemantauan aktif di latar belakang"*).
 
-### B. Properti Notifikasi Heads-Up Banner (Pop-up di Atas Layar)
-```kotlin
-val builder = NotificationCompat.Builder(this, channelId)
-    .setContentTitle("🚨 PERINGATAN REDAMAN OPTIK DROP")
-    .setContentText(message)
-    .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-    .setSmallIcon(R.mipmap.ic_launcher)
-    .setContentIntent(pendingIntent)
-    .setAutoCancel(true)
-    .setPriority(NotificationCompat.PRIORITY_MAX) // WAJIB PRIORITY_MAX
-    .setDefaults(NotificationCompat.DEFAULT_ALL)
-    .setFullScreenIntent(pendingIntent, true)      // Pemicu Heads-up Banner Pop-up
-    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+### B. Properti Notifikasi Heads-Up Banner & Anti-Duplikasi Notifikasi
+Agar notifikasi dari kantor yang sama (misal 20 menit dari Banyumas) **terbaharui langsung di tempat (Now)** dan **tidak menumpuk berulang kali**:
+- Gunakan **Notification ID deterministik berbasis jenis dan kantor** (bukan `System.currentTimeMillis()`):
+  ```kotlin
+  // Untuk notifikasi batch (misal batch_critical_banyumas):
+  val stableNotifId = if (id.startsWith("batch_")) {
+      id.substringBeforeLast('_').hashCode()
+  } else if (id.startsWith("log_")) {
+      "cust_signal_${item.optString("id_pelanggan", id)}".hashCode()
+  } else {
+      title.hashCode()
+  }
+  manager.notify(stableNotifId, builder.build())
+  ```
+- Saat scan berikutnya (misal setelah 20 menit) menghasilkan status pembaruan kantor Banyumas, notifikasi baru otomatis me-replace notifikasi lama dengan waktu *Now* tanpa membuat tumpukan notifikasi berulang.
+
+### C. Penyesuaian Ikon Aplikasi Agar Proporsional (Anti-Terpotong / Terlalu Besar)
+Untuk mencegah logo foreground melebar atau terpotong pada launcher Android modern (Adaptive Icon `v26+`), gunakan wrapper `<inset>` dengan padding aman `20% - 22%`:
+Di `app/src/guard/res/mipmap-anydpi-v26/ic_launcher.xml` dan `ic_launcher_round.xml`:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground>
+        <inset
+            android:drawable="@drawable/ic_launcher_foreground"
+            android:inset="22%" />
+    </foreground>
+</adaptive-icon>
 ```
+*(Hal serupa berlaku untuk varian `mytekno` dengan `android:inset="20%"` agar logo maskot/monitorn berada pas di tengah bulatan ikon aplikasi tanpa menempel ke pinggir).*
 
 ### C. Jembatan JavaScript Native Bridge & Anti-Accidental Refresh (`AndroidBridge`)
 Di `MainActivity.kt`:
@@ -292,7 +319,7 @@ if (typeof window !== 'undefined') {
 ### D. Otentikasi Sesi Pengguna di Background Service (`EdTeknoBackgroundService.kt`)
 Agar background service dapat mengenali **akun siapa yang sedang login** dan tidak ditolak dengan status HTTP `401 Unauthorized`:
 ```kotlin
-// 1. Polling Notifikasi NOC & Teknisi
+// 1. Polling Notifikasi NOC & Teknisi (TeknoGuard)
 private fun pollNotificationConfigAndTickets() {
     val url = "https://portal.teknoindo.net/api/notifications/poll"
     val cookieString = CookieManager.getInstance().getCookie("https://portal.teknoindo.net")
@@ -305,17 +332,17 @@ private fun pollNotificationConfigAndTickets() {
     // ...
 }
 
-// 2. Polling Tiket Pelanggan Warga (MyTekno)
+// 2. Polling Tiket & Sinyal Pelanggan Warga (MyTekno) - Anti Duplikasi (1 Kali Saja)
 private fun pollCustTicketStatus() {
-    val url = "https://portal.teknoindo.net/portal/api/kendala"
-    val cookieString = CookieManager.getInstance().getCookie("https://portal.teknoindo.net")
+    // Membaca status tiket dan status koneksi LOS/pulih
+    // Menggunakan SharedPreferences agar status yang sudah pernah ditampilkan tidak berulang
+}
 
-    val requestBuilder = Request.Builder().url(url)
-    if (!cookieString.isNullOrEmpty()) {
-        requestBuilder.addHeader("Cookie", cookieString) // Injeksi sesi login pelanggan
-    }
-    val request = requestBuilder.build()
-    // ...
+// 3. Polling Tagihan Pelanggan (MyTekno) - Jadwal H-1 & Harian Jam 10:00 WIB
+private fun pollCustBillingStatus() {
+    // Mengecek status_pembayaran dari /portal/api/dashboard
+    // H-1: Kirim notifikasi pengingat 1 kali per bulan
+    // Jatuh tempo & setelahnya jika belum lunas: Kirim push notif tiap hari tepat pukul 10:00 WIB
 }
 ```
 

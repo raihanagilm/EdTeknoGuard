@@ -350,8 +350,6 @@ export function SettingsView({
             <SettingsNotificationsTab
               onOpenConfirmModal={onOpenConfirmModal}
               settingsLoading={settingsLoading}
-              appVibration={appVibration}
-              setAppVibration={setAppVibration}
               alertWaitingInterval={alertWaitingInterval}
               setAlertWaitingInterval={setAlertWaitingInterval}
               nightModeEnabled={nightModeEnabled}
@@ -371,6 +369,8 @@ export function SettingsView({
               onLogout={onLogout}
               setProfileSuccess={setProfileSuccess}
               setProfileError={setProfileError}
+              appVibration={appVibration}
+              setAppVibration={setAppVibration}
             />
           )}
 

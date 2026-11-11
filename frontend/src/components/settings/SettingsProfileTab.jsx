@@ -7,7 +7,8 @@ import {
   ChevronDown,
   Eye,
   EyeOff,
-  LogOut
+  LogOut,
+  Smartphone
 } from 'lucide-react'
 
 export function SettingsProfileTab({
@@ -15,7 +16,9 @@ export function SettingsProfileTab({
   setCurrentUser,
   onLogout,
   setProfileSuccess,
-  setProfileError
+  setProfileError,
+  appVibration,
+  setAppVibration
 }) {
   const [isEditProfile, setIsEditProfile] = useState(false)
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false)
@@ -230,7 +233,37 @@ export function SettingsProfileTab({
         )}
       </div>
 
-      {/* Section 2: Expandable Form Ganti Kata Sandi Akun */}
+      {/* Section 2: Preferensi Notifikasi & Getaran Personal Petugas */}
+      <div className="pt-3 border-t border-sky-100">
+        <div className="p-3.5 rounded-2xl bg-cyan-50/50 border border-sky-100 space-y-2">
+          <label className="flex items-center justify-between cursor-pointer">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-white text-cyan-700 shadow-xs">
+                <Smartphone className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-800">Getaran Aplikasi Native (Web Wrapper APK)</span>
+                <p className="text-[11px] text-slate-500 font-sans mt-0.5">
+                  Aktifkan getaran perangkat saat alarm redaman kritis atau tiket darurat terdeteksi.
+                </p>
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={Boolean(appVibration)}
+              onChange={(e) => {
+                const nextVal = e.target.checked
+                if (setAppVibration) {
+                  setAppVibration(nextVal)
+                }
+              }}
+              className="rounded text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
+            />
+          </label>
+        </div>
+      </div>
+
+      {/* Section 3: Expandable Form Ganti Kata Sandi Akun */}
       <div className="pt-3 border-t border-sky-100">
         <button
           type="button"

@@ -732,3 +732,6 @@ PersistentKeepalive = 25
 
 #Update sever
 cd /home/tekno/edteknoguard && git pull origin main && cd frontend && npm run build && cd .. && sudo systemctl restart edteknoguard
+
+#cek pesan error log
+sudo journalctl -u edteknoguard -n 50 --no-pager

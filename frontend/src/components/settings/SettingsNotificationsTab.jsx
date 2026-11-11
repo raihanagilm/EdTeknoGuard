@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  Smartphone,
   Clock,
   Moon,
   Save
@@ -9,8 +8,6 @@ import {
 export function SettingsNotificationsTab({
   onOpenConfirmModal,
   settingsLoading,
-  appVibration,
-  setAppVibration,
   alertWaitingInterval,
   setAlertWaitingInterval,
   nightModeEnabled,
@@ -29,30 +26,11 @@ export function SettingsNotificationsTab({
       className="space-y-4"
     >
       <div className="border-b border-sky-100 pb-3">
-        <h3 className="text-sm font-extrabold text-slate-900">Notifikasi &amp; Jam Tenang</h3>
-        <p className="text-xs text-slate-500">Konfigurasi getaran aplikasi native dan rentang jam senyap notifikasi.</p>
+        <h3 className="text-sm font-extrabold text-slate-900">Notifikasi &amp; Jam Senyap</h3>
+        <p className="text-xs text-slate-500">Konfigurasi interval pengingat dan rentang jam senyap notifikasi operasional NOC.</p>
       </div>
 
-      {/* Opsi 1: Getaran Aplikasi Native */}
-      <div className="py-2 space-y-2 border-b border-sky-100">
-        <label className="flex items-center justify-between cursor-pointer">
-          <div className="flex items-center gap-2.5">
-            <Smartphone className="w-4 h-4 text-cyan-600" />
-            <div>
-              <span className="text-xs font-bold text-slate-800">Getaran Aplikasi Native (Web Wrapper APK)</span>
-              <p className="text-xs text-slate-600 font-sans mt-0.5">Aktifkan getaran perangkat Android saat alarm kritis terdeteksi.</p>
-            </div>
-          </div>
-          <input
-            type="checkbox"
-            checked={appVibration}
-            onChange={(e) => setAppVibration(e.target.checked)}
-            className="rounded text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
-          />
-        </label>
-      </div>
-
-      {/* Opsi 2: Pengingat Pemantauan Terjeda */}
+      {/* Opsi 1: Pengingat Pemantauan Terjeda */}
       <div className="space-y-1.5 py-1">
         <label className="block text-xs font-bold text-slate-700 flex items-center gap-2">
           <Clock className="w-4 h-4 text-cyan-600" />
@@ -71,7 +49,7 @@ export function SettingsNotificationsTab({
         </p>
       </div>
 
-      {/* Opsi 3: Jam Tenang Malam (Quiet Hours) */}
+      {/* Opsi 2: Jam Tenang Malam (Quiet Hours) */}
       <div className="py-2 space-y-3 border-t border-sky-100">
         <label className="flex items-center justify-between cursor-pointer">
           <div className="flex items-center gap-2.5">
