@@ -69,8 +69,8 @@ class KendalaService:
 
                 if target_tokens:
                     cust_name = cust.nama if cust else "Pelanggan"
-                    title = f"[TIKET KENDALA BARU] Kantor: {kantor.upper()}"
-                    body = f"[{ticket_id}] {cust_name} ({kategori}): {deskripsi}"
+                    title = f"[TIKET BARU] Kantor: {kantor.upper()}"
+                    body = f"[{ticket_id}] {cust_name}: {kategori}"
                     send_push_notification(
                         tokens=target_tokens,
                         title=title,
@@ -81,8 +81,29 @@ class KendalaService:
                             "target_filter": ticket_id,
                             "level": "critical",
                             "type": "ticket_new"
-                        }
+                        },
+                        channel_id="tekno_emergency_v3_channel",
+                        sound="tekno_alarm"
                     )
+
+                # Push notifikasi konfirmasi tepat 1 kali ke HP Pelanggan (MyTekno)
+                if cust and cust.fcm_token and cust.fcm_token.strip():
+                    try:
+                        send_push_notification(
+                            tokens=[cust.fcm_token.strip()],
+                            title="Laporan Kendala Diterima",
+                            body="Laporan kendala internet Anda telah kami terima dan segera diverifikasi oleh tim teknisi.",
+                            data={
+                                "target_tab": "tiket",
+                                "target_filter": ticket_id,
+                                "level": "info",
+                                "type": "ticket_created_confirmation"
+                            },
+                            channel_id="tekno_customer_channel",
+                            sound="default"
+                        )
+                    except Exception as cust_fcm_err:
+                        logging.getLogger("ticket_service").warning(f"[FCM_CUST_TICKET] Gagal push konfirmasi tiket ke warga: {cust_fcm_err}")
             finally:
                 m_db.close()
         except Exception as fcm_err:

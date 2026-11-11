@@ -368,13 +368,41 @@ EdTeknoGuard/
 
 
 9. **Standar Pengujian Otomatis & Relevansi Test terhadap Data Baru (Test Relevancy & Freshness Protocol)**:
-   - **Kewajiban Sinkronisasi Test**: Setiap kali terjadi penambahan fitur baru, perombakan modul/arsitektur, atau pembaruan skema data, seluruh berkas pengujian otomatis di direktori 	ests/ **WAJIB** diperbarui dan diselaraskan agar tetap relevan, akurat, dan mencerminkan logika bisnis nyata terkini.
+   - **Kewajiban Sinkronisasi Test**: Setiap kali terjadi penambahan fitur baru, perombakan modul/arsitektur, atau pembaruan skema data, seluruh berkas pengujian otomatis di direktori tests/ **WAJIB** diperbarui dan diselaraskan agar tetap relevan, akurat, dan mencerminkan logika bisnis nyata terkini.
    - **Larangan Test Usang & Mock Dummy Asal Hijau**: DILARANG KERAS mempertahankan pengujian yang sudah usang (*obsolete*), pengujian dengan data/struktur lama yang sudah tidak dipakai, atau sekadar membuat tes 'asal hijau/pass' menggunakan mock kosong yang tidak menguji alur kerja nyata.
-   - **Cakupan Pengujian Komprehensif**: Suite pengujian 	ests/ wajib mencakup:
+   - **Cakupan Pengujian Komprehensif**: Suite pengujian tests/ wajib mencakup:
      1. Integritas model MasterBase dan TenantBase beserta aturan non-cross-database foreign key di [app/db/models.py](app/db/models.py).
      2. Modul domain admin baru: tiket ([app/modules/tickets](app/modules/tickets)), kuota ([app/modules/quota](app/modules/quota)), notifikasi ([app/modules/notifications](app/modules/notifications)), dan log optik ([app/modules/optical_logs](app/modules/optical_logs)).
      3. Router aggregator REST API portal pelanggan ([app/portal/api_router.py](app/portal/api_router.py)) yang mendaftarkan endpoint 8 domain modular ([app/portal/modules](app/portal/modules): auth, dashboard, quota, tickets, wifi, profile, speedtest, payment).
      4. Logika validasi bisnis krusial (ambang batas redaman optik SOP -26.0 dBm warning dan -27.0 dBm kritis, keamanan strict IP check WiFi rumah, dan cascade deletion).
+
+10. **Matriks & Kebijakan Push Notifikasi Native (TeknoGuard & MyTekno)**:
+    - **Larangan Karakter Emoji Mutlak**: Seluruh format judul, isi pesan, payload notifikasi, dan antarmuka web DILARANG KERAS memuat karakter emoji apapun. Gunakan penanda semantik teks baku seperti `[REDAMAN]`, `[TIKET]`, `[SCHEDULER]`.
+    - **Kebijakan Teks Khusus Kantor (TeknoGuard - NOC & Teknisi)**:
+      - Wajib disusun **sangat ringkas, padat, dan langsung pada inti informasi** agar teknisi lapangan dapat membaca status dalam sekejap tanpa terbebani kalimat panjang di status bar perangkat Android.
+      - Saluran / Channel: `tekno_emergency_v3_channel`, nada suara: `tekno_alarm` (Getar + Bunyi Keras), Heads-Up Banner melayang.
+      - **Perilaku Re-Push (Anti-Lupa)**: Wajib dipush berulang setiap siklus interval pemindaian selama kondisi gangguan belum diselesaikan (tidak boleh berhenti hanya karena pengguna men-dismiss / swipe notifikasi).
+    - **Kebijakan Teks Pelanggan (MyTekno - Warga & Pelanggan)**:
+      - Wajib menggunakan bahasa Indonesia yang santun, ramah, menenangkan, dan beretika tanpa membuat panik.
+      - Saluran / Channel: `tekno_customer_channel`, nada suara: `default` sistem Android, ikon media: Maskot Tekno.
+      - **Frekuensi Terkendali (Anti-Spam)**: Notifikasi status tiket dan gangguan bersifat situasional (tepat 1 kali per peristiwa perubahan status). Notifikasi tagihan jatuh tempo dibatasi 1 kali per hari tepat pukul 10:00 WIB.
+
+    **Tabel Matriks Operasional Push Notifikasi:**
+
+    | Aplikasi | Kategori / Peristiwa | Pemicu | Suara / Media | Format Judul & Format Pesan | Perilaku & Frekuensi Pengiriman |
+    | :--- | :--- | :--- | :--- | :--- | :--- |
+    | **TeknoGuard (NOC)** | Sinyal Terputus (LOS) & Redaman Kritis | Terdeteksi modem pelanggan mati, putus optik, atau redaman <= -27.0 dBm | tekno_alarm | Judul: `[REDAMAN] Kantor: {KANTOR}`<br>Isi: `{los} LOS, {critical} Kritis. Segera cek fisik.` | Wajib dipush berulang setiap siklus interval scan selama status masih LOS/Kritis. |
+    | **TeknoGuard (NOC)** | Tiket Kendala Belum Disentuh | Terdapat tiket kendala berstatus MENUNGGU di database kantor | tekno_alarm | Judul: `[TIKET] Kantor: {KANTOR}`<br>Isi: `{count} tiket MENUNGGU belum diproses.` | Wajib dipush berulang setiap siklus pemindaian berkala selama masih ada tiket MENUNGGU. |
+    | **TeknoGuard (NOC)** | Tiket Baru Masuk | Warga baru saja mengirimkan laporan kendala dari MyTekno | tekno_alarm | Judul: `[TIKET BARU] Kantor: {KANTOR}`<br>Isi: `[{id_tiket}] {nama}: {kategori}` | Tepat 1 kali seketika saat tiket dibuat warga. |
+    | **TeknoGuard (NOC)** | Jadwal Pemantauan Terjeda | Scheduler pemantauan kantor bernilai PAUSED atau STOPPED | tekno_alarm | Judul: `[SCHEDULER] Kantor: {KANTOR}`<br>Isi: `Status {status}. Segera aktifkan.` | Wajib dipush berkala di tiap jadwal interval sebagai pengingat darurat agar tidak lupa diaktifkan kembali. |
+    | **MyTekno (Warga)** | Tiket Berhasil Terkirim | Form keluhan berhasil disubmit oleh warga | default / Maskot | Judul: `Laporan Kendala Diterima`<br>Isi: `Laporan kendala internet Anda telah kami terima dan segera diverifikasi oleh tim teknisi.` | Tepat 1 kali saat tiket selesai dibuat. |
+    | **MyTekno (Warga)** | Tiket Diverifikasi | Status tiket diubah admin menjadi DICEK_ADMIN | default / Maskot | Judul: `Status Tiket #{id_tiket}`<br>Isi: `Laporan Anda sedang diverifikasi admin NOC. {catatan}` | Tepat 1 kali saat status berubah. |
+    | **MyTekno (Warga)** | Teknisi Menuju Lokasi | Status tiket diubah menjadi DIPROSES | default / Maskot | Judul: `Status Tiket #{id_tiket}`<br>Isi: `Teknisi sedang memproses perbaikan tiket Anda. {catatan}` | Tepat 1 kali saat status berubah. |
+    | **MyTekno (Warga)** | Tiket Selesai Diperbaiki | Status tiket diubah menjadi SELESAI | default / Maskot | Judul: `Status Tiket #{id_tiket}`<br>Isi: `Kendala internet Anda telah selesai ditangani. Terima kasih atas kesabaran Anda.` | Tepat 1 kali saat konfirmasi penanganan selesai. |
+    | **MyTekno (Warga)** | Gangguan Sinyal (LOS) | Modem warga berubah status ke LOS saat pemindaian | default / Maskot | Judul: `Pemberitahuan Gangguan Jaringan`<br>Isi: `Mohon maaf, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.` | Tepat 1 kali saat transisi ke status LOS. |
+    | **MyTekno (Warga)** | Koneksi Sinyal Pulih | Modem warga pulih dari LOS kembali ke NORMAL | default / Maskot | Judul: `Koneksi Internet Telah Pulih`<br>Isi: `Koneksi internet Anda telah kembali normal dan aktif. Terima kasih atas kesabaran Anda!` | Tepat 1 kali saat transisi pulih. |
+    | **MyTekno (Warga)** | Pengingat Tagihan H-1 | H-1 sebelum tanggal jatuh tempo | default / Maskot | Judul: `Pengingat Tagihan Internet`<br>Isi: `Tagihan internet bulanan Anda akan jatuh tempo besok. Silakan lakukan pembayaran agar koneksi tetap lancar.` | Tepat 1 kali per bulan. |
+    | **MyTekno (Warga)** | Tagihan Jatuh Tempo & Belum Lunas | Hari H jatuh tempo dan setelahnya jika belum bayar | default / Maskot | Judul: `Pengingat Tagihan Internet`<br>Isi: `Tagihan internet bulanan Anda telah jatuh tempo. Mohon lakukan pembayaran agar layanan tetap aktif dan lancar.` | Tepat 1 kali per hari pada pukul 10:00 WIB. |
 
 
 ---

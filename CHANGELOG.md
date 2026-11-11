@@ -27,6 +27,19 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Matriks & Kebijakan Push Notifikasi Native Operasional ([AGENTS.md](AGENTS.md) & [docs/PROMPT_ANDROID_STUDIO.md](docs/PROMPT_ANDROID_STUDIO.md))**:
+  - Menetapkan matriks resmi push notifikasi Android untuk TeknoGuard (NOC & Teknisi) dan MyTekno (Warga & Pelanggan).
+  - Format teks khusus kantor disusun super ringkas dan padat tanpa teks panjang di status bar (`[REDAMAN]`, `[TIKET]`, `[SCHEDULER]`).
+  - Mekanisme Re-Push Anti-Lupa pada TeknoGuard: gangguan redaman LOS & Kritis, tiket berstatus MENUNGGU, dan pengingat scheduler PAUSED dipush berulang di tiap interval pemindaian selama belum ditangani teknisi.
+  - Format teks pelanggan MyTekno menggunakan bahasa santun, ramah, dan frekuensi teratur (1x per status tiket/gangguan, dan 1x pukul 10:00 WIB untuk tagihan belum lunas).
+  - Larangan mutlak karakter emoji di seluruh judul, isi pesan, payload notifikasi, dan antarmuka web.
+
+### Changed
+- **Pembaruan Format Notifikasi Backend ([scan_runner.py](app/services/scheduler/scan_runner.py), [scheduler_service.py](app/services/scheduler_service.py), [tickets/service.py](app/portal/modules/tickets/service.py))**:
+  - Memperbarui push notifikasi batch pemindaian redaman menjadi ringkas (`{los} LOS, {critical} Kritis. Segera cek fisik.`).
+  - Menambahkan pengecekan berkala dan re-push tiket `MENUNGGU` di tiap akhir siklus pemindaian kantor terkait.
+  - Menambahkan push reminder berkala jika jadwal pemantauan kantor dalam kondisi terjeda (`PAUSED` / `STOPPED`).
+  - Menambahkan 1x notifikasi konfirmasi ke warga saat tiket keluhan berhasil dibuat.
 - **Panduan Lengkap Deployment Server Linux Mandiri ([docs/DEPLOY_SERVER_LINUX.md](docs/DEPLOY_SERVER_LINUX.md))**:
   - Menyediakan panduan operasional teknis menyeluruh (*fresh install*) untuk deployment sistem produksi ke server Linux (Ubuntu/Debian) pada domain `https://portal.teknoindo.net/`.
   - Mencakup konfigurasi DNS A Record, instalasi paket (Python 3.10+, Node.js 20 LTS, Nginx, MySQL Server, Certbot), setup database master & multi-tenant, konfigurasi `.env`, inisialisasi tabel otomatis (`python -m app.db.init_db`), daemon systemd 24/7, reverse proxy Nginx, penerbitan SSL gratis Let's Encrypt (Certbot), skrip cron backup harian otomatis, serta alur update kode Git.

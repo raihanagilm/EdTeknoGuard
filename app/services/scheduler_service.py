@@ -123,6 +123,40 @@ class ONTSchedulerService:
                     status = SchedulerRecoveryManager.get_setting_from_db(t_db, "scheduler_status", default="RUNNING", kantor=k)
                     if status != "RUNNING":
                         logger.info(f"[SCHEDULER] Pemantauan berkala kantor '{k}' dilewati (Status di DB: {status}).")
+                        # Push pengingat terjeda berkala ke admin / teknisi kantor terkait (Format Ringkas)
+                        try:
+                            from app.services.fcm_service import send_push_notification
+                            from app.core.database import SessionLocal as MasterSessionLocal
+                            from app.db.models import User as MasterUser
+                            m_db_user = MasterSessionLocal()
+                            try:
+                                users = m_db_user.query(MasterUser).filter(
+                                    MasterUser.is_active == True,
+                                    MasterUser.fcm_token != None,
+                                    MasterUser.fcm_token != ""
+                                ).all()
+                                pause_tokens = []
+                                for u in users:
+                                    if u.role == "super admin" or k in u.allowed_kantor_list:
+                                        pause_tokens.append(u.fcm_token)
+                                if pause_tokens:
+                                    send_push_notification(
+                                        tokens=pause_tokens,
+                                        title=f"[SCHEDULER] Kantor: {k.upper()}",
+                                        body=f"Status {status}. Segera aktifkan.",
+                                        data={
+                                            "target_tab": "pengaturan",
+                                            "target_kantor": k,
+                                            "level": "warning",
+                                            "type": "scheduler_paused_reminder"
+                                        },
+                                        channel_id="tekno_emergency_v3_channel",
+                                        sound="tekno_alarm"
+                                    )
+                            finally:
+                                m_db_user.close()
+                        except Exception as p_err:
+                            logger.warning(f"[SCHEDULER_PAUSED_REMINDER] Gagal kirim pengingat pause kantor {k}: {p_err}")
                         continue
                 finally:
                     t_db.close()

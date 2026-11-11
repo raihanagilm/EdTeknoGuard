@@ -36,14 +36,29 @@ Dokumen ini adalah **Master Prompt & Panduan Arsitektur Komprehensif** untuk mem
     1. Memindahkan kantor aktif ke kantor tempat insiden terjadi.
     2. Membuka tab modul yang dituju (`pelanggan`, `tiket`, atau `riwayat`).
     3. Menerapkan filter status (`LOS`, `CRITICAL`, `MENUNGGU`) dan kata kunci pencarian pelanggan secara otomatis via `window.navigateToTab(...)`.
-  - **TeknoGuard (NOC):** Notifikasi multi-kantor diperbarui secara bersih (*in-place update*) menggunakan hash ID stabil format `${batchType}_${kantor}` (contoh: `batch_los_karanggede`) sehingga status redaman terbaru langsung memperbarui notifikasi sebelumnya tanpa duplikasi atau rentetan spam baru.
-  - **Pelacakan Dismiss (Anti-Spam Swipe & Pembukaan Aplikasi):**
-    - Setiap notifikasi dilengkapi `deletePendingIntent` via `setDeleteIntent`. Saat pengguna men-*swipe* (menghapus) notifikasi dari status bar, waktu dismiss disimpan secara persisten (`KEY_DISMISSED_AT_PREFIX`). Sistem tidak akan memunculkan ulang notifikasi yang sama sebelum interval waktu database tercapai.
-    - Fungsi bridge `showNativeNotification` di `MainActivity.kt` telah dikunci untuk varian `KARYAWAN` (TeknoGuard) agar saat aplikasi/web dimuat ulang, tidak ada penyemburan notifikasi duplikat (*now*).
-  - **MyTekno (Pelanggan) Non-Pembayaran:** Notifikasi status tiket kendala (`MENUNGGU`, `DICEK_ADMIN`, `DIPROSES`, `SELESAI`) dan notifikasi sinyal LOS/pulih disimpan secara persisten di `SharedPreferences` dan **cukup muncul tepat 1 kali saja** saat terjadi perubahan status baru, bebas spam berulang.
+  - **TeknoGuard (NOC & Teknisi Lapangan):**
+    - **Pesan Super Ringkas (Zero-Clutter Status Bar):** Isi notifikasi wajib ringkas, padat, dan to the point tanpa kalimat panjang. Contoh: `[REDAMAN] Kantor: CABANG` dengan isi `2 LOS, 1 Kritis. Segera cek fisik.`
+    - **Perilaku Re-Push (Anti-Lupa):** Notifikasi gangguan kritis (LOS, redaman <= -27.0 dBm, tiket status MENUNGGU, atau scheduler PAUSED) **WAJIB dipush berulang di tiap siklus interval pemindaian** selama kondisi belum diselesaikan teknisi. Jika teknisi men-swipe/dismiss notifikasi, notifikasi akan tetap dimunculkan kembali pada siklus scan berikutnya sebagai pengingat darurat.
+    - Notifikasi multi-kantor diperbarui secara bersih (*in-place update*) menggunakan hash ID stabil format `${batchType}_${kantor}` (contoh: `batch_los_karanggede`) sehingga status redaman terbaru langsung memperbarui notifikasi sebelumnya tanpa duplikasi atau rentetan spam baru.
+  - **MyTekno (Pelanggan) Non-Pembayaran:** Notifikasi status tiket kendala (`MENUNGGU`, `DICEK_ADMIN`, `DIPROSES`, `SELESAI`) dan notifikasi sinyal LOS/pulih menggunakan bahasa santun, ramah, dan menenangkan. Disimpan secara persisten di `SharedPreferences` dan **cukup muncul tepat 1 kali saja** saat terjadi perubahan status baru, bebas spam berulang.
   - **MyTekno (Pelanggan) Pembayaran Tagihan:**
     - Dikirimkan pengingat **1 hari sebelum jatuh tempo (H-1)** sebanyak 1 kali dalam bulan berjalan.
     - Pada **hari jatuh tempo dan setelahnya jika belum lunas**: push notifikasi dikirimkan harian tepat pada **pukul 10:00 WIB** (1 kali per hari) untuk mengingatkan pelanggan tanpa mengganggu di jam-jam lainnya.
+
+### 📋 Matriks Baku Push Notifikasi (TeknoGuard vs MyTekno)
+
+| Aplikasi Target | Peristiwa / Pemicu | Suara & Channel | Format Judul & Format Pesan Ringkas | Perilaku Re-Push & Frekuensi |
+| :--- | :--- | :--- | :--- | :--- |
+| **TeknoGuard (NOC)** | Sinyal Terputus (LOS) & Redaman Kritis | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[REDAMAN] Kantor: {KANTOR}`<br>Isi: `{los} LOS, {critical} Kritis. Segera cek fisik.` | Wajib dipush berulang setiap interval scan berkala selama masih ada LOS/Kritis. |
+| **TeknoGuard (NOC)** | Tiket Belum Disentuh | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[TIKET] Kantor: {KANTOR}`<br>Isi: `{count} tiket MENUNGGU belum diproses.` | Wajib dipush berulang setiap interval scan berkala jika ada tiket MENUNGGU. |
+| **TeknoGuard (NOC)** | Tiket Baru Masuk | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[TIKET BARU] Kantor: {KANTOR}`<br>Isi: `[{id_tiket}] {nama}: {kategori}` | Tepat 1 kali seketika saat tiket dibuat warga dari MyTekno. |
+| **TeknoGuard (NOC)** | Pemantauan Terjeda | `tekno_alarm` (`tekno_emergency_v3_channel`) | Judul: `[SCHEDULER] Kantor: {KANTOR}`<br>Isi: `Status {status}. Segera aktifkan.` | Wajib dipush berkala sebagai pengingat darurat agar segera di-resume. |
+| **MyTekno (Warga)** | Tiket Terkirim | `default` (`tekno_customer_channel`) | Judul: `Laporan Kendala Diterima`<br>Isi: `Laporan kendala internet Anda telah kami terima dan segera diverifikasi oleh tim teknisi.` | Tepat 1 kali saat tiket dibuat. |
+| **MyTekno (Warga)** | Update Tiket | `default` (`tekno_customer_channel`) | Judul: `Status Tiket #{id_tiket}`<br>Isi: `{status_label}. {catatan}` | Tepat 1 kali per perubahan status (`DICEK_ADMIN`, `DIPROSES`, `SELESAI`). |
+| **MyTekno (Warga)** | Gangguan LOS | `default` (`tekno_customer_channel`) | Judul: `Pemberitahuan Gangguan Jaringan`<br>Isi: `Mohon maaf, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.` | Tepat 1 kali saat status koneksi berubah ke LOS. |
+| **MyTekno (Warga)** | Sinyal Pulih | `default` (`tekno_customer_channel`) | Judul: `Koneksi Internet Telah Pulih`<br>Isi: `Koneksi internet Anda telah kembali normal dan aktif. Terima kasih atas kesabaran Anda!` | Tepat 1 kali saat pulih ke NORMAL. |
+| **MyTekno (Warga)** | Tagihan H-1 | `default` (`tekno_customer_channel`) | Judul: `Pengingat Tagihan Internet`<br>Isi: `Tagihan internet bulanan Anda akan jatuh tempo besok. Silakan lakukan pembayaran agar koneksi tetap lancar.` | Tepat 1 kali per bulan. |
+| **MyTekno (Warga)** | Tagihan Belum Lunas | `default` (`tekno_customer_channel`) | Judul: `Pengingat Tagihan Internet`<br>Isi: `Tagihan internet bulanan Anda telah jatuh tempo. Mohon lakukan pembayaran agar layanan tetap aktif dan lancar.` | 1 kali per hari, tepat pukul 10:00 WIB. |
 
 ---
 

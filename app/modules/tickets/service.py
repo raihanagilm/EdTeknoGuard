@@ -85,7 +85,7 @@ class TicketService:
 
                 send_push_notification(
                     tokens=[cust.fcm_token],
-                    title=f"Tiket #{t.id_tiket}: {new_status}",
+                    title=f"Status Tiket #{t.id_tiket}",
                     body=f"{status_label}. {catatan or ''}".strip(),
                     channel_id="tekno_customer_channel",
                     sound="default",

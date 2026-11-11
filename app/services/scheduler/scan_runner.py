@@ -399,7 +399,7 @@ class ScanRunner:
             SchedulerStateManager.cleanup_alert_logs(days=7)
             SchedulerStateManager.cleanup_activity_logs(days=60)
 
-            # Trigger Push Notifikasi FCM ke HP Teknisi/Admin jika ada modem Kritis atau LOS
+            # Trigger Push Notifikasi FCM ke HP Teknisi/Admin jika ada modem Kritis atau LOS (Format Ringkas)
             total_emergency = stats.get("los", 0) + stats.get("critical", 0)
             if total_emergency > 0:
                 try:
@@ -408,7 +408,6 @@ class ScanRunner:
                     from app.db.models import User as MasterUser
                     m_db = MasterSessionLocal()
                     try:
-                        # Ambil semua user yang memiliki akses ke kantor ini dan memiliki fcm_token
                         users_to_alert = m_db.query(MasterUser).filter(
                             MasterUser.is_active == True,
                             MasterUser.fcm_token != None,
@@ -420,11 +419,8 @@ class ScanRunner:
                                 target_tokens.append(u.fcm_token)
 
                         if target_tokens:
-                            title = f"[PERINGATAN REDAMAN] Kantor: {k_code.upper()}"
-                            body = (
-                                f"Terdeteksi {stats.get('los', 0)} modem LOS dan {stats.get('critical', 0)} modem Sinyal Kritis. "
-                                "Mohon teknisi piket lapangan untuk SEGERA melakukan pengecekan fisik kabel dropcore, sambungan fusion/fast connector, dan patchcord pelanggan!"
-                            )
+                            title = f"[REDAMAN] Kantor: {k_code.upper()}"
+                            body = f"{stats.get('los', 0)} LOS, {stats.get('critical', 0)} Kritis. Segera cek fisik."
                             send_push_notification(
                                 tokens=target_tokens,
                                 title=title,
@@ -443,6 +439,52 @@ class ScanRunner:
                         m_db.close()
                 except Exception as fcm_err:
                     logger.warning(f"[FCM_ALERT] Gagal mengirim push notifikasi redaman: {fcm_err}")
+
+            # Trigger Push Notifikasi FCM berkala jika terdapat tiket kendala MENUNGGU (Format Ringkas)
+            try:
+                from app.db.models import TiketKendala
+                t_db_ticket = TenantDatabaseManager.get_tenant_session(k_code)
+                try:
+                    pending_count = t_db_ticket.query(TiketKendala).filter(
+                        TiketKendala.status == "MENUNGGU"
+                    ).count()
+                    if pending_count > 0:
+                        from app.services.fcm_service import send_push_notification
+                        from app.core.database import SessionLocal as MasterSessionLocal
+                        from app.db.models import User as MasterUser
+                        m_db_tkt = MasterSessionLocal()
+                        try:
+                            users_to_alert = m_db_tkt.query(MasterUser).filter(
+                                MasterUser.is_active == True,
+                                MasterUser.fcm_token != None,
+                                MasterUser.fcm_token != ""
+                            ).all()
+                            tkt_tokens = []
+                            for u in users_to_alert:
+                                if u.role == "super admin" or k_code in u.allowed_kantor_list:
+                                    tkt_tokens.append(u.fcm_token)
+
+                            if tkt_tokens:
+                                send_push_notification(
+                                    tokens=tkt_tokens,
+                                    title=f"[TIKET] Kantor: {k_code.upper()}",
+                                    body=f"{pending_count} tiket MENUNGGU belum diproses.",
+                                    data={
+                                        "target_tab": "tiket",
+                                        "target_kantor": k_code,
+                                        "target_status": "MENUNGGU",
+                                        "level": "warning",
+                                        "type": "ticket_pending_reminder"
+                                    },
+                                    channel_id="tekno_emergency_v3_channel",
+                                    sound="tekno_alarm"
+                                )
+                        finally:
+                            m_db_tkt.close()
+                finally:
+                    t_db_ticket.close()
+            except Exception as ticket_err:
+                logger.warning(f"[FCM_TICKET_REMINDER] Gagal cek tiket menunggu: {ticket_err}")
 
             return {
                 "success": True,
