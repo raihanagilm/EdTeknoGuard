@@ -14578,241 +14578,10 @@ var require_react_jsx_runtime_production = /* @__PURE__ */ __commonJSMin(((expor
 	exports.jsxs = jsxProd;
 }));
 //#endregion
-//#region src/components/common/CommonUI.jsx
+//#region src/components/common/ConfirmDialogModal.jsx
 var import_jsx_runtime = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_jsx_runtime_production();
 })))();
-/**
-* Standard Unified Segmented Status Ticker Bar (Option B - Ultra-Clean Single-Container)
-*/
-function SegmentedStatusBar({ items = [] }) {
-	const schemes = {
-		cyan: {
-			active: "bg-cyan-600 text-white shadow-xs",
-			textNum: "text-cyan-900",
-			label: "text-cyan-800"
-		},
-		emerald: {
-			active: "bg-emerald-600 text-white shadow-xs",
-			textNum: "text-emerald-900",
-			label: "text-emerald-800"
-		},
-		amber: {
-			active: "bg-amber-500 text-white shadow-xs",
-			textNum: "text-amber-900",
-			label: "text-amber-800"
-		},
-		rose: {
-			active: "bg-rose-600 text-white shadow-xs",
-			textNum: "text-rose-900",
-			label: "text-rose-800"
-		},
-		purple: {
-			active: "bg-purple-600 text-white shadow-xs",
-			textNum: "text-purple-900",
-			label: "text-purple-800"
-		},
-		orange: {
-			active: "bg-orange-600 text-white shadow-xs",
-			textNum: "text-orange-950",
-			label: "text-orange-900"
-		},
-		slate: {
-			active: "bg-slate-600 text-white shadow-xs",
-			textNum: "text-slate-700",
-			label: "text-slate-600"
-		}
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "bg-white rounded-xl border border-slate-200/90 shadow-xs p-1.5 flex items-center divide-x divide-slate-100",
-		children: items.map((it, idx) => {
-			const sc = schemes[it.colorScheme || "cyan"] || schemes.cyan;
-			const isActive = Boolean(it.isActive);
-			return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-				type: "button",
-				onClick: it.onClick,
-				className: `flex-1 py-1.5 px-1 sm:py-2 sm:px-2 rounded-lg transition-all flex flex-col items-center justify-center text-center cursor-pointer select-none ${it.className || ""} ${isActive ? `${sc.active} ring-1 ring-black/5` : "hover:bg-cyan-50/50 text-slate-700"}`,
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `text-[11px] font-sans font-semibold uppercase tracking-wider truncate max-w-full ${isActive ? "text-white" : sc.label}`,
-						children: it.label
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `text-sm sm:text-base font-bold font-mono tabular-nums tracking-tight leading-none mt-0.5 ${isActive ? "text-white" : sc.textNum}`,
-						children: it.value
-					}),
-					it.subLabel && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `hidden md:block text-[11px] font-sans font-normal truncate mt-0.5 ${isActive ? "text-white/90" : "text-slate-500"}`,
-						children: it.subLabel
-					})
-				]
-			}, idx);
-		})
-	});
-}
-/**
-* Standard Filter Bar Container
-*/
-function FilterContainer({ children, className = "" }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: `bg-white/90 backdrop-blur-md rounded-2xl p-2 sm:p-2.5 border border-sky-200/80 shadow-xs ${className}`,
-		children
-	});
-}
-/**
-* Helper to compute pagination items with ellipses (...)
-*/
-function getPaginationRange(currentPage, totalPages) {
-	if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
-	const pages = [];
-	pages.push(1);
-	if (currentPage > 3) pages.push("...");
-	const start = Math.max(2, currentPage - 1);
-	const end = Math.min(totalPages - 1, currentPage + 1);
-	for (let i = start; i <= end; i++) pages.push(i);
-	if (currentPage < totalPages - 2) pages.push("...");
-	pages.push(totalPages);
-	return pages;
-}
-/**
-* Standard Data Table Container with Unified Modern Pagination Bar
-* - Sisi Kiri: Selector Tampilkan (15, 30, 50, 75, 100) & Ringkasan Data
-* - Sisi Kanan: Navigasi Nomor Halaman (< 1, 2, 3 ... 7, 8 >)
-*/
-function DataTableContainer({ children, page = 1, totalPages = 1, totalCount, totalItems, limit = 15, onLimitChange, onPageChange, onPrevPage, onNextPage, loading = false, emptyText = "Tidak ada data ditemukan.", limitOptions = [
-	15,
-	30,
-	50,
-	75,
-	100
-] }) {
-	const actualTotalCount = totalCount !== void 0 ? totalCount : totalItems;
-	const safeTotalPages = Math.max(1, totalPages || 1);
-	const safePage = Math.min(Math.max(1, page || 1), safeTotalPages);
-	const handlePrev = () => {
-		if (safePage > 1 && !loading) {
-			if (onPageChange) onPageChange(safePage - 1);
-			else if (onPrevPage) onPrevPage();
-		}
-	};
-	const handleNext = () => {
-		if (safePage < safeTotalPages && !loading) {
-			if (onPageChange) onPageChange(safePage + 1);
-			else if (onNextPage) onNextPage();
-		}
-	};
-	const handlePageSelect = (p) => {
-		if (typeof p === "number" && p !== safePage && !loading) {
-			if (onPageChange) onPageChange(p);
-			else if (p < safePage && onPrevPage) onPrevPage();
-			else if (p > safePage && onNextPage) onNextPage();
-		}
-	};
-	const paginationItems = getPaginationRange(safePage, safeTotalPages);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "bg-white/90 backdrop-blur-md rounded-2xl border border-sky-200/80 shadow-xs overflow-hidden",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "overflow-x-auto",
-			children
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "p-3 sm:p-3.5 border-t border-sky-100 flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-mono text-slate-600 bg-slate-50/50",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto justify-between md:justify-start",
-				children: [onLimitChange && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-1.5",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] text-slate-500 font-bold",
-							children: "Tampilkan:"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", {
-							value: limit,
-							onChange: (e) => {
-								onLimitChange(Number(e.target.value));
-							},
-							disabled: loading,
-							className: "px-2 py-1 bg-white border border-sky-200 rounded-lg text-slate-800 text-[11px] font-bold shadow-2xs focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 cursor-pointer",
-							children: limitOptions.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-								value: opt,
-								children: opt
-							}, opt))
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] text-slate-400",
-							children: "baris"
-						})
-					]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-[11px] text-slate-500",
-					children: [
-						"Halaman ",
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-cyan-900 font-bold",
-							children: safePage
-						}),
-						" dari ",
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-cyan-900 font-bold",
-							children: safeTotalPages
-						}),
-						actualTotalCount !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "ml-1 text-slate-400 font-normal",
-							children: [
-								"(",
-								actualTotalCount,
-								" data)"
-							]
-						})
-					]
-				})]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-1 sm:gap-1.5 select-none w-full md:w-auto justify-center md:justify-end overflow-x-auto py-0.5",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "button",
-						disabled: safePage <= 1 || loading,
-						onClick: handlePrev,
-						className: "p-1 sm:px-2 sm:py-1 rounded-lg border border-sky-200 bg-white hover:bg-cyan-50 hover:border-cyan-300 text-slate-700 disabled:opacity-35 disabled:cursor-not-allowed transition font-bold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]",
-						title: "Halaman Sebelumnya",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "hidden sm:inline",
-							children: "Sebelumnya"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "flex items-center gap-1",
-						children: paginationItems.map((item, idx) => {
-							if (item === "...") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "px-1.5 py-1 text-slate-400 text-xs font-bold",
-								children: "..."
-							}, `ellipsis-${idx}`);
-							return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "button",
-								disabled: loading,
-								onClick: () => handlePageSelect(item),
-								className: `min-w-[28px] sm:min-w-[30px] h-[28px] sm:h-[30px] px-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs ${item === safePage ? "bg-cyan-700 text-white border border-cyan-800 ring-1 ring-cyan-500/30" : "bg-white border border-sky-200 text-slate-700 hover:bg-cyan-50 hover:border-cyan-300"}`,
-								children: item
-							}, `page-${item}`);
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "button",
-						disabled: safePage >= safeTotalPages || loading,
-						onClick: handleNext,
-						className: "p-1 sm:px-2 sm:py-1 rounded-lg border border-sky-200 bg-white hover:bg-cyan-50 hover:border-cyan-300 text-slate-700 disabled:opacity-35 disabled:cursor-not-allowed transition font-bold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]",
-						title: "Halaman Berikutnya",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "hidden sm:inline",
-							children: "Berikutnya"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5" })]
-					})
-				]
-			})]
-		})]
-	});
-}
-//#endregion
-//#region src/components/common/ConfirmDialogModal.jsx
 /**
 * ConfirmDialogModal - Komponen pop-up konfirmasi kustom yang fleksibel & reusable
 *
@@ -15048,136 +14817,128 @@ function formatDuration(seconds) {
 //#endregion
 //#region src/components/dashboard/DashboardControlBar.jsx
 /**
-* DashboardControlBar (Impeccable Architectural Clean Light)
-* Mode: Operate (Mission-Control Telemetry Header)
-* - Strict Light Theme: Architectural white + slate-50 + crisp slate-200 borders
-* - Precision Typography: Natural sans-serif for labels, font-mono tabular-nums for metrics & time
-* - Zero AI Slop: No decorative halos, no fake monospace costumes on action buttons
+* DashboardControlBar — Mode: Operate (Architectural Clean Light Blue 60-30-10)
+* Kartu Bento Terpadu: Kontrol Status Pemantauan + Bar Progres + Bar Waktu + 6 Metrik Bersekat Rapat
 */
-function DashboardControlBar({ activeOffice, getOfficeDisplayName, engineStatus, isOfficeActive, isConfigured, configError, isNetworkError, intervalMinutes, lastScanTime, nextRunTime, isScanning, isStartingScan, scanActionType, isToggling, scanProgress, isCurrentOfficeScan, canControlCurrentScan, isAdminOrSuper, isSuperAdmin, isAnyActionLoading, handleStartScan, handleToggleScheduler, handlePauseScan, handleResumeScan, handleOpenStopModal }) {
+function DashboardControlBar({ activeOffice, getOfficeDisplayName, engineStatus, isOfficeActive, isConfigured, configError, isNetworkError, intervalMinutes, lastScanTime, nextRunTime, isScanning, isStartingScan, scanActionType, isToggling, scanProgress, isCurrentOfficeScan, canControlCurrentScan, isAdminOrSuper, isSuperAdmin, isAnyActionLoading, handleStartScan, handleToggleScheduler, handlePauseScan, handleResumeScan, handleOpenStopModal, kpi = {}, activeMetric = "total", setActiveMetric = () => {}, onNavigate = () => {} }) {
 	const isCurrentlyScanning = isScanning && isCurrentOfficeScan;
 	const isRunning = engineStatus === "RUNNING";
 	let statusLabel = "Aktif";
-	let statusTextColor = "text-emerald-700";
+	let statusTextColor = "text-[#026AA7]";
 	if (isNetworkError) {
 		statusLabel = "Gangguan";
-		statusTextColor = "text-rose-700";
+		statusTextColor = "text-rose-600";
 	} else if (!isOfficeActive) {
 		statusLabel = "Nonaktif";
-		statusTextColor = "text-slate-500";
+		statusTextColor = "text-[#64839E]";
 	} else if (isCurrentlyScanning) {
 		statusLabel = "Memindai";
-		statusTextColor = "text-cyan-800";
+		statusTextColor = "text-[#026AA7]";
 	} else if (!isRunning) {
 		statusLabel = "Dihentikan";
-		statusTextColor = "text-amber-700";
+		statusTextColor = "text-[#026AA7]";
 	}
+	const warningThresh = Number(kpi?.warning_threshold ?? -26).toFixed(1);
+	const criticalThresh = Number(kpi?.critical_threshold ?? -27).toFixed(1);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "bg-white rounded-xl border border-slate-200/90 shadow-xs p-4 sm:p-5 flex flex-col gap-4 transition-all",
+		className: "bg-white rounded-xl border border-[#CCDDF0] overflow-hidden shadow-2xs transition-all",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4",
+				className: "p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2.5 flex-wrap",
+					className: "flex items-center gap-2.5 sm:gap-3",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							className: "text-sm font-semibold text-slate-900 tracking-tight",
+							className: "text-sm font-bold text-[#0B2545] tracking-tight",
 							children: "Status Pemantauan"
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3.5 w-px bg-slate-200 inline-block" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3.5 w-px bg-[#CCDDF0]" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: `text-xs font-semibold ${statusTextColor}`,
 							children: statusLabel
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2 text-xs text-slate-500 mt-1 flex-wrap",
+					className: "flex items-center gap-2 sm:gap-2.5 text-xs text-[#3B5B78] mt-1 flex-wrap",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-							"Kantor:",
-							" ",
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-								className: "text-slate-800 font-medium",
-								children: getOfficeDisplayName(activeOffice)
-							})
-						] }),
-						isRunning && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3 w-px bg-slate-200 inline-block" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "text-slate-500 font-normal",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Kantor: ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+							className: "text-[#0B2545] font-semibold",
+							children: getOfficeDisplayName(activeOffice)
+						})] }),
+						isRunning && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3 w-px bg-[#CCDDF0]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "text-[#64839E]",
 							children: [
 								"Siklus ",
 								intervalMinutes,
 								" menit"
 							]
 						})] }),
-						isNetworkError && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3 w-px bg-slate-200 inline-block" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						isNetworkError && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3 w-px bg-[#CCDDF0]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-rose-600 font-medium",
 							children: "Gateway tidak merespons"
 						})] })
 					]
 				})] }), isAdminOrSuper && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between sm:justify-end gap-2 flex-wrap sm:flex-nowrap pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100",
+					className: "flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto",
 					children: [
 						isToggling && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-1.5 text-cyan-800 text-xs font-medium shrink-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "animate-spin h-3.5 w-3.5 text-cyan-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menyimpan..." })]
+							className: "flex items-center gap-1.5 text-[#026AA7] text-xs font-medium shrink-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "animate-spin h-3.5 w-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menyimpan..." })]
 						}),
-						(!isScanning || !isCurrentOfficeScan) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2 w-full sm:w-auto",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: handleStartScan,
-								disabled: isAnyActionLoading || isScanning && isCurrentOfficeScan || !isOfficeActive || !isConfigured,
-								title: !isOfficeActive ? "Kantor dalam status nonaktif. Aktifkan kantor terlebih dahulu." : !isConfigured ? configError || "Pengaturan sistem kantor belum disetel di database." : isStartingScan ? "Sedang memproses perintah pemindaian..." : "Mulai pemindaian sinyal redaman",
-								className: `flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-2 shadow-2xs min-h-[38px] active:scale-[0.98] ${!isOfficeActive || !isConfigured ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed" : isStartingScan ? "bg-cyan-800 text-white cursor-wait opacity-80" : "bg-cyan-700 hover:bg-cyan-800 active:bg-cyan-900 text-white border border-cyan-800/30 cursor-pointer"}`,
-								children: [isStartingScan ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-white animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, { className: `w-3.5 h-3.5 ${!isOfficeActive || !isConfigured ? "fill-slate-400 text-slate-400" : "fill-white"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: isStartingScan ? "Memulai..." : !isOfficeActive ? "Kantor Nonaktif" : !isConfigured ? "Pengaturan Kosong" : activeOffice && activeOffice !== "all" ? `Pindai ${getOfficeDisplayName(activeOffice)}` : "Mulai Pemantauan (Semua)" })]
-							}), isSuperAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: handleToggleScheduler,
-								disabled: isAnyActionLoading || !isOfficeActive,
-								className: `flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 min-h-[38px] shadow-2xs active:scale-[0.98] ${!isOfficeActive ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed" : isToggling ? "bg-slate-50 text-slate-500 border-slate-300 cursor-wait" : "bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 cursor-pointer"}`,
-								children: isToggling ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-cyan-700 animate-spin shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menyimpan..." })] }) : isRunning ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pause, { className: "w-3.5 h-3.5 text-amber-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hentikan Jadwal" })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, { className: "w-3.5 h-3.5 text-emerald-600 fill-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Aktifkan Jadwal" })] })
-							})]
-						}),
-						isScanning && isCurrentOfficeScan && canControlCurrentScan && scanProgress?.total > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2 w-full sm:w-auto",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: handlePauseScan,
-								disabled: isAnyActionLoading,
-								className: "flex-1 sm:flex-none px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs min-h-[38px] cursor-pointer active:scale-[0.98]",
-								children: [scanActionType === "pause" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-white animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pause, { className: "w-3.5 h-3.5 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "pause" ? "Memproses..." : "Jeda Pemindaian" })]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: handleOpenStopModal,
-								disabled: isAnyActionLoading,
-								className: "flex-1 sm:flex-none px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs min-h-[38px] cursor-pointer active:scale-[0.98]",
-								children: [scanActionType === "stop" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-white animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Square, { className: "w-3.5 h-3.5 fill-white shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "stop" ? "Memproses..." : "Hentikan" })]
-							})]
-						}),
-						isScanning && scanProgress && scanProgress.is_paused && isCurrentOfficeScan && canControlCurrentScan && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2 w-full sm:w-auto",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: handleResumeScan,
-								disabled: isAnyActionLoading,
-								className: "flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs min-h-[38px] cursor-pointer active:scale-[0.98]",
-								children: [scanActionType === "resume" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-white animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, { className: "w-3.5 h-3.5 fill-white shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "resume" ? "Melanjutkan..." : "Lanjutkan" })]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: handleOpenStopModal,
-								disabled: isAnyActionLoading,
-								className: "flex-1 sm:flex-none px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold transition-all duration-150 flex items-center justify-center gap-1.5 shadow-2xs min-h-[38px] cursor-pointer active:scale-[0.98]",
-								children: [scanActionType === "stop" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-white animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Square, { className: "w-3.5 h-3.5 fill-white shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "stop" ? "Memproses..." : "Hentikan" })]
-							})]
-						})
+						(!isScanning || !isCurrentOfficeScan) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: handleStartScan,
+							disabled: isAnyActionLoading || isScanning && isCurrentOfficeScan || !isOfficeActive || !isConfigured,
+							title: !isOfficeActive ? "Kantor dalam status nonaktif." : !isConfigured ? configError || "Pengaturan sistem kantor belum disetel di database." : isStartingScan ? "Sedang memproses perintah pemindaian..." : "Mulai pemindaian sinyal redaman",
+							className: `flex-1 sm:flex-none px-3.5 sm:px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-2 shadow-2xs min-h-[36px] sm:min-h-[38px] cursor-pointer ${!isOfficeActive || !isConfigured ? "bg-[#F1F6FC] text-[#64839E] border border-[#CCDDF0] cursor-not-allowed" : isStartingScan ? "bg-[#035388] text-white cursor-wait opacity-80" : "bg-[#026AA7] hover:bg-[#035388] text-white"}`,
+							children: [isStartingScan ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-white animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, { className: `w-3.5 h-3.5 ${!isOfficeActive || !isConfigured ? "fill-[#64839E] text-[#64839E]" : "fill-white"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: isStartingScan ? "Memulai..." : !isOfficeActive ? "Kantor Nonaktif" : !isConfigured ? "Pengaturan Kosong" : activeOffice && activeOffice !== "all" ? `Pindai ${getOfficeDisplayName(activeOffice)}` : "Mulai Pemantauan" })]
+						}), isSuperAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: handleToggleScheduler,
+							disabled: isAnyActionLoading || !isOfficeActive,
+							className: "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border border-[#CCDDF0] text-xs font-semibold transition flex items-center justify-center gap-2 shadow-2xs min-h-[36px] sm:min-h-[38px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+							children: isToggling ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-[#026AA7] animate-spin shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menyimpan..." })] }) : isRunning ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pause, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hentikan Jadwal" })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, { className: "w-3.5 h-3.5 text-[#026AA7] fill-current" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Aktifkan Jadwal" })] })
+						})] }),
+						isScanning && isCurrentOfficeScan && canControlCurrentScan && scanProgress?.total > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: handlePauseScan,
+							disabled: isAnyActionLoading,
+							className: "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border border-[#CCDDF0] text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs min-h-[36px] sm:min-h-[38px]",
+							children: [scanActionType === "pause" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-[#026AA7] animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pause, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "pause" ? "Memproses..." : "Jeda Pemindaian" })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: handleOpenStopModal,
+							disabled: isAnyActionLoading,
+							className: "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs min-h-[36px] sm:min-h-[38px]",
+							children: [scanActionType === "stop" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-white animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Square, { className: "w-3.5 h-3.5 fill-white" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "stop" ? "Memproses..." : "Hentikan" })]
+						})] }),
+						isScanning && scanProgress && scanProgress.is_paused && isCurrentOfficeScan && canControlCurrentScan && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: handleResumeScan,
+							disabled: isAnyActionLoading,
+							className: "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs min-h-[36px] sm:min-h-[38px]",
+							children: [scanActionType === "resume" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-white animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, { className: "w-3.5 h-3.5 fill-white" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "resume" ? "Melanjutkan..." : "Lanjutkan" })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: handleOpenStopModal,
+							disabled: isAnyActionLoading,
+							className: "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border border-[#CCDDF0] text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs min-h-[36px] sm:min-h-[38px]",
+							children: [scanActionType === "stop" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-[#026AA7] animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Square, { className: "w-3.5 h-3.5 text-[#026AA7] fill-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "stop" ? "Memproses..." : "Hentikan" })]
+						})] })
 					]
 				})]
 			}),
 			isScanning && isCurrentOfficeScan && scanProgress?.total > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "pt-3 border-t border-slate-100 flex flex-col gap-2",
+				className: "px-5 py-3.5 border-t border-[#DAE7F5] bg-[#F1F6FC] flex flex-col gap-2",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center justify-between text-xs text-slate-700 font-medium",
+						className: "flex items-center justify-between text-xs",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "flex items-center gap-1.5",
+							className: "flex items-center gap-1.5 text-[#3B5B78] font-medium",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanProgress.is_paused ? "Pemindaian Ditunda:" : "Progres Pemindaian:" }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "font-mono tabular-nums text-slate-900 font-bold",
+									className: "font-mono tabular-nums text-[#0B2545] font-bold",
 									children: [
 										scanProgress.current,
 										" / ",
@@ -15185,47 +14946,200 @@ function DashboardControlBar({ activeOffice, getOfficeDisplayName, engineStatus,
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-slate-500",
+									className: "text-[#64839E]",
 									children: "Modem"
 								})
 							]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "text-cyan-800 font-mono font-bold tabular-nums text-sm",
+							className: "text-[#026AA7] font-mono font-bold tabular-nums text-xs",
 							children: [scanProgress.percent, "%"]
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80",
+						className: "w-full h-1.5 bg-[#CCDDF0] rounded-full overflow-hidden",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: `h-full transition-all duration-300 rounded-full ${scanProgress.is_paused ? "bg-amber-500" : "bg-cyan-600"}`,
+							className: `h-full transition-all duration-300 rounded-full ${scanProgress.is_paused ? "bg-amber-500" : "bg-[#026AA7]"}`,
 							style: { width: `${Math.min(100, Math.max(0, scanProgress.percent))}%` }
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center justify-between text-[11px] font-mono tabular-nums text-slate-500",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Berjalan: ", formatDuration(scanProgress.elapsed_seconds)] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Estimasi Sisa: ", formatDuration(Math.max(0, (scanProgress.estimated_total_seconds || 0) - (scanProgress.elapsed_seconds || 0)))] })]
+						className: "flex items-center justify-between text-[11px] font-mono tabular-nums text-[#64839E]",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Berjalan: ", formatDuration(scanProgress.elapsed_seconds)] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+							"Estimasi Sisa:",
+							" ",
+							formatDuration(Math.max(0, (scanProgress.estimated_total_seconds || 0) - (scanProgress.elapsed_seconds || 0)))
+						] })]
 					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2",
+				className: "px-5 py-2.5 bg-[#F1F6FC] border-t border-b border-[#DAE7F5] flex items-center justify-between text-xs text-[#3B5B78]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-1.5",
+					className: "flex items-center gap-2",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5 text-slate-400 shrink-0" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5 text-[#64839E] shrink-0" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terakhir:" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-slate-800 font-mono tabular-nums font-semibold",
+							className: "text-[#0B2545] font-mono tabular-nums font-semibold",
 							children: lastScanTime
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-1.5",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Jadwal Berikutnya:" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-						className: "text-cyan-800 font-mono tabular-nums font-semibold",
+						className: "text-[#0B2545] font-mono tabular-nums font-semibold",
 						children: isRunning && nextRunTime && nextRunTime !== "-" && nextRunTime !== "Jadwal Dijeda" && nextRunTime !== "Kantor Nonaktif" ? nextRunTime : "-"
 					})]
 				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "grid grid-cols-6 divide-x divide-[#DAE7F5] bg-[#F1F6FC] w-full",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: () => {
+							setActiveMetric("total");
+							onNavigate("pelanggan", { status: "ALL" });
+						},
+						className: `metric-cell py-2.5 sm:py-4 px-1 sm:px-4 flex flex-col items-center justify-center text-center cursor-pointer select-none hover:bg-white transition ${activeMetric === "total" ? "active" : ""}`,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#3B5B78] truncate w-full",
+								children: "Total"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sm sm:text-xl font-bold font-mono tabular-nums tracking-tight text-[#0B2545] mt-0.5 sm:mt-1",
+								children: kpi?.total_monitored ?? 0
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "hidden sm:block text-[11px] text-[#64839E] mt-0.5",
+								children: kpi?.offline !== void 0 && kpi?.offline !== null ? `${kpi.offline} Offline` : kpi?.monitored_inactive > 0 ? `${kpi.monitored_inactive} Offline` : "Modem"
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: () => {
+							setActiveMetric("normal");
+							onNavigate("pelanggan", { status: "NORMAL" });
+						},
+						className: `metric-cell py-2.5 sm:py-4 px-1 sm:px-4 flex flex-col items-center justify-center text-center cursor-pointer select-none hover:bg-white transition ${activeMetric === "normal" ? "active" : ""}`,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#3B5B78] truncate w-full",
+								children: "Optimal"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sm sm:text-xl font-bold font-mono tabular-nums tracking-tight text-[#0B2545] mt-0.5 sm:mt-1",
+								children: kpi?.normal ?? 0
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "hidden sm:block text-[11px] font-mono text-[#64839E] mt-0.5",
+								children: [
+									"> ",
+									warningThresh,
+									" dBm"
+								]
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: () => {
+							setActiveMetric("warning");
+							onNavigate("pelanggan", { status: "WARNING" });
+						},
+						className: `metric-cell py-2.5 sm:py-4 px-1 sm:px-4 flex flex-col items-center justify-center text-center cursor-pointer select-none hover:bg-white transition ${activeMetric === "warning" ? "active" : ""}`,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#3B5B78] truncate w-full",
+								children: "Waspada"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sm sm:text-xl font-bold font-mono tabular-nums tracking-tight text-[#0B2545] mt-0.5 sm:mt-1",
+								children: kpi?.warning ?? 0
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "hidden sm:block text-[11px] font-mono text-[#64839E] mt-0.5",
+								children: [
+									"≤ ",
+									warningThresh,
+									" dBm"
+								]
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: () => {
+							setActiveMetric("critical");
+							onNavigate("pelanggan", { status: "CRITICAL" });
+						},
+						className: `metric-cell py-2.5 sm:py-4 px-1 sm:px-4 flex flex-col items-center justify-center text-center cursor-pointer select-none hover:bg-white transition ${activeMetric === "critical" ? "active" : ""}`,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#3B5B78] truncate w-full",
+								children: "Kritis"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sm sm:text-xl font-bold font-mono tabular-nums tracking-tight text-[#0B2545] mt-0.5 sm:mt-1",
+								children: kpi?.critical ?? 0
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "hidden sm:block text-[11px] font-mono text-[#64839E] mt-0.5",
+								children: [
+									"≤ ",
+									criticalThresh,
+									" dBm"
+								]
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: () => {
+							setActiveMetric("los");
+							onNavigate("pelanggan", { status: "LOS" });
+						},
+						className: `metric-cell py-2.5 sm:py-4 px-1 sm:px-4 flex flex-col items-center justify-center text-center cursor-pointer select-none hover:bg-white transition ${activeMetric === "los" ? "active" : ""}`,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#3B5B78] truncate w-full",
+								children: "LOS"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sm sm:text-xl font-bold font-mono tabular-nums tracking-tight text-[#0B2545] mt-0.5 sm:mt-1",
+								children: kpi?.los ?? 0
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "hidden sm:block text-[11px] text-[#64839E] mt-0.5",
+								children: "Putus"
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: () => {
+							setActiveMetric("invalid");
+							onNavigate("pelanggan", { status: "INVALID" });
+						},
+						className: `metric-cell py-2.5 sm:py-4 px-1 sm:px-4 flex flex-col items-center justify-center text-center cursor-pointer select-none hover:bg-white transition ${activeMetric === "invalid" ? "active" : ""}`,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#3B5B78] truncate w-full",
+								children: "Invalid"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sm sm:text-xl font-bold font-mono tabular-nums tracking-tight text-[#0B2545] mt-0.5 sm:mt-1",
+								children: kpi?.invalid ?? 0
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "hidden sm:block text-[11px] text-[#64839E] mt-0.5",
+								children: "Kredensial"
+							})
+						]
+					})
+				]
 			})
 		]
 	});
@@ -15233,11 +15147,8 @@ function DashboardControlBar({ activeOffice, getOfficeDisplayName, engineStatus,
 //#endregion
 //#region src/components/dashboard/DashboardQuickShortcuts.jsx
 /**
-* DashboardQuickShortcuts (Impeccable Refactor)
+* DashboardQuickShortcuts
 * Mode: Operate (Mission-Control Telemetry Grid)
-* - Anti-Slop: Zero sparkles/kicker tropes, zero pseudo-monospace on natural copy
-* - Tactile Feedback: Crisp border definition with subtle hover elevation
-* - Maintainable: DRY mapped array under 80 lines
 */
 function DashboardQuickShortcuts({ currentUser, onNavigate, unreadTicketsCount = 0 }) {
 	const isSuperAdmin = currentUser?.role === "super admin";
@@ -15296,14 +15207,14 @@ function DashboardQuickShortcuts({ currentUser, onNavigate, unreadTicketsCount =
 	].filter((item) => item.show);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		id: "dashboardQuickShortcuts",
-		className: "lg:hidden bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/90 shadow-xs mb-3",
+		className: "lg:hidden bg-white p-3.5 sm:p-4 rounded-xl border border-[#CCDDF0] shadow-2xs mb-3",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "flex items-center justify-between mb-2.5",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				className: "text-xs font-semibold text-slate-900 tracking-tight",
+				className: "text-xs font-bold text-[#0B2545] tracking-tight",
 				children: "Modul Operasional"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "text-[11px] text-slate-500 font-medium",
+				className: "text-[11px] text-[#64839E] font-medium",
 				children: "Akses Cepat"
 			})]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -15312,19 +15223,16 @@ function DashboardQuickShortcuts({ currentUser, onNavigate, unreadTicketsCount =
 				const Icon = item.icon;
 				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					onClick: item.onClick,
-					className: "group relative flex flex-col items-center justify-center p-2 rounded-lg bg-slate-50/70 hover:bg-cyan-50/40 active:bg-cyan-100/50 border border-slate-200/70 hover:border-cyan-300 transition-all duration-150 text-center min-h-[62px] active:scale-[0.98] cursor-pointer",
+					className: "group relative flex flex-col items-center justify-center p-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] border border-[#CCDDF0] transition-all duration-150 text-center min-h-[62px] active:scale-[0.98] cursor-pointer",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "h-8 w-8 rounded-md bg-white border border-slate-200/60 shadow-2xs flex items-center justify-center mb-1 text-slate-600 group-hover:text-cyan-700 group-hover:border-cyan-200 transition-colors",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-4 h-4" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] font-medium text-slate-700 group-hover:text-cyan-950 transition-colors tracking-tight truncate max-w-full px-0.5",
-							children: item.label
-						}),
 						item.badge > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[16px] text-center text-[9px] font-bold font-mono tabular-nums text-white bg-rose-600 rounded-full ring-2 ring-white shadow-2xs",
+							className: "absolute -top-1 -right-1 px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-mono font-bold",
 							children: item.badge
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-4 h-4 text-[#026AA7] group-hover:scale-105 transition-transform shrink-0" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[11px] font-semibold text-[#0B2545] mt-1.5 tracking-tight truncate w-full",
+							children: item.label
 						})
 					]
 				}, item.id);
@@ -28184,22 +28092,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 		const parts = dateStr.split("-");
 		if (parts.length !== 3) return dateStr;
 		const [y, m, d] = parts;
-		const months = [
-			"Jan",
-			"Feb",
-			"Mar",
-			"Apr",
-			"Mei",
-			"Jun",
-			"Jul",
-			"Agu",
-			"Sep",
-			"Okt",
-			"Nov",
-			"Des"
-		];
-		const monthIdx = parseInt(m, 10) - 1;
-		return `${parseInt(d, 10)} ${months[monthIdx] || m} ${y}`;
+		return `${d}/${m}/${y.length === 4 ? y.slice(-2) : y}`;
 	};
 	const formatMonthYear = (d) => {
 		return `${[
@@ -28311,14 +28204,14 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 							data: transformed,
 							rawValues: ds.values || [],
 							details: ds.details || [],
-							borderColor: ds.color || "#0891b2",
-							backgroundColor: !isMulti ? "rgba(8, 145, 178, 0.12)" : "transparent",
+							borderColor: ds.color || "#026AA7",
+							backgroundColor: !isMulti ? "rgba(2, 106, 167, 0.12)" : "transparent",
 							borderWidth: rawDatasets.length > 2 ? 2 : 2.5,
 							fill: !isMulti,
 							tension: .12,
 							pointRadius: rawDatasets.length > 2 ? 3.5 : 5,
 							pointHoverRadius: rawDatasets.length > 2 ? 6 : 8,
-							pointBackgroundColor: ds.color || "#0891b2",
+							pointBackgroundColor: ds.color || "#026AA7",
 							pointBorderColor: "#FFFFFF",
 							pointBorderWidth: 2,
 							showLine: true,
@@ -28333,14 +28226,14 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 						data: transformedValues,
 						rawValues: json.values || [],
 						details: json.details || [],
-						borderColor: "#0891b2",
-						backgroundColor: "rgba(8, 145, 178, 0.12)",
+						borderColor: "#026AA7",
+						backgroundColor: "rgba(2, 106, 167, 0.12)",
 						borderWidth: 2.5,
 						fill: true,
 						tension: .12,
 						pointRadius: 5,
 						pointHoverRadius: 8,
-						pointBackgroundColor: "#0891b2",
+						pointBackgroundColor: "#026AA7",
 						pointBorderColor: "#FFFFFF",
 						pointBorderWidth: 2,
 						showLine: true,
@@ -28351,9 +28244,9 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				datasets.push({
 					label: `Garis Warning (${Number(warnThreshold).toFixed(1)} dBm)`,
 					data: count > 0 ? new Array(count).fill(warnVal) : [],
-					borderColor: "#f59e0b",
-					borderWidth: 2,
-					borderDash: [6, 6],
+					borderColor: "#64839E",
+					borderWidth: 1.5,
+					borderDash: [5, 4],
 					pointRadius: 0,
 					pointHoverRadius: 0,
 					fill: false,
@@ -28363,9 +28256,9 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				datasets.push({
 					label: `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`,
 					data: count > 0 ? new Array(count).fill(critVal) : [],
-					borderColor: "#ef4444",
-					borderWidth: 2,
-					borderDash: [4, 4],
+					borderColor: "#0B2545",
+					borderWidth: 1.5,
+					borderDash: [2, 3],
 					pointRadius: 0,
 					pointHoverRadius: 0,
 					fill: false,
@@ -28452,27 +28345,27 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 								if (dbm >= 24.9) return `-${dbm.toFixed(1)} dBm`;
 								return `-${Math.round(dbm)} dBm`;
 							},
-							color: "#64748B",
+							color: "#64839E",
 							font: {
 								size: 10.5,
-								family: "'Roboto Flex', system-ui, sans-serif",
+								family: "'JetBrains Mono', monospace",
 								weight: "600"
 							}
 						},
 						grid: { color: (ctx) => {
-							if (!ctx.tick) return "#F1F5F9";
+							if (!ctx.tick) return "#E8F1FA";
 							const dbm = inverseTransformDbm(ctx.tick.value);
-							if (Math.abs(dbm - 26) < .05) return "rgba(245, 158, 11, 0.35)";
-							if (Math.abs(dbm - 27) < .05) return "rgba(239, 68, 68, 0.35)";
-							return "#F1F5F9";
+							if (Math.abs(dbm - 26) < .05) return "rgba(100, 131, 158, 0.45)";
+							if (Math.abs(dbm - 27) < .05) return "rgba(11, 37, 69, 0.45)";
+							return "#E8F1FA";
 						} }
 					},
 					x: {
 						ticks: {
-							color: "#64748B",
+							color: "#64839E",
 							font: {
 								size: 11,
-								family: "'Roboto Flex', system-ui, sans-serif"
+								family: "'JetBrains Mono', monospace"
 							},
 							maxRotation: 0,
 							autoSkip: true,
@@ -28484,15 +28377,17 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				plugins: {
 					legend: { display: false },
 					tooltip: {
-						backgroundColor: "rgba(15, 23, 42, 0.94)",
+						backgroundColor: "#0B2545",
+						titleColor: "#BAE6FD",
+						bodyColor: "#FFFFFF",
 						titleFont: {
-							family: "'Roboto Flex', system-ui, sans-serif",
+							family: "'JetBrains Mono', monospace",
 							size: 11,
 							weight: "bold"
 						},
 						bodyFont: {
-							family: "'Roboto Flex', system-ui, sans-serif",
-							size: 10,
+							family: "'JetBrains Mono', monospace",
+							size: 10.5,
 							weight: "500"
 						},
 						padding: {
@@ -28555,22 +28450,22 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 		setZoomScale(1);
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "bg-white rounded-xl p-4 sm:p-5 border border-slate-200/90 shadow-xs relative overflow-hidden space-y-4",
+		className: "bg-white rounded-xl p-3.5 sm:p-5 border border-[#CCDDF0] space-y-3.5 sm:space-y-4",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "min-w-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2.5 flex-wrap",
+						className: "flex items-center gap-2 sm:gap-2.5 flex-wrap",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-								className: "text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-4 h-4 text-cyan-700 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tren Kualitas Redaman" })]
+								className: "text-xs sm:text-sm font-bold text-[#0B2545] tracking-tight flex items-center gap-1.5 sm:gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tren Kualitas Redaman" })]
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3.5 w-px bg-slate-200 hidden sm:inline-block" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-3 sm:h-3.5 w-px bg-[#CCDDF0] hidden sm:inline-block" }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-xs font-mono tabular-nums text-slate-500 font-medium",
+								className: "text-[11px] sm:text-xs font-mono tabular-nums text-[#3B5B78] font-medium",
 								children: [
 									"Ambang Batas: ",
 									Number(chartStats.threshold ?? kpi.warning_threshold ?? -26).toFixed(1),
@@ -28579,11 +28474,11 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 							})
 						]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-xs text-slate-500 mt-1 font-normal line-clamp-1 sm:line-clamp-none",
+						className: "text-[11px] sm:text-xs text-[#3B5B78] mt-0.5 sm:mt-1 font-normal line-clamp-1 sm:line-clamp-none",
 						children: "Fluktuasi sinyal optik rata-rata jaringan ISP per siklus pemindaian"
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2 w-full sm:w-auto relative",
+					className: "flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto relative",
 					ref: calendarRef,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "relative flex-1 sm:flex-none",
@@ -28591,16 +28486,19 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 							type: "button",
 							onClick: () => setIsCalendarOpen(!isCalendarOpen),
 							title: "Pilih tanggal dari riwayat rekaman database",
-							className: `w-full sm:w-auto px-3 py-1.5 text-xs rounded-lg border min-h-[36px] font-semibold transition flex items-center justify-between sm:justify-start gap-2 cursor-pointer select-none shadow-2xs ${chartRange === "custom" ? "bg-cyan-700 text-white border-cyan-800 shadow-xs" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"}`,
+							className: `w-full sm:w-auto px-2.5 sm:px-3 py-1.5 text-xs rounded-lg border min-h-[32px] sm:min-h-[34px] font-semibold transition flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 cursor-pointer select-none shadow-2xs ${chartRange === "custom" ? "bg-[#026AA7] text-white border-[#035388] shadow-xs" : "bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border-[#CCDDF0]"}`,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-1.5",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { className: `w-3.5 h-3.5 ${chartRange === "custom" ? "text-white" : "text-slate-500"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatDisplayDate(selectedDate) })]
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { className: `w-3.5 h-3.5 ${chartRange === "custom" ? "text-white" : "text-[#026AA7]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "truncate",
+									children: formatDisplayDate(selectedDate)
+								})]
 							})
 						}), isCalendarOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "absolute top-full left-0 sm:left-auto sm:right-0 mt-2 z-50 bg-white rounded-xl shadow-xl border border-sky-200 p-3 w-[275px] sm:w-[290px] animate-in fade-in zoom-in-95 duration-150",
+							className: "absolute top-full left-0 sm:left-auto sm:right-0 mt-2 z-50 bg-white rounded-xl shadow-xl border border-[#CCDDF0] p-3 w-[275px] sm:w-[290px] animate-in fade-in zoom-in-95 duration-150",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-between mb-2 pb-1.5 border-b border-sky-100 font-sans",
+									className: "flex items-center justify-between mb-2 pb-1.5 border-b border-[#DAE7F5] font-sans",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 											type: "button",
@@ -28609,12 +28507,12 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 												prev.setMonth(prev.getMonth() - 1);
 												setCalendarViewMonth(prev);
 											},
-											className: "p-1 rounded hover:bg-sky-100 text-slate-600 transition cursor-pointer",
+											className: "p-1 rounded hover:bg-[#F1F6FC] text-[#3B5B78] transition cursor-pointer",
 											title: "Bulan Sebelumnya",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-4 h-4" })
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-xs font-extrabold text-slate-800",
+											className: "text-xs font-bold text-[#0B2545]",
 											children: formatMonthYear(calendarViewMonth)
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -28624,14 +28522,14 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 												next.setMonth(next.getMonth() + 1);
 												setCalendarViewMonth(next);
 											},
-											className: "p-1 rounded hover:bg-sky-100 text-slate-600 transition cursor-pointer",
+											className: "p-1 rounded hover:bg-[#F1F6FC] text-[#3B5B78] transition cursor-pointer",
 											title: "Bulan Berikutnya",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })
 										})
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-slate-500 font-sans",
+									className: "grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-[#64839E] font-sans",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Sen" }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Sel" }),
@@ -28647,21 +28545,21 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 									children: renderCalendarDays()
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "mt-2.5 pt-2 border-t border-sky-100 flex items-center justify-between text-[10px] text-slate-500 font-sans",
+									className: "mt-2.5 pt-2 border-t border-[#DAE7F5] flex items-center justify-between text-[10px] text-[#64839E] font-sans",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "flex items-center gap-1.5",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-0.5 w-3 bg-cyan-600 inline-block rounded-xs" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Data tersedia" })]
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-0.5 w-3 bg-[#026AA7] inline-block rounded-xs" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Data tersedia" })]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
 										onClick: () => setIsCalendarOpen(false),
-										className: "text-cyan-700 font-bold hover:underline cursor-pointer",
+										className: "text-[#026AA7] font-bold hover:underline cursor-pointer",
 										children: "Tutup"
 									})]
 								})
 							]
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1.5 text-xs font-medium shrink-0",
+						className: "flex items-center bg-[#F1F6FC] p-0.5 rounded-lg border border-[#CCDDF0] text-xs font-medium shrink-0",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
@@ -28670,7 +28568,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 									setSelectedDate(todayStr);
 									setIsCalendarOpen(false);
 								},
-								className: `px-3 py-1.5 rounded-lg transition font-sans cursor-pointer shadow-2xs ${chartRange === "today" ? "bg-cyan-700 text-white font-semibold" : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"}`,
+								className: `px-3 py-1 rounded-md transition font-sans cursor-pointer ${chartRange === "today" ? "bg-[#026AA7] text-white font-semibold" : "text-[#3B5B78] hover:text-[#0B2545] font-medium"}`,
 								children: "Hari Ini"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -28683,7 +28581,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 									setIsCalendarOpen(false);
 								},
 								title: hasYesterdayData ? "Bandingkan dengan hari kemarin" : "Data kemarin belum ada di database",
-								className: `px-3 py-1.5 rounded-lg transition font-sans shadow-2xs ${!hasYesterdayData ? "opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200" : chartRange === "yesterday" ? "bg-cyan-700 text-white font-semibold cursor-pointer" : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 cursor-pointer"}`,
+								className: `px-3 py-1 rounded-md transition font-sans ${!hasYesterdayData ? "opacity-40 cursor-not-allowed text-[#64839E]" : chartRange === "yesterday" ? "bg-[#026AA7] text-white font-semibold cursor-pointer" : "text-[#3B5B78] hover:text-[#0B2545] font-medium cursor-pointer"}`,
 								children: "Kemarin"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -28696,7 +28594,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 									setIsCalendarOpen(false);
 								},
 								title: hasWeekData ? "Bandingkan tren 7 hari terakhir" : "Riwayat 7 hari sebelumnya belum ada di database",
-								className: `px-3 py-1.5 rounded-lg transition font-sans shadow-2xs ${!hasWeekData ? "opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200" : chartRange === "week" ? "bg-cyan-700 text-white font-semibold cursor-pointer" : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 cursor-pointer"}`,
+								className: `px-3 py-1 rounded-md transition font-sans ${!hasWeekData ? "opacity-40 cursor-not-allowed text-[#64839E]" : chartRange === "week" ? "bg-[#026AA7] text-white font-semibold cursor-pointer" : "text-[#3B5B78] hover:text-[#0B2545] font-medium cursor-pointer"}`,
 								children: "7 Hari"
 							})
 						]
@@ -28704,73 +28602,85 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "grid grid-cols-2 sm:grid-cols-4 gap-3 py-2.5 px-3.5 rounded-lg bg-slate-50/70 border border-slate-200/80 text-xs",
+				className: "grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-[#DAE7F5] rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[11px] font-sans font-medium text-slate-500 block",
-						children: "Rata-rata Redaman"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm font-bold font-mono tabular-nums text-slate-900 mt-0.5 block",
-						children: chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : "-"
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[11px] font-sans font-medium text-slate-500 block",
-						children: "Sinyal Terbaik"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm font-bold font-mono tabular-nums text-emerald-700 mt-0.5 block",
-						children: chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : "-"
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[11px] font-sans font-medium text-slate-500 block",
-						children: "Sinyal Terendah"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm font-bold font-mono tabular-nums text-rose-700 mt-0.5 block",
-						children: chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : "-"
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[11px] font-sans font-medium text-slate-500 block",
-						children: "Total Titik Scan"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: "text-sm font-bold font-mono tabular-nums text-slate-900 mt-0.5 block",
-						children: [chartStats.total_points, " Titik"]
-					})] })
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "py-2.5 sm:py-3 px-3 sm:px-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate",
+							children: "Rata-rata Redaman"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block",
+							children: chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : "-"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "py-2.5 sm:py-3 px-3 sm:px-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate",
+							children: "Sinyal Terbaik"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block",
+							children: chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : "-"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "py-2.5 sm:py-3 px-3 sm:px-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate",
+							children: "Sinyal Terendah"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block",
+							children: chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : "-"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "py-2.5 sm:py-3 px-3 sm:px-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate",
+							children: "Total Titik Scan"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block",
+							children: [chartStats.total_points, " Titik"]
+						})]
+					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative w-full h-[220px] sm:h-[290px] overflow-hidden rounded-xl bg-white border border-sky-100",
+				className: "relative w-full h-[220px] sm:h-[290px] overflow-hidden rounded-lg bg-white border border-[#CCDDF0] p-2",
 				children: [
 					chartStats.total_points === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-50/90 backdrop-blur-xs p-4 text-center",
+						className: "absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#F1F6FC]/90 backdrop-blur-xs p-4 text-center",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-8 h-8 text-slate-300 mb-2 stroke-[1.5]" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-8 h-8 text-[#64839E] mb-2 stroke-[1.5]" }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs sm:text-sm font-extrabold text-slate-800 font-mono",
+								className: "text-xs sm:text-sm font-bold text-[#0B2545] font-mono",
 								children: "Belum Ada Riwayat Log Redaman"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[11px] text-slate-500 max-w-sm mt-0.5",
+								className: "text-[11px] text-[#3B5B78] max-w-sm mt-0.5",
 								children: "Data rekaman untuk rentang atau tanggal ini belum tersimpan di database. Sistem akan memetakan grafik otomatis setelah monitoring berjalan."
 							})
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-0.5 rounded-lg border border-sky-200 shadow-xs",
+						className: "sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-0.5 rounded-lg border border-[#CCDDF0] shadow-xs",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: handleZoomIn,
-								className: "w-6 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-900 flex items-center justify-center transition active:scale-90",
+								className: "w-6 h-6 rounded bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] flex items-center justify-center transition active:scale-90",
 								title: "Perbesar",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZoomIn, { className: "w-3.5 h-3.5" })
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: handleZoomOut,
-								className: "w-6 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-900 flex items-center justify-center transition active:scale-90",
+								className: "w-6 h-6 rounded bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] flex items-center justify-center transition active:scale-90",
 								title: "Perkecil",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZoomOut, { className: "w-3.5 h-3.5" })
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								onClick: handleZoomReset,
-								className: "px-1.5 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-950 text-[11px] font-mono font-extrabold flex items-center justify-center gap-0.5 transition active:scale-90",
+								className: "px-1.5 h-6 rounded bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] text-[11px] font-mono font-bold flex items-center justify-center gap-0.5 transition active:scale-90",
 								title: "Reset",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RotateCcw, { className: "w-3 h-3" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Reset" })]
 							})
@@ -28781,32 +28691,32 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 						style: { transform: `scale(${zoomScale})` },
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", {
 							ref: chartCanvasRef,
-							className: "w-full h-full block"
+							className: "w-full h-full block cursor-crosshair"
 						})
 					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "pt-2 sm:pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-sans text-slate-600",
+				className: "pt-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-sans text-[#3B5B78]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex flex-wrap items-center gap-2 sm:gap-3",
+					className: "flex flex-wrap items-center gap-3 sm:gap-5",
 					children: [
 						activeDatasets.filter((d) => !d.isThreshold).map((ds, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: () => toggleDataset(ds.index),
-							className: "flex items-center gap-1.5 hover:opacity-80 transition select-none cursor-pointer",
+							className: "flex items-center gap-2 hover:opacity-80 transition select-none cursor-pointer",
 							title: `Klik untuk toggle ${ds.label}`,
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "h-0.5 w-3 rounded-xs inline-block shrink-0",
-								style: { backgroundColor: ds.color }
+								className: "h-0.5 w-3.5 inline-block shrink-0",
+								style: { backgroundColor: ds.color || "#026AA7" }
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: `font-semibold text-slate-700 ${ds.hidden ? "line-through opacity-40" : ""}`,
+								className: `font-semibold text-[#0B2545] ${ds.hidden ? "line-through opacity-40" : ""}`,
 								children: ds.label
 							})]
 						}, idx)),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-1.5 ml-0.5 pl-2 border-l border-slate-200",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-0.5 w-2 sm:w-3 bg-amber-500 inline-block" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-amber-800 font-semibold font-mono tabular-nums",
+							className: "flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-0.5 w-3.5 border-b border-dashed border-[#64839E] inline-block" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "font-mono text-[#3B5B78]",
 								children: [
 									"Waspada (",
 									Number(chartStats.threshold ?? kpi.warning_threshold ?? -26).toFixed(1),
@@ -28815,9 +28725,9 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-1.5",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-0.5 w-2 sm:w-3 bg-rose-500 inline-block" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-rose-800 font-semibold font-mono tabular-nums",
+							className: "flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-0.5 w-3.5 border-b border-dotted border-[#0B2545] inline-block" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "font-mono text-[#3B5B78]",
 								children: [
 									"Kritis (",
 									Number(chartStats.critical_threshold ?? kpi.critical_threshold ?? -27).toFixed(1),
@@ -28827,9 +28737,9 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-slate-500 text-xs font-mono tabular-nums",
-					children: ["Optimal: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: "font-bold text-emerald-700",
+					className: "text-[#3B5B78] text-xs font-mono tabular-nums",
+					children: ["Optimal: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
+						className: "font-semibold text-[#0B2545]",
 						children: [
 							"> ",
 							Number(chartStats.threshold ?? kpi.warning_threshold ?? -26).toFixed(1),
@@ -29134,9 +29044,10 @@ function DashboardView({ activeOffice = "all", currentUser = {
 	const scanTargetKantor = (scanProgress?.target_kantor || "all").toLowerCase();
 	const currentOfficeLower = (activeOffice || "all").toLowerCase();
 	const isCurrentOfficeScan = scanTargetKantor === "all" || scanTargetKantor === currentOfficeLower;
+	const [activeMetric, setActiveMetric] = (0, import_react.useState)("total");
 	const canControlCurrentScan = isSuperAdmin || currentUser?.role === "admin" && scanTargetKantor === currentOfficeLower;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "space-y-4 font-sans",
+		className: "space-y-5 font-sans",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DashboardControlBar, {
 				activeOffice,
@@ -29163,7 +29074,11 @@ function DashboardView({ activeOffice = "all", currentUser = {
 				handleToggleScheduler,
 				handlePauseScan,
 				handleResumeScan,
-				handleOpenStopModal
+				handleOpenStopModal,
+				kpi,
+				activeMetric,
+				setActiveMetric,
+				onNavigate
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DashboardQuickShortcuts, {
 				currentUser,
@@ -29171,85 +29086,11 @@ function DashboardView({ activeOffice = "all", currentUser = {
 				unreadTicketsCount,
 				onNavigate
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SegmentedStatusBar, { items: [
-				{
-					label: "Total",
-					value: kpi.total_monitored,
-					colorScheme: "cyan",
-					onClick: () => onNavigate("pelanggan", { status: "ALL" }),
-					subLabel: kpi.offline !== void 0 && kpi.offline !== null ? `${kpi.offline} Offline` : kpi.monitored_inactive > 0 ? `(${kpi.monitored_inactive} OFF)` : "Modem"
-				},
-				{
-					label: "Optimal",
-					value: kpi.normal,
-					colorScheme: "emerald",
-					onClick: () => onNavigate("pelanggan", { status: "NORMAL" }),
-					subLabel: `> ${Number(kpi.warning_threshold ?? -26).toFixed(1)} dBm`
-				},
-				{
-					label: "Waspada",
-					value: kpi.warning,
-					colorScheme: "amber",
-					onClick: () => onNavigate("pelanggan", { status: "WARNING" }),
-					subLabel: `≤ ${Number(kpi.warning_threshold ?? -26).toFixed(1)} dBm`
-				},
-				{
-					label: "Kritis",
-					value: kpi.critical,
-					colorScheme: "rose",
-					onClick: () => onNavigate("pelanggan", { status: "CRITICAL" }),
-					subLabel: `≤ ${Number(kpi.critical_threshold ?? -27).toFixed(1)} dBm`
-				},
-				{
-					label: "LOS",
-					value: kpi.los,
-					colorScheme: "purple",
-					onClick: () => onNavigate("pelanggan", { status: "LOS" }),
-					subLabel: "Putus"
-				},
-				{
-					label: "Invalid",
-					value: kpi.invalid || 0,
-					colorScheme: "orange",
-					onClick: () => onNavigate("pelanggan", { status: "INVALID" }),
-					subLabel: "Kredensial"
-				}
-			] }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DashboardChartSection, {
 				activeOffice,
 				kpi,
 				isScanning,
 				lastScanTime
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => onNavigate("pelanggan"),
-					className: "rounded-xl p-4 bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-cyan-300 shadow-xs hover:shadow-xs transition-all duration-150 flex items-center justify-between group text-left cursor-pointer active:scale-[0.99]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3.5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-5 h-5 text-slate-500 group-hover:text-cyan-700 transition-colors shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-sm font-semibold text-slate-900 tracking-tight group-hover:text-cyan-950 transition-colors",
-							children: "Kelola Master Pelanggan"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-slate-500 font-normal mt-0.5",
-							children: "Tabel seluruh modem ONT, filter POP/Kantor, dan live probe"
-						})] })]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition-transform shrink-0" })]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => onNavigate("tiket"),
-					className: "rounded-xl p-4 bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-cyan-300 shadow-xs hover:shadow-xs transition-all duration-150 flex items-center justify-between group text-left cursor-pointer active:scale-[0.99]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3.5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Ticket, { className: "w-5 h-5 text-slate-500 group-hover:text-cyan-700 transition-colors shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-sm font-semibold text-slate-900 tracking-tight group-hover:text-cyan-950 transition-colors",
-							children: "Tiket Keluhan Pelanggan"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-slate-500 font-normal mt-0.5",
-							children: "Pantau laporan aduan warga desa dan update status penanganan"
-						})] })]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition-transform shrink-0" })]
-				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ToastNotification, {
 				show: toast.show,
@@ -30164,25 +30005,25 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "hidden lg:block lg:col-span-1 space-y-3",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-sky-200/80 shadow-sm space-y-4",
+						className: "bg-white rounded-xl p-4 border border-[#CCDDF0] shadow-2xs space-y-4",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-xs font-black uppercase tracking-wider text-slate-700 px-1",
+								className: "text-xs font-bold uppercase tracking-wider text-[#0B2545] px-1 font-mono",
 								children: "Menu Pengaturan"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "space-y-1",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-slate-800",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Personal" })]
+									className: "flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-[#0B2545]",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Personal" })]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "pl-4 space-y-1 border-l-2 border-sky-100 ml-3",
+									className: "pl-4 space-y-1 border-l-2 border-[#DAE7F5] ml-3",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										onClick: () => {
 											setSettingsCategory("personal");
 											setSettingsActiveSubTab("account");
 										},
-										className: `w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "account" ? "bg-cyan-600 text-white shadow-xs" : "text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900"}`,
+										className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "account" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 											className: "flex items-center gap-2",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Profil & Kata Sandi" })]
@@ -30191,19 +30032,19 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 								})]
 							}),
 							!isTeknisi && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "space-y-1 pt-2 border-t border-sky-100",
+								className: "space-y-1 pt-2 border-t border-[#DAE7F5]",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-slate-800",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersVertical, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pengaturan NOC" })]
+									className: "flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-[#0B2545]",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersVertical, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pengaturan NOC" })]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "pl-4 space-y-1 border-l-2 border-sky-100 ml-3",
+									className: "pl-4 space-y-1 border-l-2 border-[#DAE7F5] ml-3",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 											onClick: () => {
 												setSettingsCategory("noc");
 												setSettingsActiveSubTab("thresholds");
 											},
-											className: `w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "thresholds" ? "bg-cyan-600 text-white shadow-xs" : "text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900"}`,
+											className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "thresholds" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 												className: "flex items-center gap-2",
 												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersHorizontal, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Parameter & Redaman" })]
@@ -30214,7 +30055,7 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 												setSettingsCategory("noc");
 												setSettingsActiveSubTab("credentials");
 											},
-											className: `w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "credentials" ? "bg-cyan-600 text-white shadow-xs" : "text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900"}`,
+											className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "credentials" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 												className: "flex items-center gap-2",
 												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kredensial ONT" })]
@@ -30225,7 +30066,7 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 												setSettingsCategory("noc");
 												setSettingsActiveSubTab("notifications");
 											},
-											className: `w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "notifications" ? "bg-cyan-600 text-white shadow-xs" : "text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900"}`,
+											className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "notifications" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 												className: "flex items-center gap-2",
 												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Notifikasi & Jam Senyap" })]
@@ -30237,7 +30078,7 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 						]
 					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "lg:col-span-3 bg-white/90 backdrop-blur-md rounded-2xl p-5 border border-sky-200/80 shadow-sm",
+					className: "lg:col-span-3 bg-white rounded-xl p-5 border border-[#CCDDF0] shadow-2xs",
 					children: [
 						!isTeknisi && (settingsActiveSubTab === "thresholds" || settingsActiveSubTab === "threshold") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingsThresholdTab, {
 							onOpenConfirmModal,
@@ -30294,6 +30135,197 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 	});
 }
 //#endregion
+//#region src/components/common/CommonUI.jsx
+/**
+* Standard Unified Segmented Status Ticker Bar (Bento Strip Berserat Rapat Tanpa Pelangi)
+*/
+function SegmentedStatusBar({ items = [] }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "bg-[#F1F6FC] rounded-xl border border-[#CCDDF0] shadow-2xs p-1 flex items-center divide-x divide-[#DAE7F5] w-full",
+		children: items.map((it, idx) => {
+			const isActive = Boolean(it.isActive);
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+				type: "button",
+				onClick: it.onClick,
+				className: `metric-cell flex-1 py-2 sm:py-3 px-1 sm:px-3 rounded-lg transition-all flex flex-col items-center justify-center text-center cursor-pointer select-none min-w-0 ${isActive ? "active" : "hover:bg-white/80"} ${it.className || ""}`,
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider truncate max-w-full text-[#3B5B78] w-full",
+						children: it.label
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-sm sm:text-lg font-bold font-mono tabular-nums tracking-tight mt-0.5 text-[#0B2545]",
+						children: it.value
+					}),
+					it.subLabel && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "hidden sm:block text-[11px] text-[#64839E] font-mono truncate mt-0.5",
+						children: it.subLabel
+					})
+				]
+			}, idx);
+		})
+	});
+}
+/**
+* Standard Filter Bar Container
+*/
+function FilterContainer({ children, className = "" }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: `bg-white rounded-xl p-3 sm:p-3.5 border border-[#CCDDF0] shadow-2xs ${className}`,
+		children
+	});
+}
+/**
+* Helper to compute pagination items with ellipses (...)
+*/
+function getPaginationRange(currentPage, totalPages) {
+	if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+	const pages = [];
+	pages.push(1);
+	if (currentPage > 3) pages.push("...");
+	const start = Math.max(2, currentPage - 1);
+	const end = Math.min(totalPages - 1, currentPage + 1);
+	for (let i = start; i <= end; i++) pages.push(i);
+	if (currentPage < totalPages - 2) pages.push("...");
+	pages.push(totalPages);
+	return pages;
+}
+/**
+* Standard Data Table Container with Unified Modern Pagination Bar
+*/
+function DataTableContainer({ children, page = 1, totalPages = 1, totalCount, totalItems, limit = 15, onLimitChange, onPageChange, onPrevPage, onNextPage, loading = false, limitOptions = [
+	15,
+	30,
+	50,
+	75,
+	100
+] }) {
+	const actualTotalCount = totalCount !== void 0 ? totalCount : totalItems;
+	const safeTotalPages = Math.max(1, totalPages || 1);
+	const safePage = Math.min(Math.max(1, page || 1), safeTotalPages);
+	const handlePrev = () => {
+		if (safePage > 1 && !loading) {
+			if (onPageChange) onPageChange(safePage - 1);
+			else if (onPrevPage) onPrevPage();
+		}
+	};
+	const handleNext = () => {
+		if (safePage < safeTotalPages && !loading) {
+			if (onPageChange) onPageChange(safePage + 1);
+			else if (onNextPage) onNextPage();
+		}
+	};
+	const handlePageSelect = (p) => {
+		if (typeof p === "number" && p !== safePage && !loading) {
+			if (onPageChange) onPageChange(p);
+			else if (p < safePage && onPrevPage) onPrevPage();
+			else if (p > safePage && onNextPage) onNextPage();
+		}
+	};
+	const paginationItems = getPaginationRange(safePage, safeTotalPages);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "bg-white rounded-xl border border-[#CCDDF0] shadow-2xs overflow-hidden",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "overflow-x-auto",
+			children
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "p-3 sm:p-3.5 border-t border-[#DAE7F5] flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-mono text-[#3B5B78] bg-[#F1F6FC]",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto justify-between md:justify-start",
+				children: [onLimitChange && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-1.5",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[11px] text-[#64839E] font-semibold",
+							children: "Tampilkan:"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", {
+							value: limit,
+							onChange: (e) => {
+								onLimitChange(Number(e.target.value));
+							},
+							disabled: loading,
+							className: "px-2 py-1 bg-white border border-[#CCDDF0] rounded-lg text-[#0B2545] text-[11px] font-bold shadow-2xs focus:outline-none cursor-pointer",
+							children: limitOptions.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: opt,
+								children: opt
+							}, opt))
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[11px] text-[#64839E]",
+							children: "baris"
+						})
+					]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-[11px] text-[#64839E]",
+					children: [
+						"Halaman ",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+							className: "text-[#0B2545] font-bold",
+							children: safePage
+						}),
+						" dari ",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+							className: "text-[#0B2545] font-bold",
+							children: safeTotalPages
+						}),
+						actualTotalCount !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "ml-1 text-[#64839E] font-normal",
+							children: [
+								"(",
+								actualTotalCount,
+								" data)"
+							]
+						})
+					]
+				})]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-1 sm:gap-1.5 select-none w-full md:w-auto justify-center md:justify-end overflow-x-auto py-0.5",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						disabled: safePage <= 1 || loading,
+						onClick: handlePrev,
+						className: "p-1 sm:px-2 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]",
+						title: "Halaman Sebelumnya",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "hidden sm:inline",
+							children: "Sebelumnya"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex items-center gap-1",
+						children: paginationItems.map((item, idx) => {
+							if (item === "...") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "px-1.5 py-1 text-[#64839E] text-xs font-bold",
+								children: "..."
+							}, `ellipsis-${idx}`);
+							return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								disabled: loading,
+								onClick: () => handlePageSelect(item),
+								className: `min-w-[28px] sm:min-w-[30px] h-[28px] sm:h-[30px] px-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs ${item === safePage ? "bg-[#026AA7] text-white border border-[#035388]" : "bg-white border border-[#CCDDF0] text-[#0B2545] hover:bg-[#F1F6FC]"}`,
+								children: item
+							}, `page-${item}`);
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						disabled: safePage >= safeTotalPages || loading,
+						onClick: handleNext,
+						className: "p-1 sm:px-2 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]",
+						title: "Halaman Berikutnya",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "hidden sm:inline",
+							children: "Berikutnya"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5" })]
+					})
+				]
+			})]
+		})]
+	});
+}
+//#endregion
 //#region src/components/customers/CustomersFilterBar.jsx
 function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMikrotik, mikrotikSyncing, isOfficeActive, setImportModalOpen, activeOffice, fetchCustomers, loading, selectedIds, setSelectedIds, handleBulkDelete, bulkDeleting }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -30304,7 +30336,7 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 				className: "flex items-center gap-1.5 flex-1 min-w-0",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "relative flex-1 min-w-[150px]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 						type: "text",
 						value: searchQuery,
 						onChange: (e) => {
@@ -30312,7 +30344,7 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 							setPage(1);
 						},
 						placeholder: "Cari ID, Nama, IP...",
-						className: "w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px]"
+						className: "w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-mono text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
 					})]
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -30321,20 +30353,20 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: handleSyncMikrotik,
 						disabled: mikrotikSyncing || !isOfficeActive,
-						className: `flex-1 sm:flex-none px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] ${!isOfficeActive ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border-cyan-200 cursor-pointer"}`,
+						className: `flex-1 sm:flex-none px-3 py-1.5 rounded-lg border text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] ${!isOfficeActive ? "bg-[#F1F6FC] text-[#64839E] border-[#CCDDF0] cursor-not-allowed opacity-60" : "bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] border-[#CCDDF0] cursor-pointer"}`,
 						title: !isOfficeActive ? "Kantor dalam status nonaktif. Sinkronisasi MikroTik dimatikan." : "Sinkronisasi Kuota & Traffic Real-Time dari Router MikroTik",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: `w-3.5 h-3.5 ${!isOfficeActive ? "text-slate-400" : "text-cyan-700"} ${mikrotikSyncing ? "animate-spin" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: mikrotikSyncing ? "Syncing..." : !isOfficeActive ? "Sync Mati" : "Sync MikroTik" })]
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: `w-3.5 h-3.5 ${!isOfficeActive ? "text-[#64839E]" : "text-[#026AA7]"} ${mikrotikSyncing ? "animate-spin" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: mikrotikSyncing ? "Syncing..." : !isOfficeActive ? "Sync Mati" : "Sync MikroTik" })]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => setImportModalOpen(true),
-						className: "flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer",
+						className: "flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] cursor-pointer",
 						title: "Lengkapi Data Pelanggan (No. WA, Alamat, Kredensial WiFi)",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileSpreadsheet, { className: "w-3.5 h-3.5 text-cyan-200" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lengkapi Data" })]
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileSpreadsheet, { className: "w-3.5 h-3.5 text-sky-200" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lengkapi Data" })]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
 						href: `/api/customers/export-excel?kantor=${encodeURIComponent(activeOffice || "cabang")}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`,
 						download: `data_pelanggan_${activeOffice || "edteknoguard"}.xlsx`,
-						className: "p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]",
+						className: "p-2 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px]",
 						title: "Ekspor Seluruh Data ke Excel",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "hidden sm:inline",
@@ -30344,7 +30376,7 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: fetchCustomers,
 						disabled: loading,
-						className: "p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center cursor-pointer",
+						className: "p-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] border border-[#CCDDF0] transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center cursor-pointer",
 						title: "Muat Ulang Data",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: `w-3.5 h-3.5 ${loading ? "animate-spin" : ""}` })
 					})
@@ -30547,7 +30579,7 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
 			className: "hidden md:table w-full text-left border-collapse table-auto",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-				className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
+				className: "bg-[#F1F6FC] border-y border-[#CCDDF0] text-[#3B5B78] font-mono text-[11px] uppercase tracking-wider font-semibold",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 						className: "py-2.5 px-3 w-10 text-center",
@@ -30674,21 +30706,21 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 					})
 				]
 			}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
-				className: "divide-y divide-sky-100 font-mono text-xs",
+				className: "divide-y divide-[#DAE7F5] font-mono text-xs",
 				children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
 					colSpan: "10",
-					className: "text-center py-10 text-slate-400 font-mono",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pelanggan..." })]
+					className: "text-center py-10 text-[#64839E] font-mono",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pelanggan..." })]
 				}) }) : customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 					colSpan: "10",
-					className: "text-center py-10 text-slate-400 font-mono",
+					className: "text-center py-10 text-[#64839E] font-mono",
 					children: "Tidak ada data pelanggan ditemukan."
 				}) }) : customers.map((c, idx) => {
 					const cId = c.id_pelanggan || c.id;
 					const rowNo = (page - 1) * limit + idx + 1;
 					const isSelected = selectedIds.includes(cId);
 					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-						className: `transition ${isSelected ? "bg-cyan-50/70" : "hover:bg-cyan-50/40"}`,
+						className: `transition ${isSelected ? "bg-[#E0F0FF]" : "hover:bg-[#F1F6FC]"}`,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 								className: "py-2.5 px-3 text-center",
@@ -30698,15 +30730,15 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 									onChange: () => {
 										setSelectedIds((prev) => prev.includes(cId) ? prev.filter((id) => id !== cId) : [...prev, cId]);
 									},
-									className: "rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+									className: "rounded text-[#026AA7] focus:ring-[#026AA7] cursor-pointer"
 								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								className: "py-2.5 px-2 text-center text-slate-500 font-bold text-xs",
+								className: "py-2.5 px-2 text-center text-[#64839E] font-semibold text-xs",
 								children: rowNo
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-								className: "py-2.5 px-3 font-bold text-cyan-900",
+								className: "py-2.5 px-3 font-bold text-[#0B2545]",
 								children: cId
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
@@ -30714,11 +30746,11 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									type: "button",
 									onClick: () => handleOpenDetail(c),
-									className: "font-sans font-bold text-slate-900 hover:text-cyan-800 hover:underline text-left cursor-pointer transition block",
+									className: "font-sans font-semibold text-[#0B2545] hover:text-[#026AA7] hover:underline text-left cursor-pointer transition block",
 									title: "Klik untuk melihat Detail Lengkap & Kontak Pelanggan",
 									children: c.nama || c.name
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "text-xs text-slate-600 font-sans truncate max-w-xs",
+									className: "text-xs text-[#3B5B78] font-sans truncate max-w-xs",
 									children: c.alamat || c.address || "-"
 								})]
 							}),
@@ -37242,17 +37274,17 @@ function OfficeManagementView({ initialSubTab = "kantor", onSubTabChange }) {
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "flex items-center justify-between flex-wrap gap-3 pb-1",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "inline-flex p-1 bg-slate-100/90 rounded-2xl border border-sky-200/80 shadow-2xs",
+				className: "inline-flex p-1 bg-[#F1F6FC] rounded-xl border border-[#CCDDF0] shadow-2xs",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: () => handleTabClick("kantor"),
-					className: `flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${activeSubTab === "kantor" ? "bg-white text-cyan-900 border border-sky-200 shadow-xs" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"}`,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuildingComplex, { className: `w-4 h-4 ${activeSubTab === "kantor" ? "text-cyan-700" : "text-slate-500"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kantor Cabang" })]
+					className: `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${activeSubTab === "kantor" ? "bg-[#026AA7] text-white shadow-xs" : "text-[#3B5B78] hover:text-[#0B2545] hover:bg-[#E2EDF8]"}`,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuildingComplex, { className: `w-4 h-4 ${activeSubTab === "kantor" ? "text-white" : "text-[#026AA7]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kantor Cabang" })]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: () => handleTabClick("noc"),
-					className: `flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${activeSubTab === "noc" ? "bg-white text-cyan-900 border border-sky-200 shadow-xs" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"}`,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: `w-4 h-4 ${activeSubTab === "noc" ? "text-cyan-700" : "text-slate-500"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Akun NOC" })]
+					className: `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${activeSubTab === "noc" ? "bg-[#026AA7] text-white shadow-xs" : "text-[#3B5B78] hover:text-[#0B2545] hover:bg-[#E2EDF8]"}`,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: `w-4 h-4 ${activeSubTab === "noc" ? "text-white" : "text-[#026AA7]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Akun NOC" })]
 				})]
 			})
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [activeSubTab === "kantor" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BranchOfficesView, {}), activeSubTab === "noc" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UsersView, {})] })]
@@ -37452,7 +37484,7 @@ function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = {
 	role: "super admin",
 	nama_lengkap: "Admin NOC",
 	username: "admin"
-}, unreadTickets = 0 }) {
+}, unreadTickets = 0, isCollapsed = false, setIsCollapsed = () => {} }) {
 	const isSuperAdmin = currentUser?.role === "super admin";
 	const isTeknisi = currentUser?.role === "teknisi";
 	const menuSections = [
@@ -37525,80 +37557,116 @@ function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = {
 		return name.slice(0, 2).toUpperCase();
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", {
-		className: "hidden lg:flex w-60 bg-white/95 backdrop-blur-md flex-col fixed inset-y-0 z-50 border-r border-sky-200/80 shadow-sm",
+		className: `hidden lg:flex bg-[#0B2545] flex-col fixed inset-y-0 left-0 z-50 border-r border-[#1E437A] select-none shadow-sm transition-all duration-200 ${isCollapsed ? "w-16" : "w-60"}`,
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "h-14 flex items-center justify-between px-4 border-b border-sky-100",
+				className: `h-14 flex items-center border-b border-[#1E437A] ${isCollapsed ? "justify-center px-2" : "justify-between px-3.5"}`,
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2.5",
+					className: "flex items-center gap-2.5 min-w-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "h-8 w-8 rounded-lg bg-cyan-700 flex items-center justify-center text-white shadow-xs",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Radio, { className: "w-4 h-4" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "text-xs font-black text-slate-900 tracking-tight leading-none",
-						children: ["Tekno", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-cyan-700",
-							children: "Guard"
+						className: "h-8 w-8 rounded-lg bg-[#026AA7] flex items-center justify-center text-white shadow-xs overflow-hidden shrink-0",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+							src: "/tekno-indo-logo.png",
+							alt: "Tekno Indo",
+							className: "w-5 h-5 object-contain",
+							onError: (e) => {
+								e.currentTarget.style.display = "none";
+							}
+						})
+					}), !isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "min-w-0",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "text-[13px] font-extrabold text-white tracking-tight leading-none truncate",
+							children: ["Tekno", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sky-300",
+								children: "Guard"
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "text-[10px] text-sky-200/75 font-mono font-semibold mt-1 tracking-tight truncate",
+							children: "OPTICAL SURVEILLANCE"
 						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "text-[11px] text-slate-500 font-mono font-bold mt-0.5 tracking-tight",
-						children: "NOC RESMI NOC"
-					})] })]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-[11px] font-mono text-cyan-800 font-bold tracking-wider",
-					children: "AKTIF"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					onClick: () => setIsCollapsed(!isCollapsed),
+					className: `p-1.5 rounded-lg text-sky-200/75 hover:text-white hover:bg-[#13315C] transition shrink-0 cursor-pointer ${isCollapsed ? "hidden" : "block"}`,
+					title: isCollapsed ? "Perluas Sidebar" : "Ciutkan Sidebar (Mini Icons)",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-4 h-4" })
 				})]
 			}),
+			isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "py-2 flex justify-center border-b border-[#1E437A]/50 bg-[#0B2545]",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					onClick: () => setIsCollapsed(false),
+					className: "p-1.5 rounded-lg text-sky-200/75 hover:text-white hover:bg-[#13315C] transition cursor-pointer",
+					title: "Perluas Sidebar",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })
+				})
+			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "flex-1 px-2.5 py-3 space-y-3 overflow-y-auto text-xs font-semibold text-slate-600 scrollbar-thin",
+				className: "flex-1 px-2.5 py-3 space-y-4 overflow-y-auto text-xs font-semibold scrollbar-thin",
 				children: menuSections.map((sec, sIdx) => {
 					const visibleItems = sec.items.filter((item) => item.visible);
 					if (visibleItems.length === 0) return null;
 					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "space-y-0.5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "px-2 pb-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600",
-							children: sec.title
-						}), visibleItems.map((item) => {
-							const Icon = item.icon;
-							const isActive = activeTab === item.id;
-							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: () => setActiveTab(item.id),
-								className: `w-full flex items-center justify-between px-2.5 py-2 rounded-xl transition text-left text-xs ${isActive ? "bg-cyan-100/70 text-cyan-950 font-bold border border-cyan-300/90 shadow-2xs" : "hover:bg-cyan-50/60 text-slate-700 hover:text-slate-900"}`,
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-2.5",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: `w-4 h-4 ${isActive ? "text-cyan-700" : "text-slate-500"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.label })]
-								}), item.badge && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "px-1.5 py-0.5 rounded-full bg-rose-600 text-white font-mono text-[11px] font-black",
-									children: item.badge
-								})]
-							}, item.id);
-						})]
+						className: "space-y-1",
+						children: [
+							!isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "px-2 pb-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-sky-200/60 truncate",
+								children: sec.title
+							}),
+							isCollapsed && sIdx > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "my-2 border-t border-[#1E437A]/60" }),
+							visibleItems.map((item) => {
+								const Icon = item.icon;
+								const isActive = activeTab === item.id;
+								return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									onClick: () => setActiveTab(item.id),
+									title: isCollapsed ? `${item.label}${item.badge ? ` (${item.badge})` : ""}` : void 0,
+									className: `w-full flex items-center rounded-lg transition text-left text-xs cursor-pointer ${isCollapsed ? "justify-center p-2.5" : "justify-between px-2.5 py-2"} ${isActive ? "bg-[#026AA7] text-white font-semibold shadow-xs" : "text-sky-100/80 hover:bg-[#13315C] hover:text-white font-medium"}`,
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-2.5 relative",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: `w-4 h-4 shrink-0 ${isActive ? "text-sky-200" : "text-sky-300/75"}` }),
+											!isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "truncate",
+												children: item.label
+											}),
+											isCollapsed && item.badge && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute -top-1.5 -right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[#0B2545]" })
+										]
+									}), !isCollapsed && item.badge && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "px-1.5 py-0.5 rounded bg-rose-600 text-white font-mono text-[10px] font-bold",
+										children: item.badge
+									})]
+								}, item.id);
+							})
+						]
 					}, sIdx);
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "p-3 border-t border-sky-100",
+				className: `border-t border-[#1E437A] bg-[#0B2545] ${isCollapsed ? "p-2" : "p-3"}`,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between",
+					className: `flex items-center ${isCollapsed ? "flex-col gap-2" : "justify-between"}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2.5 min-w-0",
+						className: `flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-2.5"}`,
+						title: isCollapsed ? `${currentUser?.nama_lengkap || currentUser?.username} (${currentUser?.role})` : void 0,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "h-8 w-8 rounded-lg bg-cyan-700 text-white font-mono text-xs flex items-center justify-center font-bold shrink-0",
+							className: "h-8 w-8 rounded-lg bg-[#13315C] border border-[#1E437A] text-sky-200 font-mono text-xs flex items-center justify-center font-bold shrink-0",
 							children: getInitials(currentUser?.nama_lengkap || currentUser?.username)
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						}), !isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "min-w-0",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "text-xs font-bold text-slate-900 truncate",
+								className: "text-xs font-semibold text-white truncate",
 								children: currentUser?.nama_lengkap || currentUser?.username || "Admin NOC"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "text-[11px] text-slate-600 font-mono font-bold capitalize",
+								className: "text-[11px] text-sky-200/75 font-mono capitalize truncate",
 								children: currentUser?.role || "super admin"
 							})]
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onLogout,
-						className: "p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition shrink-0",
+						className: "p-1.5 rounded-lg text-sky-200/75 hover:text-white hover:bg-[#13315C] transition shrink-0 cursor-pointer",
 						title: "Keluar Sesi",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, { className: "w-4 h-4" })
 					})]
@@ -37609,13 +37677,13 @@ function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = {
 }
 function MobileNav({ activeTab, setActiveTab, unreadTickets = 0 }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
-		className: "lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-sky-200 z-50 h-16 flex items-center px-1 shadow-md",
+		className: "lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-[#CCDDF0] z-50 h-16 flex items-center px-1 shadow-md",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "grid grid-cols-5 w-full items-center text-xs",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					onClick: () => setActiveTab("pelanggan"),
-					className: `flex flex-col items-center justify-center min-h-[48px] ${activeTab === "pelanggan" ? "text-cyan-800 font-bold" : "text-slate-600"}`,
+					className: `flex flex-col items-center justify-center min-h-[48px] ${activeTab === "pelanggan" ? "text-[#026AA7] font-bold" : "text-[#3B5B78]"}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: "text-[11px] font-bold mt-0.5",
 						children: "Pelanggan"
@@ -37623,7 +37691,7 @@ function MobileNav({ activeTab, setActiveTab, unreadTickets = 0 }) {
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					onClick: () => setActiveTab("riwayat"),
-					className: `flex flex-col items-center justify-center min-h-[48px] ${activeTab === "riwayat" ? "text-cyan-800 font-bold" : "text-slate-600"}`,
+					className: `flex flex-col items-center justify-center min-h-[48px] ${activeTab === "riwayat" ? "text-[#026AA7] font-bold" : "text-[#3B5B78]"}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RotateCcwClock, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: "text-[11px] font-bold mt-0.5",
 						children: "Riwayat"
@@ -37633,16 +37701,16 @@ function MobileNav({ activeTab, setActiveTab, unreadTickets = 0 }) {
 					onClick: () => setActiveTab("beranda"),
 					className: "flex flex-col items-center justify-center -mt-3 min-h-[48px]",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "w-11 h-11 rounded-xl bg-cyan-700 text-white flex items-center justify-center shadow-md shadow-cyan-900/20 border-2 border-white",
+						className: "w-11 h-11 rounded-xl bg-[#026AA7] text-white flex items-center justify-center shadow-md shadow-[#0B2545]/20 border-2 border-white",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LayoutGrid, { className: "w-5 h-5" })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[11px] font-black text-cyan-950 mt-0.5",
+						className: "text-[11px] font-black text-[#0B2545] mt-0.5",
 						children: "Beranda"
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					onClick: () => setActiveTab("tiket"),
-					className: `flex flex-col items-center justify-center min-h-[48px] relative ${activeTab === "tiket" ? "text-cyan-800 font-bold" : "text-slate-600"}`,
+					className: `flex flex-col items-center justify-center min-h-[48px] relative ${activeTab === "tiket" ? "text-[#026AA7] font-bold" : "text-[#3B5B78]"}`,
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Ticket, { className: "w-5 h-5" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -37650,14 +37718,14 @@ function MobileNav({ activeTab, setActiveTab, unreadTickets = 0 }) {
 							children: "Tiket"
 						}),
 						unreadTickets > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "absolute top-1 right-3 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-black font-mono",
+							className: "absolute top-1 right-3 px-1.5 py-0.2 rounded bg-rose-600 text-white text-[10px] font-bold font-mono",
 							children: unreadTickets
 						})
 					]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					onClick: () => setActiveTab("pengaturan"),
-					className: `flex flex-col items-center justify-center min-h-[48px] ${activeTab === "pengaturan" ? "text-cyan-800 font-bold" : "text-slate-600"}`,
+					className: `flex flex-col items-center justify-center min-h-[48px] ${activeTab === "pengaturan" ? "text-[#026AA7] font-bold" : "text-[#3B5B78]"}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersVertical, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: "text-[11px] font-bold mt-0.5",
 						children: "Pengaturan"
@@ -37697,15 +37765,15 @@ function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, total
 		return name.replace(/^Kantor\s+/i, "").trim();
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-		className: "h-14 bg-white/90 backdrop-blur-md border-b border-sky-200/80 sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between shadow-2xs",
+		className: "h-14 bg-white border-b border-[#CCDDF0] sticky top-0 z-40 px-3 sm:px-7 flex items-center justify-between shadow-2xs",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "flex items-center gap-2 sm:gap-3",
+			className: "flex items-center gap-2 sm:gap-3 min-w-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "text-xs font-mono font-bold text-cyan-800 uppercase tracking-wide",
+				className: "text-xs font-mono font-bold text-[#0B2545] uppercase tracking-wider truncate",
 				children: tabTitles[activeTab] || `Modul ${activeTab}`
 			})
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex items-center gap-2 sm:gap-2.5",
+			className: "flex items-center gap-1.5 sm:gap-2.5 shrink-0",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "relative",
@@ -37713,11 +37781,11 @@ function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, total
 						id: "btn-bell-notification",
 						type: "button",
 						onClick: () => setIsNotificationOpen((prev) => !prev),
-						className: `relative p-2 rounded-xl border transition cursor-pointer flex items-center justify-center ${isNotificationOpen ? "bg-cyan-600 text-white border-cyan-700 shadow-md ring-2 ring-cyan-400/40" : "bg-cyan-50/80 hover:bg-cyan-100 text-cyan-700 border-sky-200/80"}`,
+						className: `relative p-1.5 sm:p-2 rounded-lg border transition cursor-pointer flex items-center justify-center ${isNotificationOpen ? "bg-[#026AA7] text-white border-[#035388] shadow-sm" : "bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] border-[#CCDDF0]"}`,
 						title: "Pusat Notifikasi Pemantauan & Tiket",
 						"aria-label": "Pusat Notifikasi Pemantauan & Tiket",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4" }), totalUnreadNotifications > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border-2 border-white animate-pulse",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4 text-[#026AA7]" }), totalUnreadNotifications > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "absolute -top-1 -right-1 min-w-[15px] h-[15px] bg-[#026AA7] text-white rounded text-[9px] font-mono font-bold flex items-center justify-center px-0.5 tabular-nums",
 							children: totalUnreadNotifications
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NotificationsView, {
@@ -37734,17 +37802,17 @@ function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, total
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-1.5 pl-2 sm:pl-2.5 rounded-xl border border-sky-200 text-xs font-mono transition bg-white/60",
+					className: "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#CCDDF0] bg-[#F1F6FC] text-xs",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuildingComplex, { className: "w-4 h-4 text-cyan-800 shrink-0" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuildingComplex, { className: "w-3.5 h-3.5 text-[#026AA7] shrink-0" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] font-bold text-slate-600 uppercase hidden md:inline",
+							className: "text-[11px] font-mono font-semibold text-[#3B5B78] uppercase hidden md:inline",
 							children: "Kantor:"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", {
 							value: activeOffice,
 							onChange: (e) => handleSwitchOffice(e.target.value),
-							className: "bg-transparent text-cyan-950 font-bold focus:outline-none cursor-pointer pr-1 py-1 text-xs",
+							className: "bg-transparent text-[#0B2545] font-bold focus:outline-none cursor-pointer pr-1 text-xs",
 							title: "Pilih Wilayah Kantor Operasional",
 							children: visibleKantors.length > 0 ? visibleKantors.map((k) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 								value: k.kode,
@@ -37762,24 +37830,24 @@ function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, total
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: () => setHeaderMenuOpen(!headerMenuOpen),
-						className: "p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer flex items-center justify-center",
+						className: "p-1.5 sm:p-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#3B5B78] hover:text-[#0B2545] border border-[#CCDDF0] transition cursor-pointer flex items-center justify-center",
 						title: "Menu Akun & Sesi",
 						"aria-label": "Menu Akun dan Sesi",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EllipsisVertical, { className: "w-4 h-4" })
 					}), headerMenuOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-sky-200/90 shadow-xl p-2 space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150",
+						className: "absolute right-0 mt-2 w-56 bg-white rounded-xl border border-[#CCDDF0] shadow-xl p-2 space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-2.5 bg-cyan-50/60 rounded-xl border border-cyan-100/80 mb-1",
+							className: "p-2.5 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] mb-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "block text-xs font-bold text-slate-900 truncate",
+								className: "block text-xs font-semibold text-[#0B2545] truncate",
 								children: currentUser?.nama_lengkap || "Administrator"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center justify-between mt-0.5",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-[10px] text-slate-500 font-mono",
+									className: "text-[10px] text-[#64839E] font-mono",
 									children: ["@", currentUser?.username || "user"]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[9px] uppercase font-bold text-cyan-800 bg-cyan-100 px-1.5 py-0.2 rounded-md",
+									className: "text-[9px] uppercase font-bold text-[#026AA7] bg-[#E0F0FF] px-1.5 py-0.5 rounded",
 									children: currentUser?.role || "user"
 								})]
 							})]
@@ -37789,7 +37857,7 @@ function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, total
 								setHeaderMenuOpen(false);
 								handleLogout();
 							},
-							className: "w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold text-rose-700 bg-rose-50/60 hover:bg-rose-100 hover:text-rose-800 flex items-center gap-2 transition cursor-pointer",
+							className: "w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50/60 hover:bg-rose-100 hover:text-rose-800 flex items-center gap-2 transition cursor-pointer",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, { className: "w-4 h-4 text-rose-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Keluar Akun (Logout)" })]
 						})]
 					})]
@@ -45080,6 +45148,19 @@ function App() {
 	const [ticketInitialSearch, setTicketInitialSearch] = (0, import_react.useState)("");
 	const [headerMenuOpen, setHeaderMenuOpen] = (0, import_react.useState)(false);
 	const headerMenuRef = (0, import_react.useRef)(null);
+	const [sidebarCollapsed, setSidebarCollapsed] = (0, import_react.useState)(() => {
+		try {
+			return localStorage.getItem("edtekno_sidebar_collapsed") === "true";
+		} catch {
+			return false;
+		}
+	});
+	const handleToggleSidebar = (val) => {
+		setSidebarCollapsed(val);
+		try {
+			localStorage.setItem("edtekno_sidebar_collapsed", val ? "true" : "false");
+		} catch {}
+	};
 	const handleNavigateCustomer = (namaOrId) => {
 		setCustomerSearchQuery(namaOrId || "");
 		handleTabChange("pelanggan");
@@ -45675,10 +45756,12 @@ function App() {
 				setActiveTab: handleTabChange,
 				currentUser,
 				unreadTickets,
-				onLogout: handleLogout
+				onLogout: handleLogout,
+				isCollapsed: sidebarCollapsed,
+				setIsCollapsed: handleToggleSidebar
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "lg:pl-60 flex-1 flex flex-col",
+				className: `${sidebarCollapsed ? "lg:pl-16" : "lg:pl-60"} flex-1 flex flex-col transition-[padding] duration-200`,
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppHeader, {
 						activeTab,

@@ -216,26 +216,26 @@ export function SettingsView({
 
         {/* DESKTOP TREE MENU (Sidebar Kolom Kiri 1/4) */}
         <div className="hidden lg:block lg:col-span-1 space-y-3">
-          <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-sky-200/80 shadow-sm space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 px-1">
+          <div className="bg-white rounded-xl p-4 border border-[#CCDDF0] shadow-2xs space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#0B2545] px-1 font-mono">
               Menu Pengaturan
             </h3>
 
             {/* Tree Branch 1: Personal (Profil & Keamanan) */}
             <div className="space-y-1">
-              <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-slate-800">
-                <User className="w-3.5 h-3.5 text-cyan-600" />
+              <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-[#0B2545]">
+                <User className="w-3.5 h-3.5 text-[#026AA7]" />
                 <span>Personal</span>
               </div>
-              <div className="pl-4 space-y-1 border-l-2 border-sky-100 ml-3">
+              <div className="pl-4 space-y-1 border-l-2 border-[#DAE7F5] ml-3">
                 <button
                   onClick={() => {
                     setSettingsCategory('personal')
                     setSettingsActiveSubTab('account')
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'account'
-                    ? 'bg-cyan-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'account'
+                    ? 'bg-[#026AA7] text-white shadow-2xs'
+                    : 'text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]'
                     }`}
                 >
                   <span className="flex items-center gap-2">
@@ -248,20 +248,20 @@ export function SettingsView({
 
             {/* Tree Branch 2: Pengaturan NOC & Jaringan (Khusus Super Admin & Admin) */}
             {!isTeknisi && (
-              <div className="space-y-1 pt-2 border-t border-sky-100">
-                <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-slate-800">
-                  <Sliders className="w-3.5 h-3.5 text-cyan-600" />
+              <div className="space-y-1 pt-2 border-t border-[#DAE7F5]">
+                <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-[#0B2545]">
+                  <Sliders className="w-3.5 h-3.5 text-[#026AA7]" />
                   <span>Pengaturan NOC</span>
                 </div>
-                <div className="pl-4 space-y-1 border-l-2 border-sky-100 ml-3">
+                <div className="pl-4 space-y-1 border-l-2 border-[#DAE7F5] ml-3">
                   <button
                     onClick={() => {
                       setSettingsCategory('noc')
                       setSettingsActiveSubTab('thresholds')
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'thresholds'
-                      ? 'bg-cyan-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'thresholds'
+                      ? 'bg-[#026AA7] text-white shadow-2xs'
+                      : 'text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]'
                       }`}
                   >
                     <span className="flex items-center gap-2">
@@ -275,9 +275,9 @@ export function SettingsView({
                       setSettingsCategory('noc')
                       setSettingsActiveSubTab('credentials')
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'credentials'
-                      ? 'bg-cyan-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'credentials'
+                      ? 'bg-[#026AA7] text-white shadow-2xs'
+                      : 'text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]'
                       }`}
                   >
                     <span className="flex items-center gap-2">
@@ -291,9 +291,9 @@ export function SettingsView({
                       setSettingsCategory('noc')
                       setSettingsActiveSubTab('notifications')
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'notifications'
-                      ? 'bg-cyan-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:bg-cyan-50/60 hover:text-cyan-900'
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'notifications'
+                      ? 'bg-[#026AA7] text-white shadow-2xs'
+                      : 'text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]'
                       }`}
                   >
                     <span className="flex items-center gap-2">
@@ -308,7 +308,7 @@ export function SettingsView({
         </div>
 
         {/* 3 Kolom Form Input (Desktop 3/4) */}
-        <div className="lg:col-span-3 bg-white/90 backdrop-blur-md rounded-2xl p-5 border border-sky-200/80 shadow-sm">
+        <div className="lg:col-span-3 bg-white rounded-xl p-5 border border-[#CCDDF0] shadow-2xs">
 
           {/* TAB 1: PARAMETER & AMBANG BATAS (Khusus Super Admin & Admin) */}
           {!isTeknisi && (settingsActiveSubTab === 'thresholds' || settingsActiveSubTab === 'threshold') && (

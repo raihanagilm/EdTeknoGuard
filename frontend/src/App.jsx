@@ -131,6 +131,21 @@ export default function App() {
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false)
   const headerMenuRef = useRef(null)
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('edtekno_sidebar_collapsed') === 'true'
+    } catch {
+      return false
+    }
+  })
+
+  const handleToggleSidebar = (val) => {
+    setSidebarCollapsed(val)
+    try {
+      localStorage.setItem('edtekno_sidebar_collapsed', val ? 'true' : 'false')
+    } catch {}
+  }
+
   const handleNavigateCustomer = (namaOrId) => {
     setCustomerSearchQuery(namaOrId || '')
     handleTabChange('pelanggan')
@@ -929,10 +944,12 @@ export default function App() {
         currentUser={currentUser}
         unreadTickets={unreadTickets}
         onLogout={handleLogout}
+        isCollapsed={sidebarCollapsed}
+        setIsCollapsed={handleToggleSidebar}
       />
 
       {/* 2. MAIN WORKSPACE CONTAINER */}
-      <div className="lg:pl-60 flex-1 flex flex-col">
+      <div className={`${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-60'} flex-1 flex flex-col transition-[padding] duration-200`}>
         
         {/* Top Header Bar */}
         <AppHeader

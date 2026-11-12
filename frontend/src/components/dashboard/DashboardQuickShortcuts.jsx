@@ -10,11 +10,8 @@ import {
 } from 'lucide-react'
 
 /**
- * DashboardQuickShortcuts (Impeccable Refactor)
+ * DashboardQuickShortcuts
  * Mode: Operate (Mission-Control Telemetry Grid)
- * - Anti-Slop: Zero sparkles/kicker tropes, zero pseudo-monospace on natural copy
- * - Tactile Feedback: Crisp border definition with subtle hover elevation
- * - Maintainable: DRY mapped array under 80 lines
  */
 export function DashboardQuickShortcuts({
   currentUser,
@@ -78,13 +75,13 @@ export function DashboardQuickShortcuts({
   ].filter((item) => item.show)
 
   return (
-    <section id="dashboardQuickShortcuts" className="lg:hidden bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/90 shadow-xs mb-3">
-      {/* Telemetry Section Header (Pure Semantic Heading - No Decorative Dot/Halo) */}
+    <section id="dashboardQuickShortcuts" className="lg:hidden bg-white p-3.5 sm:p-4 rounded-xl border border-[#CCDDF0] shadow-2xs mb-3">
+      {/* Telemetry Section Header */}
       <div className="flex items-center justify-between mb-2.5">
-        <h3 className="text-xs font-semibold text-slate-900 tracking-tight">
+        <h3 className="text-xs font-bold text-[#0B2545] tracking-tight">
           Modul Operasional
         </h3>
-        <span className="text-[11px] text-slate-500 font-medium">
+        <span className="text-[11px] text-[#64839E] font-medium">
           Akses Cepat
         </span>
       </div>
@@ -97,24 +94,17 @@ export function DashboardQuickShortcuts({
             <button
               key={item.id}
               onClick={item.onClick}
-              className="group relative flex flex-col items-center justify-center p-2 rounded-lg bg-slate-50/70 hover:bg-cyan-50/40 active:bg-cyan-100/50 border border-slate-200/70 hover:border-cyan-300 transition-all duration-150 text-center min-h-[62px] active:scale-[0.98] cursor-pointer"
+              className="group relative flex flex-col items-center justify-center p-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] border border-[#CCDDF0] transition-all duration-150 text-center min-h-[62px] active:scale-[0.98] cursor-pointer"
             >
-              {/* Icon Container with subtle high-taste contrast */}
-              <div className="h-8 w-8 rounded-md bg-white border border-slate-200/60 shadow-2xs flex items-center justify-center mb-1 text-slate-600 group-hover:text-cyan-700 group-hover:border-cyan-200 transition-colors">
-                <Icon className="w-4 h-4" />
-              </div>
-
-              {/* Natural Typography (No fake monospace on natural copy) */}
-              <span className="text-[11px] font-medium text-slate-700 group-hover:text-cyan-950 transition-colors tracking-tight truncate max-w-full px-0.5">
-                {item.label}
-              </span>
-
-              {/* Unread Indicator Badge */}
               {item.badge > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[16px] text-center text-[9px] font-bold font-mono tabular-nums text-white bg-rose-600 rounded-full ring-2 ring-white shadow-2xs">
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-mono font-bold">
                   {item.badge}
                 </span>
               )}
+              <Icon className="w-4 h-4 text-[#026AA7] group-hover:scale-105 transition-transform shrink-0" />
+              <span className="text-[11px] font-semibold text-[#0B2545] mt-1.5 tracking-tight truncate w-full">
+                {item.label}
+              </span>
             </button>
           )
         })}

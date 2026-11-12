@@ -17,30 +17,30 @@ export function OfficeManagementView({ initialSubTab = 'kantor', onSubTabChange 
     <div className="space-y-4">
       {/* Segmented Pill Tabs Header */}
       <div className="flex items-center justify-between flex-wrap gap-3 pb-1">
-        <div className="inline-flex p-1 bg-slate-100/90 rounded-2xl border border-sky-200/80 shadow-2xs">
+        <div className="inline-flex p-1 bg-[#F1F6FC] rounded-xl border border-[#CCDDF0] shadow-2xs">
           <button
             type="button"
             onClick={() => handleTabClick('kantor')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
               activeSubTab === 'kantor'
-                ? 'bg-white text-cyan-900 border border-sky-200 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                ? 'bg-[#026AA7] text-white shadow-xs'
+                : 'text-[#3B5B78] hover:text-[#0B2545] hover:bg-[#E2EDF8]'
             }`}
           >
-            <Building2 className={`w-4 h-4 ${activeSubTab === 'kantor' ? 'text-cyan-700' : 'text-slate-500'}`} />
+            <Building2 className={`w-4 h-4 ${activeSubTab === 'kantor' ? 'text-white' : 'text-[#026AA7]'}`} />
             <span>Kantor Cabang</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabClick('noc')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
               activeSubTab === 'noc'
-                ? 'bg-white text-cyan-900 border border-sky-200 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                ? 'bg-[#026AA7] text-white shadow-xs'
+                : 'text-[#3B5B78] hover:text-[#0B2545] hover:bg-[#E2EDF8]'
             }`}
           >
-            <ShieldCheck className={`w-4 h-4 ${activeSubTab === 'noc' ? 'text-cyan-700' : 'text-slate-500'}`} />
+            <ShieldCheck className={`w-4 h-4 ${activeSubTab === 'noc' ? 'text-white' : 'text-[#026AA7]'}`} />
             <span>Akun NOC</span>
           </button>
         </div>

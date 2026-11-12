@@ -97,14 +97,13 @@ export function DashboardChartSection({
     fetchDates()
   }, [activeOffice])
 
-const formatDisplayDate = (dateStr) => {
+  const formatDisplayDate = (dateStr) => {
     if (!dateStr) return 'Pilih Tanggal'
     const parts = dateStr.split('-')
     if (parts.length !== 3) return dateStr
     const [y, m, d] = parts
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
-    const monthIdx = parseInt(m, 10) - 1
-    return `${parseInt(d, 10)} ${months[monthIdx] || m} ${y}`
+    const shortYear = y.length === 4 ? y.slice(-2) : y
+    return `${d}/${m}/${shortYear}`
   }
 
   const formatMonthYear = (d) => {
@@ -262,14 +261,14 @@ const loadChartData = useCallback(async () => {
               data: transformed,
               rawValues: ds.values || [],
               details: ds.details || [],
-              borderColor: ds.color || '#0891b2',
-              backgroundColor: !isMulti ? 'rgba(8, 145, 178, 0.12)' : 'transparent',
+              borderColor: ds.color || '#026AA7',
+              backgroundColor: !isMulti ? 'rgba(2, 106, 167, 0.12)' : 'transparent',
               borderWidth: rawDatasets.length > 2 ? 2 : 2.5,
               fill: !isMulti,
               tension: 0.12,
               pointRadius: rawDatasets.length > 2 ? 3.5 : 5,
               pointHoverRadius: rawDatasets.length > 2 ? 6 : 8,
-              pointBackgroundColor: ds.color || '#0891b2',
+              pointBackgroundColor: ds.color || '#026AA7',
               pointBorderColor: '#FFFFFF',
               pointBorderWidth: 2,
               showLine: true,
@@ -286,14 +285,14 @@ const loadChartData = useCallback(async () => {
             data: transformedValues,
             rawValues: json.values || [],
             details: json.details || [],
-            borderColor: '#0891b2',
-            backgroundColor: 'rgba(8, 145, 178, 0.12)',
+            borderColor: '#026AA7',
+            backgroundColor: 'rgba(2, 106, 167, 0.12)',
             borderWidth: 2.5,
             fill: true,
             tension: 0.12,
             pointRadius: 5,
             pointHoverRadius: 8,
-            pointBackgroundColor: '#0891b2',
+            pointBackgroundColor: '#026AA7',
             pointBorderColor: '#FFFFFF',
             pointBorderWidth: 2,
             showLine: true,
@@ -306,9 +305,9 @@ const loadChartData = useCallback(async () => {
         datasets.push({
           label: `Garis Warning (${Number(warnThreshold).toFixed(1)} dBm)`,
           data: count > 0 ? new Array(count).fill(warnVal) : [],
-          borderColor: '#f59e0b',
-          borderWidth: 2,
-          borderDash: [6, 6],
+          borderColor: '#64839E',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
           pointRadius: 0,
           pointHoverRadius: 0,
           fill: false,
@@ -320,9 +319,9 @@ const loadChartData = useCallback(async () => {
         datasets.push({
           label: `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`,
           data: count > 0 ? new Array(count).fill(critVal) : [],
-          borderColor: '#ef4444',
-          borderWidth: 2,
-          borderDash: [4, 4],
+          borderColor: '#0B2545',
+          borderWidth: 1.5,
+          borderDash: [2, 3],
           pointRadius: 0,
           pointHoverRadius: 0,
           fill: false,
@@ -425,23 +424,23 @@ const loadChartData = useCallback(async () => {
                 if (dbm >= 24.9) return `-${dbm.toFixed(1)} dBm`
                 return `-${Math.round(dbm)} dBm`
               },
-              color: '#64748B',
-              font: { size: 10.5, family: "'Roboto Flex', system-ui, sans-serif", weight: '600' }
+              color: '#64839E',
+              font: { size: 10.5, family: "'JetBrains Mono', monospace", weight: '600' }
             },
             grid: {
               color: (ctx) => {
-                if (!ctx.tick) return '#F1F5F9'
+                if (!ctx.tick) return '#E8F1FA'
                 const dbm = inverseTransformDbm(ctx.tick.value)
-                if (Math.abs(dbm - 26.0) < 0.05) return 'rgba(245, 158, 11, 0.35)'
-                if (Math.abs(dbm - 27.0) < 0.05) return 'rgba(239, 68, 68, 0.35)'
-                return '#F1F5F9'
+                if (Math.abs(dbm - 26.0) < 0.05) return 'rgba(100, 131, 158, 0.45)'
+                if (Math.abs(dbm - 27.0) < 0.05) return 'rgba(11, 37, 69, 0.45)'
+                return '#E8F1FA'
               }
             }
           },
           x: {
             ticks: {
-              color: '#64748B',
-              font: { size: 11, family: "'Roboto Flex', system-ui, sans-serif" },
+              color: '#64839E',
+              font: { size: 11, family: "'JetBrains Mono', monospace" },
               maxRotation: 0,
               autoSkip: true,
               maxTicksLimit: 12
@@ -452,9 +451,11 @@ const loadChartData = useCallback(async () => {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.94)',
-            titleFont: { family: "'Roboto Flex', system-ui, sans-serif", size: 11, weight: 'bold' },
-            bodyFont: { family: "'Roboto Flex', system-ui, sans-serif", size: 10, weight: '500' },
+            backgroundColor: '#0B2545',
+            titleColor: '#BAE6FD',
+            bodyColor: '#FFFFFF',
+            titleFont: { family: "'JetBrains Mono', monospace", size: 11, weight: 'bold' },
+            bodyFont: { family: "'JetBrains Mono', monospace", size: 10.5, weight: '500' },
             padding: { top: 8, bottom: 8, left: 10, right: 10 },
             cornerRadius: 8,
             displayColors: false,
@@ -520,304 +521,305 @@ const toggleDataset = (idx) => {
   }
 
   return (
-    <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200/90 shadow-xs relative overflow-hidden space-y-4">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                <Activity className="w-4 h-4 text-cyan-700 shrink-0" />
-                <span>Tren Kualitas Redaman</span>
-              </h3>
-              <span className="h-3.5 w-px bg-slate-200 hidden sm:inline-block" />
-              <span className="text-xs font-mono tabular-nums text-slate-500 font-medium">
-                Ambang Batas: {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-1 font-normal line-clamp-1 sm:line-clamp-none">
-              Fluktuasi sinyal optik rata-rata jaringan ISP per siklus pemindaian
-            </p>
+    <div className="bg-white rounded-xl p-3.5 sm:p-5 border border-[#CCDDF0] space-y-3.5 sm:space-y-4">
+      {/* Header Grafik */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+            <h3 className="text-xs sm:text-sm font-bold text-[#0B2545] tracking-tight flex items-center gap-1.5 sm:gap-2">
+              <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#026AA7] shrink-0" />
+              <span>Tren Kualitas Redaman</span>
+            </h3>
+            <span className="h-3 sm:h-3.5 w-px bg-[#CCDDF0] hidden sm:inline-block" />
+            <span className="text-[11px] sm:text-xs font-mono tabular-nums text-[#3B5B78] font-medium">
+              Ambang Batas: {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm
+            </span>
           </div>
-
-          {/* Filter Tanggal & Segmented Control */}
-          <div className="flex items-center gap-2 w-full sm:w-auto relative" ref={calendarRef}>
-            {/* Tombol Pemilih Kalender Popover */}
-            <div className="relative flex-1 sm:flex-none">
-              <button
-                type="button"
-                onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                title="Pilih tanggal dari riwayat rekaman database"
-                className={`w-full sm:w-auto px-3 py-1.5 text-xs rounded-lg border min-h-[36px] font-semibold transition flex items-center justify-between sm:justify-start gap-2 cursor-pointer select-none shadow-2xs ${
-                  chartRange === 'custom'
-                    ? 'bg-cyan-700 text-white border-cyan-800 shadow-xs'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <Calendar className={`w-3.5 h-3.5 ${chartRange === 'custom' ? 'text-white' : 'text-slate-500'}`} />
-                  <span>{formatDisplayDate(selectedDate)}</span>
-                </div>
-              </button>
-
-              {/* Popover Kalender Interaktif */}
-              {isCalendarOpen && (
-                <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 z-50 bg-white rounded-xl shadow-xl border border-sky-200 p-3 w-[275px] sm:w-[290px] animate-in fade-in zoom-in-95 duration-150">
-                  {/* Header Bulan & Navigasi */}
-                  <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-sky-100 font-sans">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const prev = new Date(calendarViewMonth)
-                        prev.setMonth(prev.getMonth() - 1)
-                        setCalendarViewMonth(prev)
-                      }}
-                      className="p-1 rounded hover:bg-sky-100 text-slate-600 transition cursor-pointer"
-                      title="Bulan Sebelumnya"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <span className="text-xs font-extrabold text-slate-800">
-                      {formatMonthYear(calendarViewMonth)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const next = new Date(calendarViewMonth)
-                        next.setMonth(next.getMonth() + 1)
-                        setCalendarViewMonth(next)
-                      }}
-                      className="p-1 rounded hover:bg-sky-100 text-slate-600 transition cursor-pointer"
-                      title="Bulan Berikutnya"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Header Nama Hari */}
-                  <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-slate-500 font-sans">
-                    <span>Sen</span>
-                    <span>Sel</span>
-                    <span>Rab</span>
-                    <span>Kam</span>
-                    <span>Jum</span>
-                    <span>Sab</span>
-                    <span>Min</span>
-                  </div>
-
-                  {/* Grid Tanggal */}
-                  <div className="grid grid-cols-7 gap-1 text-center">
-                    {renderCalendarDays()}
-                  </div>
-
-                  {/* Footer Keterangan */}
-                  <div className="mt-2.5 pt-2 border-t border-sky-100 flex items-center justify-between text-[10px] text-slate-500 font-sans">
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-0.5 w-3 bg-cyan-600 inline-block rounded-xs" />
-                      <span>Data tersedia</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsCalendarOpen(false)}
-                      className="text-cyan-700 font-bold hover:underline cursor-pointer"
-                    >
-                      Tutup
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Tombol Filter Cepat */}
-            <div className="flex items-center gap-1.5 text-xs font-medium shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setChartRange('today')
-                  setSelectedDate(todayStr)
-                  setIsCalendarOpen(false)
-                }}
-                className={`px-3 py-1.5 rounded-lg transition font-sans cursor-pointer shadow-2xs ${
-                  chartRange === 'today'
-                    ? 'bg-cyan-700 text-white font-semibold'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
-                }`}
-              >
-                Hari Ini
-              </button>
-              <button
-                type="button"
-                disabled={!hasYesterdayData}
-                onClick={() => {
-                  if (!hasYesterdayData) return
-                  setChartRange('yesterday')
-                  setSelectedDate(todayStr)
-                  setIsCalendarOpen(false)
-                }}
-                title={hasYesterdayData ? 'Bandingkan dengan hari kemarin' : 'Data kemarin belum ada di database'}
-                className={`px-3 py-1.5 rounded-lg transition font-sans shadow-2xs ${
-                  !hasYesterdayData
-                    ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
-                    : chartRange === 'yesterday'
-                    ? 'bg-cyan-700 text-white font-semibold cursor-pointer'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 cursor-pointer'
-                }`}
-              >
-                Kemarin
-              </button>
-              <button
-                type="button"
-                disabled={!hasWeekData}
-                onClick={() => {
-                  if (!hasWeekData) return
-                  setChartRange('week')
-                  setSelectedDate(todayStr)
-                  setIsCalendarOpen(false)
-                }}
-                title={hasWeekData ? 'Bandingkan tren 7 hari terakhir' : 'Riwayat 7 hari sebelumnya belum ada di database'}
-                className={`px-3 py-1.5 rounded-lg transition font-sans shadow-2xs ${
-                  !hasWeekData
-                    ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
-                    : chartRange === 'week'
-                    ? 'bg-cyan-700 text-white font-semibold cursor-pointer'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 cursor-pointer'
-                }`}
-              >
-                7 Hari
-              </button>
-            </div>
-          </div>
+          <p className="text-[11px] sm:text-xs text-[#3B5B78] mt-0.5 sm:mt-1 font-normal line-clamp-1 sm:line-clamp-none">
+            Fluktuasi sinyal optik rata-rata jaringan ISP per siklus pemindaian
+          </p>
         </div>
 
-        {/* Telemetry Stat Bar (Clean Architectural Strip - Zero Box-in-Box, Zero Colored Icon Tiles) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-2.5 px-3.5 rounded-lg bg-slate-50/70 border border-slate-200/80 text-xs">
-          <div>
-            <span className="text-[11px] font-sans font-medium text-slate-500 block">
-              Rata-rata Redaman
-            </span>
-            <span className="text-sm font-bold font-mono tabular-nums text-slate-900 mt-0.5 block">
-              {chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : '-'}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-[11px] font-sans font-medium text-slate-500 block">
-              Sinyal Terbaik
-            </span>
-            <span className="text-sm font-bold font-mono tabular-nums text-emerald-700 mt-0.5 block">
-              {chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : '-'}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-[11px] font-sans font-medium text-slate-500 block">
-              Sinyal Terendah
-            </span>
-            <span className="text-sm font-bold font-mono tabular-nums text-rose-700 mt-0.5 block">
-              {chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : '-'}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-[11px] font-sans font-medium text-slate-500 block">
-              Total Titik Scan
-            </span>
-            <span className="text-sm font-bold font-mono tabular-nums text-slate-900 mt-0.5 block">
-              {chartStats.total_points} Titik
-            </span>
-          </div>
-        </div>
-
-        {/* Chart Canvas Container dengan Zoom Controls & Empty State Proteksi */}
-        <div className="relative w-full h-[220px] sm:h-[290px] overflow-hidden rounded-xl bg-white border border-sky-100">
-          {/* Empty State Overlay jika tidak ada data riil sama sekali */}
-          {chartStats.total_points === 0 && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-50/90 backdrop-blur-xs p-4 text-center">
-              <Activity className="w-8 h-8 text-slate-300 mb-2 stroke-[1.5]" />
-              <p className="text-xs sm:text-sm font-extrabold text-slate-800 font-mono">
-                Belum Ada Riwayat Log Redaman
-              </p>
-              <p className="text-[11px] text-slate-500 max-w-sm mt-0.5">
-                Data rekaman untuk rentang atau tanggal ini belum tersimpan di database. Sistem akan memetakan grafik otomatis setelah monitoring berjalan.
-              </p>
-            </div>
-          )}
-
-          {/* Zoom Buttons Mobile */}
-          <div className="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-0.5 rounded-lg border border-sky-200 shadow-xs">
+        {/* Filter Tanggal & Segmented Control */}
+        <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto relative" ref={calendarRef}>
+          {/* Tombol Pemilih Kalender Popover */}
+          <div className="relative flex-1 sm:flex-none">
             <button
-              onClick={handleZoomIn}
-              className="w-6 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-900 flex items-center justify-center transition active:scale-90"
-              title="Perbesar"
+              type="button"
+              onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+              title="Pilih tanggal dari riwayat rekaman database"
+              className={`w-full sm:w-auto px-2.5 sm:px-3 py-1.5 text-xs rounded-lg border min-h-[32px] sm:min-h-[34px] font-semibold transition flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 cursor-pointer select-none shadow-2xs ${
+                chartRange === 'custom'
+                  ? 'bg-[#026AA7] text-white border-[#035388] shadow-xs'
+                  : 'bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border-[#CCDDF0]'
+              }`}
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1.5">
+                <Calendar className={`w-3.5 h-3.5 ${chartRange === 'custom' ? 'text-white' : 'text-[#026AA7]'}`} />
+                <span className="truncate">{formatDisplayDate(selectedDate)}</span>
+              </div>
             </button>
-            <button
-              onClick={handleZoomOut}
-              className="w-6 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-900 flex items-center justify-center transition active:scale-90"
-              title="Perkecil"
-            >
-              <ZoomOut className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={handleZoomReset}
-              className="px-1.5 h-6 rounded bg-cyan-50 hover:bg-cyan-100 text-cyan-950 text-[11px] font-mono font-extrabold flex items-center justify-center gap-0.5 transition active:scale-90"
-              title="Reset"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset</span>
-            </button>
-          </div>
 
-          <div
-            className="w-full h-full transition-transform duration-200 ease-out origin-center"
-            style={{ transform: `scale(${zoomScale})` }}
-          >
-            <canvas ref={chartCanvasRef} className="w-full h-full block" />
-          </div>
-        </div>
-
-        {/* Legend Footer */}
-        <div className="pt-2 sm:pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-sans text-slate-600">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {activeDatasets
-              .filter((d) => !d.isThreshold)
-              .map((ds, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => toggleDataset(ds.index)}
-                  className="flex items-center gap-1.5 hover:opacity-80 transition select-none cursor-pointer"
-                  title={`Klik untuk toggle ${ds.label}`}
-                >
-                  <span
-                    className="h-0.5 w-3 rounded-xs inline-block shrink-0"
-                    style={{ backgroundColor: ds.color }}
-                  />
-                  <span
-                    className={`font-semibold text-slate-700 ${
-                      ds.hidden ? 'line-through opacity-40' : ''
-                    }`}
+            {/* Popover Kalender Interaktif */}
+            {isCalendarOpen && (
+              <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 z-50 bg-white rounded-xl shadow-xl border border-[#CCDDF0] p-3 w-[275px] sm:w-[290px] animate-in fade-in zoom-in-95 duration-150">
+                {/* Header Bulan & Navigasi */}
+                <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-[#DAE7F5] font-sans">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const prev = new Date(calendarViewMonth)
+                      prev.setMonth(prev.getMonth() - 1)
+                      setCalendarViewMonth(prev)
+                    }}
+                    className="p-1 rounded hover:bg-[#F1F6FC] text-[#3B5B78] transition cursor-pointer"
+                    title="Bulan Sebelumnya"
                   >
-                    {ds.label}
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-xs font-bold text-[#0B2545]">
+                    {formatMonthYear(calendarViewMonth)}
                   </span>
-                </button>
-              ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = new Date(calendarViewMonth)
+                      next.setMonth(next.getMonth() + 1)
+                      setCalendarViewMonth(next)
+                    }}
+                    className="p-1 rounded hover:bg-[#F1F6FC] text-[#3B5B78] transition cursor-pointer"
+                    title="Bulan Berikutnya"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
 
-            <div className="flex items-center gap-1.5 ml-0.5 pl-2 border-l border-slate-200">
-              <span className="h-0.5 w-2 sm:w-3 bg-amber-500 inline-block" />
-              <span className="text-amber-800 font-semibold font-mono tabular-nums">
-                Waspada ({Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm)
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-0.5 w-2 sm:w-3 bg-rose-500 inline-block" />
-              <span className="text-rose-800 font-semibold font-mono tabular-nums">
-                Kritis ({Number(chartStats.critical_threshold ?? kpi.critical_threshold ?? -27.0).toFixed(1)} dBm)
-              </span>
-            </div>
+                {/* Header Nama Hari */}
+                <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-[#64839E] font-sans">
+                  <span>Sen</span>
+                  <span>Sel</span>
+                  <span>Rab</span>
+                  <span>Kam</span>
+                  <span>Jum</span>
+                  <span>Sab</span>
+                  <span>Min</span>
+                </div>
+
+                {/* Grid Tanggal */}
+                <div className="grid grid-cols-7 gap-1 text-center">
+                  {renderCalendarDays()}
+                </div>
+
+                {/* Footer Keterangan */}
+                <div className="mt-2.5 pt-2 border-t border-[#DAE7F5] flex items-center justify-between text-[10px] text-[#64839E] font-sans">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-0.5 w-3 bg-[#026AA7] inline-block rounded-xs" />
+                    <span>Data tersedia</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsCalendarOpen(false)}
+                    className="text-[#026AA7] font-bold hover:underline cursor-pointer"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="text-slate-500 text-xs font-mono tabular-nums">
-            Optimal: <span className="font-bold text-emerald-700">&gt; {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm</span>
+
+          {/* Tombol Filter Cepat */}
+          <div className="flex items-center bg-[#F1F6FC] p-0.5 rounded-lg border border-[#CCDDF0] text-xs font-medium shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setChartRange('today')
+                setSelectedDate(todayStr)
+                setIsCalendarOpen(false)
+              }}
+              className={`px-3 py-1 rounded-md transition font-sans cursor-pointer ${
+                chartRange === 'today'
+                  ? 'bg-[#026AA7] text-white font-semibold'
+                  : 'text-[#3B5B78] hover:text-[#0B2545] font-medium'
+              }`}
+            >
+              Hari Ini
+            </button>
+            <button
+              type="button"
+              disabled={!hasYesterdayData}
+              onClick={() => {
+                if (!hasYesterdayData) return
+                setChartRange('yesterday')
+                setSelectedDate(todayStr)
+                setIsCalendarOpen(false)
+              }}
+              title={hasYesterdayData ? 'Bandingkan dengan hari kemarin' : 'Data kemarin belum ada di database'}
+              className={`px-3 py-1 rounded-md transition font-sans ${
+                !hasYesterdayData
+                  ? 'opacity-40 cursor-not-allowed text-[#64839E]'
+                  : chartRange === 'yesterday'
+                  ? 'bg-[#026AA7] text-white font-semibold cursor-pointer'
+                  : 'text-[#3B5B78] hover:text-[#0B2545] font-medium cursor-pointer'
+              }`}
+            >
+              Kemarin
+            </button>
+            <button
+              type="button"
+              disabled={!hasWeekData}
+              onClick={() => {
+                if (!hasWeekData) return
+                setChartRange('week')
+                setSelectedDate(todayStr)
+                setIsCalendarOpen(false)
+              }}
+              title={hasWeekData ? 'Bandingkan tren 7 hari terakhir' : 'Riwayat 7 hari sebelumnya belum ada di database'}
+              className={`px-3 py-1 rounded-md transition font-sans ${
+                !hasWeekData
+                  ? 'opacity-40 cursor-not-allowed text-[#64839E]'
+                  : chartRange === 'week'
+                  ? 'bg-[#026AA7] text-white font-semibold cursor-pointer'
+                  : 'text-[#3B5B78] hover:text-[#0B2545] font-medium cursor-pointer'
+              }`}
+            >
+              7 Hari
+            </button>
           </div>
         </div>
       </div>
+
+      {/* 4 Kotak Ringkasan (Tinted Ice Blue #F1F6FC dengan sekat #DAE7F5) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-[#DAE7F5] rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs">
+        <div className="py-2.5 sm:py-3 px-3 sm:px-4">
+          <span className="text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate">
+            Rata-rata Redaman
+          </span>
+          <span className="text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block">
+            {chartStats.avg_dbm !== null ? `${chartStats.avg_dbm} dBm` : '-'}
+          </span>
+        </div>
+
+        <div className="py-2.5 sm:py-3 px-3 sm:px-4">
+          <span className="text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate">
+            Sinyal Terbaik
+          </span>
+          <span className="text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block">
+            {chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : '-'}
+          </span>
+        </div>
+
+        <div className="py-2.5 sm:py-3 px-3 sm:px-4">
+          <span className="text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate">
+            Sinyal Terendah
+          </span>
+          <span className="text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block">
+            {chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : '-'}
+          </span>
+        </div>
+
+        <div className="py-2.5 sm:py-3 px-3 sm:px-4">
+          <span className="text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate">
+            Total Titik Scan
+          </span>
+          <span className="text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block">
+            {chartStats.total_points} Titik
+          </span>
+        </div>
+      </div>
+
+      {/* Chart Canvas Container dengan Zoom Controls & Empty State Proteksi */}
+      <div className="relative w-full h-[220px] sm:h-[290px] overflow-hidden rounded-lg bg-white border border-[#CCDDF0] p-2">
+        {/* Empty State Overlay jika tidak ada data riil sama sekali */}
+        {chartStats.total_points === 0 && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#F1F6FC]/90 backdrop-blur-xs p-4 text-center">
+            <Activity className="w-8 h-8 text-[#64839E] mb-2 stroke-[1.5]" />
+            <p className="text-xs sm:text-sm font-bold text-[#0B2545] font-mono">
+              Belum Ada Riwayat Log Redaman
+            </p>
+            <p className="text-[11px] text-[#3B5B78] max-w-sm mt-0.5">
+              Data rekaman untuk rentang atau tanggal ini belum tersimpan di database. Sistem akan memetakan grafik otomatis setelah monitoring berjalan.
+            </p>
+          </div>
+        )}
+
+        {/* Zoom Buttons Mobile */}
+        <div className="sm:hidden absolute top-2 right-2 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-md p-0.5 rounded-lg border border-[#CCDDF0] shadow-xs">
+          <button
+            onClick={handleZoomIn}
+            className="w-6 h-6 rounded bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] flex items-center justify-center transition active:scale-90"
+            title="Perbesar"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={handleZoomOut}
+            className="w-6 h-6 rounded bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] flex items-center justify-center transition active:scale-90"
+            title="Perkecil"
+          >
+            <ZoomOut className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={handleZoomReset}
+            className="px-1.5 h-6 rounded bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] text-[11px] font-mono font-bold flex items-center justify-center gap-0.5 transition active:scale-90"
+            title="Reset"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span>Reset</span>
+          </button>
+        </div>
+
+        <div
+          className="w-full h-full transition-transform duration-200 ease-out origin-center"
+          style={{ transform: `scale(${zoomScale})` }}
+        >
+          <canvas ref={chartCanvasRef} className="w-full h-full block cursor-crosshair" />
+        </div>
+      </div>
+
+      {/* Legend Footer (Garis, Tanpa Dot Bulat) */}
+      <div className="pt-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-sans text-[#3B5B78]">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+          {activeDatasets
+            .filter((d) => !d.isThreshold)
+            .map((ds, idx) => (
+              <button
+                key={idx}
+                onClick={() => toggleDataset(ds.index)}
+                className="flex items-center gap-2 hover:opacity-80 transition select-none cursor-pointer"
+                title={`Klik untuk toggle ${ds.label}`}
+              >
+                <span
+                  className="h-0.5 w-3.5 inline-block shrink-0"
+                  style={{ backgroundColor: ds.color || '#026AA7' }}
+                />
+                <span
+                  className={`font-semibold text-[#0B2545] ${
+                    ds.hidden ? 'line-through opacity-40' : ''
+                  }`}
+                >
+                  {ds.label}
+                </span>
+              </button>
+            ))}
+
+          <div className="flex items-center gap-2">
+            <span className="h-0.5 w-3.5 border-b border-dashed border-[#64839E] inline-block" />
+            <span className="font-mono text-[#3B5B78]">
+              Waspada ({Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm)
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="h-0.5 w-3.5 border-b border-dotted border-[#0B2545] inline-block" />
+            <span className="font-mono text-[#3B5B78]">
+              Kritis ({Number(chartStats.critical_threshold ?? kpi.critical_threshold ?? -27.0).toFixed(1)} dBm)
+            </span>
+          </div>
+        </div>
+        <div className="text-[#3B5B78] text-xs font-mono tabular-nums">
+          Optimal: <strong className="font-semibold text-[#0B2545]">&gt; {Number(chartStats.threshold ?? kpi.warning_threshold ?? -26.0).toFixed(1)} dBm</strong>
+        </div>
+      </div>
+    </div>
   )
 }

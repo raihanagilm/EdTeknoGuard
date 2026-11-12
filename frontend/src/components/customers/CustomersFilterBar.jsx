@@ -33,7 +33,7 @@ export function CustomersFilterBar({
             {/* Kotak Pencarian */}
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <div className="relative flex-1 min-w-[150px]">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -42,7 +42,7 @@ export function CustomersFilterBar({
                     setPage(1)
                   }}
                   placeholder="Cari ID, Nama, IP..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-sky-200 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[34px] sm:min-h-[36px]"
+                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-mono text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
                 />
               </div>
             </div>
@@ -52,30 +52,30 @@ export function CustomersFilterBar({
               <button
                 onClick={handleSyncMikrotik}
                 disabled={mikrotikSyncing || !isOfficeActive}
-                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] ${
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg border text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] ${
                   !isOfficeActive
-                    ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
-                    : 'bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border-cyan-200 cursor-pointer'
+                    ? 'bg-[#F1F6FC] text-[#64839E] border-[#CCDDF0] cursor-not-allowed opacity-60'
+                    : 'bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] border-[#CCDDF0] cursor-pointer'
                 }`}
                 title={!isOfficeActive ? 'Kantor dalam status nonaktif. Sinkronisasi MikroTik dimatikan.' : 'Sinkronisasi Kuota & Traffic Real-Time dari Router MikroTik'}
               >
-                <Activity className={`w-3.5 h-3.5 ${!isOfficeActive ? 'text-slate-400' : 'text-cyan-700'} ${mikrotikSyncing ? 'animate-spin' : ''}`} />
+                <Activity className={`w-3.5 h-3.5 ${!isOfficeActive ? 'text-[#64839E]' : 'text-[#026AA7]'} ${mikrotikSyncing ? 'animate-spin' : ''}`} />
                 <span>{mikrotikSyncing ? 'Syncing...' : !isOfficeActive ? 'Sync Mati' : 'Sync MikroTik'}</span>
               </button>
 
               <button
                 onClick={() => setImportModalOpen(true)}
-                className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
+                className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
                 title="Lengkapi Data Pelanggan (No. WA, Alamat, Kredensial WiFi)"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-200" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-sky-200" />
                 <span>Lengkapi Data</span>
               </button>
 
               <a
                 href={`/api/customers/export-excel?kantor=${encodeURIComponent(activeOffice || 'cabang')}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
                 download={`data_pelanggan_${activeOffice || 'edteknoguard'}.xlsx`}
-                className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-xs min-h-[34px] sm:min-h-[36px]"
+                className="p-2 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px]"
                 title="Ekspor Seluruh Data ke Excel"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -85,7 +85,7 @@ export function CustomersFilterBar({
               <button
                 onClick={fetchCustomers}
                 disabled={loading}
-                className="p-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center cursor-pointer"
+                className="p-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] border border-[#CCDDF0] transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center cursor-pointer"
                 title="Muat Ulang Data"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />

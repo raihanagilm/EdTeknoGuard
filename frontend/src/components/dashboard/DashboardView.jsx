@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import {
-  Users,
-  Ticket,
-  ChevronRight
-} from 'lucide-react'
 import { MonitoringService } from '../../services/api'
-import { SegmentedStatusBar } from '../common/CommonUI'
 import { ConfirmDialogModal } from '../common/ConfirmDialogModal'
 import { ToastNotification } from '../common/ToastNotification'
 import { DashboardControlBar } from './DashboardControlBar'
@@ -372,11 +366,13 @@ export function DashboardView({
   const scanTargetKantor = (scanProgress?.target_kantor || 'all').toLowerCase()
   const currentOfficeLower = (activeOffice || 'all').toLowerCase()
   const isCurrentOfficeScan = scanTargetKantor === 'all' || scanTargetKantor === currentOfficeLower
+  const [activeMetric, setActiveMetric] = useState('total')
+
   const canControlCurrentScan = isSuperAdmin || (currentUser?.role === 'admin' && scanTargetKantor === currentOfficeLower)
 
   return (
-    <div className="space-y-4 font-sans">
-      {/* 1. STATUS ENGINE & ACTION BUTTONS */}
+    <div className="space-y-5 font-sans">
+      {/* 1. KARTU BENTO TERPADU: STATUS PEMANTAUAN + 6 METRIK */}
       <DashboardControlBar
         activeOffice={activeOffice}
         getOfficeDisplayName={getOfficeDisplayName}
@@ -403,6 +399,10 @@ export function DashboardView({
         handlePauseScan={handlePauseScan}
         handleResumeScan={handleResumeScan}
         handleOpenStopModal={handleOpenStopModal}
+        kpi={kpi}
+        activeMetric={activeMetric}
+        setActiveMetric={setActiveMetric}
+        onNavigate={onNavigate}
       />
 
       {/* 2. MENU LAYANAN & OPERASIONAL (MOBILE ONLY QUICK TILES) */}
@@ -413,55 +413,7 @@ export function DashboardView({
         onNavigate={onNavigate}
       />
 
-      {/* 3. SEGMENTED STATUS TICKER BAR TERPADU */}
-      <SegmentedStatusBar
-        items={[
-          {
-            label: 'Total',
-            value: kpi.total_monitored,
-            colorScheme: 'cyan',
-            onClick: () => onNavigate('pelanggan', { status: 'ALL' }),
-            subLabel: kpi.offline !== undefined && kpi.offline !== null ? `${kpi.offline} Offline` : (kpi.monitored_inactive > 0 ? `(${kpi.monitored_inactive} OFF)` : 'Modem')
-          },
-          {
-            label: 'Optimal',
-            value: kpi.normal,
-            colorScheme: 'emerald',
-            onClick: () => onNavigate('pelanggan', { status: 'NORMAL' }),
-            subLabel: `> ${Number(kpi.warning_threshold ?? -26.0).toFixed(1)} dBm`
-          },
-          {
-            label: 'Waspada',
-            value: kpi.warning,
-            colorScheme: 'amber',
-            onClick: () => onNavigate('pelanggan', { status: 'WARNING' }),
-            subLabel: `≤ ${Number(kpi.warning_threshold ?? -26.0).toFixed(1)} dBm`
-          },
-          {
-            label: 'Kritis',
-            value: kpi.critical,
-            colorScheme: 'rose',
-            onClick: () => onNavigate('pelanggan', { status: 'CRITICAL' }),
-            subLabel: `≤ ${Number(kpi.critical_threshold ?? -27.0).toFixed(1)} dBm`
-          },
-          {
-            label: 'LOS',
-            value: kpi.los,
-            colorScheme: 'purple',
-            onClick: () => onNavigate('pelanggan', { status: 'LOS' }),
-            subLabel: 'Putus'
-          },
-          {
-            label: 'Invalid',
-            value: kpi.invalid || 0,
-            colorScheme: 'orange',
-            onClick: () => onNavigate('pelanggan', { status: 'INVALID' }),
-            subLabel: 'Kredensial'
-          }
-        ]}
-      />
-
-      {/* 4. VISUALISASI GRAFIK RIWAYAT REDAMAN (CHART.JS) */}
+      {/* 3. VISUALISASI GRAFIK RIWAYAT REDAMAN (CHART.JS) */}
       <DashboardChartSection
         activeOffice={activeOffice}
         kpi={kpi}
@@ -469,42 +421,7 @@ export function DashboardView({
         lastScanTime={lastScanTime}
       />
 
-      {/* 5. QUICK SHORTCUT NAVIGATION (2 ACTION CARDS DESKTOP/TABLET - IMPECCABLE LIGHT) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        <button
-          onClick={() => onNavigate('pelanggan')}
-          className="rounded-xl p-4 bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-cyan-300 shadow-xs hover:shadow-xs transition-all duration-150 flex items-center justify-between group text-left cursor-pointer active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-3.5">
-            <Users className="w-5 h-5 text-slate-500 group-hover:text-cyan-700 transition-colors shrink-0" />
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 tracking-tight group-hover:text-cyan-950 transition-colors">
-                Kelola Master Pelanggan
-              </h3>
-              <p className="text-xs text-slate-500 font-normal mt-0.5">Tabel seluruh modem ONT, filter POP/Kantor, dan live probe</p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition-transform shrink-0" />
-        </button>
-
-        <button
-          onClick={() => onNavigate('tiket')}
-          className="rounded-xl p-4 bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-cyan-300 shadow-xs hover:shadow-xs transition-all duration-150 flex items-center justify-between group text-left cursor-pointer active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-3.5">
-            <Ticket className="w-5 h-5 text-slate-500 group-hover:text-cyan-700 transition-colors shrink-0" />
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 tracking-tight group-hover:text-cyan-950 transition-colors">
-                Tiket Keluhan Pelanggan
-              </h3>
-              <p className="text-xs text-slate-500 font-normal mt-0.5">Pantau laporan aduan warga desa dan update status penanganan</p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-cyan-700 group-hover:translate-x-0.5 transition-transform shrink-0" />
-        </button>
-      </div>
-
-      {/* 6. TOAST NOTIFICATION FLOATING */}
+      {/* 4. TOAST NOTIFICATION FLOATING */}
       <ToastNotification
         show={toast.show}
         type={toast.type}

@@ -239,7 +239,7 @@ export function CustomersTable({
       {/* Tampilan Desktop: Tabel Lebar Standar (hidden md:table) */}
       <table className="hidden md:table w-full text-left border-collapse table-auto">
         <thead>
-          <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
+          <tr className="bg-[#F1F6FC] border-y border-[#CCDDF0] text-[#3B5B78] font-mono text-[11px] uppercase tracking-wider font-semibold">
             <th className="py-2.5 px-3 w-10 text-center">
               <input
                 type="checkbox"
@@ -377,17 +377,17 @@ export function CustomersTable({
             <th className="py-2.5 px-3 text-right w-32">Aksi</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-sky-100 font-mono text-xs">
+        <tbody className="divide-y divide-[#DAE7F5] font-mono text-xs">
           {loading ? (
             <tr>
-              <td colSpan="10" className="text-center py-10 text-slate-400 font-mono">
-                <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
+              <td colSpan="10" className="text-center py-10 text-[#64839E] font-mono">
+                <div className="inline-block animate-spin w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full mb-2"></div>
                 <div>Memuat data pelanggan...</div>
               </td>
             </tr>
           ) : customers.length === 0 ? (
             <tr>
-              <td colSpan="10" className="text-center py-10 text-slate-400 font-mono">
+              <td colSpan="10" className="text-center py-10 text-[#64839E] font-mono">
                 Tidak ada data pelanggan ditemukan.
               </td>
             </tr>
@@ -398,7 +398,7 @@ export function CustomersTable({
               const isSelected = selectedIds.includes(cId)
 
               return (
-                <tr key={cId} className={`transition ${isSelected ? 'bg-cyan-50/70' : 'hover:bg-cyan-50/40'}`}>
+                <tr key={cId} className={`transition ${isSelected ? 'bg-[#E0F0FF]' : 'hover:bg-[#F1F6FC]'}`}>
                   <td className="py-2.5 px-3 text-center">
                     <input
                       type="checkbox"
@@ -408,21 +408,21 @@ export function CustomersTable({
                           prev.includes(cId) ? prev.filter((id) => id !== cId) : [...prev, cId]
                         )
                       }}
-                      className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+                      className="rounded text-[#026AA7] focus:ring-[#026AA7] cursor-pointer"
                     />
                   </td>
-                  <td className="py-2.5 px-2 text-center text-slate-500 font-bold text-xs">{rowNo}</td>
-                  <td className="py-2.5 px-3 font-bold text-cyan-900">{cId}</td>
+                  <td className="py-2.5 px-2 text-center text-[#64839E] font-semibold text-xs">{rowNo}</td>
+                  <td className="py-2.5 px-3 font-bold text-[#0B2545]">{cId}</td>
                   <td className="py-2.5 px-3">
                     <button
                       type="button"
                       onClick={() => handleOpenDetail(c)}
-                      className="font-sans font-bold text-slate-900 hover:text-cyan-800 hover:underline text-left cursor-pointer transition block"
+                      className="font-sans font-semibold text-[#0B2545] hover:text-[#026AA7] hover:underline text-left cursor-pointer transition block"
                       title="Klik untuk melihat Detail Lengkap & Kontak Pelanggan"
                     >
                       {c.nama || c.name}
                     </button>
-                    <div className="text-xs text-slate-600 font-sans truncate max-w-xs">
+                    <div className="text-xs text-[#3B5B78] font-sans truncate max-w-xs">
                       {c.alamat || c.address || '-'}
                     </div>
                   </td>

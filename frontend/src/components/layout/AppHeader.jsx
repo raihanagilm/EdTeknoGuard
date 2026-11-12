@@ -64,31 +64,31 @@ export function AppHeader({
   }
 
   return (
-    <header className="h-14 bg-white/90 backdrop-blur-md border-b border-sky-200/80 sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between shadow-2xs">
-      <div className="flex items-center gap-2 sm:gap-3">
-        <span className="text-xs font-mono font-bold text-cyan-800 uppercase tracking-wide">
+    <header className="h-14 bg-white border-b border-[#CCDDF0] sticky top-0 z-40 px-3 sm:px-7 flex items-center justify-between shadow-2xs">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <span className="text-xs font-mono font-bold text-[#0B2545] uppercase tracking-wider truncate">
           {tabTitles[activeTab] || `Modul ${activeTab}`}
         </span>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-2.5">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* Ikon Lonceng Notifikasi */}
         <div className="relative">
           <button
             id="btn-bell-notification"
             type="button"
             onClick={() => setIsNotificationOpen((prev) => !prev)}
-            className={`relative p-2 rounded-xl border transition cursor-pointer flex items-center justify-center ${
+            className={`relative p-1.5 sm:p-2 rounded-lg border transition cursor-pointer flex items-center justify-center ${
               isNotificationOpen
-                ? 'bg-cyan-600 text-white border-cyan-700 shadow-md ring-2 ring-cyan-400/40'
-                : 'bg-cyan-50/80 hover:bg-cyan-100 text-cyan-700 border-sky-200/80'
+                ? 'bg-[#026AA7] text-white border-[#035388] shadow-sm'
+                : 'bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] border-[#CCDDF0]'
             }`}
             title="Pusat Notifikasi Pemantauan & Tiket"
             aria-label="Pusat Notifikasi Pemantauan & Tiket"
           >
-            <Bell className="w-4 h-4" />
+            <Bell className="w-4 h-4 text-[#026AA7]" />
             {totalUnreadNotifications > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-extrabold flex items-center justify-center px-1 border-2 border-white animate-pulse">
+              <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] bg-[#026AA7] text-white rounded text-[9px] font-mono font-bold flex items-center justify-center px-0.5 tabular-nums">
                 {totalUnreadNotifications}
               </span>
             )}
@@ -109,13 +109,13 @@ export function AppHeader({
         </div>
 
         {/* Office Switcher Dropdown */}
-        <div className="flex items-center gap-1.5 pl-2 sm:pl-2.5 rounded-xl border border-sky-200 text-xs font-mono transition bg-white/60">
-          <Building2 className="w-4 h-4 text-cyan-800 shrink-0" />
-          <span className="text-[11px] font-bold text-slate-600 uppercase hidden md:inline">Kantor:</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-[#CCDDF0] bg-[#F1F6FC] text-xs">
+          <Building2 className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
+          <span className="text-[11px] font-mono font-semibold text-[#3B5B78] uppercase hidden md:inline">Kantor:</span>
           <select
             value={activeOffice}
             onChange={(e) => handleSwitchOffice(e.target.value)}
-            className="bg-transparent text-cyan-950 font-bold focus:outline-none cursor-pointer pr-1 py-1 text-xs"
+            className="bg-transparent text-[#0B2545] font-bold focus:outline-none cursor-pointer pr-1 text-xs"
             title="Pilih Wilayah Kantor Operasional"
           >
             {visibleKantors.length > 0 ? (
@@ -135,7 +135,7 @@ export function AppHeader({
           <button
             type="button"
             onClick={() => setHeaderMenuOpen(!headerMenuOpen)}
-            className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer flex items-center justify-center"
+            className="p-1.5 sm:p-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#3B5B78] hover:text-[#0B2545] border border-[#CCDDF0] transition cursor-pointer flex items-center justify-center"
             title="Menu Akun & Sesi"
             aria-label="Menu Akun dan Sesi"
           >
@@ -143,14 +143,14 @@ export function AppHeader({
           </button>
 
           {headerMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-sky-200/90 shadow-xl p-2 space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="p-2.5 bg-cyan-50/60 rounded-xl border border-cyan-100/80 mb-1">
-                <span className="block text-xs font-bold text-slate-900 truncate">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl border border-[#CCDDF0] shadow-xl p-2 space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-2.5 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] mb-1">
+                <span className="block text-xs font-semibold text-[#0B2545] truncate">
                   {currentUser?.nama_lengkap || 'Administrator'}
                 </span>
                 <div className="flex items-center justify-between mt-0.5">
-                  <span className="text-[10px] text-slate-500 font-mono">@{currentUser?.username || 'user'}</span>
-                  <span className="text-[9px] uppercase font-bold text-cyan-800 bg-cyan-100 px-1.5 py-0.2 rounded-md">
+                  <span className="text-[10px] text-[#64839E] font-mono">@{currentUser?.username || 'user'}</span>
+                  <span className="text-[9px] uppercase font-bold text-[#026AA7] bg-[#E0F0FF] px-1.5 py-0.5 rounded">
                     {currentUser?.role || 'user'}
                   </span>
                 </div>
@@ -162,7 +162,7 @@ export function AppHeader({
                   setHeaderMenuOpen(false)
                   handleLogout()
                 }}
-                className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold text-rose-700 bg-rose-50/60 hover:bg-rose-100 hover:text-rose-800 flex items-center gap-2 transition cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50/60 hover:bg-rose-100 hover:text-rose-800 flex items-center gap-2 transition cursor-pointer"
               >
                 <LogOut className="w-4 h-4 text-rose-600" />
                 <span>Keluar Akun (Logout)</span>
