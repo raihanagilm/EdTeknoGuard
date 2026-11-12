@@ -266,16 +266,32 @@ class ONTSchedulerService:
                             logger.debug(f"[EMERGENCY_REMINDER] Gagal parse last_emergency_alert_at {k}: {e}")
 
                     # 3. Hitung jumlah modem LOS dan Kritis yang tersimpan pada hasil scan terakhir
-                    from app.db.models import PerangkatONT
-                    # Hitung dari PerangkatONT yang aktif dipantau
-                    los_count = t_db.query(PerangkatONT).filter(
-                        PerangkatONT.is_monitored == True,
-                        PerangkatONT.status_koneksi == "LOS"
-                    ).count()
-                    crit_count = t_db.query(PerangkatONT).filter(
-                        PerangkatONT.is_monitored == True,
-                        PerangkatONT.status_koneksi == "CRITICAL"
-                    ).count()
+                    from app.db.models import Pelanggan, LogPerformaONT
+                    from sqlalchemy import func
+
+                    subq = (
+                        t_db.query(
+                            LogPerformaONT.id_pelanggan,
+                            func.max(LogPerformaONT.id_log).label("max_id")
+                        )
+                        .join(Pelanggan, Pelanggan.id_pelanggan == LogPerformaONT.id_pelanggan)
+                        .filter(
+                            Pelanggan.is_active == True,
+                            Pelanggan.is_monitored == True
+                        )
+                        .group_by(LogPerformaONT.id_pelanggan)
+                        .subquery()
+                    )
+
+                    latest_problem_logs = (
+                        t_db.query(LogPerformaONT)
+                        .join(subq, LogPerformaONT.id_log == subq.c.max_id)
+                        .filter(LogPerformaONT.status_koneksi.in_(["LOS", "CRITICAL"]))
+                        .all()
+                    )
+
+                    los_count = sum(1 for l in latest_problem_logs if l.status_koneksi == "LOS")
+                    crit_count = sum(1 for l in latest_problem_logs if l.status_koneksi == "CRITICAL")
 
                     if los_count == 0 and crit_count == 0:
                         # Tidak ada kendala darurat aktif
