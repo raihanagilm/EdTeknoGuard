@@ -41,7 +41,7 @@ class MikroTikSyncService:
 
     @classmethod
     def get_connection_params(cls, db: Optional[Session] = None, kantor_kode: Optional[str] = None) -> Dict[str, Any]:
-        """Mengambil konfigurasi koneksi MikroTik langsung dari tabel `kantors` di database MySQL."""
+        """Mengambil konfigurasi koneksi MikroTik langsung dari tabel `kantors` di Master Database MySQL."""
         host = ""
         port = None
         user = ""
@@ -49,38 +49,32 @@ class MikroTikSyncService:
         kantor = kantor_kode or ""
         auto_sync = True
 
-        if db:
-            from app.db.models import Kantor
-            from sqlalchemy import func
-            clean_k = kantor.lower().replace(" ", "") if kantor else None
-            k = db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else None
-            if not k and not kantor:
-                first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-                if first_k:
-                    k = first_k
-                    kantor = first_k.kode
+        from app.db.models import Kantor
+        from app.core.database import SessionLocal as MasterSessionLocal
+        from sqlalchemy import func, or_
 
-            # Jika di db tenant belum memiliki host (hanya ada di Master DB), fallback ke Master DB
-            if not k or not k.mikrotik_host:
-                try:
-                    from app.core.database import SessionLocal as MasterSessionLocal
-                    m_db = MasterSessionLocal()
-                    try:
-                        k_master = m_db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-                        if k_master and k_master.mikrotik_host:
-                            k = k_master
-                            if not kantor:
-                                kantor = k_master.kode
-                    finally:
-                        m_db.close()
-                except Exception:
-                    pass
+        clean_k = kantor.lower().replace(" ", "") if kantor else None
+        
+        m_db = MasterSessionLocal()
+        try:
+            k = None
+            if clean_k:
+                k = m_db.query(Kantor).filter(
+                    (func.replace(func.lower(Kantor.nama), " ", "") == clean_k) |
+                    (func.lower(Kantor.kode) == clean_k)
+                ).first()
+            if not k:
+                k = m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
 
             if k:
                 host = k.mikrotik_host or ""
                 port = k.mikrotik_port
                 user = k.mikrotik_user or ""
                 password = k.mikrotik_pass or ""
+                if not kantor:
+                    kantor = k.kode
+        finally:
+            m_db.close()
 
         return {
             "host": str(host).strip(),
@@ -92,7 +86,64 @@ class MikroTikSyncService:
         }
 
     @classmethod
-    def sync_all_configured_kantors(cls, db: Session, force: bool = False) -> List[Dict[str, Any]]:
+    def sync_all_configured_kantors(cls, db: Optional[Session] = None, force: bool = False) -> List[Dict[str, Any]]:
+        """
+        Melakukan sinkronisasi otomatis untuk seluruh kantor aktif yang telah memiliki konfigurasi mikrotik_host
+        dan telah mencapai interval waktu mikrotik_sync_interval (dalam menit).
+        """
+        from app.db.models import Kantor
+        from app.core.timezone import get_now_wib
+        from app.core.database import SessionLocal as MasterSessionLocal
+        now = get_now_wib()
+
+        m_db = MasterSessionLocal()
+        results = []
+        try:
+            kantors = m_db.query(Kantor).filter(
+                Kantor.is_active == True,
+                Kantor.mikrotik_host.isnot(None),
+                Kantor.mikrotik_host != ""
+            ).all()
+
+            for k in kantors:
+                if not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
+                    continue
+
+                # Cek interval sinkronisasi per kantor jika bukan force
+                interval_mins = max(1, k.mikrotik_sync_interval or 3)
+                if not force and k.last_mikrotik_sync:
+                    time_diff = (now - k.last_mikrotik_sync).total_seconds() / 60.0
+                    if time_diff < interval_mins:
+                        # Belum mencapai jadwal interval kantor ini
+                        continue
+
+                logger.info(f"[AUTO-SYNC] Menjalankan sinkronisasi DHCP bound MikroTik untuk kantor '{k.nama}' ({k.kode}) @ {k.mikrotik_host}:{k.mikrotik_port} (Interval {interval_mins}m)...")
+                params = {
+                    "host": k.mikrotik_host,
+                    "port": int(k.mikrotik_port),
+                    "username": k.mikrotik_user,
+                    "password": k.mikrotik_pass or "",
+                    "kantor": k.kode
+                }
+                try:
+                    from app.core.tenant_database import TenantDatabaseManager
+                    # Jalankan sinkronisasi langsung ke database tenant kantor tersebut
+                    tenant_db = TenantDatabaseManager.get_tenant_session(k.kode)
+                    try:
+                        res = cls.sync_customers_from_mikrotik(tenant_db, params)
+                    finally:
+                        tenant_db.close()
+
+                    res["kantor"] = k.kode
+                    k.last_mikrotik_sync = get_now_wib()
+                    m_db.commit()
+                    results.append(res)
+                except Exception as sync_e:
+                    logger.error(f"[AUTO-SYNC] Gagal sync kantor '{k.kode}': {sync_e}")
+        finally:
+            m_db.close()
+
+        return results
         """
         Melakukan sinkronisasi otomatis untuk seluruh kantor aktif yang telah memiliki konfigurasi mikrotik_host
         dan telah mencapai interval waktu mikrotik_sync_interval (dalam menit).
@@ -680,40 +731,33 @@ class MikroTikSyncService:
         }
 
     @classmethod
-    def get_router_health(cls, db: Session, kantor: Optional[str] = None) -> Dict[str, Any]:
+    def get_router_health(cls, db: Optional[Session] = None, kantor: Optional[str] = None) -> Dict[str, Any]:
         """Mengambil metrik kesehatan router (CPU Load, Free RAM, Total RAM, Uptime, Versi)."""
         from app.db.models import Kantor
+        from app.core.database import SessionLocal as MasterSessionLocal
         from sqlalchemy import func
+
         clean_k = kantor.lower().replace(" ", "") if kantor else None
-        k = db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else None
-        if not k and not kantor:
-            first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-            if first_k:
-                k = first_k
-                kantor = first_k.kode
+        m_db = MasterSessionLocal()
+        k = None
+        try:
+            if clean_k:
+                k = m_db.query(Kantor).filter(
+                    (func.replace(func.lower(Kantor.nama), " ", "") == clean_k) |
+                    (func.lower(Kantor.kode) == clean_k)
+                ).first()
+            if not k:
+                k = m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
 
-        if not k or not k.mikrotik_host:
-            try:
-                from app.core.database import SessionLocal as MasterSessionLocal
-                m_db = MasterSessionLocal()
-                try:
-                    k_m = m_db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-                    if k_m and k_m.mikrotik_host:
-                        k = k_m
-                        if not kantor:
-                            kantor = k_m.kode
-                finally:
-                    m_db.close()
-            except Exception:
-                pass
+            if not k or not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
+                return {"success": False, "message": f"Kredensial MikroTik belum diatur lengkap di database untuk kantor '{kantor}'."}
 
-        if not k or not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
-            return {"success": False, "message": f"Kredensial MikroTik belum diatur lengkap di database untuk kantor '{kantor}'."}
-
-        host = k.mikrotik_host
-        port = int(k.mikrotik_port)
-        user = k.mikrotik_user
-        password = k.mikrotik_pass or ""
+            host = k.mikrotik_host
+            port = int(k.mikrotik_port)
+            user = k.mikrotik_user
+            password = k.mikrotik_pass or ""
+        finally:
+            m_db.close()
 
         try:
             connection = routeros_api.RouterOsApiPool(
@@ -774,41 +818,36 @@ class MikroTikSyncService:
         - Hubungan ke Pelanggan TeknoGuard (Linked vs Unlinked vs Office Device)
         """
         from app.db.models import Kantor
+        from app.core.database import SessionLocal as MasterSessionLocal
         from sqlalchemy import func
+
         clean_k = kantor.lower().replace(" ", "") if kantor else None
-        k = db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else None
-        if not k and not kantor:
-            first_k = db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-            if first_k:
-                k = first_k
-                kantor = first_k.kode
+        m_db = MasterSessionLocal()
+        k = None
+        target_kantor_kode = kantor or ""
+        try:
+            if clean_k:
+                k = m_db.query(Kantor).filter(
+                    (func.replace(func.lower(Kantor.nama), " ", "") == clean_k) |
+                    (func.lower(Kantor.kode) == clean_k)
+                ).first()
+            if not k:
+                k = m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
 
-        if not k or not k.mikrotik_host:
-            try:
-                from app.core.database import SessionLocal as MasterSessionLocal
-                m_db = MasterSessionLocal()
-                try:
-                    k_m = m_db.query(Kantor).filter(func.replace(func.lower(Kantor.nama), " ", "") == clean_k).first() if clean_k else m_db.query(Kantor).filter(Kantor.mikrotik_host.isnot(None), Kantor.mikrotik_host != "").first()
-                    if k_m and k_m.mikrotik_host:
-                        k = k_m
-                        if not kantor:
-                            kantor = k_m.kode
-                finally:
-                    m_db.close()
-            except Exception:
-                pass
+            if not k or not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
+                logger.debug(f"[LIVE-QUEUES] Router MikroTik belum dikonfigurasi lengkap di database untuk kantor '{kantor}'.")
+                return []
 
-        if not k or not k.mikrotik_host or not k.mikrotik_user or not k.mikrotik_port:
-            logger.debug(f"[LIVE-QUEUES] Router MikroTik belum dikonfigurasi lengkap di database untuk kantor '{kantor}'.")
-            return []
+            host = k.mikrotik_host
+            port = int(k.mikrotik_port)
+            user = k.mikrotik_user
+            password = k.mikrotik_pass or ""
+            target_kantor_kode = k.kode
+        finally:
+            m_db.close()
 
-        host = k.mikrotik_host
-        port = int(k.mikrotik_port)
-        user = k.mikrotik_user
-        password = k.mikrotik_pass or ""
-
-        # Peta pelanggan di kantor ini
-        pelanggans = db.query(Pelanggan).filter(Pelanggan.kantor == kantor).all()
+        # Peta pelanggan di database tenant kantor ini
+        pelanggans = db.query(Pelanggan).all()
         cust_by_ip = {}
         for p in pelanggans:
             if p.ip_router:
@@ -919,9 +958,14 @@ class MikroTikSyncService:
         if kantor and kantor != "all":
             target_kantors = [kantor]
         else:
-            # Ambil seluruh kantor aktif yang terdaftar di database MySQL
-            db_kantors = db.query(Kantor).filter(Kantor.is_active == True).all()
-            target_kantors = [k.kode for k in db_kantors if k.kode]
+            # Ambil seluruh kantor aktif yang terdaftar di database MySQL Master
+            from app.core.database import SessionLocal as MasterSessionLocal
+            _mdb = MasterSessionLocal()
+            try:
+                db_kantors = _mdb.query(Kantor).filter(Kantor.is_active == True).all()
+                target_kantors = [k.kode for k in db_kantors if k.kode]
+            finally:
+                _mdb.close()
         total_synced = 0
         from app.core.tenant_database import TenantDatabaseManager
 
