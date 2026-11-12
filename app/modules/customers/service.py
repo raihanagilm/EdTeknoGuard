@@ -87,8 +87,20 @@ class CustomerService:
 
     # --- DELEGASI EXPORTER ---
     @staticmethod
-    def generate_excel_export(db: Session, search_query: Optional[str] = None, kantor_filter: Optional[str] = None) -> bytes:
-        return CustomerExporter.generate_excel_export(db, search_query, kantor_filter)
+    def generate_excel_export(
+        db: Session,
+        kantor: Optional[str] = None,
+        allowed_kantor: Optional[List[str]] = None,
+        q: Optional[str] = None,
+        ip: Optional[str] = None
+    ) -> bytes:
+        return CustomerExporter.generate_excel_export(
+            db=db,
+            kantor=kantor,
+            allowed_kantor=allowed_kantor,
+            q=q,
+            ip=ip
+        )
 
     @staticmethod
     def generate_excel_template() -> bytes:
