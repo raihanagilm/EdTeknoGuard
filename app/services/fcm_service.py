@@ -105,10 +105,10 @@ def resolve_notification_audio_settings(
 
     sound_val = "tekno_alarm" if is_emergency else "default"
     if vibration_enabled:
-        channel_id = "tekno_emergency_v3_channel" if is_emergency else "tekno_customer_channel"
+        channel_id = "tekno_notif_v4_channel" if is_emergency else "tekno_customer_channel"
         vibration_val = "true"
     else:
-        channel_id = "tekno_emergency_v3_no_vib_channel" if is_emergency else "tekno_customer_channel"
+        channel_id = "tekno_notif_v4_no_vib_channel" if is_emergency else "tekno_customer_channel"
         vibration_val = "false"
 
     return {
