@@ -9,8 +9,7 @@ import {
   Building2,
   Sliders,
   LogOut,
-  ChevronLeft,
-  ChevronRight
+  ChevronLeft
 } from 'lucide-react'
 
 export function Sidebar({
@@ -60,14 +59,29 @@ export function Sidebar({
 
   return (
     <aside
-      className={`hidden lg:flex bg-[#0B2545] flex-col fixed inset-y-0 left-0 z-50 border-r border-[#1E437A] select-none shadow-sm transition-all duration-200 ${
+      className={`hidden lg:flex bg-[#0B2545] flex-col fixed inset-y-0 left-0 z-50 border-r border-[#1E437A] select-none shadow-sm transition-[width] duration-300 ease-in-out will-change-[width] overflow-hidden ${
         isCollapsed ? 'w-16' : 'w-60'
       }`}
     >
       {/* Brand Header */}
-      <div className={`h-14 flex items-center border-b border-[#1E437A] ${isCollapsed ? 'justify-center px-2' : 'justify-between px-3.5'}`}>
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 rounded-lg bg-white border border-[#1E437A] flex items-center justify-center shadow-xs overflow-hidden shrink-0 p-1">
+      <div
+        className={`h-14 flex items-center border-b border-[#1E437A] shrink-0 overflow-hidden transition-all duration-300 ${
+          isCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'
+        }`}
+      >
+        {/* Tombol / Wadah Logo: Jika collapsed, diklik akan MEMPERLUAS (MAXIMIZE) sidebar */}
+        <button
+          type="button"
+          onClick={() => {
+            if (isCollapsed) setIsCollapsed(false);
+          }}
+          disabled={!isCollapsed}
+          className={`flex items-center gap-2.5 min-w-0 transition-all ${
+            isCollapsed ? 'cursor-pointer hover:scale-105 group' : 'cursor-default'
+          }`}
+          title={isCollapsed ? 'Klik logo untuk memperluas sidebar' : undefined}
+        >
+          <div className="h-8 w-8 rounded-lg bg-white border border-[#1E437A] flex items-center justify-center shadow-xs overflow-hidden shrink-0 p-1 group-hover:border-sky-300 transition-colors">
             <img
               src="/tekno-indo-logo.png"
               alt="Tekno Indo"
@@ -77,61 +91,54 @@ export function Sidebar({
               }}
             />
           </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <div className="text-[13px] font-extrabold text-white tracking-tight leading-none truncate">
-                Tekno<span className="text-sky-300">Guard</span>
-              </div>
-              <div className="text-[10px] text-sky-200/75 font-mono font-semibold mt-1 tracking-tight truncate">
-                OPTICAL SURVEILLANCE
-              </div>
+          
+          <div
+            className={`min-w-0 whitespace-nowrap text-left transition-all duration-300 ease-in-out ${
+              isCollapsed ? 'opacity-0 max-w-0 -translate-x-2 pointer-events-none' : 'opacity-100 max-w-[140px] translate-x-0'
+            }`}
+          >
+            <div className="text-[13px] font-extrabold text-white tracking-tight leading-none truncate">
+              Tekno<span className="text-sky-300">Guard</span>
             </div>
-          )}
-        </div>
-
-        {/* Tombol Toggle Collapse Sidebar */}
-        <button
-          type="button"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`p-1.5 rounded-lg text-sky-200/75 hover:text-white hover:bg-[#13315C] transition shrink-0 cursor-pointer ${
-            isCollapsed ? 'hidden' : 'block'
-          }`}
-          title={isCollapsed ? 'Perluas Sidebar' : 'Ciutkan Sidebar (Mini Icons)'}
-        >
-          <ChevronLeft className="w-4 h-4" />
+            <div className="text-[10px] text-sky-200/75 font-mono font-semibold mt-1 tracking-tight truncate">
+              OPTICAL SURVEILLANCE
+            </div>
+          </div>
         </button>
-      </div>
 
-      {/* Mini Toggle saat collapsed */}
-      {isCollapsed && (
-        <div className="py-2 flex justify-center border-b border-[#1E437A]/50 bg-[#0B2545]">
+        {/* Tombol Toggle Collapse saat posisi terbuka (w-60) */}
+        {!isCollapsed && (
           <button
             type="button"
-            onClick={() => setIsCollapsed(false)}
-            className="p-1.5 rounded-lg text-sky-200/75 hover:text-white hover:bg-[#13315C] transition cursor-pointer"
-            title="Perluas Sidebar"
+            onClick={() => setIsCollapsed(true)}
+            className="p-1.5 rounded-lg text-sky-200/75 hover:text-white hover:bg-[#13315C] transition-colors shrink-0 cursor-pointer"
+            title="Ciutkan Sidebar (Mini Mode)"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Menu Navigasi Modul */}
-      <div className="flex-1 px-2.5 py-3 space-y-4 overflow-y-auto text-xs font-semibold scrollbar-thin">
+      <div className="flex-1 px-2.5 py-3 space-y-4 overflow-y-auto overflow-x-hidden text-xs font-semibold scrollbar-thin">
         {menuSections.map((sec, sIdx) => {
           const visibleItems = sec.items.filter((item) => item.visible);
           if (visibleItems.length === 0) return null;
 
           return (
             <div key={sIdx} className="space-y-1">
-              {!isCollapsed && (
-                <div className="px-2 pb-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-sky-200/60 truncate">
-                  {sec.title}
-                </div>
-              )}
+              <div
+                className={`px-2 pb-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-sky-200/60 truncate whitespace-nowrap transition-all duration-300 ease-in-out ${
+                  isCollapsed ? 'opacity-0 h-0 p-0 overflow-hidden' : 'opacity-100 h-auto'
+                }`}
+              >
+                {sec.title}
+              </div>
+              
               {isCollapsed && sIdx > 0 && (
                 <div className="my-2 border-t border-[#1E437A]/60" />
               )}
+
               {visibleItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -140,9 +147,9 @@ export function Sidebar({
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
                     title={isCollapsed ? `${item.label}${item.badge ? ` (${item.badge})` : ''}` : undefined}
-                    className={`w-full flex items-center rounded-lg transition text-left text-xs cursor-pointer ${
+                    className={`w-full flex items-center rounded-lg transition-all duration-200 text-left text-xs cursor-pointer group ${
                       isCollapsed
-                        ? 'justify-center p-2.5'
+                        ? 'justify-center px-0 py-2.5'
                         : 'justify-between px-2.5 py-2'
                     } ${
                       isActive
@@ -150,15 +157,24 @@ export function Sidebar({
                         : 'text-sky-100/80 hover:bg-[#13315C] hover:text-white font-medium'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 relative">
-                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-sky-200' : 'text-sky-300/75'}`} />
-                      {!isCollapsed && <span className="truncate">{item.label}</span>}
+                    <div className="flex items-center gap-2.5 min-w-0 relative">
+                      <Icon className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-105 ${isActive ? 'text-sky-200' : 'text-sky-300/75'}`} />
+                      
+                      <span
+                        className={`truncate whitespace-nowrap transition-all duration-300 ease-in-out ${
+                          isCollapsed ? 'opacity-0 max-w-0 -translate-x-2 overflow-hidden' : 'opacity-100 max-w-[140px] translate-x-0'
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+
                       {isCollapsed && item.badge && (
-                        <span className="absolute -top-1.5 -right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[#0B2545]" />
+                        <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[#0B2545]" />
                       )}
                     </div>
+
                     {!isCollapsed && item.badge && (
-                      <span className="px-1.5 py-0.5 rounded bg-rose-600 text-white font-mono text-[10px] font-bold">
+                      <span className="px-1.5 py-0.5 rounded bg-rose-600 text-white font-mono text-[10px] font-bold shrink-0 transition-opacity duration-200">
                         {item.badge}
                       </span>
                     )}
@@ -171,33 +187,53 @@ export function Sidebar({
       </div>
 
       {/* Footer Profil User */}
-      <div className={`border-t border-[#1E437A] bg-[#0B2545] ${isCollapsed ? 'p-2' : 'p-3'}`}>
-        <div className={`flex items-center ${isCollapsed ? 'flex-col gap-2' : 'justify-between'}`}>
-          <div
-            className={`flex items-center min-w-0 ${isCollapsed ? 'justify-center' : 'gap-2.5'}`}
-            title={isCollapsed ? `${currentUser?.nama_lengkap || currentUser?.username} (${currentUser?.role})` : undefined}
+      <div className={`border-t border-[#1E437A] bg-[#0B2545] shrink-0 overflow-hidden transition-all duration-300 ${isCollapsed ? 'p-2 flex justify-center' : 'p-3'}`}>
+        <div className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+          
+          {/* Avatar User */}
+          <button
+            type="button"
+            onClick={() => {
+              if (isCollapsed) {
+                // Saat minimize: klik avatar admin langsung memicu konfirmasi dialog logout modal kustom
+                onLogout();
+              }
+            }}
+            className={`flex items-center gap-2.5 min-w-0 text-left transition-transform ${
+              isCollapsed ? 'cursor-pointer hover:scale-105 group' : 'cursor-default'
+            }`}
+            title={isCollapsed ? 'Klik untuk keluar akun (Logout)' : undefined}
           >
-            <div className="h-8 w-8 rounded-lg bg-[#13315C] border border-[#1E437A] text-sky-200 font-mono text-xs flex items-center justify-center font-bold shrink-0">
+            <div className={`h-8 w-8 rounded-lg bg-[#13315C] border border-[#1E437A] text-sky-200 font-mono text-xs flex items-center justify-center font-bold shrink-0 ${
+              isCollapsed ? 'group-hover:border-rose-400 group-hover:text-rose-300' : ''
+            }`}>
               {getInitials(currentUser?.nama_lengkap || currentUser?.username)}
             </div>
-            {!isCollapsed && (
-              <div className="min-w-0">
-                <div className="text-xs font-semibold text-white truncate">
-                  {currentUser?.nama_lengkap || currentUser?.username || 'Admin NOC'}
-                </div>
-                <div className="text-[11px] text-sky-200/75 font-mono capitalize truncate">
-                  {currentUser?.role || 'super admin'}
-                </div>
+            
+            <div
+              className={`min-w-0 whitespace-nowrap transition-all duration-300 ease-in-out ${
+                isCollapsed ? 'opacity-0 max-w-0 -translate-x-2 overflow-hidden' : 'opacity-100 max-w-[110px] translate-x-0'
+              }`}
+            >
+              <div className="text-xs font-semibold text-white truncate">
+                {currentUser?.nama_lengkap || currentUser?.username || 'Admin NOC'}
               </div>
-            )}
-          </div>
-          <button
-            onClick={onLogout}
-            className="p-1.5 rounded-lg text-sky-200/75 hover:text-white hover:bg-[#13315C] transition shrink-0 cursor-pointer"
-            title="Keluar Sesi"
-          >
-            <LogOut className="w-4 h-4" />
+              <div className="text-[11px] text-sky-200/75 font-mono capitalize truncate">
+                {currentUser?.role || 'super admin'}
+              </div>
+            </div>
           </button>
+
+          {/* Tombol Logout standar saat posisi terbuka penuh */}
+          {!isCollapsed && (
+            <button
+              onClick={onLogout}
+              className="p-1.5 rounded-lg text-sky-200/75 hover:text-white hover:bg-[#13315C] transition-all duration-200 shrink-0 cursor-pointer"
+              title="Keluar Sesi"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </aside>

@@ -31,6 +31,7 @@ import { Sidebar, MobileNav } from './components/layout/Navigation'
 import { AppHeader } from './components/layout/AppHeader'
 import { ErrorView } from './components/common/ErrorView'
 import { ConfirmSaveModal } from './components/common/Modals'
+import { ConfirmDialogModal } from './components/common/ConfirmDialogModal'
 import { LoginView } from './components/auth/LoginView'
 import { PortalCustomerApp as PortalPelangganApp } from './portal/PortalCustomerApp'
 
@@ -129,6 +130,7 @@ export default function App() {
   const [logsInitialSearch, setLogsInitialSearch] = useState('')
   const [ticketInitialSearch, setTicketInitialSearch] = useState('')
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false)
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false)
   const headerMenuRef = useRef(null)
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -936,13 +938,13 @@ export default function App() {
         setActiveTab={handleTabChange}
         currentUser={currentUser}
         unreadTickets={unreadTickets}
-        onLogout={handleLogout}
+        onLogout={() => setLogoutModalOpen(true)}
         isCollapsed={sidebarCollapsed}
         setIsCollapsed={handleToggleSidebar}
       />
 
       {/* 2. MAIN WORKSPACE CONTAINER */}
-      <div className={`${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-60'} flex-1 flex flex-col transition-[padding] duration-200`}>
+      <div className={`${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-60'} flex-1 flex flex-col transition-[padding] duration-300 ease-in-out will-change-[padding]`}>
         
         {/* Top Header Bar */}
         <AppHeader
@@ -962,7 +964,7 @@ export default function App() {
           headerMenuRef={headerMenuRef}
           headerMenuOpen={headerMenuOpen}
           setHeaderMenuOpen={setHeaderMenuOpen}
-          handleLogout={handleLogout}
+          handleLogout={() => setLogoutModalOpen(true)}
         />
 
         {/* Dynamic Page Content (Modular Architecture) */}
@@ -1108,6 +1110,21 @@ export default function App() {
         nightModeEnd={nightModeEnd}
         modemCredentialsCount={modemCredentials.length}
         applyToInvalid={applyToInvalid}
+      />
+
+      {/* 5. MODAL POP-UP (Confirm Logout) */}
+      <ConfirmDialogModal
+        isOpen={logoutModalOpen}
+        onClose={() => setLogoutModalOpen(false)}
+        onConfirm={async () => {
+          setLogoutModalOpen(false)
+          await handleLogout()
+        }}
+        title="Konfirmasi Keluar Sesi"
+        message="Apakah Anda yakin ingin keluar dari sesi akun administrator TeknoGuard? Sesi aktif Anda akan diakhiri secara aman."
+        confirmText="Ya, Keluar Akun"
+        cancelText="Batal"
+        variant="danger"
       />
     </div>
   )
