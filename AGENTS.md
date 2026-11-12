@@ -410,6 +410,29 @@ EdTeknoGuard/
     | **MyTekno (Warga)** | Pengingat Tagihan H-1 | H-1 sebelum tanggal jatuh tempo | default / Maskot | Judul: `Pengingat Tagihan Internet`<br>Isi: `Tagihan internet bulanan Anda akan jatuh tempo besok. Silakan lakukan pembayaran agar koneksi tetap lancar.` | Tepat 1 kali per bulan. |
     | **MyTekno (Warga)** | Tagihan Jatuh Tempo & Belum Lunas | Hari H jatuh tempo dan setelahnya jika belum bayar | default / Maskot | Judul: `Pengingat Tagihan Internet`<br>Isi: `Tagihan internet bulanan Anda telah jatuh tempo. Mohon lakukan pembayaran agar layanan tetap aktif dan lancar.` | Tepat 1 kali per hari pada pukul 10:00 WIB. |
 
+11. **Pedoman Anti-Template AI & Sentuhan Intensional Desain Manusia (Authentic Human Craft)**:
+    - Seluruh AI Agent yang merancang, memodifikasi, atau mereview tampilan antarmuka (NOC Admin & Portal Pelanggan MyTekno/TeknoCust) **DILARANG KERAS** mengikuti pola template 'aman' generik AI dan **WAJIB** menerapkan 5 pilar desain manusiawi berikut:
+      1. **Styling yang Tegas & Intensional (Anti-Sindrom Tailwind/Shadcn Default)**:
+         - *Dilarang (AI Tells)*: Sudut kartu selalu `rounded-xl` atau `rounded-2xl` seragam di semua elemen, bayangan kabur melayang (`shadow-md`/`shadow-lg` atau blur 50px yang menciptakan *ghost card*), serta efek *glassmorphism* (`backdrop-blur`) atau *glow* neon tipis di sekeliling kartu.
+         - *Sentuhan Manusia*: Terapkan **2D Flat Design** dengan **Bold Minimalism**. Pisahkan elemen menggunakan garis tepi (*border*) solid yang tegas (1px atau 2px slate/biru terkalibrasi) dan kontras warna latar belakang yang nyata alih-alih mengandalkan drop-shadow berlebihan. *Declare elevation once: border or shadow*.
+      2. **Tata Letak Asimetris & Bento Grid (Anti-Simetris Monoton)**:
+         - *Dilarang (AI Tells)*: Menyusun baris kotak dengan ukuran dan bobot visual yang sama persis (misal 4 kartu metrik berjejer identik lalu 2 grafik berukuran sama) sehingga mata pengguna bingung menentukan fokus utama.
+         - *Sentuhan Manusia*: Terapkan **Bento Grid yang Asimetris**. Buat kartu untuk metrik paling krusial (misal status jaringan utama atau redaman optik kritis) berukuran jauh lebih besar (2x2 atau melebar 2 kolom), sedangkan informasi pendukung dibuat lebih ringkas. Ketidakseimbangan yang disengaja (*intentional asymmetry*) adalah penanda kuat karya desainer manusia.
+      3. **Distribusi Warna Disiplin 60-30-10 & Monochromatic Brand (Anti-Rainbow Confetti)**:
+         - *Dilarang (AI Tells)*: Menyemprotkan warna-warni pelangi (ungu di kuota, hijau di bayar, oranye di jam/status, indigo di tombol) yang kekanak-kanakan dan tidak selaras tema brand.
+         - *Sentuhan Manusia*: Terapkan aturan hierarki warna **60-30-10** secara disiplin:
+           - **60%**: Dominasi warna utama/netral yang bersih (Biru brand, Slate, dan Putih) sebagai ruang bernapas.
+           - **30%**: Warna sekunder untuk penataan struktur kartu, pembagi garis tepi (*divider*), dan navigasi.
+           - **10%**: Warna aksen kontras tinggi **HANYA** untuk aksi utama (CTA primer) atau indikator status kritis riil (error/alert).
+           - Hindari warna gelap pekat `#000000`; gunakan turunan *deep navy* atau *slate* agar nyaman di mata dan terlihat matang.
+      4. **Aset Orisinal & Memiliki Kepribadian (Authentic Character)**:
+         - *Dilarang (AI Tells)*: Mengandalkan 100% ikon standar (seperti Lucide/Heroicons) di dalam lingkaran berwarna transparan untuk setiap kartu serta ilustrasi *placeholder* generik.
+         - *Sentuhan Manusia*: Hadirkan aset orisinal seperti **Maskot Kustom** (`PortalActiveMascot`) pada titik-titik fokus utama (sapaan dashboard, status koneksi, atau *empty state*) untuk mematahkan kesan template generik.
+      5. **Tipografi Berkontras Ekstrem & Micro-Copy Natural Manusiawi**:
+         - *Dilarang (AI Tells)*: Ukuran teks datar tanpa kontras yang jelas, teks dibungkus kotak/border buatan, serta *micro-copy* yang kaku dan birokratis ala terjemahan mesin (misal: *"Bulan Berjalan"*, *"Kelola jaringan Anda secara efektif"*).
+         - *Sentuhan Manusia*:
+           - Berikan kontras ekstrem pada angka metrik: angka utama dibuat sangat besar dan tebal (`font-bold`/`font-black font-mono tracking-tight`), sedangkan label pendukung kecil namun tegas (`text-xs font-semibold`).
+           - Gunakan bahasa antarmuka (*micro-copy*) yang langsung ke intinya, santun, lugas, dan alami sesuai kebiasaan warga/pengguna di lapangan.
 
 ---
 

@@ -416,7 +416,13 @@ class ScanRunner:
                             MasterUser.fcm_token != None,
                             MasterUser.fcm_token != ""
                         ).all()
-                        los_tokens = [u.fcm_token for u in users_to_alert if u.role == "super admin" or k_code in u.allowed_kantor_list]
+                        los_tokens = []
+                        for u in users_to_alert:
+                            if u.role == "super admin":
+                                los_tokens.append(u.fcm_token)
+                            elif k_code.lower() in [k.lower() for k in u.allowed_kantor_list]:
+                                los_tokens.append(u.fcm_token)
+                        los_tokens = list(set(los_tokens))
                         if los_tokens:
                             title = f"[SINYAL TERPUTUS] Kantor: {k_code.upper()}"
                             body = f"{los_count} modem LOS (terputus). Segera cek kabel fisik."
@@ -453,7 +459,13 @@ class ScanRunner:
                             MasterUser.fcm_token != None,
                             MasterUser.fcm_token != ""
                         ).all()
-                        crit_tokens = [u.fcm_token for u in users_to_alert if u.role == "super admin" or k_code in u.allowed_kantor_list]
+                        crit_tokens = []
+                        for u in users_to_alert:
+                            if u.role == "super admin":
+                                crit_tokens.append(u.fcm_token)
+                            elif k_code.lower() in [k.lower() for k in u.allowed_kantor_list]:
+                                crit_tokens.append(u.fcm_token)
+                        crit_tokens = list(set(crit_tokens))
                         if crit_tokens:
                             title = f"[REDAMAN KRITIS] Kantor: {k_code.upper()}"
                             body = f"{crit_count} modem Kritis (<= -27.0 dBm). Segera cek redaman."
@@ -495,7 +507,13 @@ class ScanRunner:
                                 MasterUser.fcm_token != None,
                                 MasterUser.fcm_token != ""
                             ).all()
-                            tkt_tokens = [u.fcm_token for u in users_to_alert if u.role == "super admin" or k_code in u.allowed_kantor_list]
+                            tkt_tokens = []
+                            for u in users_to_alert:
+                                if u.role == "super admin":
+                                    tkt_tokens.append(u.fcm_token)
+                                elif k_code.lower() in [k.lower() for k in u.allowed_kantor_list]:
+                                    tkt_tokens.append(u.fcm_token)
+                            tkt_tokens = list(set(tkt_tokens))
                             if tkt_tokens:
                                 send_push_notification(
                                     tokens=tkt_tokens,

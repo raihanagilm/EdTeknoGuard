@@ -195,7 +195,7 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
   };
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900 relative">
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#EEF2F6] text-slate-900 relative">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
         showNotificationDot={hasUnreadNotifications}
@@ -206,8 +206,8 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
         customer={customer}
       />
 
-      {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
-      <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
+      {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-18) ═══ */}
+      <main className="scroll-area -mt-18 flex-1 overflow-y-auto relative z-10">
         <div className="px-3.5 pb-24 space-y-3">
 
           {/* ═══ CARD 1: INFORMASI WIFI AKTIF ═══ */}

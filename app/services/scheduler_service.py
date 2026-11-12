@@ -155,8 +155,11 @@ class ONTSchedulerService:
                                     ).all()
                                     pause_tokens = []
                                     for u in users:
-                                        if u.role == "super admin" or k in u.allowed_kantor_list:
+                                        if u.role == "super admin":
                                             pause_tokens.append(u.fcm_token)
+                                        elif k.lower() in [ak.lower() for ak in u.allowed_kantor_list]:
+                                            pause_tokens.append(u.fcm_token)
+                                    pause_tokens = list(set(pause_tokens))
                                     if pause_tokens:
                                         send_push_notification(
                                             tokens=pause_tokens,

@@ -183,8 +183,8 @@ export function PortalPaymentTab({
         customer={customer}
       />
 
-      {/* ═══ 2. KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
-      <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
+      {/* ═══ 2. KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-18) ═══ */}
+      <main className="scroll-area -mt-18 flex-1 overflow-y-auto relative z-10">
         <div className="px-3.5 pb-24 space-y-3">
 
           {/* ═══ SKELETON / LOADING STATE (Hanya pertama kali sebelum cache terisi) ═══ */}

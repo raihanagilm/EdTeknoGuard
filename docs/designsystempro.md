@@ -36,6 +36,7 @@
 8. **Sistem yang menanggung risiko, bukan user.** Pindahkan beban kerja dan keamanan ke sistem (validasi, auto-fill, rate limiting). `[V63, V69]`
 9. **Hormati perhatian user.** Semakin kecil urgensi pesan, semakin kecil gangguan yang boleh dibuat. `[V39, V67]`
 10. **Nama yang sama di Figma dan di kode.** Bahasa yang rapi sama pentingnya dengan visual yang rapi. `[V20]`
+11. **Anti-Template AI & Authentic Human Craft.** Tolak styling seragam 'aman' AI (seperti rounded-2xl + blur 50px di semua elemen, simetris monoton, rainbow confetti). Wajib menerapkan 2D Flat Design dengan Bold Minimalism, Bento Grid asimetris, hierarki warna ketat 60-30-10 (Biru brand, Slate, Putih), maskot orisinal, serta tipografi kontras ekstrem dengan micro-copy natural ramah pengguna. (Rujuk detail di `AGENTS.md` Seksi 7.11).
 
 **Urutan membangun (bottom-up):** `Foundation (token) → Components → Templates → Pages`. `[V43, V45, V46]`
 

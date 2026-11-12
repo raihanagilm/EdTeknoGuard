@@ -26,6 +26,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Added
+- **Pedoman Anti-Template AI & Sentuhan Intensional Desain Manusia (Authentic Human Craft) ([AGENTS.md](AGENTS.md), [docs/designsystempro.md](docs/designsystempro.md))**:
+  - Membukukan 5 pilar desain manusiawi permanen pada Seksi 7.11 `AGENTS.md` dan Seksi 0 `docs/designsystempro.md` untuk memberantas sindrom template AI.
+  - Menghilangkan *styling* bawaan 'aman' AI (menolak sudut seragam `rounded-2xl` + bayangan blur 50px *ghost card* di seluruh elemen, beralih ke 2D Flat Design & Bold Minimalism).
+  - Menerapkan Bento Grid asimetris untuk memecah tata letak simetris monoton.
+  - Memperketat distribusi warna 60-30-10 (60% Biru/Slate/Putih, 30% struktur kartu/divider, 10% aksen CTA/alert) dan melarang keras warna-warni pelangi (*rainbow confetti*).
+  - Mewajibkan penggunaan maskot orisinal (`PortalActiveMascot`) pada titik fokus utama dan tipografi berkontras ekstrem dengan *micro-copy* natural lugas.
+
 ### Fixed
 - **Pemisahan ID Notifikasi Android per Kategori & Anti-Overwrite ([TeknoFirebaseMessagingService.kt](d:/databaru/Magang/EdTeknoGuard-Android/app/src/main/java/com/edtekno/app/TeknoFirebaseMessagingService.kt))**:
   - Memperbaiki bentrokan `stableNotificationId` yang sebelumnya menyatukan notifikasi LOS, Kritis, Tiket, dan Scheduler ke dalam ID yang sama (`fcm_crit_{kantor}`) sehingga saling menimpa di status bar Android.

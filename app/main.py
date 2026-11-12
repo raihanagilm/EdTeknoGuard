@@ -452,6 +452,19 @@ def api_auth_logout(request: Request):
         ip = request.client.host if request.client else "unknown"
         user_agent = request.headers.get("user-agent")
         
+        if user:
+            from app.db.models import User as MasterUser
+            u_id = user.get("user_id") or user.get("id")
+            u_name = user.get("user") or user.get("username")
+            db_u = None
+            if u_id:
+                db_u = db.query(MasterUser).filter(MasterUser.id == u_id).first()
+            if not db_u and u_name:
+                db_u = db.query(MasterUser).filter(MasterUser.username == u_name).first()
+            if db_u:
+                db_u.fcm_token = None
+                db.commit()
+
         ActivityLogService.log_activity(
             db=db,
             username=username,

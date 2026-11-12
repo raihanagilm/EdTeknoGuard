@@ -177,6 +177,8 @@ def register_fcm_token(
         db_user = db.query(User).filter(User.username == username).first()
 
     if db_user:
+        # Bersihkan token ini dari user lain yang sebelumnya menggunakan perangkat fisik yang sama
+        db.query(User).filter(User.fcm_token == token, User.id != db_user.id).update({User.fcm_token: None})
         db_user.fcm_token = token
         db.commit()
         return {"status": "success", "message": f"Token FCM berhasil didaftarkan untuk {db_user.username}."}

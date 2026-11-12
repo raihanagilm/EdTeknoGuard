@@ -730,6 +730,7 @@ export default function App() {
       localStorage.removeItem('edtekno_auth_status')
       localStorage.removeItem('edtekno_last_active_time')
       localStorage.removeItem('edtekno_active_tab')
+      sessionStorage.removeItem('edtekno_synced_fcm_token')
       document.cookie = "edteknoguard_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT"
       window.history.pushState({}, '', '/login')
     }

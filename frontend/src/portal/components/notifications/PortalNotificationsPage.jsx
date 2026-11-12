@@ -341,16 +341,70 @@ export function PortalNotificationsPage({
   };
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900">
-      {/* ═══ HEADER BIRU TERPADU DENGAN TOMBOL KEMBALI (PERSIS TAB LAIN) ═══ */}
-      <div className="shrink-0 relative z-0 bg-blue-600 border-b border-blue-700/60">
-        <div className="relative px-4 sm:px-5 pt-3.5 pb-6 flex items-center justify-between gap-3">
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#EEF2F6] text-slate-900">
+      {/* ═══ HEADER BIRU TERPADU DENGAN TEKSTUR VISUAL KAYA & UKURAN KONSISTEN ═══ */}
+      <div className="shrink-0 relative z-0 bg-gradient-to-br from-blue-600 via-blue-600 to-blue-700 border-b border-blue-700/60 overflow-hidden">
+        {/* Elemen Tekstur Visual: Gelombang Sinyal, Network Nodes & Serat Optik */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none" aria-hidden="true">
+          {/* Lingkaran Gelombang Radar/WiFi Konsentris di Kanan Atas */}
+          <svg
+            className="absolute -top-16 -right-16 w-64 h-64 text-white opacity-[0.16]"
+            viewBox="0 0 240 240"
+            fill="none"
+          >
+            <circle cx="120" cy="120" r="30" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
+            <circle cx="120" cy="120" r="55" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="120" cy="120" r="85" stroke="currentColor" strokeWidth="1.5" strokeDasharray="6 4" />
+            <circle cx="120" cy="120" r="115" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+
+          {/* Jaringan Simpul Koneksi & Garis Data di Kiri & Tengah */}
+          <svg
+            className="absolute top-2 left-16 w-56 h-28 text-white opacity-[0.14]"
+            viewBox="0 0 220 110"
+            fill="none"
+          >
+            <line x1="20" y1="40" x2="70" y2="20" stroke="currentColor" strokeWidth="1.2" strokeDasharray="2 2" />
+            <line x1="70" y1="20" x2="130" y2="50" stroke="currentColor" strokeWidth="1.2" />
+            <line x1="130" y1="50" x2="190" y2="25" stroke="currentColor" strokeWidth="1.2" strokeDasharray="3 3" />
+            <line x1="70" y1="20" x2="80" y2="85" stroke="currentColor" strokeWidth="1.2" />
+            <line x1="80" y1="85" x2="150" y2="90" stroke="currentColor" strokeWidth="1.2" strokeDasharray="2 2" />
+            <line x1="130" y1="50" x2="150" y2="90" stroke="currentColor" strokeWidth="1.2" />
+            <circle cx="20" cy="40" r="2.5" fill="currentColor" />
+            <circle cx="70" cy="20" r="3.5" fill="currentColor" />
+            <circle cx="130" cy="50" r="3" fill="currentColor" />
+            <circle cx="190" cy="25" r="2.5" fill="currentColor" />
+            <circle cx="80" cy="85" r="2.5" fill="currentColor" />
+            <circle cx="150" cy="90" r="3" fill="currentColor" />
+          </svg>
+
+          {/* Garis Gelombang Aliran Data Optik Bertingkat di Bagian Bawah */}
+          <svg
+            className="absolute -bottom-4 left-0 w-full h-24 text-white opacity-[0.12]"
+            viewBox="0 0 400 90"
+            preserveAspectRatio="none"
+            fill="none"
+          >
+            <path
+              d="M-20 60 C 80 15, 180 85, 280 35 C 340 10, 390 60, 440 40"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
+
+          {/* Dual Ambient Lighting Mesh */}
+          <div className="absolute -top-10 right-4 w-36 h-36 bg-blue-300/25 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute top-10 left-10 w-28 h-28 bg-indigo-400/15 rounded-full blur-xl pointer-events-none" />
+        </div>
+
+        <div className="relative px-4 sm:px-5 pt-4 pb-20 sm:pb-22 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <button
               type="button"
               onClick={onBack}
               aria-label="Kembali"
-              className="w-9 h-9 rounded-xl bg-blue-700/70 hover:bg-blue-700 border border-white/20 flex items-center justify-center text-white transition cursor-pointer shrink-0 active:scale-95"
+              className="w-10 h-10 rounded-xl bg-blue-700/70 hover:bg-blue-700 border border-white/20 flex items-center justify-center text-white transition cursor-pointer shrink-0 active:scale-95"
             >
               <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
             </button>
@@ -366,8 +420,8 @@ export function PortalNotificationsPage({
         </div>
       </div>
 
-      {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) PERSIS TAB LAIN ═══ */}
-      <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
+      {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-18) PERSIS TAB LAIN ═══ */}
+      <main className="scroll-area -mt-18 flex-1 overflow-y-auto relative z-10">
         <div className="px-3.5 pb-24 space-y-3">
           {/* Card Utama Pembungkus List (Sesuai Styling Kartu Menu Lain) */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
