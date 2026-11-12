@@ -27,6 +27,23 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Arsitektur Pengulangan Notifikasi Darurat Mandiri & Pemisahan Siklus Pengingat ([scheduler_service.py](app/services/scheduler_service.py), [scan_runner.py](app/services/scheduler/scan_runner.py))**:
+  - **Pemisahan Scan vs Reminder**: Siklus pemantauan fisik ONT tetap berjalan sesuai intervalnya (misal: 60 menit), sementara pengulangan push notifikasi darurat berjalan via background job independen `emergency_alert_reminder_job_wrapper` tiap menit tanpa memicu scan ulang modem.
+  - **Pengulangan Notifikasi Darurat LOS & KRITIS**: Membaca konfigurasi `alert_waiting_interval_minutes` (default 10 menit) dari database `system_settings`. Kedua alert (LOS dan Kritis) wajib dikirimkan secara independen (tidak saling meniadakan) berulang kali setiap interval tersebut selama status modem belum kembali normal.
+  - **Pengingat Berkala Tiket Kendala & Permintaan Reset Password 1 Jam**: Tiket berstatus `MENUNGGU` (termasuk keluhan teknis dan permintaan reset password warga mandiri dari aplikasi TeknoCust) wajib dikirimkan push notifikasi pengingat setiap 1 jam sekali (`last_pending_ticket_alert_at`) jika belum ada tindakan penanganan dari teknisi/admin.
+  - **Notifikasi WARNING & Kredensial INVALID 1 Kali Selesai Scan**: Status redaman `WARNING` dan kredensial login modem `INVALID` hanya dikirimkan 1 kali saja tepat setelah pemindaian selesai dan tidak diulang-ulang pada timer pengingat.
+  - **Pelacak Waktu Pengiriman Alert Presisi**: Menyimpan `last_emergency_alert_at` di tabel `system_settings` per kantor cabang untuk menjamin interval pengulangan berjalan presisi tanpa drift/pergeseran waktu.
+
+### Fixed
+- **Query Status Masalah Modem pada Pengingat Darurat ([scheduler_service.py](app/services/scheduler_service.py))**:
+  - Memperbaiki `AttributeError: type object 'PerangkatONT' has no attribute 'is_monitored'` dengan mengaitkan query log performa terbaru (`LogPerformaONT`) ke tabel `Pelanggan` aktif (`is_active == True` dan `is_monitored == True`).
+- **Penanganan Timezone Subtraction Crash pada Scheduler ([scheduler_service.py](app/services/scheduler_service.py), [recovery_manager.py](app/services/scheduler/recovery_manager.py))**:
+  - Memperbaiki `TypeError: can't subtract offset-naive and offset-aware datetimes` menggunakan helper `to_wib(dateutil.parser.parse(last_scan_str))` yang menormalisasi datetime menjadi naive WIB.
+  - Mengurutkan pembacaan `SystemSetting` dengan `.order_by(SystemSetting.id_setting.desc())` untuk mencegah pembacaan data setting duplikat.
+- **Dukungan Multi-Tenant MikroTik Sync & Perhitungan Kuota ([mikrotik_service.py](app/services/mikrotik_service.py))**:
+  - Memperbaiki error `Table 'edtekno_karanggede.kantors' doesn't exist` pada fungsi `get_live_queues_and_bandwidth` dan `get_router_health` dengan menggunakan sesi Master DB (`SessionLocal`) untuk entitas `Kantor`.
+
+### Added
 - **Pedoman Anti-Template AI & Sentuhan Intensional Desain Manusia (Authentic Human Craft) ([AGENTS.md](AGENTS.md), [docs/designsystempro.md](docs/designsystempro.md))**:
   - Membukukan 5 pilar desain manusiawi permanen pada Seksi 7.11 `AGENTS.md` dan Seksi 0 `docs/designsystempro.md` untuk memberantas sindrom template AI.
   - Menghilangkan *styling* bawaan 'aman' AI (menolak sudut seragam `rounded-2xl` + bayangan blur 50px *ghost card* di seluruh elemen, beralih ke 2D Flat Design & Bold Minimalism).
