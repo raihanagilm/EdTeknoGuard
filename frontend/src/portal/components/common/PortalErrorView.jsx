@@ -67,9 +67,9 @@ export function PortalErrorView({
             <button
               type="button"
               onClick={onRetry}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 border border-cyan-300 text-cyan-900 font-bold text-xs shadow-2xs transition active:scale-[0.98] min-h-[40px] cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs shadow-2xs transition active:scale-[0.98] min-h-[40px] cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-cyan-700" />
+              <RefreshCw className="w-3.5 h-3.5 text-blue-600" />
               <span>Coba Lagi</span>
             </button>
           )}
@@ -77,7 +77,7 @@ export function PortalErrorView({
           <button
             type="button"
             onClick={onBackToHome || (() => { window.location.href = '/teknocust' })}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 transition active:scale-[0.98] min-h-[40px] cursor-pointer"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition active:scale-[0.98] min-h-[40px] cursor-pointer"
           >
             <Home className="w-3.5 h-3.5" />
             <span>{primaryActionLabel}</span>

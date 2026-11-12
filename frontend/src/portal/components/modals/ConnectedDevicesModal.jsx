@@ -141,18 +141,18 @@ export function ConnectedDevicesModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/70 to-indigo-50/50 gap-2 shrink-0">
+        <div className="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/90 gap-2 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight truncate">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
                   Perangkat Terhubung
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700">
-                  {onlineDevices.length} Aktif
+                <span className="text-xs font-bold text-blue-600">
+                  ({onlineDevices.length} aktif)
                 </span>
               </div>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 leading-tight">
@@ -163,7 +163,7 @@ export function ConnectedDevicesModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-slate-400 hover:text-slate-600 flex items-center justify-center border border-slate-200 transition cursor-pointer"
+            className="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center border border-slate-200 transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -257,8 +257,8 @@ export function ConnectedDevicesModal({
                                 <span className="text-xs font-bold text-slate-900 truncate max-w-[140px] sm:max-w-[180px]">
                                   {getDeviceDisplayName(dev)}
                                 </span>
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 uppercase shrink-0">
-                                  {dev.tipe_koneksi || 'WIFI'}
+                                <span className="text-[10px] font-medium text-slate-400 uppercase shrink-0">
+                                  · {dev.tipe_koneksi || 'WIFI'}
                                 </span>
                               </div>
 
@@ -276,7 +276,7 @@ export function ConnectedDevicesModal({
                               onClick={() => handleRequestConfirm(dev)}
                               disabled={blockingMac === dev.mac_address}
                               title="Blokir akses internet perangkat ini"
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[66px] justify-center"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[66px] justify-center"
                             >
                               {blockingMac === dev.mac_address ? (
                                 <>
@@ -292,8 +292,8 @@ export function ConnectedDevicesModal({
                             </button>
 
                             {dev.rssi !== null && dev.rssi !== undefined && (
-                              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-50 text-slate-500 text-[9px] font-mono font-medium">
-                                <Signal className="w-2.5 h-2.5 text-blue-500" />
+                              <div className="inline-flex items-center gap-1 text-slate-400 text-[10px] font-mono font-medium">
+                                <Signal className="w-3 h-3 text-blue-500" />
                                 <span>{dev.rssi} dBm</span>
                               </div>
                             )}

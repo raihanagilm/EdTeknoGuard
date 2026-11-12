@@ -138,19 +138,26 @@
   animation: floaty 3s ease-in-out infinite;
 }
 
-/* ═══ Sistem Tipografi Terstruktur TeknoCust (Design Tokens) ═══ */
+/* ═══ Sistem Tipografi & Komponen Terstruktur TeknoCust (Design Tokens Pro) ═══ */
+.portal-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem; /* 12px (rounded-xl) */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
 .portal-title-lg {
-  font-size: 1.5rem;
-  line-height: 1.2;
-  font-weight: 900;
-  letter-spacing: -0.025em;
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .portal-heading {
-  font-size: 0.9375rem; /* 15px */
+  font-size: 0.875rem; /* 14px */
   line-height: 1.25rem;
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
 }
 
 .portal-subheading {
@@ -160,19 +167,19 @@
 }
 
 .portal-body-bold {
-  font-size: 0.8125rem; /* 13px */
-  line-height: 1.125rem;
-  font-weight: 700;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem;
+  font-weight: 600;
 }
 
 .portal-body-normal {
-  font-size: 0.75rem; /* 12px */
-  line-height: 1rem;
-  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem;
+  font-weight: 400;
 }
 
 .portal-caption {
-  font-size: 0.6875rem; /* 11px */
-  line-height: 0.875rem;
-  font-weight: 600;
+  font-size: 0.75rem; /* 12px */
+  line-height: 1rem;
+  font-weight: 500;
 }

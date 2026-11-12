@@ -195,66 +195,60 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
   };
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827] relative">
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900 relative">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
         showNotificationDot={hasUnreadNotifications}
         onNotificationClick={onOpenNotifications}
         title="Kelola WiFi Rumah"
-        subtitle="Ubah Nama & Kata Sandi SSID Mandiri"
+        subtitle="Pengaturan nama & sandi"
         dashboardData={dashboardData}
         customer={customer}
       />
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
-        <div className="pb-24 space-y-3">
+        <div className="px-3.5 pb-24 space-y-3">
 
-          {/* ═══ CARD 1: INFORMASI WIFI SAAT INI (KATA SANDI SEKARANG) ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100 p-4">
-            <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-gray-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-blue-100 text-blue-700 shrink-0">
-                  <Wifi className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-xs font-black text-gray-900 leading-tight">WiFi Rumah Anda Saat Ini</h2>
-                  <p className="text-[11px] text-gray-500 font-medium">Informasi nama & sandi yang aktif</p>
-                </div>
-              </div>
+          {/* ═══ CARD 1: INFORMASI WIFI AKTIF ═══ */}
+          <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90 p-4">
+            <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
+              <span className="text-xs font-bold text-slate-700">
+                WiFi Terpasang
+              </span>
               <button
                 type="button"
                 onClick={fetchWifiDetails}
                 aria-label="Muat ulang informasi WiFi"
-                className="w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-blue-600 transition cursor-pointer"
+                className="w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 transition cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${fetchingWifi ? 'animate-spin' : ''}`} />
               </button>
             </div>
 
-            <div className="space-y-2.5 text-xs">
+            <div className="divide-y divide-slate-100 text-xs">
               {/* Nama WiFi / SSID */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-                <span className="text-gray-600 font-medium">Nama WiFi (SSID)</span>
-                <span className="font-bold text-gray-900 font-mono text-[13px]">
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500 font-medium">Nama WiFi (SSID)</span>
+                <span className="font-bold text-slate-900 font-mono text-sm">
                   {currentWifi.nama_wifi || '-'}
                 </span>
               </div>
 
               {/* Kata Sandi WiFi Sekarang */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-                <span className="text-gray-600 font-medium">Kata Sandi Sekarang</span>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500 font-medium">Kata Sandi Sekarang</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-gray-900 text-[13px]">
+                  <span className="font-mono font-bold text-slate-900 text-sm">
                     {showCurrentPassword ? currentWifi.password_wifi || '-' : '••••••••'}
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="p-1 rounded-md text-gray-500 hover:text-gray-800 cursor-pointer"
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-700 cursor-pointer"
                     aria-label="Lihat kata sandi"
                   >
-                    {showCurrentPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                   <button
                     type="button"
@@ -263,85 +257,85 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
                     aria-label="Salin kata sandi"
                     title="Salin Kata Sandi"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
               {/* Status Lokasi Sambungan (Dalam WiFi Rumah / Luar Jangkauan) */}
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-gray-500 text-[11px] font-medium">Status Sambungan HP:</span>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500 font-medium">Status Sambungan:</span>
                 {currentWifi.is_connected_to_home_wifi ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     Tersambung di WiFi Rumah
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-800 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600">
                     <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                    Tidak Tersambung di WiFi Rumah
+                    Tidak Tersambung
                   </span>
                 )}
               </div>
             </div>
 
             {/* Tombol Cepat: Cek Siapa Saja Yang Terhubung */}
-            <div className="mt-3 pt-3 border-t border-gray-100">
+            <div className="mt-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={openDevicesModal}
-                className="w-full py-2.5 px-3.5 rounded-xl bg-blue-50 hover:bg-blue-100/80 text-blue-700 border border-blue-200/70 text-xs font-bold flex items-center justify-between transition active:scale-[0.98] cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-lg bg-blue-50/70 hover:bg-blue-100/70 text-blue-700 text-xs font-semibold flex items-center justify-between transition active:scale-[0.98] cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center">
                     <Smartphone className="w-3.5 h-3.5" />
                   </div>
                   <span>Lihat Siapa Saja Yang Terhubung</span>
                 </div>
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-blue-600 text-white">
-                  Cek Sekarang
+                <span className="text-[11px] font-bold text-blue-700">
+                  Cek Sekarang →
                 </span>
               </button>
             </div>
           </section>
 
           {/* ═══ CARD 2: PENGATURAN GANTI NAMA & KATA SANDI (COLLAPSIBLE DROPDOWN) ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
             {/* Header Accordion / Toggle Button */}
             <button
               type="button"
               onClick={() => setIsFormOpen(!isFormOpen)}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50/60 transition cursor-pointer"
+              className="w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-50 text-blue-600 shrink-0">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600 shrink-0">
                   <KeyRound className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black text-gray-900 leading-tight">Ubah Nama & Kata Sandi WiFi</h3>
-                  <p className="text-[11px] text-gray-500 font-medium">Pengaturan mandiri SSID dan kata sandi modem</p>
+                  <h3 className="text-xs font-bold text-slate-900 leading-tight">Ubah Nama &amp; Kata Sandi WiFi</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Pengaturan mandiri SSID dan kata sandi modem</p>
                 </div>
               </div>
-              <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
                 {isFormOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </div>
             </button>
 
             {/* Konten Formulir & Banner Edukasi Terpadu (Ditampilkan saat isFormOpen true) */}
             {isFormOpen && (
-              <div className="border-t border-gray-100">
-                {/* ═══ SATU BANNER INFORMASI TERPADU (SEBELUM & SETELAH PENGGANTIAN) ═══ */}
-                <div className="m-4 mb-2 p-3 rounded-xl bg-blue-50/80 border border-blue-200/80 space-y-2">
+              <div className="border-t border-slate-100">
+                {/* ═══ SATU BANNER INFORMASI TERPADU ═══ */}
+                <div className="p-3.5 bg-blue-50/60 space-y-1.5 border-b border-blue-100/60">
                   <div className="flex items-start gap-2">
-                    <Info className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
+                    <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                     <div className="min-w-0">
-                      <span className="text-xs font-bold text-blue-900 block">Petunjuk Penggantian WiFi Rumah:</span>
-                      <ul className="text-[11px] text-blue-800/90 space-y-1 mt-1 leading-relaxed">
+                      <span className="text-xs font-bold text-blue-900 block">Petunjuk Penggantian WiFi:</span>
+                      <ul className="text-xs text-blue-800/90 space-y-1 mt-1 leading-relaxed">
                         <li>
                           • <b>Sebelum Ganti:</b> Pastikan HP Anda terhubung ke sinyal WiFi rumah ini (tidak dapat diubah dari luar jangkauan).
                         </li>
                         <li>
-                          • <b>Setelah Ganti:</b> Seluruh HP & laptop di rumah akan terputus sesaat. Cukup sambungkan kembali dengan sandi yang baru.
+                          • <b>Setelah Ganti:</b> Seluruh HP &amp; laptop di rumah akan terputus sesaat. Cukup sambungkan kembali dengan sandi yang baru.
                         </li>
                       </ul>
                     </div>

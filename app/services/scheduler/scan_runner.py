@@ -401,7 +401,7 @@ class ScanRunner:
 
             # Resolusi pengaturan audio & jam tenang (night mode & getar)
             from app.services.fcm_service import resolve_notification_audio_settings, send_push_notification
-            audio_settings = resolve_notification_audio_settings(t_db_finish, kantor=k_code, is_emergency=True)
+            audio_settings = resolve_notification_audio_settings(kantor=k_code, is_emergency=True)
 
             # 1. Trigger Push Notifikasi FCM Khusus Sinyal Terputus (LOS)
             los_count = stats.get("los", 0)

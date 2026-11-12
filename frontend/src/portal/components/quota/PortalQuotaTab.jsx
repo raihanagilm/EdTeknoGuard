@@ -96,7 +96,7 @@ export function PortalQuotaTab({ customer, dashboardData, onOpenNotifications , 
   const customerInitials = getInitials(customer?.nama);
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
         showNotificationDot={hasUnreadNotifications}
@@ -109,73 +109,73 @@ export function PortalQuotaTab({ customer, dashboardData, onOpenNotifications , 
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) PERSIS TAB LAIN ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
-        <div className="pb-24 space-y-3">
+        <div className="px-3.5 pb-24 space-y-3.5">
 
           {/* ═══ SECTION 1: PEMAKAIAN BULAN INI ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 overflow-hidden">
+          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
             {/* Card Header */}
-            <div className="p-4 pb-3 border-b border-gray-100 flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+            <div className="p-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/60">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-blue-50 text-blue-600">
                 <BarChart3 className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-sm font-black text-gray-900 leading-tight">Total Pemakaian Bulan Ini</h2>
-                <p className="text-xs text-gray-600 mt-0.5 leading-tight font-medium">
+                <h2 className="text-sm font-bold text-slate-900 leading-tight">Total Pemakaian Bulan Ini</h2>
+                <p className="text-xs text-slate-500 mt-0.5 leading-tight font-medium">
                   Ringkasan pemakaian kuota internet
                 </p>
               </div>
             </div>
 
             {/* Angka + progress bar pemakaian */}
-            <div className="px-4 pt-3 pb-4 bg-white">
+            <div className="p-4 bg-white">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-4xl font-black tracking-tight font-mono text-blue-600">
+                <span className="text-3xl sm:text-4xl font-bold tracking-tight font-mono text-slate-900">
                   {totalGB}
                 </span>
-                <span className="text-lg font-bold text-gray-500">GB</span>
+                <span className="text-sm font-semibold text-slate-500">GB Terpakai</span>
               </div>
-              <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
+              <div className="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-700 bg-blue-600"
                   style={{ width: `${kuotaBarPercent}%` }}
                 />
               </div>
               <div className="mt-3 flex items-center justify-between text-xs">
-                <span className="text-gray-600 font-medium">Paket aktif:</span>
-                <span className="font-bold px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                <span className="text-slate-500 font-medium">Paket aktif:</span>
+                <span className="font-bold text-slate-900">
                   {paketNama}
                 </span>
               </div>
             </div>
 
             {/* Strip info unlimited */}
-            <div className="px-4 py-3 border-t border-gray-100 flex items-start gap-2.5 bg-blue-50/70">
-              <Infinity className="w-4 h-4 mt-0.5 shrink-0 text-blue-700" />
-              <p className="text-xs text-gray-700 leading-relaxed font-normal">
-                Internet Anda bersifat <strong className="text-gray-900 font-semibold">Tanpa Batas Kuota (Unlimited)</strong> tanpa batas FUP kuota harian.
+            <div className="px-4 py-2.5 border-t border-slate-100 flex items-start gap-2.5 bg-slate-50">
+              <Infinity className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
+              <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                Internet Anda bersifat <strong className="text-slate-900 font-semibold">Tanpa Batas Kuota (Unlimited)</strong> tanpa batas FUP harian.
               </p>
             </div>
           </section>
 
           {/* ═══ SECTION 2: HISTORI 7 HARI ═══ */}
-          <section className="mx-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+          <section className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs">
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-blue-700" />
-                <h2 className="text-sm font-black text-gray-900">Histori 7 Hari Terakhir</h2>
+                <TrendingUp className="w-4 h-4 text-blue-600" />
+                <h2 className="text-sm font-bold text-slate-900">Histori 7 Hari Terakhir</h2>
               </div>
               <button
                 type="button"
                 onClick={fetchKuota}
                 aria-label="Segarkan data kuota"
-                className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 hover:text-blue-600 transition cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 transition cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
-            <p className="text-xs text-gray-600 mb-4 font-medium">Rata-rata pemakaian data harian</p>
+            <p className="text-xs text-slate-500 mb-4 font-medium">Rata-rata pemakaian data harian</p>
 
-            <div className="flex items-end justify-between gap-1 sm:gap-2 h-36 px-0.5 sm:px-1">
+            <div className="flex items-end justify-between gap-1.5 sm:gap-2 h-36 px-0.5 sm:px-1">
               {history.map((item, idx) => {
                 const val = Number(item.pemakaian_gb || 0);
                 const heightPercent = maxGB > 0 ? Math.max(18, Math.round((val / maxGB) * 100)) : 50;
@@ -183,7 +183,7 @@ export function PortalQuotaTab({ customer, dashboardData, onOpenNotifications , 
 
                 return (
                   <div key={idx} className="flex-1 h-full flex flex-col items-center justify-end gap-1.5">
-                    <span className="text-[10px] sm:text-[11px] font-bold text-gray-800 font-mono leading-none">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-slate-800 font-mono leading-none">
                       {val}
                     </span>
                     <div className="w-full flex-1 max-h-[86px] flex items-end justify-center">
@@ -191,11 +191,11 @@ export function PortalQuotaTab({ customer, dashboardData, onOpenNotifications , 
                         className="w-full rounded-t-md transition-all duration-700 bg-blue-600"
                         style={{
                           height: `${heightPercent}%`,
-                          opacity: heightPercent >= 95 ? 1 : 0.7
+                          opacity: heightPercent >= 95 ? 1 : 0.75
                         }}
                       />
                     </div>
-                    <span className="text-[10px] sm:text-[11px] font-semibold text-gray-600 font-mono leading-none">
+                    <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 font-mono leading-none">
                       {dayLabel}
                     </span>
                   </div>
@@ -203,27 +203,27 @@ export function PortalQuotaTab({ customer, dashboardData, onOpenNotifications , 
               })}
             </div>
 
-            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
+            <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
               <span>Satuan: GB (Gigabyte)</span>
-              <span className="font-mono font-bold text-gray-800">Total 7 hari: {total7Days} GB</span>
+              <span className="font-mono font-bold text-slate-900">Total 7 hari: {total7Days} GB</span>
             </div>
           </section>
 
           {/* ═══ SECTION 3: RINCIAN PEMAKAIAN ═══ */}
-          <section className="mx-3 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <section className="bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-xs">
+            <div className="px-3.5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
               <div className="flex items-center gap-2">
-                <List className="w-4 h-4 text-blue-700" />
-                <h2 className="text-sm font-black text-gray-900">Rincian Pemakaian</h2>
+                <List className="w-4 h-4 text-blue-600" />
+                <h2 className="text-sm font-bold text-slate-900">Rincian Pemakaian</h2>
               </div>
-              <span className="text-xs text-gray-600 font-medium">7 hari</span>
+              <span className="text-xs text-slate-500 font-medium">7 hari</span>
             </div>
 
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-slate-100">
               {history.map((item, idx) => (
-                <div key={idx} className="px-4 py-2.5 flex items-center justify-between">
-                  <span className="text-xs text-gray-700 font-medium">{item.tanggal}</span>
-                  <span className="text-xs font-bold font-mono text-gray-900">
+                <div key={idx} className="px-4 py-2.5 flex items-center justify-between hover:bg-slate-50/60 transition">
+                  <span className="text-xs text-slate-600 font-medium">{item.tanggal}</span>
+                  <span className="text-xs font-bold font-mono text-slate-900">
                     {Number(item.pemakaian_gb || 0)} GB
                   </span>
                 </div>

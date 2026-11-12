@@ -123,53 +123,49 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
   }, [filteredTickets, currentPage]);
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
         showNotificationDot={hasUnreadNotifications}
         onNotificationClick={onOpenNotifications}
         title="Pusat Kendala & Keluhan"
-        subtitle="Lapor Gangguan Internet Cepat & Tanggap"
+        subtitle="Layanan tiket gangguan teknis"
         dashboardData={dashboardData}
         customer={customer}
       />
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
-        <div className="pb-24 space-y-3">
+        <div className="px-3.5 pb-24 space-y-3">
 
-          {/* ═══ CARD PUTIH LAPOR GANGGUAN (naik menimpa header) ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
+          {/* ═══ CARD UTAMA: ACTION BAR (BUAT TIKET + CARI) & DAFTAR TIKET ═══ */}
+          <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
 
-            {/* Card Header & Buat Tiket CTA */}
-            <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#dbeafe' }}>
-                  <AlertCircle className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[14px] font-black text-gray-900 leading-tight">Lapor Gangguan</div>
-                  <div className="text-[11px] sm:text-xs text-gray-600 mt-0.5 leading-tight font-medium line-clamp-1 sm:line-clamp-none">
-                    Tiket diteruskan langsung ke Teknisi Lapangan
-                  </div>
-                </div>
+            {/* Bilah Aksi Utama: Tombol Buat Tiket & Ringkasan */}
+            <div className="p-3 sm:p-3.5 bg-slate-50/70 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center justify-between sm:justify-start gap-2">
+                <span className="text-xs font-bold text-slate-700">
+                  Daftar Tiket Kendala
+                </span>
+                <span className="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+                  {filteredTickets.length} tiket
+                </span>
               </div>
 
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-white portal-body-bold shadow-md active:scale-[0.98] transition cursor-pointer shrink-0"
-                style={{ background: '#2563eb' }}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-white text-xs font-semibold bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition cursor-pointer shadow-xs shrink-0"
               >
                 <Plus className="w-4 h-4" />
-                <span>Buat Tiket</span>
+                <span>Buat Tiket Baru</span>
               </button>
             </div>
 
             {/* Filter Search */}
-            <div className="p-4 pb-2">
+            <div className="p-3 sm:p-3.5 pb-2">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -178,12 +174,12 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                     setCurrentPage(1);
                   }}
                   placeholder="Cari ID tiket, kategori, atau keluhan..."
-                  className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                  className="w-full pl-9 pr-8 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 transition cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 transition cursor-pointer"
                     title="Hapus Pencarian"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -193,74 +189,83 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
             </div>
 
             {/* Ticket List */}
-            <div className="px-4 pb-4 space-y-3">
+            <div className="border-t border-slate-100">
               {loading ? (
-                <div className="space-y-2.5 animate-pulse">
+                <div className="p-3.5 space-y-2.5 animate-pulse">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80 space-y-2">
+                    <div key={i} className="py-2.5 border-b border-slate-100 space-y-2">
                       <div className="flex items-center justify-between">
-                        <div className="w-20 h-4 bg-gray-200 rounded" />
-                        <div className="w-16 h-4 bg-gray-200 rounded-full" />
+                        <div className="w-20 h-4 bg-slate-200 rounded" />
+                        <div className="w-16 h-4 bg-slate-200 rounded" />
                       </div>
-                      <div className="w-3/4 h-3.5 bg-gray-200 rounded" />
-                      <div className="w-1/2 h-3 bg-gray-100 rounded" />
+                      <div className="w-3/4 h-3.5 bg-slate-200 rounded" />
+                      <div className="w-1/2 h-3 bg-slate-100 rounded" />
                     </div>
                   ))}
                 </div>
               ) : filteredTickets.length === 0 ? (
-                <div className="p-8 bg-gray-50 rounded-2xl border border-gray-100 text-center space-y-2">
-                  <div className="w-11 h-11 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto">
+                <div className="p-8 text-center space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-gray-800">
+                    <div className="text-xs font-bold text-slate-800">
                       {searchQuery ? 'Tiket Tidak Ditemukan' : 'Tidak Ada Kendala Aktif'}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       {searchQuery ? 'Coba cari dengan kata kunci lain.' : 'Sambungan internet Anda terpantau normal dan lancar.'}
                     </p>
                   </div>
                 </div>
               ) : (
-                paginatedTickets.map((t) => (
-                  <article key={t.id_tiket} className="p-3.5 bg-slate-50/70 hover:bg-blue-50/40 rounded-xl border border-slate-200/80 space-y-2 transition">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] font-mono font-bold text-slate-800">
-                        {t.id_tiket}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-[11px] font-bold tracking-wide ${
-                            t.status === 'SELESAI'
-                              ? 'text-emerald-600'
-                              : t.status === 'DIPROSES' || t.status === 'DICEK_ADMIN'
-                              ? 'text-amber-600'
-                              : 'text-rose-600'
-                          }`}
-                        >
-                          {t.status}
+                <div className="divide-y divide-slate-100">
+                  {paginatedTickets.map((t) => (
+                    <article key={t.id_tiket} className="p-3.5 hover:bg-slate-50/60 space-y-1.5 transition">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-bold text-slate-800">
+                          {t.id_tiket}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => setTicketToDelete(t)}
-                          className="p-1 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
-                          title="Hapus Laporan Ini"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs font-bold ${
+                              t.status === 'SELESAI'
+                                ? 'text-emerald-600'
+                                : t.status === 'DIPROSES' || t.status === 'DICEK_ADMIN'
+                                ? 'text-blue-600'
+                                : 'text-amber-600'
+                            }`}
+                          >
+                            {t.status === 'SELESAI' ? (
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            ) : t.status === 'DIPROSES' || t.status === 'DICEK_ADMIN' ? (
+                              <RefreshCw className="w-3.5 h-3.5" />
+                            ) : (
+                              <Clock className="w-3.5 h-3.5" />
+                            )}
+                            <span>{t.status}</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setTicketToDelete(t)}
+                            className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+                            title="Hapus Laporan Ini"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="portal-body-bold text-gray-900">{t.kategori}</div>
-                    <p className="portal-body-normal text-gray-700 leading-relaxed">{t.deskripsi}</p>
-                    <div className="pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-gray-500 font-mono">
-                      <span className="flex items-center gap-1 text-[11px]">
-                        <Clock className="w-3.5 h-3.5 text-gray-400" />
-                        {t.created_at?.slice(0, 16)}
-                      </span>
-                      {t.redaman_saat_lapor && <span className="text-[11px] font-semibold text-slate-600">Redaman: {t.redaman_saat_lapor} dBm</span>}
-                    </div>
-                  </article>
-                ))
+                      <div className="text-xs font-bold text-slate-900">{t.kategori}</div>
+                      <p className="text-xs text-slate-600 leading-relaxed">{t.deskripsi}</p>
+                      <div className="pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-slate-400" />
+                          {t.created_at?.slice(0, 16)}
+                        </span>
+                        {t.redaman_saat_lapor && <span className="text-[11px] font-semibold text-slate-600">Redaman: {t.redaman_saat_lapor} dBm</span>}
+                      </div>
+                    </article>
+                  ))}
+                </div>
               )}
             </div>
 

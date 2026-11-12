@@ -189,49 +189,48 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-slate-200 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden">
-      <div className="w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative">
+    <div className="h-[100dvh] w-full bg-slate-100 sm:bg-slate-200/80 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden">
+      <div className="w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-2xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative">
 
-        {/* ░░░ PANEL ATAS: gradient biru diperbesar sedikit + Maskot Si Router Menyapa ░░░ */}
-        <div className="relative bg-gradient-to-br from-sky-500 via-blue-600 to-blue-800 h-[210px] sm:h-[230px] overflow-hidden shrink-0">
-          {/* Ornamen dekoratif */}
-          <div className="absolute -top-14 -right-14 w-48 h-48 bg-white/10 rounded-full pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 w-52 h-52 bg-cyan-300/10 rounded-full pointer-events-none" />
-
+        {/* ░░░ PANEL ATAS: Biru Brand Solid + Maskot Si Router Menyapa ░░░ */}
+        <div className="relative bg-blue-600 h-[200px] sm:h-[220px] overflow-hidden shrink-0 border-b border-blue-700/60 shadow-xs">
           {/* Header Brand Atas: Logo Baru Tekno Indo + MyTekno + Teks Layanan Mandiri */}
           <div className="relative z-10 pt-4 px-5">
             <div className="flex items-center gap-3">
               <img
                 src="/tekno-indo-logo.png"
                 alt="TeknoIndonet Logo"
-                className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-md shrink-0"
+                className="w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
               />
               <div className="min-w-0">
-                <div className="text-white text-xl sm:text-2xl font-black tracking-tight leading-none drop-shadow-xs">
-                  My<span className="text-cyan-200 font-extrabold">Tekno</span>
+                <div className="text-white text-xl font-bold tracking-tight leading-none">
+                  My<span className="text-blue-200">Tekno</span>
                 </div>
-                <div className="text-blue-100/90 text-[11px] sm:text-xs mt-1 font-medium leading-tight">
-                  Layanan Mandiri Khusus Pelanggan TeknoIndonet
+                <div className="text-blue-100/90 text-xs mt-1 font-medium leading-tight">
+                  Layanan Mandiri Pelanggan
                 </div>
               </div>
             </div>
           </div>
 
           {/* MASKOT Si Router Menyapa di tengah panel biru */}
-          <div className="absolute inset-0 flex items-center justify-center pt-14 pb-2 pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center pt-12 pb-2 pointer-events-none">
             <RouterMenyapaMascot className="w-24 h-20 sm:w-28 sm:h-22" />
           </div>
         </div>
 
-        {/* ░░░ PANEL BAWAH: card putih overlap + form login utama ░░░ */}
-        <div className="relative -mt-5 bg-white rounded-t-[1.75rem] shadow-2xl flex-1 flex flex-col justify-between overflow-y-auto z-10">
+        {/* ░░░ PANEL BAWAH: Card Putih Overlap + Form Login Utama ░░░ */}
+        <div className="relative -mt-4 bg-white rounded-t-2xl shadow-xl flex-1 flex flex-col justify-between overflow-y-auto z-10">
           <div className="px-5 pt-4 pb-4 sm:px-6 sm:pt-5 sm:pb-5 flex flex-col justify-between min-h-full">
             <div>
               {/* Header Title: Login Aplikasi */}
               <div className="text-center mb-3 sm:mb-4">
-                <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-                  Login Aplikasi
+                <h1 className="text-lg font-bold text-slate-900 tracking-tight">
+                  Masuk ke Akun Pelanggan
                 </h1>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Masukkan nomor WhatsApp dan kata sandi Anda
+                </p>
               </div>
 
               {/* Error Alert */}
@@ -243,10 +242,10 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
               )}
 
               {/* FORM LOGIN */}
-              <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 {/* Nomor WhatsApp */}
                 <div className="space-y-1">
-                  <label htmlFor="identifier" className="text-[11px] font-semibold text-slate-700 block">
+                  <label htmlFor="identifier" className="text-xs font-semibold text-slate-700 block">
                     Nomor WhatsApp Terdaftar
                   </label>
                   <div className="relative">
@@ -258,7 +257,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       placeholder="Contoh: 081234567890"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[42px]"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[44px]"
                     />
                   </div>
                 </div>
@@ -266,13 +265,13 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                 {/* Kata Sandi */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="password" className="text-[11px] font-semibold text-slate-700">
+                    <label htmlFor="password" className="text-xs font-semibold text-slate-700">
                       Kata Sandi (Password)
                     </label>
                     <button
                       type="button"
                       onClick={onGoToReset}
-                      className="text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                     >
                       Lupa Password?
                     </button>
@@ -286,7 +285,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-9 pr-10 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition font-mono min-h-[42px]"
+                      className="w-full pl-9 pr-10 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition font-mono min-h-[44px]"
                     />
                     <button
                       type="button"
@@ -307,9 +306,9 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                      className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
                     />
-                    <span className="text-[11px] text-slate-600 font-medium">Ingat Saya</span>
+                    <span className="text-xs text-slate-600 font-medium">Ingat Saya di Perangkat Ini</span>
                   </label>
                 </div>
 
@@ -318,7 +317,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                   id="btn-submit"
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-1 py-2.5 sm:py-3 px-4 rounded-lg bg-gradient-to-r from-sky-500 via-blue-600 to-blue-700 hover:from-sky-600 hover:to-blue-800 text-white font-bold text-xs sm:text-sm shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]"
+                  className="w-full mt-1 py-2.5 sm:py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xs transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]"
                 >
                   <span>{loading ? 'Memproses...' : 'Masuk ke Akun Saya'}</span>
                   {loading && <RefreshCw className="w-4 h-4 animate-spin shrink-0" />}
@@ -330,13 +329,13 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                 <button
                   type="button"
                   onClick={() => setIsInfoExpanded(!isInfoExpanded)}
-                  className="w-full px-3 py-2 sm:py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
+                  className="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
                 >
-                  <div className="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
                     <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Informasi Masuk Pelanggan</span>
+                    <span>Informasi Akun Pelanggan</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <div className="flex items-center gap-1 text-[11px] text-slate-500">
                     <span>{isInfoExpanded ? 'Tutup' : 'Lihat'}</span>
                     <ChevronDown
                       className={`w-3.5 h-3.5 transition-transform duration-200 ${
@@ -347,12 +346,12 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                 </button>
 
                 {isInfoExpanded && (
-                  <div className="px-3 pb-3 text-[11px] text-slate-600 space-y-2 border-t border-slate-200 animate-fadeIn">
+                  <div className="px-3.5 pb-3 text-xs text-slate-600 space-y-2 border-t border-slate-200 animate-fadeIn">
                     <p className="leading-relaxed pt-2">
-                      Aplikasi ini khusus pelanggan <strong className="text-blue-700">TeknoIndonet</strong>. Cukup masukkan <strong className="text-blue-700 font-bold">Nomor WhatsApp</strong> yang terdaftar saat pemasangan WiFi rumah Anda.
+                      Aplikasi ini khusus pelanggan <strong className="text-blue-700">TeknoIndonet</strong>. Cukup masukkan <strong className="text-blue-700 font-semibold">Nomor WhatsApp</strong> yang terdaftar saat pemasangan WiFi rumah Anda.
                     </p>
                     <p className="leading-relaxed text-slate-600">
-                      Kata sandi awal adalah <strong className="text-blue-700 font-bold">Nomor WhatsApp terdaftar</strong> Anda. Setelah berhasil login, Anda dapat langsung memantau kuota, mengganti nama WiFi, hingga melaporkan kendala.
+                      Kata sandi awal adalah <strong className="text-blue-700 font-semibold">Nomor WhatsApp terdaftar</strong> Anda. Setelah berhasil login, Anda dapat langsung memantau kuota, mengganti nama WiFi, hingga melaporkan kendala.
                     </p>
                   </div>
                 )}
@@ -361,7 +360,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 
             {/* Footer copyright */}
             <div className="pt-3 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0">
-              &copy; 2026 MyTekno &bull; Portal Layanan Mandiri Pelanggan TeknoIndonet
+              &copy; 2026 MyTekno &bull; Portal Layanan Mandiri Pelanggan
             </div>
           </div>
         </div>

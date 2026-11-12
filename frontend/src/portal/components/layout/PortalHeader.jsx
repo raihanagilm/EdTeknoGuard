@@ -48,21 +48,9 @@ export function PortalHeader({
   const isDotVisible = showNotificationDot !== null ? showNotificationDot : hasUnread;
 
   return (
-    <div className="shrink-0 relative z-0" style={{ background: '#2563eb' }}>
-      {/* Ornamen Lingkaran Header Terkapsulasi */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-0 right-0 w-32 h-32 rounded-bl-full"
-          style={{ background: '#3b82f6', opacity: 0.6 }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-24 h-24 rounded-tr-full"
-          style={{ background: '#3b82f6', opacity: 0.4 }}
-        />
-      </div>
-
+    <div className="shrink-0 relative z-0 bg-blue-600 border-b border-blue-700/60 shadow-xs">
       {/* Top bar: Avatar/Maskot + Judul/Subjudul/Greeting + Lonceng Notifikasi */}
-      <div className="relative px-5 pt-4 pb-7 flex items-center justify-between gap-3">
+      <div className="relative px-4 sm:px-5 pt-3.5 pb-6 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           {avatarInitials ? (
             customer?.foto_profil ? (
@@ -70,10 +58,10 @@ export function PortalHeader({
                 src={customer.foto_profil}
                 alt=""
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                className="w-10 h-10 rounded-full object-cover border border-white/60 shrink-0 shadow-xs"
+                className="w-10 h-10 rounded-full object-cover border border-white/40 shrink-0 shadow-xs"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-900/40 border border-white/40 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-xs">
+              <div className="w-10 h-10 rounded-full bg-blue-700/80 border border-white/30 flex items-center justify-center text-white text-xs font-bold tracking-tight shrink-0 shadow-xs">
                 {avatarInitials}
               </div>
             )
@@ -90,17 +78,17 @@ export function PortalHeader({
           <div className="min-w-0 flex-1">
             {greeting ? (
               <>
-                <div className="portal-subheading text-white/90 leading-none">{greeting}</div>
-                <div className="portal-heading text-white leading-tight mt-0.5 sm:mt-1 truncate">
+                <div className="text-xs font-medium text-blue-100/90 leading-tight truncate">{greeting}</div>
+                <div className="text-sm font-bold text-white tracking-tight leading-snug mt-0.5 truncate">
                   {title}
                 </div>
               </>
             ) : (
               <>
-                <h1 className="portal-heading font-black tracking-tight leading-none text-white truncate">
+                <h1 className="text-sm font-bold tracking-tight text-white leading-tight">
                   {title}
                 </h1>
-                <p className="portal-subheading text-white/95 mt-0.5 sm:mt-1 leading-tight truncate">
+                <p className="text-xs font-normal text-blue-100/90 mt-0.5 leading-snug break-words">
                   {subtitle}
                 </p>
               </>
@@ -112,12 +100,12 @@ export function PortalHeader({
         <button
           type="button"
           onClick={onNotificationClick}
-          aria-label="Notifikasi"
-          className="relative w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition cursor-pointer shrink-0"
+          aria-label="Buka Notifikasi"
+          className="relative w-10 h-10 rounded-xl bg-blue-700/70 hover:bg-blue-700 border border-white/20 flex items-center justify-center text-white transition cursor-pointer shrink-0 active:scale-95"
         >
           <Bell className="w-4 h-4 stroke-[2.2]" />
           {isDotVisible && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border border-blue-600" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-blue-600" />
           )}
         </button>
       </div>

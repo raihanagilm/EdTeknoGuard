@@ -178,30 +178,30 @@ export function PortalPaymentTab({
         onOpenNotifications={onOpenNotifications}
         hasUnreadNotifications={hasUnreadNotifications}
         title="Tagihan & Pembayaran"
-        subtitle="Bayar Iuran Internet Mandiri"
+        subtitle="Status & riwayat bayar"
         dashboardData={dashboardData}
         customer={customer}
       />
 
       {/* ═══ 2. KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
-        <div className="pb-24 space-y-3">
+        <div className="px-3.5 pb-24 space-y-3">
 
           {/* ═══ SKELETON / LOADING STATE (Hanya pertama kali sebelum cache terisi) ═══ */}
           {memuatTagihan && !tagihan && <SkeletonTagihan />}
 
           {/* ═══ ERROR STATE ═══ */}
           {galatTagihan && !tagihan && (
-            <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-red-100 p-4">
+            <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-rose-200 p-4">
               <div className="flex gap-2.5">
-                <XCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-black text-gray-900">Tagihan Belum Bisa Dibaca</p>
-                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">{galatTagihan}</p>
+                  <p className="text-sm font-bold text-slate-900">Tagihan Belum Bisa Dibaca</p>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">{galatTagihan}</p>
                   <button
                     type="button"
                     onClick={() => muatTagihan(false)}
-                    className="mt-3 min-h-[40px] px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
+                    className="mt-3 min-h-[40px] px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
                   >
                     <RefreshCw className="w-4 h-4" />
                     <span>Coba Lagi</span>
@@ -213,36 +213,20 @@ export function PortalPaymentTab({
 
           {/* ═══ KARTU 1: KARTU UTAMA TAGIHAN AKTIF & METODE BAYAR ═══ */}
           {(!memuatTagihan || tagihan) && !galatTagihan && (
-            <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
-              {/* Card Header dengan Badge Ikon Kotak & Sub-Tab Switcher di Kanan */}
-              <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2.5">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
-                    <ReceiptText className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="text-sm font-black text-gray-900 leading-tight truncate">
-                      {subTab === 'tagihan'
-                        ? (activeBill?.overdue ? 'Tagihan Tertunggak' : 'Total Tagihan Bulan Ini')
-                        : 'Riwayat Pembayaran'}
-                    </h2>
-                    <p className="text-xs text-gray-600 mt-0.5 leading-tight font-medium truncate">
-                      {subTab === 'tagihan'
-                        ? (activeBill?.overdue
-                            ? `Tunggakan ${periodeTeks(activeBill.billing_period)} wajib diselesaikan lebih dulu`
-                            : 'Iuran langganan internet mandiri')
-                        : 'Catatan tagihan yang sudah lunas'}
-                    </p>
-                  </div>
-                </div>
+            <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
+              {/* Card Header dengan Switcher Sub-Tab yang Jelas */}
+              <div className="p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5 bg-slate-50/70">
+                <span className="text-xs font-bold text-slate-700">
+                  {subTab === 'tagihan' ? 'Rincian Tagihan' : 'Daftar Riwayat Bayar'}
+                </span>
 
-                {/* Sub-tab Pill Switcher Terpadu di Header */}
-                <div className="flex items-center bg-gray-100 p-0.5 rounded-xl border border-gray-200 shrink-0">
+                {/* Sub-tab Pill Switcher Terpadu */}
+                <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0">
                   <button
                     type="button"
                     onClick={() => setSubTab('tagihan')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      subTab === 'tagihan' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                      subTab === 'tagihan' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     Tagihan
@@ -250,8 +234,18 @@ export function PortalPaymentTab({
                   <button
                     type="button"
                     onClick={() => setSubTab('riwayat')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      subTab === 'riwayat' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                      subTab === 'riwayat' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Riwayat
+                  </button>
+                </div>
+              </div>
+                    type="button"
+                    onClick={() => setSubTab('riwayat')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                      subTab === 'riwayat' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     Riwayat
@@ -365,52 +359,52 @@ export function PortalPaymentTab({
 
           {/* ═══ KARTU 2: DAFTAR TAGIHAN BULANAN LAINNYA (Hanya di Tab Tagihan) ═══ */}
           {subTab === 'tagihan' && (!memuatTagihan || tagihan) && !galatTagihan && otherUnpaidInvoices.length > 0 && (
-            <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
+            <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
               {/* Header Kartu 2 */}
-              <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2.5">
+              <div className="p-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5 bg-slate-50/60">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-blue-50 text-blue-600">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-black text-gray-900 leading-tight">
+                    <h2 className="text-sm font-bold text-slate-900 leading-tight">
                       Tagihan Periode Berikutnya
                     </h2>
-                    <p className="text-xs text-gray-600 mt-0.5 leading-tight font-medium">
+                    <p className="text-xs text-slate-500 mt-0.5 leading-tight font-medium">
                       {otherUnpaidInvoices.length} invoice menunggu pelunasan tagihan sebelumnya
                     </p>
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-mono font-bold text-xs border border-blue-200">
-                  {otherUnpaidInvoices.length}
+                <span className="font-mono font-bold text-xs text-blue-600">
+                  {otherUnpaidInvoices.length} invoice
                 </span>
               </div>
 
               {/* List Baris Tagihan */}
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-slate-100">
                 {otherUnpaidInvoices.map((inv) => (
-                  <div key={inv.id} className="p-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/70 transition">
+                  <div key={inv.id} className="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-50/70 transition">
                     <div className="min-w-0">
-                      <p className="text-xs font-black text-gray-900 truncate">
+                      <p className="text-xs font-bold text-slate-900 truncate">
                         {periodeTeks(inv.billing_period) || inv.number}
                       </p>
-                      <p className="text-[11px] text-gray-500 mt-0.5 font-medium">
+                      <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
                         {jenisTagihanTeks(inv.type)} · Jatuh tempo {tanggalTeks(inv.due_date)}
                       </p>
                       {inv.overdue ? (
-                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
-                          <AlertTriangle className="w-3.5 h-3.5" />
+                        <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-bold text-amber-600">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                           <span>Terlambat</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 text-[10px] font-bold">
-                          <Clock className="w-3.5 h-3.5" />
+                        <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-slate-500">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
                           <span>Belum Dibayar</span>
                         </span>
                       )}
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-black text-gray-900 font-mono">
+                      <p className="text-xs font-bold text-slate-900 font-mono">
                         {rupiah(inv.total)}
                       </p>
                     </div>

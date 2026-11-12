@@ -304,7 +304,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
   };
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827] relative">
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900 relative">
       {/* ═══ HEADER BIRU TERPADU DENGAN JUDUL HALAMAN AKTIF ═══ */}
       <PortalHeader
         showNotificationDot={hasUnreadNotifications}
@@ -317,13 +317,13 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
-        <div className="pb-24 space-y-3">
+        <div className="px-3.5 pb-24 space-y-3.5">
 
           {/* ═══ CARD PUTIH PROFIL & DATA DIRI (PERSIS SEPERTI GAMBAR USER) ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
+          <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
             {/* Card Header Identitas Pelanggan */}
-            <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="p-3.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                 {/* Avatar Bulat dengan Badge Tombol Kamera */}
                 <div className="relative shrink-0">
                   {currentCustomer?.foto_profil && !fotoLoadError ? (
@@ -331,13 +331,10 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                       src={currentCustomer.foto_profil}
                       alt=""
                       onError={() => setFotoLoadError(true)}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-xs"
+                      className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-xs"
                     />
                   ) : (
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-sm font-mono shadow-xs border-2 border-white"
-                      style={{ background: '#2563eb' }}
-                    >
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm font-mono shadow-xs border-2 border-white bg-blue-600">
                       {getInitials(currentCustomer?.nama)}
                     </div>
                   )}
@@ -347,7 +344,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingFoto}
-                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-blue-600 hover:text-blue-800 hover:bg-gray-50 transition cursor-pointer disabled:opacity-50"
+                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center text-blue-600 hover:text-blue-800 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
                     title="Ubah Foto Profil"
                     aria-label="Ubah Foto Profil"
                   >
@@ -369,17 +366,17 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                 </div>
 
                 <div className="min-w-0">
-                  <div className="portal-heading text-gray-900 leading-tight truncate">
+                  <div className="text-sm font-bold text-slate-900 leading-tight truncate">
                     {currentCustomer?.nama || 'Profil Pelanggan'}
                   </div>
-                  <div className="mt-0.5 text-[11px] sm:text-xs text-gray-500 font-mono font-medium flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                    <span className="font-bold text-gray-700 tracking-tight leading-none text-[10px] sm:text-xs truncate max-w-[140px] sm:max-w-[190px]" title={currentCustomer?.id_pelanggan}>{currentCustomer?.id_pelanggan || '-'}</span>
+                  <div className="mt-0.5 text-xs text-slate-500 font-mono font-medium flex items-center gap-1.5 flex-wrap">
+                    <span className="font-semibold text-slate-700 tracking-tight leading-none text-xs truncate max-w-[140px] sm:max-w-[190px]" title={currentCustomer?.id_pelanggan}>{currentCustomer?.id_pelanggan || '-'}</span>
                     {currentCustomer?.foto_profil && (
                       <button
                         type="button"
                         onClick={handleDeleteFoto}
                         disabled={uploadingFoto}
-                        className="text-[10px] text-gray-400 hover:text-rose-600 font-sans flex items-center gap-0.5 transition cursor-pointer"
+                        className="text-[10px] text-slate-400 hover:text-rose-600 font-sans flex items-center gap-0.5 transition cursor-pointer"
                         title="Hapus Foto Profil"
                       >
                         <Trash2 className="w-2.5 h-2.5" />
@@ -393,7 +390,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 portal-body-bold transition flex items-center gap-1 sm:gap-1.5 cursor-pointer shrink-0"
+                className="px-3 py-1.5 rounded-lg bg-blue-50/80 hover:bg-blue-100 text-blue-700 text-xs font-semibold transition flex items-center gap-1 cursor-pointer shrink-0"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit Data</span>
@@ -401,52 +398,52 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
             </div>
 
             {/* Card Body: Rincian Data Diri */}
-            <div className="p-4 pt-3">
-              <div className="space-y-2 sm:space-y-2.5 portal-body-normal">
-                <div className="flex items-center justify-between py-1 border-b border-gray-50">
-                  <span className="text-gray-600">Kantor Layanan</span>
-                  <span className="font-semibold text-gray-900 capitalize">
+            <div className="p-3.5">
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                  <span className="text-slate-500 font-medium">Kantor Layanan</span>
+                  <span className="font-semibold text-slate-800 capitalize">
                     Kantor {currentCustomer?.kantor || 'Cabang'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1 border-b border-gray-50">
-                  <span className="text-gray-600">No. WhatsApp / Telp</span>
-                  <span className="font-mono font-bold text-gray-900">{currentCustomer?.no_hp || '-'}</span>
+                <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                  <span className="text-slate-500 font-medium">No. WhatsApp / Telp</span>
+                  <span className="font-mono font-bold text-slate-800">{currentCustomer?.no_hp || '-'}</span>
                 </div>
-                <div className="flex items-start justify-between gap-3 py-1 border-b border-gray-50">
-                  <span className="text-gray-600 shrink-0">Alamat Lengkap</span>
-                  <span className="font-semibold text-gray-900 text-right">{currentCustomer?.alamat || '-'}</span>
+                <div className="flex items-start justify-between gap-3 py-1 border-b border-slate-50">
+                  <span className="text-slate-500 font-medium shrink-0">Alamat Lengkap</span>
+                  <span className="font-medium text-slate-800 text-right">{currentCustomer?.alamat || '-'}</span>
                 </div>
-                <div className="flex items-center justify-between py-1 border-b border-gray-50">
-                  <span className="text-gray-600">Paket Internet</span>
-                  <span className="font-bold text-gray-900">{currentCustomer?.paket || '-'}</span>
+                <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                  <span className="text-slate-500 font-medium">Paket Internet</span>
+                  <span className="font-semibold text-slate-800">{currentCustomer?.paket || '-'}</span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-gray-600">IP Modem Router</span>
-                  <span className="font-mono font-bold text-gray-900">{currentCustomer?.ip_router || currentCustomer?.ip_ont || '-'}</span>
+                  <span className="text-slate-500 font-medium">IP Modem Router</span>
+                  <span className="font-mono font-bold text-slate-800">{currentCustomer?.ip_router || currentCustomer?.ip_ont || '-'}</span>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* ═══ MENU PENGATURAN & LAYANAN (GAYA GOJEK LIST ROW) ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
+          {/* ═══ MENU PENGATURAN & LAYANAN (GAYA LIST ROW BERSIH) ═══ */}
+          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden divide-y divide-slate-100">
             {/* 1. Pengaturan WiFi Rumah */}
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('wifi')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50/70 transition cursor-pointer"
+              className="w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                   <Wifi className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="portal-body-bold text-gray-900">Pengaturan WiFi Rumah</div>
-                  <div className="portal-caption text-gray-500 font-medium">Ubah Nama SSID & Kata Sandi WiFi</div>
+                  <div className="text-xs font-bold text-slate-900">Pengaturan WiFi Rumah</div>
+                  <div className="text-[11px] text-slate-500 font-medium">Ubah Nama SSID &amp; Kata Sandi WiFi</div>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
             </button>
 
             {/* 2. Ganti Kata Sandi Akun */}
@@ -530,11 +527,11 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
           </section>
 
           {/* ═══ TOMBOL LOGOUT DARI AKUN PORTAL ═══ */}
-          <div className="mx-3">
+          <div className="pt-1">
             <button
               type="button"
               onClick={() => setIsLogoutConfirmOpen(true)}
-              className="w-full py-3.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 portal-body-bold flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer active:scale-98"
+              className="w-full py-3 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer active:scale-98"
             >
               <LogOut className="w-4 h-4" />
               <span>Keluar dari Akun Portal</span>

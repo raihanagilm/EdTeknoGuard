@@ -178,49 +178,46 @@ export function PortalResetPasswordView({ onBackToLogin }) {
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-slate-200 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden">
-      <div className="w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative">
+    <div className="h-[100dvh] w-full bg-slate-100 sm:bg-slate-200/80 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden">
+      <div className="w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-2xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative">
 
-        {/* ░░░ PANEL ATAS: gradient biru diperbesar + Maskot Si Router Pusing ░░░ */}
-        <div className="relative bg-gradient-to-br from-sky-500 via-blue-600 to-blue-800 h-[190px] sm:h-[210px] overflow-hidden shrink-0">
-          <div className="absolute -top-14 -right-14 w-48 h-48 bg-white/10 rounded-full pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 w-52 h-52 bg-cyan-300/10 rounded-full pointer-events-none" />
-
+        {/* ░░░ PANEL ATAS: Biru Brand Solid + Maskot Si Router Pusing ░░░ */}
+        <div className="relative bg-blue-600 h-[190px] sm:h-[210px] overflow-hidden shrink-0 border-b border-blue-700/60 shadow-xs">
           {/* Header Brand Atas */}
           <div className="relative z-10 pt-4 px-5">
             <div className="flex items-center gap-3">
               <img
                 src="/tekno-indo-logo.png"
                 alt="TeknoIndonet Logo"
-                className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-md shrink-0"
+                className="w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
               />
               <div className="min-w-0">
-                <div className="text-white text-xl sm:text-2xl font-black tracking-tight leading-none drop-shadow-xs">
-                  My<span className="text-cyan-200 font-extrabold">Tekno</span>
+                <div className="text-white text-xl font-bold tracking-tight leading-none">
+                  My<span className="text-blue-200">Tekno</span>
                 </div>
-                <div className="text-blue-100/90 text-[11px] sm:text-xs mt-1 font-medium leading-tight">
-                  Layanan Mandiri Khusus Pelanggan TeknoIndonet
+                <div className="text-blue-100/90 text-xs mt-1 font-medium leading-tight">
+                  Layanan Mandiri Pelanggan
                 </div>
               </div>
             </div>
           </div>
 
           {/* MASKOT Si Router Pusing di tengah panel biru */}
-          <div className="absolute inset-0 flex items-center justify-center pt-14 pb-2 pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center pt-12 pb-2 pointer-events-none">
             <RouterPusingMascot className="w-24 h-20 sm:w-28 sm:h-22" />
           </div>
         </div>
 
-        {/* ░░░ PANEL BAWAH: card putih overlap + alur dinamis lupa password ░░░ */}
-        <div className="relative -mt-5 bg-white rounded-t-[1.75rem] shadow-2xl flex-1 flex flex-col justify-between overflow-y-auto z-10">
+        {/* ░░░ PANEL BAWAH: Card Putih Overlap + Alur Dinamis Lupa Password ░░░ */}
+        <div className="relative -mt-4 bg-white rounded-t-2xl shadow-xl flex-1 flex flex-col justify-between overflow-y-auto z-10">
           <div className="px-5 pt-4 pb-4 sm:px-6 sm:pt-5 sm:pb-5 flex flex-col justify-between min-h-full">
             <div>
               {/* Header Title */}
               <div className="text-center mb-3 sm:mb-4">
-                <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                <h1 className="text-lg font-bold text-slate-900 tracking-tight">
                   Lupa Password
                 </h1>
-                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">
                   {step === 'submitted_success'
                     ? 'Permintaan reset telah terkirim ke Tim Admin NOC'
                     : 'Pemulihan kata sandi akun pelanggan MyTekno'}
@@ -245,14 +242,14 @@ export function PortalResetPasswordView({ onBackToLogin }) {
                       <KeyRound className="w-4 h-4 text-blue-600 shrink-0" />
                       <span>Pemulihan Sandi Melalui Admin</span>
                     </div>
-                    <p className="text-blue-800/90 text-[11px] leading-relaxed">
+                    <p className="text-blue-800/90 text-xs leading-relaxed">
                       Masukkan Nomor WhatsApp terdaftar Anda. Sistem akan membuatkan kata sandi baru secara aman dan meneruskannya ke tiket Admin NOC TeknoIndonet untuk dikirimkan langsung ke WhatsApp Anda.
                     </p>
                   </div>
 
                   <form onSubmit={handleRequestReset} className="space-y-3">
                     <div className="space-y-1">
-                      <label htmlFor="reset-phone" className="text-[11px] font-semibold text-slate-700 block">
+                      <label htmlFor="reset-phone" className="text-xs font-semibold text-slate-700 block">
                         Nomor WhatsApp Terdaftar
                       </label>
                       <div className="relative">
@@ -264,7 +261,7 @@ export function PortalResetPasswordView({ onBackToLogin }) {
                           value={noHp}
                           onChange={(e) => setNoHp(e.target.value)}
                           placeholder="Contoh: 081234567890 atau 628..."
-                          className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[42px]"
+                          className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[44px]"
                         />
                       </div>
                     </div>
@@ -272,7 +269,7 @@ export function PortalResetPasswordView({ onBackToLogin }) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full mt-2 py-2.5 sm:py-3 px-4 rounded-lg bg-gradient-to-r from-sky-500 via-blue-600 to-blue-700 hover:from-sky-600 hover:to-blue-800 text-white font-bold text-xs sm:text-sm shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]"
+                      className="w-full mt-2 py-2.5 sm:py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xs transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]"
                     >
                       <span>{loading ? 'Memproses Permintaan...' : 'Kirim Permintaan Reset'}</span>
                       {loading ? <RefreshCw className="w-4 h-4 animate-spin shrink-0" /> : <Send className="w-4 h-4 shrink-0" />}

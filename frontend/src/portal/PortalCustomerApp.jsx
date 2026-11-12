@@ -336,9 +336,9 @@ export function PortalCustomerApp() {
   }
 
   return (
-    <div className="fixed inset-0 sm:relative sm:min-h-[100dvh] bg-[#e5e7eb] p-0 sm:p-4 pb-0 sm:pb-4 flex justify-center items-center text-[#111827] font-sans antialiased overflow-hidden overscroll-none select-none">
+    <div className="fixed inset-0 sm:relative sm:min-h-[100dvh] bg-slate-200/90 p-0 sm:p-4 pb-0 sm:pb-4 flex justify-center items-center text-slate-900 font-sans antialiased overflow-hidden overscroll-none select-none">
       {/* Mobile Shell Wrapper (Max 440px dengan full dynamic viewport height) */}
-      <div className="w-full max-w-[440px] mx-auto h-[100dvh] sm:h-[92dvh] bg-[#f3f4f6] relative flex flex-col sm:rounded-2xl sm:shadow-2xl sm:shadow-slate-900/15 sm:border sm:border-slate-200 overflow-hidden overscroll-none">
+      <div className="w-full max-w-[440px] mx-auto h-[100dvh] sm:h-[92dvh] bg-slate-50 relative flex flex-col sm:rounded-2xl sm:shadow-2xl sm:shadow-slate-900/15 sm:border sm:border-slate-200 overflow-hidden overscroll-none">
         {/* Area Konten Utama Mandiri Seluruh Tab */}
         <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
           {activeTab === 'beranda' && (

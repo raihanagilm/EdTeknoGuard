@@ -38332,62 +38332,67 @@ function LoginView({ onLoginSuccess }) {
 //#region src/portal/components/layout/PortalNavigation.jsx
 function PortalBottomNav({ activeTab, onTabChange }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
-		className: "sticky bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-200 z-30 shrink-0 pb-[max(env(safe-area-inset-bottom,0px),12px)] shadow-[0_-4px_12px_rgba(0,0,0,0.05)] overflow-visible overflow-x-clip select-none",
+		className: "sticky bottom-0 w-full bg-white/98 backdrop-blur-md border-t border-slate-200 z-30 shrink-0 pb-[max(env(safe-area-inset-bottom,0px),8px)] shadow-[0_-2px_10px_rgba(0,0,0,0.03)] select-none",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "grid grid-cols-5 h-14 items-center px-1 overflow-visible",
+			className: "grid grid-cols-5 h-14 items-center px-1",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
 					onClick: () => onTabChange("kendala"),
-					className: `flex flex-col items-center justify-center min-h-[48px] transition ${activeTab === "kendala" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"}`,
+					className: `flex flex-col items-center justify-center min-h-[48px] py-1 transition cursor-pointer ${activeTab === "kendala" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: `p-1 rounded-xl transition ${activeTab === "kendala" ? "bg-blue-50" : ""}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: `w-5 h-5 ${activeTab === "kendala" ? "stroke-[2.5]" : "stroke-2"}` })
+						className: `p-1.5 rounded-xl transition ${activeTab === "kendala" ? "bg-blue-50 text-blue-600" : ""}`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: `w-5 h-5 ${activeTab === "kendala" ? "stroke-[2.3]" : "stroke-[1.8]"}` })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "portal-caption tracking-tight mt-0.5",
+						className: "text-[11px] tracking-tight mt-0.5 font-medium leading-none",
 						children: "Kendala"
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
 					onClick: () => onTabChange("pembayaran"),
-					className: `flex flex-col items-center justify-center min-h-[48px] transition ${activeTab === "pembayaran" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"}`,
+					className: `flex flex-col items-center justify-center min-h-[48px] py-1 transition cursor-pointer ${activeTab === "pembayaran" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: `p-1 rounded-xl transition ${activeTab === "pembayaran" ? "bg-blue-50" : ""}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: `w-5 h-5 ${activeTab === "pembayaran" ? "stroke-[2.5]" : "stroke-2"}` })
+						className: `p-1.5 rounded-xl transition ${activeTab === "pembayaran" ? "bg-blue-50 text-blue-600" : ""}`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: `w-5 h-5 ${activeTab === "pembayaran" ? "stroke-[2.3]" : "stroke-[1.8]"}` })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "portal-caption tracking-tight mt-0.5",
+						className: "text-[11px] tracking-tight mt-0.5 font-medium leading-none",
 						children: "Bayar"
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
 					onClick: () => onTabChange("beranda"),
-					className: "flex flex-col items-center justify-center -mt-3.5 min-h-[48px] group",
+					className: "flex flex-col items-center justify-center -mt-2 min-h-[48px] group cursor-pointer",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: `w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg transition-all ${activeTab === "beranda" ? "bg-blue-600 text-white shadow-blue-600/35 ring-2 ring-white scale-105" : "bg-blue-600/90 text-white shadow-blue-600/20 border border-white"}`,
+						className: `w-10 h-10 rounded-xl flex items-center justify-center transition-all ${activeTab === "beranda" ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-white scale-105" : "bg-slate-800 text-white shadow-xs"}`,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(House, { className: "w-5 h-5 stroke-[2.2]" })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `portal-caption tracking-tight mt-0.5 font-bold ${activeTab === "beranda" ? "text-blue-700" : "text-slate-600"}`,
+						className: `text-[11px] tracking-tight mt-1 leading-none ${activeTab === "beranda" ? "text-blue-600 font-bold" : "text-slate-600 font-medium"}`,
 						children: "Beranda"
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
 					onClick: () => onTabChange("kuota"),
-					className: `flex flex-col items-center justify-center min-h-[48px] transition ${activeTab === "kuota" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"}`,
+					className: `flex flex-col items-center justify-center min-h-[48px] py-1 transition cursor-pointer ${activeTab === "kuota" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: `p-1 rounded-xl transition ${activeTab === "kuota" ? "bg-blue-50" : ""}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartPie, { className: `w-5 h-5 ${activeTab === "kuota" ? "stroke-[2.5]" : "stroke-2"}` })
+						className: `p-1.5 rounded-xl transition ${activeTab === "kuota" ? "bg-blue-50 text-blue-600" : ""}`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartPie, { className: `w-5 h-5 ${activeTab === "kuota" ? "stroke-[2.3]" : "stroke-[1.8]"}` })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "portal-caption tracking-tight mt-0.5",
+						className: "text-[11px] tracking-tight mt-0.5 font-medium leading-none",
 						children: "Kuota"
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
 					onClick: () => onTabChange("profil"),
-					className: `flex flex-col items-center justify-center min-h-[48px] transition ${activeTab === "profil" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"}`,
+					className: `flex flex-col items-center justify-center min-h-[48px] py-1 transition cursor-pointer ${activeTab === "profil" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-700"}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: `p-1 rounded-xl transition ${activeTab === "profil" ? "bg-blue-50" : ""}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: `w-5 h-5 ${activeTab === "profil" ? "stroke-[2.5]" : "stroke-2"}` })
+						className: `p-1.5 rounded-xl transition ${activeTab === "profil" ? "bg-blue-50 text-blue-600" : ""}`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: `w-5 h-5 ${activeTab === "profil" ? "stroke-[2.3]" : "stroke-[1.8]"}` })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "portal-caption tracking-tight mt-0.5",
+						className: "text-[11px] tracking-tight mt-0.5 font-medium leading-none",
 						children: "Profil"
 					})]
 				})
@@ -38740,54 +38745,49 @@ function PortalResetPasswordView({ onBackToLogin }) {
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "h-[100dvh] w-full bg-slate-200 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden",
+		className: "h-[100dvh] w-full bg-slate-100 sm:bg-slate-200/80 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative",
+			className: "w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-2xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative bg-gradient-to-br from-sky-500 via-blue-600 to-blue-800 h-[190px] sm:h-[210px] overflow-hidden shrink-0",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -top-14 -right-14 w-48 h-48 bg-white/10 rounded-full pointer-events-none" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -bottom-16 -left-16 w-52 h-52 bg-cyan-300/10 rounded-full pointer-events-none" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "relative z-10 pt-4 px-5",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-								src: "/tekno-indo-logo.png",
-								alt: "TeknoIndonet Logo",
-								className: "w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-md shrink-0"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "min-w-0",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "text-white text-xl sm:text-2xl font-black tracking-tight leading-none drop-shadow-xs",
-									children: ["My", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-cyan-200 font-extrabold",
-										children: "Tekno"
-									})]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "text-blue-100/90 text-[11px] sm:text-xs mt-1 font-medium leading-tight",
-									children: "Layanan Mandiri Khusus Pelanggan TeknoIndonet"
+				className: "relative bg-blue-600 h-[190px] sm:h-[210px] overflow-hidden shrink-0 border-b border-blue-700/60 shadow-xs",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "relative z-10 pt-4 px-5",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+							src: "/tekno-indo-logo.png",
+							alt: "TeknoIndonet Logo",
+							className: "w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "min-w-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-white text-xl font-bold tracking-tight leading-none",
+								children: ["My", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-blue-200",
+									children: "Tekno"
 								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "text-blue-100/90 text-xs mt-1 font-medium leading-tight",
+								children: "Layanan Mandiri Pelanggan"
 							})]
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "absolute inset-0 flex items-center justify-center pt-14 pb-2 pointer-events-none",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterPusingMascot, { className: "w-24 h-20 sm:w-28 sm:h-22" })
+						})]
 					})
-				]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "absolute inset-0 flex items-center justify-center pt-12 pb-2 pointer-events-none",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterPusingMascot, { className: "w-24 h-20 sm:w-28 sm:h-22" })
+				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "relative -mt-5 bg-white rounded-t-[1.75rem] shadow-2xl flex-1 flex flex-col justify-between overflow-y-auto z-10",
+				className: "relative -mt-4 bg-white rounded-t-2xl shadow-xl flex-1 flex flex-col justify-between overflow-y-auto z-10",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "px-5 pt-4 pb-4 sm:px-6 sm:pt-5 sm:pb-5 flex flex-col justify-between min-h-full",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "text-center mb-3 sm:mb-4",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-								className: "text-lg sm:text-xl font-black text-slate-900 tracking-tight",
+								className: "text-lg font-bold text-slate-900 tracking-tight",
 								children: "Lupa Password"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[11px] text-slate-500 mt-0.5 font-medium",
+								className: "text-xs text-slate-500 mt-0.5 font-medium",
 								children: step === "submitted_success" ? "Permintaan reset telah terkirim ke Tim Admin NOC" : "Pemulihan kata sandi akun pelanggan MyTekno"
 							})]
 						}),
@@ -38806,7 +38806,7 @@ function PortalResetPasswordView({ onBackToLogin }) {
 									className: "font-bold flex items-center gap-1.5 text-blue-800",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "w-4 h-4 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pemulihan Sandi Melalui Admin" })]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-blue-800/90 text-[11px] leading-relaxed",
+									className: "text-blue-800/90 text-xs leading-relaxed",
 									children: "Masukkan Nomor WhatsApp terdaftar Anda. Sistem akan membuatkan kata sandi baru secara aman dan meneruskannya ke tiket Admin NOC TeknoIndonet untuk dikirimkan langsung ke WhatsApp Anda."
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
@@ -38816,7 +38816,7 @@ function PortalResetPasswordView({ onBackToLogin }) {
 									className: "space-y-1",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 										htmlFor: "reset-phone",
-										className: "text-[11px] font-semibold text-slate-700 block",
+										className: "text-xs font-semibold text-slate-700 block",
 										children: "Nomor WhatsApp Terdaftar"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "relative",
@@ -38827,13 +38827,13 @@ function PortalResetPasswordView({ onBackToLogin }) {
 											value: noHp,
 											onChange: (e) => setNoHp(e.target.value),
 											placeholder: "Contoh: 081234567890 atau 628...",
-											className: "w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[42px]"
+											className: "w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[44px]"
 										})]
 									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									type: "submit",
 									disabled: loading,
-									className: "w-full mt-2 py-2.5 sm:py-3 px-4 rounded-lg bg-gradient-to-r from-sky-500 via-blue-600 to-blue-700 hover:from-sky-600 hover:to-blue-800 text-white font-bold text-xs sm:text-sm shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]",
+									className: "w-full mt-2 py-2.5 sm:py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xs transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: loading ? "Memproses Permintaan..." : "Kirim Permintaan Reset" }), loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-4 h-4 shrink-0" })]
 								})]
 							})]
@@ -39102,53 +39102,51 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "h-[100dvh] w-full bg-slate-200 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden",
+		className: "h-[100dvh] w-full bg-slate-100 sm:bg-slate-200/80 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative",
+			className: "w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-2xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative bg-gradient-to-br from-sky-500 via-blue-600 to-blue-800 h-[210px] sm:h-[230px] overflow-hidden shrink-0",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -top-14 -right-14 w-48 h-48 bg-white/10 rounded-full pointer-events-none" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -bottom-16 -left-16 w-52 h-52 bg-cyan-300/10 rounded-full pointer-events-none" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "relative z-10 pt-4 px-5",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-								src: "/tekno-indo-logo.png",
-								alt: "TeknoIndonet Logo",
-								className: "w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-md shrink-0"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "min-w-0",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "text-white text-xl sm:text-2xl font-black tracking-tight leading-none drop-shadow-xs",
-									children: ["My", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-cyan-200 font-extrabold",
-										children: "Tekno"
-									})]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "text-blue-100/90 text-[11px] sm:text-xs mt-1 font-medium leading-tight",
-									children: "Layanan Mandiri Khusus Pelanggan TeknoIndonet"
+				className: "relative bg-blue-600 h-[200px] sm:h-[220px] overflow-hidden shrink-0 border-b border-blue-700/60 shadow-xs",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "relative z-10 pt-4 px-5",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+							src: "/tekno-indo-logo.png",
+							alt: "TeknoIndonet Logo",
+							className: "w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "min-w-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-white text-xl font-bold tracking-tight leading-none",
+								children: ["My", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-blue-200",
+									children: "Tekno"
 								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "text-blue-100/90 text-xs mt-1 font-medium leading-tight",
+								children: "Layanan Mandiri Pelanggan"
 							})]
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "absolute inset-0 flex items-center justify-center pt-14 pb-2 pointer-events-none",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterMenyapaMascot, { className: "w-24 h-20 sm:w-28 sm:h-22" })
+						})]
 					})
-				]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "absolute inset-0 flex items-center justify-center pt-12 pb-2 pointer-events-none",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterMenyapaMascot, { className: "w-24 h-20 sm:w-28 sm:h-22" })
+				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "relative -mt-5 bg-white rounded-t-[1.75rem] shadow-2xl flex-1 flex flex-col justify-between overflow-y-auto z-10",
+				className: "relative -mt-4 bg-white rounded-t-2xl shadow-xl flex-1 flex flex-col justify-between overflow-y-auto z-10",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "px-5 pt-4 pb-4 sm:px-6 sm:pt-5 sm:pb-5 flex flex-col justify-between min-h-full",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "text-center mb-3 sm:mb-4",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-								className: "text-lg sm:text-xl font-black text-slate-900 tracking-tight",
-								children: "Login Aplikasi"
-							})
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+								className: "text-lg font-bold text-slate-900 tracking-tight",
+								children: "Masuk ke Akun Pelanggan"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-slate-500 mt-0.5",
+								children: "Masukkan nomor WhatsApp dan kata sandi Anda"
+							})]
 						}),
 						error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "mb-3 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2",
@@ -39156,13 +39154,13 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 							onSubmit: handleSubmit,
-							className: "space-y-2.5 sm:space-y-3",
+							className: "space-y-3",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "space-y-1",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 										htmlFor: "identifier",
-										className: "text-[11px] font-semibold text-slate-700 block",
+										className: "text-xs font-semibold text-slate-700 block",
 										children: "Nomor WhatsApp Terdaftar"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "relative",
@@ -39173,7 +39171,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 											value: identifier,
 											onChange: (e) => setIdentifier(e.target.value),
 											placeholder: "Contoh: 081234567890",
-											className: "w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[42px]"
+											className: "w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[44px]"
 										})]
 									})]
 								}),
@@ -39183,12 +39181,12 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 										className: "flex items-center justify-between",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 											htmlFor: "password",
-											className: "text-[11px] font-semibold text-slate-700",
+											className: "text-xs font-semibold text-slate-700",
 											children: "Kata Sandi (Password)"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 											type: "button",
 											onClick: onGoToReset,
-											className: "text-[10px] font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer",
+											className: "text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer",
 											children: "Lupa Password?"
 										})]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -39202,7 +39200,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 												value: password,
 												onChange: (e) => setPassword(e.target.value),
 												placeholder: "••••••••",
-												className: "w-full pl-9 pr-10 py-2.5 rounded-lg border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition font-mono min-h-[42px]"
+												className: "w-full pl-9 pr-10 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition font-mono min-h-[44px]"
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 												type: "button",
@@ -39223,10 +39221,10 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 											type: "checkbox",
 											checked: rememberMe,
 											onChange: (e) => setRememberMe(e.target.checked),
-											className: "w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+											className: "w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-[11px] text-slate-600 font-medium",
-											children: "Ingat Saya"
+											className: "text-xs text-slate-600 font-medium",
+											children: "Ingat Saya di Perangkat Ini"
 										})]
 									})
 								}),
@@ -39234,7 +39232,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 									id: "btn-submit",
 									type: "submit",
 									disabled: loading,
-									className: "w-full mt-1 py-2.5 sm:py-3 px-4 rounded-lg bg-gradient-to-r from-sky-500 via-blue-600 to-blue-700 hover:from-sky-600 hover:to-blue-800 text-white font-bold text-xs sm:text-sm shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]",
+									className: "w-full mt-1 py-2.5 sm:py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xs transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: loading ? "Memproses..." : "Masuk ke Akun Saya" }), loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin shrink-0" })]
 								})
 							]
@@ -39244,16 +39242,16 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								onClick: () => setIsInfoExpanded(!isInfoExpanded),
-								className: "w-full px-3 py-2 sm:py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer",
+								className: "w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-2 text-[11px] font-bold text-slate-700",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Informasi Masuk Pelanggan" })]
+									className: "flex items-center gap-2 text-xs font-semibold text-slate-700",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Informasi Akun Pelanggan" })]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1 text-[10px] text-slate-500",
+									className: "flex items-center gap-1 text-[11px] text-slate-500",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: isInfoExpanded ? "Tutup" : "Lihat" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: `w-3.5 h-3.5 transition-transform duration-200 ${isInfoExpanded ? "rotate-180" : ""}` })]
 								})]
 							}), isInfoExpanded && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "px-3 pb-3 text-[11px] text-slate-600 space-y-2 border-t border-slate-200 animate-fadeIn",
+								className: "px-3.5 pb-3 text-xs text-slate-600 space-y-2 border-t border-slate-200 animate-fadeIn",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 									className: "leading-relaxed pt-2",
 									children: [
@@ -39264,7 +39262,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 										}),
 										". Cukup masukkan ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-											className: "text-blue-700 font-bold",
+											className: "text-blue-700 font-semibold",
 											children: "Nomor WhatsApp"
 										}),
 										" yang terdaftar saat pemasangan WiFi rumah Anda."
@@ -39274,7 +39272,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 									children: [
 										"Kata sandi awal adalah ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-											className: "text-blue-700 font-bold",
+											className: "text-blue-700 font-semibold",
 											children: "Nomor WhatsApp terdaftar"
 										}),
 										" Anda. Setelah berhasil login, Anda dapat langsung memantau kuota, mengganti nama WiFi, hingga melaporkan kendala."
@@ -39284,7 +39282,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 						})
 					] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "pt-3 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0",
-						children: "© 2026 MyTekno • Portal Layanan Mandiri Pelanggan TeknoIndonet"
+						children: "© 2026 MyTekno • Portal Layanan Mandiri Pelanggan"
 					})]
 				})
 			})]
@@ -39373,23 +39371,23 @@ var getDefaultChannels = (customerId = "1", total = 125e3) => {
 //#region src/portal/components/notifications/PortalNotificationsPage.jsx
 function NotificationCardItem({ item, isRead, onClick, onDelete }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-		className: `p-3.5 rounded-xl border border-slate-200/80 space-y-2 shadow-2xs ${isRead ? "bg-slate-50/70 opacity-50" : "bg-white"}`,
+		className: `p-3.5 space-y-1.5 transition ${isRead ? "bg-slate-50/40 opacity-60" : "bg-white hover:bg-slate-50/50"}`,
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-between gap-2",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-1.5 min-w-0",
-					children: [!isRead && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, {
-						className: "w-3 h-3 text-blue-600 shrink-0",
+					children: [!isRead && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "w-2 h-2 rounded-full bg-blue-600 shrink-0",
 						title: "Belum dibaca"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[12px] font-bold text-slate-800 truncate",
+						className: "text-xs font-bold text-slate-800 truncate",
 						children: item.title
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-2 shrink-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `text-[11px] font-bold tracking-wide ${item.statusType === "success" ? "text-emerald-600" : item.statusType === "warning" ? "text-amber-600" : "text-rose-600"}`,
+						className: `text-xs font-bold ${item.statusType === "success" ? "text-emerald-600" : item.statusType === "warning" ? "text-amber-600" : "text-rose-600"}`,
 						children: item.statusText
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
@@ -39397,21 +39395,21 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
 							e.stopPropagation();
 							onDelete(item);
 						},
-						className: "p-1 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer",
+						className: "p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer",
 						title: "Hapus Pemberitahuan Ini",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" })
 					})]
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "portal-body-normal text-gray-700 leading-relaxed",
+				className: "text-xs text-slate-600 leading-relaxed",
 				children: item.desc
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-gray-500 font-mono",
+				className: "pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-					className: "flex items-center gap-1 text-[11px]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5 text-gray-400" }), item.timestamp]
+					className: "flex items-center gap-1",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-slate-400" }), item.timestamp]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: (e) => {
@@ -39625,112 +39623,86 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 		if (onNavigate && item.actionTab) onNavigate(item.actionTab, item.actionSubTab);
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]",
+		className: "flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "shrink-0 relative z-0",
-				style: { background: "#2563eb" },
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "absolute inset-0 overflow-hidden pointer-events-none",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "absolute top-0 right-0 w-32 h-32 rounded-bl-full",
-						style: {
-							background: "#3b82f6",
-							opacity: .6
-						}
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "absolute bottom-0 left-0 w-24 h-24 rounded-tr-full",
-						style: {
-							background: "#3b82f6",
-							opacity: .4
-						}
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "relative px-5 pt-4 pb-7 flex items-center justify-between gap-3",
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "shrink-0 relative z-0 bg-blue-600 border-b border-blue-700/60 shadow-xs",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "relative px-4 sm:px-5 pt-3.5 pb-6 flex items-center justify-between gap-3",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-2.5 min-w-0 flex-1",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							type: "button",
 							onClick: onBack,
 							"aria-label": "Kembali",
-							className: "w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition cursor-pointer shrink-0",
+							className: "w-9 h-9 rounded-xl bg-blue-700/70 hover:bg-blue-700 border border-white/20 flex items-center justify-center text-white transition cursor-pointer shrink-0 active:scale-95",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-5 h-5 stroke-[2.2]" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "min-w-0 flex-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-								className: "portal-heading font-black tracking-tight leading-none text-white truncate",
+								className: "text-sm font-bold tracking-tight text-white leading-tight",
 								children: "Pusat Notifikasi"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "portal-subheading text-white/95 mt-0.5 sm:mt-1 leading-tight truncate",
-								children: "Pemberitahuan tiket kendala, tagihan & pembayaran"
+								className: "text-xs font-normal text-blue-100/90 mt-0.5 leading-snug break-words",
+								children: "Pemberitahuan & riwayat aktivitas"
 							})]
 						})]
 					})
-				})]
+				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 				className: "scroll-area -mt-3 flex-1 overflow-y-auto relative z-10",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "pb-24 space-y-3",
+					className: "px-3.5 pb-24 space-y-3",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100",
+						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2",
+							className: "p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/70",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-2.5 min-w-0",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-									style: { background: "#dbeafe" },
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-5 h-5 text-blue-600" })
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "min-w-0",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-[14px] font-black text-gray-900 leading-tight",
-										children: "Daftar Pemberitahuan"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-[11px] sm:text-xs text-gray-500 mt-0.5 leading-tight font-medium",
-										children: "Aktivitas layanan & laporan terbaru Anda"
-									})]
+								className: "flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-xs font-bold text-slate-700",
+									children: "Semua Pemberitahuan"
+								}), notificationList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200",
+									children: notificationList.length
 								})]
-							}), notificationList.some((it) => readIds.includes(it.id)) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							}), notificationList.some((it) => readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								onClick: handleClearReadNotifications,
-								className: "p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition flex items-center justify-center cursor-pointer shrink-0",
+								className: "px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer shrink-0",
 								title: "Hapus seluruh pemberitahuan yang sudah dibaca",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-4 h-4" })
-							}) : notificationList.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-xs font-bold text-blue-700 font-mono shrink-0",
-								children: [notificationList.length, " Notif"]
-							}) : null]
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus Dibaca" })]
+							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "p-4 space-y-3",
+							className: "divide-y divide-slate-100",
 							children: loading && notificationList.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "space-y-2.5 animate-pulse",
+								className: "p-3.5 space-y-2.5 animate-pulse",
 								children: [
 									1,
 									2,
 									3
 								].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80 space-y-2",
+									className: "py-2.5 border-b border-slate-100 space-y-2",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "flex items-center justify-between",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-24 h-4 bg-gray-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-4 bg-gray-200 rounded" })]
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-24 h-4 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-4 bg-slate-200 rounded" })]
 										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-3/4 h-3.5 bg-gray-200 rounded" }),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-1/2 h-3 bg-gray-100 rounded" })
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-3/4 h-3.5 bg-slate-200 rounded" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-1/2 h-3 bg-slate-100 rounded" })
 									]
 								}, i))
 							}) : notificationList.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "p-8 bg-gray-50 rounded-2xl border border-gray-100 text-center space-y-2",
+								className: "p-8 text-center space-y-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-11 h-11 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto",
+									className: "w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-5 h-5" })
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "text-xs font-bold text-gray-800",
+									className: "text-xs font-bold text-slate-800",
 									children: "Tidak Ada Notifikasi"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-500 mt-0.5",
+									className: "text-xs text-slate-500 mt-0.5",
 									children: "Semua pemberitahuan sudah dibersihkan atau belum ada kendala baru."
 								})] })]
 							}) : notificationList.map((item) => {
@@ -39989,26 +39961,10 @@ function PortalHeader({ title = "MyTekno", subtitle = "Portal Layanan Mandiri Pe
 		};
 	}, [pel?.id_pelanggan, pel?.status_pembayaran]);
 	const isDotVisible = showNotificationDot !== null ? showNotificationDot : hasUnread;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "shrink-0 relative z-0",
-		style: { background: "#2563eb" },
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "absolute inset-0 overflow-hidden pointer-events-none",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute top-0 right-0 w-32 h-32 rounded-bl-full",
-				style: {
-					background: "#3b82f6",
-					opacity: .6
-				}
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute bottom-0 left-0 w-24 h-24 rounded-tr-full",
-				style: {
-					background: "#3b82f6",
-					opacity: .4
-				}
-			})]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "relative px-5 pt-4 pb-7 flex items-center justify-between gap-3",
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "shrink-0 relative z-0 bg-blue-600 border-b border-blue-700/60 shadow-xs",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "relative px-4 sm:px-5 pt-3.5 pb-6 flex items-center justify-between gap-3",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-2.5 min-w-0 flex-1",
 				children: [avatarInitials ? customer?.foto_profil ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
@@ -40017,9 +39973,9 @@ function PortalHeader({ title = "MyTekno", subtitle = "Portal Layanan Mandiri Pe
 					onError: (e) => {
 						e.currentTarget.style.display = "none";
 					},
-					className: "w-10 h-10 rounded-full object-cover border border-white/60 shrink-0 shadow-xs"
+					className: "w-10 h-10 rounded-full object-cover border border-white/40 shrink-0 shadow-xs"
 				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "w-10 h-10 rounded-full bg-blue-900/40 border border-white/40 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-xs",
+					className: "w-10 h-10 rounded-full bg-blue-700/80 border border-white/30 flex items-center justify-center text-white text-xs font-bold tracking-tight shrink-0 shadow-xs",
 					children: avatarInitials
 				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "shrink-0 inline-flex items-center justify-center leading-none overflow-visible",
@@ -40031,27 +39987,27 @@ function PortalHeader({ title = "MyTekno", subtitle = "Portal Layanan Mandiri Pe
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "min-w-0 flex-1",
 					children: greeting ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "portal-subheading text-white/90 leading-none",
+						className: "text-xs font-medium text-blue-100/90 leading-tight truncate",
 						children: greeting
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "portal-heading text-white leading-tight mt-0.5 sm:mt-1 truncate",
+						className: "text-sm font-bold text-white tracking-tight leading-snug mt-0.5 truncate",
 						children: title
 					})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "portal-heading font-black tracking-tight leading-none text-white truncate",
+						className: "text-sm font-bold tracking-tight text-white leading-tight",
 						children: title
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "portal-subheading text-white/95 mt-0.5 sm:mt-1 leading-tight truncate",
+						className: "text-xs font-normal text-blue-100/90 mt-0.5 leading-snug break-words",
 						children: subtitle
 					})] })
 				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 				type: "button",
 				onClick: onNotificationClick,
-				"aria-label": "Notifikasi",
-				className: "relative w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition cursor-pointer shrink-0",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4 stroke-[2.2]" }), isDotVisible && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full border border-blue-600" })]
+				"aria-label": "Buka Notifikasi",
+				className: "relative w-10 h-10 rounded-xl bg-blue-700/70 hover:bg-blue-700 border border-white/20 flex items-center justify-center text-white transition cursor-pointer shrink-0 active:scale-95",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4 stroke-[2.2]" }), isDotVisible && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-blue-600" })]
 			})]
-		})]
+		})
 	});
 }
 //#endregion
@@ -40138,20 +40094,24 @@ function ConnectedDevicesModal({ isOpen, onClose, devices, loading, scanning, on
 			onClick: (e) => e.stopPropagation(),
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50/70 to-indigo-50/50 gap-2 shrink-0",
+					className: "p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/90 gap-2 shrink-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-2.5",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0",
+							className: "w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Smartphone, { className: "w-5 h-5" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center gap-1.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-sm sm:text-base font-extrabold text-slate-900 leading-tight truncate",
+								className: "text-sm sm:text-base font-bold text-slate-900 leading-tight truncate",
 								children: "Perangkat Terhubung"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700",
-								children: [onlineDevices.length, " Aktif"]
+								className: "text-xs font-bold text-blue-600",
+								children: [
+									"(",
+									onlineDevices.length,
+									" aktif)"
+								]
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5 leading-tight",
@@ -40160,7 +40120,7 @@ function ConnectedDevicesModal({ isOpen, onClose, devices, loading, scanning, on
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: onClose,
-						className: "w-8 h-8 rounded-full bg-white/80 hover:bg-white text-slate-400 hover:text-slate-600 flex items-center justify-center border border-slate-200 transition cursor-pointer",
+						className: "w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center border border-slate-200 transition cursor-pointer",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 					})]
 				}),
@@ -40253,9 +40213,9 @@ function ConnectedDevicesModal({ isOpen, onClose, devices, loading, scanning, on
 													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 														className: "text-xs font-bold text-slate-900 truncate max-w-[140px] sm:max-w-[180px]",
 														children: getDeviceDisplayName(dev)
-													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-														className: "px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 uppercase shrink-0",
-														children: dev.tipe_koneksi || "WIFI"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+														className: "text-[10px] font-medium text-slate-400 uppercase shrink-0",
+														children: ["· ", dev.tipe_koneksi || "WIFI"]
 													})]
 												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 													className: "mt-1 text-[11px] text-slate-500 font-mono",
@@ -40272,11 +40232,11 @@ function ConnectedDevicesModal({ isOpen, onClose, devices, loading, scanning, on
 												onClick: () => handleRequestConfirm(dev),
 												disabled: blockingMac === dev.mac_address,
 												title: "Blokir akses internet perangkat ini",
-												className: "inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-[11px] font-bold border border-red-200/60 active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[66px] justify-center",
+												className: "inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold active:scale-95 transition cursor-pointer disabled:opacity-50 min-w-[66px] justify-center",
 												children: blockingMac === dev.mac_address ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3 h-3 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Proses..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Ban, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Blokir" })] })
 											}), dev.rssi !== null && dev.rssi !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-50 text-slate-500 text-[9px] font-mono font-medium",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Signal, { className: "w-2.5 h-2.5 text-blue-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [dev.rssi, " dBm"] })]
+												className: "inline-flex items-center gap-1 text-slate-400 text-[10px] font-mono font-medium",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Signal, { className: "w-3 h-3 text-blue-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [dev.rssi, " dBm"] })]
 											})]
 										})]
 									})
@@ -41244,7 +41204,7 @@ function PortalDashboardTab({ data, onNavigate, onOpenNotifications, hasUnreadNo
 		fetchConnectedDevices();
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]",
+		className: "flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalHeader, {
 				showNotificationDot: hasUnreadNotifications,
@@ -41258,53 +41218,53 @@ function PortalDashboardTab({ data, onNavigate, onOpenNotifications, hasUnreadNo
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 				className: "scroll-area -mt-3 flex-1 overflow-y-auto relative z-10",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "pb-24 space-y-3",
+					className: "px-3.5 pb-24 space-y-3.5",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-							className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100",
+							className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "p-3 sm:p-4 bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white flex items-center justify-between gap-2 sm:gap-3 border-b border-gray-100",
+								className: "p-3.5 bg-slate-50/80 flex items-center justify-between gap-3 border-b border-slate-100",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center gap-3 min-w-0",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 										className: "shrink-0 pointer-events-none select-none",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalActiveMascot, {
 											data,
-											className: "w-12 h-10 sm:w-14 sm:h-12 drop-shadow-xs"
+											className: "w-12 h-10 drop-shadow-xs"
 										})
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-										className: "portal-heading text-gray-900 leading-tight",
+										className: "text-sm font-bold text-slate-900 leading-tight",
 										children: "Kondisi Perangkat"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "portal-subheading text-gray-500 leading-none mt-1",
-										children: "Status fisik & performa jaringan"
+										className: "text-xs text-slate-500 leading-tight mt-0.5",
+										children: "Status fisik & performa modem"
 									})] })]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									type: "button",
 									onClick: handleOpenSpeedTestModal,
 									title: "Uji kecepatan internet riil (Speed Test)",
-									className: "group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-[0.98] transition cursor-pointer shrink-0",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Gauge, { className: "w-4 h-4 transition-transform group-hover:rotate-12" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "portal-body-bold",
+									className: "group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-[0.98] transition cursor-pointer shrink-0",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Gauge, { className: "w-3.5 h-3.5 transition-transform group-hover:rotate-12" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-xs font-semibold",
 										children: "Uji Speed"
 									})]
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "grid grid-cols-3 divide-x divide-gray-100 py-2.5 sm:py-3.5 px-1 sm:px-2 bg-white",
+								className: "grid grid-cols-3 divide-x divide-slate-100 py-3 px-1 bg-white",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "px-2 text-center flex flex-col items-center justify-center",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "flex items-center gap-1 portal-caption text-gray-500 uppercase tracking-tight mb-1",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Signal, { className: "w-3 h-3 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Daya Terima" })]
+												className: "flex items-center gap-1 text-[11px] font-medium text-slate-500 uppercase tracking-tight mb-1",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Signal, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Daya Terima" })]
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "portal-body-bold font-black font-mono text-gray-900 leading-none",
+												className: "text-lg font-bold font-mono text-slate-900 leading-none",
 												children: rxPowerValue
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[10px] text-gray-400 font-mono mt-0.5",
+												className: "text-[10px] text-slate-400 font-mono mt-1",
 												children: "dBm"
 											})
 										]
@@ -41313,43 +41273,43 @@ function PortalDashboardTab({ data, onNavigate, onOpenNotifications, hasUnreadNo
 										className: "px-2 text-center flex flex-col items-center justify-center",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "flex items-center gap-1 portal-caption text-gray-500 uppercase tracking-tight mb-1",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thermometer, { className: "w-3 h-3 text-orange-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Suhu ONT" })]
+												className: "flex items-center gap-1 text-[11px] font-medium text-slate-500 uppercase tracking-tight mb-1",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thermometer, { className: "w-3.5 h-3.5 text-amber-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Suhu ONT" })]
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "portal-body-bold font-black font-mono text-gray-900 leading-none",
+												className: "text-lg font-bold font-mono text-slate-900 leading-none",
 												children: suhuOntValue
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[10px] text-gray-400 font-mono mt-0.5",
+												className: "text-[10px] text-slate-400 font-mono mt-1",
 												children: "°C"
 											})
 										]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "px-2 text-center flex flex-col items-center justify-center py-0.5",
+										className: "px-2 text-center flex flex-col items-center justify-center",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center gap-1 portal-caption text-gray-500 uppercase tracking-tight mb-1",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Gauge, { className: "w-3 h-3 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Speed Test" })]
+											className: "flex items-center gap-1 text-[11px] font-medium text-slate-500 uppercase tracking-tight mb-1",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Gauge, { className: "w-3.5 h-3.5 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Speed Test" })]
 										}), lastSpeedTestData && lastSpeedTestData.download !== null ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "portal-body-bold font-black font-mono text-gray-900 leading-none",
+											className: "text-sm font-bold font-mono text-slate-900 leading-none",
 											children: [
 												"↓",
 												Number(lastSpeedTestData.download).toFixed(1),
 												" ",
 												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-													className: "text-[10px] font-bold text-cyan-600",
+													className: "text-[11px] font-bold text-blue-600",
 													children: ["↑", Number(lastSpeedTestData.upload).toFixed(1)]
 												})
 											]
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-[10px] text-gray-400 font-mono mt-0.5",
+											className: "text-[10px] text-slate-400 font-mono mt-1",
 											children: lastSpeedTestData.ping ? `${lastSpeedTestData.ping}ms` : "Mbps"
 										})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "portal-body-bold font-black font-mono text-gray-900 leading-none",
+											className: "text-lg font-bold font-mono text-slate-900 leading-none",
 											children: "-"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-[10px] text-gray-400 font-mono mt-0.5",
+											className: "text-[10px] text-slate-400 font-mono mt-1",
 											children: "Mbps"
 										})] })]
 									})
@@ -41357,183 +41317,171 @@ function PortalDashboardTab({ data, onNavigate, onOpenNotifications, hasUnreadNo
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-							className: "mx-3",
+							className: "bg-white rounded-xl shadow-xs border border-slate-200/90 p-3.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-between mb-2 px-1",
+								className: "flex items-center justify-between mb-3 px-0.5",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-									className: "portal-heading text-gray-900",
+									className: "text-sm font-bold text-slate-900",
 									children: "Menu Layanan"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "portal-subheading text-gray-500",
-									children: "Akses Cepat"
+									className: "text-xs text-slate-500 font-medium",
+									children: "Akses Mandiri"
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-100 shadow-xs space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "grid grid-cols-5 gap-1 sm:gap-2",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-											type: "button",
-											onClick: openDevicesModal,
-											className: "flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
-												style: { background: "#2563eb" },
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Smartphone, { className: "w-5 h-5 text-white" })
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors",
-												children: "Perangkat"
-											})]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-											type: "button",
-											onClick: () => onNavigate("wifi"),
-											className: "flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
-												style: { background: "#2563eb" },
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-5 h-5 text-white" })
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors",
-												children: "WiFi"
-											})]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-											type: "button",
-											onClick: () => onNavigate("kendala"),
-											className: "flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
-												style: { background: "#2563eb" },
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5 text-white" })
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors",
-												children: "Kendala"
-											})]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-											type: "button",
-											onClick: () => onNavigate("kuota"),
-											className: "flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
-												style: { background: "#2563eb" },
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartPie, { className: "w-5 h-5 text-white" })
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors",
-												children: "Kuota"
-											})]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-											type: "button",
-											onClick: () => onNavigate("pembayaran"),
-											className: "flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
-												style: { background: "#2563eb" },
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: "w-5 h-5 text-white" })
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors",
-												children: "Bayar"
-											})]
-										})
-									]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "grid grid-cols-5 gap-1 sm:gap-2 pt-1",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								className: "grid grid-cols-3 gap-2",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: openDevicesModal,
+										className: "flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Smartphone, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight",
+											children: "Perangkat"
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => onNavigate("wifi"),
+										className: "flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight",
+											children: "Kelola WiFi"
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => onNavigate("kendala"),
+										className: "flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight",
+											children: "Kendala"
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => onNavigate("kuota"),
+										className: "flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartPie, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight",
+											children: "Kuota FUP"
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => onNavigate("pembayaran"),
+										className: "flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight",
+											children: "Bayar"
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => onNavigate("profil"),
-										className: "flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group",
+										className: "flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
-											style: { background: "#2563eb" },
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: "w-5 h-5 text-white" })
+											className: "w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: "w-5 h-5" })
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors",
+											className: "text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight",
 											children: "Profil"
 										})]
 									})
-								})]
+								]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-							className: "mx-3 bg-white rounded-2xl shadow-sm border border-gray-100 p-4",
+							className: "bg-white rounded-xl shadow-xs border border-slate-200/90 p-4",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex justify-between items-center mb-2.5",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-										className: "portal-heading text-gray-900",
+										className: "text-sm font-bold text-slate-900",
 										children: "Ringkasan Kuota"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => onNavigate("kuota"),
-										className: "portal-body-bold text-blue-700 flex items-center gap-1 hover:text-blue-800 cursor-pointer",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lihat Detail" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5 stroke-[2.5]" })]
+										className: "text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lihat Detail" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5 stroke-[2.2]" })]
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "portal-title-lg font-mono text-blue-600 leading-none mb-2.5",
+									className: "text-2xl font-bold font-mono text-slate-900 leading-none mb-2.5",
 									children: [
 										kuotaTerpakai,
 										" ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-sm text-gray-600 font-semibold font-sans",
-											children: "GB"
+											className: "text-sm font-sans font-medium text-slate-500",
+											children: "GB Terpakai"
 										})
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "h-2 rounded-full bg-gray-100 overflow-hidden w-full mb-2.5",
+									className: "h-2 rounded-full bg-slate-100 overflow-hidden w-full mb-2.5",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 										className: "h-full bg-blue-600 rounded-full transition-all duration-700",
 										style: { width: `${kuotaBarPercent}%` }
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex justify-between portal-body-normal text-gray-600",
+									className: "flex justify-between text-xs text-slate-600 font-medium",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pemakaian Bulan Ini" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-semibold text-gray-700",
+										className: "font-semibold text-slate-800",
 										children: cleanPaketLabel(customer.paket)
 									})]
 								})
 							]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-							className: "mx-3 bg-white rounded-2xl shadow-sm border border-gray-100 p-4",
+							className: "bg-white rounded-xl shadow-xs border border-slate-200/90 p-4",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex justify-between items-center mb-3",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center gap-2",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50 text-blue-700",
+										className: "w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Receipt, { className: "w-4 h-4" })
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-										className: "portal-heading text-gray-900",
+										className: "text-sm font-bold text-slate-900",
 										children: "Tagihan Bulan Ini"
 									})]
 								}), customer.status_pembayaran === "BELUM_BAYAR" || customer.status_tagihan === "MENUNGGAK" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-300",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5" }), "Belum Dibayar"]
+									className: "inline-flex items-center gap-1 text-xs font-bold text-amber-600",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-4 h-4 text-amber-600" }), "Belum Dibayar"]
 								}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-300",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5" }), "Lunas"]
+									className: "inline-flex items-center gap-1 text-xs font-bold text-emerald-600",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 text-emerald-600" }), "Lunas"]
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-baseline justify-between mt-1",
+								className: "flex items-baseline justify-between mt-2 pt-2 border-t border-slate-100",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "portal-body-bold text-gray-700",
+									className: "text-xs text-slate-500 font-medium",
 									children: ["Periode: ", customer.periode_tagihan || kuotaData.periode_label || "Bulan Ini"]
 								}), customer.harga_paket ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "text-xs font-mono font-black text-blue-700 mt-0.5",
+									className: "text-sm font-mono font-bold text-slate-900 mt-0.5",
 									children: ["Rp ", Number(customer.harga_paket).toLocaleString("id-ID")]
 								}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "text-xs text-gray-600 mt-0.5 font-medium",
+									className: "text-xs text-slate-500 mt-0.5 font-medium",
 									children: "Jatuh tempo tgl 20 setiap bulan"
 								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									type: "button",
 									onClick: () => onNavigate("pembayaran"),
-									className: "px-3.5 py-1.5 rounded-xl portal-body-bold text-white shadow-xs active:scale-95 transition cursor-pointer",
-									style: { background: "#2563eb" },
+									className: "px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95 transition cursor-pointer",
 									children: "Detail Tagihan"
 								})]
 							})]
@@ -41755,55 +41703,47 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 		return filteredTickets.slice(start, start + ITEMS_PER_PAGE);
 	}, [filteredTickets, currentPage]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]",
+		className: "flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalHeader, {
 				showNotificationDot: hasUnreadNotifications,
 				onNotificationClick: onOpenNotifications,
 				title: "Pusat Kendala & Keluhan",
-				subtitle: "Lapor Gangguan Internet Cepat & Tanggap",
+				subtitle: "Layanan tiket gangguan teknis",
 				dashboardData,
 				customer
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 				className: "scroll-area -mt-3 flex-1 overflow-y-auto relative z-10",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "pb-24 space-y-3",
+					className: "px-3.5 pb-24 space-y-3",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100",
+						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2",
+								className: "p-3 sm:p-3.5 bg-slate-50/70 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-2.5 min-w-0",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-										style: { background: "#dbeafe" },
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-5 h-5 text-blue-600" })
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "min-w-0",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "text-[14px] font-black text-gray-900 leading-tight",
-											children: "Lapor Gangguan"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "text-[11px] sm:text-xs text-gray-600 mt-0.5 leading-tight font-medium line-clamp-1 sm:line-clamp-none",
-											children: "Tiket diteruskan langsung ke Teknisi Lapangan"
-										})]
+									className: "flex items-center justify-between sm:justify-start gap-2",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-xs font-bold text-slate-700",
+										children: "Daftar Tiket Kendala"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200",
+										children: [filteredTickets.length, " tiket"]
 									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									type: "button",
 									onClick: () => setShowCreateModal(true),
-									className: "inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-white portal-body-bold shadow-md active:scale-[0.98] transition cursor-pointer shrink-0",
-									style: { background: "#2563eb" },
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Buat Tiket" })]
+									className: "w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-white text-xs font-semibold bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition cursor-pointer shadow-xs shrink-0",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Buat Tiket Baru" })]
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "p-4 pb-2",
+								className: "p-3 sm:p-3.5 pb-2",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "relative",
 									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 											type: "text",
 											value: searchQuery,
@@ -41812,11 +41752,11 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 												setCurrentPage(1);
 											},
 											placeholder: "Cari ID tiket, kategori, atau keluhan...",
-											className: "w-full pl-9 pr-8 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
+											className: "w-full pl-9 pr-8 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
 										}),
 										searchQuery && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 											onClick: () => setSearchQuery(""),
-											className: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 transition cursor-pointer",
+											className: "absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 transition cursor-pointer",
 											title: "Hapus Pencarian",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
 										})
@@ -41824,82 +41764,85 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "px-4 pb-4 space-y-3",
+								className: "border-t border-slate-100",
 								children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "space-y-2.5 animate-pulse",
+									className: "p-3.5 space-y-2.5 animate-pulse",
 									children: [
 										1,
 										2,
 										3
 									].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80 space-y-2",
+										className: "py-2.5 border-b border-slate-100 space-y-2",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 												className: "flex items-center justify-between",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-20 h-4 bg-gray-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-4 bg-gray-200 rounded-full" })]
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-20 h-4 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-4 bg-slate-200 rounded" })]
 											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-3/4 h-3.5 bg-gray-200 rounded" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-1/2 h-3 bg-gray-100 rounded" })
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-3/4 h-3.5 bg-slate-200 rounded" }),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-1/2 h-3 bg-slate-100 rounded" })
 										]
 									}, i))
 								}) : filteredTickets.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "p-8 bg-gray-50 rounded-2xl border border-gray-100 text-center space-y-2",
+									className: "p-8 text-center space-y-2",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-11 h-11 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto",
+										className: "w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-5 h-5" })
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-xs font-bold text-gray-800",
+										className: "text-xs font-bold text-slate-800",
 										children: searchQuery ? "Tiket Tidak Ditemukan" : "Tidak Ada Kendala Aktif"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-500 mt-0.5",
+										className: "text-xs text-slate-500 mt-0.5",
 										children: searchQuery ? "Coba cari dengan kata kunci lain." : "Sambungan internet Anda terpantau normal dan lancar."
 									})] })]
-								}) : paginatedTickets.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-									className: "p-3.5 bg-slate-50/70 hover:bg-blue-50/40 rounded-xl border border-slate-200/80 space-y-2 transition",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center justify-between",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[12px] font-mono font-bold text-slate-800",
-												children: t.id_tiket
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "flex items-center gap-2",
+								}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "divide-y divide-slate-100",
+									children: paginatedTickets.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+										className: "p-3.5 hover:bg-slate-50/60 space-y-1.5 transition",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "flex items-center justify-between",
 												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													className: `text-[11px] font-bold tracking-wide ${t.status === "SELESAI" ? "text-emerald-600" : t.status === "DIPROSES" || t.status === "DICEK_ADMIN" ? "text-amber-600" : "text-rose-600"}`,
-													children: t.status
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-													type: "button",
-													onClick: () => setTicketToDelete(t),
-													className: "p-1 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer",
-													title: "Hapus Laporan Ini",
-													children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" })
+													className: "text-xs font-mono font-bold text-slate-800",
+													children: t.id_tiket
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "flex items-center gap-2",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+														className: `inline-flex items-center gap-1 text-xs font-bold ${t.status === "SELESAI" ? "text-emerald-600" : t.status === "DIPROSES" || t.status === "DICEK_ADMIN" ? "text-blue-600" : "text-amber-600"}`,
+														children: [t.status === "SELESAI" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5" }) : t.status === "DIPROSES" || t.status === "DICEK_ADMIN" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.status })]
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+														type: "button",
+														onClick: () => setTicketToDelete(t),
+														className: "p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer",
+														title: "Hapus Laporan Ini",
+														children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" })
+													})]
 												})]
-											})]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "portal-body-bold text-gray-900",
-											children: t.kategori
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											className: "portal-body-normal text-gray-700 leading-relaxed",
-											children: t.deskripsi
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-gray-500 font-mono",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "flex items-center gap-1 text-[11px]",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5 text-gray-400" }), t.created_at?.slice(0, 16)]
-											}), t.redaman_saat_lapor && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "text-[11px] font-semibold text-slate-600",
-												children: [
-													"Redaman: ",
-													t.redaman_saat_lapor,
-													" dBm"
-												]
-											})]
-										})
-									]
-								}, t.id_tiket))
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "text-xs font-bold text-slate-900",
+												children: t.kategori
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+												className: "text-xs text-slate-600 leading-relaxed",
+												children: t.deskripsi
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+													className: "flex items-center gap-1",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-slate-400" }), t.created_at?.slice(0, 16)]
+												}), t.redaman_saat_lapor && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+													className: "text-[11px] font-semibold text-slate-600",
+													children: [
+														"Redaman: ",
+														t.redaman_saat_lapor,
+														" dBm"
+													]
+												})]
+											})
+										]
+									}, t.id_tiket))
+								})
 							}),
 							!loading && filteredTickets.length > ITEMS_PER_PAGE && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs",
@@ -42253,76 +42196,67 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827] relative",
+		className: "flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900 relative",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalHeader, {
 				showNotificationDot: hasUnreadNotifications,
 				onNotificationClick: onOpenNotifications,
 				title: "Kelola WiFi Rumah",
-				subtitle: "Ubah Nama & Kata Sandi SSID Mandiri",
+				subtitle: "Pengaturan nama & sandi",
 				dashboardData,
 				customer
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 				className: "scroll-area -mt-3 flex-1 overflow-y-auto relative z-10",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "pb-24 space-y-3",
+					className: "px-3.5 pb-24 space-y-3",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100 p-4",
+						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90 p-4",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-between mb-3 pb-2.5 border-b border-gray-100",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-2.5",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-9 h-9 rounded-xl flex items-center justify-center bg-blue-100 text-blue-700 shrink-0",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-4 h-4" })
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-										className: "text-xs font-black text-gray-900 leading-tight",
-										children: "WiFi Rumah Anda Saat Ini"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-[11px] text-gray-500 font-medium",
-										children: "Informasi nama & sandi yang aktif"
-									})] })]
+								className: "flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-xs font-bold text-slate-700",
+									children: "WiFi Terpasang"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									type: "button",
 									onClick: fetchWifiDetails,
 									"aria-label": "Muat ulang informasi WiFi",
-									className: "w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-blue-600 transition cursor-pointer",
+									className: "w-7 h-7 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 transition cursor-pointer",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: `w-3.5 h-3.5 ${fetchingWifi ? "animate-spin" : ""}` })
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "space-y-2.5 text-xs",
+								className: "divide-y divide-slate-100 text-xs",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex items-center justify-between p-2.5 rounded-xl bg-gray-50/80 border border-gray-100",
+										className: "flex items-center justify-between py-2.5",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-gray-600 font-medium",
+											className: "text-slate-500 font-medium",
 											children: "Nama WiFi (SSID)"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "font-bold text-gray-900 font-mono text-[13px]",
+											className: "font-bold text-slate-900 font-mono text-sm",
 											children: currentWifi.nama_wifi || "-"
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex items-center justify-between p-2.5 rounded-xl bg-gray-50/80 border border-gray-100",
+										className: "flex items-center justify-between py-2.5",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-gray-600 font-medium",
+											className: "text-slate-500 font-medium",
 											children: "Kata Sandi Sekarang"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "flex items-center gap-2",
 											children: [
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													className: "font-mono font-bold text-gray-900 text-[13px]",
+													className: "font-mono font-bold text-slate-900 text-sm",
 													children: showCurrentPassword ? currentWifi.password_wifi || "-" : "••••••••"
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 													type: "button",
 													onClick: () => setShowCurrentPassword(!showCurrentPassword),
-													className: "p-1 rounded-md text-gray-500 hover:text-gray-800 cursor-pointer",
+													className: "p-1 rounded-md text-slate-400 hover:text-slate-700 cursor-pointer",
 													"aria-label": "Lihat kata sandi",
-													children: showCurrentPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" })
+													children: showCurrentPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 													type: "button",
@@ -42330,80 +42264,80 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 													className: "p-1 rounded-md text-blue-600 hover:text-blue-800 cursor-pointer",
 													"aria-label": "Salin kata sandi",
 													title: "Salin Kata Sandi",
-													children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-3.5 h-3.5 text-emerald-600" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-3.5 h-3.5" })
+													children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4 text-emerald-600" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
 												})
 											]
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex items-center justify-between pt-1",
+										className: "flex items-center justify-between py-2.5",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-gray-500 text-[11px] font-medium",
-											children: "Status Sambungan HP:"
+											className: "text-slate-500 font-medium",
+											children: "Status Sambungan:"
 										}), currentWifi.is_connected_to_home_wifi ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200",
+											className: "inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5 text-emerald-600" }), "Tersambung di WiFi Rumah"]
 										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "inline-flex items-center gap-1 text-[11px] font-bold text-rose-800 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-3.5 h-3.5 text-rose-600" }), "Tidak Tersambung di WiFi Rumah"]
+											className: "inline-flex items-center gap-1.5 text-xs font-bold text-rose-600",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-3.5 h-3.5 text-rose-600" }), "Tidak Tersambung"]
 										})]
 									})
 								]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "mt-3 pt-3 border-t border-gray-100",
+								className: "mt-2 pt-2 border-t border-slate-100",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									type: "button",
 									onClick: openDevicesModal,
-									className: "w-full py-2.5 px-3.5 rounded-xl bg-blue-50 hover:bg-blue-100/80 text-blue-700 border border-blue-200/70 text-xs font-bold flex items-center justify-between transition active:scale-[0.98] cursor-pointer",
+									className: "w-full py-2.5 px-3 rounded-lg bg-blue-50/70 hover:bg-blue-100/70 text-blue-700 text-xs font-semibold flex items-center justify-between transition active:scale-[0.98] cursor-pointer",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "flex items-center gap-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center",
+											className: "w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Smartphone, { className: "w-3.5 h-3.5" })
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lihat Siapa Saja Yang Terhubung" })]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-blue-600 text-white",
-										children: "Cek Sekarang"
+										className: "text-[11px] font-bold text-blue-700",
+										children: "Cek Sekarang →"
 									})]
 								})
 							})
 						]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden",
+						className: "bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
 							onClick: () => setIsFormOpen(!isFormOpen),
-							className: "w-full p-4 flex items-center justify-between text-left hover:bg-gray-50/60 transition cursor-pointer",
+							className: "w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2.5",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-8 h-8 rounded-xl flex items-center justify-center bg-blue-50 text-blue-600 shrink-0",
+									className: "w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600 shrink-0",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "w-4 h-4" })
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-									className: "text-xs font-black text-gray-900 leading-tight",
+									className: "text-xs font-bold text-slate-900 leading-tight",
 									children: "Ubah Nama & Kata Sandi WiFi"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-[11px] text-gray-500 font-medium",
+									className: "text-[11px] text-slate-500 font-medium",
 									children: "Pengaturan mandiri SSID dan kata sandi modem"
 								})] })]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 shrink-0",
+								className: "w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 shrink-0",
 								children: isFormOpen ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "w-4 h-4" })
 							})]
 						}), isFormOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "border-t border-gray-100",
+							className: "border-t border-slate-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "m-4 mb-2 p-3 rounded-xl bg-blue-50/80 border border-blue-200/80 space-y-2",
+								className: "p-3.5 bg-blue-50/60 space-y-1.5 border-b border-blue-100/60",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-start gap-2",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4 text-blue-700 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4 text-blue-600 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "min-w-0",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-xs font-bold text-blue-900 block",
-											children: "Petunjuk Penggantian WiFi Rumah:"
+											children: "Petunjuk Penggantian WiFi:"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
-											className: "text-[11px] text-blue-800/90 space-y-1 mt-1 leading-relaxed",
+											className: "text-xs text-blue-800/90 space-y-1 mt-1 leading-relaxed",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
 												"• ",
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "Sebelum Ganti:" }),
@@ -42629,7 +42563,7 @@ function PortalQuotaTab({ customer, dashboardData, onOpenNotifications, hasUnrea
 	};
 	getInitials(customer?.nama);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]",
+		className: "flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalHeader, {
 			showNotificationDot: hasUnreadNotifications,
 			onNotificationClick: onOpenNotifications,
@@ -42640,42 +42574,42 @@ function PortalQuotaTab({ customer, dashboardData, onOpenNotifications, hasUnrea
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 			className: "scroll-area -mt-3 flex-1 overflow-y-auto relative z-10",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "pb-24 space-y-3",
+				className: "px-3.5 pb-24 space-y-3.5",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 overflow-hidden",
+						className: "bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "p-4 pb-3 border-b border-gray-100 flex items-center gap-2.5",
+								className: "p-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/60",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700",
+									className: "w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-blue-50 text-blue-600",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartColumn, { className: "w-5 h-5" })
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "min-w-0",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-										className: "text-sm font-black text-gray-900 leading-tight",
+										className: "text-sm font-bold text-slate-900 leading-tight",
 										children: "Total Pemakaian Bulan Ini"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-600 mt-0.5 leading-tight font-medium",
+										className: "text-xs text-slate-500 mt-0.5 leading-tight font-medium",
 										children: "Ringkasan pemakaian kuota internet"
 									})]
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "px-4 pt-3 pb-4 bg-white",
+								className: "p-4 bg-white",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "flex items-baseline gap-1.5",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-4xl font-black tracking-tight font-mono text-blue-600",
+											className: "text-3xl sm:text-4xl font-bold tracking-tight font-mono text-slate-900",
 											children: totalGB
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-lg font-bold text-gray-500",
-											children: "GB"
+											className: "text-sm font-semibold text-slate-500",
+											children: "GB Terpakai"
 										})]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "mt-3 h-2 rounded-full bg-gray-100 overflow-hidden",
+										className: "mt-3 h-2 rounded-full bg-slate-100 overflow-hidden",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 											className: "h-full rounded-full transition-all duration-700 bg-blue-600",
 											style: { width: `${kuotaBarPercent}%` }
@@ -42684,56 +42618,56 @@ function PortalQuotaTab({ customer, dashboardData, onOpenNotifications, hasUnrea
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "mt-3 flex items-center justify-between text-xs",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-gray-600 font-medium",
+											className: "text-slate-500 font-medium",
 											children: "Paket aktif:"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "font-bold px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200",
+											className: "font-bold text-slate-900",
 											children: paketNama
 										})]
 									})
 								]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "px-4 py-3 border-t border-gray-100 flex items-start gap-2.5 bg-blue-50/70",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Infinity$1, { className: "w-4 h-4 mt-0.5 shrink-0 text-blue-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "text-xs text-gray-700 leading-relaxed font-normal",
+								className: "px-4 py-2.5 border-t border-slate-100 flex items-start gap-2.5 bg-slate-50",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Infinity$1, { className: "w-4 h-4 mt-0.5 shrink-0 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-xs text-slate-600 leading-relaxed font-normal",
 									children: [
 										"Internet Anda bersifat ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-											className: "text-gray-900 font-semibold",
+											className: "text-slate-900 font-semibold",
 											children: "Tanpa Batas Kuota (Unlimited)"
 										}),
-										" tanpa batas FUP kuota harian."
+										" tanpa batas FUP harian."
 									]
 								})]
 							})
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl border border-gray-100 p-4 shadow-sm",
+						className: "bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center justify-between mb-1",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center gap-2",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TrendingUp, { className: "w-4 h-4 text-blue-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-										className: "text-sm font-black text-gray-900",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TrendingUp, { className: "w-4 h-4 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+										className: "text-sm font-bold text-slate-900",
 										children: "Histori 7 Hari Terakhir"
 									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									type: "button",
 									onClick: fetchKuota,
 									"aria-label": "Segarkan data kuota",
-									className: "w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 hover:text-blue-600 transition cursor-pointer",
+									className: "w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 transition cursor-pointer",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: `w-3.5 h-3.5 ${loading ? "animate-spin" : ""}` })
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-600 mb-4 font-medium",
+								className: "text-xs text-slate-500 mb-4 font-medium",
 								children: "Rata-rata pemakaian data harian"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "flex items-end justify-between gap-1 sm:gap-2 h-36 px-0.5 sm:px-1",
+								className: "flex items-end justify-between gap-1.5 sm:gap-2 h-36 px-0.5 sm:px-1",
 								children: history.map((item, idx) => {
 									const val = Number(item.pemakaian_gb || 0);
 									const heightPercent = maxGB > 0 ? Math.max(18, Math.round(val / maxGB * 100)) : 50;
@@ -42742,7 +42676,7 @@ function PortalQuotaTab({ customer, dashboardData, onOpenNotifications, hasUnrea
 										className: "flex-1 h-full flex flex-col items-center justify-end gap-1.5",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[10px] sm:text-[11px] font-bold text-gray-800 font-mono leading-none",
+												className: "text-[10px] sm:text-[11px] font-bold text-slate-800 font-mono leading-none",
 												children: val
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -42751,12 +42685,12 @@ function PortalQuotaTab({ customer, dashboardData, onOpenNotifications, hasUnrea
 													className: "w-full rounded-t-md transition-all duration-700 bg-blue-600",
 													style: {
 														height: `${heightPercent}%`,
-														opacity: heightPercent >= 95 ? 1 : .7
+														opacity: heightPercent >= 95 ? 1 : .75
 													}
 												})
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[10px] sm:text-[11px] font-semibold text-gray-600 font-mono leading-none",
+												className: "text-[10px] sm:text-[11px] font-medium text-slate-500 font-mono leading-none",
 												children: dayLabel
 											})
 										]
@@ -42764,9 +42698,9 @@ function PortalQuotaTab({ customer, dashboardData, onOpenNotifications, hasUnrea
 								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600",
+								className: "mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Satuan: GB (Gigabyte)" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "font-mono font-bold text-gray-800",
+									className: "font-mono font-bold text-slate-900",
 									children: [
 										"Total 7 hari: ",
 										total7Days,
@@ -42777,28 +42711,28 @@ function PortalQuotaTab({ customer, dashboardData, onOpenNotifications, hasUnrea
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm",
+						className: "bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-xs",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "px-4 py-3 border-b border-gray-100 flex items-center justify-between",
+							className: "px-3.5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(List, { className: "w-4 h-4 text-blue-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-									className: "text-sm font-black text-gray-900",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(List, { className: "w-4 h-4 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+									className: "text-sm font-bold text-slate-900",
 									children: "Rincian Pemakaian"
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-xs text-gray-600 font-medium",
+								className: "text-xs text-slate-500 font-medium",
 								children: "7 hari"
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "divide-y divide-gray-100",
+							className: "divide-y divide-slate-100",
 							children: history.map((item, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "px-4 py-2.5 flex items-center justify-between",
+								className: "px-4 py-2.5 flex items-center justify-between hover:bg-slate-50/60 transition",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-xs text-gray-700 font-medium",
+									className: "text-xs text-slate-600 font-medium",
 									children: item.tanggal
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-xs font-bold font-mono text-gray-900",
+									className: "text-xs font-bold font-mono text-slate-900",
 									children: [Number(item.pemakaian_gb || 0), " GB"]
 								})]
 							}, idx))
@@ -43054,7 +42988,7 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827] relative",
+		className: "flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900 relative",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalHeader, {
 				showNotificationDot: hasUnreadNotifications,
@@ -43067,14 +43001,14 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 				className: "scroll-area -mt-3 flex-1 overflow-y-auto relative z-10",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "pb-24 space-y-3",
+					className: "px-3.5 pb-24 space-y-3.5",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-							className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100",
+							className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2",
+								className: "p-3.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-2 sm:gap-3 min-w-0 flex-1",
+									className: "flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "relative shrink-0",
 										children: [
@@ -43082,17 +43016,16 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 												src: currentCustomer.foto_profil,
 												alt: "",
 												onError: () => setFotoLoadError(true),
-												className: "w-12 h-12 rounded-full object-cover border-2 border-white shadow-xs"
+												className: "w-11 h-11 rounded-full object-cover border-2 border-white shadow-xs"
 											}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-sm font-mono shadow-xs border-2 border-white",
-												style: { background: "#2563eb" },
+												className: "w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm font-mono shadow-xs border-2 border-white bg-blue-600",
 												children: getInitials(currentCustomer?.nama)
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 												type: "button",
 												onClick: () => fileInputRef.current?.click(),
 												disabled: uploadingFoto,
-												className: "absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-blue-600 hover:text-blue-800 hover:bg-gray-50 transition cursor-pointer disabled:opacity-50",
+												className: "absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center text-blue-600 hover:text-blue-800 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50",
 												title: "Ubah Foto Profil",
 												"aria-label": "Ubah Foto Profil",
 												children: uploadingFoto ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-2.5 h-2.5 animate-spin text-blue-600" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { className: "w-3 h-3" })
@@ -43108,19 +43041,19 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "min-w-0",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "portal-heading text-gray-900 leading-tight truncate",
+											className: "text-sm font-bold text-slate-900 leading-tight truncate",
 											children: currentCustomer?.nama || "Profil Pelanggan"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "mt-0.5 text-[11px] sm:text-xs text-gray-500 font-mono font-medium flex items-center gap-1.5 sm:gap-2 flex-wrap",
+											className: "mt-0.5 text-xs text-slate-500 font-mono font-medium flex items-center gap-1.5 flex-wrap",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "font-bold text-gray-700 tracking-tight leading-none text-[10px] sm:text-xs truncate max-w-[140px] sm:max-w-[190px]",
+												className: "font-semibold text-slate-700 tracking-tight leading-none text-xs truncate max-w-[140px] sm:max-w-[190px]",
 												title: currentCustomer?.id_pelanggan,
 												children: currentCustomer?.id_pelanggan || "-"
 											}), currentCustomer?.foto_profil && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 												type: "button",
 												onClick: handleDeleteFoto,
 												disabled: uploadingFoto,
-												className: "text-[10px] text-gray-400 hover:text-rose-600 font-sans flex items-center gap-0.5 transition cursor-pointer",
+												className: "text-[10px] text-slate-400 hover:text-rose-600 font-sans flex items-center gap-0.5 transition cursor-pointer",
 												title: "Hapus Foto Profil",
 												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-2.5 h-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus" })]
 											})]
@@ -43129,61 +43062,61 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									type: "button",
 									onClick: () => setIsEditModalOpen(true),
-									className: "px-2.5 sm:px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 portal-body-bold transition flex items-center gap-1 sm:gap-1.5 cursor-pointer shrink-0",
+									className: "px-3 py-1.5 rounded-lg bg-blue-50/80 hover:bg-blue-100 text-blue-700 text-xs font-semibold transition flex items-center gap-1 cursor-pointer shrink-0",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Edit Data" })]
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "p-4 pt-3",
+								className: "p-3.5",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "space-y-2 sm:space-y-2.5 portal-body-normal",
+									className: "space-y-2 text-xs",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center justify-between py-1 border-b border-gray-50",
+											className: "flex items-center justify-between py-1 border-b border-slate-50",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-gray-600",
+												className: "text-slate-500 font-medium",
 												children: "Kantor Layanan"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "font-semibold text-gray-900 capitalize",
+												className: "font-semibold text-slate-800 capitalize",
 												children: ["Kantor ", currentCustomer?.kantor || "Cabang"]
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center justify-between py-1 border-b border-gray-50",
+											className: "flex items-center justify-between py-1 border-b border-slate-50",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-gray-600",
+												className: "text-slate-500 font-medium",
 												children: "No. WhatsApp / Telp"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "font-mono font-bold text-gray-900",
+												className: "font-mono font-bold text-slate-800",
 												children: currentCustomer?.no_hp || "-"
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-start justify-between gap-3 py-1 border-b border-gray-50",
+											className: "flex items-start justify-between gap-3 py-1 border-b border-slate-50",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-gray-600 shrink-0",
+												className: "text-slate-500 font-medium shrink-0",
 												children: "Alamat Lengkap"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "font-semibold text-gray-900 text-right",
+												className: "font-medium text-slate-800 text-right",
 												children: currentCustomer?.alamat || "-"
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center justify-between py-1 border-b border-gray-50",
+											className: "flex items-center justify-between py-1 border-b border-slate-50",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-gray-600",
+												className: "text-slate-500 font-medium",
 												children: "Paket Internet"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "font-bold text-gray-900",
+												className: "font-semibold text-slate-800",
 												children: currentCustomer?.paket || "-"
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "flex items-center justify-between py-1",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-gray-600",
+												className: "text-slate-500 font-medium",
 												children: "IP Modem Router"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "font-mono font-bold text-gray-900",
+												className: "font-mono font-bold text-slate-800",
 												children: currentCustomer?.ip_router || currentCustomer?.ip_ont || "-"
 											})]
 										})
@@ -43192,24 +43125,24 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-							className: "mx-3 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100",
+							className: "bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden divide-y divide-slate-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								onClick: () => onNavigate && onNavigate("wifi"),
-								className: "w-full p-4 flex items-center justify-between text-left hover:bg-gray-50/70 transition cursor-pointer",
+								className: "w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center gap-3",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
+										className: "w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-5 h-5" })
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "portal-body-bold text-gray-900",
+										className: "text-xs font-bold text-slate-900",
 										children: "Pengaturan WiFi Rumah"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "portal-caption text-gray-500 font-medium",
+										className: "text-[11px] text-slate-500 font-medium",
 										children: "Ubah Nama SSID & Kata Sandi WiFi"
 									})] })]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4 text-gray-400 shrink-0" })]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4 text-slate-400 shrink-0" })]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								onClick: () => setIsPasswordExpanded(!isPasswordExpanded),
@@ -43291,11 +43224,11 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 							})] })]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "mx-3",
+							className: "pt-1",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								onClick: () => setIsLogoutConfirmOpen(true),
-								className: "w-full py-3.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 portal-body-bold flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer active:scale-98",
+								className: "w-full py-3 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-center gap-2 transition min-h-[44px] cursor-pointer active:scale-98",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Keluar dari Akun Portal" })]
 							})
 						})
@@ -43840,28 +43773,28 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 			className: "scroll-area -mt-3 flex-1 overflow-y-auto relative z-10",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "pb-24 space-y-3",
+				className: "px-3.5 pb-24 space-y-3.5",
 				children: [
 					memuatTagihan && !tagihan && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkeletonTagihan, {}),
 					galatTagihan && !tagihan && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-						className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-red-100 p-4",
+						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-rose-200 p-4",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex gap-2.5",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleX, { className: "w-5 h-5 text-red-600 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleX, { className: "w-5 h-5 text-rose-600 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex-1",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-sm font-black text-gray-900",
+										className: "text-sm font-bold text-slate-900",
 										children: "Tagihan Belum Bisa Dibaca"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-600 mt-1 leading-relaxed",
+										className: "text-xs text-slate-600 mt-1 leading-relaxed",
 										children: galatTagihan
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => muatTagihan(false),
-										className: "mt-3 min-h-[40px] px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-1.5 active:scale-95 transition cursor-pointer",
+										className: "mt-3 min-h-[40px] px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 active:scale-95 transition cursor-pointer",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Coba Lagi" })]
 									})
 								]
@@ -43869,36 +43802,36 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 						})
 					}),
 					(!memuatTagihan || tagihan) && !galatTagihan && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100",
+						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2.5",
+								className: "p-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5 bg-slate-50/60",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center gap-2.5 min-w-0",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700",
+										className: "w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-blue-50 text-blue-600",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReceiptText, { className: "w-5 h-5" })
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "min-w-0",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-											className: "text-sm font-black text-gray-900 leading-tight truncate",
+											className: "text-sm font-bold text-slate-900 leading-tight truncate",
 											children: subTab === "tagihan" ? activeBill?.overdue ? "Tagihan Tertunggak" : "Total Tagihan Bulan Ini" : "Riwayat Pembayaran"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											className: "text-xs text-gray-600 mt-0.5 leading-tight font-medium truncate",
+											className: "text-xs text-slate-500 mt-0.5 leading-tight font-medium truncate",
 											children: subTab === "tagihan" ? activeBill?.overdue ? `Tunggakan ${periodeTeks(activeBill.billing_period)} wajib diselesaikan lebih dulu` : "Iuran langganan internet mandiri" : "Catatan tagihan yang sudah lunas"
 										})]
 									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center bg-gray-100 p-0.5 rounded-xl border border-gray-200 shrink-0",
+									className: "flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
 										onClick: () => setSubTab("tagihan"),
-										className: `px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${subTab === "tagihan" ? "bg-white text-blue-700 shadow-xs" : "text-gray-500 hover:text-gray-900"}`,
+										className: `px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${subTab === "tagihan" ? "bg-white text-blue-600 shadow-xs" : "text-slate-600 hover:text-slate-900"}`,
 										children: "Tagihan"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
 										onClick: () => setSubTab("riwayat"),
-										className: `px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${subTab === "riwayat" ? "bg-white text-blue-700 shadow-xs" : "text-gray-500 hover:text-gray-900"}`,
+										className: `px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${subTab === "riwayat" ? "bg-white text-blue-600 shadow-xs" : "text-slate-600 hover:text-slate-900"}`,
 										children: "Riwayat"
 									})]
 								})]
@@ -44027,38 +43960,38 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 						]
 					}),
 					subTab === "tagihan" && (!memuatTagihan || tagihan) && !galatTagihan && otherUnpaidInvoices.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100",
+						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-4 pb-3 border-b border-gray-100 flex items-center justify-between gap-2.5",
+							className: "p-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5 bg-slate-50/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2.5",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-700",
+									className: "w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-blue-50 text-blue-600",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-5 h-5" })
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-									className: "text-sm font-black text-gray-900 leading-tight",
+									className: "text-sm font-bold text-slate-900 leading-tight",
 									children: "Tagihan Periode Berikutnya"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "text-xs text-gray-600 mt-0.5 leading-tight font-medium",
+									className: "text-xs text-slate-500 mt-0.5 leading-tight font-medium",
 									children: [otherUnpaidInvoices.length, " invoice menunggu pelunasan tagihan sebelumnya"]
 								})] })]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-mono font-bold text-xs border border-blue-200",
-								children: otherUnpaidInvoices.length
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "font-mono font-bold text-xs text-blue-600",
+								children: [otherUnpaidInvoices.length, " invoice"]
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "divide-y divide-gray-100",
+							className: "divide-y divide-slate-100",
 							children: otherUnpaidInvoices.map((inv) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "p-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/70 transition",
+								className: "p-3.5 flex items-center justify-between gap-3 hover:bg-slate-50/70 transition",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "min-w-0",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											className: "text-xs font-black text-gray-900 truncate",
+											className: "text-xs font-bold text-slate-900 truncate",
 											children: periodeTeks(inv.billing_period) || inv.number
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-											className: "text-[11px] text-gray-500 mt-0.5 font-medium",
+											className: "text-[11px] text-slate-500 mt-0.5 font-medium",
 											children: [
 												jenisTagihanTeks(inv.type),
 												" · Jatuh tempo ",
@@ -44066,17 +43999,17 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 											]
 										}),
 										inv.overdue ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terlambat" })]
+											className: "inline-flex items-center gap-1 mt-1 text-[11px] font-bold text-amber-600",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-3.5 h-3.5 text-amber-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terlambat" })]
 										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 text-[10px] font-bold",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Belum Dibayar" })]
+											className: "inline-flex items-center gap-1 mt-1 text-[11px] font-medium text-slate-500",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5 text-slate-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Belum Dibayar" })]
 										})
 									]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 									className: "text-right shrink-0",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs font-black text-gray-900 font-mono",
+										className: "text-xs font-bold text-slate-900 font-mono",
 										children: rupiah(inv.total)
 									})
 								})]
@@ -44136,15 +44069,15 @@ function PortalErrorView({ errorCode = 404, title = "Halaman Tidak Ditemukan", d
 						onRetry && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
 							onClick: onRetry,
-							className: "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 border border-cyan-300 text-cyan-900 font-bold text-xs shadow-2xs transition active:scale-[0.98] min-h-[40px] cursor-pointer",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-cyan-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Coba Lagi" })]
+							className: "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs shadow-2xs transition active:scale-[0.98] min-h-[40px] cursor-pointer",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Coba Lagi" })]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
 							onClick: onBackToHome || (() => {
 								window.location.href = "/teknocust";
 							}),
-							className: "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-600/25 transition active:scale-[0.98] min-h-[40px] cursor-pointer",
+							className: "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition active:scale-[0.98] min-h-[40px] cursor-pointer",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(House, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: primaryActionLabel })]
 						})
 					]
@@ -44672,9 +44605,9 @@ function PortalCustomerApp() {
 		})]
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 sm:relative sm:min-h-[100dvh] bg-[#e5e7eb] p-0 sm:p-4 pb-0 sm:pb-4 flex justify-center items-center text-[#111827] font-sans antialiased overflow-hidden overscroll-none select-none",
+		className: "fixed inset-0 sm:relative sm:min-h-[100dvh] bg-slate-200/90 p-0 sm:p-4 pb-0 sm:pb-4 flex justify-center items-center text-slate-900 font-sans antialiased overflow-hidden overscroll-none select-none",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "w-full max-w-[440px] mx-auto h-[100dvh] sm:h-[92dvh] bg-[#f3f4f6] relative flex flex-col sm:rounded-2xl sm:shadow-2xl sm:shadow-slate-900/15 sm:border sm:border-slate-200 overflow-hidden overscroll-none",
+			className: "w-full max-w-[440px] mx-auto h-[100dvh] sm:h-[92dvh] bg-slate-50 relative flex flex-col sm:rounded-2xl sm:shadow-2xl sm:shadow-slate-900/15 sm:border sm:border-slate-200 overflow-hidden overscroll-none",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex-1 flex flex-col min-h-0 relative overflow-hidden",
 				children: [

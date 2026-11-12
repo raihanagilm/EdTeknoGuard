@@ -167,7 +167,7 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
   };
 
   return (
-    <div className="flex-1 h-full min-h-0 flex flex-col bg-[#f3f4f6] text-[#111827]">
+    <div className="flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900">
       {/* ═══ HEADER BIRU TERPADU DENGAN GREETING & LONCENG NOTIFIKASI KONSISTEN ═══ */}
       <PortalHeader
         showNotificationDot={hasUnreadNotifications}
@@ -181,87 +181,86 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) PERSIS TAB LAIN ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
-        <div className="pb-24 space-y-3">
+        <div className="px-3.5 pb-24 space-y-3.5">
 
           {/* ═══ KARTU UTAMA: KONDISI PERANGKAT & SPEED TEST JARINGAN ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100">
+          <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
             {/* Header: Maskot di KIRI Judul Kondisi Perangkat & Tombol Speed Test di KANAN */}
-            <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white flex items-center justify-between gap-2 sm:gap-3 border-b border-gray-100">
+            <div className="p-3.5 bg-slate-50/80 flex items-center justify-between gap-3 border-b border-slate-100">
               {/* Sisi Kiri: Maskot + Judul */}
               <div className="flex items-center gap-3 min-w-0">
-                {/* Maskot di sebelah kiri teks judul */}
                 <div className="shrink-0 pointer-events-none select-none">
-                  <PortalActiveMascot data={data} className="w-12 h-10 sm:w-14 sm:h-12 drop-shadow-xs" />
+                  <PortalActiveMascot data={data} className="w-12 h-10 drop-shadow-xs" />
                 </div>
                 <div>
-                  <h2 className="portal-heading text-gray-900 leading-tight">
+                  <h2 className="text-sm font-bold text-slate-900 leading-tight">
                     Kondisi Perangkat
                   </h2>
-                  <p className="portal-subheading text-gray-500 leading-none mt-1">
-                    Status fisik &amp; performa jaringan
+                  <p className="text-xs text-slate-500 leading-tight mt-0.5">
+                    Status fisik &amp; performa modem
                   </p>
                 </div>
               </div>
 
-              {/* Sisi Kanan: Tombol Mulai Speed Test Jelas */}
+              {/* Sisi Kanan: Tombol Mulai Speed Test */}
               <button
                 type="button"
                 onClick={handleOpenSpeedTestModal}
                 title="Uji kecepatan internet riil (Speed Test)"
-                className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-[0.98] transition cursor-pointer shrink-0"
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-[0.98] transition cursor-pointer shrink-0"
               >
-                <Gauge className="w-4 h-4 transition-transform group-hover:rotate-12" />
-                <span className="portal-body-bold">Uji Speed</span>
+                <Gauge className="w-3.5 h-3.5 transition-transform group-hover:rotate-12" />
+                <span className="text-xs font-semibold">Uji Speed</span>
               </button>
             </div>
 
             {/* 3 Metrik Baris Data Sejajar (Daya Terima | Suhu | Hasil Speed Test) */}
-            <div className="grid grid-cols-3 divide-x divide-gray-100 py-2.5 sm:py-3.5 px-1 sm:px-2 bg-white">
+            <div className="grid grid-cols-3 divide-x divide-slate-100 py-3 px-1 bg-white">
               {/* 1. Daya Terima (dBm) */}
               <div className="px-2 text-center flex flex-col items-center justify-center">
-                <div className="flex items-center gap-1 portal-caption text-gray-500 uppercase tracking-tight mb-1">
-                  <Signal className="w-3 h-3 text-emerald-600" />
+                <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 uppercase tracking-tight mb-1">
+                  <Signal className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Daya Terima</span>
                 </div>
-                <div className="portal-body-bold font-black font-mono text-gray-900 leading-none">
+                <div className="text-lg font-bold font-mono text-slate-900 leading-none">
                   {rxPowerValue}
                 </div>
-                <span className="text-[10px] text-gray-400 font-mono mt-0.5">dBm</span>
+                <span className="text-[10px] text-slate-400 font-mono mt-1">dBm</span>
               </div>
 
               {/* 2. Suhu ONT (°C) */}
               <div className="px-2 text-center flex flex-col items-center justify-center">
-                <div className="flex items-center gap-1 portal-caption text-gray-500 uppercase tracking-tight mb-1">
-                  <Thermometer className="w-3 h-3 text-orange-500" />
+                <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 uppercase tracking-tight mb-1">
+                  <Thermometer className="w-3.5 h-3.5 text-amber-500" />
                   <span>Suhu ONT</span>
                 </div>
-                <div className="portal-body-bold font-black font-mono text-gray-900 leading-none">
+                <div className="text-lg font-bold font-mono text-slate-900 leading-none">
                   {suhuOntValue}
                 </div>
-                <span className="text-[10px] text-gray-400 font-mono mt-0.5">°C</span>
+                <span className="text-[10px] text-slate-400 font-mono mt-1">°C</span>
               </div>
 
               {/* 3. Hasil Speed Test Terakhir */}
-              <div className="px-2 text-center flex flex-col items-center justify-center py-0.5">
-                <div className="flex items-center gap-1 portal-caption text-gray-500 uppercase tracking-tight mb-1">
-                  <Gauge className="w-3 h-3 text-cyan-600" />
+              <div className="px-2 text-center flex flex-col items-center justify-center">
+                <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 uppercase tracking-tight mb-1">
+                  <Gauge className="w-3.5 h-3.5 text-blue-600" />
                   <span>Speed Test</span>
                 </div>
                 {lastSpeedTestData && lastSpeedTestData.download !== null ? (
                   <>
-                    <div className="portal-body-bold font-black font-mono text-gray-900 leading-none">
-                      ↓{Number(lastSpeedTestData.download).toFixed(1)} <span className="text-[10px] font-bold text-cyan-600">↑{Number(lastSpeedTestData.upload).toFixed(1)}</span>
+                    <div className="text-sm font-bold font-mono text-slate-900 leading-none">
+                      ↓{Number(lastSpeedTestData.download).toFixed(1)} <span className="text-[11px] font-bold text-blue-600">↑{Number(lastSpeedTestData.upload).toFixed(1)}</span>
                     </div>
-                    <span className="text-[10px] text-gray-400 font-mono mt-0.5">
+                    <span className="text-[10px] text-slate-400 font-mono mt-1">
                       {lastSpeedTestData.ping ? `${lastSpeedTestData.ping}ms` : 'Mbps'}
                     </span>
                   </>
                 ) : (
                   <>
-                    <div className="portal-body-bold font-black font-mono text-gray-900 leading-none">
+                    <div className="text-lg font-bold font-mono text-slate-900 leading-none">
                       -
                     </div>
-                    <span className="text-[10px] text-gray-400 font-mono mt-0.5">
+                    <span className="text-[10px] text-slate-400 font-mono mt-1">
                       Mbps
                     </span>
                   </>
@@ -270,191 +269,167 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
             </div>
           </section>
 
-          {/* ═══ MENU LAYANAN (BARIS 1: 5 MENU, BARIS 2: AKUN SAYA KONSISTEN) ═══ */}
-          <section className="mx-3">
-            <div className="flex items-center justify-between mb-2 px-1">
-              <h2 className="portal-heading text-gray-900">Menu Layanan</h2>
-              <span className="portal-subheading text-gray-500">Akses Cepat</span>
+          {/* ═══ MENU LAYANAN (GRID 3x2 SEIMBANG & BERSIH) ═══ */}
+          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-3.5">
+            <div className="flex items-center justify-between mb-3 px-0.5">
+              <h2 className="text-sm font-bold text-slate-900">Menu Layanan</h2>
+              <span className="text-xs text-slate-500 font-medium">Akses Mandiri</span>
             </div>
 
-            <div className="bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-100 shadow-xs space-y-2">
-              {/* Baris 1: 5 Kolom Menu */}
-              <div className="grid grid-cols-5 gap-1 sm:gap-2">
-                {/* 1. Perangkat */}
-                <button
-                  type="button"
-                  onClick={openDevicesModal}
-                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
-                >
-                  <div
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
-                    style={{ background: '#2563eb' }}
-                  >
-                    <Smartphone className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
-                    Perangkat
-                  </span>
-                </button>
+            <div className="grid grid-cols-3 gap-2">
+              {/* 1. Perangkat Terhubung */}
+              <button
+                type="button"
+                onClick={openDevicesModal}
+                className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                  Perangkat
+                </span>
+              </button>
 
-                {/* 2. WiFi */}
-                <button
-                  type="button"
-                  onClick={() => onNavigate('wifi')}
-                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
-                >
-                  <div
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
-                    style={{ background: '#2563eb' }}
-                  >
-                    <Wifi className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
-                    WiFi
-                  </span>
-                </button>
+              {/* 2. Kelola WiFi */}
+              <button
+                type="button"
+                onClick={() => onNavigate('wifi')}
+                className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+                  <Wifi className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                  Kelola WiFi
+                </span>
+              </button>
 
-                {/* 3. Kendala */}
-                <button
-                  type="button"
-                  onClick={() => onNavigate('kendala')}
-                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
-                >
-                  <div
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
-                    style={{ background: '#2563eb' }}
-                  >
-                    <AlertTriangle className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
-                    Kendala
-                  </span>
-                </button>
+              {/* 3. Lapor Kendala */}
+              <button
+                type="button"
+                onClick={() => onNavigate('kendala')}
+                className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                  Kendala
+                </span>
+              </button>
 
-                {/* 4. Kuota */}
-                <button
-                  type="button"
-                  onClick={() => onNavigate('kuota')}
-                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
-                >
-                  <div
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
-                    style={{ background: '#2563eb' }}
-                  >
-                    <PieChart className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
-                    Kuota
-                  </span>
-                </button>
+              {/* 4. Pemakaian Kuota */}
+              <button
+                type="button"
+                onClick={() => onNavigate('kuota')}
+                className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+                  <PieChart className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                  Kuota FUP
+                </span>
+              </button>
 
-                {/* 5. Bayar */}
-                <button
-                  type="button"
-                  onClick={() => onNavigate('pembayaran')}
-                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
-                >
-                  <div
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
-                    style={{ background: '#2563eb' }}
-                  >
-                    <CreditCard className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
-                    Bayar
-                  </span>
-                </button>
-              </div>
+              {/* 5. Bayar Tagihan */}
+              <button
+                type="button"
+                onClick={() => onNavigate('pembayaran')}
+                className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                  Bayar
+                </span>
+              </button>
 
-              {/* Baris 2: Profil Pelanggan (Sejajar di Kolom 1 Pojok Kiri Persis Bawah Perangkat) */}
-              <div className="grid grid-cols-5 gap-1 sm:gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => onNavigate('profil')}
-                  className="flex flex-col items-center gap-1.5 p-1 rounded-xl hover:bg-blue-50/50 transition active:scale-95 cursor-pointer group"
-                >
-                  <div
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
-                    style={{ background: '#2563eb' }}
-                  >
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="portal-caption text-gray-800 leading-none group-hover:text-blue-600 transition-colors">
-                    Profil
-                  </span>
-                </button>
-              </div>
+              {/* 6. Profil Akun */}
+              <button
+                type="button"
+                onClick={() => onNavigate('profil')}
+                className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+                  <User className="w-5 h-5" />
+                </div>
+                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                  Profil
+                </span>
+              </button>
             </div>
           </section>
 
           {/* ═══ SECTION: RINGKASAN KUOTA ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-4">
             <div className="flex justify-between items-center mb-2.5">
-              <h2 className="portal-heading text-gray-900">Ringkasan Kuota</h2>
+              <h2 className="text-sm font-bold text-slate-900">Ringkasan Kuota</h2>
               <button
                 type="button"
                 onClick={() => onNavigate('kuota')}
-                className="portal-body-bold text-blue-700 flex items-center gap-1 hover:text-blue-800 cursor-pointer"
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
               >
                 <span>Lihat Detail</span>
-                <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                <ChevronRight className="w-3.5 h-3.5 stroke-[2.2]" />
               </button>
             </div>
-            <div className="portal-title-lg font-mono text-blue-600 leading-none mb-2.5">
-              {kuotaTerpakai} <span className="text-sm text-gray-600 font-semibold font-sans">GB</span>
+            <div className="text-2xl font-bold font-mono text-slate-900 leading-none mb-2.5">
+              {kuotaTerpakai} <span className="text-sm font-sans font-medium text-slate-500">GB Terpakai</span>
             </div>
-            <div className="h-2 rounded-full bg-gray-100 overflow-hidden w-full mb-2.5">
+            <div className="h-2 rounded-full bg-slate-100 overflow-hidden w-full mb-2.5">
               <div
                 className="h-full bg-blue-600 rounded-full transition-all duration-700"
                 style={{ width: `${kuotaBarPercent}%` }}
               />
             </div>
-            <div className="flex justify-between portal-body-normal text-gray-600">
+            <div className="flex justify-between text-xs text-slate-600 font-medium">
               <span>Pemakaian Bulan Ini</span>
-              <span className="font-semibold text-gray-700">{cleanPaketLabel(customer.paket)}</span>
+              <span className="font-semibold text-slate-800">{cleanPaketLabel(customer.paket)}</span>
             </div>
           </section>
 
           {/* ═══ SECTION: TAGIHAN BULAN INI ═══ */}
-          <section className="mx-3 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-4">
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50 text-blue-700">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600">
                   <Receipt className="w-4 h-4" />
                 </div>
-                <h2 className="portal-heading text-gray-900">Tagihan Bulan Ini</h2>
+                <h2 className="text-sm font-bold text-slate-900">Tagihan Bulan Ini</h2>
               </div>
               {customer.status_pembayaran === 'BELUM_BAYAR' || customer.status_tagihan === 'MENUNGGAK' ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-300">
-                  <Clock className="w-3.5 h-3.5" />
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600">
+                  <Clock className="w-4 h-4 text-amber-600" />
                   Belum Dibayar
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-300">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   Lunas
                 </span>
               )}
             </div>
 
-            <div className="flex items-baseline justify-between mt-1">
+            <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-slate-100">
               <div>
-                <div className="portal-body-bold text-gray-700">
+                <div className="text-xs text-slate-500 font-medium">
                   Periode: {customer.periode_tagihan || kuotaData.periode_label || 'Bulan Ini'}
                 </div>
                 {customer.harga_paket ? (
-                  <div className="text-xs font-mono font-black text-blue-700 mt-0.5">
+                  <div className="text-sm font-mono font-bold text-slate-900 mt-0.5">
                     Rp {Number(customer.harga_paket).toLocaleString('id-ID')}
                   </div>
                 ) : (
-                  <div className="text-xs text-gray-600 mt-0.5 font-medium">Jatuh tempo tgl 20 setiap bulan</div>
+                  <div className="text-xs text-slate-500 mt-0.5 font-medium">Jatuh tempo tgl 20 setiap bulan</div>
                 )}
               </div>
               <button
                 type="button"
                 onClick={() => onNavigate('pembayaran')}
-                className="px-3.5 py-1.5 rounded-xl portal-body-bold text-white shadow-xs active:scale-95 transition cursor-pointer"
-                style={{ background: '#2563eb' }}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95 transition cursor-pointer"
               >
                 Detail Tagihan
               </button>

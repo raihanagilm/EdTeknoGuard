@@ -59,13 +59,11 @@ class ONTSchedulerService:
         if self.is_running:
             return
 
-        interval_mins = settings.POLLING_INTERVAL_MINUTES or 5
-
-        # Job Pemantauan Berkala Seluruh Kantor
+        # Job Pemantauan Berkala Seluruh Kantor (Ticker 1 Menit yang mengecek interval masing-masing kantor secara independen)
         self.scheduler.add_job(
             self.scheduled_job_wrapper,
             "interval",
-            minutes=interval_mins,
+            minutes=1,
             id="ont_monitoring_scan",
             replace_existing=True
         )
@@ -101,13 +99,13 @@ class ONTSchedulerService:
 
         self.scheduler.start()
         self.is_running = True
-        logger.info(f"[SCHEDULER] Engine APScheduler berhasil diaktifkan (Interval: {interval_mins} menit).")
+        logger.info("[SCHEDULER] Engine APScheduler berhasil diaktifkan (Ticker 1 Menit untuk Multi-Kantor).")
 
         # Startup recovery & catch-up scan
         SchedulerRecoveryManager.handle_startup_recovery(self)
 
     def scheduled_job_wrapper(self):
-        """Wrapper job yang memindai seluruh kantor aktif secara berurutan"""
+        """Wrapper job yang memindai kantor aktif secara independen sesuai interval masing-masing kantor"""
         m_db = TenantDatabaseManager.get_tenant_session(None)
         try:
             kantors = m_db.query(Kantor).filter(Kantor.is_active == True).all()
@@ -115,19 +113,21 @@ class ONTSchedulerService:
         finally:
             m_db.close()
 
+        now = get_now_wib()
         for k in codes:
             try:
-                # Periksa apakah kantor di-pause di DB
+                state = SchedulerStateManager.get_office_state(k)
+                if state.is_scanning:
+                    continue
+
+                # Periksa apakah kantor di-pause di DB atau sudah jatuh tempo pemindaian berikutnya
                 t_db = TenantDatabaseManager.get_tenant_session(k)
                 try:
                     status = SchedulerRecoveryManager.get_setting_from_db(t_db, "scheduler_status", default="RUNNING", kantor=k)
                     if status != "RUNNING":
-                        logger.info(f"[SCHEDULER] Pemantauan berkala kantor '{k}' dilewati (Status di DB: {status}).")
-
                         # Throttle pengingat jeda agar HANYA dikirim 1 jam sekali saja
                         last_reminder_str = SchedulerRecoveryManager.get_setting_from_db(t_db, "last_paused_reminder_at", default=None, kantor=k)
                         should_send = True
-                        now = get_now_wib()
                         if last_reminder_str:
                             try:
                                 import dateutil.parser
@@ -178,6 +178,32 @@ class ONTSchedulerService:
                                     m_db_user.close()
                             except Exception as p_err:
                                 logger.warning(f"[SCHEDULER_PAUSED_REMINDER] Gagal kirim pengingat pause kantor {k}: {p_err}")
+                        continue
+
+                    # Kantor berstatus RUNNING: Evaluasi apakah sudah saatnya memindai berdasarkan interval kantor
+                    interval_str = SchedulerRecoveryManager.get_setting_from_db(t_db, "polling_interval_minutes", default=None, kantor=k)
+                    try:
+                        interval_mins = int(interval_str) if interval_str else int(settings.POLLING_INTERVAL_MINUTES or 5)
+                    except (ValueError, TypeError):
+                        interval_mins = 5
+
+                    last_scan_str = SchedulerRecoveryManager.get_setting_from_db(t_db, "last_scan_time", default=None, kantor=k)
+                    is_due = True
+                    if last_scan_str:
+                        try:
+                            import dateutil.parser
+                            last_scan_dt = dateutil.parser.parse(last_scan_str)
+                            if last_scan_dt.tzinfo is None:
+                                from app.core.timezone import WIB_TZ
+                                last_scan_dt = last_scan_dt.replace(tzinfo=WIB_TZ)
+                            elapsed_mins = (now - last_scan_dt).total_seconds() / 60.0
+                            if elapsed_mins < interval_mins:
+                                is_due = False
+                        except Exception as e:
+                            logger.debug(f"[SCHEDULER] Gagal parse last_scan_time kantor {k}: {e}")
+                            is_due = True
+
+                    if not is_due:
                         continue
                 finally:
                     t_db.close()
@@ -273,18 +299,15 @@ class ONTSchedulerService:
             logger.error(f"[MAINTENANCE_CLEANUP] Terjadi kendala saat pembersihan berkala: {e}")
 
     def update_interval(self, minutes: int, kantor: Optional[str] = None):
-        """Mengubah interval menit scanning"""
+        """Mengubah interval menit pemantauan mandiri untuk kantor cabang tertentu di database"""
         if minutes < 1:
             minutes = 1
-
-        if self.scheduler.get_job("ont_monitoring_scan"):
-            self.scheduler.reschedule_job("ont_monitoring_scan", trigger="interval", minutes=minutes)
-            logger.info(f"[SCHEDULER] Interval pemantauan diubah menjadi {minutes} menit.")
 
         k_code = (kantor or "cabang").lower().strip()
         db = TenantDatabaseManager.get_tenant_session(k_code)
         try:
             SchedulerRecoveryManager.set_setting_in_db(db, "polling_interval_minutes", str(minutes), kantor=k_code)
+            logger.info(f"[SCHEDULER] Interval pemantauan kantor '{k_code}' diperbarui menjadi {minutes} menit di database.")
         finally:
             db.close()
 
