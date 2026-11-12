@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   Wand2,
-  Sparkles,
   ChevronUp,
   ChevronDown,
   ArrowLeft,
@@ -23,23 +22,23 @@ export function ImportStepMapping({
   handleProceedToStep3
 }) {
   return (
-    <div className="space-y-4 font-mono text-xs">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-cyan-50/60 p-3 rounded-2xl border border-cyan-200">
+    <div className="space-y-4 font-sans text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#F1F6FC] p-3 rounded-lg border border-[#CCDDF0]">
         <div>
-          <h4 className="font-bold text-slate-900 font-sans text-xs flex items-center gap-1.5">
-            <Wand2 className="w-4 h-4 text-cyan-600" />
+          <h4 className="font-bold text-[#0B2545] text-xs flex items-center gap-1.5">
+            <Wand2 className="w-4 h-4 text-[#026AA7]" />
             <span>Cocokkan Kolom Berkas ke Kolom Database</span>
           </h4>
-          <p className="text-[11px] text-slate-500 font-sans">
-            Pastikan kolom <strong className="text-cyan-900">IP Router / ONT (10.10.x.x / 192.168.x.x)</strong> terpetakan sebagai kunci utama pencocokan ke pelanggan.
+          <p className="text-[11px] text-[#64839E]">
+            Pastikan kolom <strong className="text-[#0B2545]">IP Router / ONT (10.10.x.x / 192.168.x.x)</strong> terpetakan sebagai kunci utama pencocokan ke pelanggan.
           </p>
         </div>
         <button
           type="button"
           onClick={() => autoMapColumns()}
-          className="px-3 py-1.5 rounded-xl bg-white hover:bg-cyan-100/70 text-cyan-800 border border-cyan-300 font-bold text-xs flex items-center gap-1.5 shrink-0 shadow-2xs transition cursor-pointer"
+          className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#E2EDF8] text-[#026AA7] border border-[#CCDDF0] font-bold text-xs flex items-center gap-1.5 shrink-0 shadow-2xs transition cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+          <Wand2 className="w-3.5 h-3.5 text-[#026AA7]" />
           <span>Auto-Map Kolom</span>
         </button>
       </div>
@@ -48,7 +47,7 @@ export function ImportStepMapping({
       <div className="max-h-[400px] overflow-y-auto pr-1 space-y-3">
         {/* Seksi Kolom Utama */}
         <div>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+          <span className="text-[10px] font-mono font-bold text-[#64839E] uppercase tracking-wider block mb-2">
             Kolom Utama Pengayaan Data
           </span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
@@ -57,99 +56,105 @@ export function ImportStepMapping({
               return (
                 <div
                   key={field.key}
-                  className={`p-3 rounded-2xl border transition ${
-                    field.required && !isMapped
-                      ? 'bg-amber-50/50 border-amber-300'
-                      : isMapped
-                      ? 'bg-cyan-50/30 border-cyan-200'
-                      : 'bg-slate-50/50 border-slate-200'
+                  className={`p-3 rounded-lg border transition ${
+                    isMapped
+                      ? 'bg-white border-[#CCDDF0] shadow-2xs'
+                      : 'bg-[#F1F6FC]/50 border-[#CCDDF0]/60'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-bold text-[#0B2545] flex items-center gap-1">
                       <span>{field.label}</span>
-                      {field.required ? (
-                        <span className="text-rose-600 font-bold">*Wajib</span>
-                      ) : (
-                        <span className="text-slate-400 font-normal text-[10px]">(Opsional)</span>
+                      {field.required && (
+                        <span className="text-rose-500 font-bold" title="Kolom Wajib">*</span>
                       )}
-                    </label>
+                    </span>
                     {isMapped && (
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded-md">
+                      <span className="text-[10px] font-mono font-bold text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0] px-1.5 py-0.2 rounded">
                         Terpetakan
                       </span>
                     )}
                   </div>
+                  <p className="text-[10px] text-[#64839E] mb-2">{field.desc}</p>
                   <select
                     value={importMapping[field.key] || ''}
-                    onChange={(e) => setImportMapping({ ...importMapping, [field.key]: e.target.value })}
-                    className={`w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 ${
-                      field.required && !isMapped ? 'border-amber-400 bg-white' : 'border-slate-300 bg-white'
+                    onChange={(e) =>
+                      setImportMapping({ ...importMapping, [field.key]: e.target.value })
+                    }
+                    className={`w-full px-2.5 py-1.5 rounded-lg border text-xs font-semibold focus:outline-none transition ${
+                      isMapped
+                        ? 'bg-[#F1F6FC] border-[#026AA7] text-[#0B2545]'
+                        : 'bg-white border-[#CCDDF0] text-[#64839E]'
                     }`}
                   >
-                    <option value="">-- [ Kosong / Nilai Default ] --</option>
-                    {importColumns.map((col, cIdx) => (
-                      <option key={cIdx} value={col}>
-                        Kolom Berkas: {col}
+                    <option value="">-- Lewati Kolom Ini --</option>
+                    {importColumns.map((col, idx) => (
+                      <option key={idx} value={col}>
+                        {col}
                       </option>
                     ))}
                   </select>
-                  <p className="text-[10px] text-slate-400 font-sans mt-1">{field.hint}</p>
                 </div>
               )
             })}
           </div>
         </div>
 
-        {/* Accordion Kolom Teknis Lanjutan */}
-        <div className="pt-1 border-t border-slate-200">
+        {/* Seksi Kolom Tambahan (Advanced) */}
+        <div className="pt-2">
           <button
             type="button"
             onClick={() => setShowAdvancedFields(!showAdvancedFields)}
-            className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition cursor-pointer border border-slate-200"
+            className="flex items-center justify-between w-full p-2.5 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#3B5B78] font-bold text-xs border border-[#CCDDF0] transition cursor-pointer"
           >
-            <span className="flex items-center gap-1.5">
-              <span>Pengaturan Kolom Kredensial ONT (Username &amp; Password ONT)</span>
-              <span className="text-[10px] font-normal text-slate-400">(Opsional)</span>
-            </span>
-            {showAdvancedFields ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <span>Kolom Tambahan (Kredensial ONT, Paket, WiFi, GPS)</span>
+            {showAdvancedFields ? (
+              <ChevronUp className="w-4 h-4 text-[#64839E]" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-[#64839E]" />
+            )}
           </button>
 
           {showAdvancedFields && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2.5 animate-in fade-in duration-150">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mt-2.5">
               {ADVANCED_FIELDS.map((field) => {
                 const isMapped = !!importMapping[field.key]
                 return (
                   <div
                     key={field.key}
-                    className={`p-3 rounded-2xl border transition ${
-                      isMapped ? 'bg-cyan-50/30 border-cyan-200' : 'bg-slate-50/50 border-slate-200'
+                    className={`p-3 rounded-lg border transition ${
+                      isMapped
+                        ? 'bg-white border-[#CCDDF0] shadow-2xs'
+                        : 'bg-[#F1F6FC]/50 border-[#CCDDF0]/60'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
-                        <span>{field.label}</span>
-                        <span className="text-slate-400 font-normal text-[10px]">(Opsional)</span>
-                      </label>
+                      <span className="font-bold text-[#0B2545]">{field.label}</span>
                       {isMapped && (
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded-md">
+                        <span className="text-[10px] font-mono font-bold text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0] px-1.5 py-0.2 rounded">
                           Terpetakan
                         </span>
                       )}
                     </div>
+                    <p className="text-[10px] text-[#64839E] mb-2">{field.desc}</p>
                     <select
                       value={importMapping[field.key] || ''}
-                      onChange={(e) => setImportMapping({ ...importMapping, [field.key]: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 border-slate-300 bg-white"
+                      onChange={(e) =>
+                        setImportMapping({ ...importMapping, [field.key]: e.target.value })
+                      }
+                      className={`w-full px-2.5 py-1.5 rounded-lg border text-xs font-semibold focus:outline-none transition ${
+                        isMapped
+                          ? 'bg-[#F1F6FC] border-[#026AA7] text-[#0B2545]'
+                          : 'bg-white border-[#CCDDF0] text-[#64839E]'
+                      }`}
                     >
-                      <option value="">-- [ Kosong / Nilai Default ] --</option>
-                      {importColumns.map((col, cIdx) => (
-                        <option key={cIdx} value={col}>
-                          Kolom Berkas: {col}
+                      <option value="">-- Lewati Kolom Ini --</option>
+                      {importColumns.map((col, idx) => (
+                        <option key={idx} value={col}>
+                          {col}
                         </option>
                       ))}
                     </select>
-                    <p className="text-[10px] text-slate-400 font-sans mt-1">{field.hint}</p>
                   </div>
                 )
               })}
@@ -159,29 +164,29 @@ export function ImportStepMapping({
       </div>
 
       {/* Step 2 Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-sky-100 font-sans">
+      <div className="flex items-center justify-between pt-3 border-t border-[#CCDDF0]">
         <button
           type="button"
           onClick={() => setImportStep(1)}
-          className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 cursor-pointer"
+          className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] flex items-center gap-1.5 transition cursor-pointer"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Kembali ke Upload</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span>Kembali</span>
         </button>
         <button
           type="button"
-          disabled={importLoading || !importMapping.nama || !importMapping.ip_router}
+          disabled={importLoading}
           onClick={handleProceedToStep3}
-          className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+          className="px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
         >
           {importLoading ? (
             <>
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>Memproses Pratinjau...</span>
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              <span>Memvalidasi Data...</span>
             </>
           ) : (
             <>
-              <span>Lanjut ke Pratinjau Data</span>
+              <span>Lanjut ke Pratinjau &amp; Simpan</span>
               <ChevronRight className="w-4 h-4" />
             </>
           )}
@@ -190,4 +195,3 @@ export function ImportStepMapping({
     </div>
   )
 }
-

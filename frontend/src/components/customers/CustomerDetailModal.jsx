@@ -101,26 +101,28 @@ export function CustomerDetailModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-xl border border-slate-200/90 space-y-3 sm:space-y-4 font-sans max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans">
+      <div className="bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-3 sm:space-y-4 max-h-[92vh] flex flex-col">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 sm:pb-3 shrink-0">
+        <div className="flex items-center justify-between border-b border-[#CCDDF0] pb-2.5 sm:pb-3 shrink-0">
           <div className="flex items-center gap-3">
-            <UserPlus className="w-5 h-5 text-cyan-700 shrink-0" />
+            <div className="h-9 w-9 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] flex items-center justify-center text-[#026AA7] shrink-0">
+              <UserPlus className="w-4 h-4" />
+            </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+              <h3 className="text-sm sm:text-base font-bold text-[#0B2545] truncate">
                 {customer.nama || customer.name}
               </h3>
-              <p className="text-[11px] sm:text-xs text-slate-500 font-medium truncate">
-                ID: <span className="font-mono text-slate-700 font-semibold">{cId}</span>
-                <span className="inline-block mx-1.5 h-3 w-px bg-slate-200 align-middle" />
-                Wilayah: <span className="uppercase font-semibold text-slate-700">{customer.kantor || activeOffice || 'cabang'}</span>
+              <p className="text-[11px] sm:text-xs text-[#64839E] font-medium truncate">
+                ID: <span className="font-mono text-[#0B2545] font-semibold">{cId}</span>
+                <span className="inline-block mx-1.5 h-3 w-px bg-[#CCDDF0] align-middle" />
+                Wilayah: <span className="uppercase font-semibold text-[#026AA7]">{customer.kantor || activeOffice || 'cabang'}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition shrink-0 cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#0B2545] transition shrink-0 cursor-pointer"
             title="Tutup Modal"
           >
             <X className="w-4 h-4" />
@@ -128,41 +130,41 @@ export function CustomerDetailModal({
         </div>
 
         {/* Tab Switcher (Profil vs Jaringan vs Pembayaran) */}
-        <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 shrink-0 font-sans text-[11px] sm:text-xs font-bold gap-0.5">
+        <div className="flex rounded-lg bg-[#F1F6FC] p-1 border border-[#CCDDF0] shrink-0 font-sans text-[11px] sm:text-xs font-bold gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('profil')}
-            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
+            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
               activeTab === 'profil'
-                ? 'bg-white text-cyan-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]'
+                : 'text-[#3B5B78] hover:text-[#0B2545]'
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+            <FileText className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
             <span className="truncate">Profil &amp; Kontak</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('jaringan')}
-            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
+            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
               activeTab === 'jaringan'
-                ? 'bg-white text-cyan-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]'
+                : 'text-[#3B5B78] hover:text-[#0B2545]'
             }`}
           >
-            <Server className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+            <Server className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
             <span className="truncate">Jaringan &amp; Modem</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('pembayaran')}
-            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
+            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
               activeTab === 'pembayaran'
-                ? 'bg-white text-cyan-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]'
+                : 'text-[#3B5B78] hover:text-[#0B2545]'
             }`}
           >
-            <CreditCard className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <CreditCard className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
             <span className="truncate">Tagihan &amp; Bayar</span>
           </button>
         </div>

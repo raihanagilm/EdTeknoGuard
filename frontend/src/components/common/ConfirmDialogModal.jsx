@@ -10,19 +10,7 @@ import {
 } from 'lucide-react'
 
 /**
- * ConfirmDialogModal - Komponen pop-up konfirmasi kustom yang fleksibel & reusable
- *
- * Props:
- * - isOpen: boolean
- * - onClose: () => void
- * - onConfirm: () => void
- * - title: string
- * - message: string | ReactNode
- * - confirmText: string (default: "Ya, Lanjutkan")
- * - cancelText: string (default: "Batal")
- * - variant: 'danger' | 'warning' | 'info' | 'success' (default: 'danger')
- * - isLoading: boolean (default: false)
- * - loadingText: string (default: "Memproses...")
+ * ConfirmDialogModal - Komponen pop-up konfirmasi kustom profesional (60-30-10 Light Architecture)
  */
 export function ConfirmDialogModal({
   isOpen,
@@ -38,31 +26,30 @@ export function ConfirmDialogModal({
 }) {
   if (!isOpen) return null
 
-  // Variasi warna & tema dialog
   const variantConfig = {
     danger: {
       icon: AlertCircle,
       iconBg: 'bg-rose-50 text-rose-600 border-rose-200',
-      btnConfirm: 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200',
-      border: 'border-rose-100'
+      btnConfirm: 'bg-rose-600 hover:bg-rose-700 text-white',
+      border: 'border-[#CCDDF0]'
     },
     warning: {
       icon: AlertTriangle,
-      iconBg: 'bg-amber-50 text-amber-600 border-amber-200',
-      btnConfirm: 'bg-amber-600 hover:bg-amber-700 text-white shadow-amber-200',
-      border: 'border-amber-100'
+      iconBg: 'bg-amber-50 text-amber-700 border-amber-200',
+      btnConfirm: 'bg-amber-600 hover:bg-amber-700 text-white',
+      border: 'border-[#CCDDF0]'
     },
     info: {
       icon: Info,
-      iconBg: 'bg-cyan-50 text-cyan-600 border-cyan-200',
-      btnConfirm: 'bg-cyan-700 hover:bg-cyan-800 text-white shadow-cyan-200',
-      border: 'border-cyan-100'
+      iconBg: 'bg-[#E0F0FF] text-[#026AA7] border-[#CCDDF0]',
+      btnConfirm: 'bg-[#026AA7] hover:bg-[#035388] text-white',
+      border: 'border-[#CCDDF0]'
     },
     success: {
       icon: CheckCircle2,
       iconBg: 'bg-emerald-50 text-emerald-600 border-emerald-200',
-      btnConfirm: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200',
-      border: 'border-emerald-100'
+      btnConfirm: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+      border: 'border-[#CCDDF0]'
     }
   }
 
@@ -71,7 +58,7 @@ export function ConfirmDialogModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isLoading) onClose()
       }}
@@ -79,30 +66,30 @@ export function ConfirmDialogModal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border ${currentTheme.border} space-y-4 animate-in fade-in zoom-in-95 duration-150`}
+        className={`bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border ${currentTheme.border} space-y-4 animate-in fade-in zoom-in-95 duration-150`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className={`h-12 w-12 rounded-2xl ${currentTheme.iconBg} border flex items-center justify-center shrink-0`}>
-              <IconComponent className="w-6 h-6" />
+            <div className={`h-10 w-10 rounded-lg ${currentTheme.iconBg} border flex items-center justify-center shrink-0`}>
+              <IconComponent className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 leading-snug">{title}</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Harap konfirmasi sebelum sistem melanjutkan</p>
+              <h3 className="text-sm sm:text-base font-bold text-[#0B2545] leading-snug">{title}</h3>
+              <p className="text-xs text-[#64839E] mt-0.5">Harap konfirmasi sebelum sistem melanjutkan</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition disabled:opacity-40"
+            className="text-[#64839E] hover:text-[#0B2545] p-1.5 rounded-lg hover:bg-[#F1F6FC] transition disabled:opacity-40 cursor-pointer"
             title="Tutup dialog"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed font-sans">
+        <div className="p-4 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] text-xs sm:text-sm text-[#3B5B78] leading-relaxed font-sans">
           {message}
         </div>
 
@@ -111,7 +98,7 @@ export function ConfirmDialogModal({
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px] cursor-pointer disabled:opacity-50 transition"
+            className="px-4 py-2 rounded-lg text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] font-semibold text-xs min-h-[38px] cursor-pointer disabled:opacity-50 transition border border-[#CCDDF0]"
           >
             {cancelText}
           </button>
@@ -119,7 +106,7 @@ export function ConfirmDialogModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`px-5 py-2 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2 min-h-[40px] cursor-pointer disabled:opacity-50 ${currentTheme.btnConfirm}`}
+            className={`px-5 py-2 rounded-lg font-bold text-xs shadow-2xs transition flex items-center gap-2 min-h-[38px] cursor-pointer disabled:opacity-50 ${currentTheme.btnConfirm}`}
           >
             {isLoading ? (
               <>

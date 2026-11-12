@@ -11709,7 +11709,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$92 = {
+var __iconData$91 = {
 	name: "activity",
 	size: 24,
 	node: [["path", {
@@ -11717,8 +11717,8 @@ var __iconData$92 = {
 		key: "169zse"
 	}]]
 };
-__iconData$92.node;
-var Activity = createLucideIcon(__iconData$92);
+__iconData$91.node;
+var Activity = createLucideIcon(__iconData$91);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-down.mjs
 /**
@@ -11727,7 +11727,7 @@ var Activity = createLucideIcon(__iconData$92);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$91 = {
+var __iconData$90 = {
 	name: "arrow-down",
 	size: 24,
 	node: [["path", {
@@ -11738,8 +11738,8 @@ var __iconData$91 = {
 		key: "1idqje"
 	}]]
 };
-__iconData$91.node;
-var ArrowDown = createLucideIcon(__iconData$91);
+__iconData$90.node;
+var ArrowDown = createLucideIcon(__iconData$90);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left.mjs
 /**
@@ -11748,7 +11748,7 @@ var ArrowDown = createLucideIcon(__iconData$91);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$90 = {
+var __iconData$89 = {
 	name: "arrow-left",
 	size: 24,
 	node: [["path", {
@@ -11759,8 +11759,8 @@ var __iconData$90 = {
 		key: "x3x0zl"
 	}]]
 };
-__iconData$90.node;
-var ArrowLeft = createLucideIcon(__iconData$90);
+__iconData$89.node;
+var ArrowLeft = createLucideIcon(__iconData$89);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left-right.mjs
 /**
@@ -11769,7 +11769,7 @@ var ArrowLeft = createLucideIcon(__iconData$90);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$89 = {
+var __iconData$88 = {
 	name: "arrow-left-right",
 	size: 24,
 	node: [
@@ -11791,8 +11791,8 @@ var __iconData$89 = {
 		}]
 	]
 };
-__iconData$89.node;
-var ArrowLeftRight = createLucideIcon(__iconData$89);
+__iconData$88.node;
+var ArrowLeftRight = createLucideIcon(__iconData$88);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up-down.mjs
 /**
@@ -11801,7 +11801,7 @@ var ArrowLeftRight = createLucideIcon(__iconData$89);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$88 = {
+var __iconData$87 = {
 	name: "arrow-up-down",
 	size: 24,
 	node: [
@@ -11823,8 +11823,8 @@ var __iconData$88 = {
 		}]
 	]
 };
-__iconData$88.node;
-var ArrowUpDown = createLucideIcon(__iconData$88);
+__iconData$87.node;
+var ArrowUpDown = createLucideIcon(__iconData$87);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up.mjs
 /**
@@ -11833,7 +11833,7 @@ var ArrowUpDown = createLucideIcon(__iconData$88);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$87 = {
+var __iconData$86 = {
 	name: "arrow-up",
 	size: 24,
 	node: [["path", {
@@ -11844,8 +11844,8 @@ var __iconData$87 = {
 		key: "x0mq9r"
 	}]]
 };
-__iconData$87.node;
-var ArrowUp = createLucideIcon(__iconData$87);
+__iconData$86.node;
+var ArrowUp = createLucideIcon(__iconData$86);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/ban.mjs
 /**
@@ -11854,7 +11854,7 @@ var ArrowUp = createLucideIcon(__iconData$87);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$86 = {
+var __iconData$85 = {
 	name: "ban",
 	size: 24,
 	node: [["circle", {
@@ -11867,8 +11867,8 @@ var __iconData$86 = {
 		key: "196cmz"
 	}]]
 };
-__iconData$86.node;
-var Ban = createLucideIcon(__iconData$86);
+__iconData$85.node;
+var Ban = createLucideIcon(__iconData$85);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/banknote.mjs
 /**
@@ -11877,7 +11877,7 @@ var Ban = createLucideIcon(__iconData$86);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$85 = {
+var __iconData$84 = {
 	name: "banknote",
 	size: 24,
 	node: [
@@ -11901,8 +11901,8 @@ var __iconData$85 = {
 		}]
 	]
 };
-__iconData$85.node;
-var Banknote = createLucideIcon(__iconData$85);
+__iconData$84.node;
+var Banknote = createLucideIcon(__iconData$84);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/bell.mjs
 /**
@@ -11911,7 +11911,7 @@ var Banknote = createLucideIcon(__iconData$85);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$84 = {
+var __iconData$83 = {
 	name: "bell",
 	size: 24,
 	node: [["path", {
@@ -11922,8 +11922,8 @@ var __iconData$84 = {
 		key: "11g9vi"
 	}]]
 };
-__iconData$84.node;
-var Bell = createLucideIcon(__iconData$84);
+__iconData$83.node;
+var Bell = createLucideIcon(__iconData$83);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/building-complex.mjs
 /**
@@ -11932,7 +11932,7 @@ var Bell = createLucideIcon(__iconData$84);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$83 = {
+var __iconData$82 = {
 	name: "building-complex",
 	size: 24,
 	node: [
@@ -11959,8 +11959,8 @@ var __iconData$83 = {
 	],
 	aliases: ["building-2"]
 };
-__iconData$83.node;
-var BuildingComplex = createLucideIcon(__iconData$83);
+__iconData$82.node;
+var BuildingComplex = createLucideIcon(__iconData$82);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/camera.mjs
 /**
@@ -11969,7 +11969,7 @@ var BuildingComplex = createLucideIcon(__iconData$83);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$82 = {
+var __iconData$81 = {
 	name: "camera",
 	size: 24,
 	node: [["path", {
@@ -11982,8 +11982,8 @@ var __iconData$82 = {
 		key: "1vg3eu"
 	}]]
 };
-__iconData$82.node;
-var Camera = createLucideIcon(__iconData$82);
+__iconData$81.node;
+var Camera = createLucideIcon(__iconData$81);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/calendar.mjs
 /**
@@ -11992,7 +11992,7 @@ var Camera = createLucideIcon(__iconData$82);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$81 = {
+var __iconData$80 = {
 	name: "calendar",
 	size: 24,
 	node: [
@@ -12018,8 +12018,8 @@ var __iconData$81 = {
 		}]
 	]
 };
-__iconData$81.node;
-var Calendar = createLucideIcon(__iconData$81);
+__iconData$80.node;
+var Calendar = createLucideIcon(__iconData$80);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chart-column.mjs
 /**
@@ -12028,7 +12028,7 @@ var Calendar = createLucideIcon(__iconData$81);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$80 = {
+var __iconData$79 = {
 	name: "chart-column",
 	size: 24,
 	node: [
@@ -12051,8 +12051,8 @@ var __iconData$80 = {
 	],
 	aliases: ["bar-chart-3"]
 };
-__iconData$80.node;
-var ChartColumn = createLucideIcon(__iconData$80);
+__iconData$79.node;
+var ChartColumn = createLucideIcon(__iconData$79);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chart-pie.mjs
 /**
@@ -12061,7 +12061,7 @@ var ChartColumn = createLucideIcon(__iconData$80);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$79 = {
+var __iconData$78 = {
 	name: "chart-pie",
 	size: 24,
 	node: [["path", {
@@ -12073,8 +12073,8 @@ var __iconData$79 = {
 	}]],
 	aliases: ["pie-chart"]
 };
-__iconData$79.node;
-var ChartPie = createLucideIcon(__iconData$79);
+__iconData$78.node;
+var ChartPie = createLucideIcon(__iconData$78);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/check-check.mjs
 /**
@@ -12083,7 +12083,7 @@ var ChartPie = createLucideIcon(__iconData$79);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$78 = {
+var __iconData$77 = {
 	name: "check-check",
 	size: 24,
 	node: [["path", {
@@ -12094,8 +12094,8 @@ var __iconData$78 = {
 		key: "ke71qq"
 	}]]
 };
-__iconData$78.node;
-var CheckCheck = createLucideIcon(__iconData$78);
+__iconData$77.node;
+var CheckCheck = createLucideIcon(__iconData$77);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/check.mjs
 /**
@@ -12104,7 +12104,7 @@ var CheckCheck = createLucideIcon(__iconData$78);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$77 = {
+var __iconData$76 = {
 	name: "check",
 	size: 24,
 	node: [["path", {
@@ -12112,8 +12112,8 @@ var __iconData$77 = {
 		key: "1gmf2c"
 	}]]
 };
-__iconData$77.node;
-var Check = createLucideIcon(__iconData$77);
+__iconData$76.node;
+var Check = createLucideIcon(__iconData$76);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-down.mjs
 /**
@@ -12122,7 +12122,7 @@ var Check = createLucideIcon(__iconData$77);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$76 = {
+var __iconData$75 = {
 	name: "chevron-down",
 	size: 24,
 	node: [["path", {
@@ -12130,8 +12130,8 @@ var __iconData$76 = {
 		key: "qrunsl"
 	}]]
 };
-__iconData$76.node;
-var ChevronDown = createLucideIcon(__iconData$76);
+__iconData$75.node;
+var ChevronDown = createLucideIcon(__iconData$75);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-left.mjs
 /**
@@ -12140,7 +12140,7 @@ var ChevronDown = createLucideIcon(__iconData$76);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$75 = {
+var __iconData$74 = {
 	name: "chevron-left",
 	size: 24,
 	node: [["path", {
@@ -12148,8 +12148,8 @@ var __iconData$75 = {
 		key: "1wnfg3"
 	}]]
 };
-__iconData$75.node;
-var ChevronLeft = createLucideIcon(__iconData$75);
+__iconData$74.node;
+var ChevronLeft = createLucideIcon(__iconData$74);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-up.mjs
 /**
@@ -12158,7 +12158,7 @@ var ChevronLeft = createLucideIcon(__iconData$75);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$74 = {
+var __iconData$73 = {
 	name: "chevron-up",
 	size: 24,
 	node: [["path", {
@@ -12166,8 +12166,8 @@ var __iconData$74 = {
 		key: "153udz"
 	}]]
 };
-__iconData$74.node;
-var ChevronUp = createLucideIcon(__iconData$74);
+__iconData$73.node;
+var ChevronUp = createLucideIcon(__iconData$73);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-right.mjs
 /**
@@ -12176,7 +12176,7 @@ var ChevronUp = createLucideIcon(__iconData$74);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$73 = {
+var __iconData$72 = {
 	name: "chevron-right",
 	size: 24,
 	node: [["path", {
@@ -12184,8 +12184,8 @@ var __iconData$73 = {
 		key: "mthhwq"
 	}]]
 };
-__iconData$73.node;
-var ChevronRight = createLucideIcon(__iconData$73);
+__iconData$72.node;
+var ChevronRight = createLucideIcon(__iconData$72);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-alert.mjs
 /**
@@ -12194,7 +12194,7 @@ var ChevronRight = createLucideIcon(__iconData$73);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$72 = {
+var __iconData$71 = {
 	name: "circle-alert",
 	size: 24,
 	node: [
@@ -12221,8 +12221,8 @@ var __iconData$72 = {
 	],
 	aliases: ["alert-circle"]
 };
-__iconData$72.node;
-var CircleAlert = createLucideIcon(__iconData$72);
+__iconData$71.node;
+var CircleAlert = createLucideIcon(__iconData$71);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-check.mjs
 /**
@@ -12231,7 +12231,7 @@ var CircleAlert = createLucideIcon(__iconData$72);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$71 = {
+var __iconData$70 = {
 	name: "circle-check",
 	size: 24,
 	node: [["circle", {
@@ -12245,8 +12245,8 @@ var __iconData$71 = {
 	}]],
 	aliases: ["check-circle-2"]
 };
-__iconData$71.node;
-var CircleCheck = createLucideIcon(__iconData$71);
+__iconData$70.node;
+var CircleCheck = createLucideIcon(__iconData$70);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-question-mark.mjs
 /**
@@ -12255,7 +12255,7 @@ var CircleCheck = createLucideIcon(__iconData$71);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$70 = {
+var __iconData$69 = {
 	name: "circle-question-mark",
 	size: 24,
 	node: [
@@ -12276,8 +12276,8 @@ var __iconData$70 = {
 	],
 	aliases: ["help-circle", "circle-help"]
 };
-__iconData$70.node;
-var CircleQuestionMark = createLucideIcon(__iconData$70);
+__iconData$69.node;
+var CircleQuestionMark = createLucideIcon(__iconData$69);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-x.mjs
 /**
@@ -12286,7 +12286,7 @@ var CircleQuestionMark = createLucideIcon(__iconData$70);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$69 = {
+var __iconData$68 = {
 	name: "circle-x",
 	size: 24,
 	node: [
@@ -12307,8 +12307,8 @@ var __iconData$69 = {
 	],
 	aliases: ["x-circle"]
 };
-__iconData$69.node;
-var CircleX = createLucideIcon(__iconData$69);
+__iconData$68.node;
+var CircleX = createLucideIcon(__iconData$68);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/clock.mjs
 /**
@@ -12317,7 +12317,7 @@ var CircleX = createLucideIcon(__iconData$69);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$68 = {
+var __iconData$67 = {
 	name: "clock",
 	size: 24,
 	node: [["circle", {
@@ -12330,8 +12330,8 @@ var __iconData$68 = {
 		key: "mmk7yg"
 	}]]
 };
-__iconData$68.node;
-var Clock = createLucideIcon(__iconData$68);
+__iconData$67.node;
+var Clock = createLucideIcon(__iconData$67);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/copy.mjs
 /**
@@ -12340,7 +12340,7 @@ var Clock = createLucideIcon(__iconData$68);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$67 = {
+var __iconData$66 = {
 	name: "copy",
 	size: 24,
 	node: [["rect", {
@@ -12356,8 +12356,8 @@ var __iconData$67 = {
 		key: "zix9uf"
 	}]]
 };
-__iconData$67.node;
-var Copy = createLucideIcon(__iconData$67);
+__iconData$66.node;
+var Copy = createLucideIcon(__iconData$66);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/credit-card.mjs
 /**
@@ -12366,7 +12366,7 @@ var Copy = createLucideIcon(__iconData$67);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$66 = {
+var __iconData$65 = {
 	name: "credit-card",
 	size: 24,
 	node: [
@@ -12391,8 +12391,8 @@ var __iconData$66 = {
 		}]
 	]
 };
-__iconData$66.node;
-var CreditCard = createLucideIcon(__iconData$66);
+__iconData$65.node;
+var CreditCard = createLucideIcon(__iconData$65);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/database.mjs
 /**
@@ -12401,7 +12401,7 @@ var CreditCard = createLucideIcon(__iconData$66);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$65 = {
+var __iconData$64 = {
 	name: "database",
 	size: 24,
 	node: [
@@ -12422,8 +12422,8 @@ var __iconData$65 = {
 		}]
 	]
 };
-__iconData$65.node;
-var Database = createLucideIcon(__iconData$65);
+__iconData$64.node;
+var Database = createLucideIcon(__iconData$64);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/dollar-sign.mjs
 /**
@@ -12432,7 +12432,7 @@ var Database = createLucideIcon(__iconData$65);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$64 = {
+var __iconData$63 = {
 	name: "dollar-sign",
 	size: 24,
 	node: [["line", {
@@ -12446,8 +12446,8 @@ var __iconData$64 = {
 		key: "1b0p4s"
 	}]]
 };
-__iconData$64.node;
-var DollarSign = createLucideIcon(__iconData$64);
+__iconData$63.node;
+var DollarSign = createLucideIcon(__iconData$63);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/download.mjs
 /**
@@ -12456,7 +12456,7 @@ var DollarSign = createLucideIcon(__iconData$64);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$63 = {
+var __iconData$62 = {
 	name: "download",
 	size: 24,
 	node: [
@@ -12474,8 +12474,8 @@ var __iconData$63 = {
 		}]
 	]
 };
-__iconData$63.node;
-var Download = createLucideIcon(__iconData$63);
+__iconData$62.node;
+var Download = createLucideIcon(__iconData$62);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/ellipsis-vertical.mjs
 /**
@@ -12484,7 +12484,7 @@ var Download = createLucideIcon(__iconData$63);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$62 = {
+var __iconData$61 = {
 	name: "ellipsis-vertical",
 	size: 24,
 	node: [
@@ -12509,8 +12509,8 @@ var __iconData$62 = {
 	],
 	aliases: ["more-vertical"]
 };
-__iconData$62.node;
-var EllipsisVertical = createLucideIcon(__iconData$62);
+__iconData$61.node;
+var EllipsisVertical = createLucideIcon(__iconData$61);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/eye-off.mjs
 /**
@@ -12519,7 +12519,7 @@ var EllipsisVertical = createLucideIcon(__iconData$62);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$61 = {
+var __iconData$60 = {
 	name: "eye-off",
 	size: 24,
 	node: [
@@ -12541,8 +12541,8 @@ var __iconData$61 = {
 		}]
 	]
 };
-__iconData$61.node;
-var EyeOff = createLucideIcon(__iconData$61);
+__iconData$60.node;
+var EyeOff = createLucideIcon(__iconData$60);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/eye.mjs
 /**
@@ -12551,7 +12551,7 @@ var EyeOff = createLucideIcon(__iconData$61);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$60 = {
+var __iconData$59 = {
 	name: "eye",
 	size: 24,
 	node: [["path", {
@@ -12564,8 +12564,8 @@ var __iconData$60 = {
 		key: "1v7zrd"
 	}]]
 };
-__iconData$60.node;
-var Eye = createLucideIcon(__iconData$60);
+__iconData$59.node;
+var Eye = createLucideIcon(__iconData$59);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/file-spreadsheet.mjs
 /**
@@ -12574,7 +12574,7 @@ var Eye = createLucideIcon(__iconData$60);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$59 = {
+var __iconData$58 = {
 	name: "file-spreadsheet",
 	size: 24,
 	node: [
@@ -12604,8 +12604,8 @@ var __iconData$59 = {
 		}]
 	]
 };
-__iconData$59.node;
-var FileSpreadsheet = createLucideIcon(__iconData$59);
+__iconData$58.node;
+var FileSpreadsheet = createLucideIcon(__iconData$58);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/file-text.mjs
 /**
@@ -12614,7 +12614,7 @@ var FileSpreadsheet = createLucideIcon(__iconData$59);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$58 = {
+var __iconData$57 = {
 	name: "file-text",
 	size: 24,
 	node: [
@@ -12640,8 +12640,8 @@ var __iconData$58 = {
 		}]
 	]
 };
-__iconData$58.node;
-var FileText = createLucideIcon(__iconData$58);
+__iconData$57.node;
+var FileText = createLucideIcon(__iconData$57);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/funnel.mjs
 /**
@@ -12650,7 +12650,7 @@ var FileText = createLucideIcon(__iconData$58);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$57 = {
+var __iconData$56 = {
 	name: "funnel",
 	size: 24,
 	node: [["path", {
@@ -12659,8 +12659,8 @@ var __iconData$57 = {
 	}]],
 	aliases: ["filter"]
 };
-__iconData$57.node;
-var Funnel = createLucideIcon(__iconData$57);
+__iconData$56.node;
+var Funnel = createLucideIcon(__iconData$56);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/gauge.mjs
 /**
@@ -12669,7 +12669,7 @@ var Funnel = createLucideIcon(__iconData$57);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$56 = {
+var __iconData$55 = {
 	name: "gauge",
 	size: 24,
 	node: [["path", {
@@ -12680,8 +12680,8 @@ var __iconData$56 = {
 		key: "19p75a"
 	}]]
 };
-__iconData$56.node;
-var Gauge = createLucideIcon(__iconData$56);
+__iconData$55.node;
+var Gauge = createLucideIcon(__iconData$55);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/globe.mjs
 /**
@@ -12690,7 +12690,7 @@ var Gauge = createLucideIcon(__iconData$56);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$55 = {
+var __iconData$54 = {
 	name: "globe",
 	size: 24,
 	node: [
@@ -12710,8 +12710,8 @@ var __iconData$55 = {
 		}]
 	]
 };
-__iconData$55.node;
-var Globe = createLucideIcon(__iconData$55);
+__iconData$54.node;
+var Globe = createLucideIcon(__iconData$54);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/house.mjs
 /**
@@ -12720,7 +12720,7 @@ var Globe = createLucideIcon(__iconData$55);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$54 = {
+var __iconData$53 = {
 	name: "house",
 	size: 24,
 	node: [["path", {
@@ -12732,8 +12732,8 @@ var __iconData$54 = {
 	}]],
 	aliases: ["home"]
 };
-__iconData$54.node;
-var House = createLucideIcon(__iconData$54);
+__iconData$53.node;
+var House = createLucideIcon(__iconData$53);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/info.mjs
 /**
@@ -12742,7 +12742,7 @@ var House = createLucideIcon(__iconData$54);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$53 = {
+var __iconData$52 = {
 	name: "info",
 	size: 24,
 	node: [
@@ -12762,8 +12762,8 @@ var __iconData$53 = {
 		}]
 	]
 };
-__iconData$53.node;
-var Info = createLucideIcon(__iconData$53);
+__iconData$52.node;
+var Info = createLucideIcon(__iconData$52);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/infinity.mjs
 /**
@@ -12772,7 +12772,7 @@ var Info = createLucideIcon(__iconData$53);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$52 = {
+var __iconData$51 = {
 	name: "infinity",
 	size: 24,
 	node: [["path", {
@@ -12780,8 +12780,8 @@ var __iconData$52 = {
 		key: "18ogeb"
 	}]]
 };
-__iconData$52.node;
-var Infinity$1 = createLucideIcon(__iconData$52);
+__iconData$51.node;
+var Infinity$1 = createLucideIcon(__iconData$51);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/key-round.mjs
 /**
@@ -12790,7 +12790,7 @@ var Infinity$1 = createLucideIcon(__iconData$52);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$51 = {
+var __iconData$50 = {
 	name: "key-round",
 	size: 24,
 	node: [["path", {
@@ -12804,8 +12804,8 @@ var __iconData$51 = {
 		key: "w0ekpg"
 	}]]
 };
-__iconData$51.node;
-var KeyRound = createLucideIcon(__iconData$51);
+__iconData$50.node;
+var KeyRound = createLucideIcon(__iconData$50);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/landmark.mjs
 /**
@@ -12814,7 +12814,7 @@ var KeyRound = createLucideIcon(__iconData$51);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$50 = {
+var __iconData$49 = {
 	name: "landmark",
 	size: 24,
 	node: [
@@ -12844,8 +12844,8 @@ var __iconData$50 = {
 		}]
 	]
 };
-__iconData$50.node;
-var Landmark = createLucideIcon(__iconData$50);
+__iconData$49.node;
+var Landmark = createLucideIcon(__iconData$49);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/laptop.mjs
 /**
@@ -12854,7 +12854,7 @@ var Landmark = createLucideIcon(__iconData$50);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$49 = {
+var __iconData$48 = {
 	name: "laptop",
 	size: 24,
 	node: [["path", {
@@ -12865,8 +12865,8 @@ var __iconData$49 = {
 		key: "14rxg9"
 	}]]
 };
-__iconData$49.node;
-var Laptop = createLucideIcon(__iconData$49);
+__iconData$48.node;
+var Laptop = createLucideIcon(__iconData$48);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/layout-grid.mjs
 /**
@@ -12875,7 +12875,7 @@ var Laptop = createLucideIcon(__iconData$49);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$48 = {
+var __iconData$47 = {
 	name: "layout-grid",
 	size: 24,
 	node: [
@@ -12913,8 +12913,8 @@ var __iconData$48 = {
 		}]
 	]
 };
-__iconData$48.node;
-var LayoutGrid = createLucideIcon(__iconData$48);
+__iconData$47.node;
+var LayoutGrid = createLucideIcon(__iconData$47);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/list.mjs
 /**
@@ -12923,7 +12923,7 @@ var LayoutGrid = createLucideIcon(__iconData$48);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$47 = {
+var __iconData$46 = {
 	name: "list",
 	size: 24,
 	node: [
@@ -12953,8 +12953,8 @@ var __iconData$47 = {
 		}]
 	]
 };
-__iconData$47.node;
-var List = createLucideIcon(__iconData$47);
+__iconData$46.node;
+var List = createLucideIcon(__iconData$46);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/lock-open.mjs
 /**
@@ -12963,7 +12963,7 @@ var List = createLucideIcon(__iconData$47);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$46 = {
+var __iconData$45 = {
 	name: "lock-open",
 	size: 24,
 	node: [["rect", {
@@ -12980,8 +12980,8 @@ var __iconData$46 = {
 	}]],
 	aliases: ["unlock"]
 };
-__iconData$46.node;
-var LockOpen = createLucideIcon(__iconData$46);
+__iconData$45.node;
+var LockOpen = createLucideIcon(__iconData$45);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/lock.mjs
 /**
@@ -12990,7 +12990,7 @@ var LockOpen = createLucideIcon(__iconData$46);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$45 = {
+var __iconData$44 = {
 	name: "lock",
 	size: 24,
 	node: [["rect", {
@@ -13006,8 +13006,8 @@ var __iconData$45 = {
 		key: "fwvmzm"
 	}]]
 };
-__iconData$45.node;
-var Lock = createLucideIcon(__iconData$45);
+__iconData$44.node;
+var Lock = createLucideIcon(__iconData$44);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/log-out.mjs
 /**
@@ -13016,7 +13016,7 @@ var Lock = createLucideIcon(__iconData$45);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$44 = {
+var __iconData$43 = {
 	name: "log-out",
 	size: 24,
 	node: [
@@ -13034,8 +13034,8 @@ var __iconData$44 = {
 		}]
 	]
 };
-__iconData$44.node;
-var LogOut = createLucideIcon(__iconData$44);
+__iconData$43.node;
+var LogOut = createLucideIcon(__iconData$43);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/map-pin.mjs
 /**
@@ -13044,7 +13044,7 @@ var LogOut = createLucideIcon(__iconData$44);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$43 = {
+var __iconData$42 = {
 	name: "map-pin",
 	size: 24,
 	node: [["path", {
@@ -13057,8 +13057,8 @@ var __iconData$43 = {
 		key: "ilqhr7"
 	}]]
 };
-__iconData$43.node;
-var MapPin = createLucideIcon(__iconData$43);
+__iconData$42.node;
+var MapPin = createLucideIcon(__iconData$42);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/moon.mjs
 /**
@@ -13067,7 +13067,7 @@ var MapPin = createLucideIcon(__iconData$43);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$42 = {
+var __iconData$41 = {
 	name: "moon",
 	size: 24,
 	node: [["path", {
@@ -13075,8 +13075,8 @@ var __iconData$42 = {
 		key: "kfwtm"
 	}]]
 };
-__iconData$42.node;
-var Moon = createLucideIcon(__iconData$42);
+__iconData$41.node;
+var Moon = createLucideIcon(__iconData$41);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/network.mjs
 /**
@@ -13085,7 +13085,7 @@ var Moon = createLucideIcon(__iconData$42);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$41 = {
+var __iconData$40 = {
 	name: "network",
 	size: 24,
 	node: [
@@ -13123,8 +13123,8 @@ var __iconData$41 = {
 		}]
 	]
 };
-__iconData$41.node;
-var Network = createLucideIcon(__iconData$41);
+__iconData$40.node;
+var Network = createLucideIcon(__iconData$40);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/pause.mjs
 /**
@@ -13133,7 +13133,7 @@ var Network = createLucideIcon(__iconData$41);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$40 = {
+var __iconData$39 = {
 	name: "pause",
 	size: 24,
 	node: [["rect", {
@@ -13152,8 +13152,8 @@ var __iconData$40 = {
 		key: "1wsw3u"
 	}]]
 };
-__iconData$40.node;
-var Pause = createLucideIcon(__iconData$40);
+__iconData$39.node;
+var Pause = createLucideIcon(__iconData$39);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/pen.mjs
 /**
@@ -13162,7 +13162,7 @@ var Pause = createLucideIcon(__iconData$40);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$39 = {
+var __iconData$38 = {
 	name: "pen",
 	size: 24,
 	node: [["path", {
@@ -13171,8 +13171,8 @@ var __iconData$39 = {
 	}]],
 	aliases: ["edit-2"]
 };
-__iconData$39.node;
-var Pen = createLucideIcon(__iconData$39);
+__iconData$38.node;
+var Pen = createLucideIcon(__iconData$38);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/pencil.mjs
 /**
@@ -13181,7 +13181,7 @@ var Pen = createLucideIcon(__iconData$39);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$38 = {
+var __iconData$37 = {
 	name: "pencil",
 	size: 24,
 	node: [["path", {
@@ -13192,8 +13192,8 @@ var __iconData$38 = {
 		key: "1mk7zo"
 	}]]
 };
-__iconData$38.node;
-var Pencil = createLucideIcon(__iconData$38);
+__iconData$37.node;
+var Pencil = createLucideIcon(__iconData$37);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/phone.mjs
 /**
@@ -13202,7 +13202,7 @@ var Pencil = createLucideIcon(__iconData$38);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$37 = {
+var __iconData$36 = {
 	name: "phone",
 	size: 24,
 	node: [["path", {
@@ -13210,8 +13210,8 @@ var __iconData$37 = {
 		key: "9njp5v"
 	}]]
 };
-__iconData$37.node;
-var Phone = createLucideIcon(__iconData$37);
+__iconData$36.node;
+var Phone = createLucideIcon(__iconData$36);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/play.mjs
 /**
@@ -13220,7 +13220,7 @@ var Phone = createLucideIcon(__iconData$37);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$36 = {
+var __iconData$35 = {
 	name: "play",
 	size: 24,
 	node: [["path", {
@@ -13228,8 +13228,8 @@ var __iconData$36 = {
 		key: "10ikf1"
 	}]]
 };
-__iconData$36.node;
-var Play = createLucideIcon(__iconData$36);
+__iconData$35.node;
+var Play = createLucideIcon(__iconData$35);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/plus.mjs
 /**
@@ -13238,7 +13238,7 @@ var Play = createLucideIcon(__iconData$36);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$35 = {
+var __iconData$34 = {
 	name: "plus",
 	size: 24,
 	node: [["path", {
@@ -13249,8 +13249,8 @@ var __iconData$35 = {
 		key: "s699le"
 	}]]
 };
-__iconData$35.node;
-var Plus = createLucideIcon(__iconData$35);
+__iconData$34.node;
+var Plus = createLucideIcon(__iconData$34);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/radio.mjs
 /**
@@ -13259,7 +13259,7 @@ var Plus = createLucideIcon(__iconData$35);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$34 = {
+var __iconData$33 = {
 	name: "radio",
 	size: 24,
 	node: [
@@ -13287,8 +13287,8 @@ var __iconData$34 = {
 		}]
 	]
 };
-__iconData$34.node;
-var Radio = createLucideIcon(__iconData$34);
+__iconData$33.node;
+var Radio = createLucideIcon(__iconData$33);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/receipt-text.mjs
 /**
@@ -13297,7 +13297,7 @@ var Radio = createLucideIcon(__iconData$34);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$33 = {
+var __iconData$32 = {
 	name: "receipt-text",
 	size: 24,
 	node: [
@@ -13319,8 +13319,8 @@ var __iconData$33 = {
 		}]
 	]
 };
-__iconData$33.node;
-var ReceiptText = createLucideIcon(__iconData$33);
+__iconData$32.node;
+var ReceiptText = createLucideIcon(__iconData$32);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/refresh-cw.mjs
 /**
@@ -13329,7 +13329,7 @@ var ReceiptText = createLucideIcon(__iconData$33);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$32 = {
+var __iconData$31 = {
 	name: "refresh-cw",
 	size: 24,
 	node: [
@@ -13351,8 +13351,8 @@ var __iconData$32 = {
 		}]
 	]
 };
-__iconData$32.node;
-var RefreshCw = createLucideIcon(__iconData$32);
+__iconData$31.node;
+var RefreshCw = createLucideIcon(__iconData$31);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/rotate-ccw-clock.mjs
 /**
@@ -13361,7 +13361,7 @@ var RefreshCw = createLucideIcon(__iconData$32);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$31 = {
+var __iconData$30 = {
 	name: "rotate-ccw-clock",
 	size: 24,
 	node: [
@@ -13380,8 +13380,8 @@ var __iconData$31 = {
 	],
 	aliases: ["history"]
 };
-__iconData$31.node;
-var RotateCcwClock = createLucideIcon(__iconData$31);
+__iconData$30.node;
+var RotateCcwClock = createLucideIcon(__iconData$30);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs
 /**
@@ -13390,7 +13390,7 @@ var RotateCcwClock = createLucideIcon(__iconData$31);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$30 = {
+var __iconData$29 = {
 	name: "rotate-ccw",
 	size: 24,
 	node: [["path", {
@@ -13401,8 +13401,8 @@ var __iconData$30 = {
 		key: "1xhq8a"
 	}]]
 };
-__iconData$30.node;
-var RotateCcw = createLucideIcon(__iconData$30);
+__iconData$29.node;
+var RotateCcw = createLucideIcon(__iconData$29);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/rotate-cw.mjs
 /**
@@ -13411,7 +13411,7 @@ var RotateCcw = createLucideIcon(__iconData$30);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$29 = {
+var __iconData$28 = {
 	name: "rotate-cw",
 	size: 24,
 	node: [["path", {
@@ -13422,8 +13422,8 @@ var __iconData$29 = {
 		key: "1q7to0"
 	}]]
 };
-__iconData$29.node;
-var RotateCw = createLucideIcon(__iconData$29);
+__iconData$28.node;
+var RotateCw = createLucideIcon(__iconData$28);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/router.mjs
 /**
@@ -13432,7 +13432,7 @@ var RotateCw = createLucideIcon(__iconData$29);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$28 = {
+var __iconData$27 = {
 	name: "router",
 	size: 24,
 	node: [
@@ -13466,8 +13466,8 @@ var __iconData$28 = {
 		}]
 	]
 };
-__iconData$28.node;
-var Router = createLucideIcon(__iconData$28);
+__iconData$27.node;
+var Router = createLucideIcon(__iconData$27);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/save.mjs
 /**
@@ -13476,7 +13476,7 @@ var Router = createLucideIcon(__iconData$28);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$27 = {
+var __iconData$26 = {
 	name: "save",
 	size: 24,
 	node: [
@@ -13494,8 +13494,8 @@ var __iconData$27 = {
 		}]
 	]
 };
-__iconData$27.node;
-var Save = createLucideIcon(__iconData$27);
+__iconData$26.node;
+var Save = createLucideIcon(__iconData$26);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/scroll-text.mjs
 /**
@@ -13504,7 +13504,7 @@ var Save = createLucideIcon(__iconData$27);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$26 = {
+var __iconData$25 = {
 	name: "scroll-text",
 	size: 24,
 	node: [
@@ -13526,8 +13526,8 @@ var __iconData$26 = {
 		}]
 	]
 };
-__iconData$26.node;
-var ScrollText = createLucideIcon(__iconData$26);
+__iconData$25.node;
+var ScrollText = createLucideIcon(__iconData$25);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/search.mjs
 /**
@@ -13536,7 +13536,7 @@ var ScrollText = createLucideIcon(__iconData$26);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$25 = {
+var __iconData$24 = {
 	name: "search",
 	size: 24,
 	node: [["path", {
@@ -13549,8 +13549,8 @@ var __iconData$25 = {
 		key: "4ej97u"
 	}]]
 };
-__iconData$25.node;
-var Search = createLucideIcon(__iconData$25);
+__iconData$24.node;
+var Search = createLucideIcon(__iconData$24);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/send.mjs
 /**
@@ -13559,7 +13559,7 @@ var Search = createLucideIcon(__iconData$25);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$24 = {
+var __iconData$23 = {
 	name: "send",
 	size: 24,
 	node: [["path", {
@@ -13570,8 +13570,8 @@ var __iconData$24 = {
 		key: "12cjpa"
 	}]]
 };
-__iconData$24.node;
-var Send = createLucideIcon(__iconData$24);
+__iconData$23.node;
+var Send = createLucideIcon(__iconData$23);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/server.mjs
 /**
@@ -13580,7 +13580,7 @@ var Send = createLucideIcon(__iconData$24);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$23 = {
+var __iconData$22 = {
 	name: "server",
 	size: 24,
 	node: [
@@ -13618,8 +13618,8 @@ var __iconData$23 = {
 		}]
 	]
 };
-__iconData$23.node;
-var Server = createLucideIcon(__iconData$23);
+__iconData$22.node;
+var Server = createLucideIcon(__iconData$22);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/shield-alert.mjs
 /**
@@ -13628,7 +13628,7 @@ var Server = createLucideIcon(__iconData$23);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$22 = {
+var __iconData$21 = {
 	name: "shield-alert",
 	size: 24,
 	node: [
@@ -13646,8 +13646,8 @@ var __iconData$22 = {
 		}]
 	]
 };
-__iconData$22.node;
-var ShieldAlert = createLucideIcon(__iconData$22);
+__iconData$21.node;
+var ShieldAlert = createLucideIcon(__iconData$21);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/shield-check.mjs
 /**
@@ -13656,7 +13656,7 @@ var ShieldAlert = createLucideIcon(__iconData$22);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$21 = {
+var __iconData$20 = {
 	name: "shield-check",
 	size: 24,
 	node: [["path", {
@@ -13667,8 +13667,8 @@ var __iconData$21 = {
 		key: "dzmm74"
 	}]]
 };
-__iconData$21.node;
-var ShieldCheck = createLucideIcon(__iconData$21);
+__iconData$20.node;
+var ShieldCheck = createLucideIcon(__iconData$20);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/signal.mjs
 /**
@@ -13677,7 +13677,7 @@ var ShieldCheck = createLucideIcon(__iconData$21);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$20 = {
+var __iconData$19 = {
 	name: "signal",
 	size: 24,
 	node: [
@@ -13703,8 +13703,8 @@ var __iconData$20 = {
 		}]
 	]
 };
-__iconData$20.node;
-var Signal = createLucideIcon(__iconData$20);
+__iconData$19.node;
+var Signal = createLucideIcon(__iconData$19);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/sliders-horizontal.mjs
 /**
@@ -13713,7 +13713,7 @@ var Signal = createLucideIcon(__iconData$20);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$19 = {
+var __iconData$18 = {
 	name: "sliders-horizontal",
 	size: 24,
 	node: [
@@ -13755,8 +13755,8 @@ var __iconData$19 = {
 		}]
 	]
 };
-__iconData$19.node;
-var SlidersHorizontal = createLucideIcon(__iconData$19);
+__iconData$18.node;
+var SlidersHorizontal = createLucideIcon(__iconData$18);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/sliders-vertical.mjs
 /**
@@ -13765,7 +13765,7 @@ var SlidersHorizontal = createLucideIcon(__iconData$19);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$18 = {
+var __iconData$17 = {
 	name: "sliders-vertical",
 	size: 24,
 	node: [
@@ -13808,8 +13808,8 @@ var __iconData$18 = {
 	],
 	aliases: ["sliders"]
 };
-__iconData$18.node;
-var SlidersVertical = createLucideIcon(__iconData$18);
+__iconData$17.node;
+var SlidersVertical = createLucideIcon(__iconData$17);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/smartphone.mjs
 /**
@@ -13818,7 +13818,7 @@ var SlidersVertical = createLucideIcon(__iconData$18);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$17 = {
+var __iconData$16 = {
 	name: "smartphone",
 	size: 24,
 	node: [["rect", {
@@ -13834,43 +13834,8 @@ var __iconData$17 = {
 		key: "mhygvu"
 	}]]
 };
-__iconData$17.node;
-var Smartphone = createLucideIcon(__iconData$17);
-//#endregion
-//#region node_modules/lucide-react/dist/esm/icons/sparkles.mjs
-/**
-* @license lucide-react v1.53.0 - ISC
-*
-* This source code is licensed under the ISC license.
-* See the LICENSE file in the root directory of this source tree.
-*/
-var __iconData$16 = {
-	name: "sparkles",
-	size: 24,
-	node: [
-		["path", {
-			d: "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z",
-			key: "1s2grr"
-		}],
-		["path", {
-			d: "M20 2v4",
-			key: "1rf3ol"
-		}],
-		["path", {
-			d: "M22 4h-4",
-			key: "gwowj6"
-		}],
-		["circle", {
-			cx: "4",
-			cy: "20",
-			r: "2",
-			key: "6kqj1y"
-		}]
-	],
-	aliases: ["stars"]
-};
 __iconData$16.node;
-var Sparkles = createLucideIcon(__iconData$16);
+var Smartphone = createLucideIcon(__iconData$16);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/square.mjs
 /**
@@ -14583,19 +14548,7 @@ var import_jsx_runtime = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_jsx_runtime_production();
 })))();
 /**
-* ConfirmDialogModal - Komponen pop-up konfirmasi kustom yang fleksibel & reusable
-*
-* Props:
-* - isOpen: boolean
-* - onClose: () => void
-* - onConfirm: () => void
-* - title: string
-* - message: string | ReactNode
-* - confirmText: string (default: "Ya, Lanjutkan")
-* - cancelText: string (default: "Batal")
-* - variant: 'danger' | 'warning' | 'info' | 'success' (default: 'danger')
-* - isLoading: boolean (default: false)
-* - loadingText: string (default: "Memproses...")
+* ConfirmDialogModal - Komponen pop-up konfirmasi kustom profesional (60-30-10 Light Architecture)
 */
 function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Tindakan", message = "Apakah Anda yakin ingin melanjutkan tindakan ini?", confirmText = "Ya, Lanjutkan", cancelText = "Batal", variant = "danger", isLoading = false, loadingText = "Memproses..." }) {
 	if (!isOpen) return null;
@@ -14603,65 +14556,65 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 		danger: {
 			icon: CircleAlert,
 			iconBg: "bg-rose-50 text-rose-600 border-rose-200",
-			btnConfirm: "bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200",
-			border: "border-rose-100"
+			btnConfirm: "bg-rose-600 hover:bg-rose-700 text-white",
+			border: "border-[#CCDDF0]"
 		},
 		warning: {
 			icon: TriangleAlert,
-			iconBg: "bg-amber-50 text-amber-600 border-amber-200",
-			btnConfirm: "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-200",
-			border: "border-amber-100"
+			iconBg: "bg-amber-50 text-amber-700 border-amber-200",
+			btnConfirm: "bg-amber-600 hover:bg-amber-700 text-white",
+			border: "border-[#CCDDF0]"
 		},
 		info: {
 			icon: Info,
-			iconBg: "bg-cyan-50 text-cyan-600 border-cyan-200",
-			btnConfirm: "bg-cyan-700 hover:bg-cyan-800 text-white shadow-cyan-200",
-			border: "border-cyan-100"
+			iconBg: "bg-[#E0F0FF] text-[#026AA7] border-[#CCDDF0]",
+			btnConfirm: "bg-[#026AA7] hover:bg-[#035388] text-white",
+			border: "border-[#CCDDF0]"
 		},
 		success: {
 			icon: CircleCheck,
 			iconBg: "bg-emerald-50 text-emerald-600 border-emerald-200",
-			btnConfirm: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200",
-			border: "border-emerald-100"
+			btnConfirm: "bg-emerald-600 hover:bg-emerald-700 text-white",
+			border: "border-[#CCDDF0]"
 		}
 	};
 	const currentTheme = variantConfig[variant] || variantConfig.danger;
 	const IconComponent = currentTheme.icon;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4",
+		className: "fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans",
 		onClick: (e) => {
 			if (e.target === e.currentTarget && !isLoading) onClose();
 		},
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			role: "dialog",
 			"aria-modal": "true",
-			className: `bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border ${currentTheme.border} space-y-4 animate-in fade-in zoom-in-95 duration-150`,
+			className: `bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border ${currentTheme.border} space-y-4 animate-in fade-in zoom-in-95 duration-150`,
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-start justify-between gap-3",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-3",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: `h-12 w-12 rounded-2xl ${currentTheme.iconBg} border flex items-center justify-center shrink-0`,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconComponent, { className: "w-6 h-6" })
+							className: `h-10 w-10 rounded-lg ${currentTheme.iconBg} border flex items-center justify-center shrink-0`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconComponent, { className: "w-5 h-5" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-base font-bold text-slate-900 leading-snug",
+							className: "text-sm sm:text-base font-bold text-[#0B2545] leading-snug",
 							children: title
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-slate-500 mt-0.5",
+							className: "text-xs text-[#64839E] mt-0.5",
 							children: "Harap konfirmasi sebelum sistem melanjutkan"
 						})] })]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: onClose,
 						disabled: isLoading,
-						className: "text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition disabled:opacity-40",
+						className: "text-[#64839E] hover:text-[#0B2545] p-1.5 rounded-lg hover:bg-[#F1F6FC] transition disabled:opacity-40 cursor-pointer",
 						title: "Tutup dialog",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed font-sans",
+					className: "p-4 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] text-xs sm:text-sm text-[#3B5B78] leading-relaxed font-sans",
 					children: message
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -14670,13 +14623,13 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 						type: "button",
 						onClick: onClose,
 						disabled: isLoading,
-						className: "px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px] cursor-pointer disabled:opacity-50 transition",
+						className: "px-4 py-2 rounded-lg text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] font-semibold text-xs min-h-[38px] cursor-pointer disabled:opacity-50 transition border border-[#CCDDF0]",
 						children: cancelText
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: onConfirm,
 						disabled: isLoading,
-						className: `px-5 py-2 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2 min-h-[40px] cursor-pointer disabled:opacity-50 ${currentTheme.btnConfirm}`,
+						className: `px-5 py-2 rounded-lg font-bold text-xs shadow-2xs transition flex items-center gap-2 min-h-[38px] cursor-pointer disabled:opacity-50 ${currentTheme.btnConfirm}`,
 						children: isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: loadingText })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: confirmText })
 					})]
 				})
@@ -14687,15 +14640,7 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 //#endregion
 //#region src/components/common/ToastNotification.jsx
 /**
-* ToastNotification - Komponen notifikasi pop-up pojok kanan bawah (Dark Glassmorphism)
-*
-* Props:
-* - show: boolean
-* - onClose: () => void
-* - type: 'success' | 'warning' | 'info' | 'error' (default: 'success')
-* - title: string (opsional, jika kosong otomatis sesuai type)
-* - message: string | ReactNode
-* - duration: number (milidetik, default: 5000. Set 0 untuk non-auto-dismiss)
+* ToastNotification - Komponen notifikasi pop-up pojok kanan bawah (Deep Navy & Crisp Blue Architectural)
 */
 function ToastNotification({ show, onClose, type = "success", title, message, duration = 5e3 }) {
 	const onCloseRef = import_react.useRef(onClose);
@@ -14717,26 +14662,26 @@ function ToastNotification({ show, onClose, type = "success", title, message, du
 	const config = {
 		success: {
 			defaultTitle: "Berhasil",
-			cardClass: "bg-emerald-900/95 text-emerald-100 border-emerald-500/50",
-			iconClass: "text-emerald-300",
+			cardClass: "bg-[#0B2545] text-white border-[#1E437A]",
+			iconClass: "text-emerald-400",
 			Icon: CircleCheck
 		},
 		warning: {
 			defaultTitle: "Perhatian / Terkunci",
-			cardClass: "bg-amber-900/95 text-amber-100 border-amber-500/50",
-			iconClass: "text-amber-300",
+			cardClass: "bg-[#0B2545] text-white border-[#1E437A]",
+			iconClass: "text-amber-400",
 			Icon: TriangleAlert
 		},
 		info: {
 			defaultTitle: "Informasi",
-			cardClass: "bg-cyan-900/95 text-cyan-100 border-cyan-500/50",
-			iconClass: "text-cyan-300",
+			cardClass: "bg-[#0B2545] text-white border-[#1E437A]",
+			iconClass: "text-sky-300",
 			Icon: Info
 		},
 		error: {
 			defaultTitle: "Gagal / Kesalahan",
-			cardClass: "bg-rose-900/95 text-rose-100 border-rose-500/50",
-			iconClass: "text-rose-300",
+			cardClass: "bg-[#0B2545] text-white border-[#1E437A]",
+			iconClass: "text-rose-400",
 			Icon: CircleAlert
 		}
 	};
@@ -14746,28 +14691,28 @@ function ToastNotification({ show, onClose, type = "success", title, message, du
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		role: "alert",
 		"aria-live": "polite",
-		className: "fixed bottom-5 right-5 z-[100] max-w-sm w-[calc(100vw-2.5rem)] sm:w-auto transition-all duration-300 animate-in fade-in slide-in-from-bottom-3",
+		className: "fixed bottom-5 right-5 z-[100] max-w-sm w-[calc(100vw-2.5rem)] sm:w-auto transition-all duration-300 animate-in fade-in slide-in-from-bottom-3 font-sans",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: `p-3.5 rounded-2xl shadow-xl border flex items-start gap-2.5 backdrop-blur-md ${current.cardClass}`,
+			className: `p-3.5 rounded-xl shadow-xl border flex items-start gap-2.5 ${current.cardClass}`,
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconComponent, {
 					className: `w-4 h-4 mt-0.5 shrink-0 ${current.iconClass}`,
 					"aria-hidden": "true"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex-1 text-xs font-sans leading-relaxed",
+					className: "flex-1 text-xs leading-relaxed",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "font-bold mb-0.5",
+						className: "font-bold mb-0.5 text-white",
 						children: displayTitle
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "break-words",
+						className: "break-words text-sky-100/80",
 						children: message
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					type: "button",
 					onClick: onClose,
-					className: "text-white/60 hover:text-white text-xs font-bold px-1.5 py-0.5 rounded transition cursor-pointer select-none",
+					className: "text-sky-300/60 hover:text-white text-xs font-bold px-1 py-0.5 rounded transition cursor-pointer select-none",
 					title: "Tutup Notifikasi",
 					"aria-label": "Tutup Notifikasi",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
@@ -30970,41 +30915,41 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 //#region src/components/import_wizard/ImportStepUpload.jsx
 function ImportStepUpload({ importSource, setImportSource, networkBillPops, loadNetworkBillPops, handleImportFileSelected, importAnalyzing, importFile, isExcelFile, importSheets, importSelectedSheet, handleSheetChange, activeOffice, importColumns, onClose, handleProceedToStep2, networkBillLimitMode, setNetworkBillLimitMode, networkBillFetching, handleFetchNetworkBillPreview }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "space-y-4 font-mono text-xs",
+		className: "space-y-4 font-sans text-xs",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200",
+				className: "flex items-center gap-2 p-1 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: () => setImportSource("file"),
-					className: `flex-1 py-2 px-3 rounded-xl font-bold font-sans text-xs flex items-center justify-center gap-2 transition cursor-pointer ${importSource === "file" ? "bg-white text-cyan-900 shadow-2xs border border-slate-200/80" : "text-slate-500 hover:text-slate-800"}`,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileSpreadsheet, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Unggah Berkas Spreadsheet (Excel / CSV)" })]
+					className: `flex-1 py-2 px-3 rounded-md font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer ${importSource === "file" ? "bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]" : "text-[#3B5B78] hover:text-[#0B2545]"}`,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileSpreadsheet, { className: "w-4 h-4 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Unggah Berkas Spreadsheet (Excel / CSV)" })]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: () => {
 						setImportSource("network_bill");
 						if (networkBillPops.length === 0) loadNetworkBillPops();
 					},
-					className: `flex-1 py-2 px-3 rounded-xl font-bold font-sans text-xs flex items-center justify-center gap-2 transition cursor-pointer ${importSource === "network_bill" ? "bg-white text-cyan-900 shadow-2xs border border-slate-200/80" : "text-slate-500 hover:text-slate-800"}`,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tarik dari Network Bill (API v1)" })]
+					className: `flex-1 py-2 px-3 rounded-md font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer ${importSource === "network_bill" ? "bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]" : "text-[#3B5B78] hover:text-[#0B2545]"}`,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, { className: "w-4 h-4 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Integrasi API Network Bill" })]
 				})]
 			}),
 			importSource === "file" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "space-y-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-6 rounded-3xl bg-cyan-50/40 border-2 border-dashed border-cyan-300 text-center space-y-3 hover:bg-cyan-50/70 transition",
+					className: "p-6 rounded-xl bg-[#F1F6FC] border-2 border-dashed border-[#CCDDF0] text-center space-y-3 hover:bg-[#E8F1FA] transition",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center mx-auto shadow-xs",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { className: "w-7 h-7" })
+							className: "w-12 h-12 rounded-xl bg-[#E0F0FF] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center mx-auto shadow-2xs",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { className: "w-6 h-6" })
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block text-sm font-bold text-slate-800 mb-1 cursor-pointer",
+								className: "block text-sm font-bold text-[#0B2545] mb-1 cursor-pointer",
 								children: "Pilih Berkas Excel (.xlsx, .xls) atau CSV (.csv)"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[11px] text-slate-500 font-sans mb-3",
+								className: "text-[11px] text-[#64839E] mb-3",
 								children: "Sistem akan menganalisis nama lembar kerja (sheet) dan mendeteksi susunan header kolom secara otomatis."
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
@@ -31013,37 +30958,37 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 								onChange: (e) => {
 									if (e.target.files && e.target.files[0]) handleImportFileSelected(e.target.files[0]);
 								},
-								className: "text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700 cursor-pointer shadow-xs transition"
+								className: "text-xs text-[#3B5B78] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#026AA7] file:text-white hover:file:bg-[#035388] cursor-pointer shadow-2xs transition"
 							})
 						] }),
 						importAnalyzing && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-center gap-2 text-cyan-800 font-bold text-xs pt-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Sedang menganalisis struktur berkas..." })]
+							className: "flex items-center justify-center gap-2 text-[#026AA7] font-bold text-xs pt-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Sedang menganalisis struktur berkas..." })]
 						}),
 						importFile && !importAnalyzing && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-3 rounded-2xl bg-white border border-cyan-200 text-left space-y-2 text-xs",
+							className: "p-3 rounded-lg bg-white border border-[#CCDDF0] text-left space-y-2 text-xs",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-between font-bold text-cyan-950",
+									className: "flex items-center justify-between font-bold text-[#0B2545]",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 										className: "flex items-center gap-1.5",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileSpreadsheet, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: importFile.name })]
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileSpreadsheet, { className: "w-4 h-4 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: importFile.name })]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "text-[11px] text-slate-500 font-mono",
+										className: "text-[11px] text-[#64839E] font-mono",
 										children: [(importFile.size / 1024).toFixed(1), " KB"]
 									})]
 								}),
 								isExcelFile && importSheets.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "pt-2 border-t border-slate-100 space-y-1.5",
+									className: "pt-2 border-t border-[#CCDDF0]/60 space-y-1.5",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-											className: "block text-[11px] font-bold text-slate-700",
+											className: "block text-[11px] font-bold text-[#0B2545]",
 											children: "Pilih Lembar Kerja (Sheet Excel):"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", {
 											value: importSelectedSheet,
 											onChange: (e) => handleSheetChange(e.target.value),
-											className: "w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-cyan-500 bg-cyan-50/30",
+											className: "w-full px-3 py-1.5 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#0B2545] focus:outline-none focus:border-[#026AA7] bg-[#F1F6FC]",
 											children: importSheets.map((s, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
 												value: s.name,
 												children: [
@@ -31057,7 +31002,7 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 											}, idx))
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-											className: "text-[10px] text-cyan-800 font-sans",
+											className: "text-[10px] text-[#026AA7]",
 											children: [
 												"Pilih sheet yang sesuai dengan kantor aktif saat ini (",
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
@@ -31070,14 +31015,14 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "text-[11px] text-slate-600 font-sans",
+									className: "text-[11px] text-[#3B5B78]",
 									children: [
 										"Terdeteksi ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: importColumns.length }),
 										" kolom:",
 										" ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "font-mono text-[10px] text-cyan-900 bg-cyan-50 px-1.5 py-0.5 rounded",
+											className: "font-mono text-[10px] text-[#026AA7] bg-[#E0F0FF] px-1.5 py-0.5 rounded border border-[#CCDDF0]",
 											children: [importColumns.slice(0, 6).join(", "), importColumns.length > 6 ? ` (+${importColumns.length - 6} lainnya)` : ""]
 										})
 									]
@@ -31086,17 +31031,17 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-end gap-2 pt-3 border-t border-sky-100 font-sans",
+					className: "flex items-center justify-end gap-2 pt-3 border-t border-[#CCDDF0]",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: onClose,
-						className: "px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer",
+						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer",
 						children: "Batal"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						disabled: !importFile || importAnalyzing || importColumns.length === 0,
 						onClick: handleProceedToStep2,
-						className: "px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
+						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lanjut ke Pemetaan Kolom" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })]
 					})]
 				})]
@@ -31104,18 +31049,18 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 			importSource === "network_bill" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "space-y-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-5 rounded-3xl bg-cyan-50/40 border border-cyan-200 text-left space-y-4 font-sans",
+					className: "p-5 rounded-xl bg-[#F1F6FC] border border-[#CCDDF0] text-left space-y-4",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center gap-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center shadow-xs shrink-0",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Database, { className: "w-6 h-6" })
+								className: "w-10 h-10 rounded-lg bg-[#026AA7] text-white flex items-center justify-center shadow-2xs shrink-0",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Database, { className: "w-5 h-5" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-								className: "text-sm font-bold text-slate-900",
+								className: "text-sm font-bold text-[#0B2545]",
 								children: "Sinkronisasi Langsung dari Network Bill API (v1)"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[11px] text-slate-500",
+								className: "text-[11px] text-[#64839E]",
 								children: "Tarik data pelanggan, nomor WhatsApp, IP router, MAC address, dan koordinat ODP langsung dari server billing terpusat."
 							})] })]
 						}),
@@ -31125,13 +31070,13 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 								className: "space-y-1",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-										className: "text-[11px] font-bold text-slate-700 block",
+										className: "text-[11px] font-bold text-[#0B2545] block",
 										children: "Mode Penarikan Data (Pelanggan & Jaringan):"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
 										value: networkBillLimitMode,
 										onChange: (e) => setNetworkBillLimitMode(e.target.value),
-										className: "w-full px-3 py-2 rounded-xl border border-cyan-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:border-cyan-500",
+										className: "w-full px-3 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#0B2545] bg-white focus:outline-none focus:border-[#026AA7]",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 											value: "1",
 											children: "Uji Coba 1 Data Pelanggan (Untuk Cek & Bandingkan Format)"
@@ -31155,27 +31100,23 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 							})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-3 rounded-2xl bg-white/80 border border-cyan-100 text-[11px] text-slate-600 flex items-start gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4 text-cyan-600 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Data yang ditarik akan langsung dibandingkan dengan database lokal EdTeknoGuard pada Langkah 3 (Pratinjau). Anda dapat memilih versi data mana yang ingin disimpan sebelum disimpan ke database." })]
+							className: "p-3 rounded-lg bg-white border border-[#CCDDF0] text-[11px] text-[#3B5B78] flex items-start gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4 text-[#026AA7] shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Data yang ditarik akan langsung dibandingkan dengan database lokal EdTeknoGuard pada Langkah 3 (Pratinjau). Anda dapat memilih versi data mana yang ingin disimpan sebelum disimpan ke database." })]
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-end gap-2 pt-3 border-t border-sky-100 font-sans",
+					className: "flex items-center justify-end gap-2 pt-3 border-t border-[#CCDDF0]",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: onClose,
-						className: "px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer",
+						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer",
 						children: "Batal"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						disabled: networkBillFetching,
 						onClick: handleFetchNetworkBillPreview,
-						className: "px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
-						children: networkBillFetching ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menghubungi API Network Bill..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-4 h-4" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tarik & Bandingkan Data di Pratinjau" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })
-						] })
+						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
+						children: networkBillFetching ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menghubungi API Network Bill..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tarik & Bandingkan Data di Pratinjau" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })] })
 					})]
 				})]
 			})
@@ -31186,19 +31127,19 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 //#region src/components/import_wizard/ImportStepMapping.jsx
 function ImportStepMapping({ PRIMARY_FIELDS, ADVANCED_FIELDS, importMapping, setImportMapping, importColumns, autoMapColumns, showAdvancedFields, setShowAdvancedFields, setImportStep, importLoading, handleProceedToStep3 }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "space-y-4 font-mono text-xs",
+		className: "space-y-4 font-sans text-xs",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-cyan-50/60 p-3 rounded-2xl border border-cyan-200",
+				className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#F1F6FC] p-3 rounded-lg border border-[#CCDDF0]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
-					className: "font-bold text-slate-900 font-sans text-xs flex items-center gap-1.5",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(WandSparkles, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Cocokkan Kolom Berkas ke Kolom Database" })]
+					className: "font-bold text-[#0B2545] text-xs flex items-center gap-1.5",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(WandSparkles, { className: "w-4 h-4 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Cocokkan Kolom Berkas ke Kolom Database" })]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-					className: "text-[11px] text-slate-500 font-sans",
+					className: "text-[11px] text-[#64839E]",
 					children: [
 						"Pastikan kolom ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-cyan-900",
+							className: "text-[#0B2545]",
 							children: "IP Router / ONT (10.10.x.x / 192.168.x.x)"
 						}),
 						" terpetakan sebagai kunci utama pencocokan ke pelanggan."
@@ -31206,37 +31147,39 @@ function ImportStepMapping({ PRIMARY_FIELDS, ADVANCED_FIELDS, importMapping, set
 				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: () => autoMapColumns(),
-					className: "px-3 py-1.5 rounded-xl bg-white hover:bg-cyan-100/70 text-cyan-800 border border-cyan-300 font-bold text-xs flex items-center gap-1.5 shrink-0 shadow-2xs transition cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Auto-Map Kolom" })]
+					className: "px-3 py-1.5 rounded-lg bg-white hover:bg-[#E2EDF8] text-[#026AA7] border border-[#CCDDF0] font-bold text-xs flex items-center gap-1.5 shrink-0 shadow-2xs transition cursor-pointer",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(WandSparkles, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Auto-Map Kolom" })]
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "max-h-[400px] overflow-y-auto pr-1 space-y-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2",
+					className: "text-[10px] font-mono font-bold text-[#64839E] uppercase tracking-wider block mb-2",
 					children: "Kolom Utama Pengayaan Data"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "grid grid-cols-1 md:grid-cols-2 gap-2.5",
 					children: PRIMARY_FIELDS.map((field) => {
 						const isMapped = !!importMapping[field.key];
 						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: `p-3 rounded-2xl border transition ${field.required && !isMapped ? "bg-amber-50/50 border-amber-300" : isMapped ? "bg-cyan-50/30 border-cyan-200" : "bg-slate-50/50 border-slate-200"}`,
+							className: `p-3 rounded-lg border transition ${isMapped ? "bg-white border-[#CCDDF0] shadow-2xs" : "bg-[#F1F6FC]/50 border-[#CCDDF0]/60"}`,
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-between mb-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-										className: "text-[11px] font-bold text-slate-800 flex items-center gap-1",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: field.label }), field.required ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-rose-600 font-bold",
-											children: "*Wajib"
-										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-slate-400 font-normal text-[10px]",
-											children: "(Opsional)"
+									className: "flex items-center justify-between mb-1.5",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "font-bold text-[#0B2545] flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: field.label }), field.required && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-rose-500 font-bold",
+											title: "Kolom Wajib",
+											children: "*"
 										})]
 									}), isMapped && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded-md",
+										className: "text-[10px] font-mono font-bold text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0] px-1.5 py-0.2 rounded",
 										children: "Terpetakan"
 									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-[10px] text-[#64839E] mb-2",
+									children: field.desc
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
 									value: importMapping[field.key] || "",
@@ -31244,54 +31187,45 @@ function ImportStepMapping({ PRIMARY_FIELDS, ADVANCED_FIELDS, importMapping, set
 										...importMapping,
 										[field.key]: e.target.value
 									}),
-									className: `w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 ${field.required && !isMapped ? "border-amber-400 bg-white" : "border-slate-300 bg-white"}`,
+									className: `w-full px-2.5 py-1.5 rounded-lg border text-xs font-semibold focus:outline-none transition ${isMapped ? "bg-[#F1F6FC] border-[#026AA7] text-[#0B2545]" : "bg-white border-[#CCDDF0] text-[#64839E]"}`,
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 										value: "",
-										children: "-- [ Kosong / Nilai Default ] --"
-									}), importColumns.map((col, cIdx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
+										children: "-- Lewati Kolom Ini --"
+									}), importColumns.map((col, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 										value: col,
-										children: ["Kolom Berkas: ", col]
-									}, cIdx))]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-[10px] text-slate-400 font-sans mt-1",
-									children: field.hint
+										children: col
+									}, idx))]
 								})
 							]
 						}, field.key);
 					})
 				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "pt-1 border-t border-slate-200",
+					className: "pt-2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: () => setShowAdvancedFields(!showAdvancedFields),
-						className: "w-full flex items-center justify-between py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition cursor-pointer border border-slate-200",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "flex items-center gap-1.5",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pengaturan Kolom Kredensial ONT (Username & Password ONT)" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-[10px] font-normal text-slate-400",
-								children: "(Opsional)"
-							})]
-						}), showAdvancedFields ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "w-4 h-4" })]
+						className: "flex items-center justify-between w-full p-2.5 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#3B5B78] font-bold text-xs border border-[#CCDDF0] transition cursor-pointer",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kolom Tambahan (Kredensial ONT, Paket, WiFi, GPS)" }), showAdvancedFields ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { className: "w-4 h-4 text-[#64839E]" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "w-4 h-4 text-[#64839E]" })]
 					}), showAdvancedFields && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2.5 animate-in fade-in duration-150",
+						className: "grid grid-cols-1 md:grid-cols-2 gap-2.5 mt-2.5",
 						children: ADVANCED_FIELDS.map((field) => {
 							const isMapped = !!importMapping[field.key];
 							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: `p-3 rounded-2xl border transition ${isMapped ? "bg-cyan-50/30 border-cyan-200" : "bg-slate-50/50 border-slate-200"}`,
+								className: `p-3 rounded-lg border transition ${isMapped ? "bg-white border-[#CCDDF0] shadow-2xs" : "bg-[#F1F6FC]/50 border-[#CCDDF0]/60"}`,
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "flex items-center justify-between mb-1",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-											className: "text-[11px] font-bold text-slate-800 flex items-center gap-1",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: field.label }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-slate-400 font-normal text-[10px]",
-												children: "(Opsional)"
-											})]
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "font-bold text-[#0B2545]",
+											children: field.label
 										}), isMapped && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded-md",
+											className: "text-[10px] font-mono font-bold text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0] px-1.5 py-0.2 rounded",
 											children: "Terpetakan"
 										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-[10px] text-[#64839E] mb-2",
+										children: field.desc
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
 										value: importMapping[field.key] || "",
@@ -31299,18 +31233,14 @@ function ImportStepMapping({ PRIMARY_FIELDS, ADVANCED_FIELDS, importMapping, set
 											...importMapping,
 											[field.key]: e.target.value
 										}),
-										className: "w-full px-3 py-1.5 rounded-xl text-xs font-bold border focus:outline-none focus:border-cyan-500 border-slate-300 bg-white",
+										className: `w-full px-2.5 py-1.5 rounded-lg border text-xs font-semibold focus:outline-none transition ${isMapped ? "bg-[#F1F6FC] border-[#026AA7] text-[#0B2545]" : "bg-white border-[#CCDDF0] text-[#64839E]"}`,
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 											value: "",
-											children: "-- [ Kosong / Nilai Default ] --"
-										}), importColumns.map((col, cIdx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
+											children: "-- Lewati Kolom Ini --"
+										}), importColumns.map((col, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 											value: col,
-											children: ["Kolom Berkas: ", col]
-										}, cIdx))]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-[10px] text-slate-400 font-sans mt-1",
-										children: field.hint
+											children: col
+										}, idx))]
 									})
 								]
 							}, field.key);
@@ -31319,18 +31249,18 @@ function ImportStepMapping({ PRIMARY_FIELDS, ADVANCED_FIELDS, importMapping, set
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between pt-3 border-t border-sky-100 font-sans",
+				className: "flex items-center justify-between pt-3 border-t border-[#CCDDF0]",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: () => setImportStep(1),
-					className: "px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kembali ke Upload" })]
+					className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] flex items-center gap-1.5 transition cursor-pointer",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kembali" })]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					type: "button",
-					disabled: importLoading || !importMapping.nama || !importMapping.ip_router,
+					disabled: importLoading,
 					onClick: handleProceedToStep3,
-					className: "px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
-					children: importLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Memproses Pratinjau..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lanjut ke Pratinjau Data" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })] })
+					className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
+					children: importLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Memvalidasi Data..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lanjut ke Pratinjau & Simpan" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })] })
 				})]
 			})
 		]
@@ -31349,48 +31279,48 @@ function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilt
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: () => setStatusFilter("ALL"),
-						className: `p-3 rounded-2xl text-left transition border cursor-pointer ${statusFilter === "ALL" ? "bg-cyan-100/90 border-cyan-400 text-cyan-950 ring-2 ring-cyan-400/40 shadow-xs" : "bg-cyan-50/70 border-cyan-200 text-cyan-900 hover:bg-cyan-100/50"}`,
+						className: `p-3 rounded-lg text-left transition border cursor-pointer ${statusFilter === "ALL" ? "bg-[#E0F0FF] border-[#026AA7] text-[#0B2545] shadow-2xs font-bold" : "bg-[#F1F6FC] border-[#CCDDF0] text-[#3B5B78] hover:bg-[#E8F1FA]"}`,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[10px] font-bold text-cyan-700 block",
+							className: "text-[10px] font-bold text-[#64839E] block",
 							children: "Total Baris"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-base font-black",
+							className: "text-base font-bold text-[#0B2545]",
 							children: importPreviewData.length
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: () => setStatusFilter("MATCH"),
-						className: `p-3 rounded-2xl text-left transition border cursor-pointer ${statusFilter === "MATCH" ? "bg-emerald-100/90 border-emerald-400 text-emerald-950 ring-2 ring-emerald-400/40 shadow-xs" : "bg-emerald-50/70 border-emerald-200 text-emerald-900 hover:bg-emerald-100/50"}`,
+						className: `p-3 rounded-lg text-left transition border cursor-pointer ${statusFilter === "MATCH" ? "bg-emerald-50 border-emerald-500 text-emerald-950 shadow-2xs font-bold" : "bg-[#F1F6FC] border-[#CCDDF0] text-[#3B5B78] hover:bg-[#E8F1FA]"}`,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-[10px] font-bold text-emerald-700 block",
 							children: "Siap Lengkapi (Cocok)"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-base font-black",
+							className: "text-base font-bold text-emerald-800",
 							children: importPreviewData.filter((r) => r._status === "match" && r._action !== "skip").length
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: () => setStatusFilter("CONFLICT"),
-						className: `p-3 rounded-2xl text-left transition border cursor-pointer ${statusFilter === "CONFLICT" ? "bg-amber-100/90 border-amber-400 text-amber-950 ring-2 ring-amber-400/40 shadow-xs" : "bg-amber-50/70 border-amber-200 text-amber-900 hover:bg-amber-100/50"}`,
+						className: `p-3 rounded-lg text-left transition border cursor-pointer ${statusFilter === "CONFLICT" ? "bg-amber-50 border-amber-500 text-amber-950 shadow-2xs font-bold" : "bg-[#F1F6FC] border-[#CCDDF0] text-[#3B5B78] hover:bg-[#E8F1FA]"}`,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-[10px] font-bold text-amber-700 block",
 							children: "Data Berbeda (Pilih Versi)"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-base font-black",
+							className: "text-base font-bold text-amber-800",
 							children: importPreviewData.filter((r) => r._status === "conflict").length
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: () => setStatusFilter("UNREGISTERED"),
-						className: `p-3 rounded-2xl text-left transition border cursor-pointer ${statusFilter === "UNREGISTERED" ? "bg-slate-200 border-slate-400 text-slate-900 ring-2 ring-slate-400/40 shadow-xs" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100/70"}`,
+						className: `p-3 rounded-lg text-left transition border cursor-pointer ${statusFilter === "UNREGISTERED" ? "bg-[#E0F0FF] border-[#026AA7] text-[#0B2545] shadow-2xs font-bold" : "bg-[#F1F6FC] border-[#CCDDF0] text-[#3B5B78] hover:bg-[#E8F1FA]"}`,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[10px] font-bold text-slate-600 block",
+							className: "text-[10px] font-bold text-[#64839E] block",
 							children: "IP Belum Terdaftar"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-base font-black",
+							className: "text-base font-bold text-[#0B2545]",
 							children: importPreviewData.filter((r) => r._status === "unregistered").length
 						})]
 					})
@@ -31795,18 +31725,18 @@ function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilt
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between pt-3 border-t border-sky-100 font-sans",
+				className: "flex items-center justify-between pt-3 border-t border-[#CCDDF0] font-sans",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: () => setImportStep(2),
-						className: "px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 cursor-pointer",
+						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition flex items-center gap-1.5 cursor-pointer",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kembali ke Pemetaan" })]
 					}),
 					importLoading && handleCloseModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: handleCloseModal,
-						className: "px-3 py-2 rounded-xl border border-cyan-300 text-cyan-700 hover:bg-cyan-50 text-xs font-semibold transition cursor-pointer",
+						className: "px-3 py-2 rounded-lg border border-[#CCDDF0] text-[#026AA7] hover:bg-[#E0F0FF] text-xs font-semibold transition cursor-pointer",
 						title: "Tutup modal dan biarkan proses penyimpanan selesai di latar belakang",
 						children: "Lanjutkan di Latar Belakang"
 					}),
@@ -31814,8 +31744,8 @@ function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilt
 						type: "button",
 						disabled: importLoading || readyToSaveCount === 0,
 						onClick: handleExecuteImport,
-						className: "px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
-						children: importLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menyimpan ke Database..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
+						children: importLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menyimpan ke Database..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
 							"Terapkan Pengayaan (",
 							readyToSaveCount,
 							" Data)"
@@ -32285,35 +32215,35 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 	selectedRows.some((r) => r._status === "error");
 	selectedRows.length > 0 && selectedRows.every((r) => r._status === "valid");
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto",
+		className: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs overflow-y-auto font-sans",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: `bg-white rounded-3xl border border-sky-200 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 w-full my-auto ${importStep === 3 ? "max-w-5xl" : "max-w-2xl"} p-5 sm:p-6 transition-all`,
+			className: `bg-white rounded-xl border border-[#CCDDF0] shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 w-full my-auto ${importStep === 3 ? "max-w-5xl" : "max-w-2xl"} p-5 sm:p-6 transition-all`,
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "border-b border-sky-100 pb-4 space-y-3",
+					className: "border-b border-[#CCDDF0] pb-4 space-y-3",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center justify-between",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center gap-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "h-10 w-10 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold shadow-xs",
+								className: "h-10 w-10 rounded-lg bg-[#E0F0FF] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center font-bold shadow-2xs",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileSpreadsheet, { className: "w-5 h-5" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-									className: "text-base font-bold text-slate-900 font-sans",
+									className: "text-base font-bold text-[#0B2545] font-sans",
 									children: "Lengkapi Data Pelanggan"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "inline-flex items-center gap-1 text-[10px] font-extrabold text-cyan-800 bg-cyan-100/90 px-2 py-0.5 rounded-lg uppercase tracking-tight ",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuildingComplex, { className: "w-3 h-3 text-cyan-700 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Kantor ", activeOffice] })]
+									className: "inline-flex items-center gap-1 text-[10px] font-mono font-bold text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0] px-2 py-0.5 rounded uppercase tracking-tight",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuildingComplex, { className: "w-3 h-3 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Kantor ", activeOffice] })]
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-slate-400 font-mono",
+								className: "text-xs text-[#64839E]",
 								children: "Lengkapi Nomor WhatsApp, Alamat Pemasangan, dan Kredensial WiFi berdasarkan IP Router ONT"
 							})] })]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: handleCloseModal,
-							className: "p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer",
+							className: "p-1.5 rounded-lg text-[#64839E] hover:text-[#0B2545] hover:bg-[#F1F6FC] transition cursor-pointer",
 							title: importLoading ? "Tutup & Jalankan di Latar Belakang" : "Tutup Modal",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-5 h-5" })
 						})]
@@ -32321,9 +32251,9 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 						className: "grid grid-cols-3 gap-2 pt-1 font-mono text-xs",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: `flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 1 ? "bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs" : importStep > 1 ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold" : "bg-slate-50 border-slate-200 text-slate-400"}`,
+								className: `flex items-center gap-2 p-2 rounded-lg border transition ${importStep === 1 ? "bg-white border-[#026AA7] text-[#0B2545] font-bold shadow-2xs" : importStep > 1 ? "bg-[#F1F6FC] border-[#CCDDF0] text-[#026AA7] font-semibold" : "bg-[#F1F6FC]/60 border-[#CCDDF0]/60 text-[#64839E]"}`,
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: `w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 1 ? "bg-cyan-600 text-white" : importStep > 1 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600"}`,
+									className: `w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold ${importStep === 1 ? "bg-[#026AA7] text-white" : importStep > 1 ? "bg-emerald-600 text-white" : "bg-[#CCDDF0] text-[#3B5B78]"}`,
 									children: importStep > 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-3.5 h-3.5" }) : "1"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "truncate",
@@ -32331,9 +32261,9 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: `flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 2 ? "bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs" : importStep > 2 ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold" : "bg-slate-50 border-slate-200 text-slate-400"}`,
+								className: `flex items-center gap-2 p-2 rounded-lg border transition ${importStep === 2 ? "bg-white border-[#026AA7] text-[#0B2545] font-bold shadow-2xs" : importStep > 2 ? "bg-[#F1F6FC] border-[#CCDDF0] text-[#026AA7] font-semibold" : "bg-[#F1F6FC]/60 border-[#CCDDF0]/60 text-[#64839E]"}`,
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: `w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 2 ? "bg-cyan-600 text-white" : importStep > 2 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600"}`,
+									className: `w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold ${importStep === 2 ? "bg-[#026AA7] text-white" : importStep > 2 ? "bg-emerald-600 text-white" : "bg-[#CCDDF0] text-[#3B5B78]"}`,
 									children: importStep > 2 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-3.5 h-3.5" }) : "2"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "truncate",
@@ -32341,9 +32271,9 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: `flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 3 ? "bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs" : "bg-slate-50 border-slate-200 text-slate-400"}`,
+								className: `flex items-center gap-2 p-2 rounded-lg border transition ${importStep === 3 ? "bg-white border-[#026AA7] text-[#0B2545] font-bold shadow-2xs" : "bg-[#F1F6FC]/60 border-[#CCDDF0]/60 text-[#64839E]"}`,
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: `w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 3 ? "bg-cyan-600 text-white" : "bg-slate-200 text-slate-600"}`,
+									className: `w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold ${importStep === 3 ? "bg-[#026AA7] text-white" : "bg-[#CCDDF0] text-[#3B5B78]"}`,
 									children: "3"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "truncate",
@@ -32486,31 +32416,34 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150",
+		className: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-xl border border-slate-200/90 space-y-3 sm:space-y-4 font-sans max-h-[92vh] flex flex-col",
+			className: "bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-3 sm:space-y-4 max-h-[92vh] flex flex-col",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between border-b border-slate-100 pb-2.5 sm:pb-3 shrink-0",
+					className: "flex items-center justify-between border-b border-[#CCDDF0] pb-2.5 sm:pb-3 shrink-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-3",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5 text-cyan-700 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "h-9 w-9 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] flex items-center justify-center text-[#026AA7] shrink-0",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-4 h-4" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "min-w-0",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-sm sm:text-base font-bold text-slate-900 truncate",
+								className: "text-sm sm:text-base font-bold text-[#0B2545] truncate",
 								children: customer.nama || customer.name
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-[11px] sm:text-xs text-slate-500 font-medium truncate",
+								className: "text-[11px] sm:text-xs text-[#64839E] font-medium truncate",
 								children: [
 									"ID: ",
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-mono text-slate-700 font-semibold",
+										className: "font-mono text-[#0B2545] font-semibold",
 										children: cId
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "inline-block mx-1.5 h-3 w-px bg-slate-200 align-middle" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "inline-block mx-1.5 h-3 w-px bg-[#CCDDF0] align-middle" }),
 									"Wilayah: ",
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "uppercase font-semibold text-slate-700",
+										className: "uppercase font-semibold text-[#026AA7]",
 										children: customer.kantor || activeOffice || "cabang"
 									})
 								]
@@ -32518,19 +32451,19 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onClose,
-						className: "p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition shrink-0 cursor-pointer",
+						className: "p-1.5 rounded-lg hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#0B2545] transition shrink-0 cursor-pointer",
 						title: "Tutup Modal",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex rounded-xl bg-slate-100 p-1 border border-slate-200 shrink-0 font-sans text-[11px] sm:text-xs font-bold gap-0.5",
+					className: "flex rounded-lg bg-[#F1F6FC] p-1 border border-[#CCDDF0] shrink-0 font-sans text-[11px] sm:text-xs font-bold gap-1",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
 							onClick: () => setActiveTab("profil"),
-							className: `flex-1 py-1.5 px-2 sm:px-3 rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${activeTab === "profil" ? "bg-white text-cyan-900 shadow-xs" : "text-slate-600 hover:text-slate-900"}`,
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-3.5 h-3.5 text-cyan-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: `flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${activeTab === "profil" ? "bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]" : "text-[#3B5B78] hover:text-[#0B2545]"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-3.5 h-3.5 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "truncate",
 								children: "Profil & Kontak"
 							})]
@@ -32538,8 +32471,8 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
 							onClick: () => setActiveTab("jaringan"),
-							className: `flex-1 py-1.5 px-2 sm:px-3 rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${activeTab === "jaringan" ? "bg-white text-cyan-900 shadow-xs" : "text-slate-600 hover:text-slate-900"}`,
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Server, { className: "w-3.5 h-3.5 text-indigo-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: `flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${activeTab === "jaringan" ? "bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]" : "text-[#3B5B78] hover:text-[#0B2545]"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Server, { className: "w-3.5 h-3.5 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "truncate",
 								children: "Jaringan & Modem"
 							})]
@@ -32547,8 +32480,8 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
 							onClick: () => setActiveTab("pembayaran"),
-							className: `flex-1 py-1.5 px-2 sm:px-3 rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${activeTab === "pembayaran" ? "bg-white text-cyan-900 shadow-xs" : "text-slate-600 hover:text-slate-900"}`,
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: "w-3.5 h-3.5 text-emerald-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: `flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${activeTab === "pembayaran" ? "bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]" : "text-[#3B5B78] hover:text-[#0B2545]"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: "w-3.5 h-3.5 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "truncate",
 								children: "Tagihan & Bayar"
 							})]
@@ -37318,165 +37251,151 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 	if (!isOpen) return null;
 	const getIconForType = (item) => {
 		if (item.level === "los" || item.badge?.includes("LOS")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-xl bg-purple-100 border border-purple-200 text-purple-700 flex items-center justify-center shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZapOff, { className: "w-4 h-4" })
+			className: "w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZapOff, { className: "w-4 h-4 text-rose-600" })
 		});
 		if (item.level === "critical" || item.is_critical) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-xl bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0",
+			className: "w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZapOff, { className: "w-4 h-4" })
 		});
 		if (item.level === "invalid" || item.badge?.includes("INVALID")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 text-orange-700 flex items-center justify-center shrink-0",
+			className: "w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
 		});
 		if (item.type?.includes("tiket")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0",
+			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleQuestionMark, { className: "w-4 h-4" })
 		});
 		if (item.level === "warning" || item.badge === "WARNING") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0",
+			className: "w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
 		});
 		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-xl bg-cyan-100 border border-cyan-200 text-cyan-700 flex items-center justify-center shrink-0",
+			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" })
 		});
 	};
 	const getBadgeClass = (item) => {
-		if (item.level === "los" || item.badge?.includes("LOS")) return "text-purple-700";
-		if (item.level === "critical" || item.is_critical) return "text-rose-700";
-		if (item.level === "invalid" || item.badge?.includes("INVALID")) return "text-orange-700";
-		if (item.level === "warning") return "text-amber-700";
-		return "text-cyan-800";
+		if (item.level === "los" || item.badge?.includes("LOS")) return "text-rose-700 bg-rose-50 border border-rose-200";
+		if (item.level === "critical" || item.is_critical) return "text-rose-700 bg-rose-50 border border-rose-200";
+		if (item.level === "invalid" || item.badge?.includes("INVALID")) return "text-amber-800 bg-amber-50 border border-amber-200";
+		if (item.level === "warning") return "text-amber-800 bg-amber-50 border border-amber-200";
+		return "text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0]";
 	};
 	return (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 bg-slate-900/20 backdrop-blur-2xs z-[99998] sm:hidden",
+		className: "fixed inset-0 bg-[#0B2545]/40 backdrop-blur-2xs z-[99998] sm:hidden",
 		onClick: onClose
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		ref: panelRef,
-		className: "fixed top-14 sm:top-16 right-3 sm:right-6 w-[calc(100vw-24px)] sm:w-[410px] max-h-[80vh] sm:max-h-[82vh] bg-white rounded-2xl border border-sky-200 shadow-2xl z-[99999] flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150",
-		style: { boxShadow: "0 20px 45px -10px rgba(12, 74, 110, 0.28)" },
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "p-3.5 sm:p-4 border-b border-sky-100 flex items-center justify-between bg-gradient-to-r from-sky-50/80 via-white to-cyan-50/80",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "fixed top-14 sm:top-16 right-3 sm:right-6 w-[calc(100vw-24px)] sm:w-[410px] max-h-[80vh] sm:max-h-[82vh] bg-white rounded-xl border border-[#CCDDF0] shadow-2xl z-[99999] flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 font-sans",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "p-3.5 sm:p-4 border-b border-[#CCDDF0] flex items-center justify-between bg-[#F1F6FC]",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-2.5",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "p-1.5 rounded-lg bg-[#026AA7] text-white shadow-2xs",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4" })
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "p-1.5 rounded-lg bg-cyan-600 text-white shadow-xs",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-sm font-black text-slate-900 leading-tight",
-							children: "Pusat Notifikasi"
-						}), unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold leading-none",
-							children: unreadCount
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-[11px] font-medium text-slate-500",
-						children: currentUser?.role === "super admin" ? `Kantor Aktif: ${activeOffice?.toUpperCase() || "SEMUA"}` : `Kantor: ${activeOffice?.toUpperCase() || "-"}`
-					})] })]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-1.5",
-					children: [notifications.length > 0 && onMarkAllRead && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "button",
-						onClick: onMarkAllRead,
-						className: "p-1.5 rounded-lg text-slate-500 hover:text-cyan-700 hover:bg-cyan-50 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold",
-						title: "Tandai semua sudah dibaca",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "hidden sm:inline",
-							children: "Tandai Baca"
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						type: "button",
-						onClick: onClose,
-						className: "p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer",
-						"aria-label": "Tutup panel notifikasi",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-sm font-bold text-[#0B2545] leading-tight",
+						children: "Pusat Notifikasi"
+					}), unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-mono font-bold leading-none",
+						children: unreadCount
 					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-[11px] font-medium text-[#3B5B78] mt-0.5",
+					children: currentUser?.role === "super admin" ? `Kantor Aktif: ${activeOffice?.toUpperCase() || "SEMUA"}` : `Kantor: ${activeOffice?.toUpperCase() || "-"}`
+				})] })]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-1.5",
+				children: [notifications.length > 0 && onMarkAllRead && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
+					onClick: onMarkAllRead,
+					className: "px-2 py-1 rounded-lg text-[#026AA7] hover:bg-[#E2EDF8] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-[#CCDDF0]",
+					title: "Tandai semua sudah dibaca",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "hidden sm:inline",
+						children: "Tandai Baca"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					onClick: onClose,
+					className: "p-1.5 rounded-lg text-[#64839E] hover:text-[#0B2545] hover:bg-[#E2EDF8] transition cursor-pointer",
+					"aria-label": "Tutup panel notifikasi",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "overflow-y-auto divide-y divide-sky-50 flex-1 p-1 max-h-[calc(85vh-110px)]",
-				children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-8 text-center text-slate-400 text-xs font-medium",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" }), "Memuat notifikasi..."]
-				}) : notifications.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-8 text-center",
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "overflow-y-auto divide-y divide-[#CCDDF0]/60 flex-1 p-1 max-h-[calc(85vh-110px)] bg-white",
+			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "p-8 text-center text-[#64839E] text-xs font-medium",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full animate-spin mx-auto mb-2" }), "Memuat notifikasi..."]
+			}) : notifications.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "p-8 text-center",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "w-12 h-12 rounded-xl bg-[#F1F6FC] border border-[#CCDDF0] text-[#64839E] flex items-center justify-center mx-auto mb-3",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-6 h-6 stroke-[1.5]" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+						className: "text-xs font-bold text-[#0B2545] mb-1",
+						children: "Tidak Ada Notifikasi Baru"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-[11px] text-[#64839E] max-w-[240px] mx-auto",
+						children: "Seluruh modem dan tiket keluhan dalam kondisi aman atau sudah Anda tangani."
+					})
+				]
+			}) : notifications.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "p-3 sm:p-3.5 hover:bg-[#F1F6FC] transition rounded-lg flex items-start gap-3 group relative cursor-pointer",
+				onClick: () => onItemClick && onItemClick(item),
+				children: [getIconForType(item), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex-1 min-w-0",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 text-sky-400 flex items-center justify-center mx-auto mb-3",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-6 h-6 stroke-[1.5]" })
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between gap-1.5 mb-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1.5 flex-wrap",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: `px-1.5 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wide ${getBadgeClass(item)}`,
+									children: item.badge || "INFO"
+								}), item.kantor && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[10px] font-mono font-bold text-[#3B5B78]",
+									children: item.kantor.toUpperCase()
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "text-[10px] font-medium text-[#64839E] shrink-0 flex items-center gap-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-[#64839E]" }), item.time || "Baru"]
+							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-							className: "text-xs font-bold text-slate-700 mb-1",
-							children: "Tidak Ada Notifikasi Baru"
+							className: "text-xs font-bold text-[#0B2545] group-hover:text-[#026AA7] transition truncate leading-snug",
+							children: item.title
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-[11px] text-slate-400 max-w-[240px] mx-auto",
-							children: "Seluruh modem dan tiket keluhan dalam kondisi aman atau sudah Anda tangani."
+							className: "text-[11px] text-[#3B5B78] line-clamp-2 leading-relaxed mt-0.5",
+							children: item.message
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-2 flex items-center justify-between text-[10px] font-bold",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "text-[#026AA7] flex items-center gap-0.5 group-hover:translate-x-0.5 transition",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.target_tab === "tiket" ? "Buka Tiket" : item.target_tab === "pelanggan" ? "Buka Data Pelanggan" : item.target_tab === "logs" ? "Cek Riwayat Redaman" : "Lihat Detail" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3 h-3" })]
+							}), item.level === "critical" || item.level === "los" || item.is_critical || item.status_koneksi === "LOS" || item.id?.startsWith("batch_los") || item.id?.startsWith("batch_critical") ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[10px] font-bold text-rose-600",
+								children: "Perlu Tindakan"
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[10px] font-medium text-[#64839E]",
+								children: "Info"
+							})]
 						})
 					]
-				}) : notifications.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-3 sm:p-3.5 hover:bg-sky-50/70 transition rounded-xl flex items-start gap-3 group relative cursor-pointer",
-					onClick: () => onItemClick && onItemClick(item),
-					children: [getIconForType(item), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex-1 min-w-0",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-between gap-1.5 mb-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1.5 flex-wrap",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: `text-[11px] font-bold font-mono uppercase tracking-wide ${getBadgeClass(item)}`,
-										children: item.badge || "INFO"
-									}), item.kantor && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[10px] font-mono font-bold text-slate-500",
-										children: item.kantor.toUpperCase()
-									})]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-[10px] font-medium text-slate-400 shrink-0 flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-slate-300" }), item.time || "Baru"]
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-								className: "text-xs font-extrabold text-slate-900 group-hover:text-cyan-800 transition truncate leading-snug",
-								children: item.title
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[11px] font-medium text-slate-600 line-clamp-2 leading-relaxed mt-0.5",
-								children: item.message
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "mt-2 flex items-center justify-between text-[10px] font-bold",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-cyan-700 flex items-center gap-0.5 group-hover:translate-x-0.5 transition",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.target_tab === "tiket" ? "Buka Tiket" : item.target_tab === "pelanggan" ? "Buka Data Pelanggan" : item.target_tab === "logs" ? "Cek Riwayat Redaman" : "Lihat Detail" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3 h-3" })]
-								}), item.level === "critical" || item.level === "los" || item.is_critical || item.status_koneksi === "LOS" || item.id?.startsWith("batch_los") || item.id?.startsWith("batch_critical") ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[10px] font-bold text-rose-600",
-									children: "Perlu Tindakan"
-								}) : onDismissItem && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									onClick: (e) => {
-										e.stopPropagation();
-										onDismissItem(item);
-									},
-									className: "text-slate-400 hover:text-rose-600 p-1 hover:bg-white rounded transition cursor-pointer",
-									title: "Tandai sudah dibaca",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" })
-								})]
-							})
-						]
-					})]
-				}, item.id))
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "p-2.5 bg-slate-50/90 border-t border-sky-100 text-center text-[10px] text-slate-500 font-medium",
-				children: "Setiap akun memiliki status baca mandiri. Tiket belum selesai akan tetap dimunculkan."
-			})
-		]
-	})] }), document.body);
+				})]
+			}, item.id))
+		})]
+	})] }));
 }
 //#endregion
 //#region src/components/layout/Navigation.jsx
@@ -37564,11 +37483,11 @@ function Sidebar({ activeTab, setActiveTab, onLogout, currentUser = {
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-2.5 min-w-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "h-8 w-8 rounded-lg bg-[#026AA7] flex items-center justify-center text-white shadow-xs overflow-hidden shrink-0",
+						className: "h-8 w-8 rounded-lg bg-white border border-[#1E437A] flex items-center justify-center shadow-xs overflow-hidden shrink-0 p-1",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
 							src: "/tekno-indo-logo.png",
 							alt: "Tekno Indo",
-							className: "w-5 h-5 object-contain",
+							className: "w-full h-full object-contain",
 							onError: (e) => {
 								e.currentTarget.style.display = "none";
 							}
@@ -38098,40 +38017,48 @@ function ErrorView({ errorCode = 404, title = "Halaman Tidak Ditemukan", descrip
 function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval, warnThreshold, critThreshold, nightModeEnabled, nightModeStart, nightModeEnd, modemCredentialsCount, applyToInvalid }) {
 	if (!isOpen) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4",
+		className: "fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-sky-200 space-y-4 animate-in fade-in zoom-in-95 duration-150",
+			className: "bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-[#CCDDF0] space-y-4 animate-in fade-in zoom-in-95 duration-150",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-3",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "h-12 w-12 rounded-2xl bg-cyan-50 text-cyan-600 border border-cyan-200 flex items-center justify-center shrink-0",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-6 h-6" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "text-base font-bold text-slate-900",
-						children: "Konfirmasi Simpan Pengaturan"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-xs text-slate-500 mt-0.5",
-						children: "Tinjau kembali parameter yang akan diterapkan ke sistem"
-					})] })]
+					className: "flex items-start justify-between gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "h-10 w-10 rounded-lg bg-[#E0F0FF] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center shrink-0",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5 text-[#026AA7]" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-sm sm:text-base font-bold text-[#0B2545]",
+							children: "Konfirmasi Simpan Pengaturan"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs text-[#64839E] mt-0.5",
+							children: "Tinjau kembali parameter yang akan diterapkan ke sistem"
+						})] })]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: onClose,
+						className: "text-[#64839E] hover:text-[#0B2545] p-1.5 rounded-lg hover:bg-[#F1F6FC] transition cursor-pointer",
+						title: "Tutup dialog",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
+					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-4 bg-cyan-50/50 rounded-2xl border border-sky-200 text-xs space-y-2",
+					className: "p-4 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] text-xs space-y-2",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex justify-between items-center py-1 border-b border-sky-100",
+							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-slate-500",
+								className: "text-[#3B5B78]",
 								children: "Interval Pemindaian ONT:"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
-								className: "font-mono text-cyan-800",
+								className: "font-mono text-[#026AA7]",
 								children: [pollingInterval, " Menit Sekali"]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex justify-between items-center py-1 border-b border-sky-100",
+							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-slate-500",
+								className: "text-[#3B5B78]",
 								children: "Ambang Peringatan Ringan:"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
 								className: "font-mono text-amber-700",
@@ -38139,9 +38066,9 @@ function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval,
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex justify-between items-center py-1 border-b border-sky-100",
+							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-slate-500",
+								className: "text-[#3B5B78]",
 								children: "Ambang Notifikasi Merah:"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
 								className: "font-mono text-rose-700",
@@ -38149,27 +38076,27 @@ function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval,
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex justify-between items-center py-1 border-b border-sky-100",
+							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-slate-500",
+								className: "text-[#3B5B78]",
 								children: "Mode Malam (Notifikasi Senyap):"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-								className: "text-slate-800",
+								className: "text-[#0B2545]",
 								children: nightModeEnabled ? `Aktif (${nightModeStart} - ${nightModeEnd})` : "Nonaktif"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex justify-between items-center py-1 border-b border-sky-100",
+							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-slate-500",
+								className: "text-[#3B5B78]",
 								children: "Total Kredensial ONT:"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "font-mono font-bold text-slate-800",
+								className: "font-mono font-bold text-[#0B2545]",
 								children: [modemCredentialsCount, " Pasangan User/Pass"]
 							})]
 						}),
 						applyToInvalid && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-2 bg-amber-50 rounded-lg border border-amber-200 text-[11px] text-amber-800 flex items-center gap-1.5",
+							className: "p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-[11px] text-amber-900 flex items-center gap-1.5 mt-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-3.5 h-3.5 text-amber-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
 								"Akan disinkronkan ke seluruh pelanggan berstatus ",
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "INVALID / Belum Valid" }),
@@ -38179,19 +38106,19 @@ function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval,
 					]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs text-slate-600 leading-relaxed",
+					className: "text-xs text-[#3B5B78] leading-relaxed",
 					children: "Apakah Anda yakin ingin menerapkan perubahan ini ke Database? Background scheduler pemantauan akan langsung menyesuaikan aturan secara realtime."
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-end gap-2.5 pt-2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onClose,
-						className: "px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-xs min-h-[40px]",
+						className: "px-4 py-2 rounded-lg text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] font-semibold text-xs min-h-[38px] border border-[#CCDDF0] cursor-pointer",
 						children: "Batal"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: onConfirm,
 						disabled: saving,
-						className: "px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-bold text-xs shadow-md transition disabled:opacity-50 flex items-center gap-2 min-h-[40px]",
+						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white font-bold text-xs shadow-2xs transition disabled:opacity-50 flex items-center gap-2 min-h-[38px] cursor-pointer",
 						children: [saving ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: saving ? "Menyimpan..." : "Ya, Terapkan Perubahan" })]
 					})]
 				})

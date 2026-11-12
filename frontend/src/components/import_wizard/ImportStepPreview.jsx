@@ -34,27 +34,27 @@ export function ImportStepPreview({
         <button
           type="button"
           onClick={() => setStatusFilter('ALL')}
-          className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
+          className={`p-3 rounded-lg text-left transition border cursor-pointer ${
             statusFilter === 'ALL'
-              ? 'bg-cyan-100/90 border-cyan-400 text-cyan-950 ring-2 ring-cyan-400/40 shadow-xs'
-              : 'bg-cyan-50/70 border-cyan-200 text-cyan-900 hover:bg-cyan-100/50'
+              ? 'bg-[#E0F0FF] border-[#026AA7] text-[#0B2545] shadow-2xs font-bold'
+              : 'bg-[#F1F6FC] border-[#CCDDF0] text-[#3B5B78] hover:bg-[#E8F1FA]'
           }`}
         >
-          <span className="text-[10px] font-bold text-cyan-700 block">Total Baris</span>
-          <strong className="text-base font-black">{importPreviewData.length}</strong>
+          <span className="text-[10px] font-bold text-[#64839E] block">Total Baris</span>
+          <strong className="text-base font-bold text-[#0B2545]">{importPreviewData.length}</strong>
         </button>
 
         <button
           type="button"
           onClick={() => setStatusFilter('MATCH')}
-          className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
+          className={`p-3 rounded-lg text-left transition border cursor-pointer ${
             statusFilter === 'MATCH'
-              ? 'bg-emerald-100/90 border-emerald-400 text-emerald-950 ring-2 ring-emerald-400/40 shadow-xs'
-              : 'bg-emerald-50/70 border-emerald-200 text-emerald-900 hover:bg-emerald-100/50'
+              ? 'bg-emerald-50 border-emerald-500 text-emerald-950 shadow-2xs font-bold'
+              : 'bg-[#F1F6FC] border-[#CCDDF0] text-[#3B5B78] hover:bg-[#E8F1FA]'
           }`}
         >
           <span className="text-[10px] font-bold text-emerald-700 block">Siap Lengkapi (Cocok)</span>
-          <strong className="text-base font-black">
+          <strong className="text-base font-bold text-emerald-800">
             {importPreviewData.filter((r) => r._status === 'match' && r._action !== 'skip').length}
           </strong>
         </button>
@@ -62,14 +62,14 @@ export function ImportStepPreview({
         <button
           type="button"
           onClick={() => setStatusFilter('CONFLICT')}
-          className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
+          className={`p-3 rounded-lg text-left transition border cursor-pointer ${
             statusFilter === 'CONFLICT'
-              ? 'bg-amber-100/90 border-amber-400 text-amber-950 ring-2 ring-amber-400/40 shadow-xs'
-              : 'bg-amber-50/70 border-amber-200 text-amber-900 hover:bg-amber-100/50'
+              ? 'bg-amber-50 border-amber-500 text-amber-950 shadow-2xs font-bold'
+              : 'bg-[#F1F6FC] border-[#CCDDF0] text-[#3B5B78] hover:bg-[#E8F1FA]'
           }`}
         >
           <span className="text-[10px] font-bold text-amber-700 block">Data Berbeda (Pilih Versi)</span>
-          <strong className="text-base font-black">
+          <strong className="text-base font-bold text-amber-800">
             {importPreviewData.filter((r) => r._status === 'conflict').length}
           </strong>
         </button>
@@ -77,14 +77,14 @@ export function ImportStepPreview({
         <button
           type="button"
           onClick={() => setStatusFilter('UNREGISTERED')}
-          className={`p-3 rounded-2xl text-left transition border cursor-pointer ${
+          className={`p-3 rounded-lg text-left transition border cursor-pointer ${
             statusFilter === 'UNREGISTERED'
-              ? 'bg-slate-200 border-slate-400 text-slate-900 ring-2 ring-slate-400/40 shadow-xs'
-              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100/70'
+              ? 'bg-[#E0F0FF] border-[#026AA7] text-[#0B2545] shadow-2xs font-bold'
+              : 'bg-[#F1F6FC] border-[#CCDDF0] text-[#3B5B78] hover:bg-[#E8F1FA]'
           }`}
         >
-          <span className="text-[10px] font-bold text-slate-600 block">IP Belum Terdaftar</span>
-          <strong className="text-base font-black">
+          <span className="text-[10px] font-bold text-[#64839E] block">IP Belum Terdaftar</span>
+          <strong className="text-base font-bold text-[#0B2545]">
             {importPreviewData.filter((r) => r._status === 'unregistered').length}
           </strong>
         </button>
@@ -586,11 +586,11 @@ export function ImportStepPreview({
       </div>
 
       {/* Step 3 Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-sky-100 font-sans">
+      <div className="flex items-center justify-between pt-3 border-t border-[#CCDDF0] font-sans">
         <button
           type="button"
           onClick={() => setImportStep(2)}
-          className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 cursor-pointer"
+          className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition flex items-center gap-1.5 cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Kembali ke Pemetaan</span>
@@ -599,7 +599,7 @@ export function ImportStepPreview({
           <button
             type="button"
             onClick={handleCloseModal}
-            className="px-3 py-2 rounded-xl border border-cyan-300 text-cyan-700 hover:bg-cyan-50 text-xs font-semibold transition cursor-pointer"
+            className="px-3 py-2 rounded-lg border border-[#CCDDF0] text-[#026AA7] hover:bg-[#E0F0FF] text-xs font-semibold transition cursor-pointer"
             title="Tutup modal dan biarkan proses penyimpanan selesai di latar belakang"
           >
             Lanjutkan di Latar Belakang
@@ -609,7 +609,7 @@ export function ImportStepPreview({
           type="button"
           disabled={importLoading || readyToSaveCount === 0}
           onClick={handleExecuteImport}
-          className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+          className="px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
         >
           {importLoading ? (
             <>
@@ -618,7 +618,7 @@ export function ImportStepPreview({
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4" />
               <span>Terapkan Pengayaan ({readyToSaveCount} Data)</span>
             </>
           )}

@@ -67,13 +67,12 @@ export function Sidebar({
       {/* Brand Header */}
       <div className={`h-14 flex items-center border-b border-[#1E437A] ${isCollapsed ? 'justify-center px-2' : 'justify-between px-3.5'}`}>
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 rounded-lg bg-[#026AA7] flex items-center justify-center text-white shadow-xs overflow-hidden shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-white border border-[#1E437A] flex items-center justify-center shadow-xs overflow-hidden shrink-0 p-1">
             <img
               src="/tekno-indo-logo.png"
               alt="Tekno Indo"
-              className="w-5 h-5 object-contain"
+              className="w-full h-full object-contain"
               onError={(e) => {
-                // Fallback jika path logo berbeda
                 e.currentTarget.style.display = 'none';
               }}
             />

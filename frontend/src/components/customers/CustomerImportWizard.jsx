@@ -540,36 +540,36 @@ export function CustomerImportWizard({
   const allSelectedAreValid = selectedRows.length > 0 && selectedRows.every((r) => r._status === 'valid')
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs overflow-y-auto font-sans">
       <div
-        className={`bg-white rounded-3xl border border-sky-200 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 w-full my-auto ${importStep === 3 ? 'max-w-5xl' : 'max-w-2xl'
+        className={`bg-white rounded-xl border border-[#CCDDF0] shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 w-full my-auto ${importStep === 3 ? 'max-w-5xl' : 'max-w-2xl'
           } p-5 sm:p-6 transition-all`}
       >
         {/* Modal Header & Step Indicator */}
-        <div className="border-b border-sky-100 pb-4 space-y-3">
+        <div className="border-b border-[#CCDDF0] pb-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold shadow-xs">
+              <div className="h-10 w-10 rounded-lg bg-[#E0F0FF] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center font-bold shadow-2xs">
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-slate-900 font-sans">
+                  <h3 className="text-base font-bold text-[#0B2545] font-sans">
                     Lengkapi Data Pelanggan
                   </h3>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-cyan-800 bg-cyan-100/90 px-2 py-0.5 rounded-lg uppercase tracking-tight ">
-                    <Building2 className="w-3 h-3 text-cyan-700 shrink-0" />
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0] px-2 py-0.5 rounded uppercase tracking-tight">
+                    <Building2 className="w-3 h-3 text-[#026AA7] shrink-0" />
                     <span>Kantor {activeOffice}</span>
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 font-mono">
+                <p className="text-xs text-[#64839E]">
                   Lengkapi Nomor WhatsApp, Alamat Pemasangan, dan Kredensial WiFi berdasarkan IP Router ONT
                 </p>
               </div>
             </div>
             <button
               onClick={handleCloseModal}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              className="p-1.5 rounded-lg text-[#64839E] hover:text-[#0B2545] hover:bg-[#F1F6FC] transition cursor-pointer"
               title={importLoading ? "Tutup & Jalankan di Latar Belakang" : "Tutup Modal"}
             >
               <X className="w-5 h-5" />
@@ -579,19 +579,19 @@ export function CustomerImportWizard({
           {/* 3 Step Interactive / Informative Progress Cards */}
           <div className="grid grid-cols-3 gap-2 pt-1 font-mono text-xs">
             <div
-              className={`flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 1
-                  ? 'bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs'
+              className={`flex items-center gap-2 p-2 rounded-lg border transition ${importStep === 1
+                  ? 'bg-white border-[#026AA7] text-[#0B2545] font-bold shadow-2xs'
                   : importStep > 1
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold'
-                    : 'bg-slate-50 border-slate-200 text-slate-400'
+                    ? 'bg-[#F1F6FC] border-[#CCDDF0] text-[#026AA7] font-semibold'
+                    : 'bg-[#F1F6FC]/60 border-[#CCDDF0]/60 text-[#64839E]'
                 }`}
             >
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 1
-                    ? 'bg-cyan-600 text-white'
+                className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold ${importStep === 1
+                    ? 'bg-[#026AA7] text-white'
                     : importStep > 1
                       ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-200 text-slate-600'
+                      : 'bg-[#CCDDF0] text-[#3B5B78]'
                   }`}
               >
                 {importStep > 1 ? <Check className="w-3.5 h-3.5" /> : '1'}
@@ -600,19 +600,19 @@ export function CustomerImportWizard({
             </div>
 
             <div
-              className={`flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 2
-                  ? 'bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs'
+              className={`flex items-center gap-2 p-2 rounded-lg border transition ${importStep === 2
+                  ? 'bg-white border-[#026AA7] text-[#0B2545] font-bold shadow-2xs'
                   : importStep > 2
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold'
-                    : 'bg-slate-50 border-slate-200 text-slate-400'
+                    ? 'bg-[#F1F6FC] border-[#CCDDF0] text-[#026AA7] font-semibold'
+                    : 'bg-[#F1F6FC]/60 border-[#CCDDF0]/60 text-[#64839E]'
                 }`}
             >
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 2
-                    ? 'bg-cyan-600 text-white'
+                className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold ${importStep === 2
+                    ? 'bg-[#026AA7] text-white'
                     : importStep > 2
                       ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-200 text-slate-600'
+                      : 'bg-[#CCDDF0] text-[#3B5B78]'
                   }`}
               >
                 {importStep > 2 ? <Check className="w-3.5 h-3.5" /> : '2'}
@@ -621,13 +621,13 @@ export function CustomerImportWizard({
             </div>
 
             <div
-              className={`flex items-center gap-2 p-2 rounded-xl border transition ${importStep === 3
-                  ? 'bg-cyan-50/80 border-cyan-400 text-cyan-900 font-bold shadow-xs'
-                  : 'bg-slate-50 border-slate-200 text-slate-400'
+              className={`flex items-center gap-2 p-2 rounded-lg border transition ${importStep === 3
+                  ? 'bg-white border-[#026AA7] text-[#0B2545] font-bold shadow-2xs'
+                  : 'bg-[#F1F6FC]/60 border-[#CCDDF0]/60 text-[#64839E]'
                 }`}
             >
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold ${importStep === 3 ? 'bg-cyan-600 text-white' : 'bg-slate-200 text-slate-600'
+                className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold ${importStep === 3 ? 'bg-[#026AA7] text-white' : 'bg-[#CCDDF0] text-[#3B5B78]'
                   }`}
               >
                 3

@@ -1244,6 +1244,10 @@
     min-height: 36px;
   }
 
+  .min-h-\[38px\] {
+    min-height: 38px;
+  }
+
   .min-h-\[40px\] {
     min-height: 40px;
   }
@@ -1874,6 +1878,10 @@
     border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
   }
 
+  :where(.divide-\[\#CCDDF0\]\/60 > :not(:last-child)) {
+    border-color: oklab(89.0646% -.0103284 -.0302343 / .6);
+  }
+
   :where(.divide-\[\#DAE7F5\] > :not(:last-child)) {
     border-color: #dae7f5;
   }
@@ -2068,6 +2076,10 @@
 
   .border-\[\#CCDDF0\] {
     border-color: #ccddf0;
+  }
+
+  .border-\[\#CCDDF0\]\/60 {
+    border-color: oklab(89.0646% -.0103284 -.0302343 / .6);
   }
 
   .border-\[\#DAE7F5\] {
@@ -2456,6 +2468,14 @@
     background-color: #0b2545;
   }
 
+  .bg-\[\#0B2545\]\/40 {
+    background-color: oklab(26.4046% -.017163 -.0656244 / .4);
+  }
+
+  .bg-\[\#0B2545\]\/50 {
+    background-color: oklab(26.4046% -.017163 -.0656244 / .5);
+  }
+
   .bg-\[\#026AA7\] {
     background-color: #026aa7;
   }
@@ -2490,6 +2510,14 @@
 
   .bg-\[\#F1F6FC\] {
     background-color: #f1f6fc;
+  }
+
+  .bg-\[\#F1F6FC\]\/50 {
+    background-color: oklab(97.1087% -.00284925 -.00921083 / .5);
+  }
+
+  .bg-\[\#F1F6FC\]\/60 {
+    background-color: oklab(97.1087% -.00284925 -.00921083 / .6);
   }
 
   .bg-\[\#F1F6FC\]\/90 {
@@ -4244,6 +4272,16 @@
     color: var(--color-sky-300);
   }
 
+  .text-sky-300\/60 {
+    color: #77d4ff99;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .text-sky-300\/60 {
+      color: color-mix(in oklab, var(--color-sky-300) 60%, transparent);
+    }
+  }
+
   .text-sky-300\/75 {
     color: #77d4ffbf;
   }
@@ -4783,6 +4821,10 @@
       scale: var(--tw-scale-x) var(--tw-scale-y);
     }
 
+    .group-hover\:text-\[\#026AA7\]:is(:where(.group):hover *) {
+      color: #026aa7;
+    }
+
     .group-hover\:text-blue-600:is(:where(.group):hover *) {
       color: var(--color-blue-600);
     }
@@ -4849,6 +4891,10 @@
     margin-right: calc(var(--spacing) * 3);
   }
 
+  .file\:rounded-lg::file-selector-button {
+    border-radius: var(--radius-lg);
+  }
+
   .file\:rounded-xl::file-selector-button {
     border-radius: var(--radius-xl);
   }
@@ -4858,12 +4904,24 @@
     border-width: 0;
   }
 
+  .file\:bg-\[\#026AA7\]::file-selector-button {
+    background-color: #026aa7;
+  }
+
   .file\:bg-cyan-600::file-selector-button {
     background-color: var(--color-cyan-600);
   }
 
+  .file\:px-3::file-selector-button {
+    padding-inline: calc(var(--spacing) * 3);
+  }
+
   .file\:px-4::file-selector-button {
     padding-inline: calc(var(--spacing) * 4);
+  }
+
+  .file\:py-1\.5::file-selector-button {
+    padding-block: calc(var(--spacing) * 1.5);
   }
 
   .file\:py-2::file-selector-button {
@@ -4916,8 +4974,16 @@
       background-color: #035388;
     }
 
+    .hover\:bg-\[\#E0F0FF\]:hover {
+      background-color: #e0f0ff;
+    }
+
     .hover\:bg-\[\#E2EDF8\]:hover {
       background-color: #e2edf8;
+    }
+
+    .hover\:bg-\[\#E8F1FA\]:hover {
+      background-color: #e8f1fa;
     }
 
     .hover\:bg-\[\#F1F6FC\]:hover {
@@ -5355,6 +5421,10 @@
 
     .hover\:opacity-80:hover {
       opacity: .8;
+    }
+
+    .hover\:file\:bg-\[\#035388\]:hover::file-selector-button {
+      background-color: #035388;
     }
 
     .hover\:file\:bg-cyan-700:hover::file-selector-button {
