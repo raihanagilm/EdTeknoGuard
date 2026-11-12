@@ -68,6 +68,15 @@ class ONTSchedulerService:
             replace_existing=True
         )
 
+        # Job Pengingat Notifikasi Darurat Berulang (Mengecek status masalah aktif & mengirim ulang notif tiap alert_waiting_interval_minutes)
+        self.scheduler.add_job(
+            self.emergency_alert_reminder_job_wrapper,
+            "interval",
+            minutes=1,
+            id="emergency_alert_reminder",
+            replace_existing=True
+        )
+
         # Job Sinkronisasi MikroTik
         self.scheduler.add_job(
             self.mikrotik_sync_job_wrapper,
@@ -213,6 +222,133 @@ class ONTSchedulerService:
                 ScanRunner.execute_scan_sync(kantor=k)
             except Exception as e:
                 logger.error(f"[SCHEDULER] Gagal menjalankan scan otomatis kantor '{k}': {e}")
+
+    def emergency_alert_reminder_job_wrapper(self):
+        """Memeriksa status redaman/LOS terakhir di database per kantor dan mengulang pengiriman push notifikasi secara berkala sesuai alert_waiting_interval_minutes tanpa scan ulang"""
+        m_db = TenantDatabaseManager.get_tenant_session(None)
+        try:
+            kantors = m_db.query(Kantor).filter(Kantor.is_active == True).all()
+            codes = [k.kode for k in kantors]
+        finally:
+            m_db.close()
+
+        now = get_now_wib()
+        for k in codes:
+            try:
+                state = SchedulerStateManager.get_office_state(k)
+                if state.is_scanning:
+                    continue
+
+                t_db = TenantDatabaseManager.get_tenant_session(k)
+                try:
+                    # 1. Baca interval pengingat dari database (default 10 menit)
+                    wait_str = SchedulerRecoveryManager.get_setting_from_db(t_db, "alert_waiting_interval_minutes", default="10", kantor=k)
+                    try:
+                        alert_interval_mins = int(wait_str) if wait_str else 10
+                    except (ValueError, TypeError):
+                        alert_interval_mins = 10
+
+                    if alert_interval_mins < 1:
+                        alert_interval_mins = 10
+
+                    # 2. Cek kapan terakhir kali alert darurat dikirim
+                    last_alert_str = SchedulerRecoveryManager.get_setting_from_db(t_db, "last_emergency_alert_at", default=None, kantor=k)
+                    if last_alert_str:
+                        try:
+                            import dateutil.parser
+                            from app.core.timezone import to_wib
+                            last_alert_dt = to_wib(dateutil.parser.parse(last_alert_str))
+                            diff_mins = (now - last_alert_dt).total_seconds() / 60.0
+                            if diff_mins < alert_interval_mins:
+                                # Belum saatnya mengulang pengingat
+                                continue
+                        except Exception as e:
+                            logger.debug(f"[EMERGENCY_REMINDER] Gagal parse last_emergency_alert_at {k}: {e}")
+
+                    # 3. Hitung jumlah modem LOS dan Kritis yang tersimpan pada hasil scan terakhir
+                    from app.db.models import PerangkatONT
+                    # Hitung dari PerangkatONT yang aktif dipantau
+                    los_count = t_db.query(PerangkatONT).filter(
+                        PerangkatONT.is_monitored == True,
+                        PerangkatONT.status_koneksi == "LOS"
+                    ).count()
+                    crit_count = t_db.query(PerangkatONT).filter(
+                        PerangkatONT.is_monitored == True,
+                        PerangkatONT.status_koneksi == "CRITICAL"
+                    ).count()
+
+                    if los_count == 0 and crit_count == 0:
+                        # Tidak ada kendala darurat aktif
+                        continue
+
+                    # 4. Kirim Push Notification Pengingat Berulang ke Tim Teknisi & Admin
+                    from app.services.fcm_service import resolve_notification_audio_settings, send_push_notification
+                    from app.core.database import SessionLocal as MasterSessionLocal
+                    from app.db.models import User as MasterUser
+
+                    audio_settings = resolve_notification_audio_settings(kantor=k, is_emergency=True)
+                    m_db_user = MasterSessionLocal()
+                    try:
+                        users = m_db_user.query(MasterUser).filter(
+                            MasterUser.is_active == True,
+                            MasterUser.fcm_token != None,
+                            MasterUser.fcm_token != ""
+                        ).all()
+                        alert_tokens = []
+                        for u in users:
+                            if u.role == "super admin":
+                                alert_tokens.append(u.fcm_token)
+                            elif k.lower() in [k_item.lower() for k_item in u.allowed_kantor_list]:
+                                alert_tokens.append(u.fcm_token)
+                        alert_tokens = list(set(alert_tokens))
+
+                        if alert_tokens:
+                            if los_count > 0:
+                                title = f"[PENGINGAT LOS] Kantor: {k.upper()}"
+                                body = f"Perhatian: {los_count} modem masih LOS (terputus). Segera lakukan pengecekan fisik kabel."
+                                send_push_notification(
+                                    tokens=alert_tokens,
+                                    title=title,
+                                    body=body,
+                                    data={
+                                        "target_tab": "pelanggan",
+                                        "target_kantor": k,
+                                        "target_status": "LOS",
+                                        "level": "los",
+                                        "type": "monitoring_los_reminder",
+                                        "vibration": audio_settings["vibration"]
+                                    },
+                                    channel_id=audio_settings["channel_id"],
+                                    sound=audio_settings["sound"]
+                                )
+                            elif crit_count > 0:
+                                title = f"[PENGINGAT KRITIS] Kantor: {k.upper()}"
+                                body = f"Perhatian: {crit_count} modem masih berstatus Kritis (<= -27.0 dBm). Segera cek redaman."
+                                send_push_notification(
+                                    tokens=alert_tokens,
+                                    title=title,
+                                    body=body,
+                                    data={
+                                        "target_tab": "pelanggan",
+                                        "target_kantor": k,
+                                        "target_status": "CRITICAL",
+                                        "level": "critical",
+                                        "type": "monitoring_critical_reminder",
+                                        "vibration": audio_settings["vibration"]
+                                    },
+                                    channel_id=audio_settings["channel_id"],
+                                    sound=audio_settings["sound"]
+                                )
+
+                            # 5. Perbarui timestamp alert darurat terakhir di database
+                            SchedulerRecoveryManager.set_setting_in_db(t_db, "last_emergency_alert_at", now.isoformat(), kantor=k)
+                            logger.info(f"[EMERGENCY_REMINDER] Berhasil mengirimkan pengulangan notifikasi darurat kantor {k} (LOS: {los_count}, Kritis: {crit_count}).")
+                    finally:
+                        m_db_user.close()
+                finally:
+                    t_db.close()
+            except Exception as e:
+                logger.error(f"[EMERGENCY_REMINDER] Error memeriksa pengulangan alert kantor {k}: {e}")
 
     def mikrotik_sync_job_wrapper(self):
         """Wrapper sinkronisasi berkala MikroTik per kantor"""

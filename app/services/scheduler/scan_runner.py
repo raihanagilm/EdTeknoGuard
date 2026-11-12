@@ -441,6 +441,12 @@ class ScanRunner:
                                 channel_id=audio_settings["channel_id"],
                                 sound=audio_settings["sound"]
                             )
+                            # Simpan timestamp pengiriman alert darurat terakhir untuk pengulangan pengingat mandiri
+                            t_db_time = TenantDatabaseManager.get_tenant_session(k_code)
+                            try:
+                                SchedulerRecoveryManager.set_setting_in_db(t_db_time, "last_emergency_alert_at", now.isoformat(), kantor=k_code)
+                            finally:
+                                t_db_time.close()
                     finally:
                         m_db_los.close()
                 except Exception as fcm_err:
@@ -484,6 +490,12 @@ class ScanRunner:
                                 channel_id=audio_settings["channel_id"],
                                 sound=audio_settings["sound"]
                             )
+                            # Simpan timestamp pengiriman alert darurat terakhir untuk pengulangan pengingat mandiri
+                            t_db_time = TenantDatabaseManager.get_tenant_session(k_code)
+                            try:
+                                SchedulerRecoveryManager.set_setting_in_db(t_db_time, "last_emergency_alert_at", now.isoformat(), kantor=k_code)
+                            finally:
+                                t_db_time.close()
                     finally:
                         m_db_crit.close()
                 except Exception as fcm_err:
