@@ -10,8 +10,7 @@ import {
   Info, 
   ChevronRight, 
   Clock, 
-  Building2,
-  Trash2
+  Building2
 } from 'lucide-react';
 
 export function NotificationsView({
@@ -59,23 +58,23 @@ export function NotificationsView({
   if (!isOpen) return null;
 
   const getIconForType = (item) => {
-    if (item.level === 'los' || item.badge?.includes('LOS')) {
+    if (item.level === 'los' || item.badge?.includes('LOS') || item.badge?.includes('TERPUTUS')) {
       return (
-        <div className="w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0">
-          <ZapOff className="w-4 h-4 text-rose-600" />
+        <div className="w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-rose-600 flex items-center justify-center shrink-0">
+          <ZapOff className="w-4 h-4" />
         </div>
       );
     }
-    if (item.level === 'critical' || item.is_critical) {
+    if (item.level === 'critical' || item.is_critical || item.badge?.includes('KRITIS')) {
       return (
-        <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-rose-600 flex items-center justify-center shrink-0">
           <ZapOff className="w-4 h-4" />
         </div>
       );
     }
     if (item.level === 'invalid' || item.badge?.includes('INVALID')) {
       return (
-        <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-amber-700 flex items-center justify-center shrink-0">
           <AlertTriangle className="w-4 h-4" />
         </div>
       );
@@ -87,9 +86,9 @@ export function NotificationsView({
         </div>
       );
     }
-    if (item.level === 'warning' || item.badge === 'WARNING') {
+    if (item.level === 'warning' || item.badge === 'WARNING' || item.badge?.includes('WASPADA')) {
       return (
-        <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-amber-700 flex items-center justify-center shrink-0">
           <AlertTriangle className="w-4 h-4" />
         </div>
       );
@@ -101,20 +100,20 @@ export function NotificationsView({
     );
   };
 
-  const getBadgeClass = (item) => {
-    if (item.level === 'los' || item.badge?.includes('LOS')) {
-      return 'text-rose-700 bg-rose-50 border border-rose-200';
+  const getStatusTextClass = (item) => {
+    if (item.level === 'los' || item.badge?.includes('LOS') || item.badge?.includes('TERPUTUS')) {
+      return 'text-rose-700';
     }
-    if (item.level === 'critical' || item.is_critical) {
-      return 'text-rose-700 bg-rose-50 border border-rose-200';
+    if (item.level === 'critical' || item.is_critical || item.badge?.includes('KRITIS')) {
+      return 'text-rose-700';
     }
     if (item.level === 'invalid' || item.badge?.includes('INVALID')) {
-      return 'text-amber-800 bg-amber-50 border border-amber-200';
+      return 'text-amber-800';
     }
-    if (item.level === 'warning') {
-      return 'text-amber-800 bg-amber-50 border border-amber-200';
+    if (item.level === 'warning' || item.badge?.includes('WASPADA')) {
+      return 'text-amber-800';
     }
-    return 'text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0]';
+    return 'text-[#026AA7]';
   };
 
   return createPortal(
@@ -136,11 +135,11 @@ export function NotificationsView({
               <Bell className="w-4 h-4" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <h3 className="text-sm font-bold text-[#0B2545] leading-tight">Pusat Notifikasi</h3>
                 {unreadCount > 0 && (
-                  <span className="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-mono font-bold leading-none">
-                    {unreadCount}
+                  <span className="font-mono text-xs font-bold text-[#026AA7]">
+                    ({unreadCount})
                   </span>
                 )}
               </div>
@@ -157,11 +156,11 @@ export function NotificationsView({
               <button
                 type="button"
                 onClick={onMarkAllRead}
-                className="px-2 py-1 rounded-lg text-[#026AA7] hover:bg-[#E2EDF8] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-[#CCDDF0]"
+                className="px-2.5 py-1 rounded-lg text-[#026AA7] hover:bg-[#E2EDF8] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-[#CCDDF0] bg-white"
                 title="Tandai semua sudah dibaca"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Tandai Baca</span>
+                <span>Tandai Baca</span>
               </button>
             )}
             <button
@@ -202,15 +201,19 @@ export function NotificationsView({
                 {getIconForType(item)}
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-1.5 mb-1">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wide ${getBadgeClass(item)}`}>
+                  {/* Clean Typography Header: Tanpa Box / Pill Berwarna */}
+                  <div className="flex items-center justify-between gap-1.5 mb-1 text-[11px] font-mono">
+                    <div className="flex items-center gap-1.5 flex-wrap truncate">
+                      <span className={`font-bold uppercase tracking-wider ${getStatusTextClass(item)}`}>
                         {item.badge || 'INFO'}
                       </span>
                       {item.kantor && (
-                        <span className="text-[10px] font-mono font-bold text-[#3B5B78]">
-                          {item.kantor.toUpperCase()}
-                        </span>
+                        <>
+                          <span className="text-[#CCDDF0] font-normal">•</span>
+                          <span className="font-semibold text-[#3B5B78] uppercase">
+                            {item.kantor}
+                          </span>
+                        </>
                       )}
                     </div>
 
@@ -257,6 +260,7 @@ export function NotificationsView({
           )}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

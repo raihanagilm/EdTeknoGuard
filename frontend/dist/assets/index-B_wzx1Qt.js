@@ -37250,24 +37250,24 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 	}, [isOpen, onClose]);
 	if (!isOpen) return null;
 	const getIconForType = (item) => {
-		if (item.level === "los" || item.badge?.includes("LOS")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZapOff, { className: "w-4 h-4 text-rose-600" })
+		if (item.level === "los" || item.badge?.includes("LOS") || item.badge?.includes("TERPUTUS")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-rose-600 flex items-center justify-center shrink-0",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZapOff, { className: "w-4 h-4" })
 		});
-		if (item.level === "critical" || item.is_critical) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0",
+		if (item.level === "critical" || item.is_critical || item.badge?.includes("KRITIS")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-rose-600 flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZapOff, { className: "w-4 h-4" })
 		});
 		if (item.level === "invalid" || item.badge?.includes("INVALID")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0",
+			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-amber-700 flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
 		});
 		if (item.type?.includes("tiket")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleQuestionMark, { className: "w-4 h-4" })
 		});
-		if (item.level === "warning" || item.badge === "WARNING") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0",
+		if (item.level === "warning" || item.badge === "WARNING" || item.badge?.includes("WASPADA")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-amber-700 flex items-center justify-center shrink-0",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
 		});
 		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -37275,12 +37275,12 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" })
 		});
 	};
-	const getBadgeClass = (item) => {
-		if (item.level === "los" || item.badge?.includes("LOS")) return "text-rose-700 bg-rose-50 border border-rose-200";
-		if (item.level === "critical" || item.is_critical) return "text-rose-700 bg-rose-50 border border-rose-200";
-		if (item.level === "invalid" || item.badge?.includes("INVALID")) return "text-amber-800 bg-amber-50 border border-amber-200";
-		if (item.level === "warning") return "text-amber-800 bg-amber-50 border border-amber-200";
-		return "text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0]";
+	const getStatusTextClass = (item) => {
+		if (item.level === "los" || item.badge?.includes("LOS") || item.badge?.includes("TERPUTUS")) return "text-rose-700";
+		if (item.level === "critical" || item.is_critical || item.badge?.includes("KRITIS")) return "text-rose-700";
+		if (item.level === "invalid" || item.badge?.includes("INVALID")) return "text-amber-800";
+		if (item.level === "warning" || item.badge?.includes("WASPADA")) return "text-amber-800";
+		return "text-[#026AA7]";
 	};
 	return (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 bg-[#0B2545]/40 backdrop-blur-2xs z-[99998] sm:hidden",
@@ -37296,13 +37296,17 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 					className: "p-1.5 rounded-lg bg-[#026AA7] text-white shadow-2xs",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4" })
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2",
+					className: "flex items-center gap-1.5",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 						className: "text-sm font-bold text-[#0B2545] leading-tight",
 						children: "Pusat Notifikasi"
-					}), unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-mono font-bold leading-none",
-						children: unreadCount
+					}), unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "font-mono text-xs font-bold text-[#026AA7]",
+						children: [
+							"(",
+							unreadCount,
+							")"
+						]
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-[11px] font-medium text-[#3B5B78] mt-0.5",
@@ -37313,12 +37317,9 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 				children: [notifications.length > 0 && onMarkAllRead && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: onMarkAllRead,
-					className: "px-2 py-1 rounded-lg text-[#026AA7] hover:bg-[#E2EDF8] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-[#CCDDF0]",
+					className: "px-2.5 py-1 rounded-lg text-[#026AA7] hover:bg-[#E2EDF8] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-[#CCDDF0] bg-white",
 					title: "Tandai semua sudah dibaca",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "hidden sm:inline",
-						children: "Tandai Baca"
-					})]
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tandai Baca" })]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					type: "button",
 					onClick: onClose,
@@ -37355,16 +37356,19 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 					className: "flex-1 min-w-0",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-between gap-1.5 mb-1",
+							className: "flex items-center justify-between gap-1.5 mb-1 text-[11px] font-mono",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-1.5 flex-wrap",
+								className: "flex items-center gap-1.5 flex-wrap truncate",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: `px-1.5 py-0.5 rounded text-[10px] font-bold font-mono uppercase tracking-wide ${getBadgeClass(item)}`,
+									className: `font-bold uppercase tracking-wider ${getStatusTextClass(item)}`,
 									children: item.badge || "INFO"
-								}), item.kantor && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[10px] font-mono font-bold text-[#3B5B78]",
-									children: item.kantor.toUpperCase()
-								})]
+								}), item.kantor && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[#CCDDF0] font-normal",
+									children: "•"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-semibold text-[#3B5B78] uppercase",
+									children: item.kantor
+								})] })]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 								className: "text-[10px] font-medium text-[#64839E] shrink-0 flex items-center gap-1",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-[#64839E]" }), item.time || "Baru"]
@@ -37395,7 +37399,7 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 				})]
 			}, item.id))
 		})]
-	})] }));
+	})] }), document.body);
 }
 //#endregion
 //#region src/components/layout/Navigation.jsx
@@ -45386,24 +45390,19 @@ function App() {
 	};
 	const handleMarkAllNotificationsRead = async () => {
 		try {
-			const nonCriticalItems = notificationList.filter((n) => {
-				return !(n.level === "critical" || n.level === "los" || n.is_critical || n.status_koneksi === "LOS" || n.status_koneksi === "CRITICAL" || n.id?.startsWith("batch_los") || n.id?.startsWith("batch_critical"));
-			});
-			if (nonCriticalItems.length === 0) return;
+			if (notificationList.length === 0) return;
 			await fetch("/api/notifications/read-all", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ items: nonCriticalItems.map((n) => ({
+				body: JSON.stringify({ items: notificationList.map((n) => ({
 					type: n.type,
 					reference_id: n.reference_id || n.id,
 					kantor: n.kantor || activeOffice
 				})) })
 			});
-			const emergencyOnly = notificationList.filter((n) => n.level === "critical" || n.level === "los" || n.is_critical || n.status_koneksi === "LOS" || n.status_koneksi === "CRITICAL" || n.id?.startsWith("batch_los") || n.id?.startsWith("batch_critical"));
-			setNotificationList(emergencyOnly);
-			setTotalUnreadNotifications(emergencyOnly.length);
-			const emergencyTickets = emergencyOnly.filter((n) => n.type === "ticket" || n.target_tab === "tiket");
-			setUnreadTickets(emergencyTickets.length);
+			setNotificationList([]);
+			setTotalUnreadNotifications(0);
+			setUnreadTickets(0);
 		} catch (e) {
 			console.warn("Failed to mark all notifications read:", e);
 		}

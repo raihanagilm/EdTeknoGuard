@@ -553,29 +553,22 @@ export default function App() {
 
   const handleMarkAllNotificationsRead = async () => {
     try {
-      const nonCriticalItems = notificationList.filter(n => {
-        const isEmergency = n.level === 'critical' || n.level === 'los' || n.is_critical || n.status_koneksi === 'LOS' || n.status_koneksi === 'CRITICAL' || n.id?.startsWith('batch_los') || n.id?.startsWith('batch_critical')
-        return !isEmergency
-      })
-      if (nonCriticalItems.length === 0) return
+      if (notificationList.length === 0) return
 
       await fetch('/api/notifications/read-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: nonCriticalItems.map(n => ({
+          items: notificationList.map(n => ({
             type: n.type,
             reference_id: n.reference_id || n.id,
             kantor: n.kantor || activeOffice
           }))
         })
       })
-      // Hanya bersihkan yang non-kritis, item kritis & LOS tetap dipertahankan
-      const emergencyOnly = notificationList.filter(n => n.level === 'critical' || n.level === 'los' || n.is_critical || n.status_koneksi === 'LOS' || n.status_koneksi === 'CRITICAL' || n.id?.startsWith('batch_los') || n.id?.startsWith('batch_critical'))
-      setNotificationList(emergencyOnly)
-      setTotalUnreadNotifications(emergencyOnly.length)
-      const emergencyTickets = emergencyOnly.filter(n => n.type === 'ticket' || n.target_tab === 'tiket')
-      setUnreadTickets(emergencyTickets.length)
+      setNotificationList([])
+      setTotalUnreadNotifications(0)
+      setUnreadTickets(0)
     } catch (e) {
       console.warn('Failed to mark all notifications read:', e)
     }
