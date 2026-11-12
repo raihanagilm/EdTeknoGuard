@@ -27,6 +27,15 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Fixed
+- **Pemisahan ID Notifikasi Android per Kategori & Anti-Overwrite ([TeknoFirebaseMessagingService.kt](d:/databaru/Magang/EdTeknoGuard-Android/app/src/main/java/com/edtekno/app/TeknoFirebaseMessagingService.kt))**:
+  - Memperbaiki bentrokan `stableNotificationId` yang sebelumnya menyatukan notifikasi LOS, Kritis, Tiket, dan Scheduler ke dalam ID yang sama (`fcm_crit_{kantor}`) sehingga saling menimpa di status bar Android.
+  - Memisahkan ID notifikasi Android secara spesifik: `fcm_los_{kantor}`, `fcm_crit_{kantor}`, `fcm_ticket_{kantor}`, dan `fcm_sched_{kantor}`.
+  - Menambahkan `setWhen(System.currentTimeMillis())` dan `setShowWhen(true)` agar notifikasi selalu menampilkan timestamp waktu kedatangan paling mutakhir.
+- **Independensi Interval Pemantauan Multi-Kantor ([scheduler_service.py](app/services/scheduler_service.py), [scan_runner.py](app/services/scheduler/scan_runner.py))**:
+  - Mengubah engine pemantauan latar belakang APScheduler menjadi master ticker 1 menit yang mengevaluasi `polling_interval_minutes` dan `last_scan_time` tiap kantor secara independen.
+  - Perubahan interval di satu kantor (misal Tengaran 30 menit) tidak lagi menimpa atau memperlambat interval kantor lain (Banyumas 10 menit, Slawi 20 menit, Karanggede 20 menit).
+  - Memperbaiki pemanggilan `resolve_notification_audio_settings` pada `scan_runner.py` agar membuka sesi baru tanpa mengoper sesi tertutup `t_db_finish`.
+  - Mengaktifkan kembali status jadwal pemantauan kantor Karanggede ke `RUNNING` di database server produksi.
 - **Pendaftaran Token FCM Pelanggan & Realtime Push MyTekno ([routes.py](app/portal/modules/auth/routes.py), [portalApi.js](frontend/src/portal/services/portalApi.js), [PortalCustomerApp.jsx](frontend/src/portal/PortalCustomerApp.jsx), [App.jsx](frontend/src/App.jsx))**:
   - Memperbaiki kegagalan pendaftaran token FCM pelanggan pada endpoint `/portal/api/auth/register-fcm` yang sebelumnya memeriksa `request.state.portal_customer` alih-alih `get_current_customer_optional(request)`.
   - Menambahkan verifikasi ganda berbasis cookie sesi terproteksi dan fallback identitas `id_pelanggan` serta `kantor` pada payload JSON body.
