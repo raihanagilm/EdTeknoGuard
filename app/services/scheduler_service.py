@@ -131,7 +131,8 @@ class ONTSchedulerService:
                         if last_reminder_str:
                             try:
                                 import dateutil.parser
-                                last_dt = dateutil.parser.parse(last_reminder_str)
+                                from app.core.timezone import to_wib
+                                last_dt = to_wib(dateutil.parser.parse(last_reminder_str))
                                 diff_mins = (now - last_dt).total_seconds() / 60.0
                                 if diff_mins < 60.0:
                                     should_send = False
@@ -195,10 +196,8 @@ class ONTSchedulerService:
                     if last_scan_str:
                         try:
                             import dateutil.parser
-                            last_scan_dt = dateutil.parser.parse(last_scan_str)
-                            if last_scan_dt.tzinfo is None:
-                                from app.core.timezone import WIB_TZ
-                                last_scan_dt = last_scan_dt.replace(tzinfo=WIB_TZ)
+                            from app.core.timezone import to_wib
+                            last_scan_dt = to_wib(dateutil.parser.parse(last_scan_str))
                             elapsed_mins = (now - last_scan_dt).total_seconds() / 60.0
                             if elapsed_mins < interval_mins:
                                 is_due = False

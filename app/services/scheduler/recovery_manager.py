@@ -27,10 +27,10 @@ class SchedulerRecoveryManager:
             q = db.query(SystemSetting).filter(SystemSetting.key_name == key)
             if kantor:
                 k_clean = kantor.lower().strip()
-                s_office = q.filter(SystemSetting.kantor_kode == k_clean).first()
+                s_office = q.filter(SystemSetting.kantor_kode == k_clean).order_by(SystemSetting.id_setting.desc()).first()
                 if s_office and s_office.value_text is not None and str(s_office.value_text).strip() != "":
                     return s_office.value_text
-            s = q.first()
+            s = q.order_by(SystemSetting.id_setting.desc()).first()
             if s and s.value_text is not None and str(s.value_text).strip() != "":
                 return s.value_text
             return default
@@ -43,13 +43,20 @@ class SchedulerRecoveryManager:
         """Menyimpan atau memperbarui setting di tabel system_settings per kantor cabang"""
         try:
             k_clean = (kantor or "cabang").lower().strip()
+            # Cari entri yang cocok dengan kantor_kode terlebih dahulu, atau entri key tanpa kantor
             s = db.query(SystemSetting).filter(
                 SystemSetting.key_name == key,
                 SystemSetting.kantor_kode == k_clean
-            ).first()
+            ).order_by(SystemSetting.id_setting.desc()).first()
+
+            if not s:
+                s = db.query(SystemSetting).filter(
+                    SystemSetting.key_name == key
+                ).order_by(SystemSetting.id_setting.desc()).first()
 
             now = get_now_wib()
             if s:
+                s.kantor_kode = k_clean
                 s.value_text = str(value)
                 s.updated_at = now
             else:
