@@ -215,10 +215,15 @@ export function PortalPaymentTab({
           {(!memuatTagihan || tagihan) && !galatTagihan && (
             <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
               {/* Card Header dengan Switcher Sub-Tab yang Jelas */}
-              <div className="p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5 bg-slate-50/70">
-                <span className="text-xs font-bold text-slate-700">
-                  {subTab === 'tagihan' ? 'Rincian Tagihan' : 'Daftar Riwayat Bayar'}
-                </span>
+              <div className="p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <ReceiptText className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-900 leading-tight">
+                    {subTab === 'tagihan' ? 'Rincian Tagihan' : 'Riwayat Bayar'}
+                  </span>
+                </div>
 
                 {/* Sub-tab Pill Switcher Terpadu */}
                 <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0">
@@ -232,16 +237,6 @@ export function PortalPaymentTab({
                     Tagihan
                   </button>
                   <button
-                    type="button"
-                    onClick={() => setSubTab('riwayat')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                      subTab === 'riwayat' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    Riwayat
-                  </button>
-                </div>
-              </div>
                     type="button"
                     onClick={() => setSubTab('riwayat')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${

@@ -102,28 +102,30 @@ export function PortalQuotaTab({ customer, dashboardData, onOpenNotifications , 
         showNotificationDot={hasUnreadNotifications}
         onNotificationClick={onOpenNotifications}
         title="Pemakaian Kuota"
-        subtitle="Monitoring Penggunaan Data & FUP Internet"
+        subtitle="Akumulasi data bulan ini"
         dashboardData={dashboardData}
         customer={customer}
       />
 
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-3) PERSIS TAB LAIN ═══ */}
       <main className="scroll-area -mt-3 flex-1 overflow-y-auto relative z-10">
-        <div className="px-3.5 pb-24 space-y-3.5">
+        <div className="px-3.5 pb-24 space-y-3">
 
           {/* ═══ SECTION 1: PEMAKAIAN BULAN INI ═══ */}
           <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
-            {/* Card Header */}
-            <div className="p-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/60">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-blue-50 text-blue-600">
-                <BarChart3 className="w-5 h-5" />
+            {/* Card Header dengan Ikon Semantik & Teks Bersih */}
+            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <BarChart3 className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-slate-900 leading-tight">
+                  Pemakaian Data
+                </span>
               </div>
-              <div className="min-w-0">
-                <h2 className="text-sm font-bold text-slate-900 leading-tight">Total Pemakaian Bulan Ini</h2>
-                <p className="text-xs text-slate-500 mt-0.5 leading-tight font-medium">
-                  Ringkasan pemakaian kuota internet
-                </p>
-              </div>
+              <span className="text-xs text-slate-500 font-medium">
+                Bulan ini
+              </span>
             </div>
 
             {/* Angka + progress bar pemakaian */}

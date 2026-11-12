@@ -343,7 +343,7 @@ export function PortalNotificationsPage({
   return (
     <div className="flex-1 h-full min-h-0 flex flex-col bg-slate-50 text-slate-900">
       {/* ═══ HEADER BIRU TERPADU DENGAN TOMBOL KEMBALI (PERSIS TAB LAIN) ═══ */}
-      <div className="shrink-0 relative z-0 bg-blue-600 border-b border-blue-700/60 shadow-xs">
+      <div className="shrink-0 relative z-0 bg-blue-600 border-b border-blue-700/60">
         <div className="relative px-4 sm:px-5 pt-3.5 pb-6 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <button
@@ -358,7 +358,7 @@ export function PortalNotificationsPage({
               <h1 className="text-sm font-bold tracking-tight text-white leading-tight">
                 Pusat Notifikasi
               </h1>
-              <p className="text-xs font-normal text-blue-100/90 mt-0.5 leading-snug break-words">
+              <p className="text-xs font-medium text-white/95 mt-0.5 leading-snug break-words">
                 Pemberitahuan &amp; riwayat aktivitas
               </p>
             </div>
@@ -371,17 +371,22 @@ export function PortalNotificationsPage({
         <div className="px-3.5 pb-24 space-y-3">
           {/* Card Utama Pembungkus List (Sesuai Styling Kartu Menu Lain) */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
-            {/* Action & Filter Bar Ringkas */}
-            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/70">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-700">
-                  Semua Pemberitahuan
-                </span>
-                {notificationList.length > 0 && (
-                  <span className="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-                    {notificationList.length}
+            {/* Action & Filter Bar dengan Ikon Semantik */}
+            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <div className="flex items-baseline gap-1.5 min-w-0">
+                  <span className="text-xs font-bold text-slate-900 leading-tight">
+                    Semua Pemberitahuan
                   </span>
-                )}
+                  {notificationList.length > 0 && (
+                    <span className="text-xs text-slate-500 font-normal">
+                      · {notificationList.length} pesan
+                    </span>
+                  )}
+                </div>
               </div>
 
               {notificationList.some((it) => readIds.includes(it.id)) && (

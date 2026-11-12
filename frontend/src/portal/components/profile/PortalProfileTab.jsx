@@ -309,8 +309,8 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
       <PortalHeader
         showNotificationDot={hasUnreadNotifications}
         onNotificationClick={onOpenNotifications}
-        title="Profil & Akun Pelanggan"
-        subtitle="Informasi Layanan & Keamanan Kata Sandi"
+        title="Profil Pelanggan"
+        subtitle="Data akun & keamanan"
         dashboardData={dashboardData}
         customer={customer}
       />
@@ -322,7 +322,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
           {/* ═══ CARD PUTIH PROFIL & DATA DIRI (PERSIS SEPERTI GAMBAR USER) ═══ */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
             {/* Card Header Identitas Pelanggan */}
-            <div className="p-3.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/60">
+            <div className="p-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                 {/* Avatar Bulat dengan Badge Tombol Kamera */}
                 <div className="relative shrink-0">

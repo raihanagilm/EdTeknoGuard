@@ -141,21 +141,26 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
           {/* ═══ CARD UTAMA: ACTION BAR (BUAT TIKET + CARI) & DAFTAR TIKET ═══ */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
 
-            {/* Bilah Aksi Utama: Tombol Buat Tiket & Ringkasan */}
-            <div className="p-3 sm:p-3.5 bg-slate-50/70 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <div className="flex items-center justify-between sm:justify-start gap-2">
-                <span className="text-xs font-bold text-slate-700">
-                  Daftar Tiket Kendala
-                </span>
-                <span className="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-                  {filteredTickets.length} tiket
-                </span>
+            {/* Bilah Aksi Utama: Tombol Buat Tiket & Ikon Visual Semantik */}
+            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <AlertCircle className="w-4 h-4" />
+                </div>
+                <div className="flex items-baseline gap-1.5 min-w-0">
+                  <span className="text-xs font-bold text-slate-900 leading-tight">
+                    Tiket Bantuan
+                  </span>
+                  <span className="text-xs text-slate-500 font-normal">
+                    · {filteredTickets.length} laporan
+                  </span>
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-white text-xs font-semibold bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition cursor-pointer shadow-xs shrink-0"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-white text-xs font-semibold bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition cursor-pointer shadow-xs shrink-0"
               >
                 <Plus className="w-4 h-4" />
                 <span>Buat Tiket Baru</span>

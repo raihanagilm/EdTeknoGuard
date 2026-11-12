@@ -186,7 +186,7 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
           {/* ═══ KARTU UTAMA: KONDISI PERANGKAT & SPEED TEST JARINGAN ═══ */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
             {/* Header: Maskot di KIRI Judul Kondisi Perangkat & Tombol Speed Test di KANAN */}
-            <div className="p-3.5 bg-slate-50/80 flex items-center justify-between gap-3 border-b border-slate-100">
+            <div className="p-3.5 flex items-center justify-between gap-3 border-b border-slate-100">
               {/* Sisi Kiri: Maskot + Judul */}
               <div className="flex items-center gap-3 min-w-0">
                 <div className="shrink-0 pointer-events-none select-none">
@@ -269,7 +269,7 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
             </div>
           </section>
 
-          {/* ═══ MENU LAYANAN (GRID 3x2 SEIMBANG & BERSIH) ═══ */}
+          {/* ═══ MENU LAYANAN (KONSISTEN PADA WARNA BRAND: BIRU, PUTIH, SLATE) ═══ */}
           <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-3.5">
             <div className="flex items-center justify-between mb-3 px-0.5">
               <h2 className="text-sm font-bold text-slate-900">Menu Layanan</h2>
@@ -283,10 +283,10 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                 onClick={openDevicesModal}
                 className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <Smartphone className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/80 flex items-center justify-center transition-transform group-hover:scale-105">
+                  <Smartphone className="w-5 h-5 stroke-[1.75]" />
                 </div>
-                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                <span className="text-xs font-medium text-slate-800 group-hover:text-blue-600 transition-colors text-center leading-tight">
                   Perangkat
                 </span>
               </button>
@@ -297,10 +297,10 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                 onClick={() => onNavigate('wifi')}
                 className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <Wifi className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/80 flex items-center justify-center transition-transform group-hover:scale-105">
+                  <Wifi className="w-5 h-5 stroke-[1.75]" />
                 </div>
-                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                <span className="text-xs font-medium text-slate-800 group-hover:text-blue-600 transition-colors text-center leading-tight">
                   Kelola WiFi
                 </span>
               </button>
@@ -311,10 +311,10 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                 onClick={() => onNavigate('kendala')}
                 className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <AlertTriangle className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/80 flex items-center justify-center transition-transform group-hover:scale-105">
+                  <AlertTriangle className="w-5 h-5 stroke-[1.75]" />
                 </div>
-                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                <span className="text-xs font-medium text-slate-800 group-hover:text-blue-600 transition-colors text-center leading-tight">
                   Kendala
                 </span>
               </button>
@@ -325,10 +325,10 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                 onClick={() => onNavigate('kuota')}
                 className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <PieChart className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/80 flex items-center justify-center transition-transform group-hover:scale-105">
+                  <PieChart className="w-5 h-5 stroke-[1.75]" />
                 </div>
-                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                <span className="text-xs font-medium text-slate-800 group-hover:text-blue-600 transition-colors text-center leading-tight">
                   Kuota FUP
                 </span>
               </button>
@@ -339,10 +339,10 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                 onClick={() => onNavigate('pembayaran')}
                 className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <CreditCard className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/80 flex items-center justify-center transition-transform group-hover:scale-105">
+                  <CreditCard className="w-5 h-5 stroke-[1.75]" />
                 </div>
-                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                <span className="text-xs font-medium text-slate-800 group-hover:text-blue-600 transition-colors text-center leading-tight">
                   Bayar
                 </span>
               </button>
@@ -353,86 +353,94 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
                 onClick={() => onNavigate('profil')}
                 className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 transition active:scale-95 cursor-pointer group"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <User className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/80 flex items-center justify-center transition-transform group-hover:scale-105">
+                  <User className="w-5 h-5 stroke-[1.75]" />
                 </div>
-                <span className="text-xs font-medium text-slate-700 group-hover:text-blue-600 transition-colors text-center leading-tight">
+                <span className="text-xs font-medium text-slate-800 group-hover:text-blue-600 transition-colors text-center leading-tight">
                   Profil
                 </span>
               </button>
             </div>
           </section>
 
-          {/* ═══ SECTION: RINGKASAN KUOTA ═══ */}
-          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-4">
-            <div className="flex justify-between items-center mb-2.5">
-              <h2 className="text-sm font-bold text-slate-900">Ringkasan Kuota</h2>
-              <button
-                type="button"
-                onClick={() => onNavigate('kuota')}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Lihat Detail</span>
-                <ChevronRight className="w-3.5 h-3.5 stroke-[2.2]" />
-              </button>
-            </div>
-            <div className="text-2xl font-bold font-mono text-slate-900 leading-none mb-2.5">
-              {kuotaTerpakai} <span className="text-sm font-sans font-medium text-slate-500">GB Terpakai</span>
-            </div>
-            <div className="h-2 rounded-full bg-slate-100 overflow-hidden w-full mb-2.5">
-              <div
-                className="h-full bg-blue-600 rounded-full transition-all duration-700"
-                style={{ width: `${kuotaBarPercent}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-xs text-slate-600 font-medium">
-              <span>Pemakaian Bulan Ini</span>
-              <span className="font-semibold text-slate-800">{cleanPaketLabel(customer.paket)}</span>
-            </div>
-          </section>
-
-          {/* ═══ SECTION: TAGIHAN BULAN INI ═══ */}
-          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-4">
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600">
-                  <Receipt className="w-4 h-4" />
-                </div>
-                <h2 className="text-sm font-bold text-slate-900">Tagihan Bulan Ini</h2>
-              </div>
-              {customer.status_pembayaran === 'BELUM_BAYAR' || customer.status_tagihan === 'MENUNGGAK' ? (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600">
-                  <Clock className="w-4 h-4 text-amber-600" />
-                  Belum Dibayar
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Lunas
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-slate-100">
-              <div>
-                <div className="text-xs text-slate-500 font-medium">
-                  Periode: {customer.periode_tagihan || kuotaData.periode_label || 'Bulan Ini'}
-                </div>
-                {customer.harga_paket ? (
-                  <div className="text-sm font-mono font-bold text-slate-900 mt-0.5">
-                    Rp {Number(customer.harga_paket).toLocaleString('id-ID')}
+          {/* ═══ SECTION: STATUS LAYANAN & TAGIHAN TERPADU (UNIFIED CARD) ═══ */}
+          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 divide-y divide-slate-100 overflow-hidden">
+            {/* 1. Bagian Ringkasan Kuota */}
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600">
+                    <PieChart className="w-4 h-4 stroke-[1.75]" />
                   </div>
+                  <h2 className="text-sm font-bold text-slate-900">Pemakaian Kuota</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('kuota')}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Detail</span>
+                  <ChevronRight className="w-3.5 h-3.5 stroke-[2.2]" />
+                </button>
+              </div>
+              <div className="text-2xl font-bold font-mono text-slate-900 leading-none mb-2.5">
+                {kuotaTerpakai} <span className="text-sm font-sans font-medium text-slate-500">GB Terpakai</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden w-full mb-2.5">
+                <div
+                  className="h-full bg-blue-600 rounded-full transition-all duration-700"
+                  style={{ width: `${kuotaBarPercent}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-slate-600 font-medium">
+                <span>Bulan ini</span>
+                <span className="font-semibold text-slate-800">{cleanPaketLabel(customer.paket)}</span>
+              </div>
+            </div>
+
+            {/* 2. Bagian Tagihan Bulan Ini */}
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600">
+                    <Receipt className="w-4 h-4 stroke-[1.75]" />
+                  </div>
+                  <h2 className="text-sm font-bold text-slate-900">Tagihan Iuran</h2>
+                </div>
+                {customer.status_pembayaran === 'BELUM_BAYAR' || customer.status_tagihan === 'MENUNGGAK' ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    Belum Dibayar
+                  </span>
                 ) : (
-                  <div className="text-xs text-slate-500 mt-0.5 font-medium">Jatuh tempo tgl 20 setiap bulan</div>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    Lunas
+                  </span>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => onNavigate('pembayaran')}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95 transition cursor-pointer"
-              >
-                Detail Tagihan
-              </button>
+
+              <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-slate-100">
+                <div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    Periode: {customer.periode_tagihan || kuotaData.periode_label || 'Bulan Ini'}
+                  </div>
+                  {customer.harga_paket ? (
+                    <div className="text-sm font-mono font-bold text-slate-900 mt-0.5">
+                      Rp {Number(customer.harga_paket).toLocaleString('id-ID')}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-500 mt-0.5 font-medium">Jatuh tempo tgl 20 setiap bulan</div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('pembayaran')}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95 transition cursor-pointer"
+                >
+                  Detail Tagihan
+                </button>
+              </div>
             </div>
           </section>
 

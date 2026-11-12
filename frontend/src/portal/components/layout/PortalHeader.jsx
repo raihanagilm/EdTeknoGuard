@@ -48,7 +48,7 @@ export function PortalHeader({
   const isDotVisible = showNotificationDot !== null ? showNotificationDot : hasUnread;
 
   return (
-    <div className="shrink-0 relative z-0 bg-blue-600 border-b border-blue-700/60 shadow-xs">
+    <div className="shrink-0 relative z-0 bg-blue-600 border-b border-blue-700/60">
       {/* Top bar: Avatar/Maskot + Judul/Subjudul/Greeting + Lonceng Notifikasi */}
       <div className="relative px-4 sm:px-5 pt-3.5 pb-6 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -78,7 +78,7 @@ export function PortalHeader({
           <div className="min-w-0 flex-1">
             {greeting ? (
               <>
-                <div className="text-xs font-medium text-blue-100/90 leading-tight truncate">{greeting}</div>
+                <div className="text-xs font-medium text-white/80 leading-tight truncate">{greeting}</div>
                 <div className="text-sm font-bold text-white tracking-tight leading-snug mt-0.5 truncate">
                   {title}
                 </div>
@@ -88,7 +88,7 @@ export function PortalHeader({
                 <h1 className="text-sm font-bold tracking-tight text-white leading-tight">
                   {title}
                 </h1>
-                <p className="text-xs font-normal text-blue-100/90 mt-0.5 leading-snug break-words">
+                <p className="text-xs font-medium text-white/95 mt-0.5 leading-snug break-words">
                   {subtitle}
                 </p>
               </>

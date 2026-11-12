@@ -213,9 +213,14 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
           {/* ═══ CARD 1: INFORMASI WIFI AKTIF ═══ */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90 p-4">
             <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
-              <span className="text-xs font-bold text-slate-700">
-                WiFi Terpasang
-              </span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <Wifi className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-slate-900 leading-tight">
+                  Status WiFi Rumah
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={fetchWifiDetails}
