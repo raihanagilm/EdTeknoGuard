@@ -45026,10 +45026,15 @@ function App() {
 		}
 	};
 	(0, import_react.useEffect)(() => {
+		if (!isAuthenticated || activeTab === "login" || activeTab === "portal") return;
 		fetchLiveDashboardData();
 		const interval = setInterval(fetchLiveDashboardData, 5e3);
 		return () => clearInterval(interval);
-	}, [activeOffice]);
+	}, [
+		activeOffice,
+		isAuthenticated,
+		activeTab
+	]);
 	const handleNotificationItemClick = async (item) => {
 		setIsNotificationOpen(false);
 		if (item.kantor && item.kantor.toLowerCase() !== activeOffice.toLowerCase()) handleSwitchOffice(item.kantor);

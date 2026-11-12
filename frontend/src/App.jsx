@@ -423,11 +423,16 @@ export default function App() {
   }
 
   useEffect(() => {
+    // Jangan lakukan polling background jika pengguna belum login atau sudah logout
+    if (!isAuthenticated || activeTab === 'login' || activeTab === 'portal') {
+      return
+    }
+
     fetchLiveDashboardData()
     // Polling cepat setiap 5 detik agar unread badge & notifikasi terupdate otomatis tanpa refresh
     const interval = setInterval(fetchLiveDashboardData, 5000)
     return () => clearInterval(interval)
-  }, [activeOffice])
+  }, [activeOffice, isAuthenticated, activeTab])
 
   // Notification Center Handlers
   const handleNotificationItemClick = async (item) => {
