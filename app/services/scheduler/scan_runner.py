@@ -501,53 +501,91 @@ class ScanRunner:
                 except Exception as fcm_err:
                     logger.warning(f"[FCM_ALERT_CRIT] Gagal mengirim push notifikasi Kritis: {fcm_err}")
 
-            # 3. Trigger Push Notifikasi FCM berkala jika terdapat tiket kendala MENUNGGU (Format Ringkas)
-            try:
-                from app.db.models import TiketKendala
-                t_db_ticket = TenantDatabaseManager.get_tenant_session(k_code)
+            # 3. Trigger Push Notifikasi FCM Khusus Status WARNING (Hanya 1 Kali Setelah Selesai Scan)
+            warning_count = stats.get("warning", 0)
+            if warning_count > 0:
                 try:
-                    pending_count = t_db_ticket.query(TiketKendala).filter(
-                        TiketKendala.status == "MENUNGGU"
-                    ).count()
-                    if pending_count > 0:
-                        from app.core.database import SessionLocal as MasterSessionLocal
-                        from app.db.models import User as MasterUser
-                        m_db_tkt = MasterSessionLocal()
-                        try:
-                            users_to_alert = m_db_tkt.query(MasterUser).filter(
-                                MasterUser.is_active == True,
-                                MasterUser.fcm_token != None,
-                                MasterUser.fcm_token != ""
-                            ).all()
-                            tkt_tokens = []
-                            for u in users_to_alert:
-                                if u.role == "super admin":
-                                    tkt_tokens.append(u.fcm_token)
-                                elif k_code.lower() in [k.lower() for k in u.allowed_kantor_list]:
-                                    tkt_tokens.append(u.fcm_token)
-                            tkt_tokens = list(set(tkt_tokens))
-                            if tkt_tokens:
-                                send_push_notification(
-                                    tokens=tkt_tokens,
-                                    title=f"[TIKET] Kantor: {k_code.upper()}",
-                                    body=f"{pending_count} tiket MENUNGGU belum diproses.",
-                                    data={
-                                        "target_tab": "tiket",
-                                        "target_kantor": k_code,
-                                        "target_status": "MENUNGGU",
-                                        "level": "warning",
-                                        "type": "ticket_pending_reminder",
-                                        "vibration": audio_settings["vibration"]
-                                    },
-                                    channel_id=audio_settings["channel_id"],
-                                    sound=audio_settings["sound"]
-                                )
-                        finally:
-                            m_db_tkt.close()
-                finally:
-                    t_db_ticket.close()
-            except Exception as ticket_err:
-                logger.warning(f"[FCM_TICKET_REMINDER] Gagal cek tiket menunggu: {ticket_err}")
+                    from app.core.database import SessionLocal as MasterSessionLocal
+                    from app.db.models import User as MasterUser
+                    m_db_warn = MasterSessionLocal()
+                    try:
+                        users_to_alert = m_db_warn.query(MasterUser).filter(
+                            MasterUser.is_active == True,
+                            MasterUser.fcm_token != None,
+                            MasterUser.fcm_token != ""
+                        ).all()
+                        warn_tokens = []
+                        for u in users_to_alert:
+                            if u.role == "super admin":
+                                warn_tokens.append(u.fcm_token)
+                            elif k_code.lower() in [k.lower() for k in u.allowed_kantor_list]:
+                                warn_tokens.append(u.fcm_token)
+                        warn_tokens = list(set(warn_tokens))
+                        if warn_tokens:
+                            title = f"[PERINGATAN REDAMAN] Kantor: {k_code.upper()}"
+                            body = f"{warning_count} modem berstatus WARNING (mendekati batas). Mohon dijadwalkan inspeksi."
+                            send_push_notification(
+                                tokens=warn_tokens,
+                                title=title,
+                                body=body,
+                                data={
+                                    "target_tab": "pelanggan",
+                                    "target_kantor": k_code,
+                                    "target_status": "WARNING",
+                                    "level": "warning",
+                                    "type": "monitoring_warning",
+                                    "vibration": audio_settings["vibration"]
+                                },
+                                channel_id=audio_settings["channel_id"],
+                                sound=audio_settings["sound"]
+                            )
+                    finally:
+                        m_db_warn.close()
+                except Exception as fcm_err:
+                    logger.warning(f"[FCM_ALERT_WARN] Gagal mengirim push notifikasi Warning: {fcm_err}")
+
+            # 4. Trigger Push Notifikasi FCM Khusus Kredensial INVALID (Hanya 1 Kali Setelah Selesai Scan)
+            invalid_count = stats.get("failed", 0)
+            if invalid_count > 0:
+                try:
+                    from app.core.database import SessionLocal as MasterSessionLocal
+                    from app.db.models import User as MasterUser
+                    m_db_inv = MasterSessionLocal()
+                    try:
+                        users_to_alert = m_db_inv.query(MasterUser).filter(
+                            MasterUser.is_active == True,
+                            MasterUser.fcm_token != None,
+                            MasterUser.fcm_token != ""
+                        ).all()
+                        inv_tokens = []
+                        for u in users_to_alert:
+                            if u.role == "super admin":
+                                inv_tokens.append(u.fcm_token)
+                            elif k_code.lower() in [k.lower() for k in u.allowed_kantor_list]:
+                                inv_tokens.append(u.fcm_token)
+                        inv_tokens = list(set(inv_tokens))
+                        if inv_tokens:
+                            title = f"[KREDENSIAL INVALID] Kantor: {k_code.upper()}"
+                            body = f"{invalid_count} modem gagal login (kredensial INVALID). Mohon perbarui kredensial ONT."
+                            send_push_notification(
+                                tokens=inv_tokens,
+                                title=title,
+                                body=body,
+                                data={
+                                    "target_tab": "pelanggan",
+                                    "target_kantor": k_code,
+                                    "target_status": "INVALID",
+                                    "level": "warning",
+                                    "type": "monitoring_invalid",
+                                    "vibration": audio_settings["vibration"]
+                                },
+                                channel_id=audio_settings["channel_id"],
+                                sound=audio_settings["sound"]
+                            )
+                    finally:
+                        m_db_inv.close()
+                except Exception as fcm_err:
+                    logger.warning(f"[FCM_ALERT_INV] Gagal mengirim push notifikasi Invalid: {fcm_err}")
 
             return {
                 "success": True,

@@ -297,7 +297,7 @@ class ONTSchedulerService:
                         # Tidak ada kendala darurat aktif
                         continue
 
-                    # 4. Kirim Push Notification Pengingat Berulang ke Tim Teknisi & Admin
+                    # 4. Kirim Push Notification Pengingat Berulang ke Tim Teknisi & Admin (LOS dan KRITIS Keduanya Wajib Dikirim jika Ada)
                     from app.services.fcm_service import resolve_notification_audio_settings, send_push_notification
                     from app.core.database import SessionLocal as MasterSessionLocal
                     from app.db.models import User as MasterUser
@@ -337,7 +337,8 @@ class ONTSchedulerService:
                                     channel_id=audio_settings["channel_id"],
                                     sound=audio_settings["sound"]
                                 )
-                            elif crit_count > 0:
+
+                            if crit_count > 0:
                                 title = f"[PENGINGAT KRITIS] Kantor: {k.upper()}"
                                 body = f"Perhatian: {crit_count} modem masih berstatus Kritis (<= -27.0 dBm). Segera cek redaman."
                                 send_push_notification(
@@ -361,6 +362,78 @@ class ONTSchedulerService:
                             logger.info(f"[EMERGENCY_REMINDER] Berhasil mengirimkan pengulangan notifikasi darurat kantor {k} (LOS: {los_count}, Kritis: {crit_count}).")
                     finally:
                         m_db_user.close()
+
+                    # 6. Pengingat Berkala Tiket Kendala + Permintaan Reset / Lupa Password (Wajib Dikirim Setiap 1 Jam jika masih MENUNGGU)
+                    try:
+                        from app.db.models import TiketKendala
+                        pending_tickets = t_db.query(TiketKendala).filter(
+                            TiketKendala.status == "MENUNGGU"
+                        ).all()
+                        pending_count = len(pending_tickets)
+
+                        if pending_count > 0:
+                            last_ticket_alert_str = SchedulerRecoveryManager.get_setting_from_db(t_db, "last_pending_ticket_alert_at", default=None, kantor=k)
+                            should_send_ticket_reminder = True
+                            if last_ticket_alert_str:
+                                try:
+                                    import dateutil.parser
+                                    from app.core.timezone import to_wib
+                                    last_ticket_alert_dt = to_wib(dateutil.parser.parse(last_ticket_alert_str))
+                                    ticket_diff_mins = (now - last_ticket_alert_dt).total_seconds() / 60.0
+                                    if ticket_diff_mins < 60.0:
+                                        should_send_ticket_reminder = False
+                                except Exception:
+                                    should_send_ticket_reminder = True
+
+                            if should_send_ticket_reminder:
+                                reset_pw_count = sum(1 for t in pending_tickets if t.kategori == "RESET_PASSWORD")
+                                normal_issue_count = pending_count - reset_pw_count
+
+                                ticket_body_parts = []
+                                if normal_issue_count > 0:
+                                    ticket_body_parts.append(f"{normal_issue_count} kendala")
+                                if reset_pw_count > 0:
+                                    ticket_body_parts.append(f"{reset_pw_count} reset password")
+
+                                ticket_body_text = f"{pending_count} tiket MENUNGGU ({', '.join(ticket_body_parts)}) belum ada tindakan teknisi."
+
+                                m_db_tkt = MasterSessionLocal()
+                                try:
+                                    tkt_users = m_db_tkt.query(MasterUser).filter(
+                                        MasterUser.is_active == True,
+                                        MasterUser.fcm_token != None,
+                                        MasterUser.fcm_token != ""
+                                    ).all()
+                                    tkt_tokens = []
+                                    for u in tkt_users:
+                                        if u.role == "super admin":
+                                            tkt_tokens.append(u.fcm_token)
+                                        elif k.lower() in [k_item.lower() for k_item in u.allowed_kantor_list]:
+                                            tkt_tokens.append(u.fcm_token)
+                                    tkt_tokens = list(set(tkt_tokens))
+
+                                    if tkt_tokens:
+                                        send_push_notification(
+                                            tokens=tkt_tokens,
+                                            title=f"[PENGINGAT TIKET] Kantor: {k.upper()}",
+                                            body=ticket_body_text,
+                                            data={
+                                                "target_tab": "tiket",
+                                                "target_kantor": k,
+                                                "target_status": "MENUNGGU",
+                                                "level": "warning",
+                                                "type": "ticket_pending_hourly_reminder",
+                                                "vibration": audio_settings["vibration"]
+                                            },
+                                            channel_id=audio_settings["channel_id"],
+                                            sound=audio_settings["sound"]
+                                        )
+                                        SchedulerRecoveryManager.set_setting_in_db(t_db, "last_pending_ticket_alert_at", now.isoformat(), kantor=k)
+                                        logger.info(f"[TICKET_REMINDER] Berhasil mengirimkan pengingat 1 jam tiket kendala kantor {k} ({pending_count} tiket).")
+                                finally:
+                                    m_db_tkt.close()
+                    except Exception as ticket_err:
+                        logger.warning(f"[TICKET_REMINDER] Gagal memproses pengingat tiket kantor {k}: {ticket_err}")
                 finally:
                     t_db.close()
             except Exception as e:
