@@ -40782,14 +40782,50 @@ function SpeedTestModal({ isOpen, onClose, targetSpeed = 10, latencyValue = null
 		if (finalUploadMbps <= .1 && latestReportedSpeed > 0) finalUploadMbps = latestReportedSpeed;
 		return Math.max(.1, Number(finalUploadMbps.toFixed(2)));
 	};
+	const probeLocalModem = () => {
+		return new Promise((resolve) => {
+			let resolved = false;
+			const done = (isSuccess) => {
+				if (!resolved) {
+					resolved = true;
+					resolve(isSuccess);
+				}
+			};
+			const timer = setTimeout(() => {
+				done(false);
+			}, 1800);
+			try {
+				const img = new Image();
+				img.onload = () => {
+					clearTimeout(timer);
+					done(true);
+				};
+				img.src = `http://192.168.1.1/image/logo.gif?t=${Date.now()}`;
+			} catch (e) {}
+			try {
+				fetch(`http://192.168.1.1/css/stylech.css?t=${Date.now()}`, {
+					mode: "no-cors",
+					cache: "no-store"
+				}).then(() => {
+					clearTimeout(timer);
+					done(true);
+				}).catch(() => {});
+			} catch (e) {}
+		});
+	};
 	const handleRecheckConnection = async () => {
 		setCheckingWifi(true);
 		try {
+			let isConnected = false;
 			const res = await fetch("/portal/api/wifi");
 			if (res.ok) {
 				const json = await res.json();
-				if (json.ok && json.is_connected_to_home_wifi !== void 0) setLocalWifiConnected(json.is_connected_to_home_wifi === true);
+				if (json.ok && json.is_connected_to_home_wifi !== void 0) isConnected = json.is_connected_to_home_wifi === true;
 			}
+			if (!isConnected) {
+				if (await probeLocalModem()) isConnected = true;
+			}
+			setLocalWifiConnected(isConnected);
 			if (onProbeSignal) await onProbeSignal();
 		} catch (_) {} finally {
 			setCheckingWifi(false);

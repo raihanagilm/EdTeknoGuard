@@ -378,20 +378,73 @@ export function SpeedTestModal({
     return Math.max(0.1, Number(finalUploadMbps.toFixed(2)));
   };
 
+  const probeLocalModem = () => {
+    return new Promise((resolve) => {
+      let resolved = false;
+      const done = (isSuccess) => {
+        if (!resolved) {
+          resolved = true;
+          resolve(isSuccess);
+        }
+      };
+
+      const timer = setTimeout(() => {
+        done(false);
+      }, 1800);
+
+      try {
+        const img = new Image();
+        img.onload = () => {
+          clearTimeout(timer);
+          done(true);
+        };
+        img.src = `http://192.168.1.1/image/logo.gif?t=${Date.now()}`;
+      } catch (e) {
+        // Abaikan
+      }
+
+      try {
+        fetch(`http://192.168.1.1/css/stylech.css?t=${Date.now()}`, {
+          mode: 'no-cors',
+          cache: 'no-store'
+        })
+          .then(() => {
+            clearTimeout(timer);
+            done(true);
+          })
+          .catch(() => {});
+      } catch (e) {
+        // Abaikan
+      }
+    });
+  };
+
   // ════════════════════════════════════════════════════════════════════════
   // 4. MAIN ORCHESTRATOR
   // ════════════════════════════════════════════════════════════════════════
   const handleRecheckConnection = async () => {
     setCheckingWifi(true);
     try {
+      let isConnected = false;
       // 1. Panggil API wifi portal untuk deteksi status sambungan riil
       const res = await fetch('/portal/api/wifi');
       if (res.ok) {
         const json = await res.json();
         if (json.ok && json.is_connected_to_home_wifi !== undefined) {
-          setLocalWifiConnected(json.is_connected_to_home_wifi === true);
+          isConnected = json.is_connected_to_home_wifi === true;
         }
       }
+
+      // 2. Jika server mengembalikan false (misal karena NAT), jalankan probe lokal gateway modem
+      if (!isConnected) {
+        const localOk = await probeLocalModem();
+        if (localOk) {
+          isConnected = true;
+        }
+      }
+
+      setLocalWifiConnected(isConnected);
+
       if (onProbeSignal) {
         await onProbeSignal();
       }
