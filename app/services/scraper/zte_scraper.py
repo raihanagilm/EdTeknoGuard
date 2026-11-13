@@ -260,20 +260,35 @@ class ZTEScraper:
         if not res["mac_address"]:
             res["mac_address"] = cls.get_mac_from_arp(host)
 
-        # 2. SSID dari WLAN_ESSID_PATH
+        # 2. SSID dari WLAN_ESSID_PATH & e8_status_wlan_info_t.gch
         if not res["nama_wifi"]:
             try:
-                r_essid = session.get(f"{base_url}{WLAN_ESSID_PATH}", headers=headers, timeout=8)
-                if r_essid.status_code == 200 and "logout_from" not in r_essid.text:
-                    txt_essid = html.unescape(r_essid.text)
-                    m_tm_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]*)['\"]\s*\)", txt_essid)
-                    non_empty_essid = [x.strip() for x in m_tm_essid if x.strip()]
-                    if non_empty_essid:
-                        res["nama_wifi"] = non_empty_essid[-1]
-                    if not res["nama_wifi"]:
-                        m_var = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_essid, re.I)
-                        if m_var and m_var.group(1).strip():
-                            res["nama_wifi"] = m_var.group(1).strip()
+                # Coba halaman status info WLAN (e8_status_wlan_info_t.gch) yang umum di F663/F670/GM220-S
+                r_wlan_info = session.get(f"{base_url}/getpage.gch?pid=1002&nextpage=e8_status_wlan_info_t.gch", headers=headers, timeout=8)
+                if r_wlan_info.status_code == 200 and "logout_from" not in r_wlan_info.text:
+                    txt_wlan_info = r_wlan_info.text
+                    m_essid0 = re.search(r"Transfer_meaning\s*\(\s*['\"]ESSID0['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)", txt_wlan_info)
+                    if m_essid0:
+                        raw_essid = m_essid0.group(1)
+                        decoded_val = cls.decode_hex_string(raw_essid)
+                        if decoded_val:
+                            # Jika berupa html entities &#84;&#69;...
+                            decoded_val = html.unescape(decoded_val)
+                            if decoded_val.strip():
+                                res["nama_wifi"] = decoded_val.strip()
+
+                if not res["nama_wifi"]:
+                    r_essid = session.get(f"{base_url}{WLAN_ESSID_PATH}", headers=headers, timeout=8)
+                    if r_essid.status_code == 200 and "logout_from" not in r_essid.text:
+                        txt_essid = html.unescape(r_essid.text)
+                        m_tm_essid = re.findall(r"Transfer_meaning\s*\(\s*['\"]ESSID['\"]\s*,\s*['\"]([^'\"]*)['\"]\s*\)", txt_essid)
+                        non_empty_essid = [x.strip() for x in m_tm_essid if x.strip()]
+                        if non_empty_essid:
+                            res["nama_wifi"] = non_empty_essid[-1]
+                        if not res["nama_wifi"]:
+                            m_var = re.search(r'var\s+ESSID\s*=\s*["\']([^"\']+)["\']', txt_essid, re.I)
+                            if m_var and m_var.group(1).strip():
+                                res["nama_wifi"] = m_var.group(1).strip()
             except Exception as e:
                 logger.debug(f"Gagal membaca WLAN ESSID dari {host}: {e}")
 

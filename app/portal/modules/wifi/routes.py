@@ -30,6 +30,22 @@ def portal_wifi_get(request: Request, db: Session = Depends(get_portal_db)):
     
     is_home_wifi = check_is_home_wifi(request, pelanggan)
 
+    # Sinkronisasi on-demand SSID dari modem jika di DB masih kosong / default
+    if not pelanggan.nama_wifi and ip_target:
+        try:
+            from app.services.ont_scraper_service import ONTScraperService
+            u_ont = pelanggan.user_admin or "admin"
+            p_ont = pelanggan.pass_admin or "admin"
+            dev_data = ONTScraperService.extract_device_and_wifi_data(None, f"http://{ip_target}", ip_target)
+            if dev_data.get("nama_wifi"):
+                pelanggan.nama_wifi = dev_data["nama_wifi"]
+                if hasattr(pelanggan, "perangkat") and pelanggan.perangkat:
+                    pelanggan.perangkat.nama_wifi = dev_data["nama_wifi"]
+                db.commit()
+                db.refresh(pelanggan)
+        except Exception:
+            pass
+
     default_ssid = f"WiFi-{pelanggan.nama.replace(' ', '')}" if pelanggan.nama else "WiFi-Rumah"
     current_ssid = pelanggan.nama_wifi or default_ssid
     current_password = pelanggan.password_wifi or "Belum Disetel"
