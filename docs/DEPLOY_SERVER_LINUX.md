@@ -714,16 +714,26 @@ PersistentKeepalive = 25
    sudo systemctl start wg-quick@wg0
    ```
 
-6. **Perintah Cepat Kelola WireGuard:**
+6. **Perintah Cepat Kelola & Mematikan WireGuard:**
    ```bash
-   # Status service
-   sudo systemctl status wg-quick@wg0
+   # Melihat status interface & handshake aktif
+   sudo wg show
 
-   # Restart interface WireGuard
-   sudo systemctl restart wg-quick@wg0
-
-   # Mematikan koneksi WireGuard
+   # Mematikan sementara koneksi VPN WireGuard:
    sudo systemctl stop wg-quick@wg0
+   # atau menggunakan wg-quick langsung:
+   sudo wg-quick down wg0
+
+   # Menghidupkan kembali koneksi VPN WireGuard:
+   sudo systemctl start wg-quick@wg0
+   # atau:
+   sudo wg-quick up wg0
+
+   # Mematikan autostart agar TIDAK otomatis hidup saat server reboot:
+   sudo systemctl disable wg-quick@wg0
+
+   # Mengaktifkan kembali autostart saat server booting:
+   sudo systemctl enable wg-quick@wg0
    ```
 
 ---
