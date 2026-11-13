@@ -119,6 +119,26 @@ def check_is_home_wifi(request: Request, pelanggan) -> bool:
     if ip_target and client_ip and client_ip == ip_target:
         return True
 
+    # 1.b Kecocokan subnet ISP PT Tekno Indo Jaya (AS153729) & IP NAT ISP
+    # Prefix resmi PT Tekno Indo Jaya: 38.253.120.0/24, 38.253.121.0/24, 163.223.112.0/24
+    if client_ip:
+        import ipaddress
+        isp_subnets = [
+            ipaddress.ip_network("38.253.120.0/24"),
+            ipaddress.ip_network("38.253.121.0/24"),
+            ipaddress.ip_network("163.223.112.0/24"),
+            ipaddress.ip_network("10.0.0.0/8"),
+            ipaddress.ip_network("172.21.0.0/16"),
+            ipaddress.ip_network("192.168.0.0/16")
+        ]
+        try:
+            c_addr = ipaddress.ip_address(client_ip)
+            for net in isp_subnets:
+                if c_addr in net:
+                    return True
+        except Exception:
+            pass
+
     # 2. Pengecekan perangkat lokal (Localhost / Development)
     if client_ip in ["127.0.0.1", "::1", "localhost"]:
         import subprocess, re
