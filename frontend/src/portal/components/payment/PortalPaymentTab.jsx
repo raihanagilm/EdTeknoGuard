@@ -337,7 +337,7 @@ export function PortalPaymentTab({
                 <div className="px-4 py-3 border-t border-gray-100 flex items-start gap-2.5 bg-blue-50/60">
                   <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0 text-blue-700" />
                   <p className="text-xs text-gray-700 leading-relaxed font-normal">
-                    Transfer via menu <strong className="text-gray-900 font-semibold">Virtual Account</strong> bank pilihan Anda. Pembayaran diverifikasi <strong className="text-gray-900 font-semibold">otomatis</strong> dalam 1–5 menit tanpa perlu kirim konfirmasi manual.
+                    Bayar via menu <strong className="text-gray-900 font-semibold">Virtual Account atau Bayar</strong> (bukan menu Transfer / BI-FAST) di aplikasi bank pilihan Anda. Pembayaran diverifikasi <strong className="text-gray-900 font-semibold">otomatis</strong> dalam 1–5 menit tanpa perlu kirim konfirmasi manual.
                   </p>
                 </div>
               )}

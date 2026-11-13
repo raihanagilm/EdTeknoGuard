@@ -105,6 +105,11 @@ class PaymentService:
         return _cached(key, lambda: NetworkBillService.fetch_invoices(pop, cid, status=status, limit=limit))
 
     @classmethod
+    def read_payments(cls, pop: str, cid: str, limit: int = 24) -> Dict[str, Any]:
+        key = f"pay:{pop}:{cid}:{limit}"
+        return _cached(key, lambda: NetworkBillService.fetch_payments(pop, cid, limit=limit))
+
+    @classmethod
     def read_virtual_account(cls, pop: str, cid: str) -> Dict[str, Any]:
         key = f"va:{pop}:{cid}"
         return _cached(key, lambda: NetworkBillService.fetch_virtual_account(pop, cid))
@@ -316,6 +321,51 @@ class PaymentService:
             "other_unpaid": other_unpaid,
         }
 
+    @staticmethod
+    def shape_payment(raw: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Merapikan satu baris riwayat pembayaran dari GET /customers/{id}/payments.
+        Data diurutkan berdasarkan tanggal uang diterima (date) terbaru.
+        """
+        method = (raw.get("method") or "").lower()
+        method_label = raw.get("method_label") or {
+            "tunai": "Tunai",
+            "transfer": "Transfer Bank",
+            "gateway": "Virtual Account",
+        }.get(method, method.title() or "-")
+
+        inv_raw = raw.get("invoice") or {}
+        invoice = {
+            "id": inv_raw.get("id"),
+            "number": inv_raw.get("number") or "",
+            "type": inv_raw.get("type") or "langganan",
+            "billing_period": inv_raw.get("billing_period") or "",
+            "total": inv_raw.get("total"),
+        }
+
+        return {
+            "id": raw.get("id"),
+            "date": raw.get("date"),
+            "amount": raw.get("amount"),
+            "method": method,
+            "method_label": method_label,
+            "bank_account": raw.get("bank_account"),
+            "credit_used": raw.get("credit_used") or 0,
+            "credit_added": raw.get("credit_added") or 0,
+            "invoice": invoice,
+            # Backward-compatibility shortcuts untuk tampilan list
+            "number": invoice["number"],
+            "billing_period": invoice["billing_period"],
+            "type": invoice["type"],
+            "total": invoice["total"] if invoice["total"] is not None else raw.get("amount"),
+            "payment": {
+                "date": raw.get("date"),
+                "amount": raw.get("amount"),
+                "method": method,
+                "method_label": method_label,
+            }
+        }
+
     @classmethod
     def build_history(cls, pelanggan, limit: int = 24) -> Dict[str, Any]:
         ident = cls.resolve_identity(pelanggan)
@@ -323,6 +373,17 @@ class PaymentService:
             return {"ok": True, "linked": False, "invoices": []}
 
         pop, cid = ident
+        # 1. Coba baca dari endpoint payments terbaru (urut tanggal bayar)
+        pay_res = cls.read_payments(pop, cid, limit=limit)
+        if pay_res.get("ok"):
+            raw_payments = pay_res.get("data") or []
+            return {
+                "ok": True,
+                "linked": True,
+                "invoices": [cls.shape_payment(p) for p in raw_payments],
+            }
+
+        # 2. Fallback mulus ke /invoices?status=paid jika endpoint /payments belum aktif di PoP / versi lama
         res = cls.read_invoices(pop, cid, status="paid", limit=limit)
         if not res.get("ok"):
             return {

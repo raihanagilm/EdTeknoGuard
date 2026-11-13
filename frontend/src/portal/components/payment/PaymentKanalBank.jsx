@@ -100,10 +100,16 @@ export function PaymentKanalBank({ kanal, tagihanTotal, terbuka, onToggle }) {
             </div>
           </div>
 
-          <p className="text-[11px] text-gray-500 flex items-center gap-1.5 font-medium pt-1">
-            <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span>Bayar persis <strong>{rupiah(kanal.amount_to_pay)}</strong> agar transaksi diverifikasi otomatis.</span>
-          </p>
+          <div className="space-y-1.5 pt-1 text-[11px] text-gray-500 font-medium leading-relaxed">
+            <p className="flex items-start gap-1.5">
+              <Info className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+              <span>Gunakan menu <strong>Virtual Account atau Bayar</strong> (bukan Transfer/BI-FAST) pada m-Banking/ATM bank pilihan Anda.</span>
+            </p>
+            <p className="flex items-start gap-1.5">
+              <Info className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <span>Bayar persis <strong>{rupiah(kanal.amount_to_pay)}</strong> (nominal tertutup) agar transaksi diverifikasi otomatis.</span>
+            </p>
+          </div>
         </div>
       )}
     </div>

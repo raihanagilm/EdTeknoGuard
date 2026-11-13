@@ -43532,13 +43532,23 @@ function PaymentKanalBank({ kanal, tagihanTotal, terbuka, onToggle }) {
 						})
 					]
 				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-					className: "text-[11px] text-gray-500 flex items-center gap-1.5 font-medium pt-1",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-						"Bayar persis ",
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: rupiah(kanal.amount_to_pay) }),
-						" agar transaksi diverifikasi otomatis."
-					] })]
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "space-y-1.5 pt-1 text-[11px] text-gray-500 font-medium leading-relaxed",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+						className: "flex items-start gap-1.5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+							"Gunakan menu ",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Virtual Account atau Bayar" }),
+							" (bukan Transfer/BI-FAST) pada m-Banking/ATM bank pilihan Anda."
+						] })]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+						className: "flex items-start gap-1.5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+							"Bayar persis ",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: rupiah(kanal.amount_to_pay) }),
+							" (nominal tertutup) agar transaksi diverifikasi otomatis."
+						] })]
+					})]
 				})
 			]
 		})]
@@ -43980,12 +43990,12 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-4 h-4 mt-0.5 shrink-0 text-blue-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 									className: "text-xs text-gray-700 leading-relaxed font-normal",
 									children: [
-										"Transfer via menu ",
+										"Bayar via menu ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
 											className: "text-gray-900 font-semibold",
-											children: "Virtual Account"
+											children: "Virtual Account atau Bayar"
 										}),
-										" bank pilihan Anda. Pembayaran diverifikasi ",
+										" (bukan menu Transfer / BI-FAST) di aplikasi bank pilihan Anda. Pembayaran diverifikasi ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
 											className: "text-gray-900 font-semibold",
 											children: "otomatis"

@@ -27,6 +27,12 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Pembaruan Integrasi Network Bill API v1 — Riwayat Pembayaran & Panduan VA ([network_bill_service.py](app/services/network_bill_service.py), [service.py](app/portal/modules/payment/service.py), [PaymentKanalBank.jsx](frontend/src/portal/components/payment/PaymentKanalBank.jsx), [PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
+  - Mengimplementasikan pemanggilan endpoint baru `GET /pops/{pop}/customers/{id}/payments` yang mengurutkan riwayat berdasarkan tanggal uang masuk (`date`) terbaru, dengan fallback mulus ke `/invoices?status=paid`.
+  - Merapikan struktur data pembayaran (`shape_payment`) lengkap dengan rincian invoice, metode pembayaran, bank account, serta saldo titipan (`credit_used` dan `credit_added`).
+  - Memperbarui panduan kanal bank VA di portal pelanggan TeknoCust agar secara tegas menginstruksikan pembayaran melalui menu **Virtual Account atau Bayar** (bukan menu Transfer / BI-FAST) dengan nominal tertutup persis sebesar `amount_to_pay`.
+
+### Added
 - **Arsitektur Pengulangan Notifikasi Darurat Mandiri & Pemisahan Siklus Pengingat ([scheduler_service.py](app/services/scheduler_service.py), [scan_runner.py](app/services/scheduler/scan_runner.py))**:
   - **Pemisahan Scan vs Reminder**: Siklus pemantauan fisik ONT tetap berjalan sesuai intervalnya (misal: 60 menit), sementara pengulangan push notifikasi darurat berjalan via background job independen `emergency_alert_reminder_job_wrapper` tiap menit tanpa memicu scan ulang modem.
   - **Pengulangan Notifikasi Darurat LOS & KRITIS**: Membaca konfigurasi `alert_waiting_interval_minutes` (default 10 menit) dari database `system_settings`. Kedua alert (LOS dan Kritis) wajib dikirimkan secara independen (tidak saling meniadakan) berulang kali setiap interval tersebut selama status modem belum kembali normal.

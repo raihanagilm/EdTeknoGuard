@@ -114,6 +114,21 @@ class NetworkBillService:
         return cls._billing_get(f"/pops/{pop_slug}/customers/{customer_id}/invoices", params)
 
     @classmethod
+    def fetch_payments(
+        cls,
+        pop_slug: str,
+        customer_id: Any,
+        limit: int = 24,
+    ) -> Dict[str, Any]:
+        """
+        GET /pops/{pop}/customers/{id}/payments
+        Riwayat pembayaran pelanggan diurutkan berdasarkan tanggal uang masuk (date) terbaru dulu.
+        `limit` dibatasi API pada 1-120 (default 24).
+        """
+        params: Dict[str, Any] = {"limit": max(1, min(int(limit or 24), 120))}
+        return cls._billing_get(f"/pops/{pop_slug}/customers/{customer_id}/payments", params)
+
+    @classmethod
     def fetch_virtual_account(cls, pop_slug: str, customer_id: Any) -> Dict[str, Any]:
         """
         GET /pops/{pop}/customers/{id}/virtual-account

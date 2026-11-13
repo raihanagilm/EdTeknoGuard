@@ -211,8 +211,24 @@ Urut periode terbaru dulu.
 }]}
 ```
 
-`overdue` = belum bayar dan jatuh tempo sudah lewat. Definisi ini yang dipakai
-Network Bill untuk isolir.
+| Field | Isinya |
+|---|---|
+| `id` | Id tagihan di PoP ini. Tidak unik lintas PoP -- pasangkan dengan slug PoP |
+| `number` | Nomor tagihan yang tercetak di kwitansi dan dipakai petugas saat ditanya pelanggan. Bulannya ikut periode tagihan, bukan tanggal input |
+| `type` | `langganan` (tagihan bulanan) atau `pemasangan` (biaya pasang, sekali bayar) |
+| `billing_period` | Bulan layanan yang ditagih, `YYYY-MM`. **Bukan** bulan jatuh temponya |
+| `issue_date` | Tanggal tagihan diterbitkan. Untuk data lampau yang baru diinput, ini tanggal inputnya |
+| `due_date` | Batas bayar. Pascabayar jatuh di bulan sesudah periode, prabayar di bulan periodenya |
+| `subtotal` | Jumlah harga paket sebelum diskon |
+| `discount` | Potongan atas tagihan ini. Boleh sebesar `subtotal` (kompensasi penuh) |
+| `total` | `subtotal - discount`. Ini yang harus dibayar |
+| `status` | `unpaid`, `paid`, atau `cancelled`. Tidak ada status "sebagian" |
+| `overdue` | Belum bayar dan `due_date` sudah lewat. Definisi yang sama dipakai Network Bill untuk mengisolir koneksi |
+| `items[]` | Rincian paket yang ditagih. Harga di-snapshot saat tagihan terbit, jadi tagihan lampau tidak berubah ketika harga paket dinaikkan |
+| `payment` | `null` selama belum lunas; lihat di bawah |
+
+Satu tagihan bisa punya lebih dari satu `item`: pelanggan multi-titik ditagih
+semua langganannya dalam satu tagihan.
 
 `payment` terisi bila tagihan sudah lunas:
 
@@ -226,7 +242,49 @@ Network Bill untuk isolir.
 | `transfer` | Transfer ke rekening perusahaan, dicatat petugas |
 | `gateway` | Dibayar lewat Virtual Account, dicatat otomatis |
 
-`amount` adalah total tagihan, **tanpa** biaya admin VA.
+`date` tanggal uang diterima -- untuk data lampau bisa jauh sebelum
+`issue_date`. `amount` uang yang benar-benar masuk, **tanpa** biaya admin VA.
+
+### `GET /pops/{pop}/customers/{id}/payments`
+
+Riwayat pembayaran, urut **tanggal bayar** terbaru dulu. Parameter `limit`
+(1-120, default 24).
+
+Datanya baris yang sama dengan `payment` di `/invoices`, tapi sumbunya
+berbeda: di sana urutannya periode tagihan, jadi pelunasan data lampau yang
+baru diinput mendarat di tengah daftar. Untuk halaman "Riwayat Pembayaran",
+pakai endpoint ini.
+
+```json
+{"data": [{
+  "id": 88, "date": "2026-10-02",
+  "amount": 100000, "method": "tunai", "method_label": "Tunai",
+  "bank_account": null,
+  "credit_used": 50000, "credit_added": 0,
+  "invoice": {"id": 501, "number": "INV-2026-09-0012", "type": "langganan",
+              "billing_period": "2026-09", "total": 150000}
+}]}
+```
+
+| Field | Isinya |
+|---|---|
+| `id` | Id pembayaran. Berguna sebagai kunci baris di portal |
+| `date` | Tanggal uang diterima perusahaan |
+| `amount` | Uang yang benar-benar masuk pada pembayaran ini, tanpa biaya admin VA |
+| `method` | `tunai`, `transfer`, atau `gateway`; arti ketiganya di tabel atas |
+| `method_label` | Label siap tampil (`Tunai`, `Transfer Bank`, `Virtual Account`) |
+| `bank_account` | Keterangan bank. Terisi untuk `transfer` (rekening perusahaan) dan `gateway` (bank VA yang dipakai), `null` untuk `tunai` |
+| `credit_used` | Saldo titipan yang dipotongkan ke tagihan ini. Dikirim positif |
+| `credit_added` | Kelebihan bayar yang disimpan jadi saldo titipan |
+| `invoice` | Tagihan yang dilunasi. Selalu tepat satu |
+
+Satu baris = satu tagihan: invoice pelanggan wajib lunas sekali bayar, jadi
+tidak ada pembayaran yang menutup dua tagihan atau menutup separuh tagihan.
+`amount + credit_used` sama dengan `invoice.total` **pada saat dilunasi** --
+lihat peringatan di [Angka](#angka) soal diskon yang turun sesudah itu.
+
+Pembayaran yang dibatalkan petugas tidak muncul di sini: barisnya memang
+dihapus, bukan ditandai. Tagihannya kembali `unpaid` di `/invoices`.
 
 ### `GET /pops/{pop}/customers/{id}/virtual-account`
 
@@ -280,7 +338,7 @@ tampilkan dengan label `bank`.
 - **Satu baris per bank yang dibuka PoP**, sesuai urutan daftar. PoP bisa
   membuka banyak bank (Mandiri, BRI, BCA, BSI, dan seterusnya); tiap
   pelanggan memegang satu nomor per bank dengan akhiran yang sama. Pelanggan
-  cukup membayar ke salah satunya, sebaiknya bank tempat rekeningnya. Portal
+  cukup membayar ke salah satunya, dari aplikasi bank yang sama. Portal
   wajib merender kanal berapa pun. Kode kanal yang belum dikenal portal tetap
   ditampilkan dengan label `bank`.
 - PDF tagihan dan pesan WA dari Network Bill hanya mencetak sebagian bank.
@@ -321,10 +379,14 @@ memanggil Faspay sama sekali.
 
 **Cara bayar.** Satu panduan per kanal, dipilih lewat `channel`. Langkahnya
 diambil dari panduan resmi Faspay atau bank; dokumen ini sengaja tidak
-menuliskannya. Dua hal wajib disebut:
+menuliskannya. Tiga hal wajib disebut:
 
-- Bayar persis sebesar `amount_to_pay`. Nominalnya tertutup: bank menolak
-  nominal lain.
+- Bayar lewat menu Virtual Account atau Bayar di aplikasi bank yang sama
+  dengan bank VA-nya, **bukan menu Transfer atau BI-FAST**. Sebagian aplikasi bank tetap mengenali nomor VA di
+  menu transfer dan menampilkan nama pelanggan, lalu membiarkan pelanggan
+  mengetik nominal sendiri. Pelunasan lewat jalur itu belum teruji.
+- Bayar persis sebesar `amount_to_pay`. Nominalnya tertutup: Network Bill
+  menolak nominal lain.
 - Nama di layar bank adalah nama pelanggan. Kalau namanya bukan dia, jangan
   diteruskan. Bank hanya menerima huruf dan spasi, jadi angka dan tanda baca
   dibuang: "Toko Jaya, RT 03" tampil sebagai "Toko Jaya RT". Kalau portal
@@ -351,8 +413,9 @@ selalu mengirim notifikasi; untuk kanal itu Network Bill menanyakan statusnya
 sendiri ke Faspay tiap 10 menit, jadi pelunasannya bisa tertunda sampai
 sekitar 15 menit.
 
-**Riwayat bayar.** Dari `GET /invoices?status=paid`: `payment.date`,
-`payment.amount`, dan `payment.method`.
+**Riwayat bayar.** Dari `GET /payments`, bukan dari `/invoices?status=paid`:
+urutannya tanggal uang masuk, jadi pelunasan tunggakan lama tidak terselip di
+tengah daftar.
 
 ### Keadaan dan tampilannya
 
@@ -404,6 +467,17 @@ koneksi sedang menunggu dibuka. Jangan menjanjikan internet langsung menyala.
 - Tampilkan `amount_to_pay` apa adanya, jangan dihitung ulang di portal.
 - `payment.amount` adalah total tagihan, **tanpa** biaya admin VA.
 - Biaya admin bisa berbeda per kanal, dan boleh 0.
+- **Pembayaran VA selalu melunasi persis sebesar tagihan.** Nominalnya tertutup
+  dan nominal yang berbeda ditahan untuk diperiksa petugas, bukan dilunasi
+  sebagian atau disimpan jadi saldo. Jadi untuk `method: gateway`,
+  `credit_used` dan `credit_added` selalu 0. Saldo titipan hanya lahir dari
+  pembayaran yang dicatat petugas, dan dari diskon kompensasi.
+- **Jangan hitung `total - amount` sebagai sisa yang belum dibayar.** Keduanya
+  memang sama saat tagihan dilunasi, tapi diskon kompensasi yang turun
+  *sesudah* itu menurunkan `total` tanpa menyentuh `amount` -- selisihnya jadi
+  saldo titipan pelanggan, dan hasil pengurangannya minus. Tagihan belum lunas
+  dikenali dari `status`, bukan dari selisih angka. Berlaku untuk pembayaran VA
+  juga: nominal VA selalu dibayar penuh, jadi yang bergeser adalah `total`-nya.
 
 ### Yang tidak ada di API
 
@@ -413,6 +487,10 @@ koneksi sedang menunggu dibuka. Jangan menjanjikan internet langsung menyala.
 - Webhook ke portal.
 - Menerbitkan nomor VA. Itu dikerjakan admin di Network Bill.
 - Cicilan, dan memilih tagihan yang dibayar.
+- **Sisa** saldo titipan pelanggan. `/payments` menyebut saldo yang dipakai dan
+  yang lahir per pembayaran, tapi tidak ada endpoint yang menjawab "saldo
+  pelanggan ini sekarang berapa". Memotongkan saldo ke tagihan juga kerja
+  petugas di Network Bill; portal melihat hasilnya sebagai tagihan `paid`.
 
 ### Akan datang: QRIS
 
@@ -430,6 +508,8 @@ jangan dibangun dulu.
 - [ ] Nomor VA tersalin sebagai 16 digit tanpa spasi, walau tampilannya
       dikelompokkan.
 - [ ] `amount_to_pay` tampil persis seperti dari API.
+- [ ] Panduan bayar tiap kanal mengarahkan ke menu Virtual Account atau Bayar,
+      bukan menu Transfer.
 - [ ] Pembacaan ulang berhenti sesudah 2 menit dan saat 429.
 - [ ] Belum lunas sesudah 2 menit tampil sebagai "sedang diproses", bukan
       gagal; ajakan menghubungi admin baru muncul sesudah 15 menit.
