@@ -103,12 +103,74 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
     fetchConnectedDevices();
   };
 
+  const probeLocalModem = () => {
+    return new Promise((resolve) => {
+      // 1. Coba Image ping ke aset modem ZTE / XPON
+      let resolved = false;
+      const done = (isSuccess) => {
+        if (!resolved) {
+          resolved = true;
+          resolve(isSuccess);
+        }
+      };
+
+      const timer = setTimeout(() => {
+        done(false);
+      }, 1800);
+
+      try {
+        const img = new Image();
+        img.onload = () => {
+          clearTimeout(timer);
+          done(true);
+        };
+        img.onerror = () => {
+          // Pada browser, status 200/404/error dari host lokal yang hidup tetap mentrigger onload/onerror dengan latensi sangat rendah
+          // Untuk memastikan, kita gunakan fetch mode no-cors
+        };
+        img.src = `http://192.168.1.1/image/logo.gif?t=${Date.now()}`;
+      } catch (e) {
+        // Abaikan
+      }
+
+      // 2. Fetch no-cors paralel ke http://192.168.1.1
+      try {
+        fetch(`http://192.168.1.1/css/stylech.css?t=${Date.now()}`, {
+          mode: 'no-cors',
+          cache: 'no-store'
+        })
+          .then(() => {
+            clearTimeout(timer);
+            done(true);
+          })
+          .catch(() => {
+            // Coba target fallback jika ada
+          });
+      } catch (e) {
+        // Abaikan
+      }
+    });
+  };
+
   const fetchWifiDetails = async () => {
     setFetchingWifi(true);
     try {
       const res = await PortalWifiService.getWifi();
       if (res.ok && res.data) {
-        setCurrentWifi(res.data);
+        let isConnected = Boolean(res.data.is_connected_to_home_wifi);
+        
+        // Jika server belum mendeteksi (misal karena NAT), lakukan uji probe langsung dari browser klien ke modem lokal
+        if (!isConnected) {
+          const localOk = await probeLocalModem();
+          if (localOk) {
+            isConnected = true;
+          }
+        }
+
+        setCurrentWifi({
+          ...res.data,
+          is_connected_to_home_wifi: isConnected
+        });
         setNamaWifi(res.data.nama_wifi || '');
       }
     } catch (e) {
@@ -159,7 +221,8 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
       const payload = {
         nama_wifi: namaWifi,
         password_wifi: passwordWifi,
-        konfirmasi_password: konfirmasiPassword
+        konfirmasi_password: konfirmasiPassword,
+        is_local_client_probe: Boolean(currentWifi.is_connected_to_home_wifi)
       };
 
       const res = await PortalWifiService.changeWifi(payload);

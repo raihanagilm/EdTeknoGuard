@@ -31216,7 +31216,7 @@ function ImportStepMapping({ PRIMARY_FIELDS, ADVANCED_FIELDS, importMapping, set
 }
 //#endregion
 //#region src/components/import_wizard/ImportStepPreview.jsx
-function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilter, setStatusFilter, selectedImportIndices, setSelectedImportIndices, setAllDuplicatesAction, filteredIndices, isAllFilteredSelected, toggleSelectAllFiltered, toggleSelectRow, setImportStep, importLoading, handleExecuteImport, handleCloseModal }) {
+function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilter, setStatusFilter, previewSearchQuery = "", setPreviewSearchQuery = () => {}, selectedImportIndices, setSelectedImportIndices, setAllDuplicatesAction, filteredIndices, isAllFilteredSelected, toggleSelectAllFiltered, toggleSelectRow, setImportStep, importLoading, handleExecuteImport, handleCloseModal }) {
 	const readyToSaveCount = importPreviewData.filter((r) => r._action !== "skip").length;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "space-y-4 font-mono text-xs",
@@ -31383,8 +31383,46 @@ function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilt
 					]
 				})]
 			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-[#F8FAFC] p-2.5 rounded-xl border border-[#CCDDF0]",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "relative flex-1 min-w-0",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "text",
+							value: previewSearchQuery,
+							onChange: (e) => setPreviewSearchQuery(e.target.value),
+							placeholder: "Cari berdasarkan IP, Nama, No. WhatsApp, Alamat, atau WiFi...",
+							className: "w-full pl-9 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-sans text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 transition"
+						}),
+						previewSearchQuery && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: () => setPreviewSearchQuery(""),
+							className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 rounded transition cursor-pointer",
+							title: "Bersihkan pencarian",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+						})
+					]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-[11px] font-mono text-slate-500 text-right shrink-0 px-1",
+					children: [
+						"Menampilkan ",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+							className: "text-slate-800",
+							children: filteredIndices.length
+						}),
+						" dari ",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+							className: "text-slate-800",
+							children: importPreviewData.length
+						}),
+						" baris"
+					]
+				})]
+			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "max-h-[380px] overflow-auto border border-sky-200 rounded-2xl",
+				className: "max-h-[260px] overflow-auto border border-sky-200 rounded-2xl",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
 					className: "w-full text-left border-collapse text-[11px] whitespace-nowrap",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", {
@@ -31725,6 +31763,7 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 	const [importError, setImportError] = (0, import_react.useState)("");
 	const [importSuccess, setImportSuccess] = (0, import_react.useState)("");
 	const [statusFilter, setStatusFilter] = (0, import_react.useState)("ALL");
+	const [previewSearchQuery, setPreviewSearchQuery] = (0, import_react.useState)("");
 	const resolvePopSlugFromOffice = (office, popsList = []) => {
 		const raw = (office || "").toLowerCase().trim();
 		const cleanRaw = raw.replace(/\s+/g, "");
@@ -32079,10 +32118,24 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 		row,
 		idx
 	})).filter(({ row }) => {
-		if (statusFilter === "MATCH") return row._status === "match";
-		if (statusFilter === "CONFLICT") return row._status === "conflict";
-		if (statusFilter === "UNREGISTERED") return row._status === "unregistered";
-		if (statusFilter === "ERROR") return row._status === "error";
+		if (statusFilter === "MATCH" && row._status !== "match") return false;
+		if (statusFilter === "CONFLICT" && row._status !== "conflict") return false;
+		if (statusFilter === "UNREGISTERED" && row._status !== "unregistered") return false;
+		if (statusFilter === "ERROR" && row._status !== "error") return false;
+		if (previewSearchQuery.trim()) {
+			const q = previewSearchQuery.trim().toLowerCase();
+			const ip = (row.data?.ip_router || "").toLowerCase();
+			const idPel = (row.data?.id_pelanggan || row.old_data?.id_pelanggan || "").toLowerCase();
+			const namaBaru = (row.data?.nama || "").toLowerCase();
+			const namaLama = (row.old_data?.nama || "").toLowerCase();
+			const waBaru = (row.data?.no_wa || row.data?.no_hp || "").toLowerCase();
+			const waLama = (row.old_data?.no_wa || "").toLowerCase();
+			const alamatBaru = (row.data?.alamat || "").toLowerCase();
+			const alamatLama = (row.old_data?.alamat || "").toLowerCase();
+			const wifiBaru = (row.data?.wifi_ssid || row.data?.nama_wifi || "").toLowerCase();
+			const wifiLama = (row.old_data?.nama_wifi || "").toLowerCase();
+			if (!(ip.includes(q) || idPel.includes(q) || namaBaru.includes(q) || namaLama.includes(q) || waBaru.includes(q) || waLama.includes(q) || alamatBaru.includes(q) || alamatLama.includes(q) || wifiBaru.includes(q) || wifiLama.includes(q))) return false;
+		}
 		return true;
 	}).map(({ idx }) => idx);
 	const toggleSelectAllImport = () => {
@@ -32284,6 +32337,8 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 					setImportPreviewData,
 					statusFilter,
 					setStatusFilter,
+					previewSearchQuery,
+					setPreviewSearchQuery,
 					selectedImportIndices,
 					setSelectedImportIndices,
 					setAllDuplicatesAction,
@@ -39056,24 +39111,35 @@ var getDefaultChannels = (customerId = "1", total = 125e3) => {
 //#endregion
 //#region src/portal/components/notifications/PortalNotificationsPage.jsx
 function NotificationCardItem({ item, isRead, onClick, onDelete }) {
+	const getBadgeStyle = () => {
+		switch (item.statusType) {
+			case "info": return "bg-blue-50 text-blue-700 border-blue-200/80";
+			case "success": return "bg-emerald-50 text-emerald-700 border-emerald-200/80";
+			case "warning": return "bg-amber-50 text-amber-700 border-amber-200/80";
+			case "danger": return "bg-rose-50 text-rose-700 border-rose-200/80";
+			default: return "bg-slate-50 text-slate-700 border-slate-200/80";
+		}
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-		className: `p-3.5 space-y-1.5 transition ${isRead ? "bg-slate-50/40 opacity-60" : "bg-white hover:bg-slate-50/50"}`,
+		onClick: () => onClick(item),
+		className: `p-3.5 space-y-1.5 transition cursor-pointer select-none ${isRead ? "bg-white hover:bg-slate-50/70" : "bg-blue-50/30 hover:bg-blue-50/50"}`,
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-between gap-2",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-1.5 min-w-0",
+					className: "flex items-center gap-2 min-w-0",
 					children: [!isRead && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "w-2 h-2 rounded-full bg-blue-600 shrink-0",
-						title: "Belum dibaca"
+						className: "inline-flex items-center justify-center text-blue-600 shrink-0",
+						title: "Pemberitahuan baru belum dibaca",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5" })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-bold text-slate-800 truncate",
+						className: `text-xs font-bold truncate ${isRead ? "text-slate-700" : "text-slate-900"}`,
 						children: item.title
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2 shrink-0",
+					className: "flex items-center gap-1.5 shrink-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `text-xs font-bold ${item.statusType === "success" ? "text-emerald-600" : item.statusType === "warning" ? "text-amber-600" : "text-rose-600"}`,
+						className: `text-[10px] font-bold px-2 py-0.5 rounded-md border tracking-wider uppercase ${getBadgeStyle()}`,
 						children: item.statusText
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
@@ -39088,7 +39154,7 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs text-slate-600 leading-relaxed",
+				className: `text-xs leading-relaxed ${isRead ? "text-slate-500" : "text-slate-600"}`,
 				children: item.desc
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -39096,12 +39162,7 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 					className: "flex items-center gap-1",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-slate-400" }), item.timestamp]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					type: "button",
-					onClick: (e) => {
-						e.stopPropagation();
-						onClick(item);
-					},
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 					className: "font-bold text-blue-600 inline-flex items-center gap-0.5 hover:underline cursor-pointer",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.actionText }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5" })]
 				})]
@@ -39232,7 +39293,8 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 			let statusType = "warning";
 			let desc = `Laporan #${t.id_tiket} (${t.kategori || "Gangguan"}): ${t.deskripsi || "Menunggu penanganan tim teknisi."}`;
 			if (isSelesai) statusType = "success";
-			else if (t.status === "DIPROSES" || t.status === "DICEK_ADMIN") statusType = "warning";
+			else if (t.status === "DIPROSES" || t.status === "DICEK_ADMIN") statusType = "info";
+			else if (t.status === "MENUNGGU") statusType = "warning";
 			else statusType = "danger";
 			items.push({
 				id: `ticket-${t.id_tiket}-${t.status}`,
@@ -39254,20 +39316,17 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 		payments,
 		deletedIds
 	]);
-	(0, import_react.useEffect)(() => {
-		if (notificationList.length > 0) {
-			const allIds = notificationList.map((n) => n.id);
-			if (allIds.filter((id) => !readIds.includes(id)).length > 0) {
-				const next = Array.from(/* @__PURE__ */ new Set([...readIds, ...allIds]));
-				setReadIds(next);
-				try {
-					localStorage.setItem("teknocust_read_notifications", JSON.stringify(next));
-				} catch (e) {
-					console.error(e);
-				}
-			}
+	const handleMarkAllAsRead = () => {
+		const allIds = notificationList.map((n) => n.id);
+		const next = Array.from(/* @__PURE__ */ new Set([...readIds, ...allIds]));
+		setReadIds(next);
+		try {
+			localStorage.setItem("teknocust_read_notifications", JSON.stringify(next));
+			window.dispatchEvent(new Event("teknocust_notifications_updated"));
+		} catch (e) {
+			console.error(e);
 		}
-	}, [notificationList]);
+	};
 	const handleClearReadNotifications = () => {
 		setShowClearAllModal(true);
 	};
@@ -39279,6 +39338,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 			setDeletedIds(next);
 			try {
 				localStorage.setItem("teknocust_deleted_notifications", JSON.stringify(next));
+				window.dispatchEvent(new Event("teknocust_notifications_updated"));
 			} catch (err) {
 				console.error(err);
 			}
@@ -39291,6 +39351,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 		setDeletedIds(next);
 		try {
 			localStorage.setItem("teknocust_deleted_notifications", JSON.stringify(next));
+			window.dispatchEvent(new Event("teknocust_notifications_updated"));
 		} catch (err) {
 			console.error(err);
 		}
@@ -39302,6 +39363,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 			setReadIds(next);
 			try {
 				localStorage.setItem("teknocust_read_notifications", JSON.stringify(next));
+				window.dispatchEvent(new Event("teknocust_notifications_updated"));
 			} catch (e) {
 				console.error(e);
 			}
@@ -39513,12 +39575,21 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 										]
 									})]
 								})]
-							}), notificationList.some((it) => readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								type: "button",
-								onClick: handleClearReadNotifications,
-								className: "px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer shrink-0",
-								title: "Hapus seluruh pemberitahuan yang sudah dibaca",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus Dibaca" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1.5 shrink-0",
+								children: [notificationList.some((it) => !readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									type: "button",
+									onClick: handleMarkAllAsRead,
+									className: "px-2.5 py-1 rounded-lg text-blue-600 hover:bg-blue-50 text-xs font-medium transition flex items-center gap-1 cursor-pointer",
+									title: "Tandai seluruh pemberitahuan sebagai sudah dibaca",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tandai Dibaca" })]
+								}), notificationList.some((it) => readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									type: "button",
+									onClick: handleClearReadNotifications,
+									className: "px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer",
+									title: "Hapus seluruh pemberitahuan yang sudah dibaca",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus Dibaca" })]
+								})]
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "divide-y divide-slate-100",
@@ -42156,12 +42227,51 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 		setShowDevicesModal(true);
 		fetchConnectedDevices();
 	};
+	const probeLocalModem = () => {
+		return new Promise((resolve) => {
+			let resolved = false;
+			const done = (isSuccess) => {
+				if (!resolved) {
+					resolved = true;
+					resolve(isSuccess);
+				}
+			};
+			const timer = setTimeout(() => {
+				done(false);
+			}, 1800);
+			try {
+				const img = new Image();
+				img.onload = () => {
+					clearTimeout(timer);
+					done(true);
+				};
+				img.onerror = () => {};
+				img.src = `http://192.168.1.1/image/logo.gif?t=${Date.now()}`;
+			} catch (e) {}
+			try {
+				fetch(`http://192.168.1.1/css/stylech.css?t=${Date.now()}`, {
+					mode: "no-cors",
+					cache: "no-store"
+				}).then(() => {
+					clearTimeout(timer);
+					done(true);
+				}).catch(() => {});
+			} catch (e) {}
+		});
+	};
 	const fetchWifiDetails = async () => {
 		setFetchingWifi(true);
 		try {
 			const res = await PortalWifiService.getWifi();
 			if (res.ok && res.data) {
-				setCurrentWifi(res.data);
+				let isConnected = Boolean(res.data.is_connected_to_home_wifi);
+				if (!isConnected) {
+					if (await probeLocalModem()) isConnected = true;
+				}
+				setCurrentWifi({
+					...res.data,
+					is_connected_to_home_wifi: isConnected
+				});
 				setNamaWifi(res.data.nama_wifi || "");
 			}
 		} catch (e) {
@@ -42206,7 +42316,8 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 			const payload = {
 				nama_wifi: namaWifi,
 				password_wifi: passwordWifi,
-				konfirmasi_password: konfirmasiPassword
+				konfirmasi_password: konfirmasiPassword,
+				is_local_client_probe: Boolean(currentWifi.is_connected_to_home_wifi)
 			};
 			const res = await PortalWifiService.changeWifi(payload);
 			if (res.ok && res.data.ok) {
@@ -44592,6 +44703,15 @@ function PortalCustomerApp() {
 		customer?.status_pembayaran,
 		activeTab
 	]);
+	(0, import_react.useEffect)(() => {
+		const handleNotifUpdate = () => {
+			refreshUnreadStatus();
+		};
+		window.addEventListener("teknocust_notifications_updated", handleNotifUpdate);
+		return () => {
+			window.removeEventListener("teknocust_notifications_updated", handleNotifUpdate);
+		};
+	}, [customer]);
 	(0, import_react.useEffect)(() => {
 		fetchSession();
 	}, []);

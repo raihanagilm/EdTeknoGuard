@@ -5,7 +5,9 @@ import {
   Info,
   ArrowLeft,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Search,
+  X
 } from 'lucide-react'
 
 export function ImportStepPreview({
@@ -13,6 +15,8 @@ export function ImportStepPreview({
   setImportPreviewData,
   statusFilter,
   setStatusFilter,
+  previewSearchQuery = '',
+  setPreviewSearchQuery = () => {},
   selectedImportIndices,
   setSelectedImportIndices,
   setAllDuplicatesAction,
@@ -256,8 +260,35 @@ export function ImportStepPreview({
         </div>
       )}
 
-      {/* Preview Table */}
-      <div className="max-h-[380px] overflow-auto border border-sky-200 rounded-2xl">
+      {/* Search Bar & Result Counter */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-[#F8FAFC] p-2.5 rounded-xl border border-[#CCDDF0]">
+        <div className="relative flex-1 min-w-0">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            value={previewSearchQuery}
+            onChange={(e) => setPreviewSearchQuery(e.target.value)}
+            placeholder="Cari berdasarkan IP, Nama, No. WhatsApp, Alamat, atau WiFi..."
+            className="w-full pl-9 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-sans text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 transition"
+          />
+          {previewSearchQuery && (
+            <button
+              type="button"
+              onClick={() => setPreviewSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 rounded transition cursor-pointer"
+              title="Bersihkan pencarian"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        <div className="text-[11px] font-mono text-slate-500 text-right shrink-0 px-1">
+          Menampilkan <strong className="text-slate-800">{filteredIndices.length}</strong> dari <strong className="text-slate-800">{importPreviewData.length}</strong> baris
+        </div>
+      </div>
+
+      {/* Preview Table (Tinggi disesuaikan ~260px agar muat 5-6 baris pas tanpa kepanjangan) */}
+      <div className="max-h-[260px] overflow-auto border border-sky-200 rounded-2xl">
         <table className="w-full text-left border-collapse text-[11px] whitespace-nowrap">
           <thead className="bg-cyan-50/80 sticky top-0 border-b border-sky-200 font-bold text-slate-700">
             <tr>

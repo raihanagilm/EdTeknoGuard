@@ -34,6 +34,7 @@ export function CustomerImportWizard({
   const [importError, setImportError] = useState('')
   const [importSuccess, setImportSuccess] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL') // ALL | VALID | DUPLICATE | ERROR
+  const [previewSearchQuery, setPreviewSearchQuery] = useState('')
 
   // Mapping standar nama kantor EdTeknoGuard ke kemungkinan slug PoP di Network Bill
   const resolvePopSlugFromOffice = (office, popsList = []) => {
@@ -350,14 +351,45 @@ export function CustomerImportWizard({
     }
   }
 
-  // Filtered rows for Step 3 Preview Table based on KPI card filter
+  // Filtered rows for Step 3 Preview Table based on KPI card filter & search query
   const filteredIndices = importPreviewData
     .map((row, idx) => ({ row, idx }))
     .filter(({ row }) => {
-      if (statusFilter === 'MATCH') return row._status === 'match'
-      if (statusFilter === 'CONFLICT') return row._status === 'conflict'
-      if (statusFilter === 'UNREGISTERED') return row._status === 'unregistered'
-      if (statusFilter === 'ERROR') return row._status === 'error'
+      // 1. Status Filter
+      if (statusFilter === 'MATCH' && row._status !== 'match') return false
+      if (statusFilter === 'CONFLICT' && row._status !== 'conflict') return false
+      if (statusFilter === 'UNREGISTERED' && row._status !== 'unregistered') return false
+      if (statusFilter === 'ERROR' && row._status !== 'error') return false
+
+      // 2. Search Query Filter
+      if (previewSearchQuery.trim()) {
+        const q = previewSearchQuery.trim().toLowerCase()
+        const ip = (row.data?.ip_router || '').toLowerCase()
+        const idPel = (row.data?.id_pelanggan || row.old_data?.id_pelanggan || '').toLowerCase()
+        const namaBaru = (row.data?.nama || '').toLowerCase()
+        const namaLama = (row.old_data?.nama || '').toLowerCase()
+        const waBaru = (row.data?.no_wa || row.data?.no_hp || '').toLowerCase()
+        const waLama = (row.old_data?.no_wa || '').toLowerCase()
+        const alamatBaru = (row.data?.alamat || '').toLowerCase()
+        const alamatLama = (row.old_data?.alamat || '').toLowerCase()
+        const wifiBaru = (row.data?.wifi_ssid || row.data?.nama_wifi || '').toLowerCase()
+        const wifiLama = (row.old_data?.nama_wifi || '').toLowerCase()
+
+        const match =
+          ip.includes(q) ||
+          idPel.includes(q) ||
+          namaBaru.includes(q) ||
+          namaLama.includes(q) ||
+          waBaru.includes(q) ||
+          waLama.includes(q) ||
+          alamatBaru.includes(q) ||
+          alamatLama.includes(q) ||
+          wifiBaru.includes(q) ||
+          wifiLama.includes(q)
+
+        if (!match) return false
+      }
+
       return true
     })
     .map(({ idx }) => idx)
@@ -703,6 +735,8 @@ export function CustomerImportWizard({
             setImportPreviewData={setImportPreviewData}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
+            previewSearchQuery={previewSearchQuery}
+            setPreviewSearchQuery={setPreviewSearchQuery}
             selectedImportIndices={selectedImportIndices}
             setSelectedImportIndices={setSelectedImportIndices}
             setAllDuplicatesAction={setAllDuplicatesAction}

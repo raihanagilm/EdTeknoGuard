@@ -257,6 +257,17 @@ export function PortalCustomerApp() {
     }
   }, [isAuthenticated, customer?.id_pelanggan, customer?.status_pembayaran, activeTab]);
 
+  // Listener sinkronisasi perubahan status notifikasi (read / delete)
+  useEffect(() => {
+    const handleNotifUpdate = () => {
+      refreshUnreadStatus();
+    };
+    window.addEventListener('teknocust_notifications_updated', handleNotifUpdate);
+    return () => {
+      window.removeEventListener('teknocust_notifications_updated', handleNotifUpdate);
+    };
+  }, [customer]);
+
   useEffect(() => {
     fetchSession();
   }, []);

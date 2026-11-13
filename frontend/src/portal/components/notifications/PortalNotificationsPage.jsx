@@ -6,43 +6,59 @@ import {
   ChevronLeft,
   Trash2,
   CheckCircle2,
+  CheckCheck,
   ReceiptText
 } from 'lucide-react';
 import { PortalKendalaService, PortalPembayaranService } from '../../services/portalApi';
 import { rupiah, periodeTeks } from '../payment/paymentUtils';
 
 function NotificationCardItem({ item, isRead, onClick, onDelete }) {
+  const getBadgeStyle = () => {
+    switch (item.statusType) {
+      case 'info':
+        return 'bg-blue-50 text-blue-700 border-blue-200/80';
+      case 'success':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
+      case 'warning':
+        return 'bg-amber-50 text-amber-700 border-amber-200/80';
+      case 'danger':
+        return 'bg-rose-50 text-rose-700 border-rose-200/80';
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200/80';
+    }
+  };
+
   return (
     <article
-      className={`p-3.5 space-y-1.5 transition ${
-        isRead ? 'bg-slate-50/40 opacity-60' : 'bg-white hover:bg-slate-50/50'
+      onClick={() => onClick(item)}
+      className={`p-3.5 space-y-1.5 transition cursor-pointer select-none ${
+        isRead ? 'bg-white hover:bg-slate-50/70' : 'bg-blue-50/30 hover:bg-blue-50/50'
       }`}
     >
       {/* Baris Atas: Judul Kategori & Status Badge + Tombol Hapus */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           {!isRead && (
-            <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" title="Belum dibaca" />
+            <span
+              className="inline-flex items-center justify-center text-blue-600 shrink-0"
+              title="Pemberitahuan baru belum dibaca"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+            </span>
           )}
-          <span className="text-xs font-bold text-slate-800 truncate">
+          <span className={`text-xs font-bold truncate ${isRead ? 'text-slate-700' : 'text-slate-900'}`}>
             {item.title}
           </span>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <span
-            className={`text-xs font-bold ${
-              item.statusType === 'success'
-                ? 'text-emerald-600'
-                : item.statusType === 'warning'
-                ? 'text-amber-600'
-                : 'text-rose-600'
-            }`}
+            className={`text-[10px] font-bold px-2 py-0.5 rounded-md border tracking-wider uppercase ${getBadgeStyle()}`}
           >
             {item.statusText}
           </span>
 
-          {/* Tombol Hapus Tunggal per Notifikasi (Hanya Ikon Tong Sampah Bersih) */}
+          {/* Tombol Hapus Tunggal per Notifikasi */}
           <button
             type="button"
             onClick={(e) => {
@@ -58,7 +74,7 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
       </div>
 
       {/* Isi Pesan Notifikasi */}
-      <p className="text-xs text-slate-600 leading-relaxed">
+      <p className={`text-xs leading-relaxed ${isRead ? 'text-slate-500' : 'text-slate-600'}`}>
         {item.desc}
       </p>
 
@@ -69,17 +85,12 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
           {item.timestamp}
         </span>
 
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick(item);
-          }}
+        <span
           className="font-bold text-blue-600 inline-flex items-center gap-0.5 hover:underline cursor-pointer"
         >
           <span>{item.actionText}</span>
           <ChevronRight className="w-3.5 h-3.5" />
-        </button>
+        </span>
       </div>
     </article>
   );
@@ -251,6 +262,8 @@ export function PortalNotificationsPage({
       if (isSelesai) {
         statusType = 'success';
       } else if (t.status === 'DIPROSES' || t.status === 'DICEK_ADMIN') {
+        statusType = 'info';
+      } else if (t.status === 'MENUNGGU') {
         statusType = 'warning';
       } else {
         statusType = 'danger';
@@ -272,22 +285,17 @@ export function PortalNotificationsPage({
     return items.filter((item) => !deletedIds.includes(item.id));
   }, [isBelumBayar, pel, tickets, payments, deletedIds]);
 
-// Saat halaman notifikasi dibuka, tandai semua notifikasi aktif sebagai sudah dibaca
-  useEffect(() => {
-    if (notificationList.length > 0) {
-      const allIds = notificationList.map((n) => n.id);
-      const unread = allIds.filter((id) => !readIds.includes(id));
-      if (unread.length > 0) {
-        const next = Array.from(new Set([...readIds, ...allIds]));
-        setReadIds(next);
-        try {
-          localStorage.setItem('teknocust_read_notifications', JSON.stringify(next));
-        } catch (e) {
-          console.error(e);
-        }
-      }
+  const handleMarkAllAsRead = () => {
+    const allIds = notificationList.map((n) => n.id);
+    const next = Array.from(new Set([...readIds, ...allIds]));
+    setReadIds(next);
+    try {
+      localStorage.setItem('teknocust_read_notifications', JSON.stringify(next));
+      window.dispatchEvent(new Event('teknocust_notifications_updated'));
+    } catch (e) {
+      console.error(e);
     }
-  }, [notificationList]);
+  };
 
   const handleClearReadNotifications = () => {
     setShowClearAllModal(true);
@@ -301,6 +309,7 @@ export function PortalNotificationsPage({
       setDeletedIds(next);
       try {
         localStorage.setItem('teknocust_deleted_notifications', JSON.stringify(next));
+        window.dispatchEvent(new Event('teknocust_notifications_updated'));
       } catch (err) {
         console.error(err);
       }
@@ -319,6 +328,7 @@ export function PortalNotificationsPage({
     setDeletedIds(next);
     try {
       localStorage.setItem('teknocust_deleted_notifications', JSON.stringify(next));
+      window.dispatchEvent(new Event('teknocust_notifications_updated'));
     } catch (err) {
       console.error(err);
     }
@@ -331,6 +341,7 @@ export function PortalNotificationsPage({
       setReadIds(next);
       try {
         localStorage.setItem('teknocust_read_notifications', JSON.stringify(next));
+        window.dispatchEvent(new Event('teknocust_notifications_updated'));
       } catch (e) {
         console.error(e);
       }
@@ -443,17 +454,31 @@ export function PortalNotificationsPage({
                 </div>
               </div>
 
-              {notificationList.some((it) => readIds.includes(it.id)) && (
-                <button
-                  type="button"
-                  onClick={handleClearReadNotifications}
-                  className="px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer shrink-0"
-                  title="Hapus seluruh pemberitahuan yang sudah dibaca"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Hapus Dibaca</span>
-                </button>
-              )}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {notificationList.some((it) => !readIds.includes(it.id)) && (
+                  <button
+                    type="button"
+                    onClick={handleMarkAllAsRead}
+                    className="px-2.5 py-1 rounded-lg text-blue-600 hover:bg-blue-50 text-xs font-medium transition flex items-center gap-1 cursor-pointer"
+                    title="Tandai seluruh pemberitahuan sebagai sudah dibaca"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5" />
+                    <span>Tandai Dibaca</span>
+                  </button>
+                )}
+
+                {notificationList.some((it) => readIds.includes(it.id)) && (
+                  <button
+                    type="button"
+                    onClick={handleClearReadNotifications}
+                    className="px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer"
+                    title="Hapus seluruh pemberitahuan yang sudah dibaca"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Hapus Dibaca</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* List Notifikasi */}
