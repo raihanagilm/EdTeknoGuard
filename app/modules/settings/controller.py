@@ -73,9 +73,7 @@ class SystemSettingsController:
                 f"Kritis: {data.critical_threshold_dbm} dBm"
             ]
             if data.default_modem_credentials:
-                ket_parts.append(f"Kredensial ONT: {len(data.default_modem_credentials)} entri")
-            if data.apply_to_invalid_customers:
-                ket_parts.append("Sinkronisasi massal aktif")
+                ket_parts.append(f"Kredensial ONT: {len(data.default_modem_credentials)} entri (Auto-sinkronisasi INVALID aktif)")
 
             ActivityLogService.log_from_request(
                 db=db,

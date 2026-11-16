@@ -20,7 +20,6 @@ class SystemSettingsService:
         "default_modem_user",
         "default_modem_pass",
         "default_modem_credentials",
-        "apply_to_invalid_customers",
         "last_scan_time",
         "is_network_error",
         "last_scan_duration"
@@ -137,7 +136,6 @@ class SystemSettingsService:
         mikrotik_pass = db_settings.get("mikrotik_password", getattr(settings, "MIKROTIK_PASSWORD", ""))
         mikrotik_kantor = db_settings.get("mikrotik_kantor", getattr(settings, "MIKROTIK_DEFAULT_KANTOR", "cabang"))
         mikrotik_auto = db_settings.get("mikrotik_auto_sync", "true").lower() in ["true", "1", "yes"]
-        apply_invalid = db_settings.get("apply_to_invalid_customers", "false").lower() in ["true", "1", "yes"]
 
         missing_cfg = []
         if polling_interval is None:
@@ -160,7 +158,7 @@ class SystemSettingsService:
             "default_modem_user": credentials_list[0]["username"] if credentials_list else default_user,
             "default_modem_pass": credentials_list[0]["password"] if credentials_list else default_pass,
             "default_modem_credentials": credentials_list,
-            "apply_to_invalid_customers": apply_invalid,
+            "apply_to_invalid_customers": True,
             "notification_alert_interval_hours": notif_interval_hours,
             "night_mode_enabled": night_enabled,
             "night_mode_start": night_start,
@@ -221,8 +219,7 @@ class SystemSettingsService:
             "critical_threshold_dbm": str(data.critical_threshold_dbm),
             "default_modem_user": primary_user,
             "default_modem_pass": primary_pass,
-            "default_modem_credentials": json.dumps(creds_to_save),
-            "apply_to_invalid_customers": "true" if data.apply_to_invalid_customers else "false"
+            "default_modem_credentials": json.dumps(creds_to_save)
         }
         if data.scheduler_status:
             office_pairs["scheduler_status"] = data.scheduler_status
@@ -250,7 +247,7 @@ class SystemSettingsService:
         global_pairs = {
             "notification_alert_interval_hours": str(notif_hours),
             "alert_debounce_minutes": str(debounce_minutes),
-            "night_mode_enabled": "true" if data.night_mode_enabled else "false",
+            "night_mode_enabled": "true",
             "night_mode_start": (data.night_mode_start or "22:00").strip(),
             "night_mode_end": (data.night_mode_end or "06:00").strip(),
             "app_vibration_enabled": "true" if data.app_vibration_enabled else "false",
@@ -265,24 +262,23 @@ class SystemSettingsService:
         for key_n, val_n in global_pairs.items():
             SystemSettingsService._save_setting_pair(db, key_name=key_n, val_text=val_n, kantor_kode=None)
 
-        # 3. Jika opsi sinkronisasi diaktifkan:
-        if data.apply_to_invalid_customers:
-            from app.db.models import Pelanggan, PerangkatONT
-            target_q = (
-                db.query(Pelanggan)
-                .join(PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)
-                .filter(PerangkatONT.status_kredensial != "VALID")
-            )
-            if k:
-                target_q = target_q.filter(Pelanggan.kantor == k)
-            target_customers = target_q.all()
-            for c in target_customers:
-                c.user_admin = primary_user
-                c.pass_admin = primary_pass
-                # Reset status kredensial ke UNTESTED dan reset failed_credentials agar siap diverifikasi penuh ulang
-                c.status_kredensial = "UNTESTED"
-                c.failed_credentials = None
-                c.updated_at = get_now_wib()
+        # 3. Otomatis sinkronkan kredensial baru ke seluruh pelanggan yang berstatus INVALID/UNTESTED
+        from app.db.models import Pelanggan, PerangkatONT
+        target_q = (
+            db.query(Pelanggan)
+            .join(PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)
+            .filter(PerangkatONT.status_kredensial != "VALID")
+        )
+        if k:
+            target_q = target_q.filter(Pelanggan.kantor == k)
+        target_customers = target_q.all()
+        for c in target_customers:
+            c.user_admin = primary_user
+            c.pass_admin = primary_pass
+            # Reset status kredensial ke UNTESTED dan reset failed_credentials agar siap diverifikasi penuh ulang
+            c.status_kredensial = "UNTESTED"
+            c.failed_credentials = None
+            c.updated_at = get_now_wib()
 
         db.commit()
 
