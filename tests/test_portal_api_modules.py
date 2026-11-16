@@ -111,13 +111,29 @@ class TestPortalApiModules(unittest.TestCase):
         mock_req_match.client = MagicMock(host="192.168.1.1")
         self.assertTrue(check_is_home_wifi(mock_req_match, mock_pelanggan))
 
-        # 2. Mismatched IP (akses dari luar jaringan / seluler 4G)
+        # 2. Mismatched IP (akses dari luar jaringan / seluler 4G / tetangga di 10.10.7.8 saat modem 10.10.7.3)
         mock_req_outside = MagicMock()
         mock_req_outside.headers = {"x-forwarded-for": "103.150.20.55"}
         mock_req_outside.client = MagicMock(host="103.150.20.55")
         self.assertFalse(check_is_home_wifi(mock_req_outside, mock_pelanggan))
 
-        # 3. Pelanggan None
+        mock_req_neighbor = MagicMock()
+        mock_req_neighbor.headers = {"x-forwarded-for": "10.10.7.8"}
+        mock_req_neighbor.client = MagicMock(host="10.10.7.8")
+        self.assertFalse(check_is_home_wifi(mock_req_neighbor, mock_pelanggan))
+
+        # 3. Header verifikasi APK (SSID cocok -> True, beda -> False)
+        mock_req_apk_match = MagicMock()
+        mock_req_apk_match.headers = {"x-client-ssid": "myhomewifi"}
+        mock_req_apk_match.client = MagicMock(host="10.10.7.8")
+        self.assertTrue(check_is_home_wifi(mock_req_apk_match, mock_pelanggan))
+
+        mock_req_apk_diff = MagicMock()
+        mock_req_apk_diff.headers = {"x-client-ssid": "tetanggawifi"}
+        mock_req_apk_diff.client = MagicMock(host="10.10.7.8")
+        self.assertFalse(check_is_home_wifi(mock_req_apk_diff, mock_pelanggan))
+
+        # 4. Pelanggan None
         self.assertFalse(check_is_home_wifi(mock_req_match, None))
 
 if __name__ == "__main__":

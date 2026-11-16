@@ -49,6 +49,7 @@ class GenericXPONDriver(BaseONTDriver):
             "Referer": f"{base_url}/",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         }
+        last_resp = None
         for endpoint in [f"{base_url}/login.cgi", f"{base_url}/", f"{base_url}/login.html"]:
             try:
                 resp = session.post(
@@ -57,13 +58,14 @@ class GenericXPONDriver(BaseONTDriver):
                     headers=headers,
                     timeout=5
                 )
+                last_resp = resp
                 if resp.status_code == 200:
                     t = resp.text.lower()
                     if "logout" in t or "status" in t or "index" in t:
                         return True, resp
             except Exception:
                 pass
-        return False, None
+        return False, last_resp
 
     @classmethod
     def extract_optical_data(

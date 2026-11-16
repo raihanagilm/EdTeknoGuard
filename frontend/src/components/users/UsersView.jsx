@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ShieldCheck,
   UserPlus,
@@ -34,17 +35,28 @@ export function UsersView() {
   const [sortDir, setSortDir] = useState('asc');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(15);
-  const [allKantor, setAllKantor] = useState(['cabang', 'pusat', 'banyumas']);
+  const [allKantor, setAllKantor] = useState(['cabang', 'pusat']);
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState(null);
 
-  // Tutup dropdown menu baris jika klik di luar
+  // Tutup dropdown menu baris jika klik di luar, scroll, atau resize
   useEffect(() => {
-    const handleClickOutside = () => setActiveMenuId(null);
-    window.addEventListener('click', handleClickOutside);
-    return () => window.removeEventListener('click', handleClickOutside);
-  }, []);
+    if (!activeMenuId) return;
+    const handleCloseMenu = () => {
+      setActiveMenuId(null);
+      setMenuAnchor(null);
+    };
+    window.addEventListener('click', handleCloseMenu);
+    window.addEventListener('scroll', handleCloseMenu, true);
+    window.addEventListener('resize', handleCloseMenu);
+    return () => {
+      window.removeEventListener('click', handleCloseMenu);
+      window.removeEventListener('scroll', handleCloseMenu, true);
+      window.removeEventListener('resize', handleCloseMenu);
+    };
+  }, [activeMenuId]);
 
   // Modal State User
   const [modalOpen, setModalOpen] = useState(false);
@@ -646,7 +658,21 @@ export function UsersView() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setActiveMenuId(isMenuOpen ? null : u.id);
+                            if (isMenuOpen) {
+                              setActiveMenuId(null);
+                              setMenuAnchor(null);
+                            } else {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const spaceBelow = window.innerHeight - rect.bottom;
+                              const openUp = spaceBelow < 140 && rect.top > 140;
+                              setMenuAnchor({
+                                id: u.id,
+                                top: openUp ? undefined : rect.bottom + 6,
+                                bottom: openUp ? window.innerHeight - rect.top + 6 : undefined,
+                                right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right),
+                              });
+                              setActiveMenuId(u.id);
+                            }
                           }}
                           className={`p-1.5 rounded-lg border transition cursor-pointer ${
                             isMenuOpen ? 'bg-cyan-100 border-cyan-400 text-cyan-900' : 'hover:bg-slate-100 text-slate-600 border-slate-200'
@@ -656,41 +682,59 @@ export function UsersView() {
                           <MoreVertical className="w-3.5 h-3.5" />
                         </button>
 
-                        {isMenuOpen && (
-                          <div
-                            onClick={(e) => e.stopPropagation()}
-                            className={`absolute right-0 z-50 min-w-[160px] ${
-                              isBottomRow ? 'bottom-full pb-1' : 'top-full pt-1'
-                            }`}
-                          >
-                            <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs divide-y divide-slate-100">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setActiveMenuId(null);
-                                  openEditModal(u);
-                                }}
-                                className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
-                              >
-                                <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                                <span>Edit Akun</span>
-                              </button>
-
-                              {u.username !== 'admin' && (
+                        {isMenuOpen && menuAnchor && menuAnchor.id === u.id && typeof document !== 'undefined' && createPortal(
+                          <>
+                            <div
+                              className="fixed inset-0 z-[9998]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(null);
+                                setMenuAnchor(null);
+                              }}
+                            />
+                            <div
+                              style={{
+                                position: 'fixed',
+                                top: menuAnchor.top,
+                                bottom: menuAnchor.bottom,
+                                right: menuAnchor.right,
+                                zIndex: 9999
+                              }}
+                              className="min-w-[160px]"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs divide-y divide-slate-100">
                                 <button
                                   type="button"
                                   onClick={() => {
                                     setActiveMenuId(null);
-                                    handleDeleteUser(u);
+                                    setMenuAnchor(null);
+                                    openEditModal(u);
                                   }}
-                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold"
+                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                                  <span>Hapus</span>
+                                  <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                  <span>Edit Akun</span>
                                 </button>
-                              )}
+
+                                {u.username !== 'admin' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      setMenuAnchor(null);
+                                      handleDeleteUser(u);
+                                    }}
+                                    className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                    <span>Hapus</span>
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          </>,
+                          document.body
                         )}
                       </div>
                     </td>
@@ -734,7 +778,7 @@ export function UsersView() {
                   value={formUsername}
                   onChange={(e) => setFormUsername(e.target.value)}
                   disabled={modalMode === 'edit'}
-                  placeholder="Contoh: teknisi_banyumas..."
+                  placeholder="Contoh: teknisi_lapangan..."
                   className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none disabled:bg-slate-100"
                 />
               </div>

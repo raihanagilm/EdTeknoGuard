@@ -57,9 +57,8 @@ def seed_master_data():
 def seed_tenant_settings():
     """Mengisi kredensial default modem ONT di setiap database tenant."""
     default_creds_json = (
-        '[{"username": "admin", "password": "tekno2024"}, '
-        '{"username": "admin", "password": "admin"}, '
-        '{"username": "tekno", "password": "tekno2025"}]'
+        '[{"username": "admin", "password": "admin"}, '
+        '{"username": "admin", "password": "password123"}]'
     )
     for k_code in ["pusat"]:
         try:

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   HelpCircle,
   Clock,
@@ -41,6 +42,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
   }, [initialSearch]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [catatan, setCatatan] = useState('');
   const [updating, setUpdating] = useState(false);
@@ -86,6 +88,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
     fetchTickets(false);
     setPage(1);
     setActiveMenuId(null);
+    setMenuAnchor(null);
 
     // Auto-refresh silent setiap 5 detik agar tiket baru langsung muncul tanpa reload browser
     const pollInterval = setInterval(() => {
@@ -94,6 +97,20 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
 
     return () => clearInterval(pollInterval);
   }, [filterStatus, activeOffice]);
+
+  useEffect(() => {
+    if (!activeMenuId) return;
+    const handleCloseMenu = () => {
+      setActiveMenuId(null);
+      setMenuAnchor(null);
+    };
+    window.addEventListener('scroll', handleCloseMenu, true);
+    window.addEventListener('resize', handleCloseMenu);
+    return () => {
+      window.removeEventListener('scroll', handleCloseMenu, true);
+      window.removeEventListener('resize', handleCloseMenu);
+    };
+  }, [activeMenuId]);
 
   const handleOpenModal = (ticket) => {
     setSelectedTicket(ticket);
@@ -451,7 +468,21 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setActiveMenuId(activeMenuId === t.id_tiket ? null : t.id_tiket);
+                            if (activeMenuId === t.id_tiket) {
+                              setActiveMenuId(null);
+                              setMenuAnchor(null);
+                            } else {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const spaceBelow = window.innerHeight - rect.bottom;
+                              const openUp = spaceBelow < 120 && rect.top > 120;
+                              setMenuAnchor({
+                                id: t.id_tiket,
+                                top: openUp ? undefined : rect.bottom + 6,
+                                bottom: openUp ? window.innerHeight - rect.top + 6 : undefined,
+                                right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right),
+                              });
+                              setActiveMenuId(t.id_tiket);
+                            }
                           }}
                           className={`p-1 rounded-lg border transition cursor-pointer ${
                             activeMenuId === t.id_tiket
@@ -463,27 +494,33 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                         </button>
 
-                        {activeMenuId === t.id_tiket && (
+                        {activeMenuId === t.id_tiket && menuAnchor && menuAnchor.id === t.id_tiket && typeof document !== 'undefined' && createPortal(
                           <>
                             <div
-                              className="fixed inset-0 z-40"
+                              className="fixed inset-0 z-[9998]"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setActiveMenuId(null);
+                                setMenuAnchor(null);
                               }}
                             />
                             <div
-                              className={`absolute right-0 z-50 min-w-[170px] ${
-                                idx >= Math.max(0, paginatedTickets.length - 2)
-                                  ? 'bottom-full mb-1.5'
-                                  : 'top-full mt-1.5'
-                              }`}
+                              style={{
+                                position: 'fixed',
+                                top: menuAnchor.top,
+                                bottom: menuAnchor.bottom,
+                                right: menuAnchor.right,
+                                zIndex: 9999
+                              }}
+                              className="min-w-[170px]"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs">
                                 <button
                                   type="button"
                                   onClick={() => {
                                     setActiveMenuId(null);
+                                    setMenuAnchor(null);
                                     handleOpenModal(t);
                                   }}
                                   className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
@@ -500,7 +537,10 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                                       href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      onClick={() => setActiveMenuId(null)}
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        setMenuAnchor(null);
+                                      }}
                                       className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold"
                                     >
                                       <Phone className="w-3.5 h-3.5 text-emerald-600" />
@@ -510,7 +550,8 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                                 })()}
                               </div>
                             </div>
-                          </>
+                          </>,
+                          document.body
                         )}
                       </div>
                     )}

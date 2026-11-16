@@ -31,8 +31,26 @@ export function DashboardView({
   const [lastScanTime, setLastScanTime] = useState('-')
   const [nextRunTime, setNextRunTime] = useState('-')
   const [intervalMinutes, setIntervalMinutes] = useState(10)
-  const [isScanning, setIsScanning] = useState(false)
-  const [isStartingScan, setIsStartingScan] = useState(false)
+  const [isScanning, setIsScanning] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('tekno_active_scan_initiating')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Date.now() - parsed.startTime < 25000) return true
+      }
+    } catch (_) {}
+    return false
+  })
+  const [isStartingScan, setIsStartingScan] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('tekno_active_scan_initiating')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Date.now() - parsed.startTime < 15000) return true
+      }
+    } catch (_) {}
+    return false
+  })
   const [scanActionType, setScanActionType] = useState(null) // null | 'pause' | 'resume' | 'stop'
   const [isStopModalOpen, setIsStopModalOpen] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
@@ -156,6 +174,27 @@ export function DashboardView({
         setNextRunTime(d.next_run_time || '-')
         setIntervalMinutes(d.interval_minutes || 10)
         setIsScanning(d.is_scanning || false)
+        if (d.is_scanning) {
+          setIsStartingScan(false)
+          try {
+            sessionStorage.removeItem('tekno_active_scan_initiating')
+          } catch (_) {}
+        } else {
+          const saved = sessionStorage.getItem('tekno_active_scan_initiating')
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved)
+              if (Date.now() - parsed.startTime > 8000) {
+                sessionStorage.removeItem('tekno_active_scan_initiating')
+                setIsStartingScan(false)
+              }
+            } catch (_) {
+              sessionStorage.removeItem('tekno_active_scan_initiating')
+            }
+          } else {
+            setIsStartingScan(false)
+          }
+        }
         setUnreadTicketsCount(d.unread_tickets_count || 0)
 
         if (d.scan_progress) {
@@ -229,6 +268,13 @@ export function DashboardView({
 
     actionInProgressRef.current = true
     setIsStartingScan(true)
+    setIsScanning(true)
+    try {
+      sessionStorage.setItem('tekno_active_scan_initiating', JSON.stringify({
+        kantor: activeOffice,
+        startTime: Date.now()
+      }))
+    } catch (_) {}
     showToast(`Memulai pemindaian manual ONT ${targetLabel}...`, 'info')
 
     try {
@@ -253,7 +299,10 @@ export function DashboardView({
       setIsNetworkError(true)
     } finally {
       actionInProgressRef.current = false
-      setIsStartingScan(false)
+      const saved = sessionStorage.getItem('tekno_active_scan_initiating')
+      if (!saved) {
+        setIsStartingScan(false)
+      }
       fetchStatus()
       fetchKpi()
     }

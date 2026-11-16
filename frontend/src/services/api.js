@@ -164,6 +164,10 @@ export class CustomerService {
   static async resetPortalPassword(idPelanggan) {
     return new ApiService().post(`/api/customers/${idPelanggan}/reset-portal-password`);
   }
+
+  static async changeWifi(idPelanggan, payload) {
+    return new ApiService().post(`/api/customers/${idPelanggan}/change-wifi`, payload);
+  }
 }
 
 export class SettingsService {

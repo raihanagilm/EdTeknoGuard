@@ -601,7 +601,7 @@ class CustomerService:
             nama_wifi=data.nama_wifi,
             password_wifi=data.password_wifi,
             user_admin=data.user_admin or "admin",
-            pass_admin=data.pass_admin or "tekno2024",
+            pass_admin=data.pass_admin or "admin",
             snmp_community=data.snmp_community or "public",
             status_kredensial="INVALID"
         )

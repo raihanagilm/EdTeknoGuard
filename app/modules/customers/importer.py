@@ -2,6 +2,7 @@ import io
 import re
 from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
+from sqlalchemy import text, or_
 from datetime import datetime
 import pandas as pd
 import openpyxl
@@ -464,12 +465,33 @@ class CustomerImporter:
                         # MODE LENGKAPI DATA (Enrichment Update)
                         has_change = False
 
-                        # 0. Update ID Pelanggan ke id numerik resmi Network Bill jika ada
-                        target_id_pel = str(row_data.get("network_bill_code") or id_pel or "").strip()
-                        if target_id_pel and existing_pel.id_pelanggan != target_id_pel:
+                        # 0. Update ID Pelanggan ke code resmi Network Bill (contoh: PLG-0012, BMS-0005)
+                        target_id_pel = str(row_data.get("network_bill_code") or row_data.get("network_bill_display_code") or id_pel or "").strip()
+                        old_id_pel = existing_pel.id_pelanggan
+                        if target_id_pel and old_id_pel != target_id_pel:
                             conflict_pel = pel_by_id.get(target_id_pel) or db.query(Pelanggan).filter(Pelanggan.id_pelanggan == target_id_pel).first()
+                            if conflict_pel and conflict_pel.id_pelanggan != old_id_pel:
+                                ont_conflict = getattr(conflict_pel, "perangkat", None)
+                                if not ont_conflict or not ont_conflict.ip_ont:
+                                    db.delete(conflict_pel)
+                                    db.flush()
+                                    conflict_pel = None
+
                             if not conflict_pel:
+                                for tbl in [
+                                    "perangkat_ont", "log_performa_ont", "alert_logs", 
+                                    "tiket_kendala", "kuota_pelanggan", "log_kuota_harian", "perangkat_terhubung"
+                                ]:
+                                    try:
+                                        db.execute(
+                                            text(f"UPDATE `{tbl}` SET id_pelanggan = :new_id WHERE id_pelanggan = :old_id"),
+                                            {"new_id": target_id_pel, "old_id": old_id_pel}
+                                        )
+                                    except Exception:
+                                        pass
                                 existing_pel.id_pelanggan = target_id_pel
+                                if existing_ont:
+                                    existing_ont.id_pelanggan = target_id_pel
                                 has_change = True
 
                         # 0b. Selaraskan kantor dengan slug PoP sumber data
@@ -518,7 +540,7 @@ class CustomerImporter:
                                 nama_wifi=new_wifi_ssid or None,
                                 password_wifi=new_wifi_pass or None,
                                 user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
-                                pass_admin=str(row_data.get("pass_admin", "tekno2024")).strip() or "tekno2024",
+                                pass_admin=str(row_data.get("pass_admin", "admin")).strip() or "admin",
                                 status_kredensial="INVALID"
                             )
                             db.add(existing_ont)
@@ -597,7 +619,7 @@ class CustomerImporter:
                             nama_wifi=new_wifi_ssid or None,
                             password_wifi=new_wifi_pass or None,
                             user_admin=str(row_data.get("user_admin", "admin")).strip() or "admin",
-                            pass_admin=str(row_data.get("pass_admin", "tekno2024")).strip() or "tekno2024",
+                            pass_admin=str(row_data.get("pass_admin", "admin")).strip() or "admin",
                             status_kredensial="INVALID"
                         )
                         db.add(new_ont)

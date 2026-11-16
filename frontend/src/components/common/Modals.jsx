@@ -14,22 +14,19 @@ export function ConfirmSaveModal({
   pollingInterval,
   warnThreshold,
   critThreshold,
-  nightModeEnabled,
-  nightModeStart,
-  nightModeEnd,
   modemCredentialsCount,
   applyToInvalid
 }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
-      <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-[#CCDDF0] space-y-4 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-2xs flex items-center justify-center p-4 font-sans">
+      <div className="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 animate-in fade-in zoom-in-95 duration-150">
         
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#E0F0FF] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-5 h-5 text-[#026AA7]" />
+            <div className="w-8 h-8 rounded-lg bg-[#F1F6FC] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4 text-[#026AA7]" />
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-bold text-[#0B2545]">Konfirmasi Simpan Pengaturan</h3>
@@ -45,34 +42,42 @@ export function ConfirmSaveModal({
           </button>
         </div>
 
-        <div className="p-4 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] text-xs space-y-2">
+        <div className="p-4 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] text-xs space-y-2.5">
           <div className="flex justify-between items-center py-1 border-b border-[#CCDDF0]/60">
-            <span className="text-[#3B5B78]">Interval Pemindaian ONT:</span>
-            <strong className="font-mono text-[#026AA7]">{pollingInterval} Menit Sekali</strong>
+            <span className="text-[#3B5B78] font-medium">Interval Pemindaian ONT:</span>
+            <div className="text-right">
+              <span className="font-mono font-bold text-[#026AA7] tabular-nums">{pollingInterval}</span>
+              <span className="font-sans font-medium text-[#3B5B78] ml-1">Menit Sekali</span>
+            </div>
           </div>
           <div className="flex justify-between items-center py-1 border-b border-[#CCDDF0]/60">
-            <span className="text-[#3B5B78]">Ambang Peringatan Ringan:</span>
-            <strong className="font-mono text-amber-700">{warnThreshold} dBm</strong>
+            <span className="text-[#3B5B78] font-medium">Ambang Peringatan Ringan:</span>
+            <div className="text-right">
+              <span className="font-mono font-bold text-amber-700 tabular-nums">{warnThreshold}</span>
+              <span className="font-sans font-medium text-[#3B5B78] ml-1">dBm</span>
+            </div>
           </div>
           <div className="flex justify-between items-center py-1 border-b border-[#CCDDF0]/60">
-            <span className="text-[#3B5B78]">Ambang Notifikasi Merah:</span>
-            <strong className="font-mono text-rose-700">{critThreshold} dBm</strong>
+            <span className="text-[#3B5B78] font-medium">Ambang Notifikasi Merah:</span>
+            <div className="text-right">
+              <span className="font-mono font-bold text-rose-700 tabular-nums">{critThreshold}</span>
+              <span className="font-sans font-medium text-[#3B5B78] ml-1">dBm</span>
+            </div>
           </div>
           <div className="flex justify-between items-center py-1 border-b border-[#CCDDF0]/60">
-            <span className="text-[#3B5B78]">Mode Malam (Notifikasi Senyap):</span>
-            <strong className="text-[#0B2545]">
-              {nightModeEnabled ? `Aktif (${nightModeStart} - ${nightModeEnd})` : 'Nonaktif'}
-            </strong>
-          </div>
-          <div className="flex justify-between items-center py-1 border-b border-[#CCDDF0]/60">
-            <span className="text-[#3B5B78]">Total Kredensial ONT:</span>
-            <span className="font-mono font-bold text-[#0B2545]">{modemCredentialsCount} Pasangan User/Pass</span>
+            <span className="text-[#3B5B78] font-medium">Total Kredensial ONT:</span>
+            <div className="text-right">
+              <span className="font-mono font-bold text-[#0B2545] tabular-nums">{modemCredentialsCount}</span>
+              <span className="font-sans font-medium text-[#3B5B78] ml-1">Pasangan Akun</span>
+            </div>
           </div>
 
           {applyToInvalid && (
-            <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-[11px] text-amber-900 flex items-center gap-1.5 mt-2">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Akan disinkronkan ke seluruh pelanggan berstatus <strong>INVALID / Belum Valid</strong> (Pelanggan VALID tetap aman).</span>
+            <div className="pt-2 border-t border-[#CCDDF0] text-[11px] text-[#3B5B78] flex items-start gap-1.5 leading-relaxed">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                Akan disinkronkan ke seluruh pelanggan berstatus <strong className="font-semibold text-[#0B2545]">INVALID / Belum Valid</strong> (Pelanggan VALID tetap aman).
+              </span>
             </div>
           )}
         </div>
@@ -91,7 +96,7 @@ export function ConfirmSaveModal({
           <button
             onClick={onConfirm}
             disabled={saving}
-            className="px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white font-bold text-xs shadow-2xs transition disabled:opacity-50 flex items-center gap-2 min-h-[38px] cursor-pointer"
+            className="px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white font-bold text-xs shadow-2xs transition disabled:opacity-50 flex items-center gap-1.5 min-h-[38px] cursor-pointer"
           >
             {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             <span>{saving ? 'Menyimpan...' : 'Ya, Terapkan Perubahan'}</span>

@@ -23,12 +23,15 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react'
+import { CustomerWifiModal } from './CustomerWifiModal'
 
 export function CustomerDetailModal({
   customer,
   onClose,
   activeOffice = 'cabang',
   onOpenEdit,
+  onCustomerUpdated,
+  onNotify
 }) {
   const [activeTab, setActiveTab] = useState('profil') // 'profil' | 'jaringan' | 'pembayaran'
   const [billingData, setBillingData] = useState(null)
@@ -36,9 +39,16 @@ export function CustomerDetailModal({
   const [billingError, setBillingError] = useState(null)
   const [copiedVa, setCopiedVa] = useState(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [wifiModalOpen, setWifiModalOpen] = useState(false)
+  const [currentCustomer, setCurrentCustomer] = useState(customer)
 
-  const cId = customer?.id_pelanggan || customer?.id || ''
-  const rawWa = customer?.no_wa || customer?.no_hp || ''
+  useEffect(() => {
+    setCurrentCustomer(customer)
+  }, [customer])
+
+  const activeCust = currentCustomer || customer
+  const cId = activeCust?.id_pelanggan || activeCust?.id || ''
+  const rawWa = activeCust?.no_wa || activeCust?.no_hp || ''
   const hasValidWa = Boolean(rawWa && rawWa !== '-')
 
   const fetchBilling = async () => {
@@ -258,43 +268,55 @@ export function CustomerDetailModal({
           {/* TAB 2: JARINGAN */}
           {activeTab === 'jaringan' && (
             <div className="space-y-3">
-              <div className="p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-2">
-                <span className="text-[10px] text-[#026AA7] font-bold uppercase flex items-center gap-1">
-                  <Wifi className="w-3.5 h-3.5" />
-                  <span>Kredensial WiFi Rumah &amp; Login Modem</span>
-                </span>
+              <div className="p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-[#026AA7] font-bold uppercase flex items-center gap-1">
+                    <Wifi className="w-3.5 h-3.5" />
+                    <span>Kredensial WiFi Rumah &amp; Login Modem</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setWifiModalOpen(true)}
+                    className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#026AA7] hover:bg-[#035388] text-white transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Ganti Nama WiFi & Password Modem ONT"
+                  >
+                    <Wifi className="w-3 h-3" />
+                    <span>Ubah WiFi &amp; Sandi</span>
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
                   <div>
                     <span className="text-[#64839E] block text-[10px]">Nama WiFi (SSID):</span>
-                    <span className="font-bold text-[#0B2545]">{customer.nama_wifi || '-'}</span>
+                    <span className="font-bold text-[#0B2545]">{activeCust.nama_wifi || '-'}</span>
                   </div>
                   <div>
                     <span className="text-[#64839E] block text-[10px]">Password WiFi:</span>
-                    <span className="font-bold text-[#0B2545]">{customer.password_wifi || '-'}</span>
+                    <span className="font-bold text-[#0B2545] font-mono">{activeCust.password_wifi || '-'}</span>
                   </div>
                   <div>
                     <span className="text-[#64839E] block text-[10px]">IP ONT (GPON/VLAN):</span>
-                    <span className="font-bold text-[#026AA7]">{customer.ip_ont || '-'}</span>
+                    <span className="font-bold text-[#026AA7] font-mono">{activeCust.ip_ont || '-'}</span>
                   </div>
                   <div>
                     <span className="text-[#64839E] block text-[10px]">IP Router (DHCP/LAN):</span>
-                    <span className="font-bold text-[#0B2545]">{customer.ip_router || '-'}</span>
+                    <span className="font-bold text-[#0B2545] font-mono">{activeCust.ip_router || '-'}</span>
                   </div>
                   <div>
                     <span className="text-[#64839E] block text-[10px]">User Admin Modem:</span>
-                    <span className="font-bold text-[#0B2545] font-mono">{customer.user_admin || '-'}</span>
+                    <span className="font-bold text-[#0B2545] font-mono">{activeCust.user_admin || '-'}</span>
                   </div>
                   <div>
                     <span className="text-[#64839E] block text-[10px]">Password Admin Modem:</span>
-                    <span className="font-bold text-[#0B2545] font-mono">{customer.pass_admin || '-'}</span>
+                    <span className="font-bold text-[#0B2545] font-mono">{activeCust.pass_admin || '-'}</span>
                   </div>
                   <div>
                     <span className="text-[#64839E] block text-[10px]">Jenis Modem:</span>
-                    <span className="font-bold text-[#0B2545]">{customer.jenis_modem || '-'}</span>
+                    <span className="font-bold text-[#0B2545]">{activeCust.jenis_modem || '-'}</span>
                   </div>
                   <div>
                     <span className="text-[#64839E] block text-[10px]">MAC Address:</span>
-                    <span className="font-bold text-[#0B2545] font-mono">{customer.mac_address || '-'}</span>
+                    <span className="font-bold text-[#0B2545] font-mono">{activeCust.mac_address || '-'}</span>
                   </div>
                   <div>
                     <span className="text-[#64839E] block text-[10px] flex items-center gap-0.5">
@@ -302,7 +324,7 @@ export function CustomerDetailModal({
                       <span>Redaman Baseline:</span>
                     </span>
                     <span className="font-bold font-mono text-[#0B2545]">
-                      {customer.redaman_baseline ? `${customer.redaman_baseline} dBm` : '-'}
+                      {activeCust.redaman_baseline ? `${activeCust.redaman_baseline} dBm` : '-'}
                     </span>
                   </div>
                   <div>
@@ -311,7 +333,7 @@ export function CustomerDetailModal({
                       <span>Status Kredensial:</span>
                     </span>
                     <span className="font-bold font-mono text-[#0B2545]">
-                      {customer.status_kredensial || 'UNTESTED'}
+                      {activeCust.status_kredensial || 'UNTESTED'}
                     </span>
                   </div>
                 </div>
@@ -490,7 +512,7 @@ export function CustomerDetailModal({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => onOpenEdit && onOpenEdit(customer)}
+              onClick={() => onOpenEdit && onOpenEdit(activeCust)}
               className="px-3.5 py-1.5 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#3B5B78] hover:text-[#0B2545] text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Edit2 className="w-3.5 h-3.5 text-[#026AA7]" />
@@ -506,6 +528,20 @@ export function CustomerDetailModal({
           </div>
         </div>
       </div>
+
+      {/* Modal Subkomponen Ubah WiFi & Sandi Jarak Jauh */}
+      <CustomerWifiModal
+        isOpen={wifiModalOpen}
+        onClose={() => setWifiModalOpen(false)}
+        customer={activeCust}
+        onSuccess={(updated) => {
+          setCurrentCustomer(updated);
+          if (onCustomerUpdated) {
+            onCustomerUpdated(updated);
+          }
+        }}
+        onNotify={onNotify}
+      />
     </div>
   )
 }

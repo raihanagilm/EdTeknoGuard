@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   ArrowUpDown,
   Wifi,
@@ -38,6 +39,21 @@ export function CustomersTable({
   critThreshold = -27.0
 }) {
   const totalPages = Math.max(1, Math.ceil(totalRecords / limit))
+  const [menuAnchor, setMenuAnchor] = useState(null)
+
+  useEffect(() => {
+    if (!activeMenuId) return
+    const handleCloseMenu = () => {
+      setActiveMenuId(null)
+      setMenuAnchor(null)
+    }
+    window.addEventListener('scroll', handleCloseMenu, true)
+    window.addEventListener('resize', handleCloseMenu)
+    return () => {
+      window.removeEventListener('scroll', handleCloseMenu, true)
+      window.removeEventListener('resize', handleCloseMenu)
+    }
+  }, [activeMenuId, setActiveMenuId])
 
   return (
     <DataTableContainer
@@ -634,7 +650,21 @@ export function CustomersTable({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation()
-                            setActiveMenuId(activeMenuId === cId ? null : cId)
+                            if (activeMenuId === cId) {
+                              setActiveMenuId(null)
+                              setMenuAnchor(null)
+                            } else {
+                              const rect = e.currentTarget.getBoundingClientRect()
+                              const spaceBelow = window.innerHeight - rect.bottom
+                              const openUp = spaceBelow < 180 && rect.top > 180
+                              setMenuAnchor({
+                                id: cId,
+                                top: openUp ? undefined : rect.bottom + 6,
+                                bottom: openUp ? window.innerHeight - rect.top + 6 : undefined,
+                                right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right),
+                              })
+                              setActiveMenuId(cId)
+                            }
                           }}
                           className={`p-1.5 rounded-lg border transition cursor-pointer ${
                             activeMenuId === cId
@@ -646,79 +676,93 @@ export function CustomersTable({
                           <MoreVertical className="w-3.5 h-3.5" />
                         </button>
 
-                        {activeMenuId === cId && (
+                        {activeMenuId === cId && menuAnchor && menuAnchor.id === cId && typeof document !== 'undefined' && createPortal(
                           <>
                             <div
-                              className="fixed inset-0 z-40"
+                              className="fixed inset-0 z-[9998]"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 setActiveMenuId(null)
+                                setMenuAnchor(null)
                               }}
                             />
                             <div
-                              className={`absolute right-0 z-50 w-44 bg-white rounded-xl shadow-xl border border-sky-200 py-1.5 font-sans text-xs divide-y divide-slate-100 ${
-                                idx >= Math.max(0, customers.length - 3)
-                                  ? 'bottom-full mb-1.5'
-                                  : 'top-full mt-1.5'
-                              }`}
+                              style={{
+                                position: 'fixed',
+                                top: menuAnchor.top,
+                                bottom: menuAnchor.bottom,
+                                right: menuAnchor.right,
+                                zIndex: 9999
+                              }}
+                              className="w-44"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <div className="py-1">
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setActiveMenuId(null)
-                                    handleOpenDetail(c)
-                                  }}
-                                  className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 font-bold flex items-center gap-2 transition cursor-pointer"
-                                >
-                                  <Info className="w-3.5 h-3.5 text-cyan-600" />
-                                  <span>Detail Pelanggan</span>
-                                </button>
-
-                                {c.no_wa && c.no_wa !== '-' && (
-                                  <a
-                                    href={`https://wa.me/${c.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62')}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => setActiveMenuId(null)}
-                                    className="w-full text-left px-3 py-1.5 text-emerald-700 hover:bg-emerald-50 font-bold flex items-center gap-2 transition"
+                              <div className="bg-white rounded-xl shadow-2xl border border-sky-200 py-1.5 font-sans text-xs divide-y divide-slate-100">
+                                <div className="py-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setActiveMenuId(null)
+                                      setMenuAnchor(null)
+                                      handleOpenDetail(c)
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 font-bold flex items-center gap-2 transition cursor-pointer"
                                   >
-                                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span>Hubungi WA</span>
-                                  </a>
-                                )}
-                              </div>
+                                    <Info className="w-3.5 h-3.5 text-cyan-600" />
+                                    <span>Detail Pelanggan</span>
+                                  </button>
 
-                              <div className="py-1">
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setActiveMenuId(null)
-                                    handleOpenEdit(c, c)
-                                  }}
-                                  className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-slate-100 font-bold flex items-center gap-2 transition cursor-pointer"
-                                >
-                                  <Edit2 className="w-3.5 h-3.5 text-slate-500" />
-                                  <span>Edit Data</span>
-                                </button>
+                                  {c.no_wa && c.no_wa !== '-' && (
+                                    <a
+                                      href={`https://wa.me/${c.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62')}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={() => {
+                                        setActiveMenuId(null)
+                                        setMenuAnchor(null)
+                                      }}
+                                      className="w-full text-left px-3 py-1.5 text-emerald-700 hover:bg-emerald-50 font-bold flex items-center gap-2 transition"
+                                    >
+                                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span>Hubungi WA</span>
+                                    </a>
+                                  )}
+                                </div>
 
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setActiveMenuId(null)
-                                    handleDeleteCustomer(cId)
-                                  }}
-                                  className="w-full text-left px-3 py-1.5 text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2 transition cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                                  <span>Hapus Data</span>
-                                </button>
+                                <div className="py-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setActiveMenuId(null)
+                                      setMenuAnchor(null)
+                                      handleOpenEdit(c, c)
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-slate-100 font-bold flex items-center gap-2 transition cursor-pointer"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5 text-slate-500" />
+                                    <span>Edit Data</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setActiveMenuId(null)
+                                      setMenuAnchor(null)
+                                      handleDeleteCustomer(cId)
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2 transition cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                                    <span>Hapus Data</span>
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                          </>
+                          </>,
+                          document.body
                         )}
                       </div>
                     </div>

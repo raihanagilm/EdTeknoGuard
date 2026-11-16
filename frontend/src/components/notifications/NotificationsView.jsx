@@ -5,13 +5,32 @@ import {
   X, 
   CheckCheck, 
   AlertTriangle, 
-  ZapOff, 
-  HelpCircle, 
+  WifiOff, 
+  AlertOctagon, 
+  KeyRound, 
+  Ticket, 
   Info, 
   ChevronRight, 
   Clock, 
   Building2
 } from 'lucide-react';
+
+// Pembersihan defensif untuk mencegah duplikasi nama kantor di judul atau pesan
+const formatCleanTitle = (title, kantor) => {
+  if (!title) return '';
+  if (!kantor) return title;
+  return title.replace(new RegExp(`^(Kantor\\s+)?${kantor}\\s*[•\\-|:]\\s*`, 'i'), '').trim();
+};
+
+const formatCleanMessage = (message, kantor) => {
+  if (!message) return '';
+  if (!kantor) return message;
+  // Hapus pola duplikat "Kantor: <kantor> | " di awal pesan atau "pada kantor <kantor>"
+  return message
+    .replace(new RegExp(`^Kantor:\\s*${kantor}\\s*\\|\\s*`, 'i'), '')
+    .replace(new RegExp(`\\s+pada kantor\\s+${kantor}\\.?`, 'i'), '.')
+    .trim();
+};
 
 export function NotificationsView({
   isOpen,
@@ -58,62 +77,51 @@ export function NotificationsView({
   if (!isOpen) return null;
 
   const getIconForType = (item) => {
+    let IconComponent = Info;
+
+    // 1. Sinyal Terputus / LOS (Kabel Lepas / Sinyal Hilang)
     if (item.level === 'los' || item.badge?.includes('LOS') || item.badge?.includes('TERPUTUS')) {
-      return (
-        <div className="w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-rose-600 flex items-center justify-center shrink-0">
-          <ZapOff className="w-4 h-4" />
-        </div>
-      );
+      IconComponent = WifiOff;
     }
-    if (item.level === 'critical' || item.is_critical || item.badge?.includes('KRITIS')) {
-      return (
-        <div className="w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-rose-600 flex items-center justify-center shrink-0">
-          <ZapOff className="w-4 h-4" />
-        </div>
-      );
+    // 2. Redaman Kritis (<= -27.0 dBm)
+    else if (item.level === 'critical' || item.is_critical || item.badge?.includes('KRITIS')) {
+      IconComponent = AlertOctagon;
     }
-    if (item.level === 'invalid' || item.badge?.includes('INVALID')) {
-      return (
-        <div className="w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-amber-700 flex items-center justify-center shrink-0">
-          <AlertTriangle className="w-4 h-4" />
-        </div>
-      );
+    // 3. Kredensial Modem Invalid / Ditolak
+    else if (item.level === 'invalid' || item.badge?.includes('INVALID')) {
+      IconComponent = KeyRound;
     }
-    if (item.type?.includes('tiket')) {
-      return (
-        <div className="w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0">
-          <HelpCircle className="w-4 h-4" />
-        </div>
-      );
+    // 4. Tiket Kendala / Keluhan Pelanggan
+    else if (item.type?.includes('tiket') || item.badge?.toLowerCase().includes('tiket')) {
+      IconComponent = Ticket;
     }
-    if (item.level === 'warning' || item.badge === 'WARNING' || item.badge?.includes('WASPADA')) {
-      return (
-        <div className="w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-amber-700 flex items-center justify-center shrink-0">
-          <AlertTriangle className="w-4 h-4" />
-        </div>
-      );
+    // 5. Redaman Waspada / Warning (-26.0 s/d -27.0 dBm)
+    else if (item.level === 'warning' || item.badge === 'WARNING' || item.badge?.includes('WASPADA')) {
+      IconComponent = AlertTriangle;
     }
+
+    // Monochromatic single-token box: Dilarang membungkus dengan pastel pelangi (DESIGN.md Section 5)
     return (
       <div className="w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0">
-        <Info className="w-4 h-4" />
+        <IconComponent className="w-4 h-4" />
       </div>
     );
   };
 
   const getStatusTextClass = (item) => {
-    if (item.level === 'los' || item.badge?.includes('LOS') || item.badge?.includes('TERPUTUS')) {
-      return 'text-rose-700';
+    // Aksen merah tegas hanya untuk kondisi darurat (Kritis & LOS/Terputus)
+    if (
+      item.level === 'critical' ||
+      item.level === 'los' ||
+      item.is_critical ||
+      item.badge?.includes('KRITIS') ||
+      item.badge?.includes('LOS') ||
+      item.badge?.includes('TERPUTUS')
+    ) {
+      return 'text-rose-600';
     }
-    if (item.level === 'critical' || item.is_critical || item.badge?.includes('KRITIS')) {
-      return 'text-rose-700';
-    }
-    if (item.level === 'invalid' || item.badge?.includes('INVALID')) {
-      return 'text-amber-800';
-    }
-    if (item.level === 'warning' || item.badge?.includes('WASPADA')) {
-      return 'text-amber-800';
-    }
-    return 'text-[#026AA7]';
+    // Monokromatik tenang untuk status operasional lainnya (bebas dari warna pelangi)
+    return 'text-[#3B5B78]';
   };
 
   return createPortal(
@@ -224,10 +232,10 @@ export function NotificationsView({
                   </div>
 
                   <h4 className="text-xs font-bold text-[#0B2545] group-hover:text-[#026AA7] transition truncate leading-snug">
-                    {item.title}
+                    {formatCleanTitle(item.title, item.kantor)}
                   </h4>
                   <p className="text-[11px] text-[#3B5B78] line-clamp-2 leading-relaxed mt-0.5">
-                    {item.message}
+                    {formatCleanMessage(item.message, item.kantor)}
                   </p>
 
                   <div className="mt-2 flex items-center justify-between text-[10px] font-bold">

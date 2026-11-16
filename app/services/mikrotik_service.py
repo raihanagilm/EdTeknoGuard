@@ -493,6 +493,22 @@ class MikroTikSyncService:
         return None
 
     @classmethod
+    def normalize_customer_name(cls, name_or_comment: Optional[str]) -> str:
+        """
+        Membersihkan nama atau comment dari prefix teknis WinBox:
+        - Nomor HP / ID: '130520266990 - sri hartati' -> 'sri hartati'
+        - ODP Port: '1/4/2:22_sri hartati' atau '1/4/1:6_Bagas' -> 'sri hartati' atau 'Bagas'
+        """
+        if not name_or_comment:
+            return ""
+        s = name_or_comment.strip()
+        # Hilangkan prefix nomor ID/HP: misal '130520266990 - '
+        s = re.sub(r'^\d+\s*[-_]\s*', '', s)
+        # Hilangkan prefix port ODP: misal '1/4/2:22_' atau '1/4/1:6 ' atau '1/4/2:5_'
+        s = re.sub(r'^[A-Za-z0-9]*/?\d+/\d+:\d+[_ \t]*', '', s)
+        return s.strip()
+
+    @classmethod
     def sync_customers_from_mikrotik(
         cls, 
         db: Session, 
@@ -544,6 +560,7 @@ class MikroTikSyncService:
             ip_o = p.ip_ont
             mac = p.mac_address
             nm = (p.nama or "").strip().lower()
+            norm_nm = cls.normalize_customer_name(p.nama).lower()
 
             if ip_r:
                 existing_by_ip[ip_r.strip()] = p
@@ -553,6 +570,8 @@ class MikroTikSyncService:
                 existing_by_mac[mac.strip().upper()] = p
             if nm and len(nm) >= 3 and not nm.startswith("pelanggan 1"):
                 existing_by_name[nm] = p
+            if norm_nm and len(norm_nm) >= 3 and not norm_nm.startswith("pelanggan 1"):
+                existing_by_name[norm_nm] = p
 
         # Cache POP dari data pelanggan dan Paket yang ada di DB
         existing_pops = {
@@ -562,10 +581,15 @@ class MikroTikSyncService:
         }
         existing_pakets = {pkt.nama.lower(): pkt.nama for pkt in db.query(Paket).all()}
 
+        # Prioritaskan sumber perangkat: DHCP dan PPPoE diproses lebih dahulu daripada Simple Queue
+        bound_leases.sort(key=lambda x: 0 if x.get("source") in ("dhcp", "pppoe") else 1)
+        updated_by_dhcp = set()
+
         for lease in bound_leases:
             ip = lease.get("address", "").strip()
             mac = lease.get("mac-address", "").strip().upper()
             comment = lease.get("comment", "").strip()
+            norm_comment = cls.normalize_customer_name(comment).lower()
 
             # Filter mutlak: Wajib memiliki comment valid dan bukan non-customer
             if not cls.is_valid_customer_comment(comment):
@@ -606,11 +630,13 @@ class MikroTikSyncService:
             # Cari pelanggan yang cocok:
             # 1. IP cocok langsung (baik di ip_router maupun ip_ont)
             # 2. MAC cocok
-            # 3. Nama/Comment Winbox cocok persis
+            # 3. Nama/Comment Winbox ternormalisasi cocok
+            # 4. Nama/Comment Winbox mentah cocok persis
             p_exist = (
                 existing_by_ip.get(ip) 
                 or existing_by_ip_ont.get(ip)
                 or (existing_by_mac.get(mac) if mac else None)
+                or (existing_by_name.get(norm_comment) if norm_comment and len(norm_comment) >= 3 else None)
                 or (existing_by_name.get(comment.lower()) if comment and len(comment) >= 3 else None)
             )
 
@@ -629,14 +655,23 @@ class MikroTikSyncService:
                     changed = True
 
                 # Alokasikan IP ke slot yang tepat:
-                if is_ont_ip:
-                    if p_exist.ip_ont != ip:
-                        p_exist.ip_ont = ip
-                        changed = True
-                else:
-                    if p_exist.ip_router != ip:
-                        p_exist.ip_router = ip
-                        changed = True
+                # Cegah Simple Queue menimpa IP yang sudah didapatkan dari DHCP Lease aktif
+                allow_ip_update = True
+                if lease.get("source") == "queue" and p_exist.id_pelanggan in updated_by_dhcp:
+                    allow_ip_update = False
+
+                if allow_ip_update:
+                    if is_ont_ip:
+                        if p_exist.ip_ont != ip:
+                            p_exist.ip_ont = ip
+                            changed = True
+                    else:
+                        if p_exist.ip_router != ip:
+                            p_exist.ip_router = ip
+                            changed = True
+
+                if lease.get("source") in ("dhcp", "pppoe"):
+                    updated_by_dhcp.add(p_exist.id_pelanggan)
 
                 if p_exist.kantor != kantor and not p_exist.kantor:
                     p_exist.kantor = kantor

@@ -93,12 +93,26 @@ class ONTScraperService:
         base_url = f"http://{host}"
         session = requests.Session()
 
-        # 1. Quick probe jangkauan host (Connect timeout 2.5 detik, Read 4.0 detik)
+        # 1. Quick probe jangkauan host (Connect timeout 3.5s, Read 5.0s, dengan 1x Smart Retry untuk modem VALID)
+        max_probe_attempts = 2 if is_valid_modem else 1
         r_probe = None
-        try:
-            r_probe = session.get(f"{base_url}/", timeout=(2.5, 4.0), headers={"Connection": "keep-alive"})
-        except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-            print(f"[-] [UNREACHABLE] ONT {host} ({customer_name}): Tidak dapat dijangkau ({e.__class__.__name__}). Periksa koneksi LAN/VLAN.")
+        last_conn_err = None
+
+        for attempt in range(max_probe_attempts):
+            try:
+                r_probe = session.get(f"{base_url}/", timeout=(3.5, 5.0), headers={"Connection": "close"})
+                if r_probe is not None:
+                    break
+            except (requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+                last_conn_err = e
+                if attempt < max_probe_attempts - 1:
+                    time.sleep(1.0)
+            except Exception:
+                break
+
+        if r_probe is None:
+            err_name = last_conn_err.__class__.__name__ if last_conn_err else "ConnectionError"
+            print(f"[-] [UNREACHABLE] ONT {host} ({customer_name}): Tidak dapat dijangkau ({err_name}). Periksa koneksi LAN/VLAN.")
             return {
                 "success": False,
                 "error_type": "UNREACHABLE",
@@ -110,8 +124,6 @@ class ONTScraperService:
                 "uptime": None,
                 "latency_ms": None
             }
-        except Exception:
-            pass
 
         probe_html = r_probe.text if r_probe is not None else ""
         setattr(session, "probe_html", probe_html)

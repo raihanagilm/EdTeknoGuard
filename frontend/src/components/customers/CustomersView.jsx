@@ -113,9 +113,44 @@ export function CustomersView({
   // Modal Wizard Import State
   const [importModalOpen, setImportModalOpen] = useState(false)
 
-  // Single probe test state
-  const [probingId, setProbingId] = useState(null)
+  // Single probe test state (dengan pemulihan otomatis dari sessionStorage jika refresh / pindah menu)
+  const [probingId, setProbingId] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('tekno_active_probing')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.id && Date.now() - parsed.startTime < 35000) {
+          return parsed.id
+        } else {
+          sessionStorage.removeItem('tekno_active_probing')
+        }
+      }
+    } catch (_) {}
+    return null
+  })
   const [probeResult, setProbeResult] = useState(null)
+
+  // Timer pemulihan jika halaman direload saat probe masih berlangsung
+  useEffect(() => {
+    if (!probingId) return
+    const saved = sessionStorage.getItem('tekno_active_probing')
+    let remaining = 15000
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        const elapsed = Date.now() - parsed.startTime
+        remaining = Math.max(2000, 30000 - elapsed)
+      } catch (_) {}
+    }
+    const timer = setTimeout(() => {
+      setProbingId(null)
+      try {
+        sessionStorage.removeItem('tekno_active_probing')
+      } catch (_) {}
+      fetchCustomers(true)
+    }, remaining)
+    return () => clearTimeout(timer)
+  }, [probingId])
 
   // Floating Toast Notification (Pojok Kanan Bawah)
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
@@ -386,6 +421,12 @@ export function CustomersView({
     if (probeCooldowns[id_pelanggan] > 0) return
     setProbingId(id_pelanggan)
     try {
+      sessionStorage.setItem('tekno_active_probing', JSON.stringify({
+        id: id_pelanggan,
+        startTime: Date.now()
+      }))
+    } catch (_) {}
+    try {
       const res = await fetch(`/api/monitoring/scan/${id_pelanggan}`, { method: 'POST' })
       if (res.ok) {
         const data = await res.json()
@@ -478,6 +519,9 @@ export function CustomersView({
       showToast('Koneksi terputus saat memeriksa modem ONT', 'error')
     } finally {
       setProbingId(null)
+      try {
+        sessionStorage.removeItem('tekno_active_probing')
+      } catch (_) {}
     }
   }
 
@@ -850,23 +894,29 @@ export function CustomersView({
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nama WiFi (SSID)</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center justify-between">
+                    <span>Nama WiFi (SSID)</span>
+                    <span className="text-[9px] text-[#026AA7] font-semibold">Menu Ubah WiFi</span>
+                  </label>
                   <input
                     type="text"
-                    value={formData.nama_wifi}
-                    onChange={(e) => setFormData({ ...formData, nama_wifi: e.target.value })}
-                    placeholder="Contoh: WiFi_Rumah"
-                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                    value={formData.nama_wifi || '-'}
+                    readOnly
+                    disabled
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100/80 text-slate-500 text-xs font-bold cursor-not-allowed select-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Password WiFi</label>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center justify-between">
+                    <span>Password WiFi</span>
+                    <span className="text-[9px] text-[#026AA7] font-semibold">Terkunci</span>
+                  </label>
                   <input
                     type="text"
-                    value={formData.password_wifi}
-                    onChange={(e) => setFormData({ ...formData, password_wifi: e.target.value })}
-                    placeholder="Minimal 8 karakter"
-                    className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none font-mono"
+                    value={formData.password_wifi || '-'}
+                    readOnly
+                    disabled
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100/80 text-slate-500 text-xs font-bold cursor-not-allowed select-none font-mono"
                   />
                 </div>
               </div>
@@ -888,7 +938,7 @@ export function CustomersView({
                     type="text"
                     value={formData.pass_admin}
                     onChange={(e) => setFormData({ ...formData, pass_admin: e.target.value })}
-                    placeholder="Contoh: tekno2024"
+                    placeholder="Contoh: password123"
                     className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none font-mono"
                   />
                 </div>
@@ -939,6 +989,11 @@ export function CustomersView({
           setDetailCustomer(null)
           handleOpenEdit(targetToEdit, targetToEdit)
         }}
+        onCustomerUpdated={(updatedCust) => {
+          setDetailCustomer(updatedCust)
+          fetchCustomers()
+        }}
+        onNotify={showToast}
       />
 
       {/* Component Wizard Import Pelanggan Terpisah */}

@@ -11709,7 +11709,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$89 = {
+var __iconData$90 = {
 	name: "activity",
 	size: 24,
 	node: [["path", {
@@ -11717,8 +11717,8 @@ var __iconData$89 = {
 		key: "169zse"
 	}]]
 };
-__iconData$89.node;
-var Activity = createLucideIcon(__iconData$89);
+__iconData$90.node;
+var Activity = createLucideIcon(__iconData$90);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-down.mjs
 /**
@@ -11727,7 +11727,7 @@ var Activity = createLucideIcon(__iconData$89);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$88 = {
+var __iconData$89 = {
 	name: "arrow-down",
 	size: 24,
 	node: [["path", {
@@ -11738,8 +11738,8 @@ var __iconData$88 = {
 		key: "1idqje"
 	}]]
 };
-__iconData$88.node;
-var ArrowDown = createLucideIcon(__iconData$88);
+__iconData$89.node;
+var ArrowDown = createLucideIcon(__iconData$89);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left.mjs
 /**
@@ -11748,7 +11748,7 @@ var ArrowDown = createLucideIcon(__iconData$88);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$87 = {
+var __iconData$88 = {
 	name: "arrow-left",
 	size: 24,
 	node: [["path", {
@@ -11759,8 +11759,8 @@ var __iconData$87 = {
 		key: "x3x0zl"
 	}]]
 };
-__iconData$87.node;
-var ArrowLeft = createLucideIcon(__iconData$87);
+__iconData$88.node;
+var ArrowLeft = createLucideIcon(__iconData$88);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left-right.mjs
 /**
@@ -11769,7 +11769,7 @@ var ArrowLeft = createLucideIcon(__iconData$87);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$86 = {
+var __iconData$87 = {
 	name: "arrow-left-right",
 	size: 24,
 	node: [
@@ -11791,8 +11791,8 @@ var __iconData$86 = {
 		}]
 	]
 };
-__iconData$86.node;
-var ArrowLeftRight = createLucideIcon(__iconData$86);
+__iconData$87.node;
+var ArrowLeftRight = createLucideIcon(__iconData$87);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up-down.mjs
 /**
@@ -11801,7 +11801,7 @@ var ArrowLeftRight = createLucideIcon(__iconData$86);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$85 = {
+var __iconData$86 = {
 	name: "arrow-up-down",
 	size: 24,
 	node: [
@@ -11823,8 +11823,8 @@ var __iconData$85 = {
 		}]
 	]
 };
-__iconData$85.node;
-var ArrowUpDown = createLucideIcon(__iconData$85);
+__iconData$86.node;
+var ArrowUpDown = createLucideIcon(__iconData$86);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up.mjs
 /**
@@ -11833,7 +11833,7 @@ var ArrowUpDown = createLucideIcon(__iconData$85);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$84 = {
+var __iconData$85 = {
 	name: "arrow-up",
 	size: 24,
 	node: [["path", {
@@ -11844,8 +11844,8 @@ var __iconData$84 = {
 		key: "x0mq9r"
 	}]]
 };
-__iconData$84.node;
-var ArrowUp = createLucideIcon(__iconData$84);
+__iconData$85.node;
+var ArrowUp = createLucideIcon(__iconData$85);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/ban.mjs
 /**
@@ -11854,7 +11854,7 @@ var ArrowUp = createLucideIcon(__iconData$84);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$83 = {
+var __iconData$84 = {
 	name: "ban",
 	size: 24,
 	node: [["circle", {
@@ -11867,8 +11867,8 @@ var __iconData$83 = {
 		key: "196cmz"
 	}]]
 };
-__iconData$83.node;
-var Ban = createLucideIcon(__iconData$83);
+__iconData$84.node;
+var Ban = createLucideIcon(__iconData$84);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/banknote.mjs
 /**
@@ -11877,7 +11877,7 @@ var Ban = createLucideIcon(__iconData$83);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$82 = {
+var __iconData$83 = {
 	name: "banknote",
 	size: 24,
 	node: [
@@ -11901,8 +11901,8 @@ var __iconData$82 = {
 		}]
 	]
 };
-__iconData$82.node;
-var Banknote = createLucideIcon(__iconData$82);
+__iconData$83.node;
+var Banknote = createLucideIcon(__iconData$83);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/bell.mjs
 /**
@@ -11911,7 +11911,7 @@ var Banknote = createLucideIcon(__iconData$82);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$81 = {
+var __iconData$82 = {
 	name: "bell",
 	size: 24,
 	node: [["path", {
@@ -11922,8 +11922,8 @@ var __iconData$81 = {
 		key: "11g9vi"
 	}]]
 };
-__iconData$81.node;
-var Bell = createLucideIcon(__iconData$81);
+__iconData$82.node;
+var Bell = createLucideIcon(__iconData$82);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/building-complex.mjs
 /**
@@ -11932,7 +11932,7 @@ var Bell = createLucideIcon(__iconData$81);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$80 = {
+var __iconData$81 = {
 	name: "building-complex",
 	size: 24,
 	node: [
@@ -11959,8 +11959,8 @@ var __iconData$80 = {
 	],
 	aliases: ["building-2"]
 };
-__iconData$80.node;
-var BuildingComplex = createLucideIcon(__iconData$80);
+__iconData$81.node;
+var BuildingComplex = createLucideIcon(__iconData$81);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/camera.mjs
 /**
@@ -11969,7 +11969,7 @@ var BuildingComplex = createLucideIcon(__iconData$80);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$79 = {
+var __iconData$80 = {
 	name: "camera",
 	size: 24,
 	node: [["path", {
@@ -11982,8 +11982,8 @@ var __iconData$79 = {
 		key: "1vg3eu"
 	}]]
 };
-__iconData$79.node;
-var Camera = createLucideIcon(__iconData$79);
+__iconData$80.node;
+var Camera = createLucideIcon(__iconData$80);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/calendar.mjs
 /**
@@ -11992,7 +11992,7 @@ var Camera = createLucideIcon(__iconData$79);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$78 = {
+var __iconData$79 = {
 	name: "calendar",
 	size: 24,
 	node: [
@@ -12018,8 +12018,8 @@ var __iconData$78 = {
 		}]
 	]
 };
-__iconData$78.node;
-var Calendar = createLucideIcon(__iconData$78);
+__iconData$79.node;
+var Calendar = createLucideIcon(__iconData$79);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chart-column.mjs
 /**
@@ -12028,7 +12028,7 @@ var Calendar = createLucideIcon(__iconData$78);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$77 = {
+var __iconData$78 = {
 	name: "chart-column",
 	size: 24,
 	node: [
@@ -12051,8 +12051,8 @@ var __iconData$77 = {
 	],
 	aliases: ["bar-chart-3"]
 };
-__iconData$77.node;
-var ChartColumn = createLucideIcon(__iconData$77);
+__iconData$78.node;
+var ChartColumn = createLucideIcon(__iconData$78);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chart-pie.mjs
 /**
@@ -12061,7 +12061,7 @@ var ChartColumn = createLucideIcon(__iconData$77);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$76 = {
+var __iconData$77 = {
 	name: "chart-pie",
 	size: 24,
 	node: [["path", {
@@ -12073,8 +12073,8 @@ var __iconData$76 = {
 	}]],
 	aliases: ["pie-chart"]
 };
-__iconData$76.node;
-var ChartPie = createLucideIcon(__iconData$76);
+__iconData$77.node;
+var ChartPie = createLucideIcon(__iconData$77);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/check-check.mjs
 /**
@@ -12083,7 +12083,7 @@ var ChartPie = createLucideIcon(__iconData$76);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$75 = {
+var __iconData$76 = {
 	name: "check-check",
 	size: 24,
 	node: [["path", {
@@ -12094,8 +12094,8 @@ var __iconData$75 = {
 		key: "ke71qq"
 	}]]
 };
-__iconData$75.node;
-var CheckCheck = createLucideIcon(__iconData$75);
+__iconData$76.node;
+var CheckCheck = createLucideIcon(__iconData$76);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/check.mjs
 /**
@@ -12104,7 +12104,7 @@ var CheckCheck = createLucideIcon(__iconData$75);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$74 = {
+var __iconData$75 = {
 	name: "check",
 	size: 24,
 	node: [["path", {
@@ -12112,8 +12112,8 @@ var __iconData$74 = {
 		key: "1gmf2c"
 	}]]
 };
-__iconData$74.node;
-var Check = createLucideIcon(__iconData$74);
+__iconData$75.node;
+var Check = createLucideIcon(__iconData$75);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-down.mjs
 /**
@@ -12122,7 +12122,7 @@ var Check = createLucideIcon(__iconData$74);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$73 = {
+var __iconData$74 = {
 	name: "chevron-down",
 	size: 24,
 	node: [["path", {
@@ -12130,8 +12130,8 @@ var __iconData$73 = {
 		key: "qrunsl"
 	}]]
 };
-__iconData$73.node;
-var ChevronDown = createLucideIcon(__iconData$73);
+__iconData$74.node;
+var ChevronDown = createLucideIcon(__iconData$74);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-left.mjs
 /**
@@ -12140,7 +12140,7 @@ var ChevronDown = createLucideIcon(__iconData$73);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$72 = {
+var __iconData$73 = {
 	name: "chevron-left",
 	size: 24,
 	node: [["path", {
@@ -12148,8 +12148,8 @@ var __iconData$72 = {
 		key: "1wnfg3"
 	}]]
 };
-__iconData$72.node;
-var ChevronLeft = createLucideIcon(__iconData$72);
+__iconData$73.node;
+var ChevronLeft = createLucideIcon(__iconData$73);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-up.mjs
 /**
@@ -12158,7 +12158,7 @@ var ChevronLeft = createLucideIcon(__iconData$72);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$71 = {
+var __iconData$72 = {
 	name: "chevron-up",
 	size: 24,
 	node: [["path", {
@@ -12166,8 +12166,8 @@ var __iconData$71 = {
 		key: "153udz"
 	}]]
 };
-__iconData$71.node;
-var ChevronUp = createLucideIcon(__iconData$71);
+__iconData$72.node;
+var ChevronUp = createLucideIcon(__iconData$72);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-right.mjs
 /**
@@ -12176,7 +12176,7 @@ var ChevronUp = createLucideIcon(__iconData$71);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$70 = {
+var __iconData$71 = {
 	name: "chevron-right",
 	size: 24,
 	node: [["path", {
@@ -12184,8 +12184,8 @@ var __iconData$70 = {
 		key: "mthhwq"
 	}]]
 };
-__iconData$70.node;
-var ChevronRight = createLucideIcon(__iconData$70);
+__iconData$71.node;
+var ChevronRight = createLucideIcon(__iconData$71);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-alert.mjs
 /**
@@ -12194,7 +12194,7 @@ var ChevronRight = createLucideIcon(__iconData$70);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$69 = {
+var __iconData$70 = {
 	name: "circle-alert",
 	size: 24,
 	node: [
@@ -12221,8 +12221,8 @@ var __iconData$69 = {
 	],
 	aliases: ["alert-circle"]
 };
-__iconData$69.node;
-var CircleAlert = createLucideIcon(__iconData$69);
+__iconData$70.node;
+var CircleAlert = createLucideIcon(__iconData$70);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-check.mjs
 /**
@@ -12231,7 +12231,7 @@ var CircleAlert = createLucideIcon(__iconData$69);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$68 = {
+var __iconData$69 = {
 	name: "circle-check",
 	size: 24,
 	node: [["circle", {
@@ -12245,39 +12245,8 @@ var __iconData$68 = {
 	}]],
 	aliases: ["check-circle-2"]
 };
-__iconData$68.node;
-var CircleCheck = createLucideIcon(__iconData$68);
-//#endregion
-//#region node_modules/lucide-react/dist/esm/icons/circle-question-mark.mjs
-/**
-* @license lucide-react v1.53.0 - ISC
-*
-* This source code is licensed under the ISC license.
-* See the LICENSE file in the root directory of this source tree.
-*/
-var __iconData$67 = {
-	name: "circle-question-mark",
-	size: 24,
-	node: [
-		["circle", {
-			cx: "12",
-			cy: "12",
-			r: "10",
-			key: "1mglay"
-		}],
-		["path", {
-			d: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3",
-			key: "1u773s"
-		}],
-		["path", {
-			d: "M12 17h.01",
-			key: "p32p05"
-		}]
-	],
-	aliases: ["help-circle", "circle-help"]
-};
-__iconData$67.node;
-var CircleQuestionMark = createLucideIcon(__iconData$67);
+__iconData$69.node;
+var CircleCheck = createLucideIcon(__iconData$69);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-x.mjs
 /**
@@ -12286,7 +12255,7 @@ var CircleQuestionMark = createLucideIcon(__iconData$67);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$66 = {
+var __iconData$68 = {
 	name: "circle-x",
 	size: 24,
 	node: [
@@ -12307,8 +12276,8 @@ var __iconData$66 = {
 	],
 	aliases: ["x-circle"]
 };
-__iconData$66.node;
-var CircleX = createLucideIcon(__iconData$66);
+__iconData$68.node;
+var CircleX = createLucideIcon(__iconData$68);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/clock.mjs
 /**
@@ -12317,7 +12286,7 @@ var CircleX = createLucideIcon(__iconData$66);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$65 = {
+var __iconData$67 = {
 	name: "clock",
 	size: 24,
 	node: [["circle", {
@@ -12330,8 +12299,8 @@ var __iconData$65 = {
 		key: "mmk7yg"
 	}]]
 };
-__iconData$65.node;
-var Clock = createLucideIcon(__iconData$65);
+__iconData$67.node;
+var Clock = createLucideIcon(__iconData$67);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/copy.mjs
 /**
@@ -12340,7 +12309,7 @@ var Clock = createLucideIcon(__iconData$65);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$64 = {
+var __iconData$66 = {
 	name: "copy",
 	size: 24,
 	node: [["rect", {
@@ -12356,8 +12325,8 @@ var __iconData$64 = {
 		key: "zix9uf"
 	}]]
 };
-__iconData$64.node;
-var Copy = createLucideIcon(__iconData$64);
+__iconData$66.node;
+var Copy = createLucideIcon(__iconData$66);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/credit-card.mjs
 /**
@@ -12366,7 +12335,7 @@ var Copy = createLucideIcon(__iconData$64);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$63 = {
+var __iconData$65 = {
 	name: "credit-card",
 	size: 24,
 	node: [
@@ -12391,8 +12360,8 @@ var __iconData$63 = {
 		}]
 	]
 };
-__iconData$63.node;
-var CreditCard = createLucideIcon(__iconData$63);
+__iconData$65.node;
+var CreditCard = createLucideIcon(__iconData$65);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/database.mjs
 /**
@@ -12401,7 +12370,7 @@ var CreditCard = createLucideIcon(__iconData$63);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$62 = {
+var __iconData$64 = {
 	name: "database",
 	size: 24,
 	node: [
@@ -12422,8 +12391,8 @@ var __iconData$62 = {
 		}]
 	]
 };
-__iconData$62.node;
-var Database = createLucideIcon(__iconData$62);
+__iconData$64.node;
+var Database = createLucideIcon(__iconData$64);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/download.mjs
 /**
@@ -12432,7 +12401,7 @@ var Database = createLucideIcon(__iconData$62);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$61 = {
+var __iconData$63 = {
 	name: "download",
 	size: 24,
 	node: [
@@ -12450,8 +12419,8 @@ var __iconData$61 = {
 		}]
 	]
 };
-__iconData$61.node;
-var Download = createLucideIcon(__iconData$61);
+__iconData$63.node;
+var Download = createLucideIcon(__iconData$63);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/ellipsis-vertical.mjs
 /**
@@ -12460,7 +12429,7 @@ var Download = createLucideIcon(__iconData$61);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$60 = {
+var __iconData$62 = {
 	name: "ellipsis-vertical",
 	size: 24,
 	node: [
@@ -12485,8 +12454,8 @@ var __iconData$60 = {
 	],
 	aliases: ["more-vertical"]
 };
-__iconData$60.node;
-var EllipsisVertical = createLucideIcon(__iconData$60);
+__iconData$62.node;
+var EllipsisVertical = createLucideIcon(__iconData$62);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/eye-off.mjs
 /**
@@ -12495,7 +12464,7 @@ var EllipsisVertical = createLucideIcon(__iconData$60);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$59 = {
+var __iconData$61 = {
 	name: "eye-off",
 	size: 24,
 	node: [
@@ -12517,8 +12486,8 @@ var __iconData$59 = {
 		}]
 	]
 };
-__iconData$59.node;
-var EyeOff = createLucideIcon(__iconData$59);
+__iconData$61.node;
+var EyeOff = createLucideIcon(__iconData$61);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/eye.mjs
 /**
@@ -12527,7 +12496,7 @@ var EyeOff = createLucideIcon(__iconData$59);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$58 = {
+var __iconData$60 = {
 	name: "eye",
 	size: 24,
 	node: [["path", {
@@ -12540,8 +12509,8 @@ var __iconData$58 = {
 		key: "1v7zrd"
 	}]]
 };
-__iconData$58.node;
-var Eye = createLucideIcon(__iconData$58);
+__iconData$60.node;
+var Eye = createLucideIcon(__iconData$60);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/file-spreadsheet.mjs
 /**
@@ -12550,7 +12519,7 @@ var Eye = createLucideIcon(__iconData$58);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$57 = {
+var __iconData$59 = {
 	name: "file-spreadsheet",
 	size: 24,
 	node: [
@@ -12580,8 +12549,8 @@ var __iconData$57 = {
 		}]
 	]
 };
-__iconData$57.node;
-var FileSpreadsheet = createLucideIcon(__iconData$57);
+__iconData$59.node;
+var FileSpreadsheet = createLucideIcon(__iconData$59);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/file-text.mjs
 /**
@@ -12590,7 +12559,7 @@ var FileSpreadsheet = createLucideIcon(__iconData$57);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$56 = {
+var __iconData$58 = {
 	name: "file-text",
 	size: 24,
 	node: [
@@ -12616,8 +12585,8 @@ var __iconData$56 = {
 		}]
 	]
 };
-__iconData$56.node;
-var FileText = createLucideIcon(__iconData$56);
+__iconData$58.node;
+var FileText = createLucideIcon(__iconData$58);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/funnel.mjs
 /**
@@ -12626,7 +12595,7 @@ var FileText = createLucideIcon(__iconData$56);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$55 = {
+var __iconData$57 = {
 	name: "funnel",
 	size: 24,
 	node: [["path", {
@@ -12635,8 +12604,8 @@ var __iconData$55 = {
 	}]],
 	aliases: ["filter"]
 };
-__iconData$55.node;
-var Funnel = createLucideIcon(__iconData$55);
+__iconData$57.node;
+var Funnel = createLucideIcon(__iconData$57);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/gauge.mjs
 /**
@@ -12645,7 +12614,7 @@ var Funnel = createLucideIcon(__iconData$55);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$54 = {
+var __iconData$56 = {
 	name: "gauge",
 	size: 24,
 	node: [["path", {
@@ -12656,8 +12625,8 @@ var __iconData$54 = {
 		key: "19p75a"
 	}]]
 };
-__iconData$54.node;
-var Gauge = createLucideIcon(__iconData$54);
+__iconData$56.node;
+var Gauge = createLucideIcon(__iconData$56);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/globe.mjs
 /**
@@ -12666,7 +12635,7 @@ var Gauge = createLucideIcon(__iconData$54);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$53 = {
+var __iconData$55 = {
 	name: "globe",
 	size: 24,
 	node: [
@@ -12686,8 +12655,8 @@ var __iconData$53 = {
 		}]
 	]
 };
-__iconData$53.node;
-var Globe = createLucideIcon(__iconData$53);
+__iconData$55.node;
+var Globe = createLucideIcon(__iconData$55);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/house.mjs
 /**
@@ -12696,7 +12665,7 @@ var Globe = createLucideIcon(__iconData$53);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$52 = {
+var __iconData$54 = {
 	name: "house",
 	size: 24,
 	node: [["path", {
@@ -12708,8 +12677,8 @@ var __iconData$52 = {
 	}]],
 	aliases: ["home"]
 };
-__iconData$52.node;
-var House = createLucideIcon(__iconData$52);
+__iconData$54.node;
+var House = createLucideIcon(__iconData$54);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/info.mjs
 /**
@@ -12718,7 +12687,7 @@ var House = createLucideIcon(__iconData$52);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$51 = {
+var __iconData$53 = {
 	name: "info",
 	size: 24,
 	node: [
@@ -12738,8 +12707,8 @@ var __iconData$51 = {
 		}]
 	]
 };
-__iconData$51.node;
-var Info = createLucideIcon(__iconData$51);
+__iconData$53.node;
+var Info = createLucideIcon(__iconData$53);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/infinity.mjs
 /**
@@ -12748,7 +12717,7 @@ var Info = createLucideIcon(__iconData$51);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$50 = {
+var __iconData$52 = {
 	name: "infinity",
 	size: 24,
 	node: [["path", {
@@ -12756,8 +12725,8 @@ var __iconData$50 = {
 		key: "18ogeb"
 	}]]
 };
-__iconData$50.node;
-var Infinity$1 = createLucideIcon(__iconData$50);
+__iconData$52.node;
+var Infinity$1 = createLucideIcon(__iconData$52);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/key-round.mjs
 /**
@@ -12766,7 +12735,7 @@ var Infinity$1 = createLucideIcon(__iconData$50);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$49 = {
+var __iconData$51 = {
 	name: "key-round",
 	size: 24,
 	node: [["path", {
@@ -12780,8 +12749,8 @@ var __iconData$49 = {
 		key: "w0ekpg"
 	}]]
 };
-__iconData$49.node;
-var KeyRound = createLucideIcon(__iconData$49);
+__iconData$51.node;
+var KeyRound = createLucideIcon(__iconData$51);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/landmark.mjs
 /**
@@ -12790,7 +12759,7 @@ var KeyRound = createLucideIcon(__iconData$49);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$48 = {
+var __iconData$50 = {
 	name: "landmark",
 	size: 24,
 	node: [
@@ -12820,8 +12789,8 @@ var __iconData$48 = {
 		}]
 	]
 };
-__iconData$48.node;
-var Landmark = createLucideIcon(__iconData$48);
+__iconData$50.node;
+var Landmark = createLucideIcon(__iconData$50);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/laptop.mjs
 /**
@@ -12830,7 +12799,7 @@ var Landmark = createLucideIcon(__iconData$48);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$47 = {
+var __iconData$49 = {
 	name: "laptop",
 	size: 24,
 	node: [["path", {
@@ -12841,8 +12810,8 @@ var __iconData$47 = {
 		key: "14rxg9"
 	}]]
 };
-__iconData$47.node;
-var Laptop = createLucideIcon(__iconData$47);
+__iconData$49.node;
+var Laptop = createLucideIcon(__iconData$49);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/layout-grid.mjs
 /**
@@ -12851,7 +12820,7 @@ var Laptop = createLucideIcon(__iconData$47);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$46 = {
+var __iconData$48 = {
 	name: "layout-grid",
 	size: 24,
 	node: [
@@ -12889,8 +12858,27 @@ var __iconData$46 = {
 		}]
 	]
 };
-__iconData$46.node;
-var LayoutGrid = createLucideIcon(__iconData$46);
+__iconData$48.node;
+var LayoutGrid = createLucideIcon(__iconData$48);
+//#endregion
+//#region node_modules/lucide-react/dist/esm/icons/loader-circle.mjs
+/**
+* @license lucide-react v1.53.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var __iconData$47 = {
+	name: "loader-circle",
+	size: 24,
+	node: [["path", {
+		d: "M21 12a9 9 0 1 1-6.219-8.56",
+		key: "13zald"
+	}]],
+	aliases: ["loader-2"]
+};
+__iconData$47.node;
+var LoaderCircle = createLucideIcon(__iconData$47);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/list.mjs
 /**
@@ -12899,7 +12887,7 @@ var LayoutGrid = createLucideIcon(__iconData$46);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$45 = {
+var __iconData$46 = {
 	name: "list",
 	size: 24,
 	node: [
@@ -12929,8 +12917,8 @@ var __iconData$45 = {
 		}]
 	]
 };
-__iconData$45.node;
-var List = createLucideIcon(__iconData$45);
+__iconData$46.node;
+var List = createLucideIcon(__iconData$46);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/lock-open.mjs
 /**
@@ -12939,7 +12927,7 @@ var List = createLucideIcon(__iconData$45);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$44 = {
+var __iconData$45 = {
 	name: "lock-open",
 	size: 24,
 	node: [["rect", {
@@ -12956,8 +12944,8 @@ var __iconData$44 = {
 	}]],
 	aliases: ["unlock"]
 };
-__iconData$44.node;
-var LockOpen = createLucideIcon(__iconData$44);
+__iconData$45.node;
+var LockOpen = createLucideIcon(__iconData$45);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/lock.mjs
 /**
@@ -12966,7 +12954,7 @@ var LockOpen = createLucideIcon(__iconData$44);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$43 = {
+var __iconData$44 = {
 	name: "lock",
 	size: 24,
 	node: [["rect", {
@@ -12982,8 +12970,8 @@ var __iconData$43 = {
 		key: "fwvmzm"
 	}]]
 };
-__iconData$43.node;
-var Lock = createLucideIcon(__iconData$43);
+__iconData$44.node;
+var Lock = createLucideIcon(__iconData$44);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/log-out.mjs
 /**
@@ -12992,7 +12980,7 @@ var Lock = createLucideIcon(__iconData$43);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$42 = {
+var __iconData$43 = {
 	name: "log-out",
 	size: 24,
 	node: [
@@ -13010,8 +12998,8 @@ var __iconData$42 = {
 		}]
 	]
 };
-__iconData$42.node;
-var LogOut = createLucideIcon(__iconData$42);
+__iconData$43.node;
+var LogOut = createLucideIcon(__iconData$43);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/map-pin.mjs
 /**
@@ -13020,7 +13008,7 @@ var LogOut = createLucideIcon(__iconData$42);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$41 = {
+var __iconData$42 = {
 	name: "map-pin",
 	size: 24,
 	node: [["path", {
@@ -13033,26 +13021,8 @@ var __iconData$41 = {
 		key: "ilqhr7"
 	}]]
 };
-__iconData$41.node;
-var MapPin = createLucideIcon(__iconData$41);
-//#endregion
-//#region node_modules/lucide-react/dist/esm/icons/moon.mjs
-/**
-* @license lucide-react v1.53.0 - ISC
-*
-* This source code is licensed under the ISC license.
-* See the LICENSE file in the root directory of this source tree.
-*/
-var __iconData$40 = {
-	name: "moon",
-	size: 24,
-	node: [["path", {
-		d: "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401",
-		key: "kfwtm"
-	}]]
-};
-__iconData$40.node;
-var Moon = createLucideIcon(__iconData$40);
+__iconData$42.node;
+var MapPin = createLucideIcon(__iconData$42);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/network.mjs
 /**
@@ -13061,7 +13031,7 @@ var Moon = createLucideIcon(__iconData$40);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$39 = {
+var __iconData$41 = {
 	name: "network",
 	size: 24,
 	node: [
@@ -13099,8 +13069,37 @@ var __iconData$39 = {
 		}]
 	]
 };
-__iconData$39.node;
-var Network = createLucideIcon(__iconData$39);
+__iconData$41.node;
+var Network = createLucideIcon(__iconData$41);
+//#endregion
+//#region node_modules/lucide-react/dist/esm/icons/octagon-alert.mjs
+/**
+* @license lucide-react v1.53.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var __iconData$40 = {
+	name: "octagon-alert",
+	size: 24,
+	node: [
+		["path", {
+			d: "M12 16h.01",
+			key: "1drbdi"
+		}],
+		["path", {
+			d: "M12 8v4",
+			key: "1got3b"
+		}],
+		["path", {
+			d: "M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z",
+			key: "1fd625"
+		}]
+	],
+	aliases: ["alert-octagon"]
+};
+__iconData$40.node;
+var OctagonAlert = createLucideIcon(__iconData$40);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/pause.mjs
 /**
@@ -13109,7 +13108,7 @@ var Network = createLucideIcon(__iconData$39);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$38 = {
+var __iconData$39 = {
 	name: "pause",
 	size: 24,
 	node: [["rect", {
@@ -13128,8 +13127,8 @@ var __iconData$38 = {
 		key: "1wsw3u"
 	}]]
 };
-__iconData$38.node;
-var Pause = createLucideIcon(__iconData$38);
+__iconData$39.node;
+var Pause = createLucideIcon(__iconData$39);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/pen.mjs
 /**
@@ -13138,7 +13137,7 @@ var Pause = createLucideIcon(__iconData$38);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$37 = {
+var __iconData$38 = {
 	name: "pen",
 	size: 24,
 	node: [["path", {
@@ -13147,8 +13146,8 @@ var __iconData$37 = {
 	}]],
 	aliases: ["edit-2"]
 };
-__iconData$37.node;
-var Pen = createLucideIcon(__iconData$37);
+__iconData$38.node;
+var Pen = createLucideIcon(__iconData$38);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/pencil.mjs
 /**
@@ -13157,7 +13156,7 @@ var Pen = createLucideIcon(__iconData$37);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$36 = {
+var __iconData$37 = {
 	name: "pencil",
 	size: 24,
 	node: [["path", {
@@ -13168,8 +13167,8 @@ var __iconData$36 = {
 		key: "1mk7zo"
 	}]]
 };
-__iconData$36.node;
-var Pencil = createLucideIcon(__iconData$36);
+__iconData$37.node;
+var Pencil = createLucideIcon(__iconData$37);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/phone.mjs
 /**
@@ -13178,7 +13177,7 @@ var Pencil = createLucideIcon(__iconData$36);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$35 = {
+var __iconData$36 = {
 	name: "phone",
 	size: 24,
 	node: [["path", {
@@ -13186,8 +13185,8 @@ var __iconData$35 = {
 		key: "9njp5v"
 	}]]
 };
-__iconData$35.node;
-var Phone = createLucideIcon(__iconData$35);
+__iconData$36.node;
+var Phone = createLucideIcon(__iconData$36);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/play.mjs
 /**
@@ -13196,7 +13195,7 @@ var Phone = createLucideIcon(__iconData$35);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$34 = {
+var __iconData$35 = {
 	name: "play",
 	size: 24,
 	node: [["path", {
@@ -13204,8 +13203,8 @@ var __iconData$34 = {
 		key: "10ikf1"
 	}]]
 };
-__iconData$34.node;
-var Play = createLucideIcon(__iconData$34);
+__iconData$35.node;
+var Play = createLucideIcon(__iconData$35);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/plus.mjs
 /**
@@ -13214,7 +13213,7 @@ var Play = createLucideIcon(__iconData$34);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$33 = {
+var __iconData$34 = {
 	name: "plus",
 	size: 24,
 	node: [["path", {
@@ -13225,8 +13224,8 @@ var __iconData$33 = {
 		key: "s699le"
 	}]]
 };
-__iconData$33.node;
-var Plus = createLucideIcon(__iconData$33);
+__iconData$34.node;
+var Plus = createLucideIcon(__iconData$34);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/radio.mjs
 /**
@@ -13235,7 +13234,7 @@ var Plus = createLucideIcon(__iconData$33);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$32 = {
+var __iconData$33 = {
 	name: "radio",
 	size: 24,
 	node: [
@@ -13263,8 +13262,8 @@ var __iconData$32 = {
 		}]
 	]
 };
-__iconData$32.node;
-var Radio = createLucideIcon(__iconData$32);
+__iconData$33.node;
+var Radio = createLucideIcon(__iconData$33);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/receipt-text.mjs
 /**
@@ -13273,7 +13272,7 @@ var Radio = createLucideIcon(__iconData$32);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$31 = {
+var __iconData$32 = {
 	name: "receipt-text",
 	size: 24,
 	node: [
@@ -13295,8 +13294,8 @@ var __iconData$31 = {
 		}]
 	]
 };
-__iconData$31.node;
-var ReceiptText = createLucideIcon(__iconData$31);
+__iconData$32.node;
+var ReceiptText = createLucideIcon(__iconData$32);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/refresh-cw.mjs
 /**
@@ -13305,7 +13304,7 @@ var ReceiptText = createLucideIcon(__iconData$31);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$30 = {
+var __iconData$31 = {
 	name: "refresh-cw",
 	size: 24,
 	node: [
@@ -13327,8 +13326,8 @@ var __iconData$30 = {
 		}]
 	]
 };
-__iconData$30.node;
-var RefreshCw = createLucideIcon(__iconData$30);
+__iconData$31.node;
+var RefreshCw = createLucideIcon(__iconData$31);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/rotate-ccw-clock.mjs
 /**
@@ -13337,7 +13336,7 @@ var RefreshCw = createLucideIcon(__iconData$30);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$29 = {
+var __iconData$30 = {
 	name: "rotate-ccw-clock",
 	size: 24,
 	node: [
@@ -13356,8 +13355,8 @@ var __iconData$29 = {
 	],
 	aliases: ["history"]
 };
-__iconData$29.node;
-var RotateCcwClock = createLucideIcon(__iconData$29);
+__iconData$30.node;
+var RotateCcwClock = createLucideIcon(__iconData$30);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs
 /**
@@ -13366,7 +13365,7 @@ var RotateCcwClock = createLucideIcon(__iconData$29);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$28 = {
+var __iconData$29 = {
 	name: "rotate-ccw",
 	size: 24,
 	node: [["path", {
@@ -13377,8 +13376,8 @@ var __iconData$28 = {
 		key: "1xhq8a"
 	}]]
 };
-__iconData$28.node;
-var RotateCcw = createLucideIcon(__iconData$28);
+__iconData$29.node;
+var RotateCcw = createLucideIcon(__iconData$29);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/rotate-cw.mjs
 /**
@@ -13387,7 +13386,7 @@ var RotateCcw = createLucideIcon(__iconData$28);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$27 = {
+var __iconData$28 = {
 	name: "rotate-cw",
 	size: 24,
 	node: [["path", {
@@ -13398,8 +13397,8 @@ var __iconData$27 = {
 		key: "1q7to0"
 	}]]
 };
-__iconData$27.node;
-var RotateCw = createLucideIcon(__iconData$27);
+__iconData$28.node;
+var RotateCw = createLucideIcon(__iconData$28);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/router.mjs
 /**
@@ -13408,7 +13407,7 @@ var RotateCw = createLucideIcon(__iconData$27);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$26 = {
+var __iconData$27 = {
 	name: "router",
 	size: 24,
 	node: [
@@ -13442,8 +13441,8 @@ var __iconData$26 = {
 		}]
 	]
 };
-__iconData$26.node;
-var Router = createLucideIcon(__iconData$26);
+__iconData$27.node;
+var Router = createLucideIcon(__iconData$27);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/save.mjs
 /**
@@ -13452,7 +13451,7 @@ var Router = createLucideIcon(__iconData$26);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$25 = {
+var __iconData$26 = {
 	name: "save",
 	size: 24,
 	node: [
@@ -13470,8 +13469,8 @@ var __iconData$25 = {
 		}]
 	]
 };
-__iconData$25.node;
-var Save = createLucideIcon(__iconData$25);
+__iconData$26.node;
+var Save = createLucideIcon(__iconData$26);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/scroll-text.mjs
 /**
@@ -13480,7 +13479,7 @@ var Save = createLucideIcon(__iconData$25);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$24 = {
+var __iconData$25 = {
 	name: "scroll-text",
 	size: 24,
 	node: [
@@ -13502,8 +13501,8 @@ var __iconData$24 = {
 		}]
 	]
 };
-__iconData$24.node;
-var ScrollText = createLucideIcon(__iconData$24);
+__iconData$25.node;
+var ScrollText = createLucideIcon(__iconData$25);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/search.mjs
 /**
@@ -13512,7 +13511,7 @@ var ScrollText = createLucideIcon(__iconData$24);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$23 = {
+var __iconData$24 = {
 	name: "search",
 	size: 24,
 	node: [["path", {
@@ -13525,8 +13524,8 @@ var __iconData$23 = {
 		key: "4ej97u"
 	}]]
 };
-__iconData$23.node;
-var Search = createLucideIcon(__iconData$23);
+__iconData$24.node;
+var Search = createLucideIcon(__iconData$24);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/send.mjs
 /**
@@ -13535,7 +13534,7 @@ var Search = createLucideIcon(__iconData$23);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$22 = {
+var __iconData$23 = {
 	name: "send",
 	size: 24,
 	node: [["path", {
@@ -13546,8 +13545,8 @@ var __iconData$22 = {
 		key: "12cjpa"
 	}]]
 };
-__iconData$22.node;
-var Send = createLucideIcon(__iconData$22);
+__iconData$23.node;
+var Send = createLucideIcon(__iconData$23);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/server.mjs
 /**
@@ -13556,7 +13555,7 @@ var Send = createLucideIcon(__iconData$22);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$21 = {
+var __iconData$22 = {
 	name: "server",
 	size: 24,
 	node: [
@@ -13594,8 +13593,8 @@ var __iconData$21 = {
 		}]
 	]
 };
-__iconData$21.node;
-var Server = createLucideIcon(__iconData$21);
+__iconData$22.node;
+var Server = createLucideIcon(__iconData$22);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/shield-check.mjs
 /**
@@ -13604,7 +13603,7 @@ var Server = createLucideIcon(__iconData$21);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$20 = {
+var __iconData$21 = {
 	name: "shield-check",
 	size: 24,
 	node: [["path", {
@@ -13615,8 +13614,8 @@ var __iconData$20 = {
 		key: "dzmm74"
 	}]]
 };
-__iconData$20.node;
-var ShieldCheck = createLucideIcon(__iconData$20);
+__iconData$21.node;
+var ShieldCheck = createLucideIcon(__iconData$21);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/signal.mjs
 /**
@@ -13625,7 +13624,7 @@ var ShieldCheck = createLucideIcon(__iconData$20);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$19 = {
+var __iconData$20 = {
 	name: "signal",
 	size: 24,
 	node: [
@@ -13651,8 +13650,8 @@ var __iconData$19 = {
 		}]
 	]
 };
-__iconData$19.node;
-var Signal = createLucideIcon(__iconData$19);
+__iconData$20.node;
+var Signal = createLucideIcon(__iconData$20);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/sliders-horizontal.mjs
 /**
@@ -13661,7 +13660,7 @@ var Signal = createLucideIcon(__iconData$19);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$18 = {
+var __iconData$19 = {
 	name: "sliders-horizontal",
 	size: 24,
 	node: [
@@ -13703,8 +13702,8 @@ var __iconData$18 = {
 		}]
 	]
 };
-__iconData$18.node;
-var SlidersHorizontal = createLucideIcon(__iconData$18);
+__iconData$19.node;
+var SlidersHorizontal = createLucideIcon(__iconData$19);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/sliders-vertical.mjs
 /**
@@ -13713,7 +13712,7 @@ var SlidersHorizontal = createLucideIcon(__iconData$18);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$17 = {
+var __iconData$18 = {
 	name: "sliders-vertical",
 	size: 24,
 	node: [
@@ -13756,8 +13755,8 @@ var __iconData$17 = {
 	],
 	aliases: ["sliders"]
 };
-__iconData$17.node;
-var SlidersVertical = createLucideIcon(__iconData$17);
+__iconData$18.node;
+var SlidersVertical = createLucideIcon(__iconData$18);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/smartphone.mjs
 /**
@@ -13766,7 +13765,7 @@ var SlidersVertical = createLucideIcon(__iconData$17);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$16 = {
+var __iconData$17 = {
 	name: "smartphone",
 	size: 24,
 	node: [["rect", {
@@ -13782,8 +13781,8 @@ var __iconData$16 = {
 		key: "mhygvu"
 	}]]
 };
-__iconData$16.node;
-var Smartphone = createLucideIcon(__iconData$16);
+__iconData$17.node;
+var Smartphone = createLucideIcon(__iconData$17);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/square.mjs
 /**
@@ -13792,7 +13791,7 @@ var Smartphone = createLucideIcon(__iconData$16);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$15 = {
+var __iconData$16 = {
 	name: "square",
 	size: 24,
 	node: [["rect", {
@@ -13804,8 +13803,8 @@ var __iconData$15 = {
 		key: "afitv7"
 	}]]
 };
-__iconData$15.node;
-var Square = createLucideIcon(__iconData$15);
+__iconData$16.node;
+var Square = createLucideIcon(__iconData$16);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/thermometer.mjs
 /**
@@ -13814,7 +13813,7 @@ var Square = createLucideIcon(__iconData$15);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$14 = {
+var __iconData$15 = {
 	name: "thermometer",
 	size: 24,
 	node: [["path", {
@@ -13822,8 +13821,8 @@ var __iconData$14 = {
 		key: "17jzev"
 	}]]
 };
-__iconData$14.node;
-var Thermometer = createLucideIcon(__iconData$14);
+__iconData$15.node;
+var Thermometer = createLucideIcon(__iconData$15);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/ticket.mjs
 /**
@@ -13832,7 +13831,7 @@ var Thermometer = createLucideIcon(__iconData$14);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$13 = {
+var __iconData$14 = {
 	name: "ticket",
 	size: 24,
 	node: [
@@ -13854,8 +13853,8 @@ var __iconData$13 = {
 		}]
 	]
 };
-__iconData$13.node;
-var Ticket = createLucideIcon(__iconData$13);
+__iconData$14.node;
+var Ticket = createLucideIcon(__iconData$14);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/trash.mjs
 /**
@@ -13864,7 +13863,7 @@ var Ticket = createLucideIcon(__iconData$13);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$12 = {
+var __iconData$13 = {
 	name: "trash",
 	size: 24,
 	node: [
@@ -13891,8 +13890,8 @@ var __iconData$12 = {
 	],
 	aliases: ["trash-2"]
 };
-__iconData$12.node;
-var Trash = createLucideIcon(__iconData$12);
+__iconData$13.node;
+var Trash = createLucideIcon(__iconData$13);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/trending-up.mjs
 /**
@@ -13901,7 +13900,7 @@ var Trash = createLucideIcon(__iconData$12);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$11 = {
+var __iconData$12 = {
 	name: "trending-up",
 	size: 24,
 	node: [["path", {
@@ -13912,8 +13911,8 @@ var __iconData$11 = {
 		key: "1t1m79"
 	}]]
 };
-__iconData$11.node;
-var TrendingUp = createLucideIcon(__iconData$11);
+__iconData$12.node;
+var TrendingUp = createLucideIcon(__iconData$12);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/triangle-alert.mjs
 /**
@@ -13922,7 +13921,7 @@ var TrendingUp = createLucideIcon(__iconData$11);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$10 = {
+var __iconData$11 = {
 	name: "triangle-alert",
 	size: 24,
 	node: [
@@ -13941,8 +13940,8 @@ var __iconData$10 = {
 	],
 	aliases: ["alert-triangle"]
 };
-__iconData$10.node;
-var TriangleAlert = createLucideIcon(__iconData$10);
+__iconData$11.node;
+var TriangleAlert = createLucideIcon(__iconData$11);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/upload.mjs
 /**
@@ -13951,7 +13950,7 @@ var TriangleAlert = createLucideIcon(__iconData$10);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$9 = {
+var __iconData$10 = {
 	name: "upload",
 	size: 24,
 	node: [
@@ -13969,8 +13968,8 @@ var __iconData$9 = {
 		}]
 	]
 };
-__iconData$9.node;
-var Upload = createLucideIcon(__iconData$9);
+__iconData$10.node;
+var Upload = createLucideIcon(__iconData$10);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/user-plus.mjs
 /**
@@ -13979,7 +13978,7 @@ var Upload = createLucideIcon(__iconData$9);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$8 = {
+var __iconData$9 = {
 	name: "user-plus",
 	size: 24,
 	node: [
@@ -14009,8 +14008,8 @@ var __iconData$8 = {
 		}]
 	]
 };
-__iconData$8.node;
-var UserPlus = createLucideIcon(__iconData$8);
+__iconData$9.node;
+var UserPlus = createLucideIcon(__iconData$9);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/user.mjs
 /**
@@ -14019,7 +14018,7 @@ var UserPlus = createLucideIcon(__iconData$8);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$7 = {
+var __iconData$8 = {
 	name: "user",
 	size: 24,
 	node: [["path", {
@@ -14032,8 +14031,8 @@ var __iconData$7 = {
 		key: "17ys0d"
 	}]]
 };
-__iconData$7.node;
-var User = createLucideIcon(__iconData$7);
+__iconData$8.node;
+var User = createLucideIcon(__iconData$8);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/users.mjs
 /**
@@ -14042,7 +14041,7 @@ var User = createLucideIcon(__iconData$7);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$6 = {
+var __iconData$7 = {
 	name: "users",
 	size: 24,
 	node: [
@@ -14066,8 +14065,8 @@ var __iconData$6 = {
 		}]
 	]
 };
-__iconData$6.node;
-var Users = createLucideIcon(__iconData$6);
+__iconData$7.node;
+var Users = createLucideIcon(__iconData$7);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/wand-sparkles.mjs
 /**
@@ -14076,7 +14075,7 @@ var Users = createLucideIcon(__iconData$6);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$5 = {
+var __iconData$6 = {
 	name: "wand-sparkles",
 	size: 24,
 	node: [
@@ -14115,8 +14114,52 @@ var __iconData$5 = {
 	],
 	aliases: ["wand-2"]
 };
+__iconData$6.node;
+var WandSparkles = createLucideIcon(__iconData$6);
+//#endregion
+//#region node_modules/lucide-react/dist/esm/icons/wifi-off.mjs
+/**
+* @license lucide-react v1.53.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var __iconData$5 = {
+	name: "wifi-off",
+	size: 24,
+	node: [
+		["path", {
+			d: "M12 20h.01",
+			key: "zekei9"
+		}],
+		["path", {
+			d: "M8.5 16.429a5 5 0 0 1 7 0",
+			key: "1bycff"
+		}],
+		["path", {
+			d: "M5 12.859a10 10 0 0 1 5.17-2.69",
+			key: "1dl1wf"
+		}],
+		["path", {
+			d: "M19 12.859a10 10 0 0 0-2.007-1.523",
+			key: "4k23kn"
+		}],
+		["path", {
+			d: "M2 8.82a15 15 0 0 1 4.177-2.643",
+			key: "1grhjp"
+		}],
+		["path", {
+			d: "M22 8.82a15 15 0 0 0-11.288-3.764",
+			key: "z3jwby"
+		}],
+		["path", {
+			d: "m2 2 20 20",
+			key: "1ooewy"
+		}]
+	]
+};
 __iconData$5.node;
-var WandSparkles = createLucideIcon(__iconData$5);
+var WifiOff = createLucideIcon(__iconData$5);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/wifi.mjs
 /**
@@ -14396,6 +14439,29 @@ var MonitoringService = class {
 	}
 	static async pollNotifications() {
 		return new ApiService().get("/api/notifications/poll");
+	}
+};
+var CustomerService = class {
+	static async list(params = {}) {
+		return new ApiService().get("/api/pelanggan", params);
+	}
+	static async create(payload) {
+		return new ApiService().post("/api/customers", payload);
+	}
+	static async update(idPelanggan, payload) {
+		return new ApiService().put(`/api/customers/${idPelanggan}`, payload);
+	}
+	static async delete(idPelanggan) {
+		return new ApiService().delete(`/api/customers/${idPelanggan}`);
+	}
+	static async bulkDelete(ids) {
+		return new ApiService().post("/api/customers/bulk-delete", { ids });
+	}
+	static async resetPortalPassword(idPelanggan) {
+		return new ApiService().post(`/api/customers/${idPelanggan}/reset-portal-password`);
+	}
+	static async changeWifi(idPelanggan, payload) {
+		return new ApiService().post(`/api/customers/${idPelanggan}/change-wifi`, payload);
 	}
 };
 var LogsService = class {
@@ -14792,11 +14858,12 @@ function DashboardControlBar({ activeOffice, getOfficeDisplayName, engineStatus,
 							className: "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border border-[#CCDDF0] text-xs font-semibold transition flex items-center justify-center gap-2 shadow-2xs min-h-[36px] sm:min-h-[38px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
 							children: isToggling ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-[#026AA7] animate-spin shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menyimpan..." })] }) : isRunning ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pause, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hentikan Jadwal" })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, { className: "w-3.5 h-3.5 text-[#026AA7] fill-current" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Aktifkan Jadwal" })] })
 						})] }),
-						isScanning && isCurrentOfficeScan && canControlCurrentScan && scanProgress?.total > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						isScanning && isCurrentOfficeScan && canControlCurrentScan && !scanProgress?.is_paused && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
 							onClick: handlePauseScan,
-							disabled: isAnyActionLoading,
-							className: "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border border-[#CCDDF0] text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs min-h-[36px] sm:min-h-[38px]",
+							disabled: isAnyActionLoading || !scanProgress?.total,
+							title: !scanProgress?.total ? "Sedang menginisiasi pemindaian ONT..." : "Jeda pemindaian",
+							className: "flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border border-[#CCDDF0] text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs min-h-[36px] sm:min-h-[38px] disabled:opacity-50 disabled:cursor-not-allowed",
 							children: [scanActionType === "pause" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-[#026AA7] animate-spin shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pause, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: scanActionType === "pause" ? "Memproses..." : "Jeda Pemindaian" })]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
@@ -28664,8 +28731,26 @@ function DashboardView({ activeOffice = "all", currentUser = {
 	const [lastScanTime, setLastScanTime] = (0, import_react.useState)("-");
 	const [nextRunTime, setNextRunTime] = (0, import_react.useState)("-");
 	const [intervalMinutes, setIntervalMinutes] = (0, import_react.useState)(10);
-	const [isScanning, setIsScanning] = (0, import_react.useState)(false);
-	const [isStartingScan, setIsStartingScan] = (0, import_react.useState)(false);
+	const [isScanning, setIsScanning] = (0, import_react.useState)(() => {
+		try {
+			const saved = sessionStorage.getItem("tekno_active_scan_initiating");
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				if (Date.now() - parsed.startTime < 25e3) return true;
+			}
+		} catch (_) {}
+		return false;
+	});
+	const [isStartingScan, setIsStartingScan] = (0, import_react.useState)(() => {
+		try {
+			const saved = sessionStorage.getItem("tekno_active_scan_initiating");
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				if (Date.now() - parsed.startTime < 15e3) return true;
+			}
+		} catch (_) {}
+		return false;
+	});
 	const [scanActionType, setScanActionType] = (0, import_react.useState)(null);
 	const [isStopModalOpen, setIsStopModalOpen] = (0, import_react.useState)(false);
 	const [isToggling, setIsToggling] = (0, import_react.useState)(false);
@@ -28771,6 +28856,24 @@ function DashboardView({ activeOffice = "all", currentUser = {
 				setNextRunTime(d.next_run_time || "-");
 				setIntervalMinutes(d.interval_minutes || 10);
 				setIsScanning(d.is_scanning || false);
+				if (d.is_scanning) {
+					setIsStartingScan(false);
+					try {
+						sessionStorage.removeItem("tekno_active_scan_initiating");
+					} catch (_) {}
+				} else {
+					const saved = sessionStorage.getItem("tekno_active_scan_initiating");
+					if (saved) try {
+						const parsed = JSON.parse(saved);
+						if (Date.now() - parsed.startTime > 8e3) {
+							sessionStorage.removeItem("tekno_active_scan_initiating");
+							setIsStartingScan(false);
+						}
+					} catch (_) {
+						sessionStorage.removeItem("tekno_active_scan_initiating");
+					}
+					else setIsStartingScan(false);
+				}
 				setUnreadTicketsCount(d.unread_tickets_count || 0);
 				if (d.scan_progress) setScanProgress({
 					current: d.scan_progress.current || 0,
@@ -28825,6 +28928,13 @@ function DashboardView({ activeOffice = "all", currentUser = {
 		}
 		actionInProgressRef.current = true;
 		setIsStartingScan(true);
+		setIsScanning(true);
+		try {
+			sessionStorage.setItem("tekno_active_scan_initiating", JSON.stringify({
+				kantor: activeOffice,
+				startTime: Date.now()
+			}));
+		} catch (_) {}
 		showToast(`Memulai pemindaian manual ONT ${targetLabel}...`, "info");
 		try {
 			const res = await MonitoringService.triggerScanAll({ kantor: activeOffice });
@@ -28848,7 +28958,7 @@ function DashboardView({ activeOffice = "all", currentUser = {
 			setIsNetworkError(true);
 		} finally {
 			actionInProgressRef.current = false;
-			setIsStartingScan(false);
+			if (!sessionStorage.getItem("tekno_active_scan_initiating")) setIsStartingScan(false);
 			fetchStatus();
 			fetchKpi();
 		}
@@ -29213,7 +29323,7 @@ function SettingsThresholdTab({ onOpenConfirmModal, settingsLoading, pollingInte
 }
 //#endregion
 //#region src/components/settings/SettingsCredentialsTab.jsx
-function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCredentials, addModemCredentialRow, removeModemCredentialRow, updateModemCredentialRow, showModemPasswords, toggleModemPasswordVisibility, applyToInvalid, setApplyToInvalid, dragOverCredIdx, handleCredDragStart, handleCredDragOver, handleCredDrop, handleCredDragEnd }) {
+function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCredentials, addModemCredentialRow, removeModemCredentialRow, updateModemCredentialRow, showModemPasswords, toggleModemPasswordVisibility, dragOverCredIdx, handleCredDragStart, handleCredDragOver, handleCredDrop, handleCredDragEnd }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 		onSubmit: (e) => {
 			e.preventDefault();
@@ -29272,7 +29382,7 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 								className: "relative",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									type: showModemPasswords[idx] ? "text" : "password",
-									placeholder: "Password modem (misal: tekno2024)",
+									placeholder: "Password modem (misal: password123)",
 									value: cred.password,
 									onChange: (e) => updateModemCredentialRow(idx, "password", e.target.value),
 									required: true,
@@ -29297,33 +29407,6 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 				}, idx))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "pt-2",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-					className: "flex items-start gap-2.5 p-3 rounded-xl bg-cyan-50/50 border border-sky-200 cursor-pointer transition hover:bg-cyan-50",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "checkbox",
-						checked: applyToInvalid,
-						onChange: (e) => setApplyToInvalid(e.target.checked),
-						className: "mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "text-xs flex-1",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "font-bold text-slate-800",
-								children: "Sinkronkan ke seluruh pelanggan berstatus INVALID"
-							}), applyToInvalid && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-[11px] font-mono font-bold text-cyan-700",
-								children: "Aktif Tersimpan"
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-[11px] text-slate-500 mt-0.5",
-							children: "Otomatis menguji urutan kredensial baru ini ke semua pelanggan yang sebelumnya gagal login saat disimpan dan selama pemantauan."
-						})]
-					})]
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "pt-3 border-t border-sky-100 flex justify-end",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "submit",
@@ -29336,7 +29419,7 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 				className: "hidden lg:block pt-3 border-t border-sky-100 space-y-2 text-xs",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
 					className: "font-bold text-slate-900 flex items-center gap-2 text-xs",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Cara Kerja Multi-Kredensial Fallback" })]
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Cara Kerja Multi-Kredensial Fallback Otomatis" })]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ol", {
 					className: "list-decimal list-inside space-y-1.5 text-xs text-slate-600 leading-relaxed font-sans pl-1",
 					children: [
@@ -29349,102 +29432,19 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 								children: "VALID"
 							}),
 							"."
+						] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
+							"Setiap kali kredensial disimpan, sistem ",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "otomatis menyinkronkan dan mereset antrean" }),
+							" seluruh pelanggan berstatus ",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", {
+								className: "text-rose-700 font-mono text-[11px] font-bold",
+								children: "INVALID"
+							}),
+							" agar diuji kembali pada siklus pemindaian berikutnya."
 						] })
 					]
 				})]
-			})
-		]
-	});
-}
-//#endregion
-//#region src/components/settings/SettingsNotificationsTab.jsx
-function SettingsNotificationsTab({ onOpenConfirmModal, settingsLoading, alertWaitingInterval, setAlertWaitingInterval, nightModeEnabled, setNightModeEnabled, nightModeStart, setNightModeStart, nightModeEnd, setNightModeEnd }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-		onSubmit: (e) => {
-			e.preventDefault();
-			onOpenConfirmModal();
-		},
-		className: "space-y-4",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "border-b border-sky-100 pb-3",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					className: "text-sm font-extrabold text-slate-900",
-					children: "Notifikasi & Jam Senyap"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs text-slate-500",
-					children: "Konfigurasi interval pengingat dan rentang jam senyap notifikasi operasional NOC."
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "space-y-1.5 py-1",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-						className: "block text-xs font-bold text-slate-700 flex items-center gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Interval Pengingat Pemantauan Terjeda (Menit)" })]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "number",
-						min: "5",
-						max: "180",
-						value: alertWaitingInterval,
-						onChange: (e) => setAlertWaitingInterval(e.target.value),
-						className: "w-full rounded-xl border border-sky-200 px-3.5 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[40px]"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-xs text-slate-600 font-sans",
-						children: "Notifikasi pengingat muncul di dashboard jika pemindaian terjeda lebih dari waktu ini."
-					})
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "py-2 space-y-3 border-t border-sky-100",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-					className: "flex items-center justify-between cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2.5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Moon, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-xs font-bold text-slate-800",
-							children: "Jam Tenang Malam (Quiet Hours)"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-slate-600 font-sans mt-0.5",
-							children: "Membungkam notifikasi non-kritis selama rentang jam istirahat teknisi."
-						})] })]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "checkbox",
-						checked: nightModeEnabled,
-						onChange: (e) => setNightModeEnabled(e.target.checked),
-						className: "rounded text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
-					})]
-				}), nightModeEnabled && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-						className: "block text-[11px] font-bold text-slate-700 mb-1",
-						children: "Jam Mulai Senyap"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "time",
-						value: nightModeStart,
-						onChange: (e) => setNightModeStart(e.target.value),
-						className: "w-full rounded-xl border border-sky-200 px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[40px]"
-					})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-						className: "block text-[11px] font-bold text-slate-700 mb-1",
-						children: "Jam Berakhir Senyap"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "time",
-						value: nightModeEnd,
-						onChange: (e) => setNightModeEnd(e.target.value),
-						className: "w-full rounded-xl border border-sky-200 px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[40px]"
-					})] })]
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "pt-3 border-t border-sky-100 flex justify-end",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					type: "submit",
-					disabled: settingsLoading,
-					className: "px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Pengaturan Notifikasi" })]
-				})
 			})
 		]
 	});
@@ -29566,7 +29566,7 @@ function SettingsProfileTab({ currentUser, setCurrentUser, onLogout, setProfileS
 								required: true,
 								value: editNama,
 								onChange: (e) => setEditNama(e.target.value),
-								placeholder: "Contoh: Raihan Agil / Teknisi NOC",
+								placeholder: "Contoh: Budi Santoso / Teknisi NOC",
 								className: "w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50 text-xs text-slate-900 font-semibold focus:outline-none focus:border-cyan-600 min-h-[42px]"
 							})]
 						}),
@@ -29579,7 +29579,7 @@ function SettingsProfileTab({ currentUser, setCurrentUser, onLogout, setProfileS
 								type: "text",
 								value: editNoWa,
 								onChange: (e) => setEditNoWa(e.target.value),
-								placeholder: "Contoh: 08888015154142",
+								placeholder: "Contoh: 081234567890",
 								className: "w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
 							})]
 						}),
@@ -29790,7 +29790,7 @@ function SettingsProfileTab({ currentUser, setCurrentUser, onLogout, setProfileS
 }
 //#endregion
 //#region src/components/settings/SettingsView.jsx
-function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsLoading, settingsSaveSuccess, settingsSaveError, pollingInterval, setPollingInterval, warnThreshold, setWarnThreshold, critThreshold, setCritThreshold, appVibration, setAppVibration, alertWaitingInterval, setAlertWaitingInterval, nightModeEnabled, setNightModeEnabled, nightModeStart, setNightModeStart, nightModeEnd, setNightModeEnd, modemCredentials, addModemCredentialRow, removeModemCredentialRow, updateModemCredentialRow, showModemPasswords, toggleModemPasswordVisibility, applyToInvalid, setApplyToInvalid, dragOverCredIdx, handleCredDragStart, handleCredDragOver, handleCredDrop, handleCredDragEnd, fetchBackendSettings, onOpenConfirmModal, currentUser, setCurrentUser, onLogout, activeOffice }) {
+function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsLoading, settingsSaveSuccess, settingsSaveError, pollingInterval, setPollingInterval, warnThreshold, setWarnThreshold, critThreshold, setCritThreshold, appVibration, setAppVibration, alertWaitingInterval, setAlertWaitingInterval, nightModeEnabled, setNightModeEnabled, nightModeStart, setNightModeStart, nightModeEnd, setNightModeEnd, modemCredentials, addModemCredentialRow, removeModemCredentialRow, updateModemCredentialRow, showModemPasswords, toggleModemPasswordVisibility, dragOverCredIdx, handleCredDragStart, handleCredDragOver, handleCredDrop, handleCredDragEnd, fetchBackendSettings, onOpenConfirmModal, currentUser, setCurrentUser, onLogout, activeOffice }) {
 	const [profileSuccess, setProfileSuccess] = (0, import_react.useState)("");
 	const [profileError, setProfileError] = (0, import_react.useState)("");
 	const isTeknisi = currentUser?.role === "teknisi";
@@ -29859,36 +29859,24 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 					}), !isTeknisi && settingsCategory === "noc" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "p-2 bg-white/95 rounded-2xl border border-sky-100 shadow-xs animate-in fade-in duration-200",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "grid grid-cols-3 gap-1",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									type: "button",
-									onClick: () => setSettingsActiveSubTab("thresholds"),
-									className: `flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === "thresholds" ? "text-cyan-700 font-black" : "text-slate-500 hover:text-slate-800 font-semibold"}`,
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersHorizontal, { className: `w-5 h-5 mb-1 transition ${settingsActiveSubTab === "thresholds" ? "text-cyan-600 stroke-[2.5]" : "text-slate-400 stroke-[1.8]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[11px] leading-tight font-bold",
-										children: "Parameter"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									type: "button",
-									onClick: () => setSettingsActiveSubTab("credentials"),
-									className: `flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === "credentials" ? "text-cyan-700 font-black" : "text-slate-500 hover:text-slate-800 font-semibold"}`,
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: `w-5 h-5 mb-1 transition ${settingsActiveSubTab === "credentials" ? "text-cyan-600 stroke-[2.5]" : "text-slate-400 stroke-[1.8]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[11px] leading-tight font-bold",
-										children: "Kredensial ONT"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									type: "button",
-									onClick: () => setSettingsActiveSubTab("notifications"),
-									className: `flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === "notifications" ? "text-cyan-700 font-black" : "text-slate-500 hover:text-slate-800 font-semibold"}`,
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: `w-5 h-5 mb-1 transition ${settingsActiveSubTab === "notifications" ? "text-cyan-600 stroke-[2.5]" : "text-slate-400 stroke-[1.8]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[11px] leading-tight font-bold",
-										children: "Notifikasi"
-									})]
-								})
-							]
+							className: "grid grid-cols-2 gap-1.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								onClick: () => setSettingsActiveSubTab("thresholds"),
+								className: `flex flex-col items-center justify-center py-2.5 px-2 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === "thresholds" ? "text-cyan-700 font-black" : "text-slate-500 hover:text-slate-800 font-semibold"}`,
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersHorizontal, { className: `w-5 h-5 mb-1 transition ${settingsActiveSubTab === "thresholds" ? "text-cyan-600 stroke-[2.5]" : "text-slate-400 stroke-[1.8]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[11px] leading-tight font-bold",
+									children: "Parameter"
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								onClick: () => setSettingsActiveSubTab("credentials"),
+								className: `flex flex-col items-center justify-center py-2.5 px-2 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === "credentials" ? "text-cyan-700 font-black" : "text-slate-500 hover:text-slate-800 font-semibold"}`,
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: `w-5 h-5 mb-1 transition ${settingsActiveSubTab === "credentials" ? "text-cyan-600 stroke-[2.5]" : "text-slate-400 stroke-[1.8]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[11px] leading-tight font-bold",
+									children: "Kredensial ONT"
+								})]
+							})]
 						})
 					})]
 				})
@@ -29931,41 +29919,27 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersVertical, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pengaturan NOC" })]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "pl-4 space-y-1 border-l-2 border-[#DAE7F5] ml-3",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											onClick: () => {
-												setSettingsCategory("noc");
-												setSettingsActiveSubTab("thresholds");
-											},
-											className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "thresholds" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "flex items-center gap-2",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersHorizontal, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Parameter & Redaman" })]
-											})
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											onClick: () => {
-												setSettingsCategory("noc");
-												setSettingsActiveSubTab("credentials");
-											},
-											className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "credentials" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "flex items-center gap-2",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kredensial ONT" })]
-											})
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											onClick: () => {
-												setSettingsCategory("noc");
-												setSettingsActiveSubTab("notifications");
-											},
-											className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "notifications" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "flex items-center gap-2",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Notifikasi & Jam Senyap" })]
-											})
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										onClick: () => {
+											setSettingsCategory("noc");
+											setSettingsActiveSubTab("thresholds");
+										},
+										className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "thresholds" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "flex items-center gap-2",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlidersHorizontal, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Parameter & Redaman" })]
 										})
-									]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										onClick: () => {
+											setSettingsCategory("noc");
+											setSettingsActiveSubTab("credentials");
+										},
+										className: `w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === "credentials" ? "bg-[#026AA7] text-white shadow-2xs" : "text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]"}`,
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "flex items-center gap-2",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kredensial ONT" })]
+										})
+									})]
 								})]
 							})
 						]
@@ -29992,25 +29966,11 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 							updateModemCredentialRow,
 							showModemPasswords,
 							toggleModemPasswordVisibility,
-							applyToInvalid,
-							setApplyToInvalid,
 							dragOverCredIdx,
 							handleCredDragStart,
 							handleCredDragOver,
 							handleCredDrop,
 							handleCredDragEnd
-						}),
-						!isTeknisi && settingsActiveSubTab === "notifications" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingsNotificationsTab, {
-							onOpenConfirmModal,
-							settingsLoading,
-							alertWaitingInterval,
-							setAlertWaitingInterval,
-							nightModeEnabled,
-							setNightModeEnabled,
-							nightModeStart,
-							setNightModeStart,
-							nightModeEnd,
-							setNightModeEnd
 						}),
 						(settingsActiveSubTab === "account" || isTeknisi && settingsActiveSubTab !== "account") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingsProfileTab, {
 							currentUser,
@@ -30307,8 +30267,23 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 }
 //#endregion
 //#region src/components/customers/CustomersTable.jsx
+var import_react_dom = require_react_dom();
 function CustomersTable({ customers = [], loading = false, page = 1, limit = 15, setLimit, setPage, totalRecords = 0, selectedIds = [], setSelectedIds, sortField = "id", sortDir = "asc", handleSort, handleSortIpRouter, probingId, probeCooldowns = {}, handleSingleProbe, activeMenuId, setActiveMenuId, handleOpenDetail, handleOpenEdit, handleDeleteCustomer, isOfficeActive = true, warnThreshold = -26, critThreshold = -27 }) {
 	const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
+	const [menuAnchor, setMenuAnchor] = (0, import_react.useState)(null);
+	(0, import_react.useEffect)(() => {
+		if (!activeMenuId) return;
+		const handleCloseMenu = () => {
+			setActiveMenuId(null);
+			setMenuAnchor(null);
+		};
+		window.addEventListener("scroll", handleCloseMenu, true);
+		window.addEventListener("resize", handleCloseMenu);
+		return () => {
+			window.removeEventListener("scroll", handleCloseMenu, true);
+			window.removeEventListener("resize", handleCloseMenu);
+		};
+	}, [activeMenuId, setActiveMenuId]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DataTableContainer, {
 		page,
 		totalPages,
@@ -30794,61 +30769,92 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 											type: "button",
 											onClick: (e) => {
 												e.stopPropagation();
-												setActiveMenuId(activeMenuId === cId ? null : cId);
+												if (activeMenuId === cId) {
+													setActiveMenuId(null);
+													setMenuAnchor(null);
+												} else {
+													const rect = e.currentTarget.getBoundingClientRect();
+													const openUp = window.innerHeight - rect.bottom < 180 && rect.top > 180;
+													setMenuAnchor({
+														id: cId,
+														top: openUp ? void 0 : rect.bottom + 6,
+														bottom: openUp ? window.innerHeight - rect.top + 6 : void 0,
+														right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right)
+													});
+													setActiveMenuId(cId);
+												}
 											},
 											className: `p-1.5 rounded-lg border transition cursor-pointer ${activeMenuId === cId ? "bg-cyan-600 text-white border-cyan-600 shadow-2xs" : "bg-slate-50 hover:bg-slate-200 text-slate-700 border-slate-200"}`,
 											title: "Menu Aksi Pelanggan",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EllipsisVertical, { className: "w-3.5 h-3.5" })
-										}), activeMenuId === cId && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "fixed inset-0 z-40",
+										}), activeMenuId === cId && menuAnchor && menuAnchor.id === cId && typeof document !== "undefined" && (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "fixed inset-0 z-[9998]",
 											onClick: (e) => {
 												e.stopPropagation();
 												setActiveMenuId(null);
+												setMenuAnchor(null);
 											}
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: `absolute right-0 z-50 w-44 bg-white rounded-xl shadow-xl border border-sky-200 py-1.5 font-sans text-xs divide-y divide-slate-100 ${idx >= Math.max(0, customers.length - 3) ? "bottom-full mb-1.5" : "top-full mt-1.5"}`,
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "py-1",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-													type: "button",
-													onClick: (e) => {
-														e.stopPropagation();
-														setActiveMenuId(null);
-														handleOpenDetail(c);
-													},
-													className: "w-full text-left px-3 py-1.5 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 font-bold flex items-center gap-2 transition cursor-pointer",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Detail Pelanggan" })]
-												}), c.no_wa && c.no_wa !== "-" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-													href: `https://wa.me/${c.no_wa.replace(/[^0-9]/g, "").replace(/^0/, "62")}`,
-													target: "_blank",
-													rel: "noopener noreferrer",
-													onClick: () => setActiveMenuId(null),
-													className: "w-full text-left px-3 py-1.5 text-emerald-700 hover:bg-emerald-50 font-bold flex items-center gap-2 transition",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi WA" })]
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											style: {
+												position: "fixed",
+												top: menuAnchor.top,
+												bottom: menuAnchor.bottom,
+												right: menuAnchor.right,
+												zIndex: 9999
+											},
+											className: "w-44",
+											onClick: (e) => e.stopPropagation(),
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "bg-white rounded-xl shadow-2xl border border-sky-200 py-1.5 font-sans text-xs divide-y divide-slate-100",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "py-1",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+														type: "button",
+														onClick: (e) => {
+															e.stopPropagation();
+															setActiveMenuId(null);
+															setMenuAnchor(null);
+															handleOpenDetail(c);
+														},
+														className: "w-full text-left px-3 py-1.5 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 font-bold flex items-center gap-2 transition cursor-pointer",
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Detail Pelanggan" })]
+													}), c.no_wa && c.no_wa !== "-" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+														href: `https://wa.me/${c.no_wa.replace(/[^0-9]/g, "").replace(/^0/, "62")}`,
+														target: "_blank",
+														rel: "noopener noreferrer",
+														onClick: () => {
+															setActiveMenuId(null);
+															setMenuAnchor(null);
+														},
+														className: "w-full text-left px-3 py-1.5 text-emerald-700 hover:bg-emerald-50 font-bold flex items-center gap-2 transition",
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi WA" })]
+													})]
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "py-1",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+														type: "button",
+														onClick: (e) => {
+															e.stopPropagation();
+															setActiveMenuId(null);
+															setMenuAnchor(null);
+															handleOpenEdit(c, c);
+														},
+														className: "w-full text-left px-3 py-1.5 text-slate-700 hover:bg-slate-100 font-bold flex items-center gap-2 transition cursor-pointer",
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "w-3.5 h-3.5 text-slate-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Edit Data" })]
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+														type: "button",
+														onClick: (e) => {
+															e.stopPropagation();
+															setActiveMenuId(null);
+															setMenuAnchor(null);
+															handleDeleteCustomer(cId);
+														},
+														className: "w-full text-left px-3 py-1.5 text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2 transition cursor-pointer",
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5 text-rose-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus Data" })]
+													})]
 												})]
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "py-1",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-													type: "button",
-													onClick: (e) => {
-														e.stopPropagation();
-														setActiveMenuId(null);
-														handleOpenEdit(c, c);
-													},
-													className: "w-full text-left px-3 py-1.5 text-slate-700 hover:bg-slate-100 font-bold flex items-center gap-2 transition cursor-pointer",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "w-3.5 h-3.5 text-slate-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Edit Data" })]
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-													type: "button",
-													onClick: (e) => {
-														e.stopPropagation();
-														setActiveMenuId(null);
-														handleDeleteCustomer(cId);
-													},
-													className: "w-full text-left px-3 py-1.5 text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2 transition cursor-pointer",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5 text-rose-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus Data" })]
-												})]
-											})]
-										})] })]
+											})
+										})] }), document.body)]
 									})]
 								})
 							})
@@ -31771,12 +31777,9 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 			const match = popsList.find((p) => p.slug.toLowerCase() === raw || p.slug.toLowerCase() === cleanRaw || p.name.toLowerCase().replace(/\s+/g, "").includes(cleanRaw));
 			if (match) return match.slug;
 		}
-		if (cleanRaw === "cabang" || cleanRaw === "slawi") return "slawi";
-		if (cleanRaw === "banyumas" || cleanRaw === "bms") return "banyumas";
-		if (cleanRaw.includes("karanggede") || cleanRaw.includes("karang")) return "karanggede";
-		if (cleanRaw.includes("tengaran")) return "tengaran";
+		if (cleanRaw === "cabang") return "cabang";
 		if (cleanRaw === "pusat") return "pusat";
-		return cleanRaw || "slawi";
+		return cleanRaw || "cabang";
 	};
 	const [importSource, setImportSource] = (0, import_react.useState)("file");
 	const [networkBillPops, setNetworkBillPops] = (0, import_react.useState)([]);
@@ -32356,16 +32359,237 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 	});
 }
 //#endregion
+//#region src/components/customers/CustomerWifiModal.jsx
+function CustomerWifiModal({ isOpen, onClose, customer, onSuccess, onNotify }) {
+	const [namaWifi, setNamaWifi] = (0, import_react.useState)("");
+	const [passwordWifi, setPasswordWifi] = (0, import_react.useState)("");
+	const [showPassword, setShowPassword] = (0, import_react.useState)(false);
+	const [pushToModem, setPushToModem] = (0, import_react.useState)(true);
+	const [loading, setLoading] = (0, import_react.useState)(false);
+	const [errorMsg, setErrorMsg] = (0, import_react.useState)("");
+	(0, import_react.useEffect)(() => {
+		if (customer && isOpen) {
+			setNamaWifi(customer.nama_wifi && customer.nama_wifi !== "-" ? customer.nama_wifi : "");
+			setPasswordWifi(customer.password_wifi && customer.password_wifi !== "-" ? customer.password_wifi : "");
+			setShowPassword(false);
+			setPushToModem(true);
+			setErrorMsg("");
+		}
+	}, [customer, isOpen]);
+	if (!isOpen || !customer) return null;
+	const ipTarget = (customer.ip_ont || customer.ip_router || "").trim();
+	const cId = customer.id_pelanggan || customer.id || "-";
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setErrorMsg("");
+		const trimmedSsid = namaWifi.trim();
+		const trimmedPass = passwordWifi.trim();
+		if (trimmedSsid.length < 3) {
+			setErrorMsg("Nama WiFi (SSID) minimal 3 karakter.");
+			return;
+		}
+		if (trimmedPass.length < 8) {
+			setErrorMsg("Password WiFi minimal 8 karakter.");
+			return;
+		}
+		setLoading(true);
+		try {
+			const payload = {
+				nama_wifi: trimmedSsid,
+				password_wifi: trimmedPass,
+				dry_run: !pushToModem
+			};
+			const res = await CustomerService.changeWifi(cId, payload);
+			if (res.ok && res.data?.status === "success") {
+				const ontSynced = res.data.ont_synced;
+				const msg = res.data.message || "Kredensial WiFi berhasil diperbarui.";
+				if (onNotify) onNotify(msg, ontSynced || !pushToModem ? "success" : "warning");
+				if (onSuccess) onSuccess({
+					...customer,
+					nama_wifi: trimmedSsid,
+					password_wifi: trimmedPass
+				});
+				onClose();
+			} else {
+				const errDetail = res.data?.detail || res.error || "Gagal mengubah WiFi pelanggan.";
+				setErrorMsg(errDetail);
+			}
+		} catch (err) {
+			console.error("Error changing customer WiFi:", err);
+			setErrorMsg("Terjadi kesalahan jaringan atau server saat memproses perubahan WiFi.");
+		} finally {
+			setLoading(false);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/60 backdrop-blur-2xs animate-in fade-in duration-150 font-sans",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "bg-white rounded-xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 max-h-[92vh] flex flex-col",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-between border-b border-[#CCDDF0] pb-3 shrink-0",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2.5",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "h-8 w-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] flex items-center justify-center text-[#026AA7] shrink-0",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-4 h-4" })
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "min-w-0",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-sm sm:text-base font-bold text-[#0B2545] truncate",
+							children: "Ubah WiFi Pelanggan"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "text-[11px] text-[#3B5B78] font-medium truncate",
+							children: [
+								customer.nama || customer.name,
+								" • ",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-mono font-semibold",
+									children: cId
+								})
+							]
+						})]
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					onClick: onClose,
+					disabled: loading,
+					className: "p-1.5 rounded-lg hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#0B2545] transition shrink-0 cursor-pointer disabled:opacity-50",
+					title: "Tutup Modal",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
+				})]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+				onSubmit: handleSubmit,
+				className: "space-y-3.5 flex-1 overflow-y-auto",
+				children: [
+					errorMsg && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-start gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: errorMsg })]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-[11px] text-[#3B5B78] flex items-start gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Server, { className: "w-4 h-4 text-[#026AA7] shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "leading-relaxed",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-bold text-[#0B2545] block",
+									children: "Eksekusi Jarak Jauh (NOC Management)"
+								}),
+								"Server mengirim konfigurasi langsung ke IP modem ",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+									className: "font-mono text-[#0B2545]",
+									children: ipTarget || "10.10.x.x"
+								}),
+								" via jaringan ISP. Anda tidak perlu berada di jaringan WiFi rumah pelanggan."
+							]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block text-[11px] font-bold uppercase tracking-wider text-[#0B2545] mb-1",
+							children: "Nama WiFi (SSID) *"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "text",
+							required: true,
+							disabled: loading,
+							value: namaWifi,
+							onChange: (e) => setNamaWifi(e.target.value),
+							placeholder: "Contoh: WiFi_Keluarga",
+							className: "w-full px-3 py-2 rounded-lg border border-[#CCDDF0] bg-white text-xs font-semibold text-[#0B2545] focus:border-[#026AA7] focus:ring-1 focus:ring-[#026AA7] focus:outline-none transition disabled:bg-slate-100"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] text-[#64839E] mt-1 block",
+							children: "Minimal 3 karakter tanpa spasi ganda."
+						})
+					] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block text-[11px] font-bold uppercase tracking-wider text-[#0B2545] mb-1",
+							children: "Password WiFi Baru *"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: showPassword ? "text" : "password",
+								required: true,
+								disabled: loading,
+								value: passwordWifi,
+								onChange: (e) => setPasswordWifi(e.target.value),
+								placeholder: "Minimal 8 karakter",
+								className: "w-full pl-3 pr-10 py-2 rounded-lg border border-[#CCDDF0] bg-white text-xs font-mono font-semibold text-[#0B2545] focus:border-[#026AA7] focus:ring-1 focus:ring-[#026AA7] focus:outline-none transition disabled:bg-slate-100"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								onClick: () => setShowPassword((prev) => !prev),
+								className: "absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#64839E] hover:text-[#0B2545] transition cursor-pointer",
+								title: showPassword ? "Sembunyikan password" : "Lihat password",
+								tabIndex: -1,
+								children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] text-[#64839E] mt-1 block",
+							children: "Minimal 8 karakter (standar enkripsi WPA/WPA2-PSK)."
+						})
+					] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "pt-1",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+							className: "flex items-start gap-2.5 p-2.5 rounded-lg border border-[#CCDDF0] bg-[#F1F6FC] cursor-pointer hover:bg-[#E2EDF8] transition",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "checkbox",
+								disabled: loading,
+								checked: pushToModem,
+								onChange: (e) => setPushToModem(e.target.checked),
+								className: "mt-0.5 rounded border-[#CCDDF0] text-[#026AA7] focus:ring-[#026AA7]"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-[11px]",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+									className: "font-bold text-[#0B2545] block flex items-center gap-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terapkan langsung ke modem fisik ONT" })]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[10px] text-[#3B5B78] leading-tight block mt-0.5",
+									children: "Jika dicentang, scraper akan login ke web GUI modem dan mengupdate SSID & password secara real-time."
+								})]
+							})]
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-end gap-2 pt-3 border-t border-[#CCDDF0]",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: onClose,
+							disabled: loading,
+							className: "px-3.5 py-1.5 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#3B5B78] hover:text-[#0B2545] text-xs font-semibold transition cursor-pointer disabled:opacity-50",
+							children: "Batal"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "submit",
+							disabled: loading,
+							className: "px-4 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-50",
+							children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menerapkan ke Modem..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan & Terapkan" })] })
+						})]
+					})
+				]
+			})]
+		})
+	});
+}
+//#endregion
 //#region src/components/customers/CustomerDetailModal.jsx
-function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpenEdit }) {
+function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpenEdit, onCustomerUpdated, onNotify }) {
 	const [activeTab, setActiveTab] = (0, import_react.useState)("profil");
 	const [billingData, setBillingData] = (0, import_react.useState)(null);
 	const [loadingBilling, setLoadingBilling] = (0, import_react.useState)(false);
 	const [billingError, setBillingError] = (0, import_react.useState)(null);
 	const [copiedVa, setCopiedVa] = (0, import_react.useState)(null);
 	const [updatingStatus, setUpdatingStatus] = (0, import_react.useState)(false);
-	const cId = customer?.id_pelanggan || customer?.id || "";
-	const rawWa = customer?.no_wa || customer?.no_hp || "";
+	const [wifiModalOpen, setWifiModalOpen] = (0, import_react.useState)(false);
+	const [currentCustomer, setCurrentCustomer] = (0, import_react.useState)(customer);
+	(0, import_react.useEffect)(() => {
+		setCurrentCustomer(customer);
+	}, [customer]);
+	const activeCust = currentCustomer || customer;
+	const cId = activeCust?.id_pelanggan || activeCust?.id || "";
+	const rawWa = activeCust?.no_wa || activeCust?.no_hp || "";
 	const hasValidWa = Boolean(rawWa && rawWa !== "-");
 	const fetchBilling = async () => {
 		if (!cId) return;
@@ -32412,9 +32636,9 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 			setUpdatingStatus(false);
 		}
 	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-3 sm:space-y-4 max-h-[92vh] flex flex-col",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -32567,10 +32791,19 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 						activeTab === "jaringan" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "space-y-3",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-[10px] text-[#026AA7] font-bold uppercase flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kredensial WiFi Rumah & Login Modem" })]
+								className: "p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-2.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-between gap-2",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "text-[10px] text-[#026AA7] font-bold uppercase flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kredensial WiFi Rumah & Login Modem" })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => setWifiModalOpen(true),
+										className: "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#026AA7] hover:bg-[#035388] text-white transition flex items-center gap-1.5 shadow-2xs cursor-pointer",
+										title: "Ganti Nama WiFi & Password Modem ONT",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-3 h-3" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Ubah WiFi & Sandi" })]
+									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "grid grid-cols-2 gap-2 text-[11px]",
 									children: [
@@ -32579,70 +32812,70 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 											children: "Nama WiFi (SSID):"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "font-bold text-[#0B2545]",
-											children: customer.nama_wifi || "-"
+											children: activeCust.nama_wifi || "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-[#64839E] block text-[10px]",
 											children: "Password WiFi:"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "font-bold text-[#0B2545]",
-											children: customer.password_wifi || "-"
+											className: "font-bold text-[#0B2545] font-mono",
+											children: activeCust.password_wifi || "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-[#64839E] block text-[10px]",
 											children: "IP ONT (GPON/VLAN):"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "font-bold text-[#026AA7]",
-											children: customer.ip_ont || "-"
+											className: "font-bold text-[#026AA7] font-mono",
+											children: activeCust.ip_ont || "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-[#64839E] block text-[10px]",
 											children: "IP Router (DHCP/LAN):"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "font-bold text-[#0B2545]",
-											children: customer.ip_router || "-"
+											className: "font-bold text-[#0B2545] font-mono",
+											children: activeCust.ip_router || "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-[#64839E] block text-[10px]",
 											children: "User Admin Modem:"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "font-bold text-[#0B2545] font-mono",
-											children: customer.user_admin || "-"
+											children: activeCust.user_admin || "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-[#64839E] block text-[10px]",
 											children: "Password Admin Modem:"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "font-bold text-[#0B2545] font-mono",
-											children: customer.pass_admin || "-"
+											children: activeCust.pass_admin || "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-[#64839E] block text-[10px]",
 											children: "Jenis Modem:"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "font-bold text-[#0B2545]",
-											children: customer.jenis_modem || "-"
+											children: activeCust.jenis_modem || "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-[#64839E] block text-[10px]",
 											children: "MAC Address:"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "font-bold text-[#0B2545] font-mono",
-											children: customer.mac_address || "-"
+											children: activeCust.mac_address || "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 											className: "text-[#64839E] block text-[10px] flex items-center gap-0.5",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thermometer, { className: "w-2.5 h-2.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Redaman Baseline:" })]
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "font-bold font-mono text-[#0B2545]",
-											children: customer.redaman_baseline ? `${customer.redaman_baseline} dBm` : "-"
+											children: activeCust.redaman_baseline ? `${activeCust.redaman_baseline} dBm` : "-"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 											className: "text-[#64839E] block text-[10px] flex items-center gap-0.5",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Gauge, { className: "w-2.5 h-2.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status Kredensial:" })]
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "font-bold font-mono text-[#0B2545]",
-											children: customer.status_kredensial || "UNTESTED"
+											children: activeCust.status_kredensial || "UNTESTED"
 										})] })
 									]
 								})]
@@ -32822,7 +33055,7 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 						className: "flex items-center gap-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
-							onClick: () => onOpenEdit && onOpenEdit(customer),
+							onClick: () => onOpenEdit && onOpenEdit(activeCust),
 							className: "px-3.5 py-1.5 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#3B5B78] hover:text-[#0B2545] text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-2xs",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Edit Informasi" })]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -32834,7 +33067,16 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 					})
 				})
 			]
-		})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerWifiModal, {
+			isOpen: wifiModalOpen,
+			onClose: () => setWifiModalOpen(false),
+			customer: activeCust,
+			onSuccess: (updated) => {
+				setCurrentCustomer(updated);
+				if (onCustomerUpdated) onCustomerUpdated(updated);
+			},
+			onNotify
+		})]
 	});
 }
 //#endregion
@@ -32886,8 +33128,36 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 	const [formError, setFormError] = (0, import_react.useState)("");
 	const [formSuccess, setFormSuccess] = (0, import_react.useState)("");
 	const [importModalOpen, setImportModalOpen] = (0, import_react.useState)(false);
-	const [probingId, setProbingId] = (0, import_react.useState)(null);
+	const [probingId, setProbingId] = (0, import_react.useState)(() => {
+		try {
+			const saved = sessionStorage.getItem("tekno_active_probing");
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				if (parsed.id && Date.now() - parsed.startTime < 35e3) return parsed.id;
+				else sessionStorage.removeItem("tekno_active_probing");
+			}
+		} catch (_) {}
+		return null;
+	});
 	const [probeResult, setProbeResult] = (0, import_react.useState)(null);
+	(0, import_react.useEffect)(() => {
+		if (!probingId) return;
+		const saved = sessionStorage.getItem("tekno_active_probing");
+		let remaining = 15e3;
+		if (saved) try {
+			const parsed = JSON.parse(saved);
+			const elapsed = Date.now() - parsed.startTime;
+			remaining = Math.max(2e3, 3e4 - elapsed);
+		} catch (_) {}
+		const timer = setTimeout(() => {
+			setProbingId(null);
+			try {
+				sessionStorage.removeItem("tekno_active_probing");
+			} catch (_) {}
+			fetchCustomers(true);
+		}, remaining);
+		return () => clearTimeout(timer);
+	}, [probingId]);
 	const [toast, setToast] = (0, import_react.useState)({
 		show: false,
 		message: "",
@@ -33142,6 +33412,12 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 		if (probeCooldowns[id_pelanggan] > 0) return;
 		setProbingId(id_pelanggan);
 		try {
+			sessionStorage.setItem("tekno_active_probing", JSON.stringify({
+				id: id_pelanggan,
+				startTime: Date.now()
+			}));
+		} catch (_) {}
+		try {
 			const res = await fetch(`/api/monitoring/scan/${id_pelanggan}`, { method: "POST" });
 			if (res.ok) {
 				const data = await res.json();
@@ -33221,6 +33497,9 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 			showToast("Koneksi terputus saat memeriksa modem ONT", "error");
 		} finally {
 			setProbingId(null);
+			try {
+				sessionStorage.removeItem("tekno_active_probing");
+			} catch (_) {}
 		}
 	};
 	const [mikrotikSyncing, setMikrotikSyncing] = (0, import_react.useState)(false);
@@ -33577,30 +33856,30 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "grid grid-cols-2 gap-2.5",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-										className: "block text-[10px] font-bold uppercase text-slate-500 mb-1",
-										children: "Nama WiFi (SSID)"
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+										className: "block text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center justify-between",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Nama WiFi (SSID)" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[9px] text-[#026AA7] font-semibold",
+											children: "Menu Ubah WiFi"
+										})]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 										type: "text",
-										value: formData.nama_wifi,
-										onChange: (e) => setFormData({
-											...formData,
-											nama_wifi: e.target.value
-										}),
-										placeholder: "Contoh: WiFi_Rumah",
-										className: "w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-									})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-										className: "block text-[10px] font-bold uppercase text-slate-500 mb-1",
-										children: "Password WiFi"
+										value: formData.nama_wifi || "-",
+										readOnly: true,
+										disabled: true,
+										className: "w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100/80 text-slate-500 text-xs font-bold cursor-not-allowed select-none"
+									})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+										className: "block text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center justify-between",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Password WiFi" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[9px] text-[#026AA7] font-semibold",
+											children: "Terkunci"
+										})]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 										type: "text",
-										value: formData.password_wifi,
-										onChange: (e) => setFormData({
-											...formData,
-											password_wifi: e.target.value
-										}),
-										placeholder: "Minimal 8 karakter",
-										className: "w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none font-mono"
+										value: formData.password_wifi || "-",
+										readOnly: true,
+										disabled: true,
+										className: "w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100/80 text-slate-500 text-xs font-bold cursor-not-allowed select-none font-mono"
 									})] })]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -33627,7 +33906,7 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 											...formData,
 											pass_admin: e.target.value
 										}),
-										placeholder: "Contoh: tekno2024",
+										placeholder: "Contoh: password123",
 										className: "w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none font-mono"
 									})] })]
 								}),
@@ -33672,7 +33951,12 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 				onOpenEdit: (targetToEdit) => {
 					setDetailCustomer(null);
 					handleOpenEdit(targetToEdit, targetToEdit);
-				}
+				},
+				onCustomerUpdated: (updatedCust) => {
+					setDetailCustomer(updatedCust);
+					fetchCustomers();
+				},
+				onNotify: showToast
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerImportWizard, {
 				isOpen: importModalOpen,
@@ -34189,6 +34473,7 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 	}, [initialSearch]);
 	const [selectedTicket, setSelectedTicket] = (0, import_react.useState)(null);
 	const [activeMenuId, setActiveMenuId] = (0, import_react.useState)(null);
+	const [menuAnchor, setMenuAnchor] = (0, import_react.useState)(null);
 	const [newStatus, setNewStatus] = (0, import_react.useState)("");
 	const [catatan, setCatatan] = (0, import_react.useState)("");
 	const [updating, setUpdating] = (0, import_react.useState)(false);
@@ -34239,11 +34524,25 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 		fetchTickets(false);
 		setPage(1);
 		setActiveMenuId(null);
+		setMenuAnchor(null);
 		const pollInterval = setInterval(() => {
 			fetchTickets(true);
 		}, 5e3);
 		return () => clearInterval(pollInterval);
 	}, [filterStatus, activeOffice]);
+	(0, import_react.useEffect)(() => {
+		if (!activeMenuId) return;
+		const handleCloseMenu = () => {
+			setActiveMenuId(null);
+			setMenuAnchor(null);
+		};
+		window.addEventListener("scroll", handleCloseMenu, true);
+		window.addEventListener("resize", handleCloseMenu);
+		return () => {
+			window.removeEventListener("scroll", handleCloseMenu, true);
+			window.removeEventListener("resize", handleCloseMenu);
+		};
+	}, [activeMenuId]);
 	const handleOpenModal = (ticket) => {
 		setSelectedTicket(ticket);
 		setNewStatus(ticket.status || "MENUNGGU");
@@ -34548,7 +34847,20 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 											type: "button",
 											onClick: (e) => {
 												e.stopPropagation();
-												setActiveMenuId(activeMenuId === t.id_tiket ? null : t.id_tiket);
+												if (activeMenuId === t.id_tiket) {
+													setActiveMenuId(null);
+													setMenuAnchor(null);
+												} else {
+													const rect = e.currentTarget.getBoundingClientRect();
+													const openUp = window.innerHeight - rect.bottom < 120 && rect.top > 120;
+													setMenuAnchor({
+														id: t.id_tiket,
+														top: openUp ? void 0 : rect.bottom + 6,
+														bottom: openUp ? window.innerHeight - rect.top + 6 : void 0,
+														right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right)
+													});
+													setActiveMenuId(t.id_tiket);
+												}
 											},
 											className: `p-1 rounded-lg border transition cursor-pointer ${activeMenuId === t.id_tiket ? "bg-cyan-50 border-cyan-300 text-cyan-700" : "hover:bg-slate-100 text-slate-600 border-slate-200"}`,
 											title: "Pilihan Aksi",
@@ -34581,20 +34893,30 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 													})
 												]
 											})
-										}), activeMenuId === t.id_tiket && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "fixed inset-0 z-40",
+										}), activeMenuId === t.id_tiket && menuAnchor && menuAnchor.id === t.id_tiket && typeof document !== "undefined" && (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "fixed inset-0 z-[9998]",
 											onClick: (e) => {
 												e.stopPropagation();
 												setActiveMenuId(null);
+												setMenuAnchor(null);
 											}
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: `absolute right-0 z-50 min-w-[170px] ${idx >= Math.max(0, paginatedTickets.length - 2) ? "bottom-full mb-1.5" : "top-full mt-1.5"}`,
+											style: {
+												position: "fixed",
+												top: menuAnchor.top,
+												bottom: menuAnchor.bottom,
+												right: menuAnchor.right,
+												zIndex: 9999
+											},
+											className: "min-w-[170px]",
+											onClick: (e) => e.stopPropagation(),
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 												className: "bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs",
 												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 													type: "button",
 													onClick: () => {
 														setActiveMenuId(null);
+														setMenuAnchor(null);
 														handleOpenModal(t);
 													},
 													className: "w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer",
@@ -34606,13 +34928,16 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 														href: `https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`,
 														target: "_blank",
 														rel: "noopener noreferrer",
-														onClick: () => setActiveMenuId(null),
+														onClick: () => {
+															setActiveMenuId(null);
+															setMenuAnchor(null);
+														},
 														className: "w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold",
 														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi WA" })]
 													});
 												})()]
 											})
-										})] })]
+										})] }), document.body)]
 									})
 								})
 							]
@@ -35493,19 +35818,26 @@ function UsersView() {
 	const [sortDir, setSortDir] = (0, import_react.useState)("asc");
 	const [page, setPage] = (0, import_react.useState)(1);
 	const [limit, setLimit] = (0, import_react.useState)(15);
-	const [allKantor, setAllKantor] = (0, import_react.useState)([
-		"cabang",
-		"pusat",
-		"banyumas"
-	]);
+	const [allKantor, setAllKantor] = (0, import_react.useState)(["cabang", "pusat"]);
 	const [selectedIds, setSelectedIds] = (0, import_react.useState)([]);
 	const [bulkDeleting, setBulkDeleting] = (0, import_react.useState)(false);
 	const [activeMenuId, setActiveMenuId] = (0, import_react.useState)(null);
+	const [menuAnchor, setMenuAnchor] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
-		const handleClickOutside = () => setActiveMenuId(null);
-		window.addEventListener("click", handleClickOutside);
-		return () => window.removeEventListener("click", handleClickOutside);
-	}, []);
+		if (!activeMenuId) return;
+		const handleCloseMenu = () => {
+			setActiveMenuId(null);
+			setMenuAnchor(null);
+		};
+		window.addEventListener("click", handleCloseMenu);
+		window.addEventListener("scroll", handleCloseMenu, true);
+		window.addEventListener("resize", handleCloseMenu);
+		return () => {
+			window.removeEventListener("click", handleCloseMenu);
+			window.removeEventListener("scroll", handleCloseMenu, true);
+			window.removeEventListener("resize", handleCloseMenu);
+		};
+	}, [activeMenuId]);
 	const [modalOpen, setModalOpen] = (0, import_react.useState)(false);
 	const [modalMode, setModalMode] = (0, import_react.useState)("add");
 	const [currentUserId, setCurrentUserId] = (0, import_react.useState)(null);
@@ -36022,7 +36354,7 @@ function UsersView() {
 						}) }) : paginatedUsers.map((u, idx) => {
 							const isSelected = selectedIds.includes(u.id);
 							const isMenuOpen = activeMenuId === u.id;
-							const isBottomRow = idx >= paginatedUsers.length - 2;
+							paginatedUsers.length - 2;
 							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
 								className: `hover:bg-cyan-50/40 transition ${isSelected ? "bg-cyan-50/60" : ""}`,
 								children: [
@@ -36093,20 +36425,48 @@ function UsersView() {
 												type: "button",
 												onClick: (e) => {
 													e.stopPropagation();
-													setActiveMenuId(isMenuOpen ? null : u.id);
+													if (isMenuOpen) {
+														setActiveMenuId(null);
+														setMenuAnchor(null);
+													} else {
+														const rect = e.currentTarget.getBoundingClientRect();
+														const openUp = window.innerHeight - rect.bottom < 140 && rect.top > 140;
+														setMenuAnchor({
+															id: u.id,
+															top: openUp ? void 0 : rect.bottom + 6,
+															bottom: openUp ? window.innerHeight - rect.top + 6 : void 0,
+															right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right)
+														});
+														setActiveMenuId(u.id);
+													}
 												},
 												className: `p-1.5 rounded-lg border transition cursor-pointer ${isMenuOpen ? "bg-cyan-100 border-cyan-400 text-cyan-900" : "hover:bg-slate-100 text-slate-600 border-slate-200"}`,
 												title: "Pilihan Aksi",
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EllipsisVertical, { className: "w-3.5 h-3.5" })
-											}), isMenuOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											}), isMenuOpen && menuAnchor && menuAnchor.id === u.id && typeof document !== "undefined" && (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "fixed inset-0 z-[9998]",
+												onClick: (e) => {
+													e.stopPropagation();
+													setActiveMenuId(null);
+													setMenuAnchor(null);
+												}
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												style: {
+													position: "fixed",
+													top: menuAnchor.top,
+													bottom: menuAnchor.bottom,
+													right: menuAnchor.right,
+													zIndex: 9999
+												},
+												className: "min-w-[160px]",
 												onClick: (e) => e.stopPropagation(),
-												className: `absolute right-0 z-50 min-w-[160px] ${isBottomRow ? "bottom-full pb-1" : "top-full pt-1"}`,
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 													className: "bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs divide-y divide-slate-100",
 													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 														type: "button",
 														onClick: () => {
 															setActiveMenuId(null);
+															setMenuAnchor(null);
 															openEditModal(u);
 														},
 														className: "w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer",
@@ -36115,13 +36475,14 @@ function UsersView() {
 														type: "button",
 														onClick: () => {
 															setActiveMenuId(null);
+															setMenuAnchor(null);
 															handleDeleteUser(u);
 														},
 														className: "w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold",
 														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5 text-rose-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus" })]
 													})]
 												})
-											})]
+											})] }), document.body)]
 										})
 									})
 								]
@@ -36164,7 +36525,7 @@ function UsersView() {
 									value: formUsername,
 									onChange: (e) => setFormUsername(e.target.value),
 									disabled: modalMode === "edit",
-									placeholder: "Contoh: teknisi_banyumas...",
+									placeholder: "Contoh: teknisi_lapangan...",
 									className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none disabled:bg-slate-100"
 								})] }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
@@ -36283,7 +36644,35 @@ function BranchOfficesView() {
 	const [kantorList, setKantorList] = (0, import_react.useState)([]);
 	const [kantorLoading, setKantorLoading] = (0, import_react.useState)(false);
 	const [kantorSearch, setKantorSearch] = (0, import_react.useState)("");
-	const [syncingId, setSyncingId] = (0, import_react.useState)(null);
+	const [syncingId, setSyncingId] = (0, import_react.useState)(() => {
+		try {
+			const saved = sessionStorage.getItem("tekno_active_syncing_kantor");
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				if (parsed.id && Date.now() - parsed.startTime < 25e3) return parsed.id;
+				else sessionStorage.removeItem("tekno_active_syncing_kantor");
+			}
+		} catch (_) {}
+		return null;
+	});
+	(0, import_react.useEffect)(() => {
+		if (!syncingId) return;
+		const saved = sessionStorage.getItem("tekno_active_syncing_kantor");
+		let remaining = 1e4;
+		if (saved) try {
+			const parsed = JSON.parse(saved);
+			const elapsed = Date.now() - parsed.startTime;
+			remaining = Math.max(2e3, 2e4 - elapsed);
+		} catch (_) {}
+		const timer = setTimeout(() => {
+			setSyncingId(null);
+			try {
+				sessionStorage.removeItem("tekno_active_syncing_kantor");
+			} catch (_) {}
+			fetchKantorList();
+		}, remaining);
+		return () => clearTimeout(timer);
+	}, [syncingId]);
 	const [modalKantorOpen, setModalKantorOpen] = (0, import_react.useState)(false);
 	const [kantorModalMode, setKantorModalMode] = (0, import_react.useState)("add");
 	const [currentKantorId, setCurrentKantorId] = (0, import_react.useState)(null);
@@ -36295,6 +36684,7 @@ function BranchOfficesView() {
 	const [kantorMikrotikPort, setKantorMikrotikPort] = (0, import_react.useState)("");
 	const [kantorMikrotikUser, setKantorMikrotikUser] = (0, import_react.useState)("");
 	const [kantorMikrotikPass, setKantorMikrotikPass] = (0, import_react.useState)("");
+	const [showMikrotikPass, setShowMikrotikPass] = (0, import_react.useState)(false);
 	const [kantorMikrotikSyncInterval, setKantorMikrotikSyncInterval] = (0, import_react.useState)("3");
 	const [kantorActiveTab, setKantorActiveTab] = (0, import_react.useState)("identitas");
 	const [kantorError, setKantorError] = (0, import_react.useState)("");
@@ -36342,6 +36732,7 @@ function BranchOfficesView() {
 		setKantorMikrotikPort("");
 		setKantorMikrotikUser("");
 		setKantorMikrotikPass("");
+		setShowMikrotikPass(false);
 		setKantorMikrotikSyncInterval("3");
 		setKantorActiveTab("identitas");
 		setKantorError("");
@@ -36358,6 +36749,7 @@ function BranchOfficesView() {
 		setKantorMikrotikPort(k.mikrotik_port ? String(k.mikrotik_port) : "");
 		setKantorMikrotikUser(k.mikrotik_user || "");
 		setKantorMikrotikPass(k.mikrotik_pass || "");
+		setShowMikrotikPass(false);
 		setKantorMikrotikSyncInterval(k.mikrotik_sync_interval ? String(k.mikrotik_sync_interval) : "3");
 		setKantorActiveTab("identitas");
 		setKantorError("");
@@ -36427,6 +36819,12 @@ function BranchOfficesView() {
 		}
 		setSyncingId(k.id);
 		try {
+			sessionStorage.setItem("tekno_active_syncing_kantor", JSON.stringify({
+				id: k.id,
+				startTime: Date.now()
+			}));
+		} catch (_) {}
+		try {
 			const res = await fetch(`/users/api/kantor/sync/${k.id}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" }
@@ -36441,16 +36839,30 @@ function BranchOfficesView() {
 			showToast(`Router MikroTik (${k.mikrotik_host}) tidak dapat dijangkau. Pastikan jaringan server terhubung ke jaringan router.`, "error");
 		} finally {
 			setSyncingId(null);
+			try {
+				sessionStorage.removeItem("tekno_active_syncing_kantor");
+			} catch (_) {}
 		}
 	};
 	const [page, setPage] = (0, import_react.useState)(1);
 	const [limit, setLimit] = (0, import_react.useState)(15);
 	const [activeMenuId, setActiveMenuId] = (0, import_react.useState)(null);
+	const [menuAnchor, setMenuAnchor] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
-		const handleClickOutside = () => setActiveMenuId(null);
-		window.addEventListener("click", handleClickOutside);
-		return () => window.removeEventListener("click", handleClickOutside);
-	}, []);
+		if (!activeMenuId) return;
+		const handleCloseMenu = () => {
+			setActiveMenuId(null);
+			setMenuAnchor(null);
+		};
+		window.addEventListener("click", handleCloseMenu);
+		window.addEventListener("scroll", handleCloseMenu, true);
+		window.addEventListener("resize", handleCloseMenu);
+		return () => {
+			window.removeEventListener("click", handleCloseMenu);
+			window.removeEventListener("scroll", handleCloseMenu, true);
+			window.removeEventListener("resize", handleCloseMenu);
+		};
+	}, [activeMenuId]);
 	const filteredKantors = kantorList.filter((k) => {
 		if (!kantorSearch) return true;
 		const q = kantorSearch.toLowerCase();
@@ -36573,7 +36985,7 @@ function BranchOfficesView() {
 						}) }) : paginatedKantors.map((k, idx) => {
 							const isSyncing = syncingId === k.id;
 							const isMenuOpen = activeMenuId === k.id;
-							const isBottomRow = idx >= paginatedKantors.length - 2;
+							paginatedKantors.length - 2;
 							const isActive = k.is_active !== void 0 ? Boolean(k.is_active) : true;
 							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
 								className: "hover:bg-cyan-50/40 transition",
@@ -36655,14 +37067,41 @@ function BranchOfficesView() {
 												type: "button",
 												onClick: (e) => {
 													e.stopPropagation();
-													setActiveMenuId(isMenuOpen ? null : k.id);
+													if (isMenuOpen) {
+														setActiveMenuId(null);
+														setMenuAnchor(null);
+													} else {
+														const rect = e.currentTarget.getBoundingClientRect();
+														const openUp = window.innerHeight - rect.bottom < 160 && rect.top > 160;
+														setMenuAnchor({
+															id: k.id,
+															top: openUp ? void 0 : rect.bottom + 6,
+															bottom: openUp ? window.innerHeight - rect.top + 6 : void 0,
+															right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right)
+														});
+														setActiveMenuId(k.id);
+													}
 												},
 												className: `p-1.5 rounded-lg border transition cursor-pointer ${isMenuOpen ? "bg-cyan-100 border-cyan-400 text-cyan-900" : "hover:bg-slate-100 text-slate-600 border-slate-200"}`,
 												title: "Pilihan Aksi",
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EllipsisVertical, { className: "w-3.5 h-3.5" })
-											}), isMenuOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											}), isMenuOpen && menuAnchor && menuAnchor.id === k.id && typeof document !== "undefined" && (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "fixed inset-0 z-[9998]",
+												onClick: (e) => {
+													e.stopPropagation();
+													setActiveMenuId(null);
+													setMenuAnchor(null);
+												}
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												style: {
+													position: "fixed",
+													top: menuAnchor.top,
+													bottom: menuAnchor.bottom,
+													right: menuAnchor.right,
+													zIndex: 9999
+												},
+												className: "min-w-[160px]",
 												onClick: (e) => e.stopPropagation(),
-												className: `absolute right-0 z-50 min-w-[160px] ${isBottomRow ? "bottom-full pb-1" : "top-full pt-1"}`,
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 													className: "bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs divide-y divide-slate-100",
 													children: [
@@ -36670,6 +37109,7 @@ function BranchOfficesView() {
 															type: "button",
 															onClick: () => {
 																setActiveMenuId(null);
+																setMenuAnchor(null);
 																if (k.is_active === false) {
 																	showToast(`Kantor '${k.nama}' dalam status Nonaktif. Aktifkan kantor terlebih dahulu sebelum menyinkronkan router MikroTik.`, "error");
 																	return;
@@ -36685,6 +37125,7 @@ function BranchOfficesView() {
 															type: "button",
 															onClick: () => {
 																setActiveMenuId(null);
+																setMenuAnchor(null);
 																openEditKantorModal(k);
 															},
 															className: "w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer",
@@ -36694,6 +37135,7 @@ function BranchOfficesView() {
 															type: "button",
 															onClick: () => {
 																setActiveMenuId(null);
+																setMenuAnchor(null);
 																handleOpenDeleteConfirm(k);
 															},
 															className: "w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold",
@@ -36701,7 +37143,7 @@ function BranchOfficesView() {
 														})
 													]
 												})
-											})]
+											})] }), document.body)]
 										})
 									})
 								]
@@ -36763,20 +37205,10 @@ function BranchOfficesView() {
 											value: kantorNama,
 											onChange: (e) => {
 												setKantorNama(e.target.value);
-												if (kantorModalMode === "add" && !kantorKode) setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""));
+												if (kantorModalMode === "add") setKantorKode(e.target.value.toLowerCase().trim().replace(/[^a-z0-9_-]/g, "_").replace(/^_+|_+$/g, ""));
 											},
-											placeholder: "Contoh: Kantor Banyumas, Kantor Cabang...",
+											placeholder: "Contoh: Kantor Wilayah Barat, Kantor Cabang...",
 											className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-										})] }),
-										kantorModalMode === "add" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-											className: "block text-[10px] font-bold uppercase text-slate-600 mb-1",
-											children: "Kode Kantor (Opsional - dibuat otomatis jika kosong)"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-											type: "text",
-											value: kantorKode,
-											onChange: (e) => setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "")),
-											placeholder: "contoh: banyumas",
-											className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none lowercase"
 										})] }),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "p-3 bg-slate-50/80 rounded-2xl border border-sky-100 flex items-center justify-between gap-3",
@@ -36826,7 +37258,7 @@ function BranchOfficesView() {
 													type: "text",
 													value: kantorMikrotikHost,
 													onChange: (e) => setKantorMikrotikHost(e.target.value),
-													placeholder: "Contoh: 192.168.202.50",
+													placeholder: "Contoh: 192.168.88.1",
 													className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
 												})]
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
@@ -36836,7 +37268,7 @@ function BranchOfficesView() {
 												type: "number",
 												value: kantorMikrotikPort,
 												onChange: (e) => setKantorMikrotikPort(e.target.value),
-												placeholder: "Contoh: 8095",
+												placeholder: "Contoh: 8728",
 												className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
 											})] })]
 										}),
@@ -36849,17 +37281,26 @@ function BranchOfficesView() {
 												type: "text",
 												value: kantorMikrotikUser,
 												onChange: (e) => setKantorMikrotikUser(e.target.value),
-												placeholder: "Contoh: tekno",
+												placeholder: "Contoh: admin",
 												className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
 											})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 												className: "block text-[10px] font-bold uppercase text-slate-600 mb-1",
 												children: "Password Router"
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-												type: "password",
-												value: kantorMikrotikPass,
-												onChange: (e) => setKantorMikrotikPass(e.target.value),
-												placeholder: "Contoh: tekno2025",
-												className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "relative",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+													type: showMikrotikPass ? "text" : "password",
+													value: kantorMikrotikPass,
+													onChange: (e) => setKantorMikrotikPass(e.target.value),
+													placeholder: "Masukkan kata sandi router...",
+													className: "w-full pl-3 pr-9 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+													type: "button",
+													onClick: () => setShowMikrotikPass(!showMikrotikPass),
+													className: "absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors",
+													title: showMikrotikPass ? "Sembunyikan kata sandi" : "Lihat kata sandi",
+													children: showMikrotikPass ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
+												})]
 											})] })]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
@@ -36995,7 +37436,16 @@ function OfficeManagementView({ initialSubTab = "kantor", onSubTabChange }) {
 }
 //#endregion
 //#region src/components/notifications/NotificationsView.jsx
-var import_react_dom = require_react_dom();
+var formatCleanTitle = (title, kantor) => {
+	if (!title) return "";
+	if (!kantor) return title;
+	return title.replace(new RegExp(`^(Kantor\\s+)?${kantor}\\s*[•\\-|:]\\s*`, "i"), "").trim();
+};
+var formatCleanMessage = (message, kantor) => {
+	if (!message) return "";
+	if (!kantor) return message;
+	return message.replace(new RegExp(`^Kantor:\\s*${kantor}\\s*\\|\\s*`, "i"), "").replace(new RegExp(`\\s+pada kantor\\s+${kantor}\\.?`, "i"), ".").trim();
+};
 function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 0, activeOffice = "cabang", currentUser, onItemClick, onMarkAllRead, onDismissItem, loading = false }) {
 	const panelRef = (0, import_react.useRef)(null);
 	(0, import_react.useEffect)(() => {
@@ -37020,37 +37470,20 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 	}, [isOpen, onClose]);
 	if (!isOpen) return null;
 	const getIconForType = (item) => {
-		if (item.level === "los" || item.badge?.includes("LOS") || item.badge?.includes("TERPUTUS")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-rose-600 flex items-center justify-center shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZapOff, { className: "w-4 h-4" })
-		});
-		if (item.level === "critical" || item.is_critical || item.badge?.includes("KRITIS")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0] text-rose-600 flex items-center justify-center shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZapOff, { className: "w-4 h-4" })
-		});
-		if (item.level === "invalid" || item.badge?.includes("INVALID")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-amber-700 flex items-center justify-center shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
-		});
-		if (item.type?.includes("tiket")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleQuestionMark, { className: "w-4 h-4" })
-		});
-		if (item.level === "warning" || item.badge === "WARNING" || item.badge?.includes("WASPADA")) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-amber-700 flex items-center justify-center shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
-		});
+		let IconComponent = Info;
+		if (item.level === "los" || item.badge?.includes("LOS") || item.badge?.includes("TERPUTUS")) IconComponent = WifiOff;
+		else if (item.level === "critical" || item.is_critical || item.badge?.includes("KRITIS")) IconComponent = OctagonAlert;
+		else if (item.level === "invalid" || item.badge?.includes("INVALID")) IconComponent = KeyRound;
+		else if (item.type?.includes("tiket") || item.badge?.toLowerCase().includes("tiket")) IconComponent = Ticket;
+		else if (item.level === "warning" || item.badge === "WARNING" || item.badge?.includes("WASPADA")) IconComponent = TriangleAlert;
 		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "w-8 h-8 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-[#026AA7] flex items-center justify-center shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" })
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconComponent, { className: "w-4 h-4" })
 		});
 	};
 	const getStatusTextClass = (item) => {
-		if (item.level === "los" || item.badge?.includes("LOS") || item.badge?.includes("TERPUTUS")) return "text-rose-700";
-		if (item.level === "critical" || item.is_critical || item.badge?.includes("KRITIS")) return "text-rose-700";
-		if (item.level === "invalid" || item.badge?.includes("INVALID")) return "text-amber-800";
-		if (item.level === "warning" || item.badge?.includes("WASPADA")) return "text-amber-800";
-		return "text-[#026AA7]";
+		if (item.level === "critical" || item.level === "los" || item.is_critical || item.badge?.includes("KRITIS") || item.badge?.includes("LOS") || item.badge?.includes("TERPUTUS")) return "text-rose-600";
+		return "text-[#3B5B78]";
 	};
 	return (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 bg-[#0B2545]/40 backdrop-blur-2xs z-[99998] sm:hidden",
@@ -37146,11 +37579,11 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
 							className: "text-xs font-bold text-[#0B2545] group-hover:text-[#026AA7] transition truncate leading-snug",
-							children: item.title
+							children: formatCleanTitle(item.title, item.kantor)
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-[11px] text-[#3B5B78] line-clamp-2 leading-relaxed mt-0.5",
-							children: item.message
+							children: formatCleanMessage(item.message, item.kantor)
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "mt-2 flex items-center justify-between text-[10px] font-bold",
@@ -37430,7 +37863,7 @@ function MobileNav({ activeTab, setActiveTab, unreadTickets = 0 }) {
 }
 //#endregion
 //#region src/components/layout/AppHeader.jsx
-function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, totalUnreadNotifications, notificationList, activeOffice, currentUser, handleNotificationItemClick, handleDismissNotificationItem, handleMarkAllNotificationsRead, notificationLoading, kantorList, handleSwitchOffice, headerMenuRef, headerMenuOpen, setHeaderMenuOpen, handleLogout }) {
+function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, totalUnreadNotifications, notificationList, activeOffice, currentUser, handleNotificationItemClick, handleDismissNotificationItem, handleMarkAllNotificationsRead, notificationLoading, kantorList, handleSwitchOffice, headerMenuRef, headerMenuOpen, setHeaderMenuOpen, handleLogout, isLiveScanning = false, liveScanProgress = 0 }) {
 	const tabTitles = {
 		beranda: "Beranda Pemantauan",
 		riwayat: "Riwayat Redaman",
@@ -37459,12 +37892,26 @@ function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, total
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
 		className: "h-14 bg-white border-b border-[#CCDDF0] sticky top-0 z-40 px-3 sm:px-7 flex items-center justify-between shadow-2xs",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "flex items-center gap-2 sm:gap-3 min-w-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 				className: "text-xs font-mono font-bold text-[#0B2545] uppercase tracking-wider truncate",
 				children: tabTitles[activeTab] || `Modul ${activeTab}`
-			})
+			}), isLiveScanning && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-800 text-[11px] font-mono font-bold animate-pulse",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3 h-3 animate-spin text-cyan-600 shrink-0" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "hidden sm:inline",
+						children: "Memindai ONT"
+					}),
+					liveScanProgress > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+						"(",
+						liveScanProgress,
+						"%)"
+					] })
+				]
+			})]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "flex items-center gap-1.5 sm:gap-2.5 shrink-0",
 			children: [
@@ -37477,8 +37924,8 @@ function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, total
 						className: `relative p-1.5 sm:p-2 rounded-lg border transition cursor-pointer flex items-center justify-center ${isNotificationOpen ? "bg-[#026AA7] text-white border-[#035388] shadow-sm" : "bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] border-[#CCDDF0]"}`,
 						title: "Pusat Notifikasi Pemantauan & Tiket",
 						"aria-label": "Pusat Notifikasi Pemantauan & Tiket",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4 text-[#026AA7]" }), totalUnreadNotifications > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "absolute -top-1 -right-1 min-w-[15px] h-[15px] bg-[#026AA7] text-white rounded text-[9px] font-mono font-bold flex items-center justify-center px-0.5 tabular-nums",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: `w-4 h-4 transition-colors ${isNotificationOpen ? "text-white" : "text-[#026AA7]"}` }), totalUnreadNotifications > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: `absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-mono font-bold flex items-center justify-center px-1 tabular-nums ring-2 shadow-xs transition-all ${isNotificationOpen ? "ring-[#026AA7]" : "ring-white"}`,
 							children: totalUnreadNotifications
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NotificationsView, {
@@ -37788,20 +38235,20 @@ function ErrorView({ errorCode = 404, title = "Halaman Tidak Ditemukan", descrip
 }
 //#endregion
 //#region src/components/common/Modals.jsx
-function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval, warnThreshold, critThreshold, nightModeEnabled, nightModeStart, nightModeEnd, modemCredentialsCount, applyToInvalid }) {
+function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval, warnThreshold, critThreshold, modemCredentialsCount }) {
 	if (!isOpen) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans",
+		className: "fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-2xs flex items-center justify-center p-4 font-sans",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-[#CCDDF0] space-y-4 animate-in fade-in zoom-in-95 duration-150",
+			className: "bg-white rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 animate-in fade-in zoom-in-95 duration-150",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-start justify-between gap-3",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-3",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "h-10 w-10 rounded-lg bg-[#E0F0FF] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center shrink-0",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5 text-[#026AA7]" })
+							className: "w-8 h-8 rounded-lg bg-[#F1F6FC] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center shrink-0",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4 text-[#026AA7]" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "text-sm sm:text-base font-bold text-[#0B2545]",
 							children: "Konfirmasi Simpan Pengaturan"
@@ -37817,65 +38264,71 @@ function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval,
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-4 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] text-xs space-y-2",
+					className: "p-4 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0] text-xs space-y-2.5",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-[#3B5B78]",
+								className: "text-[#3B5B78] font-medium",
 								children: "Interval Pemindaian ONT:"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
-								className: "font-mono text-[#026AA7]",
-								children: [pollingInterval, " Menit Sekali"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-right",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-mono font-bold text-[#026AA7] tabular-nums",
+									children: pollingInterval
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-sans font-medium text-[#3B5B78] ml-1",
+									children: "Menit Sekali"
+								})]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-[#3B5B78]",
+								className: "text-[#3B5B78] font-medium",
 								children: "Ambang Peringatan Ringan:"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
-								className: "font-mono text-amber-700",
-								children: [warnThreshold, " dBm"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-right",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-mono font-bold text-amber-700 tabular-nums",
+									children: warnThreshold
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-sans font-medium text-[#3B5B78] ml-1",
+									children: "dBm"
+								})]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-[#3B5B78]",
+								className: "text-[#3B5B78] font-medium",
 								children: "Ambang Notifikasi Merah:"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
-								className: "font-mono text-rose-700",
-								children: [critThreshold, " dBm"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-right",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-mono font-bold text-rose-700 tabular-nums",
+									children: critThreshold
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-sans font-medium text-[#3B5B78] ml-1",
+									children: "dBm"
+								})]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
+							className: "flex justify-between items-center py-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-[#3B5B78]",
-								children: "Mode Malam (Notifikasi Senyap):"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-								className: "text-[#0B2545]",
-								children: nightModeEnabled ? `Aktif (${nightModeStart} - ${nightModeEnd})` : "Nonaktif"
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex justify-between items-center py-1 border-b border-[#CCDDF0]/60",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-[#3B5B78]",
+								className: "text-[#3B5B78] font-medium",
 								children: "Total Kredensial ONT:"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "font-mono font-bold text-[#0B2545]",
-								children: [modemCredentialsCount, " Pasangan User/Pass"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-right",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-mono font-bold text-[#0B2545] tabular-nums",
+									children: modemCredentialsCount
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-sans font-medium text-[#3B5B78] ml-1",
+									children: "Pasangan Akun"
+								})]
 							})]
-						}),
-						applyToInvalid && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-[11px] text-amber-900 flex items-center gap-1.5 mt-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-3.5 h-3.5 text-amber-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-								"Akan disinkronkan ke seluruh pelanggan berstatus ",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "INVALID / Belum Valid" }),
-								" (Pelanggan VALID tetap aman)."
-							] })]
 						})
 					]
 				}),
@@ -37892,7 +38345,7 @@ function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval,
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: onConfirm,
 						disabled: saving,
-						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white font-bold text-xs shadow-2xs transition disabled:opacity-50 flex items-center gap-2 min-h-[38px] cursor-pointer",
+						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white font-bold text-xs shadow-2xs transition disabled:opacity-50 flex items-center gap-1.5 min-h-[38px] cursor-pointer",
 						children: [saving ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: saving ? "Menyimpan..." : "Ya, Terapkan Perubahan" })]
 					})]
 				})
@@ -40782,37 +41235,6 @@ function SpeedTestModal({ isOpen, onClose, targetSpeed = 10, latencyValue = null
 		if (finalUploadMbps <= .1 && latestReportedSpeed > 0) finalUploadMbps = latestReportedSpeed;
 		return Math.max(.1, Number(finalUploadMbps.toFixed(2)));
 	};
-	const probeLocalModem = () => {
-		return new Promise((resolve) => {
-			let resolved = false;
-			const done = (isSuccess) => {
-				if (!resolved) {
-					resolved = true;
-					resolve(isSuccess);
-				}
-			};
-			const timer = setTimeout(() => {
-				done(false);
-			}, 1800);
-			try {
-				const img = new Image();
-				img.onload = () => {
-					clearTimeout(timer);
-					done(true);
-				};
-				img.src = `http://192.168.1.1/image/logo.gif?t=${Date.now()}`;
-			} catch (e) {}
-			try {
-				fetch(`http://192.168.1.1/css/stylech.css?t=${Date.now()}`, {
-					mode: "no-cors",
-					cache: "no-store"
-				}).then(() => {
-					clearTimeout(timer);
-					done(true);
-				}).catch(() => {});
-			} catch (e) {}
-		});
-	};
 	const handleRecheckConnection = async () => {
 		setCheckingWifi(true);
 		try {
@@ -40821,9 +41243,6 @@ function SpeedTestModal({ isOpen, onClose, targetSpeed = 10, latencyValue = null
 			if (res.ok) {
 				const json = await res.json();
 				if (json.ok && json.is_connected_to_home_wifi !== void 0) isConnected = json.is_connected_to_home_wifi === true;
-			}
-			if (!isConnected) {
-				if (await probeLocalModem()) isConnected = true;
 			}
 			setLocalWifiConnected(isConnected);
 			if (onProbeSignal) await onProbeSignal();
@@ -42263,50 +42682,14 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 		setShowDevicesModal(true);
 		fetchConnectedDevices();
 	};
-	const probeLocalModem = () => {
-		return new Promise((resolve) => {
-			let resolved = false;
-			const done = (isSuccess) => {
-				if (!resolved) {
-					resolved = true;
-					resolve(isSuccess);
-				}
-			};
-			const timer = setTimeout(() => {
-				done(false);
-			}, 1800);
-			try {
-				const img = new Image();
-				img.onload = () => {
-					clearTimeout(timer);
-					done(true);
-				};
-				img.onerror = () => {};
-				img.src = `http://192.168.1.1/image/logo.gif?t=${Date.now()}`;
-			} catch (e) {}
-			try {
-				fetch(`http://192.168.1.1/css/stylech.css?t=${Date.now()}`, {
-					mode: "no-cors",
-					cache: "no-store"
-				}).then(() => {
-					clearTimeout(timer);
-					done(true);
-				}).catch(() => {});
-			} catch (e) {}
-		});
-	};
 	const fetchWifiDetails = async () => {
 		setFetchingWifi(true);
 		try {
 			const res = await PortalWifiService.getWifi();
 			if (res.ok && res.data) {
-				let isConnected = Boolean(res.data.is_connected_to_home_wifi);
-				if (!isConnected) {
-					if (await probeLocalModem()) isConnected = true;
-				}
 				setCurrentWifi({
 					...res.data,
-					is_connected_to_home_wifi: isConnected
+					is_connected_to_home_wifi: Boolean(res.data.is_connected_to_home_wifi)
 				});
 				setNamaWifi(res.data.nama_wifi || "");
 			}
@@ -42352,8 +42735,7 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 			const payload = {
 				nama_wifi: namaWifi,
 				password_wifi: passwordWifi,
-				konfirmasi_password: konfirmasiPassword,
-				is_local_client_probe: Boolean(currentWifi.is_connected_to_home_wifi)
+				konfirmasi_password: konfirmasiPassword
 			};
 			const res = await PortalWifiService.changeWifi(payload);
 			if (res.ok && res.data.ok) {
@@ -44935,14 +45317,14 @@ function App() {
 	const [customerStatusFilter, setCustomerStatusFilter] = (0, import_react.useState)("ALL");
 	const [activeOffice, setActiveOffice] = (0, import_react.useState)(() => {
 		const saved = localStorage.getItem("edtekno_active_office");
-		return saved && saved !== "cabang" ? saved : "banyumas";
+		return saved && saved !== "cabang" ? saved : "pusat";
 	});
 	const [kantorList, setKantorList] = (0, import_react.useState)([{
-		kode: "banyumas",
-		nama: "Banyumas"
-	}, {
 		kode: "pusat",
 		nama: "Pusat"
+	}, {
+		kode: "cabang",
+		nama: "Cabang"
 	}]);
 	const [currentUser, setCurrentUser] = (0, import_react.useState)({
 		id: 1,
@@ -45046,7 +45428,7 @@ function App() {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					kantor: activeOffice || "banyumas",
+					kantor: activeOffice || "pusat",
 					polling_interval_minutes: parseInt(pollingInterval, 10) || 20,
 					warning_threshold_dbm: parseFloat(warnThreshold) || -26,
 					critical_threshold_dbm: parseFloat(critThreshold) || -27,
@@ -45065,29 +45447,21 @@ function App() {
 	const [nightModeEnabled, setNightModeEnabled] = (0, import_react.useState)(false);
 	const [nightModeStart, setNightModeStart] = (0, import_react.useState)("22:00");
 	const [nightModeEnd, setNightModeEnd] = (0, import_react.useState)("06:00");
-	const [modemCredentials, setModemCredentials] = (0, import_react.useState)([
-		{
-			username: "admin",
-			password: "tekno2024"
-		},
-		{
-			username: "admin",
-			password: "admin"
-		},
-		{
-			username: "tekno",
-			password: "tekno2025"
-		}
-	]);
-	const [applyToInvalid, setApplyToInvalid] = (0, import_react.useState)(false);
+	const [modemCredentials, setModemCredentials] = (0, import_react.useState)([{
+		username: "admin",
+		password: "password123"
+	}, {
+		username: "admin",
+		password: "admin"
+	}]);
 	const [showModemPasswords, setShowModemPasswords] = (0, import_react.useState)({});
 	const [draggedCredIdx, setDraggedCredIdx] = (0, import_react.useState)(null);
 	const [dragOverCredIdx, setDragOverCredIdx] = (0, import_react.useState)(null);
-	const [mikrotikHost, setMikrotikHost] = (0, import_react.useState)("192.168.202.50");
+	const [mikrotikHost, setMikrotikHost] = (0, import_react.useState)("");
 	const [mikrotikPort, setMikrotikPort] = (0, import_react.useState)(8728);
-	const [mikrotikUser, setMikrotikUser] = (0, import_react.useState)("tekno");
+	const [mikrotikUser, setMikrotikUser] = (0, import_react.useState)("admin");
 	const [mikrotikPassword, setMikrotikPassword] = (0, import_react.useState)("");
-	const [mikrotikKantor, setMikrotikKantor] = (0, import_react.useState)("banyumas");
+	const [mikrotikKantor, setMikrotikKantor] = (0, import_react.useState)("cabang");
 	const [mikrotikAutoSync, setMikrotikAutoSync] = (0, import_react.useState)(true);
 	const fetchBackendSettings = async (targetKantor = activeOffice) => {
 		if (!isAuthenticated) return;
@@ -45134,6 +45508,7 @@ function App() {
 		target_kantor: "cabang"
 	});
 	const [liveScanProgress, setLiveScanProgress] = (0, import_react.useState)(0);
+	const [isLiveScanning, setIsLiveScanning] = (0, import_react.useState)(false);
 	const fetchLiveDashboardData = async () => {
 		try {
 			const encodedOffice = encodeURIComponent(activeOffice);
@@ -45154,6 +45529,7 @@ function App() {
 			]);
 			if (statusRes) {
 				setIsScanningActive(statusRes.status === "RUNNING" || statusRes.is_scanning);
+				setIsLiveScanning(Boolean(statusRes.is_scanning));
 				if (statusRes.scan_progress) setLiveScanProgress(statusRes.scan_progress.percent || 0);
 			}
 			if (kpiRes) setLiveKpi(kpiRes);
@@ -45323,23 +45699,23 @@ function App() {
 			critical_threshold_dbm: isNaN(parseFloat(critThreshold)) ? -27 : parseFloat(critThreshold),
 			scheduler_status: isScanningActive ? "RUNNING" : "STOPPED",
 			default_modem_user: validCredentials[0]?.username || "admin",
-			default_modem_pass: validCredentials[0]?.password || "tekno2024",
+			default_modem_pass: validCredentials[0]?.password || "password123",
 			default_modem_credentials: validCredentials.length > 0 ? validCredentials : [{
 				username: "admin",
-				password: "tekno2024"
+				password: "password123"
 			}],
-			apply_to_invalid_customers: Boolean(applyToInvalid),
+			apply_to_invalid_customers: true,
 			notification_alert_interval_hours: 1,
 			night_mode_enabled: Boolean(nightModeEnabled),
 			night_mode_start: nightModeStart || "22:00",
 			night_mode_end: nightModeEnd || "06:00",
 			app_vibration_enabled: Boolean(appVibration),
 			alert_waiting_interval_minutes: isNaN(parseInt(alertWaitingInterval, 10)) ? 5 : parseInt(alertWaitingInterval, 10),
-			mikrotik_host: mikrotikHost || "192.168.202.50",
+			mikrotik_host: mikrotikHost || "",
 			mikrotik_port: isNaN(parseInt(mikrotikPort, 10)) ? 8728 : parseInt(mikrotikPort, 10),
-			mikrotik_user: mikrotikUser || "tekno",
+			mikrotik_user: mikrotikUser || "admin",
 			mikrotik_password: mikrotikPassword || "",
-			mikrotik_kantor: activeOffice || "banyumas",
+			mikrotik_kantor: activeOffice || "cabang",
 			mikrotik_auto_sync: Boolean(mikrotikAutoSync)
 		};
 		try {
@@ -45593,7 +45969,9 @@ function App() {
 						headerMenuRef,
 						headerMenuOpen,
 						setHeaderMenuOpen,
-						handleLogout: () => setLogoutModalOpen(true)
+						handleLogout: () => setLogoutModalOpen(true),
+						isLiveScanning,
+						liveScanProgress
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
 						className: "p-4 sm:p-6 flex-1",
@@ -45677,8 +46055,6 @@ function App() {
 								updateModemCredentialRow,
 								showModemPasswords,
 								toggleModemPasswordVisibility,
-								applyToInvalid,
-								setApplyToInvalid,
 								draggedCredIdx,
 								dragOverCredIdx,
 								handleCredDragStart,
@@ -45709,11 +46085,7 @@ function App() {
 				pollingInterval,
 				warnThreshold,
 				critThreshold,
-				nightModeEnabled,
-				nightModeStart,
-				nightModeEnd,
-				modemCredentialsCount: modemCredentials.length,
-				applyToInvalid
+				modemCredentialsCount: modemCredentials.length
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ConfirmDialogModal, {
 				isOpen: logoutModalOpen,

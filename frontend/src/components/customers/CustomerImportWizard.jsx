@@ -52,13 +52,10 @@ export function CustomerImportWizard({
       if (match) return match.slug
     }
 
-    // 2. Mapping bawaan ISP EdTeknoGuard:
-    if (cleanRaw === 'cabang' || cleanRaw === 'slawi') return 'slawi'
-    if (cleanRaw === 'banyumas' || cleanRaw === 'bms') return 'banyumas'
-    if (cleanRaw.includes('karanggede') || cleanRaw.includes('karang')) return 'karanggede'
-    if (cleanRaw.includes('tengaran')) return 'tengaran'
+    // 2. Mapping bawaan kantor:
+    if (cleanRaw === 'cabang') return 'cabang'
     if (cleanRaw === 'pusat') return 'pusat'
-    return cleanRaw || 'slawi'
+    return cleanRaw || 'cabang'
   }
 
   // State Integrasi Network Bill API (api-v1)

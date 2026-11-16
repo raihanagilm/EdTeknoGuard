@@ -3,7 +3,8 @@ import {
   Bell,
   Building2,
   MoreVertical,
-  LogOut
+  LogOut,
+  RefreshCw
 } from 'lucide-react'
 import { NotificationsView } from '../notifications/NotificationsView'
 
@@ -24,7 +25,9 @@ export function AppHeader({
   headerMenuRef,
   headerMenuOpen,
   setHeaderMenuOpen,
-  handleLogout
+  handleLogout,
+  isLiveScanning = false,
+  liveScanProgress = 0
 }) {
   const tabTitles = {
     beranda: 'Beranda Pemantauan',
@@ -69,6 +72,13 @@ export function AppHeader({
         <span className="text-xs font-mono font-bold text-[#0B2545] uppercase tracking-wider truncate">
           {tabTitles[activeTab] || `Modul ${activeTab}`}
         </span>
+        {isLiveScanning && (
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-800 text-[11px] font-mono font-bold animate-pulse">
+            <RefreshCw className="w-3 h-3 animate-spin text-cyan-600 shrink-0" />
+            <span className="hidden sm:inline">Memindai ONT</span>
+            {liveScanProgress > 0 && <span>({liveScanProgress}%)</span>}
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
@@ -86,9 +96,11 @@ export function AppHeader({
             title="Pusat Notifikasi Pemantauan & Tiket"
             aria-label="Pusat Notifikasi Pemantauan & Tiket"
           >
-            <Bell className="w-4 h-4 text-[#026AA7]" />
+            <Bell className={`w-4 h-4 transition-colors ${isNotificationOpen ? 'text-white' : 'text-[#026AA7]'}`} />
             {totalUnreadNotifications > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] bg-[#026AA7] text-white rounded text-[9px] font-mono font-bold flex items-center justify-center px-0.5 tabular-nums">
+              <span className={`absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] bg-rose-500 text-white rounded-full text-[9px] font-mono font-bold flex items-center justify-center px-1 tabular-nums ring-2 shadow-xs transition-all ${
+                isNotificationOpen ? 'ring-[#026AA7]' : 'ring-white'
+              }`}>
                 {totalUnreadNotifications}
               </span>
             )}

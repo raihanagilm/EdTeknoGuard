@@ -22,7 +22,6 @@ class UsersService:
             default_items = [
                 ("pusat", "Pusat", "Kantor Pusat ISP", None, None, None, None),
                 ("cabang", "Cabang", "Kantor Cabang Operasional", None, None, None, None),
-                ("banyumas", "Banyumas", "Kantor Wilayah Banyumas", "192.168.202.50", 8728, "tekno", "tekno2025")
             ]
             for k_code, k_name, k_desc, m_host, m_port, m_user, m_pass in default_items:
                 db.add(Kantor(

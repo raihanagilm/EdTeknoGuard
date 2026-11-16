@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Building2,
   RefreshCw,
@@ -14,7 +15,9 @@ import {
   MoreVertical,
   CheckCircle2,
   XCircle,
-  Clock
+  Clock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { UsersService } from '../../services/api';
 import { FilterContainer, DataTableContainer } from '../common/CommonUI';
@@ -26,8 +29,43 @@ export function BranchOfficesView() {
   const [kantorLoading, setKantorLoading] = useState(false);
   const [kantorSearch, setKantorSearch] = useState('');
   
-  // State Sync On-Demand MikroTik
-  const [syncingId, setSyncingId] = useState(null);
+  // State Sync On-Demand MikroTik (dengan pemulihan otomatis dari sessionStorage jika refresh / pindah menu)
+  const [syncingId, setSyncingId] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('tekno_active_syncing_kantor')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.id && Date.now() - parsed.startTime < 25000) {
+          return parsed.id
+        } else {
+          sessionStorage.removeItem('tekno_active_syncing_kantor')
+        }
+      }
+    } catch (_) {}
+    return null
+  });
+
+  // Timer pemulihan jika halaman direload saat sync masih berlangsung
+  useEffect(() => {
+    if (!syncingId) return;
+    const saved = sessionStorage.getItem('tekno_active_syncing_kantor');
+    let remaining = 10000;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const elapsed = Date.now() - parsed.startTime;
+        remaining = Math.max(2000, 20000 - elapsed);
+      } catch (_) {}
+    }
+    const timer = setTimeout(() => {
+      setSyncingId(null);
+      try {
+        sessionStorage.removeItem('tekno_active_syncing_kantor');
+      } catch (_) {}
+      fetchKantorList();
+    }, remaining);
+    return () => clearTimeout(timer);
+  }, [syncingId]);
 
   // Modal Kantor State
   const [modalKantorOpen, setModalKantorOpen] = useState(false);
@@ -41,6 +79,7 @@ export function BranchOfficesView() {
   const [kantorMikrotikPort, setKantorMikrotikPort] = useState('');
   const [kantorMikrotikUser, setKantorMikrotikUser] = useState('');
   const [kantorMikrotikPass, setKantorMikrotikPass] = useState('');
+  const [showMikrotikPass, setShowMikrotikPass] = useState(false);
   const [kantorMikrotikSyncInterval, setKantorMikrotikSyncInterval] = useState('3');
   const [kantorActiveTab, setKantorActiveTab] = useState('identitas'); // 'identitas' | 'mikrotik'
   const [kantorError, setKantorError] = useState('');
@@ -84,6 +123,7 @@ export function BranchOfficesView() {
     setKantorMikrotikPort('');
     setKantorMikrotikUser('');
     setKantorMikrotikPass('');
+    setShowMikrotikPass(false);
     setKantorMikrotikSyncInterval('3');
     setKantorActiveTab('identitas');
     setKantorError('');
@@ -101,6 +141,7 @@ export function BranchOfficesView() {
     setKantorMikrotikPort(k.mikrotik_port ? String(k.mikrotik_port) : '');
     setKantorMikrotikUser(k.mikrotik_user || '');
     setKantorMikrotikPass(k.mikrotik_pass || '');
+    setShowMikrotikPass(false);
     setKantorMikrotikSyncInterval(k.mikrotik_sync_interval ? String(k.mikrotik_sync_interval) : '3');
     setKantorActiveTab('identitas');
     setKantorError('');
@@ -191,6 +232,12 @@ export function BranchOfficesView() {
 
     setSyncingId(k.id);
     try {
+      sessionStorage.setItem('tekno_active_syncing_kantor', JSON.stringify({
+        id: k.id,
+        startTime: Date.now()
+      }));
+    } catch (_) {}
+    try {
       const res = await fetch(`/users/api/kantor/sync/${k.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -208,6 +255,9 @@ export function BranchOfficesView() {
       showToast(`Router MikroTik (${k.mikrotik_host}) tidak dapat dijangkau. Pastikan jaringan server terhubung ke jaringan router.`, 'error');
     } finally {
       setSyncingId(null);
+      try {
+        sessionStorage.removeItem('tekno_active_syncing_kantor');
+      } catch (_) {}
     }
   };
 
@@ -215,13 +265,24 @@ export function BranchOfficesView() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(15);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState(null);
 
-  // Tutup dropdown jika klik di luar
+  // Tutup dropdown jika klik di luar, scroll, atau resize
   useEffect(() => {
-    const handleClickOutside = () => setActiveMenuId(null);
-    window.addEventListener('click', handleClickOutside);
-    return () => window.removeEventListener('click', handleClickOutside);
-  }, []);
+    if (!activeMenuId) return;
+    const handleCloseMenu = () => {
+      setActiveMenuId(null);
+      setMenuAnchor(null);
+    };
+    window.addEventListener('click', handleCloseMenu);
+    window.addEventListener('scroll', handleCloseMenu, true);
+    window.addEventListener('resize', handleCloseMenu);
+    return () => {
+      window.removeEventListener('click', handleCloseMenu);
+      window.removeEventListener('scroll', handleCloseMenu, true);
+      window.removeEventListener('resize', handleCloseMenu);
+    };
+  }, [activeMenuId]);
 
   const filteredKantors = kantorList.filter((k) => {
     if (!kantorSearch) return true;
@@ -412,7 +473,21 @@ export function BranchOfficesView() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setActiveMenuId(isMenuOpen ? null : k.id);
+                              if (isMenuOpen) {
+                                setActiveMenuId(null);
+                                setMenuAnchor(null);
+                              } else {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const spaceBelow = window.innerHeight - rect.bottom;
+                                const openUp = spaceBelow < 160 && rect.top > 160;
+                                setMenuAnchor({
+                                  id: k.id,
+                                  top: openUp ? undefined : rect.bottom + 6,
+                                  bottom: openUp ? window.innerHeight - rect.top + 6 : undefined,
+                                  right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right),
+                                });
+                                setActiveMenuId(k.id);
+                              }
                             }}
                             className={`p-1.5 rounded-lg border transition cursor-pointer ${
                               isMenuOpen ? 'bg-cyan-100 border-cyan-400 text-cyan-900' : 'hover:bg-slate-100 text-slate-600 border-slate-200'
@@ -422,68 +497,87 @@ export function BranchOfficesView() {
                             <MoreVertical className="w-3.5 h-3.5" />
                           </button>
 
-                          {isMenuOpen && (
-                            <div 
-                              onClick={(e) => e.stopPropagation()}
-                              className={`absolute right-0 z-50 min-w-[160px] ${
-                                isBottomRow ? 'bottom-full pb-1' : 'top-full pt-1'
-                              }`}
-                            >
-                              <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs divide-y divide-slate-100">
-                                {/* Opsi Sync MikroTik */}
-                                {k.mikrotik_host && (
+                          {isMenuOpen && menuAnchor && menuAnchor.id === k.id && typeof document !== 'undefined' && createPortal(
+                            <>
+                              <div
+                                className="fixed inset-0 z-[9998]"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveMenuId(null);
+                                  setMenuAnchor(null);
+                                }}
+                              />
+                              <div
+                                style={{
+                                  position: 'fixed',
+                                  top: menuAnchor.top,
+                                  bottom: menuAnchor.bottom,
+                                  right: menuAnchor.right,
+                                  zIndex: 9999
+                                }}
+                                className="min-w-[160px]"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs divide-y divide-slate-100">
+                                  {/* Opsi Sync MikroTik */}
+                                  {k.mikrotik_host && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        setMenuAnchor(null);
+                                        if (k.is_active === false) {
+                                          showToast(`Kantor '${k.nama}' dalam status Nonaktif. Aktifkan kantor terlebih dahulu sebelum menyinkronkan router MikroTik.`, 'error');
+                                          return;
+                                        }
+                                        handleSyncMikrotik(k);
+                                      }}
+                                      disabled={isSyncing || k.is_active === false}
+                                      title={k.is_active === false ? 'Kantor nonaktif (sync dimatikan)' : 'Tarik data lease & kuota sekarang'}
+                                      className={`w-full px-3 py-1.5 text-left flex items-center gap-2 transition ${
+                                        k.is_active === false
+                                          ? 'text-slate-400 hover:bg-slate-50 cursor-not-allowed opacity-60'
+                                          : 'text-cyan-800 hover:bg-cyan-50 cursor-pointer disabled:opacity-50'
+                                      }`}
+                                    >
+                                      <RefreshCw className={`w-3.5 h-3.5 ${k.is_active === false ? 'text-slate-400' : 'text-cyan-600'} ${isSyncing ? 'animate-spin' : ''}`} />
+                                      <span>
+                                        {isSyncing ? 'Menarik...' : (k.is_active === false ? 'Sync Mati (Nonaktif)' : 'Sync MikroTik')}
+                                      </span>
+                                    </button>
+                                  )}
+
+                                  {/* Opsi Edit Kantor */}
                                   <button
                                     type="button"
                                     onClick={() => {
                                       setActiveMenuId(null);
-                                      if (k.is_active === false) {
-                                        showToast(`Kantor '${k.nama}' dalam status Nonaktif. Aktifkan kantor terlebih dahulu sebelum menyinkronkan router MikroTik.`, 'error');
-                                        return;
-                                      }
-                                      handleSyncMikrotik(k);
+                                      setMenuAnchor(null);
+                                      openEditKantorModal(k);
                                     }}
-                                    disabled={isSyncing || k.is_active === false}
-                                    title={k.is_active === false ? 'Kantor nonaktif (sync dimatikan)' : 'Tarik data lease & kuota sekarang'}
-                                    className={`w-full px-3 py-1.5 text-left flex items-center gap-2 transition ${
-                                      k.is_active === false
-                                        ? 'text-slate-400 hover:bg-slate-50 cursor-not-allowed opacity-60'
-                                        : 'text-cyan-800 hover:bg-cyan-50 cursor-pointer disabled:opacity-50'
-                                    }`}
+                                    className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
                                   >
-                                    <RefreshCw className={`w-3.5 h-3.5 ${k.is_active === false ? 'text-slate-400' : 'text-cyan-600'} ${isSyncing ? 'animate-spin' : ''}`} />
-                                    <span>
-                                      {isSyncing ? 'Menarik...' : (k.is_active === false ? 'Sync Mati (Nonaktif)' : 'Sync MikroTik')}
-                                    </span>
+                                    <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
+                                    <span>Edit Kantor</span>
                                   </button>
-                                )}
 
-                                {/* Opsi Edit Kantor */}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setActiveMenuId(null);
-                                    openEditKantorModal(k);
-                                  }}
-                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
-                                >
-                                  <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                                  <span>Edit Kantor</span>
-                                </button>
-
-                                {/* Opsi Hapus Kantor */}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setActiveMenuId(null);
-                                    handleOpenDeleteConfirm(k);
-                                  }}
-                                  className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                                  <span>Hapus Kantor</span>
-                                </button>
+                                  {/* Opsi Hapus Kantor */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      setMenuAnchor(null);
+                                      handleOpenDeleteConfirm(k);
+                                    }}
+                                    className="w-full px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer font-bold"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                    <span>Hapus Kantor</span>
+                                  </button>
+                                </div>
                               </div>
-                            </div>
+                            </>,
+                            document.body
                           )}
                         </div>
                       </td>
@@ -561,29 +655,14 @@ export function BranchOfficesView() {
                       value={kantorNama}
                       onChange={(e) => {
                         setKantorNama(e.target.value);
-                        if (kantorModalMode === 'add' && !kantorKode) {
-                          setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''));
+                        if (kantorModalMode === 'add') {
+                          setKantorKode(e.target.value.toLowerCase().trim().replace(/[^a-z0-9_-]/g, '_').replace(/^_+|_+$/g, ''));
                         }
                       }}
-                      placeholder="Contoh: Kantor Banyumas, Kantor Cabang..."
+                      placeholder="Contoh: Kantor Wilayah Barat, Kantor Cabang..."
                       className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
-
-                  {kantorModalMode === 'add' && (
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                        Kode Kantor (Opsional - dibuat otomatis jika kosong)
-                      </label>
-                      <input
-                        type="text"
-                        value={kantorKode}
-                        onChange={(e) => setKantorKode(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                        placeholder="contoh: banyumas"
-                        className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none lowercase"
-                      />
-                    </div>
-                  )}
 
                   {/* Status Kantor (Aktif / Tidak Aktif) */}
                   <div className="p-3 bg-slate-50/80 rounded-2xl border border-sky-100 flex items-center justify-between gap-3">
@@ -644,7 +723,7 @@ export function BranchOfficesView() {
                         type="text"
                         value={kantorMikrotikHost}
                         onChange={(e) => setKantorMikrotikHost(e.target.value)}
-                        placeholder="Contoh: 192.168.202.50"
+                        placeholder="Contoh: 192.168.88.1"
                         className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
                       />
                     </div>
@@ -656,7 +735,7 @@ export function BranchOfficesView() {
                         type="number"
                         value={kantorMikrotikPort}
                         onChange={(e) => setKantorMikrotikPort(e.target.value)}
-                        placeholder="Contoh: 8095"
+                        placeholder="Contoh: 8728"
                         className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
                       />
                     </div>
@@ -671,7 +750,7 @@ export function BranchOfficesView() {
                         type="text"
                         value={kantorMikrotikUser}
                         onChange={(e) => setKantorMikrotikUser(e.target.value)}
-                        placeholder="Contoh: tekno"
+                        placeholder="Contoh: admin"
                         className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
                       />
                     </div>
@@ -679,13 +758,27 @@ export function BranchOfficesView() {
                       <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                         Password Router
                       </label>
-                      <input
-                        type="password"
-                        value={kantorMikrotikPass}
-                        onChange={(e) => setKantorMikrotikPass(e.target.value)}
-                        placeholder="Contoh: tekno2025"
-                        className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showMikrotikPass ? "text" : "password"}
+                          value={kantorMikrotikPass}
+                          onChange={(e) => setKantorMikrotikPass(e.target.value)}
+                          placeholder="Masukkan kata sandi router..."
+                          className="w-full pl-3 pr-9 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowMikrotikPass(!showMikrotikPass)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                          title={showMikrotikPass ? "Sembunyikan kata sandi" : "Lihat kata sandi"}
+                        >
+                          {showMikrotikPass ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 

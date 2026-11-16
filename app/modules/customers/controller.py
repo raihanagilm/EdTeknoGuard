@@ -339,52 +339,110 @@ class CustomerController:
         request: Optional[Request] = None,
         user: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Memperbarui kredensial WiFi (SSID/Password) di DB dan di modem ONT (dengan proteksi mode aman dry_run)."""
-        from app.db.models import Pelanggan
+        """Memperbarui kredensial WiFi (SSID/Password) di DB dan di modem ONT (Super Admin, Admin, & Teknisi)."""
+        from app.db.models import Pelanggan, SystemSetting
         from app.services.ont_scraper_service import ONTScraperService
         from app.modules.activity_logs.service import ActivityLogService
+        import json
+
+        # 1. Validasi Izin Pengguna (Super Admin, Admin, & Teknisi)
+        user_role = (user.get("role") or "").lower() if user else ""
+        if user_role not in ("super admin", "admin", "teknisi"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Hanya Super Admin, Admin, dan Teknisi yang diizinkan mengubah WiFi pelanggan")
 
         cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
         if not cust:
             raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
 
-        # 1. Update ke database TeknoGuard
-        if nama_wifi is not None:
-            cust.nama_wifi = nama_wifi.strip()
-        if password_wifi is not None:
-            cust.password_wifi = password_wifi.strip()
+        # 2. Isolasi Kantor Cabang untuk Non-Super Admin
+        if user_role != "super admin" and cust.kantor:
+            allowed_kantor = user.get("allowed_kantor", []) if user else []
+            norm_allowed = [k.lower().strip() for k in allowed_kantor]
+            if norm_allowed and cust.kantor.lower().strip() not in norm_allowed:
+                raise HTTPException(status_code=403, detail=f"Akses ditolak: Anda tidak memiliki akses ke pelanggan di kantor {cust.kantor}")
+
+        # 3. Validasi Parameter Input
+        clean_ssid = nama_wifi.strip() if nama_wifi else None
+        clean_pass = password_wifi.strip() if password_wifi else None
+
+        if clean_ssid is not None and len(clean_ssid) < 3:
+            raise HTTPException(status_code=400, detail="Nama WiFi (SSID) minimal 3 karakter")
+        if clean_pass is not None and len(clean_pass) < 8:
+            raise HTTPException(status_code=400, detail="Password WiFi minimal 8 karakter")
+
+        # 4. Update ke database
+        if clean_ssid is not None:
+            cust.nama_wifi = clean_ssid
+        if clean_pass is not None:
+            cust.password_wifi = clean_pass
+
+        if hasattr(cust, "perangkat") and cust.perangkat:
+            if clean_ssid is not None:
+                cust.perangkat.nama_wifi = clean_ssid
+            if clean_pass is not None:
+                cust.perangkat.password_wifi = clean_pass
+
         db.commit()
         db.refresh(cust)
 
-        # 2. Eksekusi scraper service (dengan proteksi dry_run=True secara default)
+        # 5. Ambil Kredensial Default untuk Fallback Scraper
+        default_creds = []
+        try:
+            setting = db.query(SystemSetting).filter(
+                SystemSetting.key_name == "default_modem_credentials"
+            ).first()
+            if setting and setting.value_text:
+                raw_creds = json.loads(setting.value_text)
+                if isinstance(raw_creds, list):
+                    for item in raw_creds:
+                        if isinstance(item, dict):
+                            default_creds.append((item.get("username", ""), item.get("password", "")))
+        except Exception:
+            default_creds = []
+
+        # 6. Eksekusi Scraper Service ke Modem ONT
         scraper_res = {}
-        ip_target = cust.ip_ont or cust.ip_router
+        ont_synced = False
+        ip_target = (cust.ip_ont or cust.ip_router or "").strip()
+        
         if ip_target:
             scraper_res = ONTScraperService.update_wifi_credentials(
                 ip=ip_target,
                 user_admin=cust.user_admin or "admin",
-                pass_admin=cust.pass_admin or "tekno2024",
-                new_ssid=cust.nama_wifi,
-                new_wifi_password=cust.password_wifi,
+                pass_admin=cust.pass_admin or "admin",
+                new_ssid=clean_ssid or cust.nama_wifi,
+                new_wifi_password=clean_pass or cust.password_wifi,
+                default_credentials=default_creds,
                 dry_run=dry_run
             )
+            ont_synced = bool(scraper_res.get("success", False))
+
+        # 7. Formulasi Pesan Response
+        if dry_run:
+            msg = f"Kredensial WiFi pelanggan '{cust.nama}' berhasil disimpan di sistem (Mode Simulasi)."
+        elif ont_synced:
+            msg = f"Kredensial WiFi pelanggan '{cust.nama}' berhasil diperbarui dan diterapkan langsung ke modem ONT ({ip_target})."
+        else:
+            err_detail = scraper_res.get("message") or "Modem ONT tidak merespons / offline"
+            msg = f"Kredensial WiFi berhasil disimpan di sistem, namun pengiriman ke modem fisik ONT ({ip_target}) gagal: {err_detail}"
 
         if request:
             ActivityLogService.log_from_request(
                 db=db,
                 request=request,
                 action="UBAH_WIFI_PELANGGAN",
-                status="SUCCESS",
-                keterangan=f"Ubah WiFi {cust.nama} (SSID: '{cust.nama_wifi}', Mode: {'DRY-RUN (Aman)' if dry_run else 'LIVE'})",
+                status="SUCCESS" if (dry_run or ont_synced) else "WARNING",
+                keterangan=f"Ubah WiFi {cust.nama} (SSID: '{cust.nama_wifi}', Mode: {'DRY-RUN' if dry_run else 'LIVE'}, ONT Synced: {ont_synced}) oleh {user.get('nama') or 'User'} ({user_role.upper()})",
                 user=user
             )
 
         return {
             "status": "success",
-            "message": f"Kredensial WiFi pelanggan '{cust.nama}' berhasil disimpan di sistem ({'Mode Aman / Belum Dites ke Fisik' if dry_run else 'Terkirim ke Modem'}).",
+            "message": msg,
             "id_pelanggan": cust.id_pelanggan,
             "nama_wifi": cust.nama_wifi,
             "password_wifi": cust.password_wifi,
+            "ont_synced": ont_synced,
             "ont_result": scraper_res
         }
 

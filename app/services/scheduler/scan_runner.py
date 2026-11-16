@@ -200,14 +200,35 @@ class ScanRunner:
                     "batch_alerts_sent": 0
                 }
 
-                cust_ids = [c.id_pelanggan for c in customers]
+                # Pre-extract parameter target ke in-memory dict agar worker TIDAK menahan koneksi DB saat HTTP scraping
+                scan_targets = []
+                for c in customers:
+                    ip_target = c.ip_ont or c.ip_router
+                    if not ip_target:
+                        continue
+                    failed_history = []
+                    if c.perangkat and c.perangkat.failed_credentials:
+                        try:
+                            failed_history = json.loads(c.perangkat.failed_credentials)
+                        except Exception:
+                            pass
+                    scan_targets.append({
+                        "id_pelanggan": c.id_pelanggan,
+                        "nama": c.nama,
+                        "ip_target": ip_target,
+                        "user_admin": c.user_admin,
+                        "pass_admin": c.pass_admin,
+                        "status_kredensial": c.status_kredensial,
+                        "failed_history": failed_history,
+                        "fcm_token": c.fcm_token
+                    })
             finally:
                 db.close()
 
-            # Jalankan worker pool secara terisolasi per sesi
-            max_workers = min(15, max(4, len(cust_ids) // 2)) if cust_ids else 4
+            # Concurrency terkalibrasi (6-8 workers) agar network stack & DB pool tetap lapang untuk frontend
+            max_workers = min(8, max(3, len(scan_targets) // 3)) if scan_targets else 3
 
-            def _scan_worker(c_id: str) -> Optional[Dict[str, Any]]:
+            def _scan_worker(target: Dict[str, Any]) -> Optional[Dict[str, Any]]:
                 if state.is_stopped:
                     return None
                 while state.is_paused:
@@ -215,74 +236,74 @@ class ScanRunner:
                     if state.is_stopped:
                         return None
 
+                c_id = target["id_pelanggan"]
+                ip_target = target["ip_target"]
+                failed_history = target["failed_history"]
+                is_valid_modem = (target["status_kredensial"] == "VALID")
+
+                # FASE 1: Scraping live murni di layer jaringan HTTP/Socket (ZERO DATABASE CONNECTION)
+                scrape_res = ONTScraperService.scrape_ont(
+                    ip=ip_target,
+                    customer_user=target["user_admin"],
+                    customer_pass=target["pass_admin"],
+                    customer_name=target["nama"],
+                    default_credentials=default_creds,
+                    warn_threshold=cfg.get("warning_threshold_dbm"),
+                    crit_threshold=cfg.get("critical_threshold_dbm"),
+                    is_mass_scan=True,
+                    failed_credentials_history=failed_history,
+                    is_valid_modem=is_valid_modem
+                )
+
+                rx = scrape_res.get("rx_power")
+                status_koneksi = scrape_res.get("status_koneksi", "LOS")
+
+                # FASE 2: Buka koneksi database sekejap (< 5ms) khusus untuk commit log & update status
                 t_db = TenantDatabaseManager.get_tenant_session(k_code)
                 try:
                     p = t_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == c_id).first()
-                    if not p:
-                        return None
+                    if p:
+                        log_entry = LogPerformaONT(
+                            id_pelanggan=p.id_pelanggan,
+                            waktu_cek=scan_batch_time,
+                            rx_power=rx,
+                            suhu_ont=scrape_res.get("suhu_ont"),
+                            uptime=scrape_res.get("uptime"),
+                            status_koneksi=status_koneksi,
+                            latency_ms=scrape_res.get("latency_ms"),
+                            keterangan=scrape_res.get("message")
+                        )
+                        t_db.add(log_entry)
 
-                    ip_target = p.ip_ont or p.ip_router
-                    if not ip_target:
-                        return None
+                        if scrape_res.get("status_kredensial") == "VALID":
+                            p.status_kredensial = "VALID"
+                            if scrape_res.get("updated_user"):
+                                p.user_admin = scrape_res.get("updated_user")
+                            if scrape_res.get("updated_pass"):
+                                p.pass_admin = scrape_res.get("updated_pass")
+                            if scrape_res.get("mac_address"):
+                                p.mac_address = scrape_res.get("mac_address")
+                            if scrape_res.get("nama_wifi"):
+                                p.nama_wifi = scrape_res.get("nama_wifi")
+                            if scrape_res.get("password_wifi"):
+                                p.password_wifi = scrape_res.get("password_wifi")
+                            if scrape_res.get("jenis_modem"):
+                                p.jenis_modem = scrape_res.get("jenis_modem")
+                            if p.perangkat:
+                                p.perangkat.failed_credentials = None
 
-                    # Saring riwayat gagal
-                    failed_history = []
-                    if p.perangkat and p.perangkat.failed_credentials:
-                        try:
-                            failed_history = json.loads(p.perangkat.failed_credentials)
-                        except Exception:
-                            pass
+                        elif scrape_res.get("status_kredensial") == "INVALID":
+                            p.status_kredensial = "INVALID"
+                            if scrape_res.get("failed_credentials"):
+                                new_fails = scrape_res.get("failed_credentials", [])
+                                current_fails = list(failed_history)
+                                for nf in new_fails:
+                                    if nf not in current_fails:
+                                        current_fails.append(nf)
+                                if p.perangkat:
+                                    p.perangkat.failed_credentials = json.dumps(current_fails)
 
-                    is_valid_modem = (p.status_kredensial == "VALID")
-                    scrape_res = ONTScraperService.scrape_ont(
-                        ip=ip_target,
-                        customer_user=p.user_admin,
-                        customer_pass=p.pass_admin,
-                        customer_name=p.nama,
-                        default_credentials=default_creds,
-                        warn_threshold=cfg.get("warning_threshold_dbm"),
-                        crit_threshold=cfg.get("critical_threshold_dbm"),
-                        is_mass_scan=True,
-                        failed_credentials_history=failed_history,
-                        is_valid_modem=is_valid_modem
-                    )
-
-                    rx = scrape_res.get("rx_power")
-                    status_koneksi = scrape_res.get("status_koneksi", "LOS")
-
-                    # Gunakan scan_batch_time seragam untuk seluruh pelanggan dalam 1 siklus pemindaian
-                    log_entry = LogPerformaONT(
-                        id_pelanggan=p.id_pelanggan,
-                        waktu_cek=scan_batch_time,
-                        rx_power=rx,
-                        suhu_ont=scrape_res.get("suhu_ont"),
-                        uptime=scrape_res.get("uptime"),
-                        status_koneksi=status_koneksi,
-                        latency_ms=scrape_res.get("latency_ms"),
-                        keterangan=scrape_res.get("message")
-                    )
-                    t_db.add(log_entry)
-
-                    if scrape_res.get("status_kredensial") == "VALID":
-                        p.status_kredensial = "VALID"
-                        if scrape_res.get("updated_user"):
-                            p.user_admin = scrape_res.get("updated_user")
-                        if scrape_res.get("updated_pass"):
-                            p.pass_admin = scrape_res.get("updated_pass")
-                        if scrape_res.get("mac_address"):
-                            p.mac_address = scrape_res.get("mac_address")
-                        if scrape_res.get("nama_wifi"):
-                            p.nama_wifi = scrape_res.get("nama_wifi")
-                        if scrape_res.get("password_wifi"):
-                            p.password_wifi = scrape_res.get("password_wifi")
-                        if scrape_res.get("jenis_modem"):
-                            p.jenis_modem = scrape_res.get("jenis_modem")
-                        if p.perangkat:
-                            p.perangkat.failed_credentials = None
-
-                    elif scrape_res.get("status_kredensial") == "INVALID":
-                        p.status_kredensial = "INVALID"
-                        if scrape_res.get("failed_credentials"):
+                        elif scrape_res.get("failed_credentials"):
                             new_fails = scrape_res.get("failed_credentials", [])
                             current_fails = list(failed_history)
                             for nf in new_fails:
@@ -291,57 +312,48 @@ class ScanRunner:
                             if p.perangkat:
                                 p.perangkat.failed_credentials = json.dumps(current_fails)
 
-                    elif scrape_res.get("failed_credentials"):
-                        # Simpan tambahan kredensial yang gagal
-                        new_fails = scrape_res.get("failed_credentials", [])
-                        current_fails = list(failed_history)
-                        for nf in new_fails:
-                            if nf not in current_fails:
-                                current_fails.append(nf)
-                        if p.perangkat:
-                            p.perangkat.failed_credentials = json.dumps(current_fails)
+                        # Push notifikasi transisi status koneksi khusus pelanggan yang memiliki FCM token
+                        if p.fcm_token and p.fcm_token.strip():
+                            prev_log = t_db.query(LogPerformaONT).filter(
+                                LogPerformaONT.id_pelanggan == p.id_pelanggan
+                            ).order_by(LogPerformaONT.id.desc()).offset(1).first()
+                            prev_status = prev_log.status_koneksi if prev_log else "NORMAL"
 
-                    # Push notifikasi transisi status koneksi khusus pelanggan yang memiliki FCM token
-                    if p.fcm_token and p.fcm_token.strip():
-                        prev_log = t_db.query(LogPerformaONT).filter(
-                            LogPerformaONT.id_pelanggan == p.id_pelanggan
-                        ).order_by(LogPerformaONT.id.desc()).offset(1).first()
-                        prev_status = prev_log.status_koneksi if prev_log else "NORMAL"
+                            if status_koneksi == "LOS" and prev_status != "LOS":
+                                try:
+                                    from app.services.fcm_service import send_push_notification
+                                    send_push_notification(
+                                        tokens=[p.fcm_token.strip()],
+                                        title="Pemberitahuan Gangguan Jaringan",
+                                        body="Mohon maaf, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.",
+                                        data={
+                                            "target_tab": "beranda",
+                                            "level": "los",
+                                            "type": "cust_los"
+                                        },
+                                        channel_id="tekno_customer_channel"
+                                    )
+                                except Exception as fcm_err:
+                                    logger.warning(f"[FCM_CUST_LOS] Gagal push notif LOS ke pelanggan {p.id_pelanggan}: {fcm_err}")
+                            elif status_koneksi == "NORMAL" and prev_status == "LOS":
+                                try:
+                                    from app.services.fcm_service import send_push_notification
+                                    send_push_notification(
+                                        tokens=[p.fcm_token.strip()],
+                                        title="Koneksi Internet Telah Pulih",
+                                        body="Koneksi internet Anda telah kembali normal dan aktif. Terima kasih atas kesabaran Anda telah menggunakan layanan kami!",
+                                        data={
+                                            "target_tab": "beranda",
+                                            "level": "info",
+                                            "type": "cust_recovery"
+                                        },
+                                        channel_id="tekno_customer_channel"
+                                    )
+                                except Exception as fcm_err:
+                                    logger.warning(f"[FCM_CUST_REC] Gagal push notif pulih ke pelanggan {p.id_pelanggan}: {fcm_err}")
 
-                        if status_koneksi == "LOS" and prev_status != "LOS":
-                            try:
-                                from app.services.fcm_service import send_push_notification
-                                send_push_notification(
-                                    tokens=[p.fcm_token.strip()],
-                                    title="Pemberitahuan Gangguan Jaringan",
-                                    body="Mohon maaf, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.",
-                                    data={
-                                        "target_tab": "beranda",
-                                        "level": "los",
-                                        "type": "cust_los"
-                                    },
-                                    channel_id="tekno_customer_channel"
-                                )
-                            except Exception as fcm_err:
-                                logger.warning(f"[FCM_CUST_LOS] Gagal push notif LOS ke pelanggan {p.id_pelanggan}: {fcm_err}")
-                        elif status_koneksi == "NORMAL" and prev_status == "LOS":
-                            try:
-                                from app.services.fcm_service import send_push_notification
-                                send_push_notification(
-                                    tokens=[p.fcm_token.strip()],
-                                    title="Koneksi Internet Telah Pulih",
-                                    body="Koneksi internet Anda telah kembali normal dan aktif. Terima kasih atas kesabaran Anda telah menggunakan layanan kami!",
-                                    data={
-                                        "target_tab": "beranda",
-                                        "level": "info",
-                                        "type": "cust_recovery"
-                                    },
-                                    channel_id="tekno_customer_channel"
-                                )
-                            except Exception as fcm_err:
-                                logger.warning(f"[FCM_CUST_REC] Gagal push notif pulih ke pelanggan {p.id_pelanggan}: {fcm_err}")
+                        t_db.commit()
 
-                    t_db.commit()
                     return {
                         "id": c_id,
                         "status_koneksi": status_koneksi,
@@ -350,13 +362,13 @@ class ScanRunner:
                     }
                 except Exception as e:
                     t_db.rollback()
-                    logger.error(f"[WORKER_SCAN] Gagal scan pelanggan {c_id}: {e}")
+                    logger.error(f"[WORKER_SCAN] Gagal menyimpan log scan pelanggan {c_id}: {e}")
                     return None
                 finally:
                     t_db.close()
 
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = {executor.submit(_scan_worker, cid): cid for cid in cust_ids}
+                futures = {executor.submit(_scan_worker, target): target["id_pelanggan"] for target in scan_targets}
                 for f in as_completed(futures):
                     res = f.result()
                     state.current_scan_index += 1

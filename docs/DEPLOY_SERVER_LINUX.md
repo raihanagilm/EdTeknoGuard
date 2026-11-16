@@ -222,8 +222,8 @@ SECRET_KEY="GANTI_DENGAN_TOKEN_ACAK_PANJANG_HASIL_GENERATOR"
 # ════════════════════════════════════════════════════════════════
 DB_HOST="127.0.0.1"
 DB_PORT=3306
-DB_USER="tekno"
-DB_PASSWORD="tekno2025"
+DB_USER="edtekno_user"
+DB_PASSWORD="password_database_anda"
 DB_NAME="edteknoguard"
 
 # ════════════════════════════════════════════════════════════════
@@ -266,10 +266,8 @@ Output terminal yang sukses akan menampilkan:
 [INFO] Membuat Super Admin default (admin / agiltampan)...
   -> [OK] Super Admin & hak akses kantor berhasil dibuat.
 [2/3] Memastikan skema seluruh database tenant aktif...
-  -> [OK] Skema tenant 'Karang Gede' siap.
-  -> [OK] Skema tenant 'Banyumas' siap.
-  -> [OK] Skema tenant 'Tengaran' siap.
-  -> [OK] Skema tenant 'Slawi' siap.
+  -> [OK] Skema tenant 'Pusat' siap.
+  -> [OK] Skema tenant 'Cabang' siap.
 [3/3] Selesai. Seluruh database master & tenant siap digunakan!
 ```
 
@@ -482,7 +480,7 @@ Amankan data pelanggan dan riwayat log dengan backup otomatis setiap pukul 02:00
    #!/bin/bash
    BACKUP_DIR="/var/backups/edteknoguard"
    DATE=$(date +"%Y%m%d_%H%M%S")
-   mysqldump -u edtekno_user -p'SandiKuatEdTekno2026!' --databases edteknoguard edtekno_karang_gede edtekno_banyumas edtekno_tengaran edtekno_slawi | gzip > "$BACKUP_DIR/backup_edtekno_$DATE.sql.gz"
+   mysqldump -u edtekno_user -p'SandiKuatEdTekno2026!' --databases edteknoguard edtekno_pusat edtekno_cabang | gzip > "$BACKUP_DIR/backup_edtekno_$DATE.sql.gz"
    # Hapus backup yang lebih lama dari 30 hari
    find $BACKUP_DIR -type f -name "*.sql.gz" -mtime +30 -exec rm {} \;
    ```
@@ -714,26 +712,16 @@ PersistentKeepalive = 25
    sudo systemctl start wg-quick@wg0
    ```
 
-6. **Perintah Cepat Kelola & Mematikan WireGuard:**
+6. **Perintah Cepat Kelola WireGuard:**
    ```bash
-   # Melihat status interface & handshake aktif
-   sudo wg show
+   # Status service
+   sudo systemctl status wg-quick@wg0
 
-   # Mematikan sementara koneksi VPN WireGuard:
+   # Restart interface WireGuard
+   sudo systemctl restart wg-quick@wg0
+
+   # Mematikan koneksi WireGuard
    sudo systemctl stop wg-quick@wg0
-   # atau menggunakan wg-quick langsung:
-   sudo wg-quick down wg0
-
-   # Menghidupkan kembali koneksi VPN WireGuard:
-   sudo systemctl start wg-quick@wg0
-   # atau:
-   sudo wg-quick up wg0
-
-   # Mematikan autostart agar TIDAK otomatis hidup saat server reboot:
-   sudo systemctl disable wg-quick@wg0
-
-   # Mengaktifkan kembali autostart saat server booting:
-   sudo systemctl enable wg-quick@wg0
    ```
 
 ---

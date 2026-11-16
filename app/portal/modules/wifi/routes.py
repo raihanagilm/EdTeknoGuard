@@ -75,7 +75,6 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_portal_
     nama_wifi = body.get("nama_wifi", "").strip()
     password_wifi = body.get("password_wifi", "").strip()
     konfirmasi = body.get("konfirmasi_password", "").strip()
-    is_local_client_probe = body.get("is_local_client_probe", False)
     
     if len(nama_wifi) < 3:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Nama WiFi (SSID) minimal 3 karakter!"})
@@ -92,7 +91,7 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_portal_
         
     ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
     
-    is_home_wifi = check_is_home_wifi(request, pelanggan) or is_local_client_probe
+    is_home_wifi = check_is_home_wifi(request, pelanggan)
             
     if not is_home_wifi:
         return JSONResponse(
@@ -109,7 +108,7 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_portal_
     target_modem_ips = []
     if ip_target:
         target_modem_ips.append(ip_target)
-    if "192.168.1.1" not in target_modem_ips:
+    else:
         target_modem_ips.append("192.168.1.1")
 
     user_ont = pelanggan.user_admin or "admin"

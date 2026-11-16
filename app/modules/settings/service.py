@@ -128,14 +128,14 @@ class SystemSettingsService:
             credentials_list = [{"username": default_user, "password": default_pass or ""}]
 
         # MikroTik Settings
-        mikrotik_host = db_settings.get("mikrotik_host", getattr(settings, "MIKROTIK_HOST", "192.168.202.50"))
+        mikrotik_host = db_settings.get("mikrotik_host", getattr(settings, "MIKROTIK_HOST", ""))
         try:
             mikrotik_port = int(db_settings.get("mikrotik_port", getattr(settings, "MIKROTIK_PORT", 8728)))
         except (ValueError, TypeError):
             mikrotik_port = 8728
-        mikrotik_user = db_settings.get("mikrotik_user", getattr(settings, "MIKROTIK_USER", "tekno"))
+        mikrotik_user = db_settings.get("mikrotik_user", getattr(settings, "MIKROTIK_USER", "admin"))
         mikrotik_pass = db_settings.get("mikrotik_password", getattr(settings, "MIKROTIK_PASSWORD", ""))
-        mikrotik_kantor = db_settings.get("mikrotik_kantor", getattr(settings, "MIKROTIK_DEFAULT_KANTOR", "banyumas"))
+        mikrotik_kantor = db_settings.get("mikrotik_kantor", getattr(settings, "MIKROTIK_DEFAULT_KANTOR", "cabang"))
         mikrotik_auto = db_settings.get("mikrotik_auto_sync", "true").lower() in ["true", "1", "yes"]
         apply_invalid = db_settings.get("apply_to_invalid_customers", "false").lower() in ["true", "1", "yes"]
 
@@ -205,11 +205,11 @@ class SystemSettingsService:
         if not creds_to_save and (data.default_modem_user or data.default_modem_pass):
             creds_to_save.append({
                 "username": (data.default_modem_user or "admin").strip(),
-                "password": (data.default_modem_pass or "tekno2024").strip()
+                "password": (data.default_modem_pass or "password123").strip()
             })
 
         primary_user = creds_to_save[0]["username"] if creds_to_save else "admin"
-        primary_pass = creds_to_save[0]["password"] if creds_to_save else "tekno2024"
+        primary_pass = creds_to_save[0]["password"] if creds_to_save else "password123"
 
         notif_hours = data.notification_alert_interval_hours if data.notification_alert_interval_hours is not None else 1.0
         debounce_minutes = max(1, int(notif_hours * 60))
@@ -255,11 +255,11 @@ class SystemSettingsService:
             "night_mode_end": (data.night_mode_end or "06:00").strip(),
             "app_vibration_enabled": "true" if data.app_vibration_enabled else "false",
             "alert_waiting_interval_minutes": str(data.alert_waiting_interval_minutes or 5),
-            "mikrotik_host": (data.mikrotik_host or "192.168.202.50").strip(),
+            "mikrotik_host": (data.mikrotik_host or "").strip(),
             "mikrotik_port": str(data.mikrotik_port or 8728),
-            "mikrotik_user": (data.mikrotik_user or "tekno").strip(),
+            "mikrotik_user": (data.mikrotik_user or "admin").strip(),
             "mikrotik_password": (data.mikrotik_password or "").strip(),
-            "mikrotik_kantor": (data.mikrotik_kantor or "banyumas").strip(),
+            "mikrotik_kantor": (data.mikrotik_kantor or "cabang").strip(),
             "mikrotik_auto_sync": "true" if data.mikrotik_auto_sync else "false"
         }
         for key_n, val_n in global_pairs.items():

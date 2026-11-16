@@ -161,5 +161,84 @@ class TestCustomerModules(unittest.TestCase):
         finally:
             db.close()
 
+    def test_change_wifi_roles_and_permissions(self):
+        """Memastikan Super Admin, Admin, dan Teknisi dapat mengubah WiFi tanpa harus jaringan yang sama."""
+        from app.modules.customers.controller import CustomerController
+        from fastapi import HTTPException
+
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+
+        try:
+            p = models.Pelanggan(
+                id_pelanggan="CUST-WIFI-01",
+                nama="Budi Santoso",
+                kantor="cabang",
+                is_active=True
+            )
+            per = models.PerangkatONT(
+                id_perangkat=101,
+                id_pelanggan="CUST-WIFI-01",
+                ip_router="10.10.7.10",
+                nama_wifi="SSID_LAMA",
+                password_wifi="password_lama123",
+                status_kredensial="VALID"
+            )
+            db.add_all([p, per])
+            db.commit()
+
+            # 1. Teknisi di kantor yang diizinkan (cabang) -> SUKSES
+            user_teknisi = {"nama": "Teknisi Lapangan", "role": "teknisi", "allowed_kantor": ["cabang"]}
+            res_tek = CustomerController.change_wifi(
+                db=db,
+                id_pelanggan="CUST-WIFI-01",
+                nama_wifi="WiFi_Baru_Teknisi",
+                password_wifi="rahasia_baru_88",
+                dry_run=True,
+                user=user_teknisi
+            )
+            self.assertEqual(res_tek["status"], "success")
+            self.assertEqual(res_tek["nama_wifi"], "WiFi_Baru_Teknisi")
+            self.assertEqual(res_tek["password_wifi"], "rahasia_baru_88")
+
+            # 2. Teknisi di luar kantor yang diizinkan -> HTTP 403
+            user_tek_pusat = {"nama": "Teknisi Pusat", "role": "teknisi", "allowed_kantor": ["pusat"]}
+            with self.assertRaises(HTTPException) as ctx_tek:
+                CustomerController.change_wifi(
+                    db=db,
+                    id_pelanggan="CUST-WIFI-01",
+                    nama_wifi="WiFi_Hacking",
+                    password_wifi="12345678",
+                    user=user_tek_pusat
+                )
+            self.assertEqual(ctx_tek.exception.status_code, 403)
+
+            # 3. Super Admin -> Akses Penuh Lintas Kantor
+            user_super = {"nama": "Super Admin", "role": "super admin"}
+            res_super = CustomerController.change_wifi(
+                db=db,
+                id_pelanggan="CUST-WIFI-01",
+                nama_wifi="WiFi_Super_Admin",
+                password_wifi="super_admin_pass",
+                dry_run=True,
+                user=user_super
+            )
+            self.assertEqual(res_super["status"], "success")
+            self.assertEqual(res_super["nama_wifi"], "WiFi_Super_Admin")
+
+            # 4. Validasi password kurang dari 8 karakter -> HTTP 400
+            with self.assertRaises(HTTPException) as ctx_val:
+                CustomerController.change_wifi(
+                    db=db,
+                    id_pelanggan="CUST-WIFI-01",
+                    password_wifi="pendek",
+                    user=user_super
+                )
+            self.assertEqual(ctx_val.exception.status_code, 400)
+        finally:
+            db.close()
+
 if __name__ == "__main__":
     unittest.main()

@@ -151,7 +151,7 @@ export function SettingsProfileTab({
                 required
                 value={editNama}
                 onChange={(e) => setEditNama(e.target.value)}
-                placeholder="Contoh: Raihan Agil / Teknisi NOC"
+                placeholder="Contoh: Budi Santoso / Teknisi NOC"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50 text-xs text-slate-900 font-semibold focus:outline-none focus:border-cyan-600 min-h-[42px]"
               />
             </div>
@@ -165,7 +165,7 @@ export function SettingsProfileTab({
                 type="text"
                 value={editNoWa}
                 onChange={(e) => setEditNoWa(e.target.value)}
-                placeholder="Contoh: 08888015154142"
+                placeholder="Contoh: 081234567890"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-cyan-50/50 text-xs text-slate-900 font-mono focus:outline-none focus:border-cyan-600 min-h-[42px]"
               />
             </div>

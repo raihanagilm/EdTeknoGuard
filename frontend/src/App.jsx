@@ -109,11 +109,11 @@ export default function App() {
   const [customerStatusFilter, setCustomerStatusFilter] = useState('ALL')
   const [activeOffice, setActiveOffice] = useState(() => {
     const saved = localStorage.getItem('edtekno_active_office')
-    return (saved && saved !== 'cabang') ? saved : 'banyumas'
+    return (saved && saved !== 'cabang') ? saved : 'pusat'
   })
   const [kantorList, setKantorList] = useState([
-    { kode: 'banyumas', nama: 'Banyumas' },
-    { kode: 'pusat', nama: 'Pusat' }
+    { kode: 'pusat', nama: 'Pusat' },
+    { kode: 'cabang', nama: 'Cabang' }
   ])
   const [currentUser, setCurrentUser] = useState({
     id: 1,
@@ -243,7 +243,7 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kantor: activeOffice || 'banyumas',
+          kantor: activeOffice || 'pusat',
           polling_interval_minutes: parseInt(pollingInterval, 10) || 20,
           warning_threshold_dbm: parseFloat(warnThreshold) || -26.0,
           critical_threshold_dbm: parseFloat(critThreshold) || -27.0,
@@ -265,9 +265,8 @@ export default function App() {
   
   // Tab 2 Kredensial Modem ONT Repeater & Drag Drop State
   const [modemCredentials, setModemCredentials] = useState([
-    { username: 'admin', password: 'tekno2024' },
-    { username: 'admin', password: 'admin' },
-    { username: 'tekno', password: 'tekno2025' }
+    { username: 'admin', password: 'password123' },
+    { username: 'admin', password: 'admin' }
   ])
   const [applyToInvalid, setApplyToInvalid] = useState(false)
   const [showModemPasswords, setShowModemPasswords] = useState({})
@@ -275,11 +274,11 @@ export default function App() {
   const [dragOverCredIdx, setDragOverCredIdx] = useState(null)
 
   // State Integrasi MikroTik RouterOS
-  const [mikrotikHost, setMikrotikHost] = useState('192.168.202.50')
+  const [mikrotikHost, setMikrotikHost] = useState('')
   const [mikrotikPort, setMikrotikPort] = useState(8728)
-  const [mikrotikUser, setMikrotikUser] = useState('tekno')
+  const [mikrotikUser, setMikrotikUser] = useState('admin')
   const [mikrotikPassword, setMikrotikPassword] = useState('')
-  const [mikrotikKantor, setMikrotikKantor] = useState('banyumas')
+  const [mikrotikKantor, setMikrotikKantor] = useState('cabang')
   const [mikrotikAutoSync, setMikrotikAutoSync] = useState(true)
 
   // Fetch Settings From Backend FastAPI (Thresholds & Credentials per active office)
@@ -340,6 +339,7 @@ export default function App() {
     target_kantor: 'cabang'
   })
   const [liveScanProgress, setLiveScanProgress] = useState(0)
+  const [isLiveScanning, setIsLiveScanning] = useState(false)
 
   const fetchLiveDashboardData = async () => {
     try {
@@ -356,6 +356,7 @@ export default function App() {
 
       if (statusRes) {
         setIsScanningActive(statusRes.status === 'RUNNING' || statusRes.is_scanning)
+        setIsLiveScanning(Boolean(statusRes.is_scanning))
         if (statusRes.scan_progress) {
           setLiveScanProgress(statusRes.scan_progress.percent || 0)
         }
@@ -616,8 +617,8 @@ export default function App() {
       critical_threshold_dbm: isNaN(parseFloat(critThreshold)) ? -27.0 : parseFloat(critThreshold),
       scheduler_status: isScanningActive ? 'RUNNING' : 'STOPPED',
       default_modem_user: validCredentials[0]?.username || 'admin',
-      default_modem_pass: validCredentials[0]?.password || 'tekno2024',
-      default_modem_credentials: validCredentials.length > 0 ? validCredentials : [{ username: 'admin', password: 'tekno2024' }],
+      default_modem_pass: validCredentials[0]?.password || 'password123',
+      default_modem_credentials: validCredentials.length > 0 ? validCredentials : [{ username: 'admin', password: 'password123' }],
       apply_to_invalid_customers: Boolean(applyToInvalid),
       notification_alert_interval_hours: 1.0,
       night_mode_enabled: Boolean(nightModeEnabled),
@@ -625,11 +626,11 @@ export default function App() {
       night_mode_end: nightModeEnd || '06:00',
       app_vibration_enabled: Boolean(appVibration),
       alert_waiting_interval_minutes: isNaN(parseInt(alertWaitingInterval, 10)) ? 5 : parseInt(alertWaitingInterval, 10),
-      mikrotik_host: mikrotikHost || '192.168.202.50',
+      mikrotik_host: mikrotikHost || '',
       mikrotik_port: isNaN(parseInt(mikrotikPort, 10)) ? 8728 : parseInt(mikrotikPort, 10),
-      mikrotik_user: mikrotikUser || 'tekno',
+      mikrotik_user: mikrotikUser || 'admin',
       mikrotik_password: mikrotikPassword || '',
-      mikrotik_kantor: activeOffice || 'banyumas',
+      mikrotik_kantor: activeOffice || 'cabang',
       mikrotik_auto_sync: Boolean(mikrotikAutoSync)
     }
 
@@ -970,6 +971,8 @@ export default function App() {
           headerMenuOpen={headerMenuOpen}
           setHeaderMenuOpen={setHeaderMenuOpen}
           handleLogout={() => setLogoutModalOpen(true)}
+          isLiveScanning={isLiveScanning}
+          liveScanProgress={liveScanProgress}
         />
 
         {/* Dynamic Page Content (Modular Architecture) */}
@@ -1110,9 +1113,6 @@ export default function App() {
         pollingInterval={pollingInterval}
         warnThreshold={warnThreshold}
         critThreshold={critThreshold}
-        nightModeEnabled={nightModeEnabled}
-        nightModeStart={nightModeStart}
-        nightModeEnd={nightModeEnd}
         modemCredentialsCount={modemCredentials.length}
         applyToInvalid={applyToInvalid}
       />

@@ -57,9 +57,8 @@ Modem pelanggan di lapangan dapat memiliki kredensial yang bervariasi karena kon
    - Daftar kredensial disimpan pada tabel `system_settings` di database MySQL Local dengan key `default_modem_credentials` berupa JSON Array:
      ```json
      [
-       {"username": "admin", "password": "tekno2024"},
        {"username": "admin", "password": "admin"},
-       {"username": "tekno", "password": "tekno2025"}
+       {"username": "admin", "password": "password123"}
      ]
      ```
 2. **Alur Pengecekan Scraper (`ONTScraperService.scrape_ont`)**:

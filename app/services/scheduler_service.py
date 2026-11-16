@@ -618,15 +618,26 @@ class ONTSchedulerService:
                     if latest_log and latest_log[0]:
                         last_scan_dt = latest_log[0]
 
-            # 2. Cek status aktif kantor di master DB
-            from app.db.models import Kantor
-            m_db = TenantDatabaseManager.get_tenant_session(None)
-            try:
-                k_obj = m_db.query(Kantor).filter(Kantor.kode == k_code).first()
-                if k_obj is not None:
-                    is_office_active = bool(k_obj.is_active)
-            finally:
-                m_db.close()
+            # 2. Cek status aktif kantor di master DB (dengan TTL cache 30s untuk menghemat connection pool)
+            now_ts = time.time()
+            if not hasattr(self, "_office_active_cache"):
+                self._office_active_cache = {}
+            cached_info = self._office_active_cache.get(k_code)
+            if cached_info and (now_ts - cached_info[0] < 30.0):
+                is_office_active = cached_info[1]
+            else:
+                try:
+                    from app.db.models import Kantor
+                    m_db = TenantDatabaseManager.get_tenant_session(None)
+                    try:
+                        k_obj = m_db.query(Kantor).filter(Kantor.kode == k_code).first()
+                        if k_obj is not None:
+                            is_office_active = bool(k_obj.is_active)
+                        self._office_active_cache[k_code] = (now_ts, is_office_active)
+                    finally:
+                        m_db.close()
+                except Exception:
+                    is_office_active = True
         finally:
             db.close()
 

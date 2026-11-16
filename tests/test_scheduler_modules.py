@@ -25,7 +25,7 @@ class TestSchedulerModules(unittest.TestCase):
         """Memvalidasi kalkulasi konfigurasi kantor menggunakan mock session DB"""
         mock_db = MagicMock()
         mock_setting = MagicMock()
-        mock_setting.value_text = '[{"username": "admin", "password": "tekno2025"}]'
+        mock_setting.value_text = '[{"username": "admin", "password": "password123"}]'
         
         # Simulasi return nilai setting dari DB dan query count
         mock_db.query.return_value.filter.return_value.first.return_value = mock_setting

@@ -171,13 +171,14 @@ export function DashboardControlBar({
             )}
 
             {/* Kondisi 2: Active Scanning */}
-            {isScanning && isCurrentOfficeScan && canControlCurrentScan && scanProgress?.total > 0 && (
+            {isScanning && isCurrentOfficeScan && canControlCurrentScan && !scanProgress?.is_paused && (
               <>
                 <button
                   type="button"
                   onClick={handlePauseScan}
-                  disabled={isAnyActionLoading}
-                  className="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border border-[#CCDDF0] text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs min-h-[36px] sm:min-h-[38px]"
+                  disabled={isAnyActionLoading || !scanProgress?.total}
+                  title={!scanProgress?.total ? 'Sedang menginisiasi pemindaian ONT...' : 'Jeda pemindaian'}
+                  className="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#0B2545] border border-[#CCDDF0] text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs min-h-[36px] sm:min-h-[38px] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {scanActionType === 'pause' ? (
                     <RefreshCw className="w-3.5 h-3.5 text-[#026AA7] animate-spin shrink-0" />

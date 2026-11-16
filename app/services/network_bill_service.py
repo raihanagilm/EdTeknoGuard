@@ -325,12 +325,19 @@ class NetworkBillService:
 
             # Prioritaskan `code` resmi Network Bill (contoh: BMS-0001, PLG-0012)
             # sebagai ID utama tampilan dan identitas pelanggan di sistem.
-            # Jika `code` tidak tersedia, fallback ke `id` numerik.
+            # Selalu pastikan menggunakan prefix resmi (PLG, BMS, SLW, KGD).
             nb_id = item.get("id")
             nb_code = (item.get("code") or "").strip()
-            official_code = nb_code if nb_code else (str(nb_id).strip() if nb_id is not None else "")
-            if not official_code:
-                official_code = str(index)
+            if nb_code:
+                official_code = nb_code
+            elif nb_id is not None:
+                office_prefixes = {"tengaran": "PLG", "banyumas": "BMS", "slawi": "SLW", "karanggede": "KGD"}
+                pref = office_prefixes.get(pop_slug.lower(), pop_slug[:3].upper())
+                official_code = f"{pref}-{int(nb_id):04d}" if str(nb_id).isdigit() else f"{pref}-{nb_id}"
+            else:
+                office_prefixes = {"tengaran": "PLG", "banyumas": "BMS", "slawi": "SLW", "karanggede": "KGD"}
+                pref = office_prefixes.get(pop_slug.lower(), pop_slug[:3].upper())
+                official_code = f"{pref}-{index:04d}"
 
             # Standard row data untuk EdTeknoGuard
             mapped_row = {

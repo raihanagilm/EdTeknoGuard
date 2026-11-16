@@ -11,7 +11,7 @@ class SystemSettingsSchema(BaseModel):
     critical_threshold_dbm: float = Field(-27.0, le=-20.0, ge=-45.0, description="Ambang batas notifikasi merah / kritis (dBm)")
     scheduler_status: Optional[str] = Field("RUNNING", description="Status pemantau (RUNNING / STOPPED)")
     default_modem_user: Optional[str] = Field("admin", description="Username default modem ONT")
-    default_modem_pass: Optional[str] = Field("tekno2024", description="Password default modem ONT")
+    default_modem_pass: Optional[str] = Field("password123", description="Password default modem ONT")
     default_modem_credentials: Optional[List[ModemCredentialItem]] = Field(
         default_factory=list,
         description="Daftar pasangan username & password modem ONT"
@@ -25,14 +25,14 @@ class SystemSettingsSchema(BaseModel):
     alert_waiting_interval_minutes: Optional[int] = Field(5, ge=1, le=60, description="Interval pengulangan notifikasi tiket menunggu (menit)")
     
     # Target Kantor untuk Pengaturan Spesifik Kantor
-    kantor: Optional[str] = Field(None, description="Kode kantor target pengaturan (misal: cabang, pusat, banyumas)")
+    kantor: Optional[str] = Field(None, description="Kode kantor target pengaturan (misal: cabang, pusat)")
 
     # MikroTik RouterOS Sync Settings
-    mikrotik_host: Optional[str] = Field("192.168.202.50", description="IP Host router MikroTik")
+    mikrotik_host: Optional[str] = Field("192.168.88.1", description="IP Host router MikroTik")
     mikrotik_port: Optional[int] = Field(8728, description="Port API RouterOS MikroTik (default 8728)")
-    mikrotik_user: Optional[str] = Field("tekno", description="Username API MikroTik")
+    mikrotik_user: Optional[str] = Field("admin", description="Username API MikroTik")
     mikrotik_password: Optional[str] = Field("", description="Password API MikroTik")
-    mikrotik_kantor: Optional[str] = Field("banyumas", description="Kantor cabang router MikroTik")
+    mikrotik_kantor: Optional[str] = Field("cabang", description="Kantor cabang router MikroTik")
     mikrotik_auto_sync: Optional[bool] = Field(True, description="Aktifkan sinkronisasi otomatis realtime dari MikroTik")
 
 class MikroTikTestSchema(BaseModel):

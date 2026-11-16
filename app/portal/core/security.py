@@ -94,13 +94,10 @@ def require_customer_login(request: Request) -> Dict[str, Any]:
 def check_is_home_wifi(request: Request, pelanggan) -> bool:
     """
     Validasi ketat apakah perangkat klien saat ini benar-benar terhubung ke WiFi modem pelanggan:
-    1. Jika akses via IP publik/WAN router (client_ip == ip_target), cocok 100%.
-    2. Jika akses dari localhost / development:
-       - Memeriksa SSID aktif yang terhubung pada adaptor WiFi (misal via netsh di Windows).
-       - Jika SSID aktif cocok dengan nama_wifi pelanggan -> True.
-       - Jika SSID aktif adalah WiFi lain -> False.
-       - Memeriksa MAC Gateway lokal (192.168.1.1) via ARP. Jika cocok -> True, jika beda -> False.
-    3. Jika klien di belakang NAT/LAN tapi subnet berbeda atau bukan modem pelanggan -> False.
+    1. Kecocokan IP WAN/Router persis (client_ip == ip_target).
+    2. Header verifikasi dari APK Android / Native Client (x-client-ssid atau x-client-gateway-mac).
+    3. Pengecekan perangkat lokal (Localhost / Development) mencocokkan SSID atau ARP MAC.
+    4. Klien dari luar jangkauan / subnet lain / modem tetangga -> False (Ditolak).
     """
     if not pelanggan:
         return False
@@ -109,37 +106,26 @@ def check_is_home_wifi(request: Request, pelanggan) -> bool:
     if client_ip:
         client_ip = client_ip.split(",")[0].strip()
     else:
-        client_ip = request.client.host if request.client else ""
+        client_ip = request.headers.get("x-real-ip") or (request.client.host if request.client else "")
 
     ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
     cust_mac = (pelanggan.mac_address or (pelanggan.perangkat.mac_address if pelanggan.perangkat else "") or "").strip().upper()
-    cust_ssid = (pelanggan.nama_wifi or "").strip().lower()
+    cust_ssid = (pelanggan.nama_wifi or (pelanggan.perangkat.nama_wifi if pelanggan.perangkat else "") or "").strip().lower()
 
     # 1. Kecocokan IP WAN/Router persis
     if ip_target and client_ip and client_ip == ip_target:
         return True
 
-    # 1.b Kecocokan subnet ISP PT Tekno Indo Jaya (AS153729) & IP NAT ISP
-    # Prefix resmi PT Tekno Indo Jaya: 38.253.120.0/24, 38.253.121.0/24, 163.223.112.0/24
-    if client_ip:
-        import ipaddress
-        isp_subnets = [
-            ipaddress.ip_network("38.253.120.0/24"),
-            ipaddress.ip_network("38.253.121.0/24"),
-            ipaddress.ip_network("163.223.112.0/24"),
-            ipaddress.ip_network("10.0.0.0/8"),
-            ipaddress.ip_network("172.21.0.0/16"),
-            ipaddress.ip_network("192.168.0.0/16")
-        ]
-        try:
-            c_addr = ipaddress.ip_address(client_ip)
-            for net in isp_subnets:
-                if c_addr in net:
-                    return True
-        except Exception:
-            pass
+    # 2. Header verifikasi dari APK Android / Native Client (jika tersedia)
+    client_ssid = request.headers.get("x-client-ssid", "").strip().lower()
+    if client_ssid and cust_ssid and client_ssid == cust_ssid:
+        return True
 
-    # 2. Pengecekan perangkat lokal (Localhost / Development)
+    client_gateway_mac = request.headers.get("x-client-gateway-mac", "").strip().upper()
+    if client_gateway_mac and cust_mac and client_gateway_mac == cust_mac:
+        return True
+
+    # 3. Pengecekan perangkat lokal (Localhost / Development)
     if client_ip in ["127.0.0.1", "::1", "localhost"]:
         import subprocess, re
         

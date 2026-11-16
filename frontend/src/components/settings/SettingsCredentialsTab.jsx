@@ -86,7 +86,7 @@ export function SettingsCredentialsTab({
               <div className="relative">
                 <input
                   type={showModemPasswords[idx] ? 'text' : 'password'}
-                  placeholder="Password modem (misal: tekno2024)"
+                  placeholder="Password modem (misal: password123)"
                   value={cred.password}
                   onChange={(e) => updateModemCredentialRow(idx, 'password', e.target.value)}
                   required

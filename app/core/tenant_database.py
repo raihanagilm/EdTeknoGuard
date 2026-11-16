@@ -63,8 +63,9 @@ class TenantDatabaseManager:
                 connect_args=connect_args,
                 pool_pre_ping=True,
                 pool_recycle=1800,
-                pool_size=15,
-                max_overflow=30
+                pool_size=25,
+                max_overflow=50,
+                pool_timeout=10
             )
 
             # Pastikan tabel-tabel TenantBase ada di database tenant ini

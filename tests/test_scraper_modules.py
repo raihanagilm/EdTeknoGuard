@@ -39,7 +39,7 @@ class TestScraperModules(unittest.TestCase):
     def test_credential_candidates_filtering(self):
         """Memvalidasi urutan kandidat kredensial dan eliminasi failed history"""
         customer_u, customer_p = "admin", "pass123"
-        default_creds = [("admin", "admin"), ("tekno", "tekno2025")]
+        default_creds = [("admin", "admin"), ("admin", "password123")]
         failed_history = [("admin", "pass123")]
 
         active_list, total, all_creds = CredentialChainManager.build_candidates_list(
@@ -71,7 +71,7 @@ class TestScraperModules(unittest.TestCase):
         res_valid = ONTScraperService.scrape_ont(
             ip="10.10.2.100",
             customer_user="admin",
-            customer_pass="tekno2024",
+            customer_pass="password123",
             is_valid_modem=True
         )
         self.assertEqual(res_valid["status_koneksi"], "LOS")
@@ -82,7 +82,7 @@ class TestScraperModules(unittest.TestCase):
         res_untested = ONTScraperService.scrape_ont(
             ip="10.10.2.100",
             customer_user="admin",
-            customer_pass="tekno2024",
+            customer_pass="password123",
             is_valid_modem=False
         )
         self.assertEqual(res_untested["status_koneksi"], "LOS")

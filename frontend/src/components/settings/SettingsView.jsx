@@ -3,14 +3,12 @@ import {
   Sliders,
   SlidersHorizontal,
   KeyRound,
-  Bell,
   User,
   Lock
 } from 'lucide-react'
 import { ToastNotification } from '../common/ToastNotification'
 import { SettingsThresholdTab } from './SettingsThresholdTab'
 import { SettingsCredentialsTab } from './SettingsCredentialsTab'
-import { SettingsNotificationsTab } from './SettingsNotificationsTab'
 import { SettingsProfileTab } from './SettingsProfileTab'
 
 export function SettingsView({
@@ -152,16 +150,16 @@ export function SettingsView({
             )}
           </div>
 
-          {/* Grid Menu Simpel (Hanya Ikon Bersih, Tanpa Border Kotak, Tanpa Background Bulat, Tanpa Badge Angka) */}
+          {/* Grid Menu Simpel (Layout Resmi 2 TAB: Parameter & Kredensial ONT) */}
           {!isTeknisi && settingsCategory === 'noc' && (
             <div className="p-2 bg-white/95 rounded-2xl border border-sky-100 shadow-xs animate-in fade-in duration-200">
-              <div className="grid grid-cols-3 gap-1">
+              <div className="grid grid-cols-2 gap-1.5">
 
                 {/* 1. Parameter Redaman */}
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('thresholds')}
-                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'thresholds'
+                  className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'thresholds'
                     ? 'text-cyan-700 font-black'
                     : 'text-slate-500 hover:text-slate-800 font-semibold'
                     }`}
@@ -177,7 +175,7 @@ export function SettingsView({
                 <button
                   type="button"
                   onClick={() => setSettingsActiveSubTab('credentials')}
-                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'credentials'
+                  className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'credentials'
                     ? 'text-cyan-700 font-black'
                     : 'text-slate-500 hover:text-slate-800 font-semibold'
                     }`}
@@ -186,22 +184,6 @@ export function SettingsView({
                     }`} />
                   <span className="text-[11px] leading-tight font-bold">
                     Kredensial ONT
-                  </span>
-                </button>
-
-                {/* 3. Notifikasi */}
-                <button
-                  type="button"
-                  onClick={() => setSettingsActiveSubTab('notifications')}
-                  className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl transition cursor-pointer text-center ${settingsActiveSubTab === 'notifications'
-                    ? 'text-cyan-700 font-black'
-                    : 'text-slate-500 hover:text-slate-800 font-semibold'
-                    }`}
-                >
-                  <Bell className={`w-5 h-5 mb-1 transition ${settingsActiveSubTab === 'notifications' ? 'text-cyan-600 stroke-[2.5]' : 'text-slate-400 stroke-[1.8]'
-                    }`} />
-                  <span className="text-[11px] leading-tight font-bold">
-                    Notifikasi
                   </span>
                 </button>
 
@@ -285,22 +267,6 @@ export function SettingsView({
                       <span>Kredensial ONT</span>
                     </span>
                   </button>
-
-                  <button
-                    onClick={() => {
-                      setSettingsCategory('noc')
-                      setSettingsActiveSubTab('notifications')
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition flex items-center justify-between cursor-pointer ${settingsActiveSubTab === 'notifications'
-                      ? 'bg-[#026AA7] text-white shadow-2xs'
-                      : 'text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545]'
-                      }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Bell className="w-3.5 h-3.5" />
-                      <span>Notifikasi &amp; Jam Senyap</span>
-                    </span>
-                  </button>
                 </div>
               </div>
             )}
@@ -345,23 +311,7 @@ export function SettingsView({
             />
           )}
 
-          {/* TAB 3: NOTIFIKASI & PENGINGAT (Khusus Super Admin & Admin) */}
-          {!isTeknisi && settingsActiveSubTab === 'notifications' && (
-            <SettingsNotificationsTab
-              onOpenConfirmModal={onOpenConfirmModal}
-              settingsLoading={settingsLoading}
-              alertWaitingInterval={alertWaitingInterval}
-              setAlertWaitingInterval={setAlertWaitingInterval}
-              nightModeEnabled={nightModeEnabled}
-              setNightModeEnabled={setNightModeEnabled}
-              nightModeStart={nightModeStart}
-              setNightModeStart={setNightModeStart}
-              nightModeEnd={nightModeEnd}
-              setNightModeEnd={setNightModeEnd}
-            />
-          )}
-
-          {/* TAB 4: PROFIL & AKUN SAYA (Semua Role: Super Admin, Admin, & Teknisi) - Gaya TeknoCust */}
+          {/* TAB 3: PROFIL & AKUN SAYA (Semua Role: Super Admin, Admin, & Teknisi) - Gaya TeknoCust */}
           {(settingsActiveSubTab === 'account' || (isTeknisi && settingsActiveSubTab !== 'account')) && (
             <SettingsProfileTab
               currentUser={currentUser}

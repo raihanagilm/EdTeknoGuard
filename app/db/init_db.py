@@ -39,10 +39,8 @@ def init_db():
         if kantor_count == 0:
             print("\n[INFO] Menambahkan kantor default...")
             default_kantors = [
-                Kantor(nama="Karang Gede", alamat="Kantor Operasional Karang Gede"),
-                Kantor(nama="Banyumas", alamat="Kantor Operasional Banyumas"),
-                Kantor(nama="Tengaran", alamat="Kantor Operasional Tengaran"),
-                Kantor(nama="Slawi", alamat="Kantor Operasional Slawi"),
+                Kantor(nama="Pusat", alamat="Kantor Pusat ISP"),
+                Kantor(nama="Cabang", alamat="Kantor Cabang Operasional"),
             ]
             db.add_all(default_kantors)
             db.commit()
