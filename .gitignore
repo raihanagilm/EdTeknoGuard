@@ -8,6 +8,7 @@
 firebase-service-account.json
 .kilo/
 .github
+
 # Python
 __pycache__/
 *.py[cod]
@@ -41,3 +42,5 @@ frontend/node_modules/
 !frontend/dist/
 !frontend/dist/**
 
+# Documentation & Internal System Guides (Sensitive IP & Infrastructure Specs)
+docs/
