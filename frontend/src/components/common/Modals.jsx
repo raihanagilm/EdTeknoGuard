@@ -14,7 +14,6 @@ export function ConfirmSaveModal({
   pollingInterval,
   warnThreshold,
   critThreshold,
-  nightModeEnabled,
   nightModeStart,
   nightModeEnd,
   modemCredentialsCount
@@ -69,14 +68,8 @@ export function ConfirmSaveModal({
           <div className="flex justify-between items-center py-1 border-b border-[#CCDDF0]/60">
             <span className="text-[#3B5B78] font-medium">Jam Tenang Malam (Quiet Hours):</span>
             <div className="text-right font-medium">
-              {nightModeEnabled ? (
-                <span>
-                  <strong className="text-emerald-700 font-semibold">Aktif</strong>{' '}
-                  <span className="font-mono text-[#3B5B78] tabular-nums">({nightModeStart} - {nightModeEnd})</span>
-                </span>
-              ) : (
-                <span className="text-[#64839E]">Nonaktif</span>
-              )}
+              <span className="font-mono text-[#0B2545] font-semibold tabular-nums">{nightModeStart || '22:00'} - {nightModeEnd || '06:00'}</span>
+              <span className="font-sans text-[11px] text-emerald-700 ml-1.5 font-medium">(Otomatis)</span>
             </div>
           </div>
           <div className="flex justify-between items-center py-1">

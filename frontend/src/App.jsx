@@ -617,7 +617,7 @@ export default function App() {
       default_modem_credentials: validCredentials.length > 0 ? validCredentials : [{ username: 'admin', password: 'password123' }],
       apply_to_invalid_customers: true,
       notification_alert_interval_hours: 1.0,
-      night_mode_enabled: Boolean(nightModeEnabled),
+      night_mode_enabled: true,
       night_mode_start: nightModeStart || '22:00',
       night_mode_end: nightModeEnd || '06:00',
       app_vibration_enabled: Boolean(appVibration),
@@ -1107,7 +1107,6 @@ export default function App() {
         pollingInterval={pollingInterval}
         warnThreshold={warnThreshold}
         critThreshold={critThreshold}
-        nightModeEnabled={nightModeEnabled}
         nightModeStart={nightModeStart}
         nightModeEnd={nightModeEnd}
         modemCredentialsCount={modemCredentials.length}

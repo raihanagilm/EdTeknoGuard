@@ -29467,7 +29467,7 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 }
 //#endregion
 //#region src/components/settings/SettingsNotificationsTab.jsx
-function SettingsNotificationsTab({ onOpenConfirmModal, settingsLoading, alertWaitingInterval, setAlertWaitingInterval, nightModeEnabled, setNightModeEnabled, nightModeStart, setNightModeStart, nightModeEnd, setNightModeEnd }) {
+function SettingsNotificationsTab({ onOpenConfirmModal, settingsLoading, alertWaitingInterval, setAlertWaitingInterval, nightModeStart, setNightModeStart, nightModeEnd, setNightModeEnd }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 		onSubmit: (e) => {
 			e.preventDefault();
@@ -29508,25 +29508,23 @@ function SettingsNotificationsTab({ onOpenConfirmModal, settingsLoading, alertWa
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "py-2 space-y-3 border-t border-sky-100",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-					className: "flex items-center justify-between cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2.5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Moon, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2.5",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Moon, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-xs font-bold text-slate-800",
 							children: "Jam Tenang Malam (Quiet Hours)"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-slate-600 font-sans mt-0.5",
-							children: "Membungkam notifikasi non-kritis selama rentang jam istirahat teknisi."
-						})] })]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "checkbox",
-						checked: nightModeEnabled,
-						onChange: (e) => setNightModeEnabled(e.target.checked),
-						className: "rounded text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
-					})]
-				}), nightModeEnabled && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2",
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-200",
+							children: "Otomatis"
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-slate-600 font-sans mt-0.5",
+						children: "Otomatis membungkam notifikasi non-kritis selama rentang jam istirahat teknisi."
+					})] })]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 						className: "block text-[11px] font-bold text-slate-700 mb-1",
 						children: "Jam Mulai Senyap"
@@ -30112,8 +30110,6 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 							settingsLoading,
 							alertWaitingInterval,
 							setAlertWaitingInterval,
-							nightModeEnabled,
-							setNightModeEnabled,
 							nightModeStart,
 							setNightModeStart,
 							nightModeEnd,
@@ -38382,7 +38378,7 @@ function ErrorView({ errorCode = 404, title = "Halaman Tidak Ditemukan", descrip
 }
 //#endregion
 //#region src/components/common/Modals.jsx
-function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval, warnThreshold, critThreshold, nightModeEnabled, nightModeStart, nightModeEnd, modemCredentialsCount }) {
+function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval, warnThreshold, critThreshold, nightModeStart, nightModeEnd, modemCredentialsCount }) {
 	if (!isOpen) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-2xs flex items-center justify-center p-4 font-sans",
@@ -38466,28 +38462,19 @@ function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval,
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-[#3B5B78] font-medium",
 								children: "Jam Tenang Malam (Quiet Hours):"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "text-right font-medium",
-								children: nightModeEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-										className: "text-emerald-700 font-semibold",
-										children: "Aktif"
-									}),
-									" ",
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "font-mono text-[#3B5B78] tabular-nums",
-										children: [
-											"(",
-											nightModeStart,
-											" - ",
-											nightModeEnd,
-											")"
-										]
-									})
-								] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[#64839E]",
-									children: "Nonaktif"
-								})
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+									className: "font-mono text-[#0B2545] font-semibold tabular-nums",
+									children: [
+										nightModeStart || "22:00",
+										" - ",
+										nightModeEnd || "06:00"
+									]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-sans text-[11px] text-emerald-700 ml-1.5 font-medium",
+									children: "(Otomatis)"
+								})]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -45881,7 +45868,7 @@ function App() {
 			}],
 			apply_to_invalid_customers: true,
 			notification_alert_interval_hours: 1,
-			night_mode_enabled: Boolean(nightModeEnabled),
+			night_mode_enabled: true,
 			night_mode_start: nightModeStart || "22:00",
 			night_mode_end: nightModeEnd || "06:00",
 			app_vibration_enabled: Boolean(appVibration),
@@ -46260,7 +46247,6 @@ function App() {
 				pollingInterval,
 				warnThreshold,
 				critThreshold,
-				nightModeEnabled,
 				nightModeStart,
 				nightModeEnd,
 				modemCredentialsCount: modemCredentials.length

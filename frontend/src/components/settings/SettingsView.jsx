@@ -348,8 +348,6 @@ export function SettingsView({
               settingsLoading={settingsLoading}
               alertWaitingInterval={alertWaitingInterval}
               setAlertWaitingInterval={setAlertWaitingInterval}
-              nightModeEnabled={nightModeEnabled}
-              setNightModeEnabled={setNightModeEnabled}
               nightModeStart={nightModeStart}
               setNightModeStart={setNightModeStart}
               nightModeEnd={nightModeEnd}

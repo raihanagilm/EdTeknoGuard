@@ -998,6 +998,10 @@
     margin-left: var(--spacing);
   }
 
+  .ml-1\.5 {
+    margin-left: calc(var(--spacing) * 1.5);
+  }
+
   .ml-3 {
     margin-left: calc(var(--spacing) * 3);
   }
