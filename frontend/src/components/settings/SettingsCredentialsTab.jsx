@@ -17,8 +17,6 @@ export function SettingsCredentialsTab({
   updateModemCredentialRow,
   showModemPasswords,
   toggleModemPasswordVisibility,
-  applyToInvalid,
-  setApplyToInvalid,
   dragOverCredIdx,
   handleCredDragStart,
   handleCredDragOver,
@@ -118,31 +116,6 @@ export function SettingsCredentialsTab({
         ))}
       </div>
 
-      {/* Checkbox Sinkronisasi Pelanggan Invalid */}
-      <div className="pt-2">
-        <label className="flex items-start gap-2.5 p-3 rounded-xl bg-cyan-50/50 border border-sky-200 cursor-pointer transition hover:bg-cyan-50">
-          <input
-            type="checkbox"
-            checked={applyToInvalid}
-            onChange={(e) => setApplyToInvalid(e.target.checked)}
-            className="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
-          />
-          <div className="text-xs flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-800">Sinkronkan ke seluruh pelanggan berstatus INVALID</span>
-              {applyToInvalid && (
-                <span className="text-[11px] font-mono font-bold text-cyan-700">
-                  Aktif Tersimpan
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              Otomatis menguji urutan kredensial baru ini ke semua pelanggan yang sebelumnya gagal login saat disimpan dan selama pemantauan.
-            </p>
-          </div>
-        </label>
-      </div>
-
       {/* Tombol Simpan Tab 2 */}
       <div className="pt-3 border-t border-sky-100 flex justify-end">
         <button
@@ -165,6 +138,7 @@ export function SettingsCredentialsTab({
           <li>Sistem mencoba kredensial tersimpan milik pelanggan terlebih dahulu.</li>
           <li>Jika ditolak, sistem mencoba semua username/password default di atas satu per satu.</li>
           <li>Jika berhasil, status kredensial pelanggan otomatis diperbarui menjadi <code className="text-emerald-700 font-mono text-[11px] font-bold">VALID</code>.</li>
+          <li>Kredensial baru ini otomatis diuji ke seluruh pelanggan yang sebelumnya berstatus <code className="text-amber-700 font-mono text-[11px] font-bold">INVALID</code>.</li>
         </ol>
       </div>
     </form>

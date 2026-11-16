@@ -268,7 +268,6 @@ export default function App() {
     { username: 'admin', password: 'password123' },
     { username: 'admin', password: 'admin' }
   ])
-  const [applyToInvalid, setApplyToInvalid] = useState(false)
   const [showModemPasswords, setShowModemPasswords] = useState({})
   const [draggedCredIdx, setDraggedCredIdx] = useState(null)
   const [dragOverCredIdx, setDragOverCredIdx] = useState(null)
@@ -311,9 +310,6 @@ export default function App() {
         }
         if (data.default_modem_credentials !== undefined) {
           setModemCredentials(Array.isArray(data.default_modem_credentials) ? data.default_modem_credentials : [])
-        }
-        if (data.apply_to_invalid_customers !== undefined) {
-          setApplyToInvalid(Boolean(data.apply_to_invalid_customers))
         }
         if (data.mikrotik_host) setMikrotikHost(data.mikrotik_host)
         if (data.mikrotik_port) setMikrotikPort(data.mikrotik_port)
@@ -619,7 +615,7 @@ export default function App() {
       default_modem_user: validCredentials[0]?.username || 'admin',
       default_modem_pass: validCredentials[0]?.password || 'password123',
       default_modem_credentials: validCredentials.length > 0 ? validCredentials : [{ username: 'admin', password: 'password123' }],
-      apply_to_invalid_customers: Boolean(applyToInvalid),
+      apply_to_invalid_customers: true,
       notification_alert_interval_hours: 1.0,
       night_mode_enabled: Boolean(nightModeEnabled),
       night_mode_start: nightModeStart || '22:00',
@@ -1082,8 +1078,6 @@ export default function App() {
               updateModemCredentialRow={updateModemCredentialRow}
               showModemPasswords={showModemPasswords}
               toggleModemPasswordVisibility={toggleModemPasswordVisibility}
-              applyToInvalid={applyToInvalid}
-              setApplyToInvalid={setApplyToInvalid}
               draggedCredIdx={draggedCredIdx}
               dragOverCredIdx={dragOverCredIdx}
               handleCredDragStart={handleCredDragStart}
@@ -1113,8 +1107,10 @@ export default function App() {
         pollingInterval={pollingInterval}
         warnThreshold={warnThreshold}
         critThreshold={critThreshold}
+        nightModeEnabled={nightModeEnabled}
+        nightModeStart={nightModeStart}
+        nightModeEnd={nightModeEnd}
         modemCredentialsCount={modemCredentials.length}
-        applyToInvalid={applyToInvalid}
       />
 
       {/* 5. MODAL POP-UP (Confirm Logout) */}

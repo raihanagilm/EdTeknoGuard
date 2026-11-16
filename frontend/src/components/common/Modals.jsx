@@ -14,8 +14,10 @@ export function ConfirmSaveModal({
   pollingInterval,
   warnThreshold,
   critThreshold,
-  modemCredentialsCount,
-  applyToInvalid
+  nightModeEnabled,
+  nightModeStart,
+  nightModeEnd,
+  modemCredentialsCount
 }) {
   if (!isOpen) return null
 
@@ -65,21 +67,25 @@ export function ConfirmSaveModal({
             </div>
           </div>
           <div className="flex justify-between items-center py-1 border-b border-[#CCDDF0]/60">
+            <span className="text-[#3B5B78] font-medium">Jam Tenang Malam (Quiet Hours):</span>
+            <div className="text-right font-medium">
+              {nightModeEnabled ? (
+                <span>
+                  <strong className="text-emerald-700 font-semibold">Aktif</strong>{' '}
+                  <span className="font-mono text-[#3B5B78] tabular-nums">({nightModeStart} - {nightModeEnd})</span>
+                </span>
+              ) : (
+                <span className="text-[#64839E]">Nonaktif</span>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-between items-center py-1">
             <span className="text-[#3B5B78] font-medium">Total Kredensial ONT:</span>
             <div className="text-right">
               <span className="font-mono font-bold text-[#0B2545] tabular-nums">{modemCredentialsCount}</span>
               <span className="font-sans font-medium text-[#3B5B78] ml-1">Pasangan Akun</span>
             </div>
           </div>
-
-          {applyToInvalid && (
-            <div className="pt-2 border-t border-[#CCDDF0] text-[11px] text-[#3B5B78] flex items-start gap-1.5 leading-relaxed">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-              <span>
-                Akan disinkronkan ke seluruh pelanggan berstatus <strong className="font-semibold text-[#0B2545]">INVALID / Belum Valid</strong> (Pelanggan VALID tetap aman).
-              </span>
-            </div>
-          )}
         </div>
 
         <p className="text-xs text-[#3B5B78] leading-relaxed">
