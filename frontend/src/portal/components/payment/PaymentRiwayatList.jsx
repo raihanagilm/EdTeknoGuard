@@ -10,6 +10,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { rupiah, periodeTeks, tanggalTeks, jenisTagihanTeks } from './paymentUtils';
+import { PortalPagination } from '../common/PortalPagination';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -162,34 +163,12 @@ export function PaymentRiwayatList({ riwayat, memuatRiwayat }) {
             ))}
           </div>
 
-          {/* Kontrol Paginasi Bersih Ramah Mobile */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs">
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>Sebelumnya</span>
-              </button>
-
-              <span className="text-gray-500 font-medium text-[11px]">
-                Halaman <strong>{currentPage}</strong> dari <strong>{totalPages}</strong>
-              </span>
-
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
-              >
-                <span>Selanjutnya</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
+          {/* Kontrol Paginasi Angka Ramah Mobile (< 1 2 3 ... 7 8 >) */}
+          <PortalPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </>
       )}
     </div>

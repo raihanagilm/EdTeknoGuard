@@ -1645,6 +1645,10 @@
     scale: var(--tw-scale-x) var(--tw-scale-y);
   }
 
+  .scale-\[1\.02\] {
+    scale: 1.02;
+  }
+
   .-rotate-90 {
     rotate: -90deg;
   }
@@ -2045,6 +2049,11 @@
   .border-t {
     border-top-style: var(--tw-border-style);
     border-top-width: 1px;
+  }
+
+  .border-t-0 {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 0;
   }
 
   .border-r {
@@ -3476,6 +3485,10 @@
     padding-block: calc(var(--spacing) * 12);
   }
 
+  .pt-0 {
+    padding-top: 0;
+  }
+
   .pt-0\.5 {
     padding-top: calc(var(--spacing) * .5);
   }
@@ -4857,10 +4870,6 @@
       .hover\:bg-gray-50\/70:hover {
         background-color: color-mix(in oklab, var(--color-gray-50) 70%, transparent);
       }
-    }
-
-    .hover\:bg-gray-100:hover {
-      background-color: var(--color-gray-100);
     }
 
     .hover\:bg-gray-200:hover {

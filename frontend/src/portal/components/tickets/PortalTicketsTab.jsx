@@ -17,6 +17,7 @@ import { PortalKendalaService } from '../../services/portalApi';
 import { PortalActiveMascot } from '../common/PortalActiveMascot';
 import { PortalHeader } from '../layout/PortalHeader';
 import { PortalToastNotification } from '../common/PortalToastNotification';
+import { PortalPagination } from '../common/PortalPagination';
 
 export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications , hasUnreadNotifications}) {
   const [tickets, setTickets] = useState([]);
@@ -274,30 +275,17 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
               )}
             </div>
 
-              {/* Pagination Controls */}
+              {/* Pagination Controls (< 1 2 3 ... 7 8 >) */}
               {!loading && filteredTickets.length > ITEMS_PER_PAGE && (
-                <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs">
-                  <div className="text-[11px] text-gray-500 font-mono">
-                    Halaman {currentPage} dari {totalPages} ({filteredTickets.length} tiket)
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="p-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition cursor-pointer"
-                      title="Halaman Sebelumnya"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <span className="px-2 font-mono font-bold text-blue-700">{currentPage}</span>
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="p-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition cursor-pointer"
-                      title="Halaman Selanjutnya"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex flex-col items-center gap-1.5">
+                  <PortalPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    className="border-t-0 pt-0"
+                  />
+                  <div className="text-[11px] text-gray-500 font-sans">
+                    Total {filteredTickets.length} tiket keluhan
                   </div>
                 </div>
               )}

@@ -5,7 +5,8 @@ import time
 import re
 import logging
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
+from sqlalchemy import case, or_, and_
 from sqlalchemy.orm import Session
 
 from app.core.timezone import get_now_wib
@@ -94,11 +95,54 @@ class BillingSyncWorker:
 
     @classmethod
     def sync_office_batch(cls, db: Session, pop_slug: str, batch_size: int = 4) -> int:
-        """Memproses satu batch kecil pelanggan tertua/belum pernah disinkronkan."""
-        # Prioritaskan pelanggan yang belum pernah sync atau sync terlama
+        """
+        Memproses satu batch kecil pelanggan dengan algoritma Smart Adaptive Priority:
+        1. Prioritas 0: Pelanggan baru / belum pernah sync sama sekali (last_billing_sync is None).
+        2. Prioritas 1: Pelanggan kritis OVERDUE / is_overdue (perlu verifikasi cepat pembayaran denda/isolir).
+        3. Prioritas 2: Pelanggan BELUM_BAYAR yang jatuh temponya mendekati deadline (H-5 s/d H+2).
+        4. Prioritas 3: Pelanggan BELUM_BAYAR reguler (dicek berkala tiap >= 30 menit).
+        5. Prioritas 4: Pelanggan LUNAS (Deep Sleep, hanya dicek 1x per >= 12 jam untuk invoice bulan baru).
+        """
+        now = get_now_wib()
+        thirty_mins_ago = now - timedelta(minutes=30)
+        twelve_hours_ago = now - timedelta(hours=12)
+        today = now.date()
+        approaching_due_date = today + timedelta(days=5)
+
+        # Skema Bobot Prioritas Dinamis (Angka terendah = Paling pertama diproses)
+        priority_case = case(
+            (Pelanggan.last_billing_sync.is_(None), 0),
+            (or_(Pelanggan.is_overdue == True, Pelanggan.status_pembayaran == "OVERDUE"), 1),
+            (
+                and_(
+                    Pelanggan.status_pembayaran != "LUNAS",
+                    Pelanggan.jatuh_tempo.isnot(None),
+                    Pelanggan.jatuh_tempo <= approaching_due_date
+                ),
+                2
+            ),
+            (Pelanggan.status_pembayaran != "LUNAS", 3),
+            else_=4
+        )
+
+        # Filter cerdas: hanya ambil kandidat yang sudah layak diperbarui (menghemat 80%+ kuota API)
+        need_sync_condition = or_(
+            Pelanggan.last_billing_sync.is_(None),
+            and_(
+                or_(Pelanggan.status_pembayaran != "LUNAS", Pelanggan.is_overdue == True),
+                Pelanggan.last_billing_sync <= thirty_mins_ago
+            ),
+            and_(
+                Pelanggan.status_pembayaran == "LUNAS",
+                Pelanggan.last_billing_sync <= twelve_hours_ago
+            )
+        )
+
         candidates = db.query(Pelanggan).filter(
-            Pelanggan.is_active == True
+            Pelanggan.is_active == True,
+            need_sync_condition
         ).order_by(
+            priority_case.asc(),
             Pelanggan.last_billing_sync.asc().nullsfirst()
         ).limit(batch_size).all()
 

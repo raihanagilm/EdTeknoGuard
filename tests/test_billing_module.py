@@ -91,3 +91,13 @@ class TestBillingModule(unittest.TestCase):
         self.assertEqual(mock_cust.total_tagihan, 125000)
         self.assertEqual(mock_cust.nomor_va, "11223344")
         self.assertTrue(mock_db.commit.called)
+
+    @patch("app.modules.billing.sync_worker.NetworkBillService.fetch_invoices")
+    def test_sync_worker_skips_when_no_candidates(self, mock_inv):
+        """Memastikan BillingSyncWorker tidak memanggil API jika semua pelanggan LUNAS dan baru disinkronkan."""
+        mock_db = MagicMock()
+        mock_db.query().filter().order_by().limit().all.return_value = []
+
+        synced = BillingSyncWorker.sync_office_batch(mock_db, "karanggede", batch_size=4)
+        self.assertEqual(synced, 0)
+        self.assertFalse(mock_inv.called)

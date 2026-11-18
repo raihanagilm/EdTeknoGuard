@@ -35,7 +35,15 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ### Added
 - **Modul Pemantauan Tagihan & Pembayaran Pelanggan Terpusat NOC ([billing/](app/modules/billing/), [routes.py](app/modules/billing/routes.py), [BillingView.jsx](frontend/src/components/billing/BillingView.jsx))**:
   - **Menu Baru Status Tagihan & Bayar (`/pembayaran`)**: Menambahkan menu baru di sidebar admin NOC (`Layanan & Pelanggan`) dan shortcut dashboard untuk memantau status lunas, belum bayar, overdue, dan total tunggakan seluruh pelanggan per kantor cabang secara kolektif tanpa perlu memeriksa satu per satu.
-  - **Arsitektur Background Throttled Sync (Sinkronisasi Dicicil Otomatis)**: Menghindari limitasi Network Bill API (120 req/menit) dengan mekanisme cicilan otomatis bertahap pada background scheduler (`BillingSyncWorker.run_throttled_sync_cycle`) tiap 1 menit. Mengambil 4 pelanggan per kantor per menit secara bergantian dengan jeda aman, menyimpan snapshot ke tabel `pelanggan`, sehingga antarmuka admin dapat memuat ratusan pelanggan (misal: 579 pelanggan Karanggede) secara instan (< 0.5s) tanpa risiko HTTP 429.
+  - **Arsitektur Background Throttled Sync (Sinkronisasi Dicicil Otomatis & Smart Adaptive Priority)**:
+    - Menghindari limitasi Network Bill API (120 req/menit) dengan mekanisme cicilan otomatis bertahap pada background scheduler (`BillingSyncWorker.run_throttled_sync_cycle`) tiap 1 menit. Mengambil 4 pelanggan per kantor per menit secara bergantian dengan jeda aman.
+    - **Smart Adaptive Priority Sync**:
+      1. Prioritas 0: Pelanggan baru / belum pernah disinkronkan sama sekali (`last_billing_sync is None`).
+      2. Prioritas 1: Pelanggan kritis `OVERDUE` (prioritas teratas untuk verifikasi cepat pencabutan isolir pasca-bayar).
+      3. Prioritas 2: Pelanggan `BELUM_BAYAR` yang mendekati jatuh tempo (H-5 s/d H+2).
+      4. Prioritas 3: Pelanggan `BELUM_BAYAR` reguler (dicek berkala tiap >= 30 menit).
+      5. Prioritas 4: Pelanggan `LUNAS` (*Deep Sleep* 12 jam, menghemat lebih dari 80% kuota API tanpa membebani server).
+    - **Zero-Waste saat Idle**: Jika seluruh pelanggan berstatus LUNAS dan sudah disinkronkan < 12 jam yang lalu, worker otomatis melakukan *skip* tanpa memicu panggilan API Network Bill sama sekali.
   - **Resolusi Pemetaan ID Pelanggan Cerdas**: Memetakan ID numerik maupun kode lokal pelanggan (seperti `BMS-0001` atau nomor WA) ke `network_bill_id` dengan cache TTL 15 menit agar menghemat pemanggilan API Network Bill.
   - **Pengiriman Pengingat Tagihan Massal (Dual-Channel FCM & WhatsApp)**:
     - Push Notifikasi Native ke aplikasi MyTekno bagi pelanggan yang memiliki token FCM aktif.

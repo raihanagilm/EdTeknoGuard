@@ -30244,7 +30244,7 @@ function FilterContainer({ children, className = "" }) {
 /**
 * Helper to compute pagination items with ellipses (...)
 */
-function getPaginationRange(currentPage, totalPages) {
+function getPaginationRange$1(currentPage, totalPages) {
 	if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
 	const pages = [];
 	pages.push(1);
@@ -30288,7 +30288,7 @@ function DataTableContainer({ children, page = 1, totalPages = 1, totalCount, to
 			else if (p > safePage && onNextPage) onNextPage();
 		}
 	};
-	const paginationItems = getPaginationRange(safePage, safeTotalPages);
+	const paginationItems = getPaginationRange$1(safePage, safeTotalPages);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "bg-white rounded-xl border border-[#CCDDF0] shadow-2xs overflow-hidden",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -43186,6 +43186,88 @@ function PortalToastNotification({ show, message, type = "success", title, durat
 	});
 }
 //#endregion
+//#region src/portal/components/common/PortalPagination.jsx
+/**
+* Generate windowed pagination items with ellipses (e.g. 1 2 3 ... 7 8)
+*/
+function getPaginationRange(currentPage, totalPages, maxVisible = 5) {
+	if (totalPages <= maxVisible + 2) return Array.from({ length: totalPages }, (_, i) => i + 1);
+	const leftSiblingIndex = Math.max(currentPage - 1, 1);
+	const rightSiblingIndex = Math.min(currentPage + 1, totalPages);
+	const shouldShowLeftDots = leftSiblingIndex > 2;
+	const shouldShowRightDots = rightSiblingIndex < totalPages - 1;
+	if (!shouldShowLeftDots && shouldShowRightDots) return [
+		...Array.from({ length: 4 }, (_, i) => i + 1),
+		"...",
+		totalPages
+	];
+	if (shouldShowLeftDots && !shouldShowRightDots) {
+		const rightItemCount = 4;
+		return [
+			1,
+			"...",
+			...Array.from({ length: rightItemCount }, (_, i) => totalPages - rightItemCount + 1 + i)
+		];
+	}
+	if (shouldShowLeftDots && shouldShowRightDots) return [
+		1,
+		"...",
+		...[
+			currentPage - 1,
+			currentPage,
+			currentPage + 1
+		],
+		"...",
+		totalPages
+	];
+	return Array.from({ length: totalPages }, (_, i) => i + 1);
+}
+function PortalPagination({ currentPage = 1, totalPages = 1, onPageChange, className = "" }) {
+	if (totalPages <= 1) return null;
+	const pages = getPaginationRange(currentPage, totalPages);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("nav", {
+		"aria-label": "Paginasi Halaman",
+		className: `flex items-center justify-center gap-1 sm:gap-1.5 pt-3 border-t border-gray-100 select-none ${className}`,
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				type: "button",
+				onClick: () => onPageChange(Math.max(1, currentPage - 1)),
+				disabled: currentPage === 1,
+				className: "w-8 h-8 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600 disabled:opacity-35 disabled:cursor-not-allowed transition-colors flex items-center justify-center shrink-0 cursor-pointer shadow-2xs",
+				"aria-label": "Halaman Sebelumnya",
+				title: "Halaman Sebelumnya",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-4 h-4 stroke-[2.2]" })
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex items-center gap-1 sm:gap-1.5",
+				children: pages.map((item, index) => {
+					if (item === "...") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "w-6 h-8 flex items-center justify-center text-xs font-semibold text-gray-400 select-none",
+						children: "..."
+					}, `dots-${index}`);
+					const isActive = item === currentPage;
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: () => onPageChange(item),
+						"aria-current": isActive ? "page" : void 0,
+						className: `w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center shrink-0 cursor-pointer ${isActive ? "bg-blue-600 text-white shadow-2xs ring-1 ring-blue-600 scale-[1.02]" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600 shadow-2xs"}`,
+						children: item
+					}, `page-${item}`);
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				type: "button",
+				onClick: () => onPageChange(Math.min(totalPages, currentPage + 1)),
+				disabled: currentPage === totalPages,
+				className: "w-8 h-8 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600 disabled:opacity-35 disabled:cursor-not-allowed transition-colors flex items-center justify-center shrink-0 cursor-pointer shadow-2xs",
+				"aria-label": "Halaman Selanjutnya",
+				title: "Halaman Selanjutnya",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4 stroke-[2.2]" })
+			})
+		]
+	});
+}
+//#endregion
 //#region src/portal/components/tickets/PortalTicketsTab.jsx
 function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnreadNotifications }) {
 	const [tickets, setTickets] = (0, import_react.useState)([]);
@@ -43428,39 +43510,18 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 								})
 							}),
 							!loading && filteredTickets.length > ITEMS_PER_PAGE && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "text-[11px] text-gray-500 font-mono",
-									children: [
-										"Halaman ",
-										currentPage,
-										" dari ",
-										totalPages,
-										" (",
-										filteredTickets.length,
-										" tiket)"
-									]
+								className: "px-4 py-3 bg-gray-50 border-t border-gray-100 flex flex-col items-center gap-1.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalPagination, {
+									currentPage,
+									totalPages,
+									onPageChange: setCurrentPage,
+									className: "border-t-0 pt-0"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1.5",
+									className: "text-[11px] text-gray-500 font-sans",
 									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											onClick: () => setCurrentPage((p) => Math.max(1, p - 1)),
-											disabled: currentPage === 1,
-											className: "p-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition cursor-pointer",
-											title: "Halaman Sebelumnya",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-4 h-4" })
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "px-2 font-mono font-bold text-blue-700",
-											children: currentPage
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											onClick: () => setCurrentPage((p) => Math.min(totalPages, p + 1)),
-											disabled: currentPage === totalPages,
-											className: "p-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition cursor-pointer",
-											title: "Halaman Selanjutnya",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })
-										})
+										"Total ",
+										filteredTickets.length,
+										" tiket keluhan"
 									]
 								})]
 							})
@@ -45234,33 +45295,10 @@ function PaymentRiwayatList({ riwayat, memuatRiwayat }) {
 						})]
 					}, inv.id))
 				}),
-				totalPages > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between pt-3 border-t border-gray-100 text-xs",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-							type: "button",
-							onClick: () => setCurrentPage((p) => Math.max(1, p - 1)),
-							disabled: currentPage === 1,
-							className: "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Sebelumnya" })]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "text-gray-500 font-medium text-[11px]",
-							children: [
-								"Halaman ",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: currentPage }),
-								" dari ",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: totalPages })
-							]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-							type: "button",
-							onClick: () => setCurrentPage((p) => Math.min(totalPages, p + 1)),
-							disabled: currentPage === totalPages,
-							className: "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Selanjutnya" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5" })]
-						})
-					]
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalPagination, {
+					currentPage,
+					totalPages,
+					onPageChange: setCurrentPage
 				})
 			] })
 		]
