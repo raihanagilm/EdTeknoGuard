@@ -16,7 +16,8 @@ import {
   PortalAuthService,
   PortalDashboardService,
   PortalKendalaService,
-  PortalPembayaranService
+  PortalPembayaranService,
+  PortalProfilService
 } from './services/portalApi';
 import { PortalErrorView } from './components/common/PortalErrorView';
 import { PortalSemanticSkeleton } from './components/common/PortalSemanticSkeleton';
@@ -120,6 +121,9 @@ export function PortalCustomerApp() {
 
         // Sinkronisasi Token FCM dari Android Bridge ke Database Pelanggan
         syncFcmToken(res.data.customer);
+
+        // Kunci Titik Lokasi Rumah (GPS) otomatis jika belum terkunci dan terhubung ke WiFi rumah
+        syncGpsLocation(res.data.customer);
       } else {
         setIsAuthenticated(false);
         setViewState('login');
@@ -152,6 +156,68 @@ export function PortalCustomerApp() {
     } catch (_) {}
   };
 
+  const syncGpsLocation = (targetCustomer) => {
+    if (!targetCustomer) return;
+    // Syarat Mutlak: Wajib terhubung ke sinyal WiFi rumah pelanggan
+    if (!targetCustomer.is_connected_to_home_wifi) return;
+    // Cukup sekali: Jika koordinat sudah tersimpan permanen di database, jangan minta lagi
+    if (targetCustomer.lokasi_gps && targetCustomer.lokasi_gps.trim() !== '') return;
+
+    const attemptedKey = `mytekno_gps_sync_${targetCustomer.id_pelanggan}`;
+    if (sessionStorage.getItem(attemptedKey)) return;
+
+    const performSave = async (lat, lng, acc) => {
+      try {
+        const res = await PortalProfilService.lockGpsLocation(lat, lng, acc);
+        if (res.ok && res.data?.ok) {
+          sessionStorage.setItem(attemptedKey, 'true');
+          const newLoc = res.data.lokasi_gps;
+          setCustomer((prev) => ({ ...(prev || {}), lokasi_gps: newLoc }));
+        }
+      } catch (err) {
+        console.warn('Gagal mengunci lokasi GPS rumah:', err);
+      }
+    };
+
+    // 1. Coba baca via AndroidBridge Native jika tersedia
+    if (window.AndroidBridge && typeof window.AndroidBridge.getCurrentLocation === 'function') {
+      try {
+        const locStr = window.AndroidBridge.getCurrentLocation();
+        if (locStr && typeof locStr === 'string' && locStr.includes(',')) {
+          const parts = locStr.split(',');
+          const lat = parseFloat(parts[0]);
+          const lng = parseFloat(parts[1]);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            performSave(lat, lng, 10);
+            return;
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 2. Fallback standar HTML5 Geolocation API
+    if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const acc = pos.coords.accuracy;
+          performSave(lat, lng, acc);
+        },
+        (err) => {
+          console.warn('Geolocation permission or error:', err.message);
+          // Cegah spam permintaan izin dalam sesi aktif jika ditolak pengguna
+          sessionStorage.setItem(attemptedKey, 'denied');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000
+        }
+      );
+    }
+  };
+
   const fetchDashboard = async () => {
     try {
       const res = await PortalDashboardService.getDashboard();
@@ -159,6 +225,7 @@ export function PortalCustomerApp() {
         setDashboardData(res.data);
         if (res.data.customer) {
           setCustomer((prev) => ({ ...(prev || {}), ...res.data.customer }));
+          syncGpsLocation(res.data.customer);
         }
       }
     } catch (e) {

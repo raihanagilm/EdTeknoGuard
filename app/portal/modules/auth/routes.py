@@ -70,6 +70,7 @@ def portal_auth_me(request: Request, db: Session = Depends(get_portal_db)):
             "kantor": pelanggan.kantor if (pelanggan and pelanggan.kantor) else cust.get("kantor", ""),
             "pop": pelanggan.pop if (pelanggan and pelanggan.pop) else "",
             "foto_profil": pelanggan.foto_profil if (pelanggan and pelanggan.foto_profil) else "",
+            "lokasi_gps": pelanggan.lokasi_gps if (pelanggan and pelanggan.lokasi_gps) else "",
             "is_connected_to_home_wifi": check_is_home_wifi(request, pelanggan),
             "status_pembayaran": pelanggan.status_pembayaran if (pelanggan and getattr(pelanggan, "status_pembayaran", None)) else "LUNAS",
             "total_tagihan": float(pelanggan.total_tagihan or 0.0) if (pelanggan and getattr(pelanggan, "total_tagihan", None)) else 0.0,
@@ -107,7 +108,8 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
         "paket": data.get("paket", ""),
         "ip_router": data.get("ip_router", ""),
         "nama_wifi": data.get("nama_wifi", ""),
-        "pop": data.get("pop", "")
+        "pop": data.get("pop", ""),
+        "lokasi_gps": data.get("lokasi_gps", "")
     }
 
     # Audit Trail: Catat riwayat login pelanggan

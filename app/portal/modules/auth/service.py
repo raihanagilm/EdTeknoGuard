@@ -272,7 +272,8 @@ class AuthService:
             "paket": cust.paket or "",
             "ip_router": ip_display,
             "nama_wifi": cust.nama_wifi or "",
-            "pop": cust.pop or ""
+            "pop": cust.pop or "",
+            "lokasi_gps": cust.lokasi_gps or ""
         }
         if is_tenant_db_opened:
             active_session.close()

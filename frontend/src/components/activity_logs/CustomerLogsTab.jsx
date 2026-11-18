@@ -117,6 +117,14 @@ export function CustomerLogsTab({ activeOffice }) {
 
   const renderActionBadge = (aksi) => {
     const rawAksi = (aksi || '').toUpperCase();
+    if (rawAksi === 'KUNCI_LOKASI_GPS') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+          <MapPin className="w-3 h-3 text-emerald-600" />
+          <span>Kunci Lokasi GPS</span>
+        </span>
+      );
+    }
     if (rawAksi === 'UBAH_ALAMAT') {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
@@ -241,6 +249,7 @@ export function CustomerLogsTab({ activeOffice }) {
                 >
                   <option value="all">Semua Tindakan</option>
                   <optgroup label="Profil & Identitas">
+                    <option value="KUNCI_LOKASI_GPS">Kunci Lokasi GPS Rumah</option>
                     <option value="UBAH_ALAMAT">Ubah Alamat</option>
                     <option value="UBAH_NO_WA">Ubah Nomor WhatsApp</option>
                     <option value="UBAH_NAMA">Ubah Nama Profil</option>

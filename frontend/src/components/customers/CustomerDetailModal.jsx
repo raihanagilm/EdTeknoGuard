@@ -139,6 +139,14 @@ export function CustomerDetailModal({
 
   const renderCustomerActivityBadge = (aksi) => {
     const raw = (aksi || '').toUpperCase()
+    if (raw === 'KUNCI_LOKASI_GPS') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+          <MapPin className="w-2.5 h-2.5 text-emerald-600" />
+          <span>Kunci Lokasi GPS</span>
+        </span>
+      )
+    }
     if (raw === 'UBAH_ALAMAT') {
       return (
         <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
@@ -354,20 +362,23 @@ export function CustomerDetailModal({
                     <MapPin className="w-3 h-3 text-[#026AA7] shrink-0" />
                     <span>Titik Lokasi GPS</span>
                   </span>
-                  {customer.lokasi_gps ? (
+                  {(currentCustomer?.lokasi_gps || customer.lokasi_gps) ? (
                     <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(customer.lokasi_gps)}`}
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.lokasi_gps || customer.lokasi_gps)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold text-[#026AA7] hover:underline flex items-center gap-1 text-xs truncate transition"
-                      title="Buka lokasi di Google Maps"
+                      className="font-bold text-[#026AA7] hover:underline flex items-center justify-between gap-1 text-xs truncate transition"
+                      title="Buka titik koordinat di Google Maps"
                     >
-                      <span className="truncate">{customer.lokasi_gps}</span>
-                      <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate font-mono text-[11px]">{currentCustomer?.lokasi_gps || customer.lokasi_gps}</span>
+                      <span className="shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded flex items-center gap-0.5">
+                        <Check className="w-2.5 h-2.5" />
+                        <span>Terkunci</span>
+                      </span>
                     </a>
-                  ) : customer.alamat ? (
+                  ) : (currentCustomer?.alamat || customer.alamat) ? (
                     <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(customer.alamat)}`}
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.alamat || customer.alamat)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-bold text-[#026AA7] hover:underline flex items-center gap-1 text-xs truncate transition"

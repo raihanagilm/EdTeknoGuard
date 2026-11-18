@@ -39,6 +39,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - `UPDATE_PROFIL`: Mencatat perubahan multi-atribut profil warga.
     - `UBAH_ALAMAT`, `UBAH_NO_WA`, `UBAH_NAMA`, `UBAH_FOTO_PROFIL`: Pencatatan granular/spesifik delta nilai lama -> nilai baru saat pelanggan memperbarui alamat, nomor WhatsApp, nama, atau foto profil secara terpisah.
     - `UBAH_SSID_WIFI` & `UBAH_SANDI_WIFI`: Pencatatan terpisah saat pelanggan hanya mengubah nama SSID atau hanya mengganti kata sandi WiFi (tanpa mengekspos plaintext password).
+    - `KUNCI_LOKASI_GPS`: Pencatatan audit saat pelanggan mengunci titik koordinat GPS lokasi fisik rumah secara otomatis via WiFi modem ONT.
+- **Penguncian Titik Lokasi Rumah (GPS) Otomatis Berbasis Jaringan WiFi ONT ([routes.py](app/portal/modules/profile/routes.py), [security.py](app/portal/core/security.py), [PortalCustomerApp.jsx](frontend/src/portal/PortalCustomerApp.jsx), [PortalProfileTab.jsx](frontend/src/portal/components/profile/PortalProfileTab.jsx), [CustomerDetailModal.jsx](frontend/src/components/customers/CustomerDetailModal.jsx), [PROMPT_ANDROID_STUDIO.md](docs/PROMPT_ANDROID_STUDIO.md))**:
+  - **Endpoint Validasi Keras `POST /portal/api/profil/lokasi-gps`**: Mengunci koordinat GPS (`latitude, longitude`) dengan syarat wajib terhubung ke sinyal WiFi rumah pelanggan (`check_is_home_wifi`). Akses dari luar jaringan modem ditolak tegas (HTTP 403 Forbidden).
+  - **Kebijakan One-Time Lock**: Titik koordinat hanya diambil dan disimpan 1 kali secara otomatis saat perangkat warga terkoneksi ke WiFi rumah dan data `lokasi_gps` di database masih kosong, menghemat baterai HP dan menjaga konsistensi titik koordinat instalasi modem/ODP.
+  - **Tampilan Interaktif di Profil MyTekno & Modal NOC**:
+    - Portal MyTekno: Menampilkan status `Terkunci` dengan tautan Google Maps jika sudah tersimpan, atau indikator penguncian otomatis saat terhubung.
+    - Modal Pelanggan NOC: Kartu *Titik Lokasi GPS* menampilkan koordinat presisi ber-badge hijau `Terkunci` yang langsung mengarahkan teknisi ke pin Google Maps.
+  - **Panduan Android Studio**: Konfigurasi izin hardware `ACCESS_FINE_LOCATION`, handler `WebChromeClient.onGeolocationPermissionsShowPrompt`, dan bridge native di `PROMPT_ANDROID_STUDIO.md`.
   - **Antarmuka 2 Tab di Menu Log Aktivitas NOC (`/log`)**:
     - `Tab 1: Log Admin & Sistem`: Audit trail internal operasional NOC (Import, Settings, Monitoring, CRUD User).
     - `Tab 2: Log Pelanggan (MyTekno)`: Audit trail aktivitas mandiri warga lengkap dengan pencarian instan (ID, Nama, No WA, Aksi, IP), filter jenis tindakan terkelompok (`<optgroup>`: Profil, WiFi, Keamanan), dan filter rentang waktu (Hari ini, 7 hari, 30 hari, semua, kustom).

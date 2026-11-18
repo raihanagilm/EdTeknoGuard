@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_portal_db
-from app.portal.core.security import get_current_customer_optional, get_password_hash
+from app.portal.core.security import get_current_customer_optional, get_password_hash, check_is_home_wifi
 from app.portal.services.customer_service import PortalCustomerService
 
 router = APIRouter(prefix="/profil", tags=["Portal Profile"])
@@ -268,4 +268,97 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_portal
     return {
         "ok": True,
         "message": "Foto profil berhasil dihapus dan kembali ke inisial nama."
+    }
+
+
+@router.post("/lokasi-gps")
+async def portal_profil_lock_gps_location(request: Request, db: Session = Depends(get_portal_db)):
+    """
+    Mengunci titik koordinat GPS lokasi rumah pelanggan (Latitude & Longitude)
+    dengan syarat mutlak: perangkat WAJIB terhubung ke sinyal WiFi modem rumah pelanggan.
+    Mendukung one-time lock (cukup sekali dikunci secara otomatis saat terhubung).
+    """
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"authenticated": False, "message": "Belum login"})
+
+    id_pel = cust.get("id_pelanggan")
+    pelanggan, target_db = PortalCustomerService.get_customer_by_id(id_pel, db=db, hint_kantor=cust.get("kantor"))
+    if not target_db:
+        target_db = db
+
+    if not pelanggan:
+        return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
+
+    # Syarat Mutlak: Perangkat klien wajib terhubung ke sinyal WiFi rumah pelanggan
+    is_home_wifi = check_is_home_wifi(request, pelanggan)
+    if not is_home_wifi:
+        if target_db != db:
+            target_db.close()
+        return JSONResponse(
+            status_code=403,
+            content={
+                "ok": False,
+                "is_connected_to_home_wifi": False,
+                "message": "Gagal: Penguncian titik lokasi GPS hanya dapat dilakukan saat perangkat terhubung langsung ke sinyal WiFi modem rumah Anda!"
+            }
+        )
+
+    body = await request.json()
+    raw_lat = body.get("latitude")
+    raw_lng = body.get("longitude")
+    accuracy = body.get("accuracy")
+    force = body.get("force", False)
+
+    # Kebijakan One-Time Lock: Jika sudah pernah terkunci dan tidak dipaksa (force=False), kembalikan status locked
+    if pelanggan.lokasi_gps and pelanggan.lokasi_gps.strip() and not force:
+        existing_loc = pelanggan.lokasi_gps.strip()
+        if target_db != db:
+            target_db.close()
+        return {
+            "ok": True,
+            "already_locked": True,
+            "lokasi_gps": existing_loc,
+            "message": "Titik lokasi GPS rumah Anda sudah terkunci di sistem."
+        }
+
+    try:
+        lat = float(raw_lat)
+        lng = float(raw_lng)
+    except (ValueError, TypeError):
+        if target_db != db:
+            target_db.close()
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Format koordinat latitude / longitude tidak valid!"})
+
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lng <= 180.0):
+        if target_db != db:
+            target_db.close()
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Rentang nilai koordinat GPS di luar batas bumi!"})
+
+    # Format koordinat 6 desimal (~10 cm akurasi)
+    lokasi_str = f"{lat:.6f}, {lng:.6f}"
+    pelanggan.lokasi_gps = lokasi_str
+    target_db.commit()
+    target_db.refresh(pelanggan)
+
+    # Catat audit trail aktivitas forensik
+    from app.portal.services.customer_activity_service import CustomerActivityService
+    acc_info = f" (Akurasi: ±{round(float(accuracy))}m)" if accuracy else ""
+    CustomerActivityService.record(
+        db=target_db,
+        id_pelanggan=id_pel,
+        aksi="KUNCI_LOKASI_GPS",
+        kategori="PROFIL",
+        keterangan=f"Pelanggan mengunci titik lokasi GPS rumah: '{lokasi_str}' via WiFi ONT{acc_info}",
+        request=request
+    )
+
+    if target_db != db:
+        target_db.close()
+
+    return {
+        "ok": True,
+        "already_locked": False,
+        "lokasi_gps": lokasi_str,
+        "message": "Titik lokasi GPS rumah Anda berhasil dikunci secara otomatis!"
     }

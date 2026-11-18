@@ -170,6 +170,15 @@ export class PortalProfilService {
   static async deleteFoto() {
     return new PortalApiService().request('/profil/foto', { method: 'DELETE' });
   }
+
+  static async lockGpsLocation(latitude, longitude, accuracy = null, force = false) {
+    return new PortalApiService().post('/profil/lokasi-gps', {
+      latitude,
+      longitude,
+      accuracy,
+      force
+    });
+  }
 }
 
 export class PortalPembayaranService {

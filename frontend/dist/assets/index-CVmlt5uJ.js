@@ -32990,6 +32990,10 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 	};
 	const renderCustomerActivityBadge = (aksi) => {
 		const raw = (aksi || "").toUpperCase();
+		if (raw === "KUNCI_LOKASI_GPS") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+			className: "inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-2.5 h-2.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kunci Lokasi GPS" })]
+		});
 		if (raw === "UBAH_ALAMAT") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 			className: "inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-2.5 h-2.5 text-amber-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Ubah Alamat" })]
@@ -33166,18 +33170,21 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 											className: "text-[10px] text-[#64839E] font-bold uppercase flex items-center gap-1",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3 h-3 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Titik Lokasi GPS" })]
-										}), customer.lokasi_gps ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-											href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(customer.lokasi_gps)}`,
+										}), currentCustomer?.lokasi_gps || customer.lokasi_gps ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+											href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.lokasi_gps || customer.lokasi_gps)}`,
 											target: "_blank",
 											rel: "noopener noreferrer",
-											className: "font-bold text-[#026AA7] hover:underline flex items-center gap-1 text-xs truncate transition",
-											title: "Buka lokasi di Google Maps",
+											className: "font-bold text-[#026AA7] hover:underline flex items-center justify-between gap-1 text-xs truncate transition",
+											title: "Buka titik koordinat di Google Maps",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "truncate",
-												children: customer.lokasi_gps
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5 shrink-0" })]
-										}) : customer.alamat ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-											href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(customer.alamat)}`,
+												className: "truncate font-mono text-[11px]",
+												children: currentCustomer?.lokasi_gps || customer.lokasi_gps
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded flex items-center gap-0.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-2.5 h-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terkunci" })]
+											})]
+										}) : currentCustomer?.alamat || customer.alamat ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+											href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.alamat || customer.alamat)}`,
 											target: "_blank",
 											rel: "noopener noreferrer",
 											className: "font-bold text-[#026AA7] hover:underline flex items-center gap-1 text-xs truncate transition",
@@ -37503,6 +37510,10 @@ function CustomerLogsTab({ activeOffice }) {
 	};
 	const renderActionBadge = (aksi) => {
 		const rawAksi = (aksi || "").toUpperCase();
+		if (rawAksi === "KUNCI_LOKASI_GPS") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+			className: "inline-flex items-center gap-1 text-[11px] font-mono font-bold uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3 h-3 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kunci Lokasi GPS" })]
+		});
 		if (rawAksi === "UBAH_ALAMAT") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 			className: "inline-flex items-center gap-1 text-[11px] font-mono font-bold uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3 h-3 text-amber-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Ubah Alamat" })]
@@ -37589,6 +37600,10 @@ function CustomerLogsTab({ activeOffice }) {
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("optgroup", {
 										label: "Profil & Identitas",
 										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+												value: "KUNCI_LOKASI_GPS",
+												children: "Kunci Lokasi GPS Rumah"
+											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 												value: "UBAH_ALAMAT",
 												children: "Ubah Alamat"
@@ -40934,6 +40949,14 @@ var PortalProfilService = class {
 	}
 	static async deleteFoto() {
 		return new PortalApiService().request("/profil/foto", { method: "DELETE" });
+	}
+	static async lockGpsLocation(latitude, longitude, accuracy = null, force = false) {
+		return new PortalApiService().post("/profil/lokasi-gps", {
+			latitude,
+			longitude,
+			accuracy,
+			force
+		});
 	}
 };
 var PortalPembayaranService = class {
@@ -45969,13 +45992,33 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center justify-between py-1",
+											className: "flex items-center justify-between py-1 border-b border-slate-50",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 												className: "text-slate-500 font-medium",
 												children: "IP Modem Router"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 												className: "font-mono font-bold text-slate-800",
 												children: currentCustomer?.ip_router || currentCustomer?.ip_ont || "-"
+											})]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex items-center justify-between py-1",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "text-slate-500 font-medium flex items-center gap-1",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Titik Lokasi (GPS)" })]
+											}), currentCustomer?.lokasi_gps ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+												href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer.lokasi_gps)}`,
+												target: "_blank",
+												rel: "noopener noreferrer",
+												className: "inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded hover:bg-emerald-100 transition",
+												title: "Buka titik koordinat di Google Maps",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3 h-3 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terkunci" })]
+											}) : currentCustomer?.is_connected_to_home_wifi ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3 h-3 text-sky-600 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Mengunci..." })]
+											}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-[11px] text-slate-400 italic",
+												children: "WiFi rumah belum terhubung"
 											})]
 										})
 									]
@@ -47289,6 +47332,7 @@ function PortalCustomerApp() {
 				setViewState("app");
 				fetchDashboard();
 				syncFcmToken(res.data.customer);
+				syncGpsLocation(res.data.customer);
 			} else {
 				setIsAuthenticated(false);
 				setViewState("login");
@@ -47312,15 +47356,65 @@ function PortalCustomerApp() {
 			}
 		} catch (_) {}
 	};
+	const syncGpsLocation = (targetCustomer) => {
+		if (!targetCustomer) return;
+		if (!targetCustomer.is_connected_to_home_wifi) return;
+		if (targetCustomer.lokasi_gps && targetCustomer.lokasi_gps.trim() !== "") return;
+		const attemptedKey = `mytekno_gps_sync_${targetCustomer.id_pelanggan}`;
+		if (sessionStorage.getItem(attemptedKey)) return;
+		const performSave = async (lat, lng, acc) => {
+			try {
+				const res = await PortalProfilService.lockGpsLocation(lat, lng, acc);
+				if (res.ok && res.data?.ok) {
+					sessionStorage.setItem(attemptedKey, "true");
+					const newLoc = res.data.lokasi_gps;
+					setCustomer((prev) => ({
+						...prev || {},
+						lokasi_gps: newLoc
+					}));
+				}
+			} catch (err) {
+				console.warn("Gagal mengunci lokasi GPS rumah:", err);
+			}
+		};
+		if (window.AndroidBridge && typeof window.AndroidBridge.getCurrentLocation === "function") try {
+			const locStr = window.AndroidBridge.getCurrentLocation();
+			if (locStr && typeof locStr === "string" && locStr.includes(",")) {
+				const parts = locStr.split(",");
+				const lat = parseFloat(parts[0]);
+				const lng = parseFloat(parts[1]);
+				if (!isNaN(lat) && !isNaN(lng)) {
+					performSave(lat, lng, 10);
+					return;
+				}
+			}
+		} catch (_) {}
+		if (typeof navigator !== "undefined" && "geolocation" in navigator) navigator.geolocation.getCurrentPosition((pos) => {
+			const lat = pos.coords.latitude;
+			const lng = pos.coords.longitude;
+			const acc = pos.coords.accuracy;
+			performSave(lat, lng, acc);
+		}, (err) => {
+			console.warn("Geolocation permission or error:", err.message);
+			sessionStorage.setItem(attemptedKey, "denied");
+		}, {
+			enableHighAccuracy: true,
+			timeout: 1e4,
+			maximumAge: 3e5
+		});
+	};
 	const fetchDashboard = async () => {
 		try {
 			const res = await PortalDashboardService.getDashboard();
 			if (res.ok && res.data?.ok) {
 				setDashboardData(res.data);
-				if (res.data.customer) setCustomer((prev) => ({
-					...prev || {},
-					...res.data.customer
-				}));
+				if (res.data.customer) {
+					setCustomer((prev) => ({
+						...prev || {},
+						...res.data.customer
+					}));
+					syncGpsLocation(res.data.customer);
+				}
 			}
 		} catch (e) {
 			console.error(e);
