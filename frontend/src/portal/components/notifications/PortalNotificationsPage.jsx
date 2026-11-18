@@ -7,24 +7,23 @@ import {
   Trash2,
   CheckCircle2,
   CheckCheck,
-  ReceiptText
+  ReceiptText,
+  RefreshCw
 } from 'lucide-react';
 import { PortalKendalaService, PortalPembayaranService } from '../../services/portalApi';
 import { rupiah, periodeTeks } from '../payment/paymentUtils';
 
 function NotificationCardItem({ item, isRead, onClick, onDelete }) {
-  const getBadgeStyle = () => {
+  const getStatusColor = () => {
     switch (item.statusType) {
       case 'info':
-        return 'bg-blue-50 text-blue-700 border-blue-200/80';
+        return 'text-blue-600';
       case 'success':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
-      case 'warning':
-        return 'bg-amber-50 text-amber-700 border-amber-200/80';
+        return 'text-emerald-600';
       case 'danger':
-        return 'bg-rose-50 text-rose-700 border-rose-200/80';
+        return 'text-rose-600';
       default:
-        return 'bg-slate-50 text-slate-700 border-slate-200/80';
+        return 'text-blue-600';
     }
   };
 
@@ -35,7 +34,7 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
         isRead ? 'bg-white hover:bg-slate-50/70' : 'bg-blue-50/30 hover:bg-blue-50/50'
       }`}
     >
-      {/* Baris Atas: Judul Kategori & Status Badge + Tombol Hapus */}
+      {/* Baris Atas: Judul Kategori & Status Bersih (Tanpa Box) + Tombol Hapus */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {!isRead && (
@@ -53,9 +52,16 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
 
         <div className="flex items-center gap-1.5 shrink-0">
           <span
-            className={`text-[10px] font-bold px-2 py-0.5 rounded-md border tracking-wider uppercase ${getBadgeStyle()}`}
+            className={`text-xs font-bold uppercase inline-flex items-center gap-1 tracking-tight ${getStatusColor()}`}
           >
-            {item.statusText}
+            {item.statusType === 'success' ? (
+              <CheckCircle2 className="w-3.5 h-3.5" />
+            ) : item.statusType === 'info' && item.statusText !== 'MENUNGGU' ? (
+              <RefreshCw className="w-3.5 h-3.5" />
+            ) : (
+              <Clock className="w-3.5 h-3.5" />
+            )}
+            <span>{item.statusText}</span>
           </span>
 
           {/* Tombol Hapus Tunggal per Notifikasi */}
@@ -275,15 +281,13 @@ export function PortalNotificationsPage({
       const isSelesai = t.status === 'SELESAI';
 
       let statusLabel = t.status || 'MENUNGGU';
-      let statusType = 'warning';
+      let statusType = 'info';
       let desc = `Laporan #${t.id_tiket} (${t.kategori || 'Gangguan'}): ${t.deskripsi || 'Menunggu penanganan tim teknisi.'}`;
 
       if (isSelesai) {
         statusType = 'success';
-      } else if (t.status === 'DIPROSES' || t.status === 'DICEK_ADMIN') {
+      } else if (t.status === 'DIPROSES' || t.status === 'DICEK_ADMIN' || t.status === 'MENUNGGU') {
         statusType = 'info';
-      } else if (t.status === 'MENUNGGU') {
-        statusType = 'warning';
       } else {
         statusType = 'danger';
       }

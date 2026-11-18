@@ -12,11 +12,14 @@ export function PortalHeader({
   avatarInitials = null,
   greeting = null,
   showNotificationDot = null, // Jika null, otomatis dihitung dari unread
+  hasUnreadNotifications = null, // Alias toleran untuk showNotificationDot
   onNotificationClick = null,
+  onOpenNotifications = null, // Alias toleran untuk onNotificationClick
   children = null
 }) {
   const pel = customer || dashboardData?.customer || null;
   const [hasUnread, setHasUnread] = useState(false);
+  const handleNotificationClick = onNotificationClick || onOpenNotifications;
 
   useEffect(() => {
     let isMounted = true;
@@ -45,8 +48,10 @@ export function PortalHeader({
     };
   }, [pel?.id_pelanggan, pel?.status_pembayaran]);
 
-  // Dot tampil jika showNotificationDot dioper manual boolean, atau otomatis jika hasUnread == true
-  const isDotVisible = showNotificationDot !== null ? showNotificationDot : hasUnread;
+  // Dot tampil jika showNotificationDot / hasUnreadNotifications dioper manual boolean, atau otomatis jika hasUnread == true
+  const isDotVisible = showNotificationDot !== null
+    ? showNotificationDot
+    : (hasUnreadNotifications !== null ? hasUnreadNotifications : hasUnread);
 
   return (
     <div className="shrink-0 relative z-0 bg-gradient-to-br from-blue-600 via-blue-600 to-blue-700 border-b border-blue-700/60 overflow-hidden">
@@ -163,7 +168,7 @@ export function PortalHeader({
         {/* Lonceng Notifikasi Konsisten */}
         <button
           type="button"
-          onClick={onNotificationClick}
+          onClick={handleNotificationClick}
           aria-label="Buka Notifikasi"
           className="relative w-10 h-10 rounded-xl bg-blue-700/70 hover:bg-blue-700 border border-white/20 flex items-center justify-center text-white transition cursor-pointer shrink-0 active:scale-95"
         >

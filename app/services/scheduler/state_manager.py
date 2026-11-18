@@ -179,4 +179,10 @@ class SchedulerStateManager:
             master_db.close()
         return total_deleted
 
+    @classmethod
+    def cleanup_customer_activity_logs(cls, days: int = 60) -> int:
+        """Menghapus log_aktivitas_pelanggan yang berusia lebih dari X hari (60 hari) di seluruh tenant DB"""
+        from app.portal.services.customer_activity_service import CustomerActivityService
+        return CustomerActivityService.cleanup_old_logs(days=days)
+
 

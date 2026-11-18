@@ -26,6 +26,25 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Added
+- **Audit Trail & Pemantauan Log Aktivitas Pelanggan MyTekno ([customer_activity_service.py](app/portal/services/customer_activity_service.py), [models.py](app/db/models.py), [routes.py](app/modules/activity_logs/routes.py), [ActivityLogsView.jsx](frontend/src/components/activity_logs/ActivityLogsView.jsx), [CustomerLogsTab.jsx](frontend/src/components/activity_logs/CustomerLogsTab.jsx), [AdminLogsTab.jsx](frontend/src/components/activity_logs/AdminLogsTab.jsx), [CustomerDetailModal.jsx](frontend/src/components/customers/CustomerDetailModal.jsx))**:
+  - **Tabel & Relasi Multi-Tenant `log_aktivitas_pelanggan`**: Menyimpan riwayat aksi mandiri warga di basis data tenant (`TenantBase`) dengan integritas referensial `ON DELETE CASCADE` sehingga riwayat otomatis terhapus bersih saat pelanggan dihapus tanpa menimbulkan *orphaned rows*.
+  - **Pencatatan Seluruh Aksi Mandiri Kritis & Autentikasi**:
+    - `LOGIN_PORTAL` & `LOGOUT_PORTAL`: Mencatat waktu masuk/keluar, IP address, dan user agent perangkat warga.
+    - `UBAH_WIFI`: Mencatat nama SSID baru, pembaruan password WiFi, dan status sinkronisasi ke modem router.
+    - `GANTI_PASSWORD`: Mencatat perubahan kata sandi akun portal pelanggan secara mandiri.
+    - `RESET_PASSWORD`: Mencatat permintaan reset kata sandi mandiri yang diteruskan ke tiket bantuan NOC.
+    - `BLOKIR_MAC` & `UNBLOK_MAC`: Mencatat pemblokiran atau pembukaan blokir akses perangkat WiFi/LAN (MAC & Hostname).
+    - `BUAT_TIKET`: Mencatat pembuatan tiket keluhan kendala baru berserta kategori dan ringkasan kendala.
+    - `UPDATE_PROFIL`: Mencatat perubahan multi-atribut profil warga.
+    - `UBAH_ALAMAT`, `UBAH_NO_WA`, `UBAH_NAMA`, `UBAH_FOTO_PROFIL`: Pencatatan granular/spesifik delta nilai lama -> nilai baru saat pelanggan memperbarui alamat, nomor WhatsApp, nama, atau foto profil secara terpisah.
+    - `UBAH_SSID_WIFI` & `UBAH_SANDI_WIFI`: Pencatatan terpisah saat pelanggan hanya mengubah nama SSID atau hanya mengganti kata sandi WiFi (tanpa mengekspos plaintext password).
+  - **Antarmuka 2 Tab di Menu Log Aktivitas NOC (`/log`)**:
+    - `Tab 1: Log Admin & Sistem`: Audit trail internal operasional NOC (Import, Settings, Monitoring, CRUD User).
+    - `Tab 2: Log Pelanggan (MyTekno)`: Audit trail aktivitas mandiri warga lengkap dengan pencarian instan (ID, Nama, No WA, Aksi, IP), filter jenis tindakan terkelompok (`<optgroup>`: Profil, WiFi, Keamanan), dan filter rentang waktu (Hari ini, 7 hari, 30 hari, semua, kustom).
+  - **Tab Aktivitas di Modal Detail Pelanggan (`CustomerDetailModal.jsx`)**: Menambahkan tab ke-4 "Aktivitas" pada modal detail pelanggan dengan badge semantik (ikon `<MapPin />`, `<Phone />`, `<User />`, `<Wifi />`, dll.) untuk memudahkan teknisi/CS memeriksa riwayat forensik warga secara instan dalam 1 klik.
+  - **Kebijakan Retensi Otomatis 60 Hari**: Terintegrasi ke pembersihan berkala APScheduler daemon untuk menghapus log aktivitas pelanggan yang berusia > 60 hari.
+
 ### Fixed
 - **Gateway Anchor & Circuit Breaker Pemantauan Jaringan Kantor ([scan_runner.py](app/services/scheduler/scan_runner.py), [state_manager.py](app/services/scheduler/state_manager.py), [scheduler_service.py](app/services/scheduler_service.py))**:
   - **Pencegahan False Alarm & Terminal Hang saat Server/VPN Terputus (Kasus A)**:

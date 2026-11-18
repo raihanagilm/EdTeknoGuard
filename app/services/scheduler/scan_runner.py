@@ -492,6 +492,7 @@ class ScanRunner:
             # Pembersihan log lama otomatis
             SchedulerStateManager.cleanup_alert_logs(days=7)
             SchedulerStateManager.cleanup_activity_logs(days=60)
+            SchedulerStateManager.cleanup_customer_activity_logs(days=60)
 
             # Resolusi pengaturan audio & jam tenang (night mode & getar)
             from app.services.fcm_service import resolve_notification_audio_settings, send_push_notification

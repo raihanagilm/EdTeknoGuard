@@ -94,3 +94,45 @@ class ActivityLogController:
     def get_available_dates(db: Session, target_kantor: Optional[str] = None, current_user: Optional[Dict[str, Any]] = None) -> List[str]:
         """Endpoint JSON untuk mendapatkan daftar tanggal yang tersedia di database"""
         return ActivityLogService.get_distinct_dates(db)
+
+    @staticmethod
+    def get_customer_logs_data(
+        kantor: Optional[str] = None,
+        id_pelanggan: Optional[str] = None,
+        q: Optional[str] = None,
+        aksi: Optional[str] = None,
+        kategori: Optional[str] = None,
+        range_type: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        date: Optional[str] = None,
+        sort_by: str = "created_at",
+        sort_dir: str = "desc",
+        page: int = 1,
+        limit: int = 15,
+        current_user: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """Endpoint JSON untuk mengambil riwayat aktivitas pelanggan MyTekno"""
+        total, data, min_date_str = ActivityLogService.get_customer_activity_logs(
+            kantor=kantor,
+            id_pelanggan=id_pelanggan,
+            q=q,
+            aksi=aksi,
+            kategori=kategori,
+            range_type=range_type,
+            start_date=start_date,
+            end_date=end_date,
+            date=date,
+            sort_by=sort_by,
+            sort_dir=sort_dir,
+            page=page,
+            limit=limit,
+            current_user=current_user
+        )
+        return {
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "min_date": min_date_str,
+            "data": data
+        }

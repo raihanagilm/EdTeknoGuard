@@ -41,7 +41,7 @@ export function PortalPagination({
   onPageChange,
   className = ''
 }) {
-  if (totalPages <= 1) return null;
+  if (totalPages < 1) return null;
 
   const pages = getPaginationRange(currentPage, totalPages);
 

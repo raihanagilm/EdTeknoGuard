@@ -109,6 +109,24 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
         "nama_wifi": data.get("nama_wifi", ""),
         "pop": data.get("pop", "")
     }
+
+    # Audit Trail: Catat riwayat login pelanggan
+    cust_kantor = data.get("kantor")
+    t_db_log = TenantDatabaseManager.get_tenant_session(cust_kantor) if cust_kantor else db
+    try:
+        from app.portal.services.customer_activity_service import CustomerActivityService
+        CustomerActivityService.record(
+            db=t_db_log,
+            id_pelanggan=data.get("id_pelanggan"),
+            aksi="LOGIN_PORTAL",
+            kategori="AUTH",
+            keterangan=f"Pelanggan berhasil login ke portal MyTekno ({data.get('nama')})",
+            request=request
+        )
+    finally:
+        if t_db_log != db:
+            t_db_log.close()
+
     response = JSONResponse(
         content={
             "ok": True,
@@ -130,7 +148,25 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
 
 @router.post("/logout")
 @router.get("/logout")
-def portal_auth_logout():
+def portal_auth_logout(request: Request, db: Session = Depends(get_portal_db)):
+    cust = get_current_customer_optional(request)
+    if cust and cust.get("id_pelanggan"):
+        k = cust.get("kantor")
+        t_db_out = TenantDatabaseManager.get_tenant_session(k) if k else db
+        try:
+            from app.portal.services.customer_activity_service import CustomerActivityService
+            CustomerActivityService.record(
+                db=t_db_out,
+                id_pelanggan=cust.get("id_pelanggan"),
+                aksi="LOGOUT_PORTAL",
+                kategori="AUTH",
+                keterangan="Pelanggan logout dari sesi portal MyTekno",
+                request=request
+            )
+        finally:
+            if t_db_out != db:
+                t_db_out.close()
+
     response = JSONResponse(content={"ok": True, "message": "Logout berhasil!"})
     response.delete_cookie(CUSTOMER_SESSION_COOKIE, path="/")
     response.set_cookie(
@@ -218,18 +254,14 @@ async def portal_auth_minta_reset_password(request: Request, db: Session = Depen
     )
     id_tiket_created = new_ticket.id_tiket if new_ticket else "-"
 
-    client_ip = request.client.host if request.client else "unknown"
-    user_agent = request.headers.get("user-agent", "")
-    ActivityLogService.log_activity(
+    from app.portal.services.customer_activity_service import CustomerActivityService
+    CustomerActivityService.record(
         db=target_db,
-        username=cust_id,
-        nama_karyawan=f"Pelanggan: {cust_nama}",
-        role="pelanggan",
-        action="REQUEST_RESET_PASSWORD",
-        ip_address=client_ip,
-        user_agent=user_agent,
-        status="SUCCESS",
-        keterangan=f"Reset password mandiri berhasil digenerate ({random_password}) dan diteruskan ke Tiket #{id_tiket_created}"
+        id_pelanggan=cust_id,
+        aksi="RESET_PASSWORD",
+        kategori="AUTH",
+        keterangan=f"Reset kata sandi mandiri digenerate ({random_password}) dan diteruskan ke Tiket #{id_tiket_created}",
+        request=request
     )
 
     if target_db != db:

@@ -60,3 +60,56 @@ def get_available_dates_api(
 ) -> List[str]:
     """API JSON daftar tanggal yang tersedia di log aktivitas"""
     return ActivityLogController.get_available_dates(db)
+
+@router.get("/api/activity-logs/customers")
+def get_customer_logs_api(
+    id_pelanggan: Optional[str] = Query(None),
+    q: Optional[str] = Query(None),
+    aksi: Optional[str] = Query(None),
+    kategori: Optional[str] = Query(None),
+    kantor: Optional[str] = Query(None),
+    range: Optional[str] = Query(None, description="Rentang waktu: today, 7d, 30d, custom"),
+    start_date: Optional[str] = Query(None),
+    end_date: Optional[str] = Query(None),
+    date: Optional[str] = Query(None),
+    sort_by: str = Query("created_at"),
+    sort_dir: str = Query("desc"),
+    page: int = Query(1, ge=1),
+    limit: int = Query(15, ge=1, le=100),
+    admin: dict = Depends(require_admin)
+):
+    """API JSON log aktivitas pelanggan MyTekno"""
+    return ActivityLogController.get_customer_logs_data(
+        kantor=kantor,
+        id_pelanggan=id_pelanggan,
+        q=q,
+        aksi=aksi,
+        kategori=kategori,
+        range_type=range,
+        start_date=start_date,
+        end_date=end_date,
+        date=date,
+        sort_by=sort_by,
+        sort_dir=sort_dir,
+        page=page,
+        limit=limit,
+        current_user=admin
+    )
+
+@router.get("/api/activity-logs/customers/{id_pelanggan}")
+def get_single_customer_logs_api(
+    id_pelanggan: str,
+    kantor: Optional[str] = Query(None),
+    limit: int = Query(10, ge=1, le=50),
+    admin: dict = Depends(require_admin)
+):
+    """API JSON riwayat aktivitas satu pelanggan untuk ditampilkan di Modal Detail"""
+    return ActivityLogController.get_customer_logs_data(
+        kantor=kantor,
+        id_pelanggan=id_pelanggan,
+        limit=limit,
+        page=1,
+        sort_by="created_at",
+        sort_dir="desc",
+        current_user=admin
+    )

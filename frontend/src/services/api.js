@@ -210,6 +210,14 @@ export class ActivityLogsService {
   static async list(params = {}) {
     return new ApiService().get('/api/log', params);
   }
+
+  static async listCustomerLogs(params = {}) {
+    return new ApiService().get('/api/activity-logs/customers', params);
+  }
+
+  static async getCustomerActivities(idPelanggan, params = {}) {
+    return new ApiService().get(`/api/activity-logs/customers/${encodeURIComponent(idPelanggan)}`, params);
+  }
 }
 
 export class UsersService {

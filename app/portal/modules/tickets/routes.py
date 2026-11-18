@@ -56,7 +56,19 @@ async def portal_kendala_create(request: Request, db: Session = Depends(get_port
         deskripsi=deskripsi,
         no_wa=no_wa
     )
-    
+
+    if ticket:
+        from app.portal.services.customer_activity_service import CustomerActivityService
+        deskripsi_preview = deskripsi[:60] + "..." if len(deskripsi) > 60 else deskripsi
+        CustomerActivityService.record(
+            db=db,
+            id_pelanggan=cust.get("id_pelanggan"),
+            aksi="BUAT_TIKET",
+            kategori="TIKET",
+            keterangan=f"Pelanggan membuat tiket keluhan #{ticket.id_tiket} [{kategori}]: {deskripsi_preview}",
+            request=request
+        )
+
     return {
         "ok": True,
         "message": "Tiket keluhan berhasil dikirim ke tim teknisi NOC!",

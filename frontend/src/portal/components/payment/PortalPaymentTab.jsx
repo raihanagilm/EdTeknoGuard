@@ -175,8 +175,8 @@ export function PortalPaymentTab({
       {/* ═══ 1. HEADER PORTAL DENGAN GRADASI BIRU RESMI ═══ */}
       <PortalHeader
         onBack={onBack}
-        onOpenNotifications={onOpenNotifications}
-        hasUnreadNotifications={hasUnreadNotifications}
+        showNotificationDot={hasUnreadNotifications}
+        onNotificationClick={onOpenNotifications}
         title="Tagihan & Pembayaran"
         subtitle="Status & riwayat bayar"
         dashboardData={dashboardData}

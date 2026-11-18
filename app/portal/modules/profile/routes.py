@@ -39,6 +39,17 @@ async def portal_profil_change_password(request: Request, db: Session = Depends(
         
     pelanggan.password_hash = get_password_hash(password_baru)
     target_db.commit()
+
+    from app.portal.services.customer_activity_service import CustomerActivityService
+    CustomerActivityService.record(
+        db=target_db,
+        id_pelanggan=id_pel,
+        aksi="GANTI_PASSWORD",
+        kategori="AUTH",
+        keterangan="Pelanggan berhasil mengganti kata sandi login portal MyTekno mandiri",
+        request=request
+    )
+
     if target_db != db:
         target_db.close()
     
@@ -67,15 +78,58 @@ async def portal_profil_update(request: Request, db: Session = Depends(get_porta
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
         
-    if nama:
+    old_nama = (pelanggan.nama or "").strip()
+    old_no_hp = (pelanggan.no_hp or "").strip()
+    old_alamat = (pelanggan.alamat or "").strip()
+
+    changed_fields = []
+    if nama and nama != old_nama:
+        changed_fields.append(("nama", old_nama, nama))
         pelanggan.nama = nama
-    if no_hp:
+    if no_hp and no_hp != old_no_hp:
+        changed_fields.append(("no_hp", old_no_hp, no_hp))
         pelanggan.no_hp = no_hp
-    if alamat:
+    if alamat and alamat != old_alamat:
+        changed_fields.append(("alamat", old_alamat, alamat))
         pelanggan.alamat = alamat
-        
+
     target_db.commit()
     target_db.refresh(pelanggan)
+
+    # Resolusi aksi audit spesifik (UBAH_ALAMAT, UBAH_NO_WA, UBAH_NAMA, atau UPDATE_PROFIL)
+    aksi = "UPDATE_PROFIL"
+    if len(changed_fields) == 1:
+        field, old_v, new_v = changed_fields[0]
+        if field == "alamat":
+            aksi = "UBAH_ALAMAT"
+            keterangan = f"Pelanggan mengubah alamat: '{old_v or '-'}' -> '{new_v}'"
+        elif field == "no_hp":
+            aksi = "UBAH_NO_WA"
+            keterangan = f"Pelanggan mengubah nomor WhatsApp: '{old_v or '-'}' -> '{new_v}'"
+        elif field == "nama":
+            aksi = "UBAH_NAMA"
+            keterangan = f"Pelanggan mengubah nama profil: '{old_v or '-'}' -> '{new_v}'"
+        else:
+            keterangan = f"Pelanggan memperbarui {field}: '{new_v}'"
+    elif len(changed_fields) > 1:
+        details = []
+        for field, old_v, new_v in changed_fields:
+            lbl = "Nama" if field == "nama" else ("No WA" if field == "no_hp" else "Alamat")
+            details.append(f"{lbl}: '{new_v}'")
+        keterangan = f"Pelanggan memperbarui profil ({', '.join(details)})"
+    else:
+        keterangan = "Pelanggan menyimpan profil tanpa perubahan data"
+
+    from app.portal.services.customer_activity_service import CustomerActivityService
+    CustomerActivityService.record(
+        db=target_db,
+        id_pelanggan=id_pel,
+        aksi=aksi,
+        kategori="PROFIL",
+        keterangan=keterangan,
+        request=request
+    )
+
     cust_res = {
         "id_pelanggan": pelanggan.id_pelanggan,
         "nama": pelanggan.nama,
@@ -149,6 +203,17 @@ async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_
     pelanggan.foto_profil = relative_url
     target_db.commit()
     target_db.refresh(pelanggan)
+
+    from app.portal.services.customer_activity_service import CustomerActivityService
+    CustomerActivityService.record(
+        db=target_db,
+        id_pelanggan=id_pel,
+        aksi="UBAH_FOTO_PROFIL",
+        kategori="PROFIL",
+        keterangan="Pelanggan memperbarui foto profil",
+        request=request
+    )
+
     if target_db != db:
         target_db.close()
     
@@ -186,6 +251,17 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_portal
             
     pelanggan.foto_profil = None
     target_db.commit()
+
+    from app.portal.services.customer_activity_service import CustomerActivityService
+    CustomerActivityService.record(
+        db=target_db,
+        id_pelanggan=id_pel,
+        aksi="UBAH_FOTO_PROFIL",
+        kategori="PROFIL",
+        keterangan="Pelanggan menghapus foto profil dan kembali ke inisial nama",
+        request=request
+    )
+
     if target_db != db:
         target_db.close()
     

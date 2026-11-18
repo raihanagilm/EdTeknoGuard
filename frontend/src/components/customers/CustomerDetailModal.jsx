@@ -21,7 +21,11 @@ import {
   Check,
   ShieldAlert,
   Calendar,
-  DollarSign
+  DollarSign,
+  Key,
+  Camera,
+  UserCheck,
+  User
 } from 'lucide-react'
 import { CustomerWifiModal } from './CustomerWifiModal'
 
@@ -33,7 +37,7 @@ export function CustomerDetailModal({
   onCustomerUpdated,
   onNotify
 }) {
-  const [activeTab, setActiveTab] = useState('profil') // 'profil' | 'jaringan' | 'pembayaran'
+  const [activeTab, setActiveTab] = useState('profil') // 'profil' | 'jaringan' | 'pembayaran' | 'aktivitas'
   const [billingData, setBillingData] = useState(null)
   const [loadingBilling, setLoadingBilling] = useState(false)
   const [billingError, setBillingError] = useState(null)
@@ -41,6 +45,8 @@ export function CustomerDetailModal({
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [wifiModalOpen, setWifiModalOpen] = useState(false)
   const [currentCustomer, setCurrentCustomer] = useState(customer)
+  const [activities, setActivities] = useState([])
+  const [loadingActivities, setLoadingActivities] = useState(false)
 
   useEffect(() => {
     setCurrentCustomer(customer)
@@ -69,6 +75,29 @@ export function CustomerDetailModal({
       setLoadingBilling(false)
     }
   }
+
+  const fetchActivities = async () => {
+    if (!cId) return
+    setLoadingActivities(true)
+    try {
+      const k = customer.kantor || activeOffice || 'cabang'
+      const res = await fetch(`/api/activity-logs/customers/${encodeURIComponent(cId)}?kantor=${encodeURIComponent(k)}&limit=15`)
+      if (res.ok) {
+        const json = await res.json()
+        setActivities(json.data || [])
+      }
+    } catch (e) {
+      console.warn('Gagal memuat log aktivitas pelanggan:', e)
+    } finally {
+      setLoadingActivities(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'aktivitas') {
+      fetchActivities()
+    }
+  }, [activeTab, cId])
 
   useEffect(() => {
     setBillingData(null)
@@ -108,9 +137,92 @@ export function CustomerDetailModal({
     }
   }
 
+  const renderCustomerActivityBadge = (aksi) => {
+    const raw = (aksi || '').toUpperCase()
+    if (raw === 'UBAH_ALAMAT') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+          <MapPin className="w-2.5 h-2.5 text-amber-600" />
+          <span>Ubah Alamat</span>
+        </span>
+      )
+    }
+    if (raw === 'UBAH_NO_WA') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+          <Phone className="w-2.5 h-2.5 text-emerald-600" />
+          <span>Ubah No WA</span>
+        </span>
+      )
+    }
+    if (raw === 'UBAH_NAMA') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded">
+          <User className="w-2.5 h-2.5 text-purple-600" />
+          <span>Ubah Nama</span>
+        </span>
+      )
+    }
+    if (raw === 'UBAH_FOTO_PROFIL') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-violet-700 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded">
+          <Camera className="w-2.5 h-2.5 text-violet-600" />
+          <span>Foto Profil</span>
+        </span>
+      )
+    }
+    if (raw === 'UBAH_SSID_WIFI' || raw === 'UBAH_WIFI') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded">
+          <Wifi className="w-2.5 h-2.5 text-sky-600" />
+          <span>{raw === 'UBAH_SSID_WIFI' ? 'Ubah SSID' : 'Ubah WiFi'}</span>
+        </span>
+      )
+    }
+    if (raw === 'UBAH_SANDI_WIFI' || raw === 'GANTI_PASSWORD' || raw === 'RESET_PASSWORD') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+          <Key className="w-2.5 h-2.5 text-amber-600" />
+          <span>{raw === 'RESET_PASSWORD' ? 'Reset Sandi' : raw === 'GANTI_PASSWORD' ? 'Ganti Sandi' : 'Sandi WiFi'}</span>
+        </span>
+      )
+    }
+    if (raw === 'BLOKIR_MAC' || raw === 'UNBLOK_MAC') {
+      return (
+        <span className={`inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded border ${
+          raw === 'BLOKIR_MAC' ? 'text-rose-700 bg-rose-50 border-rose-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+        }`}>
+          <ShieldAlert className="w-2.5 h-2.5" />
+          <span>{raw === 'BLOKIR_MAC' ? 'Blokir MAC' : 'Buka Blokir'}</span>
+        </span>
+      )
+    }
+    if (raw === 'BUAT_TIKET') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded">
+          <FileText className="w-2.5 h-2.5 text-indigo-600" />
+          <span>Buat Tiket</span>
+        </span>
+      )
+    }
+    if (raw === 'LOGIN_PORTAL' || raw === 'LOGOUT_PORTAL') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+          <UserCheck className="w-2.5 h-2.5 text-emerald-600" />
+          <span>{raw === 'LOGIN_PORTAL' ? 'Login' : 'Logout'}</span>
+        </span>
+      )
+    }
+    return (
+      <span className="inline-block text-[10px] font-mono font-bold uppercase text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+        {raw || 'PORTAL'}
+      </span>
+    )
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans">
-      <div className="bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-3 sm:space-y-4 max-h-[92vh] flex flex-col">
+      <div className="bg-white rounded-xl max-w-xl sm:max-w-2xl w-full p-3 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-3 sm:space-y-4 max-h-[92vh] flex flex-col">
         
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-[#CCDDF0] pb-2.5 sm:pb-3 shrink-0">
@@ -138,43 +250,61 @@ export function CustomerDetailModal({
           </button>
         </div>
 
-        {/* Tab Switcher (Profil vs Jaringan vs Pembayaran) */}
-        <div className="flex rounded-lg bg-[#F1F6FC] p-1 border border-[#CCDDF0] shrink-0 font-sans text-[11px] sm:text-xs font-bold gap-1">
+        {/* Tab Switcher (Profil vs Jaringan vs Pembayaran vs Aktivitas) */}
+        <div className="flex rounded-lg bg-[#F1F6FC] p-0.5 sm:p-1 border border-[#CCDDF0] shrink-0 font-sans text-[10px] sm:text-xs font-bold gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('profil')}
-            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
+            className={`flex-1 min-w-0 py-1.5 px-1 sm:px-3 rounded-md flex items-center justify-center gap-0.5 sm:gap-1.5 transition cursor-pointer ${
               activeTab === 'profil'
                 ? 'bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]'
                 : 'text-[#3B5B78] hover:text-[#0B2545]'
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
-            <span className="truncate">Profil &amp; Kontak</span>
+            <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#026AA7] shrink-0" />
+            <span className="truncate">
+              <span className="sm:hidden">Profil</span>
+              <span className="hidden sm:inline">Profil &amp; Kontak</span>
+            </span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('jaringan')}
-            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
+            className={`flex-1 min-w-0 py-1.5 px-1 sm:px-3 rounded-md flex items-center justify-center gap-0.5 sm:gap-1.5 transition cursor-pointer ${
               activeTab === 'jaringan'
                 ? 'bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]'
                 : 'text-[#3B5B78] hover:text-[#0B2545]'
             }`}
           >
-            <Server className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
-            <span className="truncate">Jaringan &amp; Modem</span>
+            <Server className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#026AA7] shrink-0" />
+            <span className="truncate">
+              <span className="sm:hidden">Jaringan</span>
+              <span className="hidden sm:inline">Jaringan &amp; Modem</span>
+            </span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('pembayaran')}
-            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-md flex items-center justify-center gap-1 sm:gap-1.5 transition cursor-pointer ${
+            className={`flex-1 min-w-0 py-1.5 px-1 sm:px-3 rounded-md flex items-center justify-center gap-0.5 sm:gap-1.5 transition cursor-pointer ${
               activeTab === 'pembayaran'
                 ? 'bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]'
                 : 'text-[#3B5B78] hover:text-[#0B2545]'
             }`}
           >
-            <CreditCard className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
-            <span className="truncate">Tagihan &amp; Bayar</span>
+            <CreditCard className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#026AA7] shrink-0" />
+            <span className="truncate">Tagihan</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('aktivitas')}
+            className={`flex-1 min-w-0 py-1.5 px-1 sm:px-3 rounded-md flex items-center justify-center gap-0.5 sm:gap-1.5 transition cursor-pointer ${
+              activeTab === 'aktivitas'
+                ? 'bg-white text-[#0B2545] shadow-2xs border border-[#CCDDF0]'
+                : 'text-[#3B5B78] hover:text-[#0B2545]'
+            }`}
+          >
+            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#026AA7] shrink-0" />
+            <span className="truncate">Aktivitas</span>
           </button>
         </div>
 
@@ -505,27 +635,79 @@ export function CustomerDetailModal({
               )}
             </div>
           )}
+
+          {/* TAB 4: AKTIVITAS MYTEKNO */}
+          {activeTab === 'aktivitas' && (
+            <div className="space-y-3">
+              <div className="p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-bold text-[#0B2545] flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#026AA7]" />
+                    <span>Riwayat Aktivitas Portal MyTekno</span>
+                  </div>
+                  <div className="text-[11px] text-[#64839E]">
+                    Catatan forensik aksi mandiri yang dilakukan oleh pelanggan.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={fetchActivities}
+                  className="p-1 rounded-md hover:bg-white text-[#026AA7] border border-transparent hover:border-[#CCDDF0] transition cursor-pointer"
+                  title="Segarkan Riwayat"
+                >
+                  <RotateCw className={`w-3.5 h-3.5 ${loadingActivities ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+
+              {loadingActivities ? (
+                <div className="text-center py-8 text-[#64839E] font-mono text-xs">
+                  <div className="inline-block animate-spin w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full mb-2"></div>
+                  <div>Memuat riwayat aktivitas...</div>
+                </div>
+              ) : activities.length === 0 ? (
+                <div className="text-center py-8 px-4 rounded-lg bg-[#F8FAFC] border border-[#CCDDF0] text-[#64839E] text-xs space-y-1">
+                  <Clock className="w-6 h-6 mx-auto text-slate-300 mb-1" />
+                  <div className="font-semibold text-slate-700">Belum Ada Catatan Aktivitas</div>
+                  <div className="text-[11px]">Pelanggan ini belum melakukan aktivitas mandiri di portal MyTekno.</div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {activities.map((act) => (
+                    <div
+                      key={act.id}
+                      className="p-2.5 rounded-lg bg-white border border-[#CCDDF0] space-y-1 shadow-2xs hover:border-[#026AA7]/40 transition text-[11px]"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        {renderCustomerActivityBadge(act.aksi)}
+                        <span className="text-[10px] text-[#64839E] font-mono">
+                          {act.created_at || act.waktu}
+                        </span>
+                      </div>
+                      <div className="text-slate-700 leading-snug">
+                        {act.keterangan}
+                      </div>
+                      <div className="text-[10px] text-[#64839E] font-mono pt-0.5 flex items-center justify-between">
+                        <span>IP: {act.ip_address || '-'}</span>
+                        <span className="font-bold text-emerald-700 uppercase">{act.status}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-[#CCDDF0] shrink-0 font-sans">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onOpenEdit && onOpenEdit(activeCust)}
-              className="px-3.5 py-1.5 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#3B5B78] hover:text-[#0B2545] text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
-            >
-              <Edit2 className="w-3.5 h-3.5 text-[#026AA7]" />
-              <span>Edit Informasi</span>
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold transition cursor-pointer shadow-2xs"
-            >
-              Tutup
-            </button>
-          </div>
+        {/* Modal Footer (Opsi Minimalis: Rata Kanan, Tombol Primer Tunggal) */}
+        <div className="flex items-center justify-end pt-2.5 sm:pt-3 border-t border-[#CCDDF0] shrink-0 font-sans">
+          <button
+            type="button"
+            onClick={() => onOpenEdit && onOpenEdit(activeCust)}
+            className="px-4 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <Edit2 className="w-3.5 h-3.5 text-white" />
+            <span>Edit Informasi</span>
+          </button>
         </div>
       </div>
 

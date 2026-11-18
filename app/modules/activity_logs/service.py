@@ -318,3 +318,125 @@ class ActivityLogService:
             db.rollback()
             print(f"[ActivityLogService] cleanup_old_activity_logs error: {e}")
             return 0
+
+    @staticmethod
+    def get_customer_activity_logs(
+        kantor: Optional[str] = None,
+        id_pelanggan: Optional[str] = None,
+        q: Optional[str] = None,
+        aksi: Optional[str] = None,
+        kategori: Optional[str] = None,
+        range_type: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        date: Optional[str] = None,
+        sort_by: str = "created_at",
+        sort_dir: str = "desc",
+        page: int = 1,
+        limit: int = 15,
+        current_user: Optional[Dict[str, Any]] = None
+    ) -> Tuple[int, List[Dict[str, Any]], Optional[str]]:
+        """Mengambil data log aktivitas pelanggan dari database tenant per-kantor aktif"""
+        from app.db.models import LogAktivitasPelanggan, Pelanggan
+        from app.core.tenant_database import TenantDatabaseManager
+
+        k_code = (kantor or "cabang").lower().strip()
+        t_db = TenantDatabaseManager.get_tenant_session(k_code)
+        try:
+            query = t_db.query(LogAktivitasPelanggan, Pelanggan.nama, Pelanggan.no_hp).outerjoin(
+                Pelanggan, LogAktivitasPelanggan.id_pelanggan == Pelanggan.id_pelanggan
+            )
+
+            if id_pelanggan and id_pelanggan != "all":
+                query = query.filter(LogAktivitasPelanggan.id_pelanggan == id_pelanggan.strip())
+
+            if aksi and aksi != "all":
+                query = query.filter(LogAktivitasPelanggan.aksi == aksi.strip().upper())
+
+            if kategori and kategori != "all":
+                query = query.filter(LogAktivitasPelanggan.kategori == kategori.strip().upper())
+
+            now = get_now_wib()
+            if range_type == "today":
+                cutoff = datetime.datetime(now.year, now.month, now.day)
+                query = query.filter(LogAktivitasPelanggan.created_at >= cutoff)
+            elif range_type == "7d":
+                cutoff = now - datetime.timedelta(days=7)
+                query = query.filter(LogAktivitasPelanggan.created_at >= cutoff)
+            elif range_type == "30d":
+                cutoff = now - datetime.timedelta(days=30)
+                query = query.filter(LogAktivitasPelanggan.created_at >= cutoff)
+            elif range_type == "custom" and start_date and end_date:
+                try:
+                    s_dt = datetime.datetime.strptime(start_date.strip(), "%Y-%m-%d")
+                    e_dt = datetime.datetime.strptime(end_date.strip(), "%Y-%m-%d") + datetime.timedelta(days=1)
+                    query = query.filter(LogAktivitasPelanggan.created_at >= s_dt, LogAktivitasPelanggan.created_at < e_dt)
+                except ValueError:
+                    pass
+            elif date and date != "all":
+                try:
+                    target_date = datetime.date.fromisoformat(date.strip())
+                    next_day = target_date + datetime.timedelta(days=1)
+                    query = query.filter(
+                        LogAktivitasPelanggan.created_at >= datetime.datetime.combine(target_date, datetime.time.min),
+                        LogAktivitasPelanggan.created_at < datetime.datetime.combine(next_day, datetime.time.min)
+                    )
+                except ValueError:
+                    pass
+
+            if q:
+                search_pat = f"%{q.strip()}%"
+                query = query.filter(
+                    or_(
+                        LogAktivitasPelanggan.id_pelanggan.ilike(search_pat),
+                        Pelanggan.nama.ilike(search_pat),
+                        Pelanggan.no_hp.ilike(search_pat),
+                        LogAktivitasPelanggan.aksi.ilike(search_pat),
+                        LogAktivitasPelanggan.keterangan.ilike(search_pat),
+                        LogAktivitasPelanggan.ip_address.ilike(search_pat)
+                    )
+                )
+
+            total_count = query.count()
+
+            col_map = {
+                "created_at": LogAktivitasPelanggan.created_at,
+                "id_pelanggan": LogAktivitasPelanggan.id_pelanggan,
+                "aksi": LogAktivitasPelanggan.aksi,
+                "kategori": LogAktivitasPelanggan.kategori,
+                "status": LogAktivitasPelanggan.status,
+                "ip_address": LogAktivitasPelanggan.ip_address,
+                "id": LogAktivitasPelanggan.id_log
+            }
+            target_col = col_map.get(sort_by, LogAktivitasPelanggan.created_at)
+            if sort_dir.lower() == "desc":
+                query = query.order_by(desc(target_col))
+            else:
+                query = query.order_by(asc(target_col))
+
+            offset = (page - 1) * limit
+            rows = query.offset(offset).limit(limit).all()
+
+            results = []
+            for log_entry, nama_cust, no_hp_cust in rows:
+                results.append({
+                    "id": log_entry.id_log,
+                    "id_pelanggan": log_entry.id_pelanggan,
+                    "nama_pelanggan": nama_cust or log_entry.id_pelanggan,
+                    "no_wa": no_hp_cust or "-",
+                    "kantor": k_code.upper(),
+                    "aksi": log_entry.aksi,
+                    "kategori": log_entry.kategori,
+                    "status": log_entry.status,
+                    "keterangan": log_entry.keterangan or "-",
+                    "ip_address": log_entry.ip_address or "-",
+                    "user_agent": log_entry.user_agent or "-",
+                    "created_at": log_entry.created_at.strftime("%Y-%m-%d %H:%M:%S") if log_entry.created_at else "-",
+                    "waktu": log_entry.created_at.strftime("%Y-%m-%d %H:%M:%S") if log_entry.created_at else "-"
+                })
+
+            earliest = t_db.query(func.min(LogAktivitasPelanggan.created_at)).scalar()
+            min_date_str = earliest.strftime("%Y-%m-%d") if earliest else get_today_wib().strftime("%Y-%m-%d")
+            return total_count, results, min_date_str
+        finally:
+            t_db.close()

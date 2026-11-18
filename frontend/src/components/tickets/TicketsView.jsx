@@ -118,6 +118,29 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
     setCatatan(ticket.catatan_teknisi || '');
   };
 
+  const handleQuickStatusChange = async (ticket, nextStatus) => {
+    if (nextStatus === 'SELESAI') {
+      // Buka modal agar teknisi dapat melengkapi catatan solusi sebelum tiket ditutup
+      handleOpenModal({ ...ticket, status: nextStatus });
+      return;
+    }
+
+    try {
+      const res = await TicketsService.updateStatus(ticket.id_tiket, nextStatus, ticket.catatan_teknisi || '');
+      if (res.ok && res.data && res.data.status === 'success') {
+        showToast(res.data.message || `Status #${ticket.id_tiket} berhasil diubah ke ${nextStatus}`);
+        setTickets(prev => prev.map(item => item.id_tiket === ticket.id_tiket ? { ...item, status: nextStatus } : item));
+      } else {
+        showToast(res.data?.message || 'Gagal mengubah status tiket', 'error');
+        fetchTickets();
+      }
+    } catch (err) {
+      console.error('Gagal update status tiket:', err);
+      showToast('Terjadi kesalahan koneksi', 'error');
+      fetchTickets();
+    }
+  };
+
 
   const isSuperAdminOrAdmin = currentUser?.role === 'super admin' || currentUser?.role === 'admin';
 
@@ -341,9 +364,21 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                       </span>
                     </div>
 
-                    <span className={`text-[11px] font-bold uppercase tracking-tight shrink-0 ${statusColor}`}>
-                      {t.status}
-                    </span>
+                    <div className="shrink-0 flex items-center gap-1">
+                      <select
+                        value={t.status || 'MENUNGGU'}
+                        onChange={(e) => handleQuickStatusChange(t, e.target.value)}
+                        className={`text-[11px] font-semibold uppercase rounded-md px-2 py-0.5 bg-white border border-[#CCDDF0] hover:border-[#026AA7] focus:outline-none focus:ring-2 focus:ring-[#026AA7]/20 focus:border-[#026AA7] transition cursor-pointer shadow-2xs font-sans ${
+                          t.status === 'SELESAI' ? 'text-emerald-700 font-bold' : 'text-[#0B2545]'
+                        }`}
+                        title="Ubah status penanganan langsung"
+                      >
+                        <option value="MENUNGGU" className="bg-white text-[#0B2545]">MENUNGGU</option>
+                        <option value="DICEK_ADMIN" className="bg-white text-[#0B2545]">DICEK ADMIN</option>
+                        <option value="DIPROSES" className="bg-white text-[#0B2545]">DIPROSES</option>
+                        <option value="SELESAI" className="bg-white text-emerald-700 font-bold">SELESAI</option>
+                      </select>
+                    </div>
                   </div>
 
                   {/* Baris 2: Nama Pelanggan & Rx Saat Lapor */}
@@ -421,26 +456,29 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                       )
                     ) : (
                       <>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenModal(t)}
-                          className="flex-1 py-1 px-3 border border-cyan-200 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[32px] cursor-pointer"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                          <span>Kelola Status</span>
-                        </button>
-                        {cleanWa && (
+                        {cleanWa ? (
                           <a
                             href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="py-1 px-3 border border-emerald-200 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[32px]"
+                            className="flex-1 py-1 px-3 border border-emerald-200 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[32px]"
                             title="Hubungi Pelanggan via WhatsApp"
                           >
-                            <Phone className="w-3 h-3 text-emerald-600" />
-                            <span>WA</span>
+                            <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Hubungi WA</span>
                           </a>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic py-1 flex-1 text-center">WA Tidak Tersedia</span>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => handleOpenModal(t)}
+                          className="py-1 px-2.5 border border-cyan-200 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 min-h-[32px] cursor-pointer shrink-0"
+                          title="Lihat atau edit catatan teknisi"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                          <span>Catatan</span>
+                        </button>
                       </>
                     )}
                   </div>
@@ -599,116 +637,68 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                       {t.redaman_saat_lapor != null ? `${t.redaman_saat_lapor.toFixed(1)} dBm` : '-'}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <span className={`text-xs font-bold uppercase tracking-tight ${
-    t.status === 'MENUNGGU'
-      ? 'text-amber-700'
-      : t.status === 'DICEK_ADMIN'
-      ? 'text-purple-700'
-      : t.status === 'DIPROSES'
-      ? 'text-cyan-700'
-      : 'text-emerald-700'
-  }`}>
-    {t.status}
-  </span>
+                  {/* Kolom STATUS: Langsung Dropdown Inline Interaktif Sesuai Tema */}
+                  <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                    <div className="inline-flex items-center justify-center gap-1.5">
+                      <select
+                        value={t.status || 'MENUNGGU'}
+                        onChange={(e) => handleQuickStatusChange(t, e.target.value)}
+                        className={`text-xs font-semibold uppercase rounded-lg px-2.5 py-1 bg-white border border-[#CCDDF0] hover:border-[#026AA7] focus:outline-none focus:ring-2 focus:ring-[#026AA7]/20 focus:border-[#026AA7] transition cursor-pointer shadow-2xs font-sans ${
+                          t.status === 'SELESAI' ? 'text-emerald-700 font-bold' : 'text-[#0B2545]'
+                        }`}
+                        title="Klik untuk ubah status penanganan langsung"
+                      >
+                        <option value="MENUNGGU" className="bg-white text-[#0B2545]">MENUNGGU</option>
+                        <option value="DICEK_ADMIN" className="bg-white text-[#0B2545]">DICEK ADMIN</option>
+                        <option value="DIPROSES" className="bg-white text-[#0B2545]">DIPROSES</option>
+                        <option value="SELESAI" className="bg-white text-emerald-700 font-bold">SELESAI</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenModal(t)}
+                        className="p-1 rounded-lg text-[#64839E] hover:text-[#026AA7] hover:bg-[#F1F6FC] border border-transparent hover:border-[#CCDDF0] transition cursor-pointer"
+                        title={t.catatan_teknisi ? `Catatan: ${t.catatan_teknisi}` : 'Catatan Solusi / Detail Penanganan'}
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
-                                    <td className="py-2.5 px-3 text-right">
-                    {/* Menu Titik Tiga / Aksi Kelola (Khusus kategori selain RESET_PASSWORD) */}
+
+                  {/* Kolom AKSI: Tombol Hubungi WA Langsung (Tanpa Titik Tiga) */}
+                  <td className="py-2.5 px-3 text-right whitespace-nowrap">
                     {t.kategori === 'RESET_PASSWORD' ? (
-                      <span className="text-slate-400 font-mono text-xs">-</span>
-                    ) : (
-                      <div className="relative inline-block text-left">
+                      isSuperAdminOrAdmin ? (
                         <button
                           type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (activeMenuId === t.id_tiket) {
-                              setActiveMenuId(null);
-                              setMenuAnchor(null);
-                            } else {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const spaceBelow = window.innerHeight - rect.bottom;
-                              const openUp = spaceBelow < 120 && rect.top > 120;
-                              setMenuAnchor({
-                                id: t.id_tiket,
-                                top: openUp ? undefined : rect.bottom + 6,
-                                bottom: openUp ? window.innerHeight - rect.top + 6 : undefined,
-                                right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right),
-                              });
-                              setActiveMenuId(t.id_tiket);
-                            }
-                          }}
-                          className={`p-1 rounded-lg border transition cursor-pointer ${
-                            activeMenuId === t.id_tiket
-                              ? 'bg-cyan-50 border-cyan-300 text-cyan-700'
-                              : 'hover:bg-slate-100 text-slate-600 border-slate-200'
-                          }`}
-                          title="Pilihan Aksi"
+                          onClick={() => handleSendResetPasswordWA(t)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold shadow-xs transition cursor-pointer"
+                          title="Kirim Kata Sandi Baru langsung ke WhatsApp Pelanggan dan selesaikan tiket"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                          <Phone className="w-3.5 h-3.5 shrink-0" />
+                          <span>Kirim Sandi Baru</span>
                         </button>
+                      ) : (
+                        <span className="text-xs font-semibold text-slate-400 italic">Hanya Admin</span>
+                      )
+                    ) : (() => {
+                      const cleanWa = t.no_wa ? t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62') : '';
+                      const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`;
 
-                        {activeMenuId === t.id_tiket && menuAnchor && menuAnchor.id === t.id_tiket && typeof document !== 'undefined' && createPortal(
-                          <>
-                            <div
-                              className="fixed inset-0 z-[9998]"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveMenuId(null);
-                                setMenuAnchor(null);
-                              }}
-                            />
-                            <div
-                              style={{
-                                position: 'fixed',
-                                top: menuAnchor.top,
-                                bottom: menuAnchor.bottom,
-                                right: menuAnchor.right,
-                                zIndex: 9999
-                              }}
-                              className="min-w-[170px]"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setActiveMenuId(null);
-                                    setMenuAnchor(null);
-                                    handleOpenModal(t);
-                                  }}
-                                  className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer"
-                                >
-                                  <Edit2 className="w-3.5 h-3.5 text-cyan-600" />
-                                  <span>Kelola Status</span>
-                                </button>
-                                {t.no_wa && (() => {
-                                  const cleanWa = t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62');
-                                  const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`;
-
-                                  return (
-                                    <a
-                                      href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      onClick={() => {
-                                        setActiveMenuId(null);
-                                        setMenuAnchor(null);
-                                      }}
-                                      className="w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold"
-                                    >
-                                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                                      <span>Hubungi WA</span>
-                                    </a>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          </>,
-                          document.body
-                        )}
-                      </div>
-                    )}
+                      return cleanWa ? (
+                        <a
+                          href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 text-xs font-bold transition shadow-2xs"
+                          title={`Hubungi ${t.nama_pelanggan} (${t.no_wa}) via WhatsApp`}
+                        >
+                          <Phone className="w-3.5 h-3.5 text-emerald-600 group-hover:text-white" />
+                          <span>Hubungi WA</span>
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 font-mono text-xs">-</span>
+                      );
+                    })()}
                   </td>
                 </tr>
               ))

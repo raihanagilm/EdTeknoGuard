@@ -236,9 +236,7 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                             className={`inline-flex items-center gap-1 text-xs font-bold ${
                               t.status === 'SELESAI'
                                 ? 'text-emerald-600'
-                                : t.status === 'DIPROSES' || t.status === 'DICEK_ADMIN'
-                                ? 'text-blue-600'
-                                : 'text-amber-600'
+                                : 'text-blue-600'
                             }`}
                           >
                             {t.status === 'SELESAI' ? (
@@ -276,7 +274,7 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
             </div>
 
               {/* Pagination Controls (< 1 2 3 ... 7 8 >) */}
-              {!loading && filteredTickets.length > ITEMS_PER_PAGE && (
+              {!loading && filteredTickets.length > 0 && (
                 <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex flex-col items-center gap-1.5">
                   <PortalPagination
                     currentPage={currentPage}
@@ -285,7 +283,7 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                     className="border-t-0 pt-0"
                   />
                   <div className="text-[11px] text-gray-500 font-sans">
-                    Total {filteredTickets.length} tiket keluhan
+                    Halaman {currentPage} dari {totalPages} ({filteredTickets.length} tiket keluhan)
                   </div>
                 </div>
               )}

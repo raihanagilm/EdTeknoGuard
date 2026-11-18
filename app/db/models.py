@@ -136,6 +136,7 @@ class Pelanggan(TenantBase):
     kuota_list = relationship("KuotaPelanggan", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
     kuota_harian_list = relationship("LogKuotaHarian", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
     perangkat_terhubung_list = relationship("PerangkatTerhubung", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
+    aktivitas_list = relationship("LogAktivitasPelanggan", back_populates="pelanggan", cascade="all, delete-orphan", passive_deletes=True)
 
     # Properti pembantu (Property shortcuts) untuk backward-compatibility transparan
     def _get_or_create_perangkat(self):
@@ -566,9 +567,27 @@ class PerangkatTerhubung(TenantBase):
     )
 
 
+class LogAktivitasPelanggan(TenantBase):
+    __tablename__ = "log_aktivitas_pelanggan"
 
+    id_log = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_pelanggan = Column(String(64), ForeignKey("pelanggan.id_pelanggan", onupdate="CASCADE", ondelete="CASCADE"), nullable=False, index=True)
+    aksi = Column(String(50), nullable=False, index=True)  # LOGIN_PORTAL, LOGOUT_PORTAL, UBAH_WIFI, GANTI_PASSWORD, RESET_PASSWORD, BLOKIR_MAC, UNBLOK_MAC, BUAT_TIKET, UPDATE_PROFIL
+    kategori = Column(String(30), nullable=False, default="PORTAL", index=True)  # AUTH, WIFI, KEAMANAN, TIKET, PROFIL
+    status = Column(String(20), nullable=False, default="SUCCESS")  # SUCCESS, FAILED
+    keterangan = Column(Text, nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=get_now_wib, nullable=False, index=True)
 
+    pelanggan = relationship("Pelanggan", back_populates="aktivitas_list")
 
+    id = synonym("id_log")
+
+    __table_args__ = (
+        Index("idx_log_pelanggan_created", "id_pelanggan", "created_at"),
+        Index("idx_log_pelanggan_aksi_created", "aksi", "created_at"),
+    )
 
 
 __all__ = [
@@ -590,5 +609,6 @@ __all__ = [
     "KuotaPelanggan",
     "LogKuotaHarian",
     "Paket",
-    "PerangkatTerhubung"
+    "PerangkatTerhubung",
+    "LogAktivitasPelanggan"
 ]

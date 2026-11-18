@@ -138,6 +138,9 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_portal_
         except Exception as ex:
             modem_error_msg = str(ex)
 
+    old_ssid = (pelanggan.nama_wifi or "").strip()
+    old_pass = (pelanggan.password_wifi or "").strip()
+
     pelanggan.nama_wifi = nama_wifi
     pelanggan.password_wifi = password_wifi
     if hasattr(pelanggan, "perangkat") and pelanggan.perangkat:
@@ -146,6 +149,33 @@ async def portal_wifi_change(request: Request, db: Session = Depends(get_portal_
 
     db.commit()
     db.refresh(pelanggan)
+
+    # Deteksi spesifik perubahan SSID vs Kata Sandi WiFi
+    ssid_changed = (nama_wifi != old_ssid)
+    pass_changed = (password_wifi != old_pass)
+
+    if ssid_changed and pass_changed:
+        aksi = "UBAH_WIFI"
+        keterangan = f"Pelanggan mengubah SSID ('{old_ssid or '-'}' -> '{nama_wifi}') dan kata sandi WiFi ({'Sukses ke ONT' if modem_updated else 'Tersimpan lokal di DB'})"
+    elif ssid_changed:
+        aksi = "UBAH_SSID_WIFI"
+        keterangan = f"Pelanggan mengubah nama WiFi (SSID): '{old_ssid or '-'}' -> '{nama_wifi}' ({'Sukses ke ONT' if modem_updated else 'Tersimpan lokal di DB'})"
+    elif pass_changed:
+        aksi = "UBAH_SANDI_WIFI"
+        keterangan = f"Pelanggan memperbarui kata sandi WiFi untuk SSID '{nama_wifi}' ({'Sukses ke ONT' if modem_updated else 'Tersimpan lokal di DB'})"
+    else:
+        aksi = "UBAH_WIFI"
+        keterangan = f"Pelanggan menyimpan pengaturan WiFi '{nama_wifi}'"
+
+    from app.portal.services.customer_activity_service import CustomerActivityService
+    CustomerActivityService.record(
+        db=db,
+        id_pelanggan=pelanggan.id_pelanggan,
+        aksi=aksi,
+        kategori="WIFI",
+        keterangan=keterangan,
+        request=request
+    )
 
     pesan_sukses = "Nama WiFi (SSID) dan Kata Sandi baru berhasil diperbarui langsung ke modem router dan database!"
     if not modem_updated and modem_error_msg:
@@ -248,6 +278,18 @@ async def portal_toggle_block_device(request: Request, db: Session = Depends(get
     from app.services.connected_device_service import ConnectedDeviceService
     try:
         res = ConnectedDeviceService.toggle_block_device(db=target_db, id_pelanggan=id_pel, mac_address=mac, block=block)
+        if res.get("success"):
+            is_blk = res.get("is_blocked", False)
+            dev_name = (res.get("device") or {}).get("hostname") or mac
+            from app.portal.services.customer_activity_service import CustomerActivityService
+            CustomerActivityService.record(
+                db=target_db,
+                id_pelanggan=id_pel,
+                aksi="BLOKIR_MAC" if is_blk else "UNBLOK_MAC",
+                kategori="KEAMANAN",
+                keterangan=f"Pelanggan {'memblokir' if is_blk else 'membuka blokir'} perangkat WiFi '{dev_name}' ({mac})",
+                request=request
+            )
     finally:
         if target_db is not db:
             try:
