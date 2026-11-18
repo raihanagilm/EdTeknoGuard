@@ -5530,6 +5530,10 @@
       align-items: center;
     }
 
+    .sm\:justify-between {
+      justify-content: space-between;
+    }
+
     .sm\:justify-start {
       justify-content: flex-start;
     }
@@ -5723,6 +5727,10 @@
       padding-bottom: calc(var(--spacing) * 22);
     }
 
+    .sm\:text-left {
+      text-align: left;
+    }
+
     .sm\:text-2xl {
       font-size: var(--text-2xl);
       line-height: var(--tw-leading, var(--text-2xl--line-height));
@@ -5830,6 +5838,10 @@
 
     .md\:justify-start {
       justify-content: flex-start;
+    }
+
+    .md\:text-left {
+      text-align: left;
     }
   }
 

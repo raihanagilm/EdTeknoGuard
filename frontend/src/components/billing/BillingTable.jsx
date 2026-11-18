@@ -252,23 +252,25 @@ export function BillingTable({
       </div>
 
       {/* Pagination Bar */}
-      <div className="flex items-center justify-between px-3 py-2.5 bg-[#F1F6FC] border-t border-[#CCDDF0] text-xs font-mono">
+      <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2.5 px-3 py-2.5 bg-[#F1F6FC] border-t border-[#CCDDF0] text-xs font-sans text-center sm:text-left">
         <span className="text-[#64839E]">
-          Total <strong className="text-[#0B2545]">{total_records}</strong> data (Halaman{' '}
-          <strong className="text-[#0B2545]">{page}</strong> dari <strong className="text-[#0B2545]">{total_pages}</strong>)
+          Total <strong className="text-[#0B2545] font-mono">{total_records}</strong> data (Halaman{' '}
+          <strong className="text-[#0B2545] font-mono">{page}</strong> dari <strong className="text-[#0B2545] font-mono">{total_pages}</strong>)
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 justify-center">
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="p-1 rounded border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+            className="p-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer shadow-2xs"
+            title="Halaman Sebelumnya"
           >
             <ChevronLeft className="w-4 h-4 text-[#0B2545]" />
           </button>
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= total_pages}
-            className="p-1 rounded border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+            className="p-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer shadow-2xs"
+            title="Halaman Berikutnya"
           >
             <ChevronRight className="w-4 h-4 text-[#0B2545]" />
           </button>

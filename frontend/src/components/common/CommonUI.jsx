@@ -226,12 +226,12 @@ export function DataTableContainer({
         {children}
       </div>
 
-      <div className="p-3 sm:p-3.5 border-t border-[#DAE7F5] flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-mono text-[#3B5B78] bg-[#F1F6FC]">
-        {/* Sisi Kiri: Selector Rows Per Page & Ringkasan Data */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto justify-between md:justify-start">
+      <div className="p-3 sm:p-3.5 border-t border-[#DAE7F5] flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-[#3B5B78] bg-[#F1F6FC]">
+        {/* Sisi Kiri (Mobile: Terpusat di tengah, Desktop: Rata Kiri) */}
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3 w-full md:w-auto text-center md:text-left">
           {onLimitChange && (
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-[#64839E] font-semibold">Tampilkan:</span>
+              <span className="text-[11px] text-[#64839E] font-medium font-sans">Tampilkan:</span>
               <select
                 value={limit}
                 onChange={(e) => {
@@ -239,7 +239,7 @@ export function DataTableContainer({
                   onLimitChange(newLimit);
                 }}
                 disabled={loading}
-                className="px-2 py-1 bg-white border border-[#CCDDF0] rounded-lg text-[#0B2545] text-[11px] font-bold shadow-2xs focus:outline-none cursor-pointer"
+                className="px-2 py-1 bg-white border border-[#CCDDF0] rounded-lg text-[#0B2545] text-[11px] font-bold font-mono shadow-2xs focus:outline-none cursor-pointer"
               >
                 {limitOptions.map((opt) => (
                   <option key={opt} value={opt}>
@@ -247,75 +247,79 @@ export function DataTableContainer({
                   </option>
                 ))}
               </select>
-              <span className="text-[11px] text-[#64839E]">baris</span>
+              <span className="text-[11px] text-[#64839E] font-medium font-sans">baris</span>
             </div>
           )}
 
-          <div className="text-[11px] text-[#64839E]">
-            Halaman <strong className="text-[#0B2545] font-bold">{safePage}</strong> dari <strong className="text-[#0B2545] font-bold">{safeTotalPages}</strong>
+          <div className="text-[11px] text-[#64839E] font-sans">
+            Halaman <strong className="text-[#0B2545] font-bold font-mono">{safePage}</strong> dari <strong className="text-[#0B2545] font-bold font-mono">{safeTotalPages}</strong>
             {actualTotalCount !== undefined && (
-              <span className="ml-1 text-[#64839E] font-normal">
-                ({actualTotalCount} data)
+              <span className="ml-1 text-[#64839E] font-normal font-sans">
+                (<span className="font-mono font-semibold">{actualTotalCount}</span> data)
               </span>
             )}
           </div>
         </div>
 
-        {/* Sisi Kanan: Navigasi Nomor Halaman */}
-        <div className="flex items-center gap-1 sm:gap-1.5 select-none w-full md:w-auto justify-center md:justify-end overflow-x-auto py-0.5">
-          <button
-            type="button"
-            disabled={safePage <= 1 || loading}
-            onClick={handlePrev}
-            className="p-1 sm:px-2 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]"
-            title="Halaman Sebelumnya"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Sebelumnya</span>
-          </button>
+        {/* Sisi Kanan (Mobile: Terpusat di tengah, Desktop: Rata Kanan) */}
+        <div className="w-full md:w-auto flex items-center justify-center md:justify-end">
+          <div className="flex items-center gap-1 sm:gap-1.5 select-none max-w-full overflow-x-auto py-0.5 justify-center">
+            <button
+              type="button"
+              disabled={safePage <= 1 || loading}
+              onClick={handlePrev}
+              className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]"
+              title="Halaman Sebelumnya"
+              aria-label="Halaman Sebelumnya"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline font-sans">Sebelumnya</span>
+            </button>
 
-          <div className="flex items-center gap-1">
-            {paginationItems.map((item, idx) => {
-              if (item === '...') {
+            <div className="flex items-center gap-1">
+              {paginationItems.map((item, idx) => {
+                if (item === '...') {
+                  return (
+                    <span
+                      key={`ellipsis-${idx}`}
+                      className="px-1.5 py-1 text-[#64839E] text-xs font-bold font-mono"
+                    >
+                      ...
+                    </span>
+                  );
+                }
+
+                const isCurrent = item === safePage;
                 return (
-                  <span
-                    key={`ellipsis-${idx}`}
-                    className="px-1.5 py-1 text-[#64839E] text-xs font-bold"
+                  <button
+                    key={`page-${item}`}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handlePageSelect(item)}
+                    className={`min-w-[28px] sm:min-w-[30px] h-[28px] sm:h-[30px] px-1.5 rounded-lg text-xs font-bold font-mono transition flex items-center justify-center cursor-pointer shadow-2xs ${
+                      isCurrent
+                        ? 'bg-[#026AA7] text-white border border-[#035388]'
+                        : 'bg-white border border-[#CCDDF0] text-[#0B2545] hover:bg-[#F1F6FC]'
+                    }`}
                   >
-                    ...
-                  </span>
+                    {item}
+                  </button>
                 );
-              }
+              })}
+            </div>
 
-              const isCurrent = item === safePage;
-              return (
-                <button
-                  key={`page-${item}`}
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handlePageSelect(item)}
-                  className={`min-w-[28px] sm:min-w-[30px] h-[28px] sm:h-[30px] px-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs ${
-                    isCurrent
-                      ? 'bg-[#026AA7] text-white border border-[#035388]'
-                      : 'bg-white border border-[#CCDDF0] text-[#0B2545] hover:bg-[#F1F6FC]'
-                  }`}
-                >
-                  {item}
-                </button>
-              );
-            })}
+            <button
+              type="button"
+              disabled={safePage >= safeTotalPages || loading}
+              onClick={handleNext}
+              className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]"
+              title="Halaman Berikutnya"
+              aria-label="Halaman Berikutnya"
+            >
+              <span className="hidden sm:inline font-sans">Berikutnya</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-
-          <button
-            type="button"
-            disabled={safePage >= safeTotalPages || loading}
-            onClick={handleNext}
-            className="p-1 sm:px-2 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]"
-            title="Halaman Berikutnya"
-          >
-            <span className="hidden sm:inline">Berikutnya</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
     </div>

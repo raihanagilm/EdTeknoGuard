@@ -30295,14 +30295,14 @@ function DataTableContainer({ children, page = 1, totalPages = 1, totalCount, to
 			className: "overflow-x-auto",
 			children
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "p-3 sm:p-3.5 border-t border-[#DAE7F5] flex flex-col md:flex-row items-center justify-between gap-3 text-xs font-mono text-[#3B5B78] bg-[#F1F6FC]",
+			className: "p-3 sm:p-3.5 border-t border-[#DAE7F5] flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-[#3B5B78] bg-[#F1F6FC]",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto justify-between md:justify-start",
+				className: "flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3 w-full md:w-auto text-center md:text-left",
 				children: [onLimitChange && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-1.5",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] text-[#64839E] font-semibold",
+							className: "text-[11px] text-[#64839E] font-medium font-sans",
 							children: "Tampilkan:"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", {
@@ -30311,82 +30311,90 @@ function DataTableContainer({ children, page = 1, totalPages = 1, totalCount, to
 								onLimitChange(Number(e.target.value));
 							},
 							disabled: loading,
-							className: "px-2 py-1 bg-white border border-[#CCDDF0] rounded-lg text-[#0B2545] text-[11px] font-bold shadow-2xs focus:outline-none cursor-pointer",
+							className: "px-2 py-1 bg-white border border-[#CCDDF0] rounded-lg text-[#0B2545] text-[11px] font-bold font-mono shadow-2xs focus:outline-none cursor-pointer",
 							children: limitOptions.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 								value: opt,
 								children: opt
 							}, opt))
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[11px] text-[#64839E]",
+							className: "text-[11px] text-[#64839E] font-medium font-sans",
 							children: "baris"
 						})
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-[11px] text-[#64839E]",
+					className: "text-[11px] text-[#64839E] font-sans",
 					children: [
 						"Halaman ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-[#0B2545] font-bold",
+							className: "text-[#0B2545] font-bold font-mono",
 							children: safePage
 						}),
 						" dari ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-[#0B2545] font-bold",
+							className: "text-[#0B2545] font-bold font-mono",
 							children: safeTotalPages
 						}),
 						actualTotalCount !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "ml-1 text-[#64839E] font-normal",
+							className: "ml-1 text-[#64839E] font-normal font-sans",
 							children: [
 								"(",
-								actualTotalCount,
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-mono font-semibold",
+									children: actualTotalCount
+								}),
 								" data)"
 							]
 						})
 					]
 				})]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-1 sm:gap-1.5 select-none w-full md:w-auto justify-center md:justify-end overflow-x-auto py-0.5",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "button",
-						disabled: safePage <= 1 || loading,
-						onClick: handlePrev,
-						className: "p-1 sm:px-2 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]",
-						title: "Halaman Sebelumnya",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "hidden sm:inline",
-							children: "Sebelumnya"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "flex items-center gap-1",
-						children: paginationItems.map((item, idx) => {
-							if (item === "...") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "px-1.5 py-1 text-[#64839E] text-xs font-bold",
-								children: "..."
-							}, `ellipsis-${idx}`);
-							return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "button",
-								disabled: loading,
-								onClick: () => handlePageSelect(item),
-								className: `min-w-[28px] sm:min-w-[30px] h-[28px] sm:h-[30px] px-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs ${item === safePage ? "bg-[#026AA7] text-white border border-[#035388]" : "bg-white border border-[#CCDDF0] text-[#0B2545] hover:bg-[#F1F6FC]"}`,
-								children: item
-							}, `page-${item}`);
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "w-full md:w-auto flex items-center justify-center md:justify-end",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-1 sm:gap-1.5 select-none max-w-full overflow-x-auto py-0.5 justify-center",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							disabled: safePage <= 1 || loading,
+							onClick: handlePrev,
+							className: "p-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]",
+							title: "Halaman Sebelumnya",
+							"aria-label": "Halaman Sebelumnya",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "hidden sm:inline font-sans",
+								children: "Sebelumnya"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "flex items-center gap-1",
+							children: paginationItems.map((item, idx) => {
+								if (item === "...") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "px-1.5 py-1 text-[#64839E] text-xs font-bold font-mono",
+									children: "..."
+								}, `ellipsis-${idx}`);
+								return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									disabled: loading,
+									onClick: () => handlePageSelect(item),
+									className: `min-w-[28px] sm:min-w-[30px] h-[28px] sm:h-[30px] px-1.5 rounded-lg text-xs font-bold font-mono transition flex items-center justify-center cursor-pointer shadow-2xs ${item === safePage ? "bg-[#026AA7] text-white border border-[#035388]" : "bg-white border border-[#CCDDF0] text-[#0B2545] hover:bg-[#F1F6FC]"}`,
+									children: item
+								}, `page-${item}`);
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							disabled: safePage >= safeTotalPages || loading,
+							onClick: handleNext,
+							className: "p-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]",
+							title: "Halaman Berikutnya",
+							"aria-label": "Halaman Berikutnya",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "hidden sm:inline font-sans",
+								children: "Berikutnya"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5" })]
 						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "button",
-						disabled: safePage >= safeTotalPages || loading,
-						onClick: handleNext,
-						className: "p-1 sm:px-2 sm:py-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#0B2545] disabled:opacity-35 disabled:cursor-not-allowed transition font-semibold flex items-center gap-0.5 shadow-2xs cursor-pointer text-[11px]",
-						title: "Halaman Berikutnya",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "hidden sm:inline",
-							children: "Berikutnya"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5" })]
-					})
-				]
+					]
+				})
 			})]
 		})]
 	});
@@ -35982,39 +35990,41 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between px-3 py-2.5 bg-[#F1F6FC] border-t border-[#CCDDF0] text-xs font-mono",
+				className: "flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2.5 px-3 py-2.5 bg-[#F1F6FC] border-t border-[#CCDDF0] text-xs font-sans text-center sm:text-left",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 					className: "text-[#64839E]",
 					children: [
 						"Total ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-[#0B2545]",
+							className: "text-[#0B2545] font-mono",
 							children: total_records
 						}),
 						" data (Halaman",
 						" ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-[#0B2545]",
+							className: "text-[#0B2545] font-mono",
 							children: page
 						}),
 						" dari ",
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-							className: "text-[#0B2545]",
+							className: "text-[#0B2545] font-mono",
 							children: total_pages
 						}),
 						")"
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-1",
+					className: "flex items-center gap-1 justify-center",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => onPageChange(page - 1),
 						disabled: page <= 1,
-						className: "p-1 rounded border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer",
+						className: "p-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer shadow-2xs",
+						title: "Halaman Sebelumnya",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-4 h-4 text-[#0B2545]" })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => onPageChange(page + 1),
 						disabled: page >= total_pages,
-						className: "p-1 rounded border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer",
+						className: "p-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer shadow-2xs",
+						title: "Halaman Berikutnya",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4 text-[#0B2545]" })
 					})]
 				})]
