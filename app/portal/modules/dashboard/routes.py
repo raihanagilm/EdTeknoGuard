@@ -31,12 +31,31 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_portal_db)
     
     # Format nama bulan Indonesia (misal: "Oktober 2026")
     from app.core.timezone import get_now_wib
+    from app.db.models import AlertLog
     now_wib = get_now_wib()
     bulan_indo = [
         "Januari", "Februari", "Maret", "April", "Mei", "Juni",
         "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ]
     periode_teks = f"{bulan_indo[now_wib.month - 1]} {now_wib.year}"
+
+    # Cari pengingat tagihan terbaru yang dikirim admin NOC
+    c_id = pel.id_pelanggan if pel else cust.get("id_pelanggan")
+    latest_billing_alert = None
+    if c_id:
+        latest_billing_alert = db.query(AlertLog).filter(
+            AlertLog.id_pelanggan == c_id,
+            AlertLog.tipe_alert == "TAGIHAN_REMINDER"
+        ).order_by(AlertLog.waktu_kirim.desc()).first()
+
+    billing_reminder = None
+    if latest_billing_alert:
+        billing_reminder = {
+            "id": f"billing-alert-{latest_billing_alert.id_alert}",
+            "pesan": latest_billing_alert.pesan,
+            "waktu": latest_billing_alert.waktu_kirim.strftime("%d/%m/%Y %H:%M"),
+            "timestamp_iso": latest_billing_alert.waktu_kirim.isoformat()
+        }
 
     return {
         "ok": True,
@@ -52,6 +71,10 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_portal_db)
             "is_active": pel.is_active if pel else True,
             "status_pembayaran": status_bayar,
             "periode_tagihan": periode_teks,
+            "total_tagihan": float(pel.total_tagihan or 0.0) if (pel and getattr(pel, "total_tagihan", None)) else 0.0,
+            "is_overdue": bool(getattr(pel, "is_overdue", False)) if pel else False,
+            "nomor_va": pel.nomor_va if (pel and getattr(pel, "nomor_va", None)) else "-",
+            "billing_reminder": billing_reminder,
             "status_verifikasi": pel.status_verifikasi if (pel and pel.status_verifikasi) else cust.get("status_verifikasi", ""),
             "foto_profil": pel.foto_profil if (pel and pel.foto_profil) else "",
             "is_connected_to_home_wifi": is_home_wifi,

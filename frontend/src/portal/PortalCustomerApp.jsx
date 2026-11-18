@@ -243,6 +243,22 @@ export function PortalCustomerApp() {
           try {
             localStorage.setItem(alertedTicketStorageKey, JSON.stringify(lastTicketStatusMap));
           } catch (_) {}
+
+          // 3. Notifikasi Native Pengingat Tagihan dari Admin NOC
+          const billingAlert = pel.billing_reminder;
+          if (billingAlert && billingAlert.id) {
+            const alertedBillingKey = `mytekno_alerted_billing_${billingAlert.id}`;
+            if (!sessionStorage.getItem(alertedBillingKey)) {
+              sessionStorage.setItem(alertedBillingKey, '1');
+              try {
+                window.AndroidBridge.showNativeNotification(
+                  'Pengingat Tagihan Internet',
+                  billingAlert.pesan || 'Tagihan internet bulanan Anda telah terbit. Silakan lakukan pembayaran agar layanan tetap aktif.',
+                  false
+                );
+              } catch (_) {}
+            }
+          }
         }
       })
       .catch(() => {

@@ -264,4 +264,27 @@ export class AuthService {
   }
 }
 
+export class BillingService {
+  static async getOverview({ kantor, q, status, page = 1, limit = 15 } = {}) {
+    const params = new URLSearchParams();
+    if (kantor && kantor !== 'all') params.append('kantor', kantor);
+    if (q) params.append('q', q);
+    if (status && status !== 'ALL') params.append('status', status);
+    params.append('page', page);
+    params.append('limit', limit);
+    const res = await new ApiService().get(`/api/pembayaran?${params.toString()}`);
+    return res.data || {};
+  }
+
+  static async syncSingle(idPelanggan) {
+    const res = await new ApiService().post(`/api/pembayaran/sync-single/${idPelanggan}`);
+    return res.data || {};
+  }
+
+  static async sendReminders(payload) {
+    const res = await new ApiService().post('/api/pembayaran/kirim-pengingat', payload);
+    return res.data || {};
+  }
+}
+
 export const api = new ApiService();

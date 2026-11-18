@@ -15,6 +15,7 @@ from app.modules.settings.routes import router as settings_router
 from app.modules.activity_logs.routes import router as activity_logs_router
 from app.modules.users.routes import router as users_router
 from app.modules.mikrotik.routes import router as mikrotik_router
+from app.modules.billing.routes import router as billing_router
 
 
 def register_api_routes(app: FastAPI):
@@ -31,3 +32,4 @@ def register_api_routes(app: FastAPI):
     app.include_router(activity_logs_router)
     app.include_router(users_router)
     app.include_router(mikrotik_router)
+    app.include_router(billing_router)

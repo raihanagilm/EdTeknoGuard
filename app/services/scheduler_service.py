@@ -86,6 +86,15 @@ class ONTSchedulerService:
             replace_existing=True
         )
 
+        # Job Sinkronisasi Tagihan Bertahap (Dicicil tiap 1 menit secara aman)
+        self.scheduler.add_job(
+            self.billing_throttled_sync_job_wrapper,
+            "interval",
+            minutes=1,
+            id="billing_throttled_sync",
+            replace_existing=True
+        )
+
         # Job Pengingat Tagihan Harian Tiap Jam 10:00 WIB
         self.scheduler.add_job(
             self.daily_billing_reminder_job_wrapper,
@@ -505,6 +514,14 @@ class ONTSchedulerService:
                     logger.debug(f"[BILLING_REMINDER] Error periksa tagihan kantor {k.nama}: {e}")
         finally:
             m_db.close()
+
+    def billing_throttled_sync_job_wrapper(self):
+        """Wrapper sinkronisasi bertahap snapshot tagihan Network Bill tanpa melampaui rate limit"""
+        try:
+            from app.modules.billing.sync_worker import BillingSyncWorker
+            BillingSyncWorker.run_throttled_sync_cycle()
+        except Exception as e:
+            logger.debug(f"[BILLING_SYNC_WORKER] Error pada throttled sync cycle: {e}")
 
     def daily_maintenance_cleanup_job_wrapper(self):
         """Menjalankan pembersihan otomatis berkala: tiket selesai > 90 hari, alert logs > 7 hari, logs ont > 30 hari"""

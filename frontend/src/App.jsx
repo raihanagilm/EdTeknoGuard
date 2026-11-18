@@ -22,6 +22,7 @@ import { CustomersView } from './components/customers/CustomersView'
 import { OpticalLogsView } from './components/optical_logs/OpticalLogsView'
 import { TicketsView } from './components/tickets/TicketsView'
 import { QuotaView } from './components/quota/QuotaView'
+import { BillingView } from './components/billing/BillingView'
 import { ActivityLogsView } from './components/activity_logs/ActivityLogsView'
 import { UsersView } from './components/users/UsersView'
 import { BranchOfficesView } from './components/offices/BranchOfficesView'
@@ -53,6 +54,7 @@ function getTabFromPath(path) {
   if (clean === 'logs' || clean === 'riwayat') return 'riwayat'
   if (clean === 'kuota' || clean === 'admin/kuota') return 'kuota'
   if (clean === 'pelanggan') return 'pelanggan'
+  if (clean === 'pembayaran' || clean === 'tagihan' || clean === 'billing') return 'pembayaran'
   if (clean === 'tiket' || clean === 'admin/tiket') return 'tiket'
   if (clean === 'log' || clean === 'activity-logs') return 'log'
   if (clean === 'manajemen-kantor') return 'manajemen-kantor'
@@ -71,6 +73,7 @@ function getPathFromTab(tab) {
     case 'riwayat': return '/riwayat'
     case 'kuota': return '/kuota'
     case 'pelanggan': return '/pelanggan'
+    case 'pembayaran': return '/pembayaran'
     case 'tiket': return '/tiket'
     case 'log': return '/log'
     case 'manajemen-kantor': return '/manajemen-kantor'
@@ -902,7 +905,7 @@ export default function App() {
     return null
   }
 
-  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'tiket', 'log', 'manajemen-kantor', 'pengguna', 'kantor', 'mikrotik', 'pengaturan']
+  const validModules = ['beranda', 'riwayat', 'kuota', 'pelanggan', 'pembayaran', 'tiket', 'log', 'manajemen-kantor', 'pengguna', 'kantor', 'mikrotik', 'pengaturan']
   if (!validModules.includes(activeTab)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#ecfeff] via-[#f0f9ff] to-[#e0f2fe] flex flex-col justify-between p-4 sm:p-6 text-slate-900 font-sans">
@@ -1028,6 +1031,13 @@ export default function App() {
               onClearInitialSearch={() => setCustomerSearchQuery('')}
               initialStatus={customerStatusFilter}
               onClearInitialStatus={() => setCustomerStatusFilter('ALL')}
+            />
+          )}
+          {activeTab === 'pembayaran' && (
+            <BillingView
+              activeOffice={activeOffice}
+              currentUser={currentUser}
+              onNavigateCustomer={handleNavigateCustomer}
             />
           )}
           {activeTab === 'tiket' && (

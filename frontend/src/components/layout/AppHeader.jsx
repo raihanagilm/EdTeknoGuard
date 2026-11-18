@@ -34,6 +34,7 @@ export function AppHeader({
     riwayat: 'Riwayat Redaman',
     kuota: 'Pemantauan Kuota',
     pelanggan: 'Data Pelanggan',
+    pembayaran: 'Status Tagihan & Bayar',
     tiket: 'Tiket Keluhan',
     log: 'Log Aktivitas',
     'manajemen-kantor': 'Manajemen Kantor & Akun',

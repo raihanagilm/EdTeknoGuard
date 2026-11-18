@@ -172,6 +172,7 @@
     --color-gray-700: oklch(37.3% .034 259.733);
     --color-gray-800: oklch(27.8% .033 256.848);
     --color-gray-900: oklch(21% .034 264.665);
+    --color-black: #000;
     --color-white: #fff;
     --spacing: .25rem;
     --container-xs: 20rem;
@@ -1200,12 +1201,20 @@
     height: 100%;
   }
 
+  .max-h-56 {
+    max-height: calc(var(--spacing) * 56);
+  }
+
   .max-h-\[80vh\] {
     max-height: 80vh;
   }
 
   .max-h-\[86px\] {
     max-height: 86px;
+  }
+
+  .max-h-\[90vh\] {
+    max-height: 90vh;
   }
 
   .max-h-\[92vh\] {
@@ -2553,6 +2562,16 @@
     }
   }
 
+  .bg-black\/60 {
+    background-color: #0009;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-black\/60 {
+      background-color: color-mix(in oklab, var(--color-black) 60%, transparent);
+    }
+  }
+
   .bg-blue-50 {
     background-color: var(--color-blue-50);
   }
@@ -3357,6 +3376,10 @@
     padding: calc(var(--spacing) * 8);
   }
 
+  .p-12 {
+    padding: calc(var(--spacing) * 12);
+  }
+
   .px-0 {
     padding-inline: 0;
   }
@@ -3914,6 +3937,10 @@
 
   .text-emerald-800 {
     color: var(--color-emerald-800);
+  }
+
+  .text-emerald-900 {
+    color: var(--color-emerald-900);
   }
 
   .text-emerald-950 {
@@ -4688,8 +4715,16 @@
       background-color: #e8f1fa;
     }
 
+    .hover\:bg-\[\#EAF2FB\]:hover {
+      background-color: #eaf2fb;
+    }
+
     .hover\:bg-\[\#F1F6FC\]:hover {
       background-color: #f1f6fc;
+    }
+
+    .hover\:bg-\[\#F8FAFC\]:hover {
+      background-color: #f8fafc;
     }
 
     .hover\:bg-amber-200:hover {
@@ -4908,6 +4943,16 @@
       }
     }
 
+    .hover\:bg-slate-200\/60:hover {
+      background-color: #e2e8f099;
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-slate-200\/60:hover {
+        background-color: color-mix(in oklab, var(--color-slate-200) 60%, transparent);
+      }
+    }
+
     .hover\:bg-slate-800:hover {
       background-color: var(--color-slate-800);
     }
@@ -4962,6 +5007,10 @@
 
     .hover\:text-\[\#026AA7\]:hover {
       color: #026aa7;
+    }
+
+    .hover\:text-\[\#035388\]:hover {
+      color: #035388;
     }
 
     .hover\:text-blue-600:hover {

@@ -27,6 +27,20 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Added
+- **Modul Pemantauan Tagihan & Pembayaran Pelanggan Terpusat NOC ([billing/](app/modules/billing/), [routes.py](app/modules/billing/routes.py), [BillingView.jsx](frontend/src/components/billing/BillingView.jsx))**:
+  - **Menu Baru Status Tagihan & Bayar (`/pembayaran`)**: Menambahkan menu baru di sidebar admin NOC (`Layanan & Pelanggan`) dan shortcut dashboard untuk memantau status lunas, belum bayar, overdue, dan total tunggakan seluruh pelanggan per kantor cabang secara kolektif tanpa perlu memeriksa satu per satu.
+  - **Arsitektur Background Throttled Sync (Sinkronisasi Dicicil Otomatis)**: Menghindari limitasi Network Bill API (120 req/menit) dengan mekanisme cicilan otomatis bertahap pada background scheduler (`BillingSyncWorker.run_throttled_sync_cycle`) tiap 1 menit. Mengambil 4 pelanggan per kantor per menit secara bergantian dengan jeda aman, menyimpan snapshot ke tabel `pelanggan`, sehingga antarmuka admin dapat memuat ratusan pelanggan (misal: 579 pelanggan Karanggede) secara instan (< 0.5s) tanpa risiko HTTP 429.
+  - **Resolusi Pemetaan ID Pelanggan Cerdas**: Memetakan ID numerik maupun kode lokal pelanggan (seperti `BMS-0001` atau nomor WA) ke `network_bill_id` dengan cache TTL 15 menit agar menghemat pemanggilan API Network Bill.
+  - **Pengiriman Pengingat Tagihan Massal (Dual-Channel FCM & WhatsApp)**:
+    - Push Notifikasi Native ke aplikasi MyTekno bagi pelanggan yang memiliki token FCM aktif.
+    - Generator tautan resmi WhatsApp personal (`https://wa.me/...`) yang memuat draf sapaan sopan, rincian periode, total tagihan berformat rupiah, tanggal jatuh tempo, dan nomor Virtual Account pelanggan.
+  - **Antarmuka Pengguna Berstandar Operasional NOC (Design System Pro & Anti-Slop)**:
+    - `BillingKPISection.jsx`: Kartu metrik bento (Total Tunggakan, Belum Lunas, Lewat Jatuh Tempo, Sudah Lunas) yang interaktif untuk memfilter tabel secara langsung.
+    - `BillingFilterBar.jsx`: Pencarian instan (ID, Nama, No. HP, VA), tab filter status, dan tombol aksi pengingat massal.
+    - `BillingTable.jsx`: Tabel desktop responsif dan card stack mobile (< 768px) dengan indikator SVG semantik, tombol salin nomor VA cepat, serta tombol sinkronisasi live on-demand per pelanggan.
+    - `BillingMessageModal.jsx`: Modal kustomisasi pesan pengingat tagihan dan daftar tautan WhatsApp siap kirim.
+
+### Added
 - **Pembaruan Integrasi Network Bill API v1 — Riwayat Pembayaran & Panduan VA ([network_bill_service.py](app/services/network_bill_service.py), [service.py](app/portal/modules/payment/service.py), [PaymentKanalBank.jsx](frontend/src/portal/components/payment/PaymentKanalBank.jsx), [PortalPaymentTab.jsx](frontend/src/portal/components/payment/PortalPaymentTab.jsx))**:
   - Mengimplementasikan pemanggilan endpoint baru `GET /pops/{pop}/customers/{id}/payments` yang mengurutkan riwayat berdasarkan tanggal uang masuk (`date`) terbaru, dengan fallback mulus ke `/invoices?status=paid`.
   - Merapikan struktur data pembayaran (`shape_payment`) lengkap dengan rincian invoice, metode pembayaran, bank account, serta saldo titipan (`credit_used` dan `credit_added`).

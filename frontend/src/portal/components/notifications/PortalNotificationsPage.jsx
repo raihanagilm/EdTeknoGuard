@@ -189,11 +189,30 @@ export function PortalNotificationsPage({
   const notificationList = useMemo(() => {
     const items = [];
 
+    // 0. Notifikasi Pesan Pengingat Resmi dari Admin NOC
+    if (pel.billing_reminder) {
+      items.push({
+        id: pel.billing_reminder.id,
+        category: 'BILLING',
+        title: 'Pengingat Tagihan Internet (NOC)',
+        desc: pel.billing_reminder.pesan,
+        timestamp: pel.billing_reminder.waktu,
+        actionText: 'Bayar Sekarang',
+        actionTab: 'pembayaran',
+        actionSubTab: 'tagihan',
+        statusText: pel.status_pembayaran || 'BELUM BAYAR',
+        statusType: 'danger'
+      });
+    }
+
     // 1. Notifikasi Pengingat Tagihan Harian (Setiap Hari Pukul 10:00 WIB sampai lunas)
-    if (isBelumBayar) {
-      const hargaFormatted = pel.harga_paket
-        ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(pel.harga_paket)
-        : 'Rp -';
+    const hasUnpaidBill = isBelumBayar || (pel.total_tagihan && pel.total_tagihan > 0) || pel.is_overdue;
+    if (hasUnpaidBill && !pel.billing_reminder) {
+      const hargaFormatted = pel.total_tagihan
+        ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(pel.total_tagihan)
+        : (pel.harga_paket
+          ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(pel.harga_paket)
+          : 'Rp -');
 
       // Tanggal hari ini format YYYY-MM-DD
       const now = new Date();
@@ -214,7 +233,7 @@ export function PortalNotificationsPage({
         statusText: 'BELUM BAYAR',
         statusType: 'danger'
       });
-    } else {
+    } else if (!pel.billing_reminder) {
       items.push({
         id: `billing-paid-${pel.periode_tagihan || 'current'}`,
         category: 'BILLING',

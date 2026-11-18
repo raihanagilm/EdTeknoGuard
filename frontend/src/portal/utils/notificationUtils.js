@@ -8,14 +8,19 @@ export function getActiveNotificationList(customer, tickets = [], payments = [])
   const isBelumBayar = pel.status_pembayaran === 'BELUM_BAYAR';
   const items = [];
 
-  // 1. Tagihan
-  if (isBelumBayar) {
+  // 0. Pengingat Tagihan dari Admin NOC
+  if (pel.billing_reminder && pel.billing_reminder.id) {
+    items.push({ id: pel.billing_reminder.id });
+  }
+
+  // 1. Tagihan Rutin
+  if (isBelumBayar || (pel.total_tagihan && pel.total_tagihan > 0) || pel.is_overdue) {
     const now = new Date();
     const todayDateStr = now.toISOString().slice(0, 10);
     items.push({
       id: `billing-unpaid-${pel.id_pelanggan || 'cust'}-${todayDateStr}`
     });
-  } else {
+  } else if (!pel.billing_reminder) {
     items.push({
       id: `billing-paid-${pel.periode_tagihan || 'current'}`
     });

@@ -3,6 +3,7 @@ import {
   Users,
   History,
   Activity,
+  CreditCard,
   Ticket,
   ScrollText,
   Building2,
@@ -42,6 +43,13 @@ export function DashboardQuickShortcuts({
       icon: Activity,
       show: true,
       onClick: () => onNavigate('kuota')
+    },
+    {
+      id: 'pembayaran',
+      label: 'Tagihan',
+      icon: CreditCard,
+      show: !isTeknisi,
+      onClick: () => onNavigate('pembayaran')
     },
     {
       id: 'tiket',

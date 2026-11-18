@@ -91,11 +91,28 @@ class PaymentService:
         if pop_slug == "cabang":
             pop_slug = "slawi"
 
-        raw_id = str(getattr(pelanggan, "id_pelanggan", "") or "").strip()
+        nb_id = str(getattr(pelanggan, "network_bill_id", "") or "").strip()
+        if pop_slug and nb_id and nb_id.isdigit():
+            return pop_slug, nb_id
 
-        if not pop_slug or not raw_id.isdigit():
-            return None
-        return pop_slug, raw_id
+        raw_id = str(getattr(pelanggan, "id_pelanggan", "") or "").strip()
+        if pop_slug and raw_id.isdigit():
+            return pop_slug, raw_id
+
+        # Coba auto-resolve dari session database jika instance SQLAlchemy terpetakan
+        try:
+            if pop_slug and hasattr(pelanggan, "_sa_instance_state"):
+                from sqlalchemy.orm import object_session
+                sess = object_session(pelanggan)
+                if sess:
+                    from app.modules.billing.sync_worker import BillingSyncWorker
+                    matched = BillingSyncWorker.resolve_nb_id(sess, pelanggan, pop_slug)
+                    if matched and str(matched).isdigit():
+                        return pop_slug, str(matched)
+        except Exception:
+            pass
+
+        return None
 
     # ── Pembacaan mentah, ter-dedupe ────────────────────────────────────
 

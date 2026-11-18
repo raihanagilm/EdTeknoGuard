@@ -4,6 +4,7 @@ import {
   History,
   Activity,
   Users,
+  CreditCard,
   Ticket,
   ScrollText,
   Building2,
@@ -37,6 +38,7 @@ export function Sidebar({
       title: 'Layanan & Pelanggan',
       items: [
         { id: 'pelanggan', label: 'Data Pelanggan', icon: Users, visible: true },
+        { id: 'pembayaran', label: 'Status Tagihan & Bayar', icon: CreditCard, visible: !isTeknisi },
         { id: 'tiket', label: 'Tiket Keluhan', icon: Ticket, visible: true, badge: unreadTickets > 0 ? unreadTickets : null }
       ]
     },
