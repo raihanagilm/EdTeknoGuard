@@ -26,6 +26,12 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ## [Unreleased]
 
+### Fixed
+- **Sinkronisasi Notifikasi Pengingat Tagihan & Native Android Bridge di MyTekno ([PortalCustomerApp.jsx](frontend/src/portal/PortalCustomerApp.jsx), [PortalNotificationsPage.jsx](frontend/src/portal/components/notifications/PortalNotificationsPage.jsx), [routes.py](app/portal/modules/auth/routes.py))**:
+  - **Penyimpanan AlertLog Pengingat Tagihan**: Pengiriman pengingat tagihan dari Admin NOC kini otomatis mencatat entri ke tabel `alert_logs` (`tipe_alert="TAGIHAN_REMINDER"`) per pelanggan terpilih, sehingga pesan resmi tersimpan permanen di basis data.
+  - **Penyatuan State Pelanggan & Billing di Portal**: Memperbarui rute `/portal/api/auth/me` agar menyertakan `billing_reminder`, `status_pembayaran`, `total_tagihan`, `is_overdue`, dan `nomor_va`, serta menyatukan state `customer` dan `dashboardData.customer` (`{ ...customer, ...dashboardData.customer }`) di `PortalCustomerApp.jsx` dan `PortalNotificationsPage.jsx` sehingga pesan pengingat langsung muncul di Pusat Notifikasi web.
+  - **Pemicuan Notifikasi Native Android**: Menghubungkan pembacaan pengingat tagihan ke `window.AndroidBridge.showNativeNotification('Pengingat Tagihan Internet', pesan, false)` sehingga notifikasi status bar native Android langsung muncul saat pengguna membuka MyTekno.
+
 ### Added
 - **Modul Pemantauan Tagihan & Pembayaran Pelanggan Terpusat NOC ([billing/](app/modules/billing/), [routes.py](app/modules/billing/routes.py), [BillingView.jsx](frontend/src/components/billing/BillingView.jsx))**:
   - **Menu Baru Status Tagihan & Bayar (`/pembayaran`)**: Menambahkan menu baru di sidebar admin NOC (`Layanan & Pelanggan`) dan shortcut dashboard untuk memantau status lunas, belum bayar, overdue, dan total tunggakan seluruh pelanggan per kantor cabang secara kolektif tanpa perlu memeriksa satu per satu.

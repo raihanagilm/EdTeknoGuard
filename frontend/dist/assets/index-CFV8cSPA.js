@@ -30409,8 +30409,8 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 							setSearchQuery(e.target.value);
 							setPage(1);
 						},
-						placeholder: "Cari ID, Nama, IP...",
-						className: "w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-mono text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
+						placeholder: "Cari ID, Nama, Alamat, Modem, WA, IP...",
+						className: "w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
 					})]
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -40680,7 +40680,10 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 			isMounted = false;
 		};
 	}, []);
-	const pel = customer || dashboardData?.customer || {};
+	const pel = {
+		...customer || {},
+		...dashboardData?.customer || {}
+	};
 	const isBelumBayar = pel.status_pembayaran === "BELUM_BAYAR";
 	const notificationList = (0, import_react.useMemo)(() => {
 		const items = [];
@@ -46069,14 +46072,23 @@ function PortalCustomerApp() {
 	const fetchDashboard = async () => {
 		try {
 			const res = await PortalDashboardService.getDashboard();
-			if (res.ok && res.data?.ok) setDashboardData(res.data);
+			if (res.ok && res.data?.ok) {
+				setDashboardData(res.data);
+				if (res.data.customer) setCustomer((prev) => ({
+					...prev || {},
+					...res.data.customer
+				}));
+			}
 		} catch (e) {
 			console.error(e);
 		}
 	};
 	const refreshUnreadStatus = () => {
-		const pel = customer || dashboardData?.customer;
-		if (!pel) return;
+		const pel = {
+			...customer || {},
+			...dashboardData?.customer || {}
+		};
+		if (!pel || !pel.id_pelanggan) return;
 		Promise.allSettled([PortalKendalaService.list(), PortalPembayaranService.getRiwayat(5)]).then(([ticketRes, paymentRes]) => {
 			const tickets = ticketRes.status === "fulfilled" && ticketRes.value?.ok && ticketRes.value.data?.tickets ? ticketRes.value.data.tickets : [];
 			const payments = paymentRes.status === "fulfilled" && paymentRes.value?.ok && paymentRes.value.data?.invoices ? paymentRes.value.data.invoices : [];
@@ -46142,7 +46154,9 @@ function PortalCustomerApp() {
 		isAuthenticated,
 		customer?.id_pelanggan,
 		customer?.status_pembayaran,
-		activeTab
+		customer?.billing_reminder?.id,
+		activeTab,
+		dashboardData
 	]);
 	(0, import_react.useEffect)(() => {
 		const handleNotifUpdate = () => {
@@ -46152,7 +46166,7 @@ function PortalCustomerApp() {
 		return () => {
 			window.removeEventListener("teknocust_notifications_updated", handleNotifUpdate);
 		};
-	}, [customer]);
+	}, [customer, dashboardData]);
 	(0, import_react.useEffect)(() => {
 		fetchSession();
 	}, []);

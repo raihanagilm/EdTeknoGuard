@@ -37,6 +37,25 @@ def portal_auth_me(request: Request, db: Session = Depends(get_portal_db)):
         except Exception:
             ip_display = ""
 
+    # Cari alert pengingat tagihan terbaru yang dikirim admin NOC
+    c_id = pelanggan.id_pelanggan if pelanggan else cust.get("id_pelanggan")
+    latest_billing_alert = None
+    if c_id:
+        from app.db.models import AlertLog
+        latest_billing_alert = db.query(AlertLog).filter(
+            AlertLog.id_pelanggan == c_id,
+            AlertLog.tipe_alert == "TAGIHAN_REMINDER"
+        ).order_by(AlertLog.waktu_kirim.desc()).first()
+
+    billing_reminder = None
+    if latest_billing_alert:
+        billing_reminder = {
+            "id": f"billing-alert-{latest_billing_alert.id_alert}",
+            "pesan": latest_billing_alert.pesan,
+            "waktu": latest_billing_alert.waktu_kirim.strftime("%d/%m/%Y %H:%M"),
+            "timestamp_iso": latest_billing_alert.waktu_kirim.isoformat()
+        }
+
     return {
         "authenticated": True,
         "customer": {
@@ -51,7 +70,13 @@ def portal_auth_me(request: Request, db: Session = Depends(get_portal_db)):
             "kantor": pelanggan.kantor if (pelanggan and pelanggan.kantor) else cust.get("kantor", ""),
             "pop": pelanggan.pop if (pelanggan and pelanggan.pop) else "",
             "foto_profil": pelanggan.foto_profil if (pelanggan and pelanggan.foto_profil) else "",
-            "is_connected_to_home_wifi": check_is_home_wifi(request, pelanggan)
+            "is_connected_to_home_wifi": check_is_home_wifi(request, pelanggan),
+            "status_pembayaran": pelanggan.status_pembayaran if (pelanggan and getattr(pelanggan, "status_pembayaran", None)) else "LUNAS",
+            "total_tagihan": float(pelanggan.total_tagihan or 0.0) if (pelanggan and getattr(pelanggan, "total_tagihan", None)) else 0.0,
+            "is_overdue": bool(getattr(pelanggan, "is_overdue", False)) if pelanggan else False,
+            "nomor_va": pelanggan.nomor_va if (pelanggan and getattr(pelanggan, "nomor_va", None)) else "-",
+            "periode_tagihan": pelanggan.periode_tagihan if (pelanggan and getattr(pelanggan, "periode_tagihan", None)) else None,
+            "billing_reminder": billing_reminder
         }
     }
 

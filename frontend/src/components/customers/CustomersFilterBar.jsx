@@ -41,8 +41,8 @@ export function CustomersFilterBar({
                     setSearchQuery(e.target.value)
                     setPage(1)
                   }}
-                  placeholder="Cari ID, Nama, IP..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-mono text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
+                  placeholder="Cari ID, Nama, Alamat, Modem, WA, IP..."
+                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
                 />
               </div>
             </div>

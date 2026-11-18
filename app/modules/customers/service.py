@@ -152,19 +152,29 @@ class CustomerService:
             .filter(Pelanggan.is_active == True)
         )
 
-        if q:
-            search_pattern = f"%{q.strip()}%"
-            query = query.filter(
-                or_(
-                    Pelanggan.nama.ilike(search_pattern),
-                    Pelanggan.id_pelanggan.ilike(search_pattern),
-                    Pelanggan.alamat.ilike(search_pattern),
-                    PerangkatONT.ip_router.ilike(search_pattern),
-                    PerangkatONT.ip_ont.ilike(search_pattern),
-                    PerangkatONT.mac_address.ilike(search_pattern),
-                    PerangkatONT.nama_wifi.ilike(search_pattern)
-                )
-            )
+        if q and q.strip():
+            clean_q = q.strip()
+            search_pattern = f"%{clean_q}%"
+            conditions = [
+                Pelanggan.nama.ilike(search_pattern),
+                Pelanggan.id_pelanggan.ilike(search_pattern),
+                Pelanggan.alamat.ilike(search_pattern),
+                Pelanggan.no_hp.ilike(search_pattern),
+                PerangkatONT.jenis_modem.ilike(search_pattern),
+                PerangkatONT.ip_router.ilike(search_pattern),
+                PerangkatONT.ip_ont.ilike(search_pattern),
+                PerangkatONT.mac_address.ilike(search_pattern),
+                PerangkatONT.nama_wifi.ilike(search_pattern)
+            ]
+            # Normalisasi pencarian nomor WA/HP (08xxx <-> 628xxx)
+            digits_only = re.sub(r'\D', '', clean_q)
+            if len(digits_only) >= 4:
+                conditions.append(Pelanggan.no_hp.ilike(f"%{digits_only}%"))
+                if digits_only.startswith('08'):
+                    conditions.append(Pelanggan.no_hp.ilike(f"%62{digits_only[1:]}%"))
+                elif digits_only.startswith('628'):
+                    conditions.append(Pelanggan.no_hp.ilike(f"%0{digits_only[2:]}%"))
+            query = query.filter(or_(*conditions))
 
         if pop and pop != "Semua POP" and pop != "ALL":
             query = query.filter(Pelanggan.pop == pop)

@@ -157,6 +157,9 @@ export function PortalCustomerApp() {
       const res = await PortalDashboardService.getDashboard();
       if (res.ok && res.data?.ok) {
         setDashboardData(res.data);
+        if (res.data.customer) {
+          setCustomer((prev) => ({ ...(prev || {}), ...res.data.customer }));
+        }
       }
     } catch (e) {
       console.error(e);
@@ -164,8 +167,8 @@ export function PortalCustomerApp() {
   };
 
   const refreshUnreadStatus = () => {
-    const pel = customer || dashboardData?.customer;
-    if (!pel) return;
+    const pel = { ...(customer || {}), ...(dashboardData?.customer || {}) };
+    if (!pel || !pel.id_pelanggan) return;
     Promise.allSettled([
       PortalKendalaService.list(),
       PortalPembayaranService.getRiwayat(5)
@@ -271,7 +274,7 @@ export function PortalCustomerApp() {
     if (isAuthenticated) {
       refreshUnreadStatus();
     }
-  }, [isAuthenticated, customer?.id_pelanggan, customer?.status_pembayaran, activeTab]);
+  }, [isAuthenticated, customer?.id_pelanggan, customer?.status_pembayaran, customer?.billing_reminder?.id, activeTab, dashboardData]);
 
   // Listener sinkronisasi perubahan status notifikasi (read / delete)
   useEffect(() => {
@@ -282,7 +285,7 @@ export function PortalCustomerApp() {
     return () => {
       window.removeEventListener('teknocust_notifications_updated', handleNotifUpdate);
     };
-  }, [customer]);
+  }, [customer, dashboardData]);
 
   useEffect(() => {
     fetchSession();

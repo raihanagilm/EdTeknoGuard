@@ -182,7 +182,7 @@ export function PortalNotificationsPage({
     };
   }, []);
 
-  const pel = customer || dashboardData?.customer || {};
+  const pel = { ...(customer || {}), ...(dashboardData?.customer || {}) };
   const isBelumBayar = pel.status_pembayaran === 'BELUM_BAYAR';
 
   // Bangun daftar notifikasi dengan skema monokromatik biru & slate konsisten

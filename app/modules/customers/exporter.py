@@ -1,6 +1,8 @@
 import io
 import csv
+import re
 from typing import Optional, List, Dict, Any
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -73,19 +75,28 @@ class CustomerExporter:
                 )
             )
 
-        if q:
-            search_pat = f"%{q.strip()}%"
-            q_cust = q_cust.filter(
-                or_(
-                    Pelanggan.nama.ilike(search_pat),
-                    Pelanggan.id_pelanggan.ilike(search_pat),
-                    Pelanggan.alamat.ilike(search_pat),
-                    PerangkatONT.ip_router.ilike(search_pat),
-                    PerangkatONT.ip_ont.ilike(search_pat),
-                    PerangkatONT.mac_address.ilike(search_pat),
-                    PerangkatONT.nama_wifi.ilike(search_pat)
-                )
-            )
+        if q and q.strip():
+            clean_q = q.strip()
+            search_pat = f"%{clean_q}%"
+            conditions = [
+                Pelanggan.nama.ilike(search_pat),
+                Pelanggan.id_pelanggan.ilike(search_pat),
+                Pelanggan.alamat.ilike(search_pat),
+                Pelanggan.no_hp.ilike(search_pat),
+                PerangkatONT.jenis_modem.ilike(search_pat),
+                PerangkatONT.ip_router.ilike(search_pat),
+                PerangkatONT.ip_ont.ilike(search_pat),
+                PerangkatONT.mac_address.ilike(search_pat),
+                PerangkatONT.nama_wifi.ilike(search_pat)
+            ]
+            digits_only = re.sub(r'\D', '', clean_q)
+            if len(digits_only) >= 4:
+                conditions.append(Pelanggan.no_hp.ilike(f"%{digits_only}%"))
+                if digits_only.startswith('08'):
+                    conditions.append(Pelanggan.no_hp.ilike(f"%62{digits_only[1:]}%"))
+                elif digits_only.startswith('628'):
+                    conditions.append(Pelanggan.no_hp.ilike(f"%0{digits_only[2:]}%"))
+            q_cust = q_cust.filter(or_(*conditions))
 
         customers = q_cust.order_by(Pelanggan.id.asc()).all()
 
