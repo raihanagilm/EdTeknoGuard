@@ -337,7 +337,85 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
         onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
         loading={loading}
       >
-        <table className="w-full text-left border-collapse table-auto md:table-fixed">
+        {/* Tampilan Mobile: Dense Streamline Micro-Card (Hemat Ruang & Super Ringkas) */}
+        <div className="block md:hidden p-2 sm:p-2.5 space-y-1.5">
+          {loading ? (
+            <div className="text-center py-6 text-slate-400 font-mono text-xs">
+              <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
+              <div>Memuat data pemakaian kuota...</div>
+            </div>
+          ) : filteredQuota.length === 0 ? (
+            <div className="text-center py-6 text-slate-400 font-mono text-xs">
+              Tidak ada data kuota ditemukan.
+            </div>
+          ) : (
+            paginatedQuota.map((item, idx) => {
+              const rowNo = (page - 1) * limit + idx + 1;
+              return (
+                <div
+                  key={`mobile-quota-${item.id_pelanggan}`}
+                  className="bg-white rounded-xl border border-sky-200/80 p-2.5 font-mono transition shadow-2xs hover:border-cyan-300 space-y-1.5"
+                >
+                  {/* Baris 1: Nomor, Nama Pelanggan & Pemakaian GB (kiri-kanan) */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-[11px] text-slate-400 font-bold shrink-0">#{rowNo}</span>
+                      {onNavigateCustomer && item.nama ? (
+                        <button
+                          type="button"
+                          onClick={() => onNavigateCustomer(item.nama)}
+                          className="font-sans font-bold text-xs sm:text-sm text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate"
+                          title={`Lihat detail ${item.nama} di Data Pelanggan`}
+                        >
+                          {item.nama}
+                        </button>
+                      ) : (
+                        <span className="font-sans font-bold text-xs sm:text-sm text-slate-900 truncate">{item.nama}</span>
+                      )}
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      <span className="font-black text-xs sm:text-sm text-slate-900">
+                        {item.terpakai_gb != null ? item.terpakai_gb.toFixed(1) : '0.0'} <span className="text-[10px] text-slate-500 font-normal">GB</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Baris 2: ID • Paket • IP (kiri) & Mini Progress Bar (kanan) */}
+                  <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                    <div className="flex items-center gap-1.5 min-w-0 truncate">
+                      <span className="font-bold text-cyan-900 shrink-0">{item.id_pelanggan}</span>
+                      <span className="text-slate-300 shrink-0">•</span>
+                      <span className="text-slate-700 font-semibold shrink-0">{item.paket || '-'}</span>
+                      <span className="text-slate-300 shrink-0">•</span>
+                      <span className="text-slate-500 font-mono truncate">{item.ip_ont || item.ip_router || '-'}</span>
+                    </div>
+
+                    <div className="shrink-0 w-16 sm:w-20 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${
+                          item.terpakai_gb > 150 ? 'bg-rose-500' : item.terpakai_gb > 100 ? 'bg-amber-500' : 'bg-cyan-500'
+                        }`}
+                        style={{ width: `${Math.min(100, ((item.terpakai_gb || 0) / 200) * 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Baris 3 (Kondisional): Alamat jika tersedia */}
+                  {item.alamat && (
+                    <div className="text-[10px] text-slate-400 font-sans truncate pt-0.5">
+                      {item.alamat}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Tampilan Desktop: Tabel Standar */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse table-auto md:table-fixed">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3 w-12 text-center">No</th>
@@ -455,6 +533,7 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
             )}
           </tbody>
         </table>
+        </div>
       </DataTableContainer>
     </div>
   );

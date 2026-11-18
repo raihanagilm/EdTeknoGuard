@@ -42,5 +42,10 @@ frontend/node_modules/
 !frontend/dist/
 !frontend/dist/**
 
+# Temporary files & Scan Checkpoints
+.tmp/
+app/.tmp/
+*.tmp
+
 # Documentation & Internal System Guides (Sensitive IP & Infrastructure Specs)
 docs/

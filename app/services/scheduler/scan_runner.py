@@ -26,21 +26,64 @@ class ScanRunner:
 
     @classmethod
     def check_office_connectivity(cls, db: Session, kantor: Optional[str] = None) -> bool:
-        """Memeriksa apakah server memiliki rute ke subnet gateway kantor"""
-        sample = db.query(Pelanggan).join(PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)\
-            .filter(Pelanggan.is_active == True, PerangkatONT.ip_ont != None).first()
-        if not sample or not sample.perangkat.ip_ont:
-            return True
+        """
+        Gateway Anchor & Circuit Breaker:
+        Memeriksa apakah server memiliki rute jaringan ke kantor / VPN aktif.
+        1. Cek router MikroTik kantor (host & port API/Web) via socket cepat (0.4s).
+        2. Jika router belum merespons, cek sampel 2-3 IP modem aktif di kantor tersebut (0.3s).
+        Jika seluruh rute gagal, server disimpulkan sedang offline / VPN mati (Kasus A),
+        sehingga scan massal dibatalkan seketika tanpa membanjiri timeout.
+        """
+        k_code = (kantor or "cabang").lower().strip()
 
-        target_ip = sample.perangkat.ip_ont.strip()
+        # 1. Cek Router MikroTik Kantor sebagai Gateway Anchor Utama
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(2.0)
-            res = sock.connect_ex((target_ip, 80))
-            sock.close()
-            return res == 0
-        except Exception:
-            return False
+            m_db = TenantDatabaseManager.get_tenant_session(None)
+            try:
+                k_obj = m_db.query(Kantor).filter(Kantor.nama.ilike(k_code)).first()
+                if k_obj and k_obj.mikrotik_host:
+                    host = k_obj.mikrotik_host.strip()
+                    ports_to_test = [k_obj.mikrotik_port] if k_obj.mikrotik_port else [8728, 80, 8022, 8095]
+                    for p in ports_to_test:
+                        try:
+                            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            sock.settimeout(0.4)
+                            res = sock.connect_ex((host, int(p)))
+                            sock.close()
+                            if res == 0:
+                                return True
+                        except Exception:
+                            pass
+            finally:
+                m_db.close()
+        except Exception as e:
+            logger.debug(f"[CONNECTIVITY_CHECK] Error cek router anchor {k_code}: {e}")
+
+        # 2. Cek Sampel 2-3 Modem Aktif di Kantor Terkait (Fallback Anchor)
+        try:
+            samples = db.query(PerangkatONT.ip_ont).join(Pelanggan, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)\
+                .filter(Pelanggan.is_active == True, PerangkatONT.ip_ont != None, PerangkatONT.ip_ont != "").limit(3).all()
+
+            if not samples:
+                return True
+
+            for s in samples:
+                ip_target = s[0].strip() if s and s[0] else None
+                if not ip_target:
+                    continue
+                try:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.settimeout(0.3)
+                    res = sock.connect_ex((ip_target, 80))
+                    sock.close()
+                    if res == 0:
+                        return True
+                except Exception:
+                    pass
+        except Exception as e:
+            logger.debug(f"[CONNECTIVITY_CHECK] Error cek modem samples {k_code}: {e}")
+
+        return False
 
     @classmethod
     def scan_single(cls, id_pelanggan: str, db: Optional[Session] = None) -> Optional[Dict[str, Any]]:
@@ -166,6 +209,18 @@ class ScanRunner:
             try:
                 cfg = SchedulerRecoveryManager.check_office_configuration(db, kantor=k_code)
                 is_connected = cls.check_office_connectivity(db, kantor=k_code)
+                if not is_connected:
+                    state.network_connected = False
+                    state.last_scan_message = f"Jaringan kantor {k_code.upper()} / VPN tidak terhubung. Pemindaian otomatis dilewati."
+                    logger.warning(f"[-] [NETWORK_DISCONNECTED] Kantor: {k_code.upper()} - Server tidak terhubung ke jaringan kantor/VPN. Pemindaian dilewati.")
+                    return {
+                        "success": False,
+                        "status": "NETWORK_DISCONNECTED",
+                        "message": state.last_scan_message,
+                        "network_connected": False
+                    }
+                state.network_connected = True
+                state.last_scan_message = None
 
                 # Ambil daftar pelanggan yang terpantau
                 customers = db.query(Pelanggan).join(PerangkatONT, Pelanggan.id_pelanggan == PerangkatONT.id_pelanggan)\
@@ -241,19 +296,46 @@ class ScanRunner:
                 failed_history = target["failed_history"]
                 is_valid_modem = (target["status_kredensial"] == "VALID")
 
-                # FASE 1: Scraping live murni di layer jaringan HTTP/Socket (ZERO DATABASE CONNECTION)
-                scrape_res = ONTScraperService.scrape_ont(
-                    ip=ip_target,
-                    customer_user=target["user_admin"],
-                    customer_pass=target["pass_admin"],
-                    customer_name=target["nama"],
-                    default_credentials=default_creds,
-                    warn_threshold=cfg.get("warning_threshold_dbm"),
-                    crit_threshold=cfg.get("critical_threshold_dbm"),
-                    is_mass_scan=True,
-                    failed_credentials_history=failed_history,
-                    is_valid_modem=is_valid_modem
-                )
+                # Pre-flight socket probe cepat (0.4s):
+                # Jika port 80 tidak dapat dihubungi via TCP socket, modem sedang mati listrik/LOS
+                # Fail-fast seketika tanpa menahan requests HTTP timeout selama 8 detik
+                is_reachable = False
+                try:
+                    s_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    s_sock.settimeout(0.4)
+                    res_code = s_sock.connect_ex((ip_target, 80))
+                    s_sock.close()
+                    if res_code == 0:
+                        is_reachable = True
+                except Exception:
+                    pass
+
+                if not is_reachable:
+                    scrape_res = {
+                        "success": False,
+                        "error_type": "UNREACHABLE",
+                        "message": "Host tidak terjangkau (Periksa koneksi jaringan lokal/VLAN)",
+                        "status_kredensial": "VALID" if is_valid_modem else "UNTESTED",
+                        "status_koneksi": "LOS",
+                        "rx_power": None,
+                        "suhu_ont": None,
+                        "uptime": None,
+                        "latency_ms": None
+                    }
+                else:
+                    # FASE 1: Scraping live murni di layer jaringan HTTP/Socket (ZERO DATABASE CONNECTION)
+                    scrape_res = ONTScraperService.scrape_ont(
+                        ip=ip_target,
+                        customer_user=target["user_admin"],
+                        customer_pass=target["pass_admin"],
+                        customer_name=target["nama"],
+                        default_credentials=default_creds,
+                        warn_threshold=cfg.get("warning_threshold_dbm"),
+                        crit_threshold=cfg.get("critical_threshold_dbm"),
+                        is_mass_scan=True,
+                        failed_credentials_history=failed_history,
+                        is_valid_modem=is_valid_modem
+                    )
 
                 rx = scrape_res.get("rx_power")
                 status_koneksi = scrape_res.get("status_koneksi", "LOS")

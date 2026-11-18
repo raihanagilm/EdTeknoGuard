@@ -340,7 +340,108 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
         onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
         loading={loading}
       >
-        <table className="w-full text-left border-collapse table-auto">
+        {/* Tampilan Mobile: Dense Streamline Micro-Card (Hemat Ruang & Super Ringkas) */}
+        <div className="block md:hidden p-2 sm:p-2.5 space-y-1.5">
+          {loading ? (
+            <div className="text-center py-6 text-slate-400 font-mono text-xs">
+              <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
+              <div>Memuat data riwayat...</div>
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="text-center py-6 text-slate-400 font-mono text-xs">
+              Tidak ada rekaman log ditemukan.
+            </div>
+          ) : (
+            logs.map((item, idx) => {
+              const rowNo = (page - 1) * limit + idx + 1;
+              const statusVal = (item.status_koneksi || 'NORMAL').toUpperCase();
+              let badgeClass = 'text-emerald-700';
+              if (statusVal === 'WARNING') {
+                badgeClass = 'text-amber-700';
+              } else if (statusVal === 'CRITICAL' || statusVal === 'INVALID') {
+                badgeClass = 'text-rose-700';
+              } else if (statusVal === 'LOS') {
+                badgeClass = 'text-purple-700';
+              }
+
+              const hasDiagnostics = item.suhu_ont != null || item.latency_ms != null;
+
+              return (
+                <div
+                  key={`mobile-log-${idx}`}
+                  className="bg-white rounded-xl border border-sky-200/80 p-2.5 font-mono transition shadow-2xs hover:border-cyan-300 space-y-1.5"
+                >
+                  {/* Baris 1: Nama Pelanggan (kiri) & Daya Rx / LOS (kanan) */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-[11px] text-slate-400 font-bold shrink-0">#{rowNo}</span>
+                      {onNavigateCustomer && item.nama ? (
+                        <button
+                          type="button"
+                          onClick={() => onNavigateCustomer(item.nama)}
+                          className="font-sans font-bold text-xs sm:text-sm text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate"
+                          title={`Lihat detail ${item.nama} di Data Pelanggan`}
+                        >
+                          {item.nama}
+                        </button>
+                      ) : (
+                        <span className="font-sans font-bold text-xs sm:text-sm text-slate-900 truncate" title={item.nama}>
+                          {item.nama || '-'}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="text-right shrink-0 flex items-center gap-1.5">
+                      {item.rx_power != null ? (
+                        <span
+                          className={`font-black text-xs sm:text-sm ${
+                            item.rx_power <= critThreshold ? 'text-rose-600' : item.rx_power <= warnThreshold ? 'text-amber-600' : 'text-emerald-600'
+                          }`}
+                        >
+                          {Number(item.rx_power).toFixed(1)} <span className="text-[10px] font-bold">dBm</span>
+                        </span>
+                      ) : (
+                        <span className={`font-black text-xs sm:text-sm ${badgeClass}`}>
+                          {item.status_koneksi === 'LOS' ? 'LOS' : '-'}
+                        </span>
+                      )}
+                      <span className={`text-[10px] font-bold uppercase ${badgeClass}`}>
+                        {statusVal}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Baris 2: ID Pelanggan • IP Router (kiri) & Waktu Cek (kanan) */}
+                  <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                    <div className="flex items-center gap-1.5 min-w-0 truncate">
+                      <span className="font-bold text-cyan-900 shrink-0">{item.id_pelanggan}</span>
+                      <span className="text-slate-300 shrink-0">•</span>
+                      <span className="text-slate-600 truncate">{item.ip_router || item.ip_ont || item.ip || '-'}</span>
+                    </div>
+
+                    <div className="shrink-0 text-slate-400 text-[10px] flex items-center gap-1">
+                      <Clock className="w-2.5 h-2.5 text-slate-400" />
+                      <span>{item.waktu_cek || '-'}</span>
+                    </div>
+                  </div>
+
+                  {/* Baris 3 (Kondisional): Suhu & Latency hanya muncul jika ada datanya */}
+                  {hasDiagnostics && (
+                    <div className="text-[10px] text-slate-400 flex items-center gap-2 pt-0.5 border-t border-slate-50">
+                      {item.suhu_ont != null && <span>Suhu: <strong className="text-slate-600 font-mono">{item.suhu_ont}°C</strong></span>}
+                      {item.suhu_ont != null && item.latency_ms != null && <span className="text-slate-300">•</span>}
+                      {item.latency_ms != null && <span>Latency: <strong className="text-slate-600 font-mono">{item.latency_ms}ms</strong></span>}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Tampilan Desktop: Tabel Standar */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse table-auto">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3 w-12 text-center whitespace-nowrap">No</th>
@@ -500,6 +601,7 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
             )}
           </tbody>
         </table>
+        </div>
       </DataTableContainer>
     </div>
   );

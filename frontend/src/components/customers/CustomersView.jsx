@@ -316,8 +316,8 @@ export function CustomersView({
   }
 
   // Fetch Customers From FastAPI Backend (/api/customers)
-  const fetchCustomers = async () => {
-    setLoading(true)
+  const fetchCustomers = async (silent = false) => {
+    if (!silent) setLoading(true)
     try {
       let url = `/api/customers?page=${page}&limit=${limit}&sort_by=${sortField}&sort_dir=${sortDir}`
       if (activeOffice && activeOffice !== 'all') url += `&kantor=${encodeURIComponent(activeOffice)}`
@@ -343,7 +343,7 @@ export function CustomersView({
     } catch (err) {
       console.warn('Backend offline, using simulated customer state:', err)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 

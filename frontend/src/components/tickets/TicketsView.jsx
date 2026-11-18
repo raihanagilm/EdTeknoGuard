@@ -298,7 +298,161 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
         onNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
         loading={loading}
       >
-        <table className="w-full text-left border-collapse table-auto">
+        {/* Tampilan Mobile: Dense Streamline Micro-Card (Hemat Ruang & Bebas Truncate) */}
+        <div className="block md:hidden p-2 sm:p-2.5 space-y-1.5">
+          {loading ? (
+            <div className="text-center py-6 text-slate-400 font-mono text-xs">
+              <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
+              <div>Memuat daftar tiket keluhan...</div>
+            </div>
+          ) : paginatedTickets.length === 0 ? (
+            <div className="text-center py-6 text-slate-400 font-mono text-xs">
+              Tidak ada tiket keluhan ditemukan.
+            </div>
+          ) : (
+            paginatedTickets.map((t, idx) => {
+              const rowNo = (page - 1) * limit + idx + 1;
+              const statusColor =
+                t.status === 'MENUNGGU'
+                  ? 'text-amber-700'
+                  : t.status === 'DICEK_ADMIN'
+                  ? 'text-purple-700'
+                  : t.status === 'DIPROSES'
+                  ? 'text-cyan-700'
+                  : 'text-emerald-700';
+
+              const cleanWa = t.no_wa ? t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62') : '';
+              const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`;
+
+              return (
+                <div
+                  key={`mobile-tkt-${t.id_tiket}`}
+                  className="bg-white rounded-xl border border-sky-200/80 p-2.5 font-mono transition shadow-2xs hover:border-cyan-300 space-y-1.5"
+                >
+                  {/* Baris 1: ID Tiket, Waktu Cek, Status Badge */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-xs min-w-0">
+                      <span className="text-slate-400 font-bold shrink-0">#{rowNo}</span>
+                      <span className="font-bold text-cyan-900 shrink-0">{t.id_tiket}</span>
+                      <span className="text-slate-300 shrink-0">•</span>
+                      <span className="text-slate-500 font-mono text-[11px] truncate flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                        <span>{t.created_at_str}</span>
+                      </span>
+                    </div>
+
+                    <span className={`text-[11px] font-bold uppercase tracking-tight shrink-0 ${statusColor}`}>
+                      {t.status}
+                    </span>
+                  </div>
+
+                  {/* Baris 2: Nama Pelanggan & Rx Saat Lapor */}
+                  <div className="flex items-center justify-between gap-2 pt-0.5">
+                    <div className="min-w-0">
+                      {onNavigateCustomer && t.nama_pelanggan ? (
+                        <button
+                          type="button"
+                          onClick={() => onNavigateCustomer(t.nama_pelanggan)}
+                          className="font-sans font-bold text-xs sm:text-sm text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate block"
+                          title={`Lihat detail ${t.nama_pelanggan} di Data Pelanggan`}
+                        >
+                          {t.nama_pelanggan}
+                        </button>
+                      ) : (
+                        <div className="font-sans font-bold text-xs sm:text-sm text-slate-900 truncate">{t.nama_pelanggan}</div>
+                      )}
+                    </div>
+
+                    <div className="shrink-0 text-right text-[11px] font-mono">
+                      <span className="text-slate-400">Rx: </span>
+                      <span className={`font-black ${t.redaman_saat_lapor <= -27 ? 'text-rose-600' : 'text-slate-700'}`}>
+                        {t.redaman_saat_lapor != null ? `${t.redaman_saat_lapor.toFixed(1)} dBm` : '-'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Baris 3: ID Pelanggan & WA (Satu baris penuh, bebas truncate) */}
+                  <div className="text-[11px] text-slate-600 font-mono flex items-center gap-1.5 flex-wrap">
+                    <span className="font-bold text-cyan-900">{t.id_pelanggan}</span>
+                    {t.no_wa && (
+                      <>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-emerald-700 font-medium font-sans flex items-center gap-1">
+                          <Phone className="w-2.5 h-2.5" />
+                          <span>{t.no_wa}</span>
+                        </span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Baris 4: Kategori chip + Cuplikan deskripsi keluhan */}
+                  <div className="text-xs font-sans text-slate-700 leading-snug pt-0.5">
+                    <span
+                      className={`inline-block text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md mr-1.5 align-middle ${
+                        t.kategori === 'RESET_PASSWORD'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      {t.kategori}
+                    </span>
+                    <span className="align-middle text-slate-600 text-[11px]">
+                      {t.deskripsi || '-'}
+                    </span>
+                  </div>
+
+                  {/* Baris 5: Action Bar Ramping (Tinggi 32px) */}
+                  <div className="pt-1.5 border-t border-slate-100 flex items-center gap-2">
+                    {t.kategori === 'RESET_PASSWORD' ? (
+                      isSuperAdminOrAdmin ? (
+                        <button
+                          type="button"
+                          onClick={() => handleSendResetPasswordWA(t)}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold shadow-xs transition cursor-pointer min-h-[32px]"
+                          title="Kirim Kata Sandi Baru langsung ke WhatsApp Pelanggan dan selesaikan tiket"
+                        >
+                          <Phone className="w-3 h-3 shrink-0" />
+                          <span>Kirim Sandi Baru (WA)</span>
+                        </button>
+                      ) : (
+                        <span className="text-xs font-semibold text-slate-500 italic py-0.5">
+                          Hanya Admin / Super Admin
+                        </span>
+                      )
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenModal(t)}
+                          className="flex-1 py-1 px-3 border border-cyan-200 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[32px] cursor-pointer"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                          <span>Kelola Status</span>
+                        </button>
+                        {cleanWa && (
+                          <a
+                            href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="py-1 px-3 border border-emerald-200 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[32px]"
+                            title="Hubungi Pelanggan via WhatsApp"
+                          >
+                            <Phone className="w-3 h-3 text-emerald-600" />
+                            <span>WA</span>
+                          </a>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Tampilan Desktop: Tabel Standar */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse table-auto">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
               <th className="py-2.5 px-3 w-12 text-center whitespace-nowrap">No</th>
@@ -561,6 +715,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
             )}
           </tbody>
         </table>
+        </div>
       </DataTableContainer>
 
       {/* Modal Kelola Status Tiket */}

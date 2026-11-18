@@ -29420,7 +29420,7 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 		className: "space-y-4",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sky-100 pb-3",
+				className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-sky-100 pb-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 					className: "text-sm font-extrabold text-slate-900",
 					children: "Daftar Kredensial Modem ONT (Multi-Fallback)"
@@ -29428,11 +29428,11 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 					className: "text-xs text-slate-500",
 					children: "Sistem mencoba kredensial ini berurutan dari atas ke bawah saat login scraper ONT pelanggan gagal."
 				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex items-center gap-2 self-start sm:self-auto",
+					className: "flex items-center gap-2 self-stretch sm:self-auto",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: addModemCredentialRow,
-						className: "px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 text-xs font-bold flex items-center gap-1.5 transition min-h-[36px] cursor-pointer",
+						className: "w-full sm:w-auto px-3.5 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 text-xs font-bold flex items-center justify-center gap-1.5 transition min-h-[36px] cursor-pointer border border-cyan-200",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tambah Baris" })]
 					})
 				})]
@@ -29445,27 +29445,43 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 					onDragOver: (e) => handleCredDragOver(e, idx),
 					onDrop: (e) => handleCredDrop(e, idx),
 					onDragEnd: handleCredDragEnd,
-					className: `p-3 rounded-xl border bg-white/90 transition flex flex-col sm:flex-row sm:items-center gap-2.5 ${dragOverCredIdx === idx ? "border-cyan-500 ring-2 ring-cyan-200 bg-cyan-50/40" : "border-sky-200/80 hover:border-cyan-300"}`,
+					className: `p-3 rounded-xl border bg-white/90 transition flex flex-col sm:flex-row sm:items-center gap-2.5 shadow-2xs ${dragOverCredIdx === idx ? "border-cyan-500 ring-2 ring-cyan-200 bg-cyan-50/40" : "border-sky-200/80 hover:border-cyan-300"}`,
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2 text-xs font-mono font-bold text-slate-400 shrink-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600",
-								children: "⠿"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "w-5 text-center",
-								children: ["#", idx + 1]
+							className: "flex items-center justify-between sm:justify-start gap-2 text-xs font-mono font-bold text-slate-400 shrink-0 pb-1.5 sm:pb-0 border-b border-sky-100 sm:border-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 text-sm",
+									children: "⠿"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+									className: "text-cyan-900 font-bold",
+									children: ["Akun #", idx + 1]
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								onClick: () => removeModemCredentialRow(idx),
+								disabled: modemCredentials.length <= 1,
+								className: `sm:hidden p-1.5 rounded-lg text-slate-400 transition ${modemCredentials.length > 1 ? "hover:bg-rose-50 hover:text-rose-600 cursor-pointer" : "opacity-30 cursor-not-allowed"}`,
+								title: "Hapus baris kredensial",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-4 h-4" })
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							className: "grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1 w-full",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block sm:hidden text-[11px] font-bold text-slate-600 mb-1 font-sans",
+								children: "Username Modem"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "text",
 								placeholder: "Username modem (misal: admin)",
 								value: cred.username,
 								onChange: (e) => updateModemCredentialRow(idx, "username", e.target.value),
 								required: true,
-								className: "rounded-lg border border-sky-200 px-3 py-1.5 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[36px]"
+								className: "w-full rounded-lg border border-sky-200 px-3 py-1.5 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[36px]"
+							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block sm:hidden text-[11px] font-bold text-slate-600 mb-1 font-sans",
+								children: "Password Modem"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "relative",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
@@ -29481,13 +29497,13 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 									className: "absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer",
 									children: showModemPasswords[idx] ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" })
 								})]
-							})]
+							})] })]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							type: "button",
 							onClick: () => removeModemCredentialRow(idx),
 							disabled: modemCredentials.length <= 1,
-							className: `p-2 rounded-lg text-slate-400 transition ${modemCredentials.length > 1 ? "hover:bg-rose-50 hover:text-rose-600 cursor-pointer" : "opacity-30 cursor-not-allowed"}`,
+							className: `hidden sm:block p-2 rounded-lg text-slate-400 transition ${modemCredentials.length > 1 ? "hover:bg-rose-50 hover:text-rose-600 cursor-pointer" : "opacity-30 cursor-not-allowed"}`,
 							title: "Hapus baris kredensial",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-4 h-4" })
 						})
@@ -29499,7 +29515,7 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "submit",
 					disabled: settingsLoading,
-					className: "px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer",
+					className: "w-full sm:w-auto px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition min-h-[42px] cursor-pointer",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Kredensial Modem" })]
 				})
 			}),
@@ -30520,7 +30536,7 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 		loading,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "block md:hidden p-2.5 sm:p-3 space-y-3",
-			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			children: loading && customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "text-center py-8 text-slate-400 font-mono text-xs",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pelanggan..." })]
 			}) : customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -30796,7 +30812,7 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 				]
 			}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
 				className: "divide-y divide-[#DAE7F5] font-mono text-xs",
-				children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+				children: loading && customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
 					colSpan: "10",
 					className: "text-center py-10 text-[#64839E] font-mono",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pelanggan..." })]
@@ -33518,8 +33534,8 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 		}
 		setPage(1);
 	};
-	const fetchCustomers = async () => {
-		setLoading(true);
+	const fetchCustomers = async (silent = false) => {
+		if (!silent) setLoading(true);
 		try {
 			let url = `/api/customers?page=${page}&limit=${limit}&sort_by=${sortField}&sort_dir=${sortDir}`;
 			if (activeOffice && activeOffice !== "all") url += `&kantor=${encodeURIComponent(activeOffice)}`;
@@ -33542,7 +33558,7 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 		} catch (err) {
 			console.warn("Backend offline, using simulated customer state:", err);
 		} finally {
-			setLoading(false);
+			if (!silent) setLoading(false);
 		}
 	};
 	(0, import_react.useEffect)(() => {
@@ -34518,7 +34534,7 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 					})]
 				}) })
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DataTableContainer, {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DataTableContainer, {
 				page,
 				totalPages,
 				totalCount,
@@ -34531,150 +34547,254 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 				onPrevPage: () => setPage((p) => Math.max(1, p - 1)),
 				onNextPage: () => setPage((p) => Math.min(totalPages, p + 1)),
 				loading,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-					className: "w-full text-left border-collapse table-auto",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-						className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 w-12 text-center whitespace-nowrap",
-								children: "No"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("waktu_cek"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[140px]",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Waktu Cek" }), sortField === "waktu_cek" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("id_pelanggan"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[150px]",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "ID Pelanggan" }), sortField === "id_pelanggan" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("nama"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[200px]",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Nama Pelanggan" }), sortField === "nama" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 whitespace-nowrap min-w-[140px]",
-								children: "IP Router ONT"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("rx_power"),
-								className: "py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[130px]",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-end gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Daya Rx (dBm)" }), sortField === "rx_power" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 text-center whitespace-nowrap min-w-[80px]",
-								children: "Suhu"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 text-center whitespace-nowrap min-w-[90px]",
-								children: "Latency"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("status_koneksi"),
-								className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[100px]",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }), sortField === "status_koneksi" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							})
-						]
-					}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
-						className: "divide-y divide-sky-100 font-mono text-xs",
-						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-							colSpan: "9",
-							className: "text-center py-10 text-slate-400 font-mono",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data riwayat..." })]
-						}) }) : logs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-							colSpan: "9",
-							className: "text-center py-10 text-slate-400 font-mono",
-							children: "Tidak ada rekaman log ditemukan."
-						}) }) : logs.map((item, idx) => {
-							const rowNo = (page - 1) * limit + idx + 1;
-							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-								className: "hover:bg-cyan-50/40 transition",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-center text-slate-500 font-bold text-xs",
-										children: rowNo
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-slate-500 font-medium text-[11px] whitespace-nowrap",
-										children: item.waktu_cek || "-"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 font-bold text-cyan-900 whitespace-nowrap",
-										children: item.id_pelanggan
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 font-sans whitespace-nowrap",
-										children: onNavigateCustomer && item.nama ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "block md:hidden p-2 sm:p-2.5 space-y-1.5",
+					children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "text-center py-6 text-slate-400 font-mono text-xs",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data riwayat..." })]
+					}) : logs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "text-center py-6 text-slate-400 font-mono text-xs",
+						children: "Tidak ada rekaman log ditemukan."
+					}) : logs.map((item, idx) => {
+						const rowNo = (page - 1) * limit + idx + 1;
+						const statusVal = (item.status_koneksi || "NORMAL").toUpperCase();
+						let badgeClass = "text-emerald-700";
+						if (statusVal === "WARNING") badgeClass = "text-amber-700";
+						else if (statusVal === "CRITICAL" || statusVal === "INVALID") badgeClass = "text-rose-700";
+						else if (statusVal === "LOS") badgeClass = "text-purple-700";
+						const hasDiagnostics = item.suhu_ont != null || item.latency_ms != null;
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-white rounded-xl border border-sky-200/80 p-2.5 font-mono transition shadow-2xs hover:border-cyan-300 space-y-1.5",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-between gap-2",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1.5 min-w-0",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "text-[11px] text-slate-400 font-bold shrink-0",
+											children: ["#", rowNo]
+										}), onNavigateCustomer && item.nama ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 											type: "button",
 											onClick: () => onNavigateCustomer(item.nama),
-											className: "font-semibold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate max-w-[280px] inline-block align-middle",
+											className: "font-sans font-bold text-xs sm:text-sm text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate",
 											title: `Lihat detail ${item.nama} di Data Pelanggan`,
 											children: item.nama
 										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "font-semibold text-slate-900 truncate max-w-[280px] inline-block align-middle",
+											className: "font-sans font-bold text-xs sm:text-sm text-slate-900 truncate",
 											title: item.nama,
 											children: item.nama || "-"
-										})
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-slate-600 whitespace-nowrap font-mono text-xs",
-										children: item.ip_router || item.ip_ont || item.ip || "-"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-right whitespace-nowrap",
-										children: item.rx_power != null ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: `font-black ${item.rx_power <= critThreshold ? "text-rose-600" : item.rx_power <= warnThreshold ? "text-amber-600" : "text-emerald-600"}`,
-											children: [Number(item.rx_power).toFixed(1), " dBm"]
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "text-right shrink-0 flex items-center gap-1.5",
+										children: [item.rx_power != null ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: `font-black text-xs sm:text-sm ${item.rx_power <= critThreshold ? "text-rose-600" : item.rx_power <= warnThreshold ? "text-amber-600" : "text-emerald-600"}`,
+											children: [
+												Number(item.rx_power).toFixed(1),
+												" ",
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "text-[10px] font-bold",
+													children: "dBm"
+												})
+											]
 										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-slate-400 font-bold",
+											className: `font-black text-xs sm:text-sm ${badgeClass}`,
 											children: item.status_koneksi === "LOS" ? "LOS" : "-"
-										})
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-center text-slate-600 whitespace-nowrap",
-										children: item.suhu_ont != null ? `${item.suhu_ont}°C` : "-"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-center text-slate-600 whitespace-nowrap",
-										children: item.latency_ms != null ? `${item.latency_ms}ms` : "-"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-center whitespace-nowrap",
-										children: (() => {
-											const statusVal = (item.status_koneksi || "NORMAL").toUpperCase();
-											let badgeClass = "text-emerald-700";
-											if (statusVal === "WARNING") badgeClass = "text-amber-700";
-											else if (statusVal === "CRITICAL" || statusVal === "INVALID") badgeClass = "text-rose-700";
-											else if (statusVal === "LOS") badgeClass = "text-purple-700";
-											return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: `text-xs font-bold uppercase ${badgeClass}`,
-												children: statusVal
-											});
-										})()
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: `text-[10px] font-bold uppercase ${badgeClass}`,
+											children: statusVal
+										})]
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-between gap-2 text-[11px] text-slate-500 pt-1 border-t border-slate-100",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1.5 min-w-0 truncate",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "font-bold text-cyan-900 shrink-0",
+												children: item.id_pelanggan
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-300 shrink-0",
+												children: "•"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-600 truncate",
+												children: item.ip_router || item.ip_ont || item.ip || "-"
+											})
+										]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "shrink-0 text-slate-400 text-[10px] flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-2.5 h-2.5 text-slate-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.waktu_cek || "-" })]
+									})]
+								}),
+								hasDiagnostics && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "text-[10px] text-slate-400 flex items-center gap-2 pt-0.5 border-t border-slate-50",
+									children: [
+										item.suhu_ont != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Suhu: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
+											className: "text-slate-600 font-mono",
+											children: [item.suhu_ont, "°C"]
+										})] }),
+										item.suhu_ont != null && item.latency_ms != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-slate-300",
+											children: "•"
+										}),
+										item.latency_ms != null && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Latency: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", {
+											className: "text-slate-600 font-mono",
+											children: [item.latency_ms, "ms"]
+										})] })
+									]
+								})
+							]
+						}, `mobile-log-${idx}`);
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "hidden md:block overflow-x-auto",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+						className: "w-full text-left border-collapse table-auto",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+							className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 w-12 text-center whitespace-nowrap",
+									children: "No"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("waktu_cek"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[140px]",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Waktu Cek" }), sortField === "waktu_cek" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
 									})
-								]
-							}, idx);
-						})
-					})]
-				})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("id_pelanggan"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[150px]",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "ID Pelanggan" }), sortField === "id_pelanggan" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("nama"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[200px]",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Nama Pelanggan" }), sortField === "nama" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 whitespace-nowrap min-w-[140px]",
+									children: "IP Router ONT"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("rx_power"),
+									className: "py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[130px]",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center justify-end gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Daya Rx (dBm)" }), sortField === "rx_power" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 text-center whitespace-nowrap min-w-[80px]",
+									children: "Suhu"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 text-center whitespace-nowrap min-w-[90px]",
+									children: "Latency"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("status_koneksi"),
+									className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[100px]",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center justify-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }), sortField === "status_koneksi" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								})
+							]
+						}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
+							className: "divide-y divide-sky-100 font-mono text-xs",
+							children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+								colSpan: "9",
+								className: "text-center py-10 text-slate-400 font-mono",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data riwayat..." })]
+							}) }) : logs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+								colSpan: "9",
+								className: "text-center py-10 text-slate-400 font-mono",
+								children: "Tidak ada rekaman log ditemukan."
+							}) }) : logs.map((item, idx) => {
+								const rowNo = (page - 1) * limit + idx + 1;
+								return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+									className: "hover:bg-cyan-50/40 transition",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-center text-slate-500 font-bold text-xs",
+											children: rowNo
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-slate-500 font-medium text-[11px] whitespace-nowrap",
+											children: item.waktu_cek || "-"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 font-bold text-cyan-900 whitespace-nowrap",
+											children: item.id_pelanggan
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 font-sans whitespace-nowrap",
+											children: onNavigateCustomer && item.nama ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												type: "button",
+												onClick: () => onNavigateCustomer(item.nama),
+												className: "font-semibold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate max-w-[280px] inline-block align-middle",
+												title: `Lihat detail ${item.nama} di Data Pelanggan`,
+												children: item.nama
+											}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "font-semibold text-slate-900 truncate max-w-[280px] inline-block align-middle",
+												title: item.nama,
+												children: item.nama || "-"
+											})
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-slate-600 whitespace-nowrap font-mono text-xs",
+											children: item.ip_router || item.ip_ont || item.ip || "-"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-right whitespace-nowrap",
+											children: item.rx_power != null ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: `font-black ${item.rx_power <= critThreshold ? "text-rose-600" : item.rx_power <= warnThreshold ? "text-amber-600" : "text-emerald-600"}`,
+												children: [Number(item.rx_power).toFixed(1), " dBm"]
+											}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-400 font-bold",
+												children: item.status_koneksi === "LOS" ? "LOS" : "-"
+											})
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-center text-slate-600 whitespace-nowrap",
+											children: item.suhu_ont != null ? `${item.suhu_ont}°C` : "-"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-center text-slate-600 whitespace-nowrap",
+											children: item.latency_ms != null ? `${item.latency_ms}ms` : "-"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-center whitespace-nowrap",
+											children: (() => {
+												const statusVal = (item.status_koneksi || "NORMAL").toUpperCase();
+												let badgeClass = "text-emerald-700";
+												if (statusVal === "WARNING") badgeClass = "text-amber-700";
+												else if (statusVal === "CRITICAL" || statusVal === "INVALID") badgeClass = "text-rose-700";
+												else if (statusVal === "LOS") badgeClass = "text-purple-700";
+												return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: `text-xs font-bold uppercase ${badgeClass}`,
+													children: statusVal
+												});
+											})()
+										})
+									]
+								}, idx);
+							})
+						})]
+					})
+				})]
 			})
 		]
 	});
@@ -34902,7 +35022,7 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 					})
 				})]
 			}) }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DataTableContainer, {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DataTableContainer, {
 				page,
 				totalPages,
 				totalCount: filteredTickets.length,
@@ -34915,256 +35035,378 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 				onPrevPage: () => setPage((p) => Math.max(1, p - 1)),
 				onNextPage: () => setPage((p) => Math.min(totalPages, p + 1)),
 				loading,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-					className: "w-full text-left border-collapse table-auto",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-						className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 w-12 text-center whitespace-nowrap",
-								children: "No"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("id_tiket"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "No. Tiket / Waktu" }), sortField === "id_tiket" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("nama_pelanggan"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pelanggan" }), sortField === "nama_pelanggan" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("kategori"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kategori Kendala" }), sortField === "kategori" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 whitespace-nowrap min-w-[200px]",
-								children: "Deskripsi Keluhan"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("redaman_saat_lapor"),
-								className: "py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-end gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Rx Saat Lapor" }), sortField === "redaman_saat_lapor" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("status"),
-								className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }), sortField === "status" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 text-right whitespace-nowrap w-24",
-								children: "Aksi"
-							})
-						]
-					}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
-						className: "divide-y divide-sky-100 font-mono text-xs",
-						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-							colSpan: "8",
-							className: "text-center py-10 text-slate-400 font-mono",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat daftar tiket keluhan..." })]
-						}) }) : paginatedTickets.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-							colSpan: "8",
-							className: "text-center py-10 text-slate-400 font-mono",
-							children: "Tidak ada tiket keluhan ditemukan."
-						}) }) : paginatedTickets.map((t, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-							className: "hover:bg-cyan-50/40 transition",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "block md:hidden p-2 sm:p-2.5 space-y-1.5",
+					children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "text-center py-6 text-slate-400 font-mono text-xs",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat daftar tiket keluhan..." })]
+					}) : paginatedTickets.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "text-center py-6 text-slate-400 font-mono text-xs",
+						children: "Tidak ada tiket keluhan ditemukan."
+					}) : paginatedTickets.map((t, idx) => {
+						const rowNo = (page - 1) * limit + idx + 1;
+						const statusColor = t.status === "MENUNGGU" ? "text-amber-700" : t.status === "DICEK_ADMIN" ? "text-purple-700" : t.status === "DIPROSES" ? "text-cyan-700" : "text-emerald-700";
+						const cleanWa = t.no_wa ? t.no_wa.replace(/[^0-9]/g, "").replace(/^0/, "62") : "";
+						const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ""}".`;
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-white rounded-xl border border-sky-200/80 p-2.5 font-mono transition shadow-2xs hover:border-cyan-300 space-y-1.5",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 text-center text-slate-500 font-bold text-xs",
-									children: (page - 1) * limit + idx + 1
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-									className: "py-2.5 px-3 whitespace-nowrap",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "font-bold text-cyan-900",
-										children: t.id_tiket
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-xs text-slate-600 font-mono",
-										children: t.created_at_str
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-									className: "py-2.5 px-3",
-									children: [onNavigateCustomer && t.nama_pelanggan ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										type: "button",
-										onClick: () => onNavigateCustomer(t.nama_pelanggan),
-										className: "font-sans font-bold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition block",
-										title: `Lihat detail ${t.nama_pelanggan} di Data Pelanggan`,
-										children: t.nama_pelanggan
-									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "font-sans font-bold text-slate-900",
-										children: t.nama_pelanggan
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "text-xs text-slate-600 font-mono",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-between gap-2",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1.5 text-xs min-w-0",
 										children: [
-											t.id_pelanggan,
-											" ",
-											t.no_wa && `• WA: ${t.no_wa}`
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "text-slate-400 font-bold shrink-0",
+												children: ["#", rowNo]
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "font-bold text-cyan-900 shrink-0",
+												children: t.id_tiket
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-300 shrink-0",
+												children: "•"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "text-slate-500 font-mono text-[11px] truncate flex items-center gap-1",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-2.5 h-2.5 text-slate-400 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.created_at_str })]
+											})
 										]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: `text-[11px] font-bold uppercase tracking-tight shrink-0 ${statusColor}`,
+										children: t.status
 									})]
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: `inline-block text-xs font-bold font-mono ${t.kategori === "RESET_PASSWORD" ? "text-amber-700" : "text-slate-700"}`,
-										children: t.kategori
-									})
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-between gap-2 pt-0.5",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "min-w-0",
+										children: onNavigateCustomer && t.nama_pelanggan ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+											type: "button",
+											onClick: () => onNavigateCustomer(t.nama_pelanggan),
+											className: "font-sans font-bold text-xs sm:text-sm text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate block",
+											title: `Lihat detail ${t.nama_pelanggan} di Data Pelanggan`,
+											children: t.nama_pelanggan
+										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "font-sans font-bold text-xs sm:text-sm text-slate-900 truncate",
+											children: t.nama_pelanggan
+										})
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "shrink-0 text-right text-[11px] font-mono",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-slate-400",
+											children: "Rx: "
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: `font-black ${t.redaman_saat_lapor <= -27 ? "text-rose-600" : "text-slate-700"}`,
+											children: t.redaman_saat_lapor != null ? `${t.redaman_saat_lapor.toFixed(1)} dBm` : "-"
+										})]
+									})]
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 font-sans text-slate-600 max-w-xs",
-									children: t.kategori === "RESET_PASSWORD" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: isSuperAdminOrAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "text-[11px] text-slate-600 font-mono flex items-center gap-1.5 flex-wrap",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "font-bold text-cyan-900",
+										children: t.id_pelanggan
+									}), t.no_wa && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-slate-300",
+										children: "•"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "text-emerald-700 font-medium font-sans flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-2.5 h-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.no_wa })]
+									})] })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "text-xs font-sans text-slate-700 leading-snug pt-0.5",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: `inline-block text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md mr-1.5 align-middle ${t.kategori === "RESET_PASSWORD" ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-slate-100 text-slate-700"}`,
+										children: t.kategori
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "align-middle text-slate-600 text-[11px]",
+										children: t.deskripsi || "-"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "pt-1.5 border-t border-slate-100 flex items-center gap-2",
+									children: t.kategori === "RESET_PASSWORD" ? isSuperAdminOrAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => handleSendResetPasswordWA(t),
-										className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold shadow-xs transition cursor-pointer",
+										className: "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold shadow-xs transition cursor-pointer min-h-[32px]",
 										title: "Kirim Kata Sandi Baru langsung ke WhatsApp Pelanggan dan selesaikan tiket",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kirim Sandi Baru" })]
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3 h-3 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kirim Sandi Baru (WA)" })]
 									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-xs font-semibold text-slate-500 italic",
+										className: "text-xs font-semibold text-slate-500 italic py-0.5",
 										children: "Hanya Admin / Super Admin"
-									}) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "line-clamp-2 text-xs",
-										children: t.deskripsi || "-"
+									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => handleOpenModal(t),
+										className: "flex-1 py-1 px-3 border border-cyan-200 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[32px] cursor-pointer",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "w-3 h-3" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kelola Status" })]
+									}), cleanWa && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+										href: `https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`,
+										target: "_blank",
+										rel: "noopener noreferrer",
+										className: "py-1 px-3 border border-emerald-200 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[32px]",
+										title: "Hubungi Pelanggan via WhatsApp",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3 h-3 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "WA" })]
+									})] })
+								})
+							]
+						}, `mobile-tkt-${t.id_tiket}`);
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "hidden md:block overflow-x-auto",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+						className: "w-full text-left border-collapse table-auto",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+							className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 w-12 text-center whitespace-nowrap",
+									children: "No"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("id_tiket"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "No. Tiket / Waktu" }), sortField === "id_tiket" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
 									})
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 text-right font-black",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: t.redaman_saat_lapor <= -27 ? "text-rose-600" : "text-slate-700",
-										children: t.redaman_saat_lapor != null ? `${t.redaman_saat_lapor.toFixed(1)} dBm` : "-"
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("nama_pelanggan"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pelanggan" }), sortField === "nama_pelanggan" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
 									})
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 text-center",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: `text-xs font-bold uppercase tracking-tight ${t.status === "MENUNGGU" ? "text-amber-700" : t.status === "DICEK_ADMIN" ? "text-purple-700" : t.status === "DIPROSES" ? "text-cyan-700" : "text-emerald-700"}`,
-										children: t.status
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("kategori"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kategori Kendala" }), sortField === "kategori" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
 									})
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 text-right",
-									children: t.kategori === "RESET_PASSWORD" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-slate-400 font-mono text-xs",
-										children: "-"
-									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative inline-block text-left",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											type: "button",
-											onClick: (e) => {
-												e.stopPropagation();
-												if (activeMenuId === t.id_tiket) {
-													setActiveMenuId(null);
-													setMenuAnchor(null);
-												} else {
-													const rect = e.currentTarget.getBoundingClientRect();
-													const openUp = window.innerHeight - rect.bottom < 120 && rect.top > 120;
-													setMenuAnchor({
-														id: t.id_tiket,
-														top: openUp ? void 0 : rect.bottom + 6,
-														bottom: openUp ? window.innerHeight - rect.top + 6 : void 0,
-														right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right)
-													});
-													setActiveMenuId(t.id_tiket);
-												}
-											},
-											className: `p-1 rounded-lg border transition cursor-pointer ${activeMenuId === t.id_tiket ? "bg-cyan-50 border-cyan-300 text-cyan-700" : "hover:bg-slate-100 text-slate-600 border-slate-200"}`,
-											title: "Pilihan Aksi",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-												xmlns: "http://www.w3.org/2000/svg",
-												width: "16",
-												height: "16",
-												viewBox: "0 0 24 24",
-												fill: "none",
-												stroke: "currentColor",
-												strokeWidth: "2",
-												strokeLinecap: "round",
-												strokeLinejoin: "round",
-												className: "w-3.5 h-3.5",
-												children: [
-													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-														cx: "12",
-														cy: "12",
-														r: "1"
-													}),
-													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-														cx: "12",
-														cy: "5",
-														r: "1"
-													}),
-													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-														cx: "12",
-														cy: "19",
-														r: "1"
-													})
-												]
-											})
-										}), activeMenuId === t.id_tiket && menuAnchor && menuAnchor.id === t.id_tiket && typeof document !== "undefined" && (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "fixed inset-0 z-[9998]",
-											onClick: (e) => {
-												e.stopPropagation();
-												setActiveMenuId(null);
-												setMenuAnchor(null);
-											}
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 whitespace-nowrap min-w-[200px]",
+									children: "Deskripsi Keluhan"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("redaman_saat_lapor"),
+									className: "py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center justify-end gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Rx Saat Lapor" }), sortField === "redaman_saat_lapor" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("status"),
+									className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center justify-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }), sortField === "status" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 text-right whitespace-nowrap w-24",
+									children: "Aksi"
+								})
+							]
+						}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
+							className: "divide-y divide-sky-100 font-mono text-xs",
+							children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+								colSpan: "8",
+								className: "text-center py-10 text-slate-400 font-mono",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat daftar tiket keluhan..." })]
+							}) }) : paginatedTickets.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+								colSpan: "8",
+								className: "text-center py-10 text-slate-400 font-mono",
+								children: "Tidak ada tiket keluhan ditemukan."
+							}) }) : paginatedTickets.map((t, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+								className: "hover:bg-cyan-50/40 transition",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 text-center text-slate-500 font-bold text-xs",
+										children: (page - 1) * limit + idx + 1
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+										className: "py-2.5 px-3 whitespace-nowrap",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "font-bold text-cyan-900",
+											children: t.id_tiket
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											style: {
-												position: "fixed",
-												top: menuAnchor.top,
-												bottom: menuAnchor.bottom,
-												right: menuAnchor.right,
-												zIndex: 9999
-											},
-											className: "min-w-[170px]",
-											onClick: (e) => e.stopPropagation(),
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-													type: "button",
-													onClick: () => {
+											className: "text-xs text-slate-600 font-mono",
+											children: t.created_at_str
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+										className: "py-2.5 px-3",
+										children: [onNavigateCustomer && t.nama_pelanggan ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+											type: "button",
+											onClick: () => onNavigateCustomer(t.nama_pelanggan),
+											className: "font-sans font-bold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition block",
+											title: `Lihat detail ${t.nama_pelanggan} di Data Pelanggan`,
+											children: t.nama_pelanggan
+										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "font-sans font-bold text-slate-900",
+											children: t.nama_pelanggan
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "text-xs text-slate-600 font-mono",
+											children: [
+												t.id_pelanggan,
+												" ",
+												t.no_wa && `• WA: ${t.no_wa}`
+											]
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: `inline-block text-xs font-bold font-mono ${t.kategori === "RESET_PASSWORD" ? "text-amber-700" : "text-slate-700"}`,
+											children: t.kategori
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 font-sans text-slate-600 max-w-xs",
+										children: t.kategori === "RESET_PASSWORD" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: isSuperAdminOrAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+											type: "button",
+											onClick: () => handleSendResetPasswordWA(t),
+											className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold shadow-xs transition cursor-pointer",
+											title: "Kirim Kata Sandi Baru langsung ke WhatsApp Pelanggan dan selesaikan tiket",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kirim Sandi Baru" })]
+										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-xs font-semibold text-slate-500 italic",
+											children: "Hanya Admin / Super Admin"
+										}) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "line-clamp-2 text-xs",
+											children: t.deskripsi || "-"
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 text-right font-black",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: t.redaman_saat_lapor <= -27 ? "text-rose-600" : "text-slate-700",
+											children: t.redaman_saat_lapor != null ? `${t.redaman_saat_lapor.toFixed(1)} dBm` : "-"
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 text-center",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: `text-xs font-bold uppercase tracking-tight ${t.status === "MENUNGGU" ? "text-amber-700" : t.status === "DICEK_ADMIN" ? "text-purple-700" : t.status === "DIPROSES" ? "text-cyan-700" : "text-emerald-700"}`,
+											children: t.status
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 text-right",
+										children: t.kategori === "RESET_PASSWORD" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-slate-400 font-mono text-xs",
+											children: "-"
+										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "relative inline-block text-left",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												type: "button",
+												onClick: (e) => {
+													e.stopPropagation();
+													if (activeMenuId === t.id_tiket) {
 														setActiveMenuId(null);
 														setMenuAnchor(null);
-														handleOpenModal(t);
-													},
-													className: "w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kelola Status" })]
-												}), t.no_wa && (() => {
-													const cleanWa = t.no_wa.replace(/[^0-9]/g, "").replace(/^0/, "62");
-													const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ""}".`;
-													return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-														href: `https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`,
-														target: "_blank",
-														rel: "noopener noreferrer",
+													} else {
+														const rect = e.currentTarget.getBoundingClientRect();
+														const openUp = window.innerHeight - rect.bottom < 120 && rect.top > 120;
+														setMenuAnchor({
+															id: t.id_tiket,
+															top: openUp ? void 0 : rect.bottom + 6,
+															bottom: openUp ? window.innerHeight - rect.top + 6 : void 0,
+															right: Math.max(8, (document.documentElement.clientWidth || window.innerWidth) - rect.right)
+														});
+														setActiveMenuId(t.id_tiket);
+													}
+												},
+												className: `p-1 rounded-lg border transition cursor-pointer ${activeMenuId === t.id_tiket ? "bg-cyan-50 border-cyan-300 text-cyan-700" : "hover:bg-slate-100 text-slate-600 border-slate-200"}`,
+												title: "Pilihan Aksi",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+													xmlns: "http://www.w3.org/2000/svg",
+													width: "16",
+													height: "16",
+													viewBox: "0 0 24 24",
+													fill: "none",
+													stroke: "currentColor",
+													strokeWidth: "2",
+													strokeLinecap: "round",
+													strokeLinejoin: "round",
+													className: "w-3.5 h-3.5",
+													children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+															cx: "12",
+															cy: "12",
+															r: "1"
+														}),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+															cx: "12",
+															cy: "5",
+															r: "1"
+														}),
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+															cx: "12",
+															cy: "19",
+															r: "1"
+														})
+													]
+												})
+											}), activeMenuId === t.id_tiket && menuAnchor && menuAnchor.id === t.id_tiket && typeof document !== "undefined" && (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "fixed inset-0 z-[9998]",
+												onClick: (e) => {
+													e.stopPropagation();
+													setActiveMenuId(null);
+													setMenuAnchor(null);
+												}
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												style: {
+													position: "fixed",
+													top: menuAnchor.top,
+													bottom: menuAnchor.bottom,
+													right: menuAnchor.right,
+													zIndex: 9999
+												},
+												className: "min-w-[170px]",
+												onClick: (e) => e.stopPropagation(),
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "bg-white rounded-xl shadow-2xl border border-sky-300 py-1 font-mono text-xs",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+														type: "button",
 														onClick: () => {
 															setActiveMenuId(null);
 															setMenuAnchor(null);
+															handleOpenModal(t);
 														},
-														className: "w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold",
-														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi WA" })]
-													});
-												})()]
-											})
-										})] }), document.body)]
+														className: "w-full px-3 py-1.5 text-left text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 flex items-center gap-2 transition cursor-pointer",
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kelola Status" })]
+													}), t.no_wa && (() => {
+														const cleanWa = t.no_wa.replace(/[^0-9]/g, "").replace(/^0/, "62");
+														const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ""}".`;
+														return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+															href: `https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`,
+															target: "_blank",
+															rel: "noopener noreferrer",
+															onClick: () => {
+																setActiveMenuId(null);
+																setMenuAnchor(null);
+															},
+															className: "w-full px-3 py-1.5 text-left text-emerald-700 hover:bg-emerald-50 flex items-center gap-2 transition border-t border-slate-100 font-bold",
+															children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi WA" })]
+														});
+													})()]
+												})
+											})] }), document.body)]
+										})
 									})
-								})
-							]
-						}, t.id_tiket))
-					})]
-				})
+								]
+							}, t.id_tiket))
+						})]
+					})
+				})]
 			}),
 			selectedTicket && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs",
@@ -35531,7 +35773,7 @@ function QuotaView({ activeOffice = "cabang", onNavigateCustomer }) {
 					})]
 				}) })
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DataTableContainer, {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DataTableContainer, {
 				page,
 				totalPages,
 				totalCount: filteredQuota.length,
@@ -35544,127 +35786,216 @@ function QuotaView({ activeOffice = "cabang", onNavigateCustomer }) {
 				onPrevPage: () => setPage((p) => Math.max(1, p - 1)),
 				onNextPage: () => setPage((p) => Math.min(totalPages, p + 1)),
 				loading,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-					className: "w-full text-left border-collapse table-auto md:table-fixed",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-						className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 w-12 text-center",
-								children: "No"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("id_pelanggan"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-32",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "ID Pelanggan" }), sortField === "id_pelanggan" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("nama"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Nama Pelanggan" }), sortField === "nama" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("paket"),
-								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-32",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Paket Layanan" }), sortField === "paket" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3 font-mono w-32",
-								children: "IP Router"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								onClick: () => handleSort("terpakai_gb"),
-								className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none w-44",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pemakaian Bulan Ini" }), sortField === "terpakai_gb" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-								})
-							})
-						]
-					}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
-						className: "divide-y divide-sky-100 font-mono text-xs",
-						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-							colSpan: "6",
-							className: "text-center py-10 text-slate-400 font-mono",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pemakaian kuota..." })]
-						}) }) : filteredQuota.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-							colSpan: "6",
-							className: "text-center py-10 text-slate-400 font-mono",
-							children: "Tidak ada data kuota ditemukan."
-						}) }) : paginatedQuota.map((item, idx) => {
-							const rowNo = (page - 1) * limit + idx + 1;
-							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-								className: "hover:bg-cyan-50/40 transition",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-center text-slate-500 font-bold text-xs",
-										children: rowNo
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 font-bold text-cyan-900",
-										children: item.id_pelanggan
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-										className: "py-2.5 px-3",
-										children: [onNavigateCustomer && item.nama ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "block md:hidden p-2 sm:p-2.5 space-y-1.5",
+					children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "text-center py-6 text-slate-400 font-mono text-xs",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pemakaian kuota..." })]
+					}) : filteredQuota.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "text-center py-6 text-slate-400 font-mono text-xs",
+						children: "Tidak ada data kuota ditemukan."
+					}) : paginatedQuota.map((item, idx) => {
+						const rowNo = (page - 1) * limit + idx + 1;
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-white rounded-xl border border-sky-200/80 p-2.5 font-mono transition shadow-2xs hover:border-cyan-300 space-y-1.5",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-between gap-2",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1.5 min-w-0",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "text-[11px] text-slate-400 font-bold shrink-0",
+											children: ["#", rowNo]
+										}), onNavigateCustomer && item.nama ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 											type: "button",
 											onClick: () => onNavigateCustomer(item.nama),
-											className: "font-bold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition block",
+											className: "font-sans font-bold text-xs sm:text-sm text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition truncate",
 											title: `Lihat detail ${item.nama} di Data Pelanggan`,
 											children: item.nama
-										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "font-bold text-slate-900",
+										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "font-sans font-bold text-xs sm:text-sm text-slate-900 truncate",
 											children: item.nama
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "text-xs text-slate-600 mt-0.5",
-											children: item.alamat || "-"
 										})]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-xs font-semibold text-slate-800",
-											children: item.paket || "-"
-										})
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-										className: "py-2.5 px-3 text-slate-600 font-mono text-xs",
-										children: item.ip_ont || item.ip_router || "-"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-										className: "py-2.5 px-3 text-center",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "font-black text-slate-900",
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "shrink-0 text-right",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "font-black text-xs sm:text-sm text-slate-900",
 											children: [
 												item.terpakai_gb != null ? item.terpakai_gb.toFixed(1) : "0.0",
 												" ",
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													className: "text-xs text-slate-600 font-normal",
+													className: "text-[10px] text-slate-500 font-normal",
 													children: "GB"
 												})
 											]
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "w-20 bg-slate-100 h-1.5 rounded-full mx-auto mt-1 overflow-hidden",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: `h-full rounded-full ${item.terpakai_gb > 150 ? "bg-rose-500" : item.terpakai_gb > 100 ? "bg-amber-500" : "bg-cyan-500"}`,
-												style: { width: `${Math.min(100, (item.terpakai_gb || 0) / 200 * 100)}%` }
+										})
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-between gap-2 text-[11px] text-slate-500 pt-1 border-t border-slate-100",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1.5 min-w-0 truncate",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "font-bold text-cyan-900 shrink-0",
+												children: item.id_pelanggan
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-300 shrink-0",
+												children: "•"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-700 font-semibold shrink-0",
+												children: item.paket || "-"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-300 shrink-0",
+												children: "•"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-500 font-mono truncate",
+												children: item.ip_ont || item.ip_router || "-"
 											})
-										})]
+										]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "shrink-0 w-16 sm:w-20 bg-slate-200 h-1.5 rounded-full overflow-hidden",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: `h-full rounded-full ${item.terpakai_gb > 150 ? "bg-rose-500" : item.terpakai_gb > 100 ? "bg-amber-500" : "bg-cyan-500"}`,
+											style: { width: `${Math.min(100, (item.terpakai_gb || 0) / 200 * 100)}%` }
+										})
+									})]
+								}),
+								item.alamat && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "text-[10px] text-slate-400 font-sans truncate pt-0.5",
+									children: item.alamat
+								})
+							]
+						}, `mobile-quota-${item.id_pelanggan}`);
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "hidden md:block overflow-x-auto",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+						className: "w-full text-left border-collapse table-auto md:table-fixed",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+							className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 w-12 text-center",
+									children: "No"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("id_pelanggan"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-32",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "ID Pelanggan" }), sortField === "id_pelanggan" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
 									})
-								]
-							}, item.id_pelanggan);
-						})
-					})]
-				})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("nama"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Nama Pelanggan" }), sortField === "nama" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("paket"),
+									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none w-32",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Paket Layanan" }), sortField === "paket" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									className: "py-2.5 px-3 font-mono w-32",
+									children: "IP Router"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									onClick: () => handleSort("terpakai_gb"),
+									className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none w-44",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center justify-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pemakaian Bulan Ini" }), sortField === "terpakai_gb" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+									})
+								})
+							]
+						}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
+							className: "divide-y divide-sky-100 font-mono text-xs",
+							children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+								colSpan: "6",
+								className: "text-center py-10 text-slate-400 font-mono",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pemakaian kuota..." })]
+							}) }) : filteredQuota.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+								colSpan: "6",
+								className: "text-center py-10 text-slate-400 font-mono",
+								children: "Tidak ada data kuota ditemukan."
+							}) }) : paginatedQuota.map((item, idx) => {
+								const rowNo = (page - 1) * limit + idx + 1;
+								return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+									className: "hover:bg-cyan-50/40 transition",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-center text-slate-500 font-bold text-xs",
+											children: rowNo
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 font-bold text-cyan-900",
+											children: item.id_pelanggan
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+											className: "py-2.5 px-3",
+											children: [onNavigateCustomer && item.nama ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												type: "button",
+												onClick: () => onNavigateCustomer(item.nama),
+												className: "font-bold text-cyan-800 hover:text-cyan-950 hover:underline text-left cursor-pointer transition block",
+												title: `Lihat detail ${item.nama} di Data Pelanggan`,
+												children: item.nama
+											}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "font-bold text-slate-900",
+												children: item.nama
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "text-xs text-slate-600 mt-0.5",
+												children: item.alamat || "-"
+											})]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-xs font-semibold text-slate-800",
+												children: item.paket || "-"
+											})
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+											className: "py-2.5 px-3 text-slate-600 font-mono text-xs",
+											children: item.ip_ont || item.ip_router || "-"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+											className: "py-2.5 px-3 text-center",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "font-black text-slate-900",
+												children: [
+													item.terpakai_gb != null ? item.terpakai_gb.toFixed(1) : "0.0",
+													" ",
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "text-xs text-slate-600 font-normal",
+														children: "GB"
+													})
+												]
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "w-20 bg-slate-100 h-1.5 rounded-full mx-auto mt-1 overflow-hidden",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: `h-full rounded-full ${item.terpakai_gb > 150 ? "bg-rose-500" : item.terpakai_gb > 100 ? "bg-amber-500" : "bg-cyan-500"}`,
+													style: { width: `${Math.min(100, (item.terpakai_gb || 0) / 200 * 100)}%` }
+												})
+											})]
+										})
+									]
+								}, item.id_pelanggan);
+							})
+						})]
+					})
+				})]
 			})
 		]
 	});
@@ -36637,7 +36968,7 @@ function ActivityLogsView({ activeOffice }) {
 					})
 				})]
 			}) })
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DataTableContainer, {
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DataTableContainer, {
 			page,
 			totalPages,
 			totalCount,
@@ -36650,134 +36981,194 @@ function ActivityLogsView({ activeOffice }) {
 			onPrevPage: () => setPage((p) => Math.max(1, p - 1)),
 			onNextPage: () => setPage((p) => Math.min(totalPages, p + 1)),
 			loading,
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
-				className: "w-full text-left border-collapse table-auto",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-					className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-							className: "py-2.5 px-3 w-12 text-center whitespace-nowrap",
-							children: "No"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-							onClick: () => handleSort("created_at"),
-							className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Waktu Kejadian" }), sortField === "created_at" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-							})
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-							onClick: () => handleSort("kantor"),
-							className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kantor" }), sortField === "kantor" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-							})
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-							onClick: () => handleSort("username"),
-							className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pengguna" }), sortField === "username" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-							})
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-							onClick: () => handleSort("action"),
-							className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Aksi / Tindakan" }), sortField === "action" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-							})
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-							className: "py-2.5 px-3 min-w-[240px]",
-							children: "Keterangan Audit"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-							className: "py-2.5 px-3 whitespace-nowrap",
-							children: "Alamat IP"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-							onClick: () => handleSort("status"),
-							className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-center gap-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }), sortField === "status" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
-							})
-						})
-					]
-				}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
-					className: "divide-y divide-sky-100 font-mono text-xs",
-					children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-						colSpan: "8",
-						className: "text-center py-10 text-slate-400 font-mono",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat log aktivitas..." })]
-					}) }) : logs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-						colSpan: "8",
-						className: "text-center py-10 text-slate-400 font-mono",
-						children: "Tidak ada catatan aktivitas ditemukan."
-					}) }) : logs.map((item, idx) => {
-						const rowNo = (page - 1) * limit + idx + 1;
-						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-							className: "hover:bg-cyan-50/40 transition",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 text-center text-slate-500 font-bold text-xs",
-									children: rowNo
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 text-slate-600 text-xs whitespace-nowrap",
-									children: item.created_at || item.waktu || "-"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 whitespace-nowrap",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "inline-block text-[11px] font-mono font-bold uppercase text-purple-700",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "block md:hidden p-2 sm:p-2.5 space-y-1.5",
+				children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-center py-6 text-slate-400 font-mono text-xs",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat log aktivitas..." })]
+				}) : logs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "text-center py-6 text-slate-400 font-mono text-xs",
+					children: "Tidak ada catatan aktivitas ditemukan."
+				}) : logs.map((item, idx) => {
+					const rowNo = (page - 1) * limit + idx + 1;
+					const isSuccess = item.status === "SUCCESS" || item.status === "BERHASIL";
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white rounded-xl border border-sky-200/80 p-2.5 font-mono transition shadow-2xs hover:border-cyan-300 space-y-1.5",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center justify-between gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5 min-w-0",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "text-[11px] text-slate-400 font-bold shrink-0",
+											children: ["#", rowNo]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "font-bold text-xs sm:text-sm text-cyan-900 truncate",
+											children: item.username || item.user || "Sistem"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "inline-block text-[10px] font-mono font-bold uppercase text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded shrink-0",
+											children: item.action || item.aksi || "ACTIVITY"
+										})
+									]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5 shrink-0",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "inline-block text-[10px] font-mono font-bold uppercase text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded",
 										children: item.kantor || "SEMUA"
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-									className: "py-2.5 px-3 whitespace-nowrap",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "font-bold text-cyan-900",
-										children: item.username || item.user || "Sistem"
-									}), item.nama_karyawan && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-xs text-slate-600 font-sans",
-										children: item.nama_karyawan
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 whitespace-nowrap",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "inline-block text-xs font-bold font-mono text-slate-700",
-										children: item.action || item.aksi || "ACTIVITY"
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 font-sans text-slate-700 min-w-[240px]",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-xs leading-relaxed break-words",
-										children: item.keterangan || item.detail || "-"
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 text-slate-600 text-xs font-mono whitespace-nowrap",
-									children: item.ip_address || "-"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 text-center whitespace-nowrap",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: `inline-block text-[11px] font-mono font-bold uppercase ${item.status === "SUCCESS" || item.status === "BERHASIL" ? "text-emerald-700" : "text-rose-700"}`,
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: `inline-block text-[11px] font-mono font-bold uppercase ${isSuccess ? "text-emerald-700" : "text-rose-700"}`,
 										children: item.status || "OK"
-									})
+									})]
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "text-xs font-sans text-slate-700 leading-snug line-clamp-2",
+								children: item.keterangan || item.detail || "-"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center justify-between gap-2 text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-100",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-2.5 h-2.5 text-slate-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.created_at || item.waktu || "-" })]
+								}), item.ip_address && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: ["IP: ", item.ip_address] })]
+							})
+						]
+					}, `mobile-act-${idx}`);
+				})
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "hidden md:block overflow-x-auto",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+					className: "w-full text-left border-collapse table-auto",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+						className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+								className: "py-2.5 px-3 w-12 text-center whitespace-nowrap",
+								children: "No"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+								onClick: () => handleSort("created_at"),
+								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Waktu Kejadian" }), sortField === "created_at" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
 								})
-							]
-						}, idx);
-					})
-				})]
-			})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+								onClick: () => handleSort("kantor"),
+								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kantor" }), sortField === "kantor" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+								onClick: () => handleSort("username"),
+								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pengguna" }), sortField === "username" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+								onClick: () => handleSort("action"),
+								className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Aksi / Tindakan" }), sortField === "action" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+								className: "py-2.5 px-3 min-w-[240px]",
+								children: "Keterangan Audit"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+								className: "py-2.5 px-3 whitespace-nowrap",
+								children: "Alamat IP"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+								onClick: () => handleSort("status"),
+								className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-center gap-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }), sortField === "status" ? sortDir === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { className: "w-3.5 h-3.5 text-cyan-700" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: "w-3.5 h-3.5 text-slate-400" })]
+								})
+							})
+						]
+					}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
+						className: "divide-y divide-sky-100 font-mono text-xs",
+						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+							colSpan: "8",
+							className: "text-center py-10 text-slate-400 font-mono",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat log aktivitas..." })]
+						}) }) : logs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+							colSpan: "8",
+							className: "text-center py-10 text-slate-400 font-mono",
+							children: "Tidak ada catatan aktivitas ditemukan."
+						}) }) : logs.map((item, idx) => {
+							const rowNo = (page - 1) * limit + idx + 1;
+							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+								className: "hover:bg-cyan-50/40 transition",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 text-center text-slate-500 font-bold text-xs",
+										children: rowNo
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 text-slate-600 text-xs whitespace-nowrap",
+										children: item.created_at || item.waktu || "-"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 whitespace-nowrap",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "inline-block text-[11px] font-mono font-bold uppercase text-purple-700",
+											children: item.kantor || "SEMUA"
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+										className: "py-2.5 px-3 whitespace-nowrap",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "font-bold text-cyan-900",
+											children: item.username || item.user || "Sistem"
+										}), item.nama_karyawan && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-xs text-slate-600 font-sans",
+											children: item.nama_karyawan
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 whitespace-nowrap",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "inline-block text-xs font-bold font-mono text-slate-700",
+											children: item.action || item.aksi || "ACTIVITY"
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 font-sans text-slate-700 min-w-[240px]",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-xs leading-relaxed break-words",
+											children: item.keterangan || item.detail || "-"
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 text-slate-600 text-xs font-mono whitespace-nowrap",
+										children: item.ip_address || "-"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+										className: "py-2.5 px-3 text-center whitespace-nowrap",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: `inline-block text-[11px] font-mono font-bold uppercase ${item.status === "SUCCESS" || item.status === "BERHASIL" ? "text-emerald-700" : "text-rose-700"}`,
+											children: item.status || "OK"
+										})
+									})
+								]
+							}, idx);
+						})
+					})]
+				})
+			})]
 		})]
 	});
 }
@@ -46597,8 +46988,7 @@ function App() {
 	const [isLiveScanning, setIsLiveScanning] = (0, import_react.useState)(false);
 	const fetchLiveDashboardData = async () => {
 		try {
-			const encodedOffice = encodeURIComponent(activeOffice);
-			const q = activeOffice && activeOffice !== "all" ? `?kantor=${encodedOffice}&_t=${Date.now()}` : `?_t=${Date.now()}`;
+			const q = activeOffice && activeOffice !== "all" ? `?kantor=${encodeURIComponent(activeOffice)}&_t=${Date.now()}` : `?_t=${Date.now()}`;
 			const fetchOpts = {
 				cache: "no-store",
 				headers: {
@@ -46606,10 +46996,9 @@ function App() {
 					"Pragma": "no-cache"
 				}
 			};
-			const [statusRes, kpiRes, custRes, meRes, notifRes] = await Promise.all([
+			const [statusRes, kpiRes, meRes, notifRes] = await Promise.all([
 				fetch(`/api/monitoring/status${q}`, fetchOpts).then((r) => r.ok ? r.json() : null).catch(() => null),
 				fetch(`/api/monitoring/kpi${q}`, fetchOpts).then((r) => r.ok ? r.json() : null).catch(() => null),
-				fetch(`/api/customers?limit=10${activeOffice && activeOffice !== "all" ? `&kantor=${encodedOffice}` : ""}&_t=${Date.now()}`, fetchOpts).then((r) => r.ok ? r.json() : null).catch(() => null),
 				fetch(`/api/auth/me?_t=${Date.now()}`, fetchOpts).then((r) => r.ok ? r.json() : null).catch(() => null),
 				fetch(`/api/notifications/poll${q}`, fetchOpts).then((r) => r.ok ? r.json() : null).catch(() => null)
 			]);

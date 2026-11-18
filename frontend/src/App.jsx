@@ -345,10 +345,9 @@ export default function App() {
       const encodedOffice = encodeURIComponent(activeOffice)
       const q = activeOffice && activeOffice !== 'all' ? `?kantor=${encodedOffice}&_t=${Date.now()}` : `?_t=${Date.now()}`
       const fetchOpts = { cache: 'no-store', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } }
-      const [statusRes, kpiRes, custRes, meRes, notifRes] = await Promise.all([
+      const [statusRes, kpiRes, meRes, notifRes] = await Promise.all([
         fetch(`/api/monitoring/status${q}`, fetchOpts).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/monitoring/kpi${q}`, fetchOpts).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`/api/customers?limit=10${activeOffice && activeOffice !== 'all' ? `&kantor=${encodedOffice}` : ''}&_t=${Date.now()}`, fetchOpts).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/auth/me?_t=${Date.now()}`, fetchOpts).then(r => r.ok ? r.json() : null).catch(() => null),
         fetch(`/api/notifications/poll${q}`, fetchOpts).then(r => r.ok ? r.json() : null).catch(() => null)
       ])

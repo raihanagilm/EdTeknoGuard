@@ -31,7 +31,7 @@ export function SettingsCredentialsTab({
       }}
       className="space-y-4"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sky-100 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-sky-100 pb-3">
         <div>
           <h3 className="text-sm font-extrabold text-slate-900">Daftar Kredensial Modem ONT (Multi-Fallback)</h3>
           <p className="text-xs text-slate-500">
@@ -39,11 +39,11 @@ export function SettingsCredentialsTab({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2 self-stretch sm:self-auto">
           <button
             type="button"
             onClick={addModemCredentialRow}
-            className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 text-xs font-bold flex items-center gap-1.5 transition min-h-[36px] cursor-pointer"
+            className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 text-xs font-bold flex items-center justify-center gap-1.5 transition min-h-[36px] cursor-pointer border border-cyan-200"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Tambah Baris</span>
@@ -61,53 +61,85 @@ export function SettingsCredentialsTab({
             onDragOver={(e) => handleCredDragOver(e, idx)}
             onDrop={(e) => handleCredDrop(e, idx)}
             onDragEnd={handleCredDragEnd}
-            className={`p-3 rounded-xl border bg-white/90 transition flex flex-col sm:flex-row sm:items-center gap-2.5 ${dragOverCredIdx === idx
-              ? 'border-cyan-500 ring-2 ring-cyan-200 bg-cyan-50/40'
-              : 'border-sky-200/80 hover:border-cyan-300'
-              }`}
+            className={`p-3 rounded-xl border bg-white/90 transition flex flex-col sm:flex-row sm:items-center gap-2.5 shadow-2xs ${
+              dragOverCredIdx === idx
+                ? 'border-cyan-500 ring-2 ring-cyan-200 bg-cyan-50/40'
+                : 'border-sky-200/80 hover:border-cyan-300'
+            }`}
           >
-            <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400 shrink-0">
-              <span className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600">⠿</span>
-              <span className="w-5 text-center">#{idx + 1}</span>
+            {/* Header Baris Mobile: Drag handle + Nomor Akun di kiri, Tombol Hapus di kanan */}
+            <div className="flex items-center justify-between sm:justify-start gap-2 text-xs font-mono font-bold text-slate-400 shrink-0 pb-1.5 sm:pb-0 border-b border-sky-100 sm:border-0">
+              <div className="flex items-center gap-1.5">
+                <span className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 text-sm">⠿</span>
+                <span className="text-cyan-900 font-bold">Akun #{idx + 1}</span>
+              </div>
+
+              {/* Tombol Hapus khusus Mobile (muncul di baris atas kartu) */}
+              <button
+                type="button"
+                onClick={() => removeModemCredentialRow(idx)}
+                disabled={modemCredentials.length <= 1}
+                className={`sm:hidden p-1.5 rounded-lg text-slate-400 transition ${
+                  modemCredentials.length > 1
+                    ? 'hover:bg-rose-50 hover:text-rose-600 cursor-pointer'
+                    : 'opacity-30 cursor-not-allowed'
+                }`}
+                title="Hapus baris kredensial"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
-              <input
-                type="text"
-                placeholder="Username modem (misal: admin)"
-                value={cred.username}
-                onChange={(e) => updateModemCredentialRow(idx, 'username', e.target.value)}
-                required
-                className="rounded-lg border border-sky-200 px-3 py-1.5 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[36px]"
-              />
-
-              <div className="relative">
+            {/* Input Username & Password */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1 w-full">
+              <div>
+                <label className="block sm:hidden text-[11px] font-bold text-slate-600 mb-1 font-sans">
+                  Username Modem
+                </label>
                 <input
-                  type={showModemPasswords[idx] ? 'text' : 'password'}
-                  placeholder="Password modem (misal: password123)"
-                  value={cred.password}
-                  onChange={(e) => updateModemCredentialRow(idx, 'password', e.target.value)}
+                  type="text"
+                  placeholder="Username modem (misal: admin)"
+                  value={cred.username}
+                  onChange={(e) => updateModemCredentialRow(idx, 'username', e.target.value)}
                   required
-                  className="w-full rounded-lg border border-sky-200 px-3 py-1.5 pr-8 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[36px]"
+                  className="w-full rounded-lg border border-sky-200 px-3 py-1.5 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[36px]"
                 />
-                <button
-                  type="button"
-                  onClick={() => toggleModemPasswordVisibility(idx)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  {showModemPasswords[idx] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
+              </div>
+
+              <div>
+                <label className="block sm:hidden text-[11px] font-bold text-slate-600 mb-1 font-sans">
+                  Password Modem
+                </label>
+                <div className="relative">
+                  <input
+                    type={showModemPasswords[idx] ? 'text' : 'password'}
+                    placeholder="Password modem (misal: password123)"
+                    value={cred.password}
+                    onChange={(e) => updateModemCredentialRow(idx, 'password', e.target.value)}
+                    required
+                    className="w-full rounded-lg border border-sky-200 px-3 py-1.5 pr-8 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-cyan-500 min-h-[36px]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => toggleModemPasswordVisibility(idx)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showModemPasswords[idx] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </div>
             </div>
 
+            {/* Tombol Hapus khusus Desktop (hidden di mobile) */}
             <button
               type="button"
               onClick={() => removeModemCredentialRow(idx)}
               disabled={modemCredentials.length <= 1}
-              className={`p-2 rounded-lg text-slate-400 transition ${modemCredentials.length > 1
-                ? 'hover:bg-rose-50 hover:text-rose-600 cursor-pointer'
-                : 'opacity-30 cursor-not-allowed'
-                }`}
+              className={`hidden sm:block p-2 rounded-lg text-slate-400 transition ${
+                modemCredentials.length > 1
+                  ? 'hover:bg-rose-50 hover:text-rose-600 cursor-pointer'
+                  : 'opacity-30 cursor-not-allowed'
+              }`}
               title="Hapus baris kredensial"
             >
               <Trash2 className="w-4 h-4" />
@@ -121,7 +153,7 @@ export function SettingsCredentialsTab({
         <button
           type="submit"
           disabled={settingsLoading}
-          className="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer"
+          className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition min-h-[42px] cursor-pointer"
         >
           <Save className="w-4 h-4" />
           <span>Simpan Kredensial Modem</span>

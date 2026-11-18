@@ -27,6 +27,17 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 ## [Unreleased]
 
 ### Fixed
+- **Gateway Anchor & Circuit Breaker Pemantauan Jaringan Kantor ([scan_runner.py](app/services/scheduler/scan_runner.py), [state_manager.py](app/services/scheduler/state_manager.py), [scheduler_service.py](app/services/scheduler_service.py))**:
+  - **Pencegahan False Alarm & Terminal Hang saat Server/VPN Terputus (Kasus A)**:
+    - Menambahkan mekanisme *Circuit Breaker* berbasis rute gateway: sebelum memulai pemindaian massal di kantor cabang, sistem terlebih dahulu memverifikasi keterjangkauan rute ke router MikroTik kantor (`mikrotik_host` & `mikrotik_port`) dan sampel modem aktif via socket TCP ultra-cepat (< 0.8 detik).
+    - Jika server/laptop tidak terhubung ke jaringan kantor/VPN, pemindaian ~1.000 modem langsung dibatalkan seketika dengan status `NETWORK_DISCONNECTED`, mencatat log peringatan bersih di terminal, dan **TIDAK** memicu false alarm darurat LOS ke teknisi.
+  - **Pre-Flight Socket Probe Cepat per Modem (Kasus B & Pemadaman Lapangan)**:
+    - Menambahkan socket probe (0.4 detik) sebelum HTTP scraping pada worker pemindaian berkala. Modem yang mati listrik atau kabel putus langsung diidentifikasi sebagai `UNREACHABLE` / `LOS` dalam hitungan milidetik tanpa menahan thread pool selama 8 detik akibat `ConnectTimeout`.
+- **Eliminasi Reload & Kedipan Frontend (Zero CLS) ([App.jsx](frontend/src/App.jsx), [CustomersView.jsx](frontend/src/components/customers/CustomersView.jsx), [CustomersTable.jsx](frontend/src/components/customers/CustomersTable.jsx))**:
+  - **Pembersihan Dead-Code Query Berat**: Menghapus pemanggilan `GET /api/customers?limit=10` dari fungsi polling berkala 5-detik di `App.jsx` yang sebelumnya membebani CPU database dan thread pool server.
+  - **Hydration Latar Belakang Senyap (Silent Refresh)**: Memperbarui fungsi `fetchCustomers(silent = false)` dan proteksi rendering `{loading && customers.length === 0 ? ...}` pada tampilan mobile card stack maupun tabel desktop, sehingga kartu pelanggan yang sudah tampil tidak hilang / tidak berkedip saat sinkronisasi data berlangsung (Cumulative Layout Shift = 0).
+
+### Fixed
 - **Sinkronisasi Notifikasi Pengingat Tagihan & Native Android Bridge di MyTekno ([PortalCustomerApp.jsx](frontend/src/portal/PortalCustomerApp.jsx), [PortalNotificationsPage.jsx](frontend/src/portal/components/notifications/PortalNotificationsPage.jsx), [routes.py](app/portal/modules/auth/routes.py))**:
   - **Penyimpanan AlertLog Pengingat Tagihan**: Pengiriman pengingat tagihan dari Admin NOC kini otomatis mencatat entri ke tabel `alert_logs` (`tipe_alert="TAGIHAN_REMINDER"`) per pelanggan terpilih, sehingga pesan resmi tersimpan permanen di basis data.
   - **Penyatuan State Pelanggan & Billing di Portal**: Memperbarui rute `/portal/api/auth/me` agar menyertakan `billing_reminder`, `status_pembayaran`, `total_tagihan`, `is_overdue`, dan `nomor_va`, serta menyatukan state `customer` dan `dashboardData.customer` (`{ ...customer, ...dashboardData.customer }`) di `PortalCustomerApp.jsx` dan `PortalNotificationsPage.jsx` sehingga pesan pengingat langsung muncul di Pusat Notifikasi web.

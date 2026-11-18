@@ -730,6 +730,8 @@ class ONTSchedulerService:
             "next_run_time": next_run_formatted,
             "last_sync_stats": state.last_sync_stats,
             "scan_progress": scan_progress,
+            "network_connected": getattr(state, "network_connected", True),
+            "last_scan_message": getattr(state, "last_scan_message", None),
             "unread_tickets_count": 0,
             "kantor": k_code
         }

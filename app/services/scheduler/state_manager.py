@@ -33,6 +33,8 @@ class OfficeScanState:
         self.current_scan_index: int = 0
         self.total_customers_in_scan: int = 0
         self.current_scan_customer: Optional[str] = None
+        self.network_connected: bool = True
+        self.last_scan_message: Optional[str] = None
         self.last_sync_stats: Dict[str, Any] = {
             "total_checked": 0,
             "success": 0,
