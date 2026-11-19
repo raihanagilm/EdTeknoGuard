@@ -890,10 +890,6 @@
     margin-inline: calc(var(--spacing) * 1.5);
   }
 
-  .mx-3 {
-    margin-inline: calc(var(--spacing) * 3);
-  }
-
   .mx-4 {
     margin-inline: calc(var(--spacing) * 4);
   }
@@ -4471,16 +4467,6 @@
   @supports (color: color-mix(in lab, red, red)) {
     .shadow-cyan-600\/25 {
       --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-cyan-600) 25%, transparent) var(--tw-shadow-alpha), transparent);
-    }
-  }
-
-  .shadow-gray-200\/60 {
-    --tw-shadow-color: #e5e7eb99;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .shadow-gray-200\/60 {
-      --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-gray-200) 60%, transparent) var(--tw-shadow-alpha), transparent);
     }
   }
 

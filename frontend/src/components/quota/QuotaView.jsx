@@ -328,7 +328,11 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
                 className="px-2.5 sm:px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 text-[11px] sm:text-xs font-mono font-bold transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-xs disabled:opacity-50"
                 title="Sinkronkan data kuota langsung dari Simple Queues MikroTik"
               >
-                <Activity className={`w-3.5 h-3.5 text-cyan-700 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? (
+                  <RefreshCw className="w-3.5 h-3.5 text-cyan-700 animate-spin" />
+                ) : (
+                  <Activity className="w-3.5 h-3.5 text-cyan-700" />
+                )}
                 <span className="hidden sm:inline">{loading ? 'Syncing...' : 'Sync MikroTik'}</span>
                 <span className="sm:hidden">{loading ? '...' : 'Sync'}</span>
               </button>

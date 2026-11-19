@@ -29514,11 +29514,11 @@ function SettingsThresholdTab({ onOpenConfirmModal, settingsLoading, pollingInte
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "submit",
 					disabled: settingsLoading,
-					className: "px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer",
+					className: "px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer disabled:opacity-60",
 					title: "Simpan Parameter (Ctrl+S)",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Parameter" }),
+						settingsLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: settingsLoading ? "Menyimpan..." : "Simpan Parameter" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
 							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
 							children: "Ctrl+S"
@@ -29697,11 +29697,11 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "submit",
 					disabled: settingsLoading,
-					className: "w-full sm:w-auto px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition min-h-[42px] cursor-pointer",
+					className: "w-full sm:w-auto px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition min-h-[42px] cursor-pointer disabled:opacity-60",
 					title: "Simpan Kredensial Modem (Ctrl+S)",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Kredensial Modem" }),
+						settingsLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: settingsLoading ? "Menyimpan..." : "Simpan Kredensial Modem" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
 							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
 							children: "Ctrl+S"
@@ -29825,11 +29825,11 @@ function SettingsNotificationsTab({ onOpenConfirmModal, settingsLoading, alertWa
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "submit",
 					disabled: settingsLoading,
-					className: "px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer",
+					className: "px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer disabled:opacity-60",
 					title: "Simpan Pengaturan Notifikasi (Ctrl+S)",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Pengaturan Notifikasi" }),
+						settingsLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: settingsLoading ? "Menyimpan..." : "Simpan Pengaturan Notifikasi" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
 							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
 							children: "Ctrl+S"
@@ -30698,7 +30698,7 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 						disabled: mikrotikSyncing || !isOfficeActive,
 						className: `flex-1 sm:flex-none px-3 py-1.5 rounded-lg border text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] ${!isOfficeActive ? "bg-[#F1F6FC] text-[#64839E] border-[#CCDDF0] cursor-not-allowed opacity-60" : "bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] border-[#CCDDF0] cursor-pointer"}`,
 						title: !isOfficeActive ? "Kantor dalam status nonaktif. Sinkronisasi MikroTik dimatikan." : "Sinkronisasi Kuota & Traffic Real-Time dari Router MikroTik",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: `w-3.5 h-3.5 ${!isOfficeActive ? "text-[#64839E]" : "text-[#026AA7]"} ${mikrotikSyncing ? "animate-spin" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: mikrotikSyncing ? "Syncing..." : !isOfficeActive ? "Sync Mati" : "Sync MikroTik" })]
+						children: [mikrotikSyncing ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin text-[#026AA7]" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: `w-3.5 h-3.5 ${!isOfficeActive ? "text-[#64839E]" : "text-[#026AA7]"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: mikrotikSyncing ? "Syncing..." : !isOfficeActive ? "Sync Mati" : "Sync MikroTik" })]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => setImportModalOpen(true),
@@ -36855,7 +36855,7 @@ function QuotaView({ activeOffice = "cabang", onNavigateCustomer }) {
 							className: "px-2.5 sm:px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 text-[11px] sm:text-xs font-mono font-bold transition min-h-[34px] sm:min-h-[36px] flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-xs disabled:opacity-50",
 							title: "Sinkronkan data kuota langsung dari Simple Queues MikroTik",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: `w-3.5 h-3.5 text-cyan-700 ${loading ? "animate-spin" : ""}` }),
+								loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 text-cyan-700 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-3.5 h-3.5 text-cyan-700" }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "hidden sm:inline",
 									children: loading ? "Syncing..." : "Sync MikroTik"
@@ -37698,7 +37698,7 @@ function BillingMessageModal({ isOpen, onClose, selectedCustomers = [], onSendRe
 						}),
 						disabled: sending || selectedCustomers.length === 0,
 						className: "px-4 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] disabled:opacity-50 text-white text-xs font-sans font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: `w-3.5 h-3.5 ${sending ? "animate-spin" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: sending ? "Memproses..." : "Kirim Sekarang" })]
+						children: [sending ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: sending ? "Memproses..." : "Kirim Sekarang" })]
 					})] })
 				})
 			]

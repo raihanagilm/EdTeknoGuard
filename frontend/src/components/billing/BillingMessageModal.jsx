@@ -6,7 +6,8 @@ import {
   MessageCircle,
   ExternalLink,
   CheckCircle2,
-  Info
+  Info,
+  RefreshCw
 } from 'lucide-react'
 
 export function BillingMessageModal({
@@ -177,7 +178,11 @@ export function BillingMessageModal({
                 disabled={sending || selectedCustomers.length === 0}
                 className="px-4 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] disabled:opacity-50 text-white text-xs font-sans font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
               >
-                <Send className={`w-3.5 h-3.5 ${sending ? 'animate-spin' : ''}`} />
+                {sending ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
                 <span>{sending ? 'Memproses...' : 'Kirim Sekarang'}</span>
               </button>
             </>

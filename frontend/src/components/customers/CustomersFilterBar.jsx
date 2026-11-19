@@ -80,7 +80,11 @@ export function CustomersFilterBar({
                 }`}
                 title={!isOfficeActive ? 'Kantor dalam status nonaktif. Sinkronisasi MikroTik dimatikan.' : 'Sinkronisasi Kuota & Traffic Real-Time dari Router MikroTik'}
               >
-                <Activity className={`w-3.5 h-3.5 ${!isOfficeActive ? 'text-[#64839E]' : 'text-[#026AA7]'} ${mikrotikSyncing ? 'animate-spin' : ''}`} />
+                {mikrotikSyncing ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#026AA7]" />
+                ) : (
+                  <Activity className={`w-3.5 h-3.5 ${!isOfficeActive ? 'text-[#64839E]' : 'text-[#026AA7]'}`} />
+                )}
                 <span>{mikrotikSyncing ? 'Syncing...' : !isOfficeActive ? 'Sync Mati' : 'Sync MikroTik'}</span>
               </button>
 
