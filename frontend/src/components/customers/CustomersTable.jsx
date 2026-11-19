@@ -12,6 +12,7 @@ import {
   EyeOff
 } from 'lucide-react'
 import { DataTableContainer } from '../common/CommonUI'
+import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton'
 
 export function CustomersTable({
   customers = [],
@@ -75,10 +76,7 @@ export function CustomersTable({
       {/* Tampilan Mobile: Card Stack Responsif (P8-03 Pola #1) */}
       <div className="block md:hidden p-2.5 sm:p-3 space-y-3">
         {loading && customers.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 font-mono text-xs">
-            <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-            <div>Memuat data pelanggan...</div>
-          </div>
+          <MobileCardStackSkeleton count={4} type="customer" />
         ) : customers.length === 0 ? (
           <div className="text-center py-8 text-slate-400 font-mono text-xs">
             Tidak ada data pelanggan ditemukan.
@@ -421,12 +419,7 @@ export function CustomersTable({
         </thead>
         <tbody className="divide-y divide-[#DAE7F5] font-mono text-xs">
           {loading && customers.length === 0 ? (
-            <tr>
-              <td colSpan="10" className="text-center py-10 text-[#64839E] font-mono">
-                <div className="inline-block animate-spin w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full mb-2"></div>
-                <div>Memuat data pelanggan...</div>
-              </td>
-            </tr>
+            <DesktopTableSkeleton rows={Math.min(limit || 5, 8)} colCount={10} type="customer" />
           ) : customers.length === 0 ? (
             <tr>
               <td colSpan="10" className="text-center py-10 text-[#64839E] font-mono">

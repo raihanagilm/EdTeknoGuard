@@ -1035,6 +1035,10 @@
     margin-left: calc(var(--spacing) * 8);
   }
 
+  .ml-auto {
+    margin-left: auto;
+  }
+
   .line-clamp-1 {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -1263,10 +1267,6 @@
 
   .max-h-\[calc\(85vh-110px\)\] {
     max-height: calc(85vh - 110px);
-  }
-
-  .max-h-\[calc\(100dvh-6rem\)\] {
-    max-height: calc(100dvh - 6rem);
   }
 
   .max-h-\[calc\(100dvh-7\.5rem\)\] {
@@ -5974,6 +5974,10 @@
 
     .md\:table {
       display: table;
+    }
+
+    .md\:table-row-group {
+      display: table-row-group;
     }
 
     .md\:w-auto {

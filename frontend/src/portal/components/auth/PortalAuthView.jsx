@@ -202,7 +202,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
               <img
                 src="/tekno-indo-logo.png"
                 alt="TeknoIndonet Logo"
-                className="w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
+                className="w-10 h-10 sm:w-11 sm:h-11 object-contain bg-white border-2 border-white rounded-xl p-1 shadow-xs shrink-0"
               />
               <div className="min-w-0">
                 <div className="text-white text-xl font-bold tracking-tight leading-none">

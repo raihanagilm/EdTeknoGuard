@@ -30756,8 +30756,143 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 	})] });
 }
 //#endregion
-//#region src/components/customers/CustomersTable.jsx
+//#region src/components/common/DeviceAdaptiveSkeleton.jsx
 var import_react_dom = require_react_dom();
+/**
+* DeviceAdaptiveSkeleton.jsx
+*
+* Standar Loading Skeleton Dual-Device (Desktop Table & Mobile Card Stack) untuk TeknoGuard.
+* Mengikuti Skullet Standard (https://skullet.lochie.me/docs) dan Anti-Slop CLS = 0.
+*
+* Menyediakan:
+* 1. DesktopTableSkeleton: Khusus tabel desktop (<tr> dan <td> valid semantik).
+* 2. MobileCardStackSkeleton: Khusus card stack mobile (block md:hidden).
+* 3. SkulletWrapper: Wrapper deklaratif Skullet untuk komponen UI individual.
+*/
+/**
+* 1. DesktopTableSkeleton
+* Digunakan di dalam <tbody> untuk layar desktop (hidden md:table-row-group / table).
+*/
+function DesktopTableSkeleton({ rows = 5, colCount = 10, type = "customer" }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: [...Array(rows)].map((_, rIdx) => {
+		if (type === "customer") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+			className: "animate-pulse border-b border-[#DAE7F5] bg-white/70",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3 text-center",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-4 h-4 bg-slate-200 rounded mx-auto" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-2 text-center",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-3.5 bg-slate-200 rounded mx-auto" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-24 h-4 bg-slate-200 rounded font-mono" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-1.5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-36 h-4 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-20 h-2.5 bg-slate-100 rounded" })]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-1",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-24 h-3.5 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-2.5 bg-slate-100 rounded" })]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-1",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-28 h-3.5 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-20 h-2.5 bg-slate-100 rounded" })]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-4 bg-slate-200 rounded" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-20 h-5 bg-slate-200 rounded-full" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-5 bg-slate-200 rounded-full" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+					className: "py-3 px-3 text-right",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-end gap-1.5",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 bg-slate-200 rounded-lg" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 bg-slate-200 rounded-lg" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 bg-slate-200 rounded-lg" })
+						]
+					})
+				})
+			]
+		}, `desk-skel-${rIdx}`);
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", {
+			className: "animate-pulse border-b border-[#DAE7F5] bg-white/70",
+			children: [...Array(colCount)].map((_, cIdx) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+				className: "py-3.5 px-3",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `h-4 bg-slate-200 rounded ${cIdx === 0 ? "w-6 mx-auto" : cIdx === colCount - 1 ? "w-16 ml-auto" : "w-24"}` })
+			}, cIdx))
+		}, `desk-skel-gen-${rIdx}`);
+	}) });
+}
+/**
+* 2. MobileCardStackSkeleton
+* Digunakan untuk tampilan layar HP / Mobile (block md:hidden).
+*/
+function MobileCardStackSkeleton({ count = 3, type = "customer" }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "space-y-3",
+		children: [...Array(count)].map((_, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "p-3 rounded-xl border border-sky-100 bg-white shadow-2xs space-y-2.5 animate-pulse",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-start justify-between gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-4 h-4 bg-slate-200 rounded" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-3 bg-slate-200 rounded" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "space-y-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-28 h-4 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-3 bg-slate-100 rounded" })]
+							})
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-5 bg-slate-200 rounded-full shrink-0" })]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 text-xs",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-1",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-20 h-3 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-2.5 bg-slate-100 rounded" })]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-1 text-right flex flex-col items-end",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-14 h-3.5 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-12 h-2.5 bg-slate-100 rounded" })]
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "pt-2 border-t border-sky-100 flex items-center justify-between gap-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex-1 h-8 bg-slate-200 rounded-lg" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 bg-slate-200 rounded-lg shrink-0" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 bg-slate-200 rounded-lg shrink-0" })
+					]
+				})
+			]
+		}, `mob-skel-${idx}`))
+	});
+}
+//#endregion
+//#region src/components/customers/CustomersTable.jsx
 function CustomersTable({ customers = [], loading = false, page = 1, limit = 15, setLimit, setPage, totalRecords = 0, selectedIds = [], setSelectedIds, sortField = "id", sortDir = "asc", handleSort, handleSortIpRouter, probingId, probeCooldowns = {}, handleSingleProbe, activeMenuId, setActiveMenuId, handleOpenDetail, handleOpenEdit, handleDeleteCustomer, handleToggleMonitoring, isOfficeActive = true, warnThreshold = -26, critThreshold = -27 }) {
 	const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
 	const [menuAnchor, setMenuAnchor] = (0, import_react.useState)(null);
@@ -30789,9 +30924,9 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 		loading,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "block md:hidden p-2.5 sm:p-3 space-y-3",
-			children: loading && customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "text-center py-8 text-slate-400 font-mono text-xs",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pelanggan..." })]
+			children: loading && customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MobileCardStackSkeleton, {
+				count: 4,
+				type: "customer"
 			}) : customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "text-center py-8 text-slate-400 font-mono text-xs",
 				children: "Tidak ada data pelanggan ditemukan."
@@ -31079,11 +31214,11 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 				]
 			}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", {
 				className: "divide-y divide-[#DAE7F5] font-mono text-xs",
-				children: loading && customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
-					colSpan: "10",
-					className: "text-center py-10 text-[#64839E] font-mono",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "inline-block animate-spin w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full mb-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: "Memuat data pelanggan..." })]
-				}) }) : customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+				children: loading && customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DesktopTableSkeleton, {
+					rows: Math.min(limit || 5, 8),
+					colCount: 10,
+					type: "customer"
+				}) : customers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 					colSpan: "10",
 					className: "text-center py-10 text-[#64839E] font-mono",
 					children: "Tidak ada data pelanggan ditemukan."
@@ -42090,7 +42225,7 @@ function PortalResetPasswordView({ onBackToLogin }) {
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
 							src: "/tekno-indo-logo.png",
 							alt: "TeknoIndonet Logo",
-							className: "w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
+							className: "w-10 h-10 sm:w-11 sm:h-11 object-contain bg-white border-2 border-white rounded-xl p-1 shadow-xs shrink-0"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "min-w-0",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -42452,7 +42587,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
 								src: "/tekno-indo-logo.png",
 								alt: "TeknoIndonet Logo",
-								className: "w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
+								className: "w-10 h-10 sm:w-11 sm:h-11 object-contain bg-white border-2 border-white rounded-xl p-1 shadow-xs shrink-0"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "min-w-0",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
