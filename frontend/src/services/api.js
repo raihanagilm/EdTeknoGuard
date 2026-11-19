@@ -8,7 +8,7 @@ class ApiService {
     this.baseUrl = baseUrl;
   }
 
-  async request(endpoint, options = {}) {
+  async request(endpoint, options = {}, retries = 1) {
     const url = `${this.baseUrl}${endpoint}`;
     const defaultHeaders = {
       'Accept': 'application/json',
@@ -39,7 +39,15 @@ class ApiService {
         data,
       };
     } catch (error) {
-      console.error(`[ApiService Error] ${endpoint}:`, error);
+      // Jika request gagal karena gangguan jaringan sesaat (misal: ERR_NETWORK_CHANGED / offline singkat)
+      // dan merupakan metode idempotent (GET), lakukan retry otomatis 1x setelah delay 800ms
+      const isGet = !options.method || options.method.toUpperCase() === 'GET';
+      if (retries > 0 && isGet) {
+        await new Promise((r) => setTimeout(r, 800));
+        return this.request(endpoint, options, retries - 1);
+      }
+
+      console.warn(`[ApiService Network Warning] ${endpoint}:`, error.message);
       return {
         ok: false,
         status: 500,

@@ -14486,7 +14486,7 @@ var ApiService = class {
 	constructor(baseUrl = "") {
 		this.baseUrl = baseUrl;
 	}
-	async request(endpoint, options = {}) {
+	async request(endpoint, options = {}, retries = 1) {
 		const url = `${this.baseUrl}${endpoint}`;
 		const defaultHeaders = {
 			"Accept": "application/json",
@@ -14512,7 +14512,12 @@ var ApiService = class {
 				data
 			};
 		} catch (error) {
-			console.error(`[ApiService Error] ${endpoint}:`, error);
+			const isGet = !options.method || options.method.toUpperCase() === "GET";
+			if (retries > 0 && isGet) {
+				await new Promise((r) => setTimeout(r, 800));
+				return this.request(endpoint, options, retries - 1);
+			}
+			console.warn(`[ApiService Network Warning] ${endpoint}:`, error.message);
 			return {
 				ok: false,
 				status: 500,
@@ -41476,7 +41481,7 @@ var PortalApiService = class {
 	constructor(baseUrl = "/portal/api") {
 		this.baseUrl = baseUrl;
 	}
-	async request(endpoint, options = {}) {
+	async request(endpoint, options = {}, retries = 1) {
 		const url = `${this.baseUrl}${endpoint}`;
 		const defaultHeaders = { "Accept": "application/json" };
 		if (options.body && !(options.body instanceof FormData)) defaultHeaders["Content-Type"] = "application/json";
@@ -41497,7 +41502,12 @@ var PortalApiService = class {
 				data
 			};
 		} catch (error) {
-			console.error(`[PortalApiService Error] ${endpoint}:`, error);
+			const isGet = !options.method || options.method.toUpperCase() === "GET";
+			if (retries > 0 && isGet) {
+				await new Promise((r) => setTimeout(r, 800));
+				return this.request(endpoint, options, retries - 1);
+			}
+			console.warn(`[PortalApiService Network Warning] ${endpoint}:`, error.message);
 			return {
 				ok: false,
 				status: 500,
