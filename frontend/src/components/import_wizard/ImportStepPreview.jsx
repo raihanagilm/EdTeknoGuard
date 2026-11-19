@@ -26,6 +26,7 @@ export function ImportStepPreview({
   toggleSelectRow,
   setImportStep,
   importLoading,
+  importProgress = { current: 0, total: 0, percent: 0 },
   handleExecuteImport,
   handleCloseModal
 }) {
@@ -622,45 +623,72 @@ export function ImportStepPreview({
       </div>
 
       {/* Step 3 Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-[#CCDDF0] font-sans">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-[#CCDDF0] font-sans">
         <button
           type="button"
+          disabled={importLoading}
           onClick={() => setImportStep(2)}
-          className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition flex items-center gap-1.5 cursor-pointer"
+          className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
           title="Kembali ke Pemetaan (Esc)"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Kembali ke Pemetaan</span>
           <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]">Esc</kbd>
         </button>
-        {importLoading && handleCloseModal && (
+
+        {/* Informative Progress Bar (Anti-Slop) */}
+        {importLoading && importProgress.total > 0 && (
+          <div className="flex-1 max-w-xs mx-auto w-full px-2">
+            <div className="flex justify-between items-center text-[11px] font-mono text-[#3B5B78] mb-1">
+              <span className="font-semibold text-[#026AA7] flex items-center gap-1">
+                <RefreshCw className="w-3 h-3 animate-spin text-[#026AA7]" />
+                Menyimpan data...
+              </span>
+              <span className="font-bold">{importProgress.current} / {importProgress.total} ({importProgress.percent}%)</span>
+            </div>
+            <div className="w-full bg-[#E2EDF8] rounded-full h-2 overflow-hidden border border-[#CCDDF0]">
+              <div
+                className="bg-[#026AA7] h-2 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${importProgress.percent}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 justify-end">
+          {importLoading && handleCloseModal && (
+            <button
+              type="button"
+              onClick={handleCloseModal}
+              className="px-3 py-2 rounded-lg border border-[#CCDDF0] text-[#026AA7] hover:bg-[#E0F0FF] text-xs font-semibold transition cursor-pointer"
+              title="Tutup modal dan biarkan proses penyimpanan selesai di latar belakang"
+            >
+              Lanjutkan di Latar Belakang
+            </button>
+          )}
           <button
             type="button"
-            onClick={handleCloseModal}
-            className="px-3 py-2 rounded-lg border border-[#CCDDF0] text-[#026AA7] hover:bg-[#E0F0FF] text-xs font-semibold transition cursor-pointer"
-            title="Tutup modal dan biarkan proses penyimpanan selesai di latar belakang"
+            disabled={importLoading || readyToSaveCount === 0}
+            onClick={handleExecuteImport}
+            className="px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
           >
-            Lanjutkan di Latar Belakang
+            {importLoading ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>
+                  {importProgress.total > 0
+                    ? `Menyimpan (${importProgress.percent}%)`
+                    : 'Menyimpan ke Database...'}
+                </span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Terapkan Pengayaan ({readyToSaveCount} Data)</span>
+              </>
+            )}
           </button>
-        )}
-        <button
-          type="button"
-          disabled={importLoading || readyToSaveCount === 0}
-          onClick={handleExecuteImport}
-          className="px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
-        >
-          {importLoading ? (
-            <>
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>Menyimpan ke Database...</span>
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Terapkan Pengayaan ({readyToSaveCount} Data)</span>
-            </>
-          )}
-        </button>
+        </div>
       </div>
     </div>
   )

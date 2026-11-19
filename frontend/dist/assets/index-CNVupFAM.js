@@ -31781,7 +31781,11 @@ function ImportStepMapping({ PRIMARY_FIELDS, ADVANCED_FIELDS, importMapping, set
 }
 //#endregion
 //#region src/components/import_wizard/ImportStepPreview.jsx
-function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilter, setStatusFilter, previewSearchQuery = "", setPreviewSearchQuery = () => {}, selectedImportIndices, setSelectedImportIndices, setAllDuplicatesAction, filteredIndices, isAllFilteredSelected, toggleSelectAllFiltered, toggleSelectRow, setImportStep, importLoading, handleExecuteImport, handleCloseModal }) {
+function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilter, setStatusFilter, previewSearchQuery = "", setPreviewSearchQuery = () => {}, selectedImportIndices, setSelectedImportIndices, setAllDuplicatesAction, filteredIndices, isAllFilteredSelected, toggleSelectAllFiltered, toggleSelectRow, setImportStep, importLoading, importProgress = {
+	current: 0,
+	total: 0,
+	percent: 0
+}, handleExecuteImport, handleCloseModal }) {
 	const readyToSaveCount = importPreviewData.filter((r) => r._action !== "skip").length;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "space-y-4 font-mono text-xs",
@@ -32279,12 +32283,13 @@ function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilt
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between pt-3 border-t border-[#CCDDF0] font-sans",
+				className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-[#CCDDF0] font-sans",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
+						disabled: importLoading,
 						onClick: () => setImportStep(2),
-						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition flex items-center gap-1.5 cursor-pointer",
+						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
 						title: "Kembali ke Pemetaan (Esc)",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-3.5 h-3.5" }),
@@ -32295,23 +32300,51 @@ function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilt
 							})
 						]
 					}),
-					importLoading && handleCloseModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						type: "button",
-						onClick: handleCloseModal,
-						className: "px-3 py-2 rounded-lg border border-[#CCDDF0] text-[#026AA7] hover:bg-[#E0F0FF] text-xs font-semibold transition cursor-pointer",
-						title: "Tutup modal dan biarkan proses penyimpanan selesai di latar belakang",
-						children: "Lanjutkan di Latar Belakang"
+					importLoading && importProgress.total > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 max-w-xs mx-auto w-full px-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex justify-between items-center text-[11px] font-mono text-[#3B5B78] mb-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "font-semibold text-[#026AA7] flex items-center gap-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3 h-3 animate-spin text-[#026AA7]" }), "Menyimpan data..."]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "font-bold",
+								children: [
+									importProgress.current,
+									" / ",
+									importProgress.total,
+									" (",
+									importProgress.percent,
+									"%)"
+								]
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-full bg-[#E2EDF8] rounded-full h-2 overflow-hidden border border-[#CCDDF0]",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-[#026AA7] h-2 rounded-full transition-all duration-300 ease-out",
+								style: { width: `${importProgress.percent}%` }
+							})
+						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						type: "button",
-						disabled: importLoading || readyToSaveCount === 0,
-						onClick: handleExecuteImport,
-						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
-						children: importLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menyimpan ke Database..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-							"Terapkan Pengayaan (",
-							readyToSaveCount,
-							" Data)"
-						] })] })
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2 justify-end",
+						children: [importLoading && handleCloseModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: handleCloseModal,
+							className: "px-3 py-2 rounded-lg border border-[#CCDDF0] text-[#026AA7] hover:bg-[#E0F0FF] text-xs font-semibold transition cursor-pointer",
+							title: "Tutup modal dan biarkan proses penyimpanan selesai di latar belakang",
+							children: "Lanjutkan di Latar Belakang"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							disabled: importLoading || readyToSaveCount === 0,
+							onClick: handleExecuteImport,
+							className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer",
+							children: importLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: importProgress.total > 0 ? `Menyimpan (${importProgress.percent}%)` : "Menyimpan ke Database..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+								"Terapkan Pengayaan (",
+								readyToSaveCount,
+								" Data)"
+							] })] })
+						})]
 					})
 				]
 			})
@@ -32336,6 +32369,11 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 	const [existingDbIds, setExistingDbIds] = (0, import_react.useState)([]);
 	const [existingDbIps, setExistingDbIps] = (0, import_react.useState)([]);
 	const [importLoading, setImportLoading] = (0, import_react.useState)(false);
+	const [importProgress, setImportProgress] = (0, import_react.useState)({
+		current: 0,
+		total: 0,
+		percent: 0
+	});
 	const [importError, setImportError] = (0, import_react.useState)("");
 	const [importSuccess, setImportSuccess] = (0, import_react.useState)("");
 	const [statusFilter, setStatusFilter] = (0, import_react.useState)("ALL");
@@ -32372,6 +32410,11 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 		setExistingDbIds([]);
 		setExistingDbIps([]);
 		setImportLoading(false);
+		setImportProgress({
+			current: 0,
+			total: 0,
+			percent: 0
+		});
 		setImportError("");
 		setImportSuccess("");
 		setStatusFilter("ALL");
@@ -32792,35 +32835,70 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 		setImportLoading(true);
 		setImportError("");
 		setImportSuccess("");
+		setImportProgress({
+			current: 0,
+			total: validRows.length,
+			percent: 0
+		});
+		const CHUNK_SIZE = 75;
+		const chunks = [];
+		for (let i = 0; i < validRows.length; i += CHUNK_SIZE) chunks.push(validRows.slice(i, i + CHUNK_SIZE));
+		let totalImported = 0;
+		let totalUpdated = 0;
+		let totalSkipped = 0;
+		let totalFailed = 0;
+		let allErrors = [];
+		let processedCount = 0;
 		try {
-			const res = await fetch("/api/customers/import/execute", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					data: validRows,
-					target_kantor: activeOffice || "cabang"
-				})
-			});
-			const data = await res.json();
-			if (res.ok && data.status === "success") {
-				const msg = data.message || "Data pelanggan berhasil disimpan ke database!";
-				setImportSuccess(msg);
-				if (isBackgroundRef.current) {
-					if (onNotify) onNotify(msg, "success");
-					if (onSuccess) onSuccess();
-				} else setTimeout(() => {
-					resetWizardState();
-					onClose();
-					if (onSuccess) onSuccess();
-					if (onNotify) onNotify(msg, "success");
-				}, 800);
-			} else {
-				const errMsg = data.detail || data.message || "Gagal menyimpan data import ke database.";
-				setImportError(errMsg);
-				if (isBackgroundRef.current && onNotify) onNotify(errMsg, "error");
+			for (let i = 0; i < chunks.length; i++) {
+				const chunk = chunks[i];
+				const res = await fetch("/api/customers/import/execute", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						data: chunk,
+						target_kantor: activeOffice || "cabang"
+					})
+				});
+				const data = await res.json();
+				if (res.ok && data.status === "success") {
+					const r = data.result || {};
+					totalImported += r.imported || 0;
+					totalUpdated += r.updated || 0;
+					totalSkipped += r.skipped || 0;
+					totalFailed += r.failed || 0;
+					if (r.errors && r.errors.length > 0) allErrors.push(...r.errors);
+				} else {
+					const errMsg = data.detail || data.message || `Gagal menyimpan batch ${i + 1} (${chunk.length} data) ke database.`;
+					throw new Error(errMsg);
+				}
+				processedCount += chunk.length;
+				const currentCount = Math.min(processedCount, validRows.length);
+				const percent = Math.round(currentCount / validRows.length * 100);
+				setImportProgress({
+					current: currentCount,
+					total: validRows.length,
+					percent
+				});
 			}
+			const summaryParts = [];
+			if (totalUpdated > 0) summaryParts.push(`${totalUpdated} diperbarui`);
+			if (totalImported > 0) summaryParts.push(`${totalImported} baru`);
+			if (totalSkipped > 0) summaryParts.push(`${totalSkipped} dilewati`);
+			if (totalFailed > 0) summaryParts.push(`${totalFailed} gagal`);
+			const finalMsg = `Pengayaan data berhasil diterapkan! (${summaryParts.join(", ") || "0 data"})`;
+			setImportSuccess(finalMsg);
+			if (isBackgroundRef.current) {
+				if (onNotify) onNotify(finalMsg, "success");
+				if (onSuccess) onSuccess();
+			} else setTimeout(() => {
+				resetWizardState();
+				onClose();
+				if (onSuccess) onSuccess();
+				if (onNotify) onNotify(finalMsg, "success");
+			}, 900);
 		} catch (err) {
-			const errMsg = "Gagal menghubungkan ke backend untuk eksekusi import.";
+			const errMsg = err.message || "Gagal menghubungkan ke backend untuk eksekusi import.";
 			setImportError(errMsg);
 			if (isBackgroundRef.current && onNotify) onNotify(errMsg, "error");
 		} finally {
@@ -32965,6 +33043,7 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 					toggleSelectRow: toggleSelectImportRow,
 					setImportStep,
 					importLoading,
+					importProgress,
 					handleExecuteImport,
 					handleCloseModal
 				})

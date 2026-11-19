@@ -31,6 +31,7 @@ export function CustomerImportWizard({
   const [existingDbIds, setExistingDbIds] = useState([])
   const [existingDbIps, setExistingDbIps] = useState([])
   const [importLoading, setImportLoading] = useState(false)
+  const [importProgress, setImportProgress] = useState({ current: 0, total: 0, percent: 0 })
   const [importError, setImportError] = useState('')
   const [importSuccess, setImportSuccess] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL') // ALL | VALID | DUPLICATE | ERROR
@@ -82,6 +83,7 @@ export function CustomerImportWizard({
     setExistingDbIds([])
     setExistingDbIps([])
     setImportLoading(false)
+    setImportProgress({ current: 0, total: 0, percent: 0 })
     setImportError('')
     setImportSuccess('')
     setStatusFilter('ALL')
@@ -570,41 +572,80 @@ export function CustomerImportWizard({
     setImportLoading(true)
     setImportError('')
     setImportSuccess('')
+    setImportProgress({ current: 0, total: validRows.length, percent: 0 })
+
+    const CHUNK_SIZE = 75
+    const chunks = []
+    for (let i = 0; i < validRows.length; i += CHUNK_SIZE) {
+      chunks.push(validRows.slice(i, i + CHUNK_SIZE))
+    }
+
+    let totalImported = 0
+    let totalUpdated = 0
+    let totalSkipped = 0
+    let totalFailed = 0
+    let allErrors = []
+    let processedCount = 0
 
     try {
-      const res = await fetch('/api/customers/import/execute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          data: validRows,
-          target_kantor: activeOffice || 'cabang'
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i]
+        const res = await fetch('/api/customers/import/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: chunk,
+            target_kantor: activeOffice || 'cabang'
+          })
         })
-      })
 
-      const data = await res.json()
-      if (res.ok && data.status === 'success') {
-        const msg = data.message || 'Data pelanggan berhasil disimpan ke database!'
-        setImportSuccess(msg)
-        if (isBackgroundRef.current) {
-          if (onNotify) onNotify(msg, 'success')
-          if (onSuccess) onSuccess()
+        const data = await res.json()
+        if (res.ok && data.status === 'success') {
+          const r = data.result || {}
+          totalImported += r.imported || 0
+          totalUpdated += r.updated || 0
+          totalSkipped += r.skipped || 0
+          totalFailed += r.failed || 0
+          if (r.errors && r.errors.length > 0) {
+            allErrors.push(...r.errors)
+          }
         } else {
-          setTimeout(() => {
-            resetWizardState()
-            onClose()
-            if (onSuccess) onSuccess()
-            if (onNotify) onNotify(msg, 'success')
-          }, 800)
+          const errMsg = data.detail || data.message || `Gagal menyimpan batch ${i + 1} (${chunk.length} data) ke database.`
+          throw new Error(errMsg)
         }
+
+        processedCount += chunk.length
+        const currentCount = Math.min(processedCount, validRows.length)
+        const percent = Math.round((currentCount / validRows.length) * 100)
+        setImportProgress({
+          current: currentCount,
+          total: validRows.length,
+          percent
+        })
+      }
+
+      const summaryParts = []
+      if (totalUpdated > 0) summaryParts.push(`${totalUpdated} diperbarui`)
+      if (totalImported > 0) summaryParts.push(`${totalImported} baru`)
+      if (totalSkipped > 0) summaryParts.push(`${totalSkipped} dilewati`)
+      if (totalFailed > 0) summaryParts.push(`${totalFailed} gagal`)
+
+      const finalMsg = `Pengayaan data berhasil diterapkan! (${summaryParts.join(', ') || '0 data'})`
+      setImportSuccess(finalMsg)
+
+      if (isBackgroundRef.current) {
+        if (onNotify) onNotify(finalMsg, 'success')
+        if (onSuccess) onSuccess()
       } else {
-        const errMsg = data.detail || data.message || 'Gagal menyimpan data import ke database.'
-        setImportError(errMsg)
-        if (isBackgroundRef.current && onNotify) {
-          onNotify(errMsg, 'error')
-        }
+        setTimeout(() => {
+          resetWizardState()
+          onClose()
+          if (onSuccess) onSuccess()
+          if (onNotify) onNotify(finalMsg, 'success')
+        }, 900)
       }
     } catch (err) {
-      const errMsg = 'Gagal menghubungkan ke backend untuk eksekusi import.'
+      const errMsg = err.message || 'Gagal menghubungkan ke backend untuk eksekusi import.'
       setImportError(errMsg)
       if (isBackgroundRef.current && onNotify) {
         onNotify(errMsg, 'error')
@@ -800,6 +841,7 @@ export function CustomerImportWizard({
             toggleSelectRow={toggleSelectImportRow}
             setImportStep={setImportStep}
             importLoading={importLoading}
+            importProgress={importProgress}
             handleExecuteImport={handleExecuteImport}
             handleCloseModal={handleCloseModal}
           />

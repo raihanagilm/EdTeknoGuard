@@ -375,6 +375,19 @@ class CustomerImporter:
         failed_count = 0
         errors = []
 
+        from app.core.security import get_password_hash
+        hash_cache = {}
+
+        def get_cached_hash(val: Optional[str]) -> Optional[str]:
+            if not val:
+                return None
+            s = str(val).strip()
+            if not s:
+                return None
+            if s not in hash_cache:
+                hash_cache[s] = get_password_hash(s)
+            return hash_cache[s]
+
         # Batch Pre-fetch: optimasi query dalam 2 SQL call untuk seluruh baris
         all_ips = set()
         all_ids = set()
@@ -490,6 +503,7 @@ class CustomerImporter:
                                     except Exception:
                                         pass
                                 existing_pel.id_pelanggan = target_id_pel
+                                pel_by_id[target_id_pel] = existing_pel
                                 if existing_ont:
                                     existing_ont.id_pelanggan = target_id_pel
                                 has_change = True
@@ -502,18 +516,17 @@ class CustomerImporter:
 
                         # 1. Update No. WhatsApp & Kata Sandi Portal
                         if new_wa:
-                            from app.core.security import get_password_hash
                             clean_wa = new_wa.strip()
                             if not existing_pel.no_hp:
                                 existing_pel.no_hp = clean_wa
-                                existing_pel.password_hash = get_password_hash(clean_wa)
+                                existing_pel.password_hash = get_cached_hash(clean_wa)
                                 has_change = True
                             elif selected_version == "new" and existing_pel.no_hp != clean_wa:
                                 existing_pel.no_hp = clean_wa
-                                existing_pel.password_hash = get_password_hash(clean_wa)
+                                existing_pel.password_hash = get_cached_hash(clean_wa)
                                 has_change = True
                             elif not existing_pel.password_hash:
-                                existing_pel.password_hash = get_password_hash(clean_wa)
+                                existing_pel.password_hash = get_cached_hash(clean_wa)
                                 has_change = True
 
                         # 2. Update Alamat
@@ -592,8 +605,7 @@ class CustomerImporter:
                             except Exception:
                                 raw_paket = None
                                 
-                        from app.core.security import get_password_hash
-                        init_hash = get_password_hash(new_wa.strip()) if new_wa else None
+                        init_hash = get_cached_hash(new_wa.strip()) if new_wa else None
                         new_pelanggan = Pelanggan(
                             id_pelanggan=id_pel,
                             nama=nama,
