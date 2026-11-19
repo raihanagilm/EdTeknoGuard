@@ -690,19 +690,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
                   {/* Kolom AKSI: Tombol Hubungi WA Langsung (Tanpa Titik Tiga) */}
                   <td className="py-2.5 px-3 text-right whitespace-nowrap">
                     {t.kategori === 'RESET_PASSWORD' ? (
-                      isSuperAdminOrAdmin ? (
-                        <button
-                          type="button"
-                          onClick={() => handleSendResetPasswordWA(t)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-bold shadow-xs transition cursor-pointer"
-                          title="Kirim Kata Sandi Baru langsung ke WhatsApp Pelanggan dan selesaikan tiket"
-                        >
-                          <Phone className="w-3.5 h-3.5 shrink-0" />
-                          <span>Kirim Sandi Baru</span>
-                        </button>
-                      ) : (
-                        <span className="text-xs font-semibold text-slate-400 italic">Hanya Admin</span>
-                      )
+                      <span className="text-slate-400 font-mono text-xs">-</span>
                     ) : (() => {
                       const cleanWa = t.no_wa ? t.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62') : '';
                       const waText = `Halo Bapak/Ibu ${t.nama_pelanggan}, kami dari Tim Teknis TeknoGuard NOC terkait keluhan tiket #${t.id_tiket} (${t.kategori}): "${t.deskripsi || ''}".`;
