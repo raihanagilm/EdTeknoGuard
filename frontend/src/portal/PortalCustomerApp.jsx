@@ -425,6 +425,8 @@ export function PortalCustomerApp() {
       setIsAuthenticated(false);
       setCustomer(null);
       setViewState('login');
+      window.history.pushState({}, '', '/portal');
+      setActiveTab('beranda');
     }
   };
 

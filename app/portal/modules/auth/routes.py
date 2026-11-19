@@ -7,6 +7,7 @@ import logging
 logger = logging.getLogger("portal_auth")
 
 from app.core.database import get_portal_db
+from app.core.tenant_database import TenantDatabaseManager
 from app.portal.services.customer_service import PortalCustomerService
 from app.portal.core.security import (
     get_current_customer_optional,
@@ -112,22 +113,25 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
         "lokasi_gps": data.get("lokasi_gps", "")
     }
 
-    # Audit Trail: Catat riwayat login pelanggan
-    cust_kantor = data.get("kantor")
-    t_db_log = TenantDatabaseManager.get_tenant_session(cust_kantor) if cust_kantor else db
+    # Audit Trail: Catat riwayat login pelanggan (dengan proteksi fail-safe)
     try:
-        from app.portal.services.customer_activity_service import CustomerActivityService
-        CustomerActivityService.record(
-            db=t_db_log,
-            id_pelanggan=data.get("id_pelanggan"),
-            aksi="LOGIN_PORTAL",
-            kategori="AUTH",
-            keterangan=f"Pelanggan berhasil login ke portal MyTekno ({data.get('nama')})",
-            request=request
-        )
-    finally:
-        if t_db_log != db:
-            t_db_log.close()
+        cust_kantor = data.get("kantor")
+        t_db_log = TenantDatabaseManager.get_tenant_session(cust_kantor) if cust_kantor else db
+        try:
+            from app.portal.services.customer_activity_service import CustomerActivityService
+            CustomerActivityService.record(
+                db=t_db_log,
+                id_pelanggan=data.get("id_pelanggan"),
+                aksi="LOGIN_PORTAL",
+                kategori="AUTH",
+                keterangan=f"Pelanggan berhasil login ke portal MyTekno ({data.get('nama')})",
+                request=request
+            )
+        finally:
+            if t_db_log != db:
+                t_db_log.close()
+    except Exception as e:
+        logger.warning(f"Gagal mencatat log aktivitas login portal: {e}")
 
     response = JSONResponse(
         content={
@@ -153,21 +157,25 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
 def portal_auth_logout(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
     if cust and cust.get("id_pelanggan"):
-        k = cust.get("kantor")
-        t_db_out = TenantDatabaseManager.get_tenant_session(k) if k else db
+        # Audit Trail: Catat riwayat logout pelanggan (dengan proteksi fail-safe)
         try:
-            from app.portal.services.customer_activity_service import CustomerActivityService
-            CustomerActivityService.record(
-                db=t_db_out,
-                id_pelanggan=cust.get("id_pelanggan"),
-                aksi="LOGOUT_PORTAL",
-                kategori="AUTH",
-                keterangan="Pelanggan logout dari sesi portal MyTekno",
-                request=request
-            )
-        finally:
-            if t_db_out != db:
-                t_db_out.close()
+            k = cust.get("kantor")
+            t_db_out = TenantDatabaseManager.get_tenant_session(k) if k else db
+            try:
+                from app.portal.services.customer_activity_service import CustomerActivityService
+                CustomerActivityService.record(
+                    db=t_db_out,
+                    id_pelanggan=cust.get("id_pelanggan"),
+                    aksi="LOGOUT_PORTAL",
+                    kategori="AUTH",
+                    keterangan="Pelanggan logout dari sesi portal MyTekno",
+                    request=request
+                )
+            finally:
+                if t_db_out != db:
+                    t_db_out.close()
+        except Exception as e:
+            logger.warning(f"Gagal mencatat log aktivitas logout portal: {e}")
 
     response = JSONResponse(content={"ok": True, "message": "Logout berhasil!"})
     response.delete_cookie(CUSTOMER_SESSION_COOKIE, path="/")

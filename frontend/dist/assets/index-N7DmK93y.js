@@ -49194,6 +49194,8 @@ function PortalCustomerApp() {
 			setIsAuthenticated(false);
 			setCustomer(null);
 			setViewState("login");
+			window.history.pushState({}, "", "/portal");
+			setActiveTab("beranda");
 		}
 	};
 	if (loading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
