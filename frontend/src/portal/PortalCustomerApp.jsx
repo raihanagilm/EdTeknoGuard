@@ -22,6 +22,7 @@ import {
 import { PortalErrorView } from './components/common/PortalErrorView';
 import { PortalSemanticSkeleton } from './components/common/PortalSemanticSkeleton';
 import { PortalToastNotification } from './components/common/PortalToastNotification';
+import { PortalLegalPage } from './components/legal/PortalLegalPage';
 import { checkHasUnreadNotifications } from './utils/notificationUtils';
 import { RefreshCw } from 'lucide-react';
 
@@ -41,6 +42,9 @@ export function PortalCustomerApp() {
     if (parts.length >= 2 && (parts[0] === 'mytekno' || parts[0] === 'teknocust' || parts[0] === 'portal')) {
       const sub = parts[1];
       if (['beranda', 'kendala', 'wifi', 'kuota', 'profil', 'pembayaran', 'notifikasi'].includes(sub)) {
+        return sub;
+      }
+      if (['kebijakan-privasi', 'privasi', 'privacy-policy', 'syarat-ketentuan', 'terms'].includes(sub)) {
         return sub;
       }
       if (['login', 'masuk', 'auth', 'daftar'].includes(sub)) {
@@ -429,6 +433,23 @@ export function PortalCustomerApp() {
       <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center">
         <PortalSemanticSkeleton tab="app" />
       </div>
+    );
+  }
+
+  if (['kebijakan-privasi', 'privasi', 'privacy-policy', 'syarat-ketentuan', 'terms'].includes(activeTab)) {
+    return (
+      <PortalLegalPage
+        initialTab={activeTab}
+        onBack={() => {
+          if (isAuthenticated) {
+            switchTab('profil');
+          } else {
+            setViewState('login');
+            window.history.pushState({}, '', '/portal');
+            setActiveTab('beranda');
+          }
+        }}
+      />
     );
   }
 

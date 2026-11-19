@@ -20,17 +20,20 @@ import {
   Wifi,
   Pencil,
   Camera,
-  Trash2
+  Trash2,
+  FileText
 } from 'lucide-react';
 import { PortalProfilService } from '../../services/portalApi';
 import { PortalActiveMascot } from '../common/PortalActiveMascot';
 import { PortalHeader } from '../layout/PortalHeader';
 import { PortalToastNotification } from '../common/PortalToastNotification';
+import { PortalLegalModal } from '../modals/PortalLegalModal';
 
 export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdate, onLogout, onOpenNotifications, hasUnreadNotifications }) {
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [legalModal, setLegalModal] = useState({ open: false, tab: 'privasi' });
 
   // Floating Toast State (Pengganti banner inline)
   const [toast, setToast] = useState({ show: false, message: '', type: 'success', title: '' });
@@ -524,6 +527,42 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                 </div>
               )}
             </div>
+
+            {/* 3. Kebijakan Privasi & Izin Aplikasi */}
+            <button
+              type="button"
+              onClick={() => setLegalModal({ open: true, tab: 'privasi' })}
+              className="w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Kebijakan Privasi &amp; Izin Aplikasi</div>
+                  <div className="text-[11px] text-slate-500 font-medium">Transparansi sensor GPS, galeri foto, &amp; data akun</div>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+            </button>
+
+            {/* 4. Syarat & Ketentuan Layanan */}
+            <button
+              type="button"
+              onClick={() => setLegalModal({ open: true, tab: 'syarat' })}
+              className="w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Syarat &amp; Ketentuan Layanan</div>
+                  <div className="text-[11px] text-slate-500 font-medium">Hak, kewajiban, &amp; ketentuan langganan internet</div>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+            </button>
           </section>
 
           {/* ═══ TOMBOL LOGOUT DARI AKUN PORTAL ═══ */}
@@ -694,6 +733,13 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
         title={toast.title}
         message={toast.message}
         onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+      />
+
+      {/* ═══ MODAL KEBIJAKAN PRIVASI & SYARAT KETENTUAN ═══ */}
+      <PortalLegalModal
+        isOpen={legalModal.open}
+        initialTab={legalModal.tab}
+        onClose={() => setLegalModal({ open: false, tab: 'privasi' })}
       />
     </div>
   );

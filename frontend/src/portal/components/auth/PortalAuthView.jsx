@@ -10,6 +10,7 @@ import {
   Info
 } from 'lucide-react';
 import { PortalAuthService } from '../../services/portalApi';
+import { PortalLegalModal } from '../modals/PortalLegalModal';
 import '../../../styles/mascots/mascot-menyapa.css';
 
 /* ░░░ Komponen Maskot Animasi Si Router Menyapa (menyapa.html) ░░░ */
@@ -163,6 +164,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [legalModal, setLegalModal] = useState({ open: false, tab: 'privasi' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -356,15 +358,41 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                   </div>
                 )}
               </div>
+              {/* Disclaimer Syarat & Privasi */}
+              <div className="pt-2 text-center text-[10.5px] text-slate-500 leading-normal">
+                Dengan masuk, Anda menyetujui{' '}
+                <button
+                  type="button"
+                  onClick={() => setLegalModal({ open: true, tab: 'syarat' })}
+                  className="text-blue-600 font-semibold hover:underline cursor-pointer"
+                >
+                  Syarat &amp; Ketentuan
+                </button>{' '}
+                serta{' '}
+                <button
+                  type="button"
+                  onClick={() => setLegalModal({ open: true, tab: 'privasi' })}
+                  className="text-blue-600 font-semibold hover:underline cursor-pointer"
+                >
+                  Kebijakan Privasi
+                </button>{' '}
+                MyTekno.
+              </div>
             </div>
 
             {/* Footer copyright */}
-            <div className="pt-3 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0">
+            <div className="pt-2 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0">
               &copy; 2026 MyTekno &bull; Portal Layanan Mandiri Pelanggan
             </div>
           </div>
         </div>
 
+        {/* Modal Legal (Privasi & Syarat Ketentuan) */}
+        <PortalLegalModal
+          isOpen={legalModal.open}
+          initialTab={legalModal.tab}
+          onClose={() => setLegalModal({ open: false, tab: 'privasi' })}
+        />
       </div>
     </div>
   );

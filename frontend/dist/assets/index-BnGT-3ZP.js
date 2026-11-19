@@ -41641,6 +41641,236 @@ var PortalPembayaranService = class {
 };
 new PortalApiService();
 //#endregion
+//#region src/portal/components/modals/PortalLegalModal.jsx
+function PortalLegalModal({ isOpen, onClose, initialTab = "privasi" }) {
+	const [activeTab, setActiveTab] = (0, import_react.useState)(initialTab);
+	if (!isOpen) return null;
+	return typeof document !== "undefined" ? (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn font-sans",
+		onClick: (e) => {
+			if (e.target === e.currentTarget) onClose();
+		},
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] animate-scaleUp",
+			onClick: (e) => e.stopPropagation(),
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "p-4 pb-3 border-b border-slate-100 flex items-center justify-between bg-white shrink-0",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2.5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
+							children: activeTab === "privasi" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-4 h-4" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-sm font-bold text-slate-900 leading-tight",
+							children: activeTab === "privasi" ? "Kebijakan Privasi & Izin" : "Syarat & Ketentuan Layanan"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[10px] text-slate-500 font-mono",
+							children: "MyTekno Customer Care"
+						})] })]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: onClose,
+						className: "w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer",
+						title: "Tutup Modal",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "p-2.5 bg-slate-50/80 border-b border-slate-100 shrink-0",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid grid-cols-2 gap-1.5 p-1 bg-slate-200/70 rounded-xl text-xs font-semibold",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: () => setActiveTab("privasi"),
+							className: `py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer ${activeTab === "privasi" ? "bg-white text-blue-700 font-bold shadow-2xs" : "text-slate-600 hover:text-slate-900"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kebijakan Privasi" })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: () => setActiveTab("syarat"),
+							className: `py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer ${activeTab === "syarat" ? "bg-white text-blue-700 font-bold shadow-2xs" : "text-slate-600 hover:text-slate-900"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Syarat & Ketentuan" })]
+						})]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "p-4 space-y-4 overflow-y-auto text-xs text-slate-600 leading-relaxed",
+					children: activeTab === "privasi" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3 rounded-xl bg-blue-50/60 border border-blue-100 text-blue-900 space-y-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1.5 font-bold text-xs",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-4 h-4 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Transparansi Penggunaan Data & Sensor" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11px] text-blue-800 leading-snug",
+								children: "Aplikasi MyTekno dirancang untuk mempermudah layanan pelanggan internet mandiri. Kami hanya meminta izin perangkat yang benar-benar esensial untuk kebutuhan operasional Anda."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3.5 rounded-xl border border-slate-200/80 bg-white space-y-2",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-2 text-slate-900 font-bold",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "w-6 h-6 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center shrink-0",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3.5 h-3.5" })
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "1. Izin Lokasi Presisi (GPS)" })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-[11.5px] text-slate-600",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Tujuan:" }), " Memetakan koordinat fisik rumah pelanggan ke peta operasional NOC TeknoGuard saat Anda terhubung ke sinyal WiFi rumah."]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100 space-y-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "font-semibold text-slate-700 flex items-center gap-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3 h-3 text-emerald-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Komitmen Perlindungan:" })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+										"Aplikasi ",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "TIDAK melacak pergerakan lokasi Anda secara berkala di latar belakang" }),
+										". Koordinat hanya dikunci sekali untuk memastikan teknisi piket dapat menuju ke rumah Anda secara cepat saat terjadi gangguan fisik kabel fiber optik atau redaman drop."
+									] })]
+								})
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3.5 rounded-xl border border-slate-200/80 bg-white space-y-2",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-2 text-slate-900 font-bold",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "w-6 h-6 rounded-md bg-purple-50 text-purple-600 flex items-center justify-center shrink-0",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { className: "w-3.5 h-3.5" })
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "2. Izin Akses Galeri & Kamera" })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-[11.5px] text-slate-600",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Tujuan:" }), " Digunakan secara khusus saat Anda memilih untuk mengambil atau mengganti foto profil akun MyTekno serta mengunggah bukti transfer pembayaran tagihan."]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100",
+									children: [
+										"Aplikasi ",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "tidak pernah membaca, memindai, atau mengunggah berkas foto pribadi lainnya" }),
+										" di memori penyimpanan ponsel Anda. Foto profil otomatis dikompresi menjadi format WebP berukuran kecil demi keamanan bandwidth."
+									]
+								})
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3.5 rounded-xl border border-slate-200/80 bg-white space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 text-slate-900 font-bold",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: "w-3.5 h-3.5" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "3. Data Transaksi Pembayaran" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-[11.5px] text-slate-600",
+								children: [
+									"Informasi penagihan bulanan, nomor Virtual Account, dan riwayat transaksi internet Anda dilindungi dengan enkripsi koneksi HTTPS resmi. MyTekno ",
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "tidak pernah menyimpan nomor kartu kredit/debit, PIN, atau data rahasia perbankan" }),
+									" Anda."
+								]
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3.5 rounded-xl border border-slate-200/80 bg-white space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 text-slate-900 font-bold",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-3.5 h-3.5" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "4. Keamanan Akun & Kepatuhan Hukum" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-[11.5px] text-slate-600",
+								children: [
+									"Nomor WhatsApp Anda hanya digunakan untuk verifikasi autentikasi masuk, pengiriman kata sandi resmi, dan informasi darurat koneksi internet. Seluruh kata sandi dienkripsi dengan standar ",
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: "one-way cryptographic hash" }),
+									". Kami menjamin kerahasiaan data Anda dan tidak pernah membagikannya kepada pihak ketiga tanpa persetujuan Anda sesuai ketentuan UU Perlindungan Data Pribadi."
+								]
+							})]
+						})
+					] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3 rounded-xl bg-slate-100 text-slate-800 space-y-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1.5 font-bold text-xs",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-4 h-4 text-slate-700 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Ketentuan Penggunaan Layanan MyTekno" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11px] text-slate-600 leading-snug",
+								children: "Syarat dan ketentuan ini mengatur hak, kewajiban, serta tata tertib penggunaan layanan internet dan aplikasi mandiri antara pelanggan dengan penyedia layanan."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-1.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+								className: "font-bold text-slate-900 flex items-center gap-1.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-3.5 h-3.5 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 1 • Layanan Sambungan Internet" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11.5px] text-slate-600 pl-5",
+								children: "Penyedia layanan menyediakan akses sambungan internet tanpa batas kuota (*unlimited*) dengan kapasitas kecepatan bandwidth sesuai paket langganan yang dipilih oleh pelanggan pada formulir pemasangan awal."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-1.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+								className: "font-bold text-slate-900 flex items-center gap-1.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Radio, { className: "w-3.5 h-3.5 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 2 • Pemantauan Otomatis & Pemeliharaan" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11.5px] text-slate-600 pl-5",
+								children: "Sistem EdTeknoGuard memantau daya redaman optik (*Optical Rx Power*) modem ONT secara berkala untuk mendeteksi penurunan kualitas sinyal sebelum terjadi pemutusan koneksi (*Loss of Signal / LOS*). Tim teknisi berhak melakukan pengecekan kabel fisik atau perbaikan sambungan lapangan demi menjaga stabilitas koneksi pelanggan."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-1.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+								className: "font-bold text-slate-900 flex items-center gap-1.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: "w-3.5 h-3.5 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 3 • Tagihan & Pembayaran" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11.5px] text-slate-600 pl-5",
+								children: "Pelanggan berkewajiban melakukan pembayaran tagihan langganan bulanan selambat-lambatnya pada tanggal jatuh tempo yang tercantum di aplikasi. Keterlambatan pembayaran setelah masa tenggang dapat mengakibatkan penonaktifan sementara (*isolir*) sambungan internet hingga tagihan diselesaikan."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-1.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+								className: "font-bold text-slate-900 flex items-center gap-1.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-3.5 h-3.5 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 4 • Perangkat Modem ONT & Aksesoris" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11.5px] text-slate-600 pl-5",
+								children: "Perangkat modem ONT dan adaptor listrik yang dipasang di tempat pelanggan merupakan aset operasional penyedia layanan. Pelanggan wajib menjaga fisik perangkat tersebut dari kerusakan akibat kelalaian, kebakaran, atau pemindahtanganan tanpa persetujuan resmi kantor layanan."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-1.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+								className: "font-bold text-slate-900 flex items-center gap-1.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 5 • Pelaporan Kendala Mandiri" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11.5px] text-slate-600 pl-5",
+								children: "Pelanggan dapat menyampaikan kendala internet secara mandiri melalui tab Kendala di aplikasi MyTekno. Tim teknisi piket akan merespons pengaduan sesuai urutan antrean dan prioritas gangguan operasional di lapangan."
+							})]
+						})
+					] })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "p-3.5 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between shrink-0 font-sans",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[10px] text-slate-400 font-mono",
+						children: "Pembaruan: November 2026"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: onClose,
+						className: "px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition active:scale-98 cursor-pointer",
+						children: "Saya Mengerti & Setuju"
+					})]
+				})
+			]
+		})
+	}), document.body) : null;
+}
+//#endregion
 //#region src/portal/components/auth/PortalResetPasswordView.jsx
 function RouterPusingMascot({ className = "w-28 h-20" }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -42161,6 +42391,10 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 	const [showPassword, setShowPassword] = (0, import_react.useState)(false);
 	const [loading, setLoading] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)("");
+	const [legalModal, setLegalModal] = (0, import_react.useState)({
+		open: false,
+		tab: "privasi"
+	});
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setLoading(true);
@@ -42183,187 +42417,228 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 		className: "h-[100dvh] w-full bg-slate-100 sm:bg-slate-200/80 flex items-center justify-center p-0 sm:p-4 text-slate-900 font-sans overflow-hidden",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "w-full sm:max-w-[440px] h-[100dvh] sm:h-[92dvh] bg-white sm:rounded-2xl sm:shadow-2xl sm:border sm:border-slate-200/80 flex flex-col overflow-hidden relative",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative bg-blue-600 h-[200px] sm:h-[220px] overflow-hidden shrink-0 border-b border-blue-700/60 shadow-xs",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "relative z-10 pt-4 px-5",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-							src: "/tekno-indo-logo.png",
-							alt: "TeknoIndonet Logo",
-							className: "w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "min-w-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "text-white text-xl font-bold tracking-tight leading-none",
-								children: ["My", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-blue-200",
-									children: "Tekno"
-								})]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "text-blue-100/90 text-xs mt-1 font-medium leading-tight",
-								children: "Layanan Mandiri Pelanggan"
-							})]
-						})]
-					})
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "absolute inset-0 flex items-center justify-center pt-12 pb-2 pointer-events-none",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterMenyapaMascot, { className: "w-24 h-20 sm:w-28 sm:h-22" })
-				})]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "relative -mt-4 bg-white rounded-t-2xl shadow-xl flex-1 flex flex-col justify-between overflow-y-auto z-10",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "px-5 pt-4 pb-4 sm:px-6 sm:pt-5 sm:pb-5 flex flex-col justify-between min-h-full",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "text-center mb-3 sm:mb-4",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-								className: "text-lg font-bold text-slate-900 tracking-tight",
-								children: "Masuk ke Akun Pelanggan"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-slate-500 mt-0.5",
-								children: "Masukkan nomor WhatsApp dan kata sandi Anda"
-							})]
-						}),
-						error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mb-3 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 shrink-0 text-rose-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: error })]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-							onSubmit: handleSubmit,
-							className: "space-y-3",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "space-y-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-										htmlFor: "identifier",
-										className: "text-xs font-semibold text-slate-700 block",
-										children: "Nomor WhatsApp Terdaftar"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-											id: "identifier",
-											type: "tel",
-											required: true,
-											value: identifier,
-											onChange: (e) => setIdentifier(e.target.value),
-											placeholder: "Contoh: 081234567890",
-											className: "w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[44px]"
-										})]
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "space-y-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex items-center justify-between",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-											htmlFor: "password",
-											className: "text-xs font-semibold text-slate-700",
-											children: "Kata Sandi (Password)"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											type: "button",
-											onClick: onGoToReset,
-											className: "text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer",
-											children: "Lupa Password?"
-										})]
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-												id: "password",
-												type: showPassword ? "text" : "password",
-												required: true,
-												value: password,
-												onChange: (e) => setPassword(e.target.value),
-												placeholder: "••••••••",
-												className: "w-full pl-9 pr-10 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition font-mono min-h-[44px]"
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-												type: "button",
-												onClick: () => setShowPassword(!showPassword),
-												className: "absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer",
-												"aria-label": showPassword ? "Sembunyikan password" : "Lihat password",
-												children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
-											})
-										]
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "flex items-center pt-0.5",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-										className: "inline-flex items-center gap-2 cursor-pointer select-none",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-											id: "remember",
-											type: "checkbox",
-											checked: rememberMe,
-											onChange: (e) => setRememberMe(e.target.checked),
-											className: "w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-xs text-slate-600 font-medium",
-											children: "Ingat Saya di Perangkat Ini"
-										})]
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									id: "btn-submit",
-									type: "submit",
-									disabled: loading,
-									className: "w-full mt-1 py-2.5 sm:py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xs transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: loading ? "Memproses..." : "Masuk ke Akun Saya" }), loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin shrink-0" })]
-								})
-							]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "rounded-xl border border-slate-200 overflow-hidden mt-3 sm:mt-4 bg-white",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								type: "button",
-								onClick: () => setIsInfoExpanded(!isInfoExpanded),
-								className: "w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "relative bg-blue-600 h-[200px] sm:h-[220px] overflow-hidden shrink-0 border-b border-blue-700/60 shadow-xs",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "relative z-10 pt-4 px-5",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+								src: "/tekno-indo-logo.png",
+								alt: "TeknoIndonet Logo",
+								className: "w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-xs shrink-0"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "min-w-0",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-2 text-xs font-semibold text-slate-700",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Informasi Akun Pelanggan" })]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1 text-[11px] text-slate-500",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: isInfoExpanded ? "Tutup" : "Lihat" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: `w-3.5 h-3.5 transition-transform duration-200 ${isInfoExpanded ? "rotate-180" : ""}` })]
-								})]
-							}), isInfoExpanded && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "px-3.5 pb-3 text-xs text-slate-600 space-y-2 border-t border-slate-200 animate-fadeIn",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "leading-relaxed pt-2",
-									children: [
-										"Aplikasi ini khusus pelanggan ",
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-											className: "text-blue-700",
-											children: "TeknoIndonet"
-										}),
-										". Cukup masukkan ",
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-											className: "text-blue-700 font-semibold",
-											children: "Nomor WhatsApp"
-										}),
-										" yang terdaftar saat pemasangan WiFi rumah Anda."
-									]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "leading-relaxed text-slate-600",
-									children: [
-										"Kata sandi awal adalah ",
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
-											className: "text-blue-700 font-semibold",
-											children: "Nomor WhatsApp terdaftar"
-										}),
-										" Anda. Setelah berhasil login, Anda dapat langsung memantau kuota, mengganti nama WiFi, hingga melaporkan kendala."
-									]
+									className: "text-white text-xl font-bold tracking-tight leading-none",
+									children: ["My", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-blue-200",
+										children: "Tekno"
+									})]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "text-blue-100/90 text-xs mt-1 font-medium leading-tight",
+									children: "Layanan Mandiri Pelanggan"
 								})]
 							})]
 						})
-					] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "pt-3 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0",
-						children: "© 2026 MyTekno • Portal Layanan Mandiri Pelanggan"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "absolute inset-0 flex items-center justify-center pt-12 pb-2 pointer-events-none",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterMenyapaMascot, { className: "w-24 h-20 sm:w-28 sm:h-22" })
 					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "relative -mt-4 bg-white rounded-t-2xl shadow-xl flex-1 flex flex-col justify-between overflow-y-auto z-10",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "px-5 pt-4 pb-4 sm:px-6 sm:pt-5 sm:pb-5 flex flex-col justify-between min-h-full",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-center mb-3 sm:mb-4",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+									className: "text-lg font-bold text-slate-900 tracking-tight",
+									children: "Masuk ke Akun Pelanggan"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-slate-500 mt-0.5",
+									children: "Masukkan nomor WhatsApp dan kata sandi Anda"
+								})]
+							}),
+							error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "mb-3 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 shrink-0 text-rose-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: error })]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+								onSubmit: handleSubmit,
+								className: "space-y-3",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "space-y-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+											htmlFor: "identifier",
+											className: "text-xs font-semibold text-slate-700 block",
+											children: "Nomor WhatsApp Terdaftar"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "relative",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+												id: "identifier",
+												type: "tel",
+												required: true,
+												value: identifier,
+												onChange: (e) => setIdentifier(e.target.value),
+												placeholder: "Contoh: 081234567890",
+												className: "w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition min-h-[44px]"
+											})]
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "space-y-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex items-center justify-between",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+												htmlFor: "password",
+												className: "text-xs font-semibold text-slate-700",
+												children: "Kata Sandi (Password)"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												type: "button",
+												onClick: onGoToReset,
+												className: "text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer",
+												children: "Lupa Password?"
+											})]
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "relative",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+													id: "password",
+													type: showPassword ? "text" : "password",
+													required: true,
+													value: password,
+													onChange: (e) => setPassword(e.target.value),
+													placeholder: "••••••••",
+													className: "w-full pl-9 pr-10 py-2.5 rounded-lg border border-slate-300 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition font-mono min-h-[44px]"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+													type: "button",
+													onClick: () => setShowPassword(!showPassword),
+													className: "absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer",
+													"aria-label": showPassword ? "Sembunyikan password" : "Lihat password",
+													children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
+												})
+											]
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "flex items-center pt-0.5",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+											className: "inline-flex items-center gap-2 cursor-pointer select-none",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+												id: "remember",
+												type: "checkbox",
+												checked: rememberMe,
+												onChange: (e) => setRememberMe(e.target.checked),
+												className: "w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-xs text-slate-600 font-medium",
+												children: "Ingat Saya di Perangkat Ini"
+											})]
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										id: "btn-submit",
+										type: "submit",
+										disabled: loading,
+										className: "w-full mt-1 py-2.5 sm:py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xs transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer min-h-[44px]",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: loading ? "Memproses..." : "Masuk ke Akun Saya" }), loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin shrink-0" })]
+									})
+								]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "rounded-xl border border-slate-200 overflow-hidden mt-3 sm:mt-4 bg-white",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									type: "button",
+									onClick: () => setIsInfoExpanded(!isInfoExpanded),
+									className: "w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-2 text-xs font-semibold text-slate-700",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Informasi Akun Pelanggan" })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1 text-[11px] text-slate-500",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: isInfoExpanded ? "Tutup" : "Lihat" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: `w-3.5 h-3.5 transition-transform duration-200 ${isInfoExpanded ? "rotate-180" : ""}` })]
+									})]
+								}), isInfoExpanded && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "px-3.5 pb-3 text-xs text-slate-600 space-y-2 border-t border-slate-200 animate-fadeIn",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+										className: "leading-relaxed pt-2",
+										children: [
+											"Aplikasi ini khusus pelanggan ",
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+												className: "text-blue-700",
+												children: "TeknoIndonet"
+											}),
+											". Cukup masukkan ",
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+												className: "text-blue-700 font-semibold",
+												children: "Nomor WhatsApp"
+											}),
+											" yang terdaftar saat pemasangan WiFi rumah Anda."
+										]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+										className: "leading-relaxed text-slate-600",
+										children: [
+											"Kata sandi awal adalah ",
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+												className: "text-blue-700 font-semibold",
+												children: "Nomor WhatsApp terdaftar"
+											}),
+											" Anda. Setelah berhasil login, Anda dapat langsung memantau kuota, mengganti nama WiFi, hingga melaporkan kendala."
+										]
+									})]
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "pt-2 text-center text-[10.5px] text-slate-500 leading-normal",
+								children: [
+									"Dengan masuk, Anda menyetujui",
+									" ",
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: () => setLegalModal({
+											open: true,
+											tab: "syarat"
+										}),
+										className: "text-blue-600 font-semibold hover:underline cursor-pointer",
+										children: "Syarat & Ketentuan"
+									}),
+									" ",
+									"serta",
+									" ",
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: () => setLegalModal({
+											open: true,
+											tab: "privasi"
+										}),
+										className: "text-blue-600 font-semibold hover:underline cursor-pointer",
+										children: "Kebijakan Privasi"
+									}),
+									" ",
+									"MyTekno."
+								]
+							})
+						] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "pt-2 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0",
+							children: "© 2026 MyTekno • Portal Layanan Mandiri Pelanggan"
+						})]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalLegalModal, {
+					isOpen: legalModal.open,
+					initialTab: legalModal.tab,
+					onClose: () => setLegalModal({
+						open: false,
+						tab: "privasi"
+					})
 				})
-			})]
+			]
 		})
 	});
 }
@@ -46317,6 +46592,10 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 	const [isPasswordExpanded, setIsPasswordExpanded] = (0, import_react.useState)(false);
 	const [isEditModalOpen, setIsEditModalOpen] = (0, import_react.useState)(false);
 	const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = (0, import_react.useState)(false);
+	const [legalModal, setLegalModal] = (0, import_react.useState)({
+		open: false,
+		tab: "privasi"
+	});
 	const [toast, setToast] = (0, import_react.useState)({
 		show: false,
 		message: "",
@@ -46694,102 +46973,147 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 							className: "bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden divide-y divide-slate-100",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								type: "button",
-								onClick: () => onNavigate && onNavigate("wifi"),
-								className: "w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-3",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-5 h-5" })
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-xs font-bold text-slate-900",
-										children: "Pengaturan WiFi Rumah"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-[11px] text-slate-500 font-medium",
-										children: "Ubah Nama SSID & Kata Sandi WiFi"
-									})] })]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4 text-slate-400 shrink-0" })]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								type: "button",
-								onClick: () => setIsPasswordExpanded(!isPasswordExpanded),
-								className: "w-full p-4 flex items-center justify-between text-left hover:bg-gray-50/70 transition cursor-pointer",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-3",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-5 h-5" })
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "portal-body-bold text-gray-900",
-										children: "Ganti Kata Sandi Akun"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "portal-caption text-gray-500 font-medium",
-										children: "Amankan akses masuk portal mandiri"
-									})] })]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: `w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${isPasswordExpanded ? "rotate-180" : ""}` })]
-							}), isPasswordExpanded && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "p-4 pt-1 space-y-4 border-t border-gray-100 bg-gray-50/50",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-									onSubmit: handleChangePassword,
-									className: "space-y-3 text-xs font-semibold",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "space-y-1.5",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-												className: "text-gray-700 block",
-												children: "Kata Sandi Baru"
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "relative",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-													type: showPasswordBaru ? "text" : "password",
-													required: true,
-													value: passwordBaru,
-													onChange: (e) => setPasswordBaru(e.target.value),
-													placeholder: "Minimal 6 karakter",
-													className: "w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white border border-gray-200 text-xs text-gray-900 font-mono focus:outline-none focus:border-blue-600 min-h-[42px]"
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-													type: "button",
-													onClick: () => setShowPasswordBaru(!showPasswordBaru),
-													className: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 cursor-pointer",
-													"aria-label": "Lihat kata sandi baru",
-													children: showPasswordBaru ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" })
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									type: "button",
+									onClick: () => onNavigate && onNavigate("wifi"),
+									className: "w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-3",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-xs font-bold text-slate-900",
+											children: "Pengaturan WiFi Rumah"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-[11px] text-slate-500 font-medium",
+											children: "Ubah Nama SSID & Kata Sandi WiFi"
+										})] })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4 text-slate-400 shrink-0" })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									type: "button",
+									onClick: () => setIsPasswordExpanded(!isPasswordExpanded),
+									className: "w-full p-4 flex items-center justify-between text-left hover:bg-gray-50/70 transition cursor-pointer",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-3",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "portal-body-bold text-gray-900",
+											children: "Ganti Kata Sandi Akun"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "portal-caption text-gray-500 font-medium",
+											children: "Amankan akses masuk portal mandiri"
+										})] })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: `w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${isPasswordExpanded ? "rotate-180" : ""}` })]
+								}), isPasswordExpanded && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "p-4 pt-1 space-y-4 border-t border-gray-100 bg-gray-50/50",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+										onSubmit: handleChangePassword,
+										className: "space-y-3 text-xs font-semibold",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "space-y-1.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+													className: "text-gray-700 block",
+													children: "Kata Sandi Baru"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "relative",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+														type: showPasswordBaru ? "text" : "password",
+														required: true,
+														value: passwordBaru,
+														onChange: (e) => setPasswordBaru(e.target.value),
+														placeholder: "Minimal 6 karakter",
+														className: "w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white border border-gray-200 text-xs text-gray-900 font-mono focus:outline-none focus:border-blue-600 min-h-[42px]"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+														type: "button",
+														onClick: () => setShowPasswordBaru(!showPasswordBaru),
+														className: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 cursor-pointer",
+														"aria-label": "Lihat kata sandi baru",
+														children: showPasswordBaru ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" })
+													})]
 												})]
-											})]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "space-y-1.5",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-												className: "text-gray-700 block",
-												children: "Konfirmasi Kata Sandi Baru"
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "relative",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-													type: showPasswordKonfirm ? "text" : "password",
-													required: true,
-													value: konfirmasiPassword,
-													onChange: (e) => setKonfirmasiPassword(e.target.value),
-													placeholder: "Ulangi kata sandi baru",
-													className: "w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white border border-gray-200 text-xs text-gray-900 font-mono focus:outline-none focus:border-blue-600 min-h-[42px]"
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-													type: "button",
-													onClick: () => setShowPasswordKonfirm(!showPasswordKonfirm),
-													className: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 cursor-pointer",
-													"aria-label": "Lihat konfirmasi kata sandi",
-													children: showPasswordKonfirm ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" })
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "space-y-1.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+													className: "text-gray-700 block",
+													children: "Konfirmasi Kata Sandi Baru"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "relative",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+														type: showPasswordKonfirm ? "text" : "password",
+														required: true,
+														value: konfirmasiPassword,
+														onChange: (e) => setKonfirmasiPassword(e.target.value),
+														placeholder: "Ulangi kata sandi baru",
+														className: "w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white border border-gray-200 text-xs text-gray-900 font-mono focus:outline-none focus:border-blue-600 min-h-[42px]"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+														type: "button",
+														onClick: () => setShowPasswordKonfirm(!showPasswordKonfirm),
+														className: "absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 cursor-pointer",
+														"aria-label": "Lihat konfirmasi kata sandi",
+														children: showPasswordKonfirm ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" })
+													})]
 												})]
-											})]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											type: "submit",
-											disabled: loading,
-											className: "w-full mt-2 py-3 px-4 rounded-xl text-white font-bold text-xs shadow-md shadow-blue-600/20 active:scale-[0.99] transition flex items-center justify-center gap-2 min-h-[44px] cursor-pointer disabled:opacity-50",
-											style: { background: "#2563eb" },
-											children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Kata Sandi Baru" })
-										})
-									]
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												type: "submit",
+												disabled: loading,
+												className: "w-full mt-2 py-3 px-4 rounded-xl text-white font-bold text-xs shadow-md shadow-blue-600/20 active:scale-[0.99] transition flex items-center justify-center gap-2 min-h-[44px] cursor-pointer disabled:opacity-50",
+												style: { background: "#2563eb" },
+												children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Kata Sandi Baru" })
+											})
+										]
+									})
+								})] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									type: "button",
+									onClick: () => setLegalModal({
+										open: true,
+										tab: "privasi"
+									}),
+									className: "w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-3",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-xs font-bold text-slate-900",
+											children: "Kebijakan Privasi & Izin Aplikasi"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-[11px] text-slate-500 font-medium",
+											children: "Transparansi sensor GPS, galeri foto, & data akun"
+										})] })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4 text-slate-400 shrink-0" })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									type: "button",
+									onClick: () => setLegalModal({
+										open: true,
+										tab: "syarat"
+									}),
+									className: "w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50/70 transition cursor-pointer",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-3",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-5 h-5" })
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-xs font-bold text-slate-900",
+											children: "Syarat & Ketentuan Layanan"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-[11px] text-slate-500 font-medium",
+											children: "Hak, kewajiban, & ketentuan langganan internet"
+										})] })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4 text-slate-400 shrink-0" })]
 								})
-							})] })]
+							]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "pt-1",
@@ -46948,6 +47272,14 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 					...prev,
 					show: false
 				}))
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalLegalModal, {
+				isOpen: legalModal.open,
+				initialTab: legalModal.tab,
+				onClose: () => setLegalModal({
+					open: false,
+					tab: "privasi"
+				})
 			})
 		]
 	});
@@ -47906,6 +48238,225 @@ function PortalSemanticSkeleton({ tab = "beranda" }) {
 	});
 }
 //#endregion
+//#region src/portal/components/legal/PortalLegalPage.jsx
+function PortalLegalPage({ initialTab = "privasi", onBack }) {
+	const [activeTab, setActiveTab] = (0, import_react.useState)(initialTab === "syarat-ketentuan" || initialTab === "syarat" ? "syarat" : "privasi");
+	const handleBack = () => {
+		if (onBack) onBack();
+		else window.location.href = "/portal";
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] text-slate-800 font-sans p-3 sm:p-6 antialiased flex flex-col justify-between",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col my-auto animate-scaleUp",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: handleBack,
+							className: "p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 transition cursor-pointer",
+							title: "Kembali",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-4 h-4" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-base sm:text-lg font-bold text-slate-900 leading-tight",
+							children: activeTab === "privasi" ? "Kebijakan Privasi & Izin Aplikasi" : "Syarat & Ketentuan Layanan"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs text-slate-500 font-mono",
+							children: "MyTekno • Layanan Mandiri Pelanggan"
+						})] })]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "px-4 py-3 bg-slate-50 border-b border-slate-100",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid grid-cols-2 gap-2 p-1 bg-slate-200/80 rounded-xl text-xs font-semibold",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: () => setActiveTab("privasi"),
+							className: `py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer ${activeTab === "privasi" ? "bg-white text-blue-700 font-bold shadow-2xs" : "text-slate-600 hover:text-slate-900"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kebijakan Privasi" })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: () => setActiveTab("syarat"),
+							className: `py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer ${activeTab === "syarat" ? "bg-white text-blue-700 font-bold shadow-2xs" : "text-slate-600 hover:text-slate-900"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Syarat & Ketentuan" })]
+						})]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "p-4 sm:p-6 space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed max-h-[70vh] overflow-y-auto",
+					children: activeTab === "privasi" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-blue-900 space-y-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 font-bold text-xs sm:text-sm",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-4 h-4 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Komitmen Privasi & Izin Sensor MyTekno" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-blue-800 leading-normal",
+								children: "Dokumen ini menjelaskan kebijakan privasi, tata kelola data, dan perizinan perangkat yang digunakan pada aplikasi mandiri pelanggan MyTekno."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-4 rounded-xl border border-slate-200 bg-white space-y-2",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-2 text-slate-900 font-bold",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-4 h-4" })
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "1. Izin Lokasi Perangkat (GPS)" })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-xs text-slate-600",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Tujuan:" }), " Memetakan titik koordinat fisik rumah pelanggan pada sistem NOC TeknoGuard saat Anda terhubung ke sinyal WiFi rumah pelanggan."]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "font-semibold text-slate-800 flex items-center gap-1.5",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5 text-emerald-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Jaminan Keamanan:" })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+										"Aplikasi ",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "TIDAK pernah melacak pergerakan lokasi Anda secara berkala di latar belakang" }),
+										" saat aplikasi ditutup. Koordinat hanya dipetakan untuk keperluan penanganan gangguan kabel optik atau kendala redaman oleh teknisi lapangan."
+									] })]
+								})
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-4 rounded-xl border border-slate-200 bg-white space-y-2",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-2 text-slate-900 font-bold",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { className: "w-4 h-4" })
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "2. Izin Akses Galeri & Kamera" })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-xs text-slate-600",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Tujuan:" }), " Digunakan hanya saat Anda memilih untuk mengambil atau mengganti foto profil akun MyTekno serta melampirkan foto struk bukti pembayaran tagihan."]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100",
+									children: [
+										"Aplikasi ",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "tidak memindai atau membaca berkas foto pribadi lainnya" }),
+										" di memori ponsel Anda. Foto profil otomatis dioptimasi dan dikompresi ke format WebP aman."
+									]
+								})
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-4 rounded-xl border border-slate-200 bg-white space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 text-slate-900 font-bold",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: "w-4 h-4" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "3. Keamanan Data Tagihan & Pembayaran" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-xs text-slate-600",
+								children: [
+									"Informasi tagihan bulanan dan nomor Virtual Account diproses menggunakan protokol enkripsi resmi. MyTekno ",
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "tidak pernah menyimpan nomor kartu kredit/debit, kode CVV, atau PIN perbankan pribadi Anda" }),
+									"."
+								]
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-4 rounded-xl border border-slate-200 bg-white space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 text-slate-900 font-bold",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-4 h-4" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "4. Perlindungan Data Akun & Kepatuhan UU PDP" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-xs text-slate-600",
+								children: [
+									"Nomor WhatsApp Anda hanya digunakan untuk verifikasi autentikasi resmi dan notifikasi operasional internet. Kata sandi dienkripsi dengan standar ",
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: "cryptographic hash" }),
+									" satu arah. Data Anda tidak pernah diperjualbelikan kepada pihak mana pun sesuai amanat UU Perlindungan Data Pribadi di Indonesia."
+								]
+							})]
+						})
+					] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3.5 rounded-xl bg-slate-100 text-slate-800 space-y-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 font-bold text-xs sm:text-sm",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-4 h-4 text-slate-700 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Syarat & Ketentuan Layanan Internet MyTekno" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-slate-600 leading-normal",
+								children: "Ketentuan ini mengatur tata cara berlangganan dan hak kewajiban pelanggan internet resmi."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								className: "font-bold text-slate-900 flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wifi, { className: "w-4 h-4 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 1 • Layanan Sambungan Internet" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-slate-600 pl-6",
+								children: "Penyedia layanan menyediakan akses internet tanpa batas kuota (*unlimited*) sesuai paket kecepatan bandwidth yang telah dipilih pada formulir pemasangan awal."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								className: "font-bold text-slate-900 flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Radio, { className: "w-4 h-4 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 2 • Pemantauan Daya Optik & Pemeliharaan" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-slate-600 pl-6",
+								children: "Sistem EdTeknoGuard memantau daya terima optik (*Optical Rx Power*) modem ONT secara berkala untuk mencegah terjadinya pemutusan sinyal (*Loss of Signal / LOS*). Tim teknisi berhak melakukan pengecekan kabel fisik lapangan demi menjaga kualitas koneksi Anda."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								className: "font-bold text-slate-900 flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CreditCard, { className: "w-4 h-4 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 3 • Kewajiban Pembayaran Tagihan" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-slate-600 pl-6",
+								children: "Pelanggan berkewajiban menyelesaikan pembayaran iuran bulanan selambat-lambatnya pada tanggal jatuh tempo. Keterlambatan pembayaran setelah batas masa tenggang dapat mengakibatkan isolir sementara hingga tagihan dilunasi."
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								className: "font-bold text-slate-900 flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pasal 4 • Tanggung Jawab Perangkat Modem" })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-slate-600 pl-6",
+								children: "Perangkat modem ONT dan adaptor yang terpasang merupakan aset operasional penyedia layanan. Pelanggan berkewajiban merawat fisik perangkat dan tidak memindahtangankannya tanpa persetujuan resmi kantor cabang."
+							})]
+						})
+					] })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[11px] text-slate-400 font-mono",
+						children: "MyTekno Legal Care • Nov 2026"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: handleBack,
+						className: "px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer",
+						children: "Kembali ke Portal"
+					})]
+				})
+			]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "text-center text-[11px] text-slate-400 font-mono py-2",
+			children: "© 2026 MyTekno • PT Tekno Indo Network. Seluruh hak cipta dilindungi undang-undang."
+		})]
+	});
+}
+//#endregion
 //#region src/portal/PortalCustomerApp.jsx
 function PortalCustomerApp() {
 	const [isAuthenticated, setIsAuthenticated] = (0, import_react.useState)(false);
@@ -47935,6 +48486,13 @@ function PortalCustomerApp() {
 				"profil",
 				"pembayaran",
 				"notifikasi"
+			].includes(sub)) return sub;
+			if ([
+				"kebijakan-privasi",
+				"privasi",
+				"privacy-policy",
+				"syarat-ketentuan",
+				"terms"
 			].includes(sub)) return sub;
 			if ([
 				"login",
@@ -48224,6 +48782,23 @@ function PortalCustomerApp() {
 	if (loading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "min-h-screen bg-[#f3f4f6] flex items-center justify-center",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalSemanticSkeleton, { tab: "app" })
+	});
+	if ([
+		"kebijakan-privasi",
+		"privasi",
+		"privacy-policy",
+		"syarat-ketentuan",
+		"terms"
+	].includes(activeTab)) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalLegalPage, {
+		initialTab: activeTab,
+		onBack: () => {
+			if (isAuthenticated) switchTab("profil");
+			else {
+				setViewState("login");
+				window.history.pushState({}, "", "/portal");
+				setActiveTab("beranda");
+			}
+		}
 	});
 	if (viewState === "reset") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalResetPasswordView, { onBackToLogin: () => setViewState("login") });
 	if (!isAuthenticated || viewState === "login") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalLoginView, {
