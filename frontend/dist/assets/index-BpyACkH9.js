@@ -36740,7 +36740,10 @@ function QuotaView({ activeOffice = "cabang", onNavigateCustomer }) {
 										className: "hidden sm:inline",
 										children: filterPaket !== "all" ? filterPaket : filterLevel !== "all" ? `Level: ${filterLevel}` : "Filter"
 									}),
-									(filterPaket !== "all" || filterLevel !== "all") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-2 h-2 rounded-full bg-white animate-pulse" })
+									(filterPaket !== "all" || filterLevel !== "all") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "px-1.5 py-0.5 rounded text-[10px] font-bold bg-white text-cyan-800 leading-none",
+										children: filterPaket !== "all" && filterLevel !== "all" ? "2" : "1"
+									})
 								]
 							}), filterDropdownOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "fixed inset-0 z-40",
@@ -39310,7 +39313,10 @@ function UsersView() {
 										className: "hidden md:inline",
 										children: filterRole !== "all" ? filterRole : filterStatus !== "all" ? `Status: ${filterStatus}` : "Filter"
 									}),
-									(filterRole !== "all" || filterStatus !== "all") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" })
+									(filterRole !== "all" || filterStatus !== "all") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "px-1.5 py-0.5 rounded text-[10px] font-bold bg-white text-cyan-800 leading-none",
+										children: filterRole !== "all" && filterStatus !== "all" ? "2" : "1"
+									})
 								]
 							}), filterDropdownOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "fixed inset-0 z-40",
@@ -40736,9 +40742,22 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 			})]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "overflow-y-auto divide-y divide-[#CCDDF0]/60 flex-1 p-1 max-h-[calc(85vh-110px)] bg-white",
-			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "p-8 text-center text-[#64839E] text-xs font-medium",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full animate-spin mx-auto mb-2" }), "Memuat notifikasi..."]
+			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "p-2 space-y-2 animate-pulse",
+				children: [...Array(4)].map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "p-3 rounded-lg border border-[#CCDDF0]/60 bg-white flex items-start gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 rounded-lg bg-slate-200 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 min-w-0 space-y-1.5",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex justify-between items-center",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-24 h-3.5 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-14 h-3 bg-slate-100 rounded" })]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-48 h-3.5 bg-slate-200 rounded" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-32 h-2.5 bg-slate-100 rounded" })
+						]
+					})]
+				}, i))
 			}) : notifications.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "p-8 text-center",
 				children: [
@@ -44241,18 +44260,20 @@ function ConnectedDevicesModal({ isOpen, onClose, devices, loading, scanning, on
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "p-3 sm:p-4 overflow-y-auto space-y-3.5 flex-1",
 					children: [loading && devices.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "py-12 flex flex-col items-center justify-center text-center",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-8 h-8 text-blue-500 animate-spin mb-3" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs font-bold text-slate-700",
-								children: "Memeriksa sambungan jaringan..."
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[11px] text-slate-400 mt-0.5",
-								children: "Mengambil daftar perangkat terhubung"
-							})
-						]
+						className: "space-y-2.5 animate-pulse",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between px-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-28 h-3 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-14 h-3 bg-slate-200 rounded" })]
+						}), [...Array(3)].map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "p-3 rounded-xl bg-white border border-slate-100 shadow-2xs flex items-center justify-between gap-2.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2.5 flex-1 min-w-0",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 rounded-lg bg-slate-200 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "space-y-1.5 flex-1 min-w-0",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-28 h-3.5 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-20 h-2.5 bg-slate-100 rounded" })]
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-7 h-7 rounded-lg bg-slate-100 shrink-0" })]
+						}, i))]
 					}) : devices.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "py-10 flex flex-col items-center justify-center text-center px-4",
 						children: [

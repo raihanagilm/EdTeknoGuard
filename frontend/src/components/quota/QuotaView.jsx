@@ -206,7 +206,9 @@ export function QuotaView({ activeOffice = 'cabang', onNavigateCustomer }) {
                     {filterPaket !== 'all' ? filterPaket : filterLevel !== 'all' ? `Level: ${filterLevel}` : 'Filter'}
                   </span>
                   {(filterPaket !== 'all' || filterLevel !== 'all') && (
-                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white text-cyan-800 leading-none">
+                      {filterPaket !== 'all' && filterLevel !== 'all' ? '2' : '1'}
+                    </span>
                   )}
                 </button>
 

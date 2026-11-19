@@ -404,7 +404,9 @@ export function UsersView() {
                     {filterRole !== 'all' ? filterRole : filterStatus !== 'all' ? `Status: ${filterStatus}` : 'Filter'}
                   </span>
                   {(filterRole !== 'all' || filterStatus !== 'all') && (
-                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" />
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white text-cyan-800 leading-none">
+                      {filterRole !== 'all' && filterStatus !== 'all' ? '2' : '1'}
+                    </span>
                   )}
                 </button>
 

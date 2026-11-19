@@ -185,9 +185,20 @@ export function NotificationsView({
         {/* Konten Notifikasi (List) */}
         <div className="overflow-y-auto divide-y divide-[#CCDDF0]/60 flex-1 p-1 max-h-[calc(85vh-110px)] bg-white">
           {loading ? (
-            <div className="p-8 text-center text-[#64839E] text-xs font-medium">
-              <div className="w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              Memuat notifikasi...
+            <div className="p-2 space-y-2 animate-pulse">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="p-3 rounded-lg border border-[#CCDDF0]/60 bg-white flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-200 shrink-0" />
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <div className="w-24 h-3.5 bg-slate-200 rounded" />
+                      <div className="w-14 h-3 bg-slate-100 rounded" />
+                    </div>
+                    <div className="w-48 h-3.5 bg-slate-200 rounded" />
+                    <div className="w-32 h-2.5 bg-slate-100 rounded" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center">

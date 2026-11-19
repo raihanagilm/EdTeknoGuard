@@ -206,10 +206,26 @@ export function ConnectedDevicesModal({
         {/* Modal Body / Device List */}
         <div className="p-3 sm:p-4 overflow-y-auto space-y-3.5 flex-1">
           {loading && devices.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center text-center">
-              <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mb-3" />
-              <p className="text-xs font-bold text-slate-700">Memeriksa sambungan jaringan...</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Mengambil daftar perangkat terhubung</p>
+            <div className="space-y-2.5 animate-pulse">
+              <div className="flex items-center justify-between px-1">
+                <div className="w-28 h-3 bg-slate-200 rounded" />
+                <div className="w-14 h-3 bg-slate-200 rounded" />
+              </div>
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="p-3 rounded-xl bg-white border border-slate-100 shadow-2xs flex items-center justify-between gap-2.5"
+                >
+                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-slate-200 shrink-0" />
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                      <div className="w-28 h-3.5 bg-slate-200 rounded" />
+                      <div className="w-20 h-2.5 bg-slate-100 rounded" />
+                    </div>
+                  </div>
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 shrink-0" />
+                </div>
+              ))}
             </div>
           ) : devices.length === 0 ? (
             <div className="py-10 flex flex-col items-center justify-center text-center px-4">
