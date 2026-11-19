@@ -880,11 +880,14 @@ class MikroTikSyncService:
         # Peta pelanggan di database tenant kantor ini
         pelanggans = db.query(Pelanggan).all()
         cust_by_ip = {}
+        cust_by_queue = {}
         for p in pelanggans:
             if p.ip_router:
                 cust_by_ip[p.ip_router.strip()] = p
             if p.ip_ont:
                 cust_by_ip[p.ip_ont.strip()] = p
+            if p.queue_name:
+                cust_by_queue[p.queue_name.strip().lower()] = p
 
         raw_queues = []
         try:
@@ -936,6 +939,8 @@ class MikroTikSyncService:
                     continue
 
                 cust = cust_by_ip.get(target_ip)
+                if not cust and name:
+                    cust = cust_by_queue.get(name.strip().lower())
 
                 # Ambil log redaman terakhir jika ada
                 c_log = cust.logs[0] if (cust and cust.logs) else None

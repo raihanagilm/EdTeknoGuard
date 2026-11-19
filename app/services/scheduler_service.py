@@ -77,11 +77,11 @@ class ONTSchedulerService:
             replace_existing=True
         )
 
-        # Job Sinkronisasi MikroTik
+        # Job Sinkronisasi MikroTik (Lease & Counter Kuota Simple Queues tiap 5 menit)
         self.scheduler.add_job(
             self.mikrotik_sync_job_wrapper,
             "interval",
-            minutes=3,
+            minutes=5,
             id="mikrotik_auto_sync",
             replace_existing=True
         )
@@ -469,6 +469,12 @@ class ONTSchedulerService:
                             MikroTikSyncService.sync_customers_from_mikrotik(t_db, params)
                         finally:
                             t_db.close()
+
+                        # Sinkronisasi pemakaian kuota Simple Queues ke database tenant kantor terkait
+                        try:
+                            MikroTikSyncService.sync_traffic_quota_to_db(m_db, kantor=k.kode)
+                        except Exception as q_err:
+                            logger.debug(f"[MIKROTIK_SYNC] Gagal auto-sync kuota kantor {k.nama}: {q_err}")
                     except Exception as e:
                         logger.debug(f"[MIKROTIK_SYNC] Gagal auto-sync kantor {k.nama}: {e}")
         finally:
