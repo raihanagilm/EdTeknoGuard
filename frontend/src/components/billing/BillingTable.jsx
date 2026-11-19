@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Smartphone
 } from 'lucide-react'
+import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton'
 
 export function BillingTable({
   data = [],
@@ -52,8 +53,31 @@ export function BillingTable({
 
   if (loading && data.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-[#CCDDF0] p-6 space-y-3">
-        {[...Array(6)].map((_, i) => <div key={i} className="h-12 bg-slate-100 rounded-lg animate-pulse" />)}
+      <div className="bg-white rounded-xl border border-[#CCDDF0] shadow-2xs overflow-hidden mb-4">
+        {/* Desktop Skeleton */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-[#F1F6FC] border-b border-[#CCDDF0] text-[#3B5B78] font-sans text-[11px] font-semibold uppercase tracking-wider">
+                <th className="py-2.5 px-3 w-10 text-center"><div className="w-4 h-4 bg-slate-200 rounded mx-auto" /></th>
+                <th className="py-2.5 px-3">Pelanggan</th>
+                <th className="py-2.5 px-3">Kontak WA</th>
+                <th className="py-2.5 px-3">Tagihan & Periode</th>
+                <th className="py-2.5 px-3">Status</th>
+                <th className="py-2.5 px-3">Jatuh Tempo</th>
+                <th className="py-2.5 px-3">Nomor VA</th>
+                <th className="py-2.5 px-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#CCDDF0]/60 font-mono text-xs">
+              <DesktopTableSkeleton rows={6} colCount={8} type="billing" />
+            </tbody>
+          </table>
+        </div>
+        {/* Mobile Skeleton */}
+        <div className="md:hidden p-3">
+          <MobileCardStackSkeleton count={4} type="billing" />
+        </div>
       </div>
     )
   }

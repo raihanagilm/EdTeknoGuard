@@ -21,6 +21,7 @@ import {
   FilterContainer,
   DataTableContainer
 } from '../common/CommonUI';
+import { DesktopTableSkeleton } from '../common/DeviceAdaptiveSkeleton';
 import { ConfirmDialogModal } from '../common/ConfirmDialogModal';
 import { ToastNotification } from '../common/ToastNotification';
 
@@ -577,12 +578,7 @@ export function UsersView() {
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
-              <tr>
-                <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
-                  <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-                  <div>Memuat data pengguna...</div>
-                </td>
-              </tr>
+              <DesktopTableSkeleton rows={Math.min(limit || 5, 8)} colCount={8} type="generic" />
             ) : paginatedUsers.length === 0 ? (
               <tr>
                 <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">

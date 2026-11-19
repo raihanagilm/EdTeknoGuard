@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { UsersService } from '../../services/api';
 import { FilterContainer, DataTableContainer } from '../common/CommonUI';
+import { DesktopTableSkeleton } from '../common/DeviceAdaptiveSkeleton';
 import { ConfirmDialogModal } from '../common/ConfirmDialogModal';
 import { ToastNotification } from '../common/ToastNotification';
 
@@ -414,12 +415,7 @@ export function BranchOfficesView() {
             </thead>
             <tbody className="divide-y divide-sky-100 font-mono text-xs">
               {kantorLoading ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">
-                    <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-                    <div>Memuat data kantor...</div>
-                  </td>
-                </tr>
+                <DesktopTableSkeleton rows={Math.min(limit || 5, 8)} colCount={7} type="generic" />
               ) : paginatedKantors.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-10 text-slate-400 font-mono">

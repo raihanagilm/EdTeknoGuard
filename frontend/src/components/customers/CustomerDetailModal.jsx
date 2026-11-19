@@ -584,9 +584,15 @@ export function CustomerDetailModal({
 
               {/* Loading State */}
               {loadingBilling && (
-                <div className="p-6 text-center space-y-2 bg-[#F1F6FC] rounded-lg border border-[#CCDDF0]">
-                  <RotateCw className="w-5 h-5 text-[#026AA7] animate-spin mx-auto" />
-                  <p className="text-xs font-bold text-[#0B2545]">Membaca tagihan dari Network Bill...</p>
+                <div className="p-4 bg-[#F8FAFC] rounded-lg border border-[#CCDDF0] space-y-3 animate-pulse">
+                  <div className="flex justify-between items-center">
+                    <div className="w-28 h-4 bg-slate-200 rounded" />
+                    <div className="w-16 h-5 bg-slate-200 rounded-full" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-10 bg-slate-100 rounded-lg" />
+                    <div className="h-10 bg-slate-100 rounded-lg" />
+                  </div>
                 </div>
               )}
 
@@ -750,9 +756,16 @@ export function CustomerDetailModal({
               </div>
 
               {loadingActivities ? (
-                <div className="text-center py-8 text-[#64839E] font-mono text-xs">
-                  <div className="inline-block animate-spin w-5 h-5 border-2 border-[#026AA7] border-t-transparent rounded-full mb-2"></div>
-                  <div>Memuat riwayat aktivitas...</div>
+                <div className="space-y-2 animate-pulse">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="p-2.5 rounded-lg border border-[#CCDDF0] bg-white space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <div className="w-28 h-3.5 bg-slate-200 rounded" />
+                        <div className="w-16 h-3 bg-slate-100 rounded" />
+                      </div>
+                      <div className="w-3/4 h-3 bg-slate-100 rounded" />
+                    </div>
+                  ))}
                 </div>
               ) : activities.length === 0 ? (
                 <div className="text-center py-8 px-4 rounded-lg bg-[#F8FAFC] border border-[#CCDDF0] text-[#64839E] text-xs space-y-1">

@@ -22,6 +22,7 @@ import {
   FilterContainer,
   DataTableContainer
 } from '../common/CommonUI';
+import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton';
 
 export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0, critThreshold = -27.0, onNavigateCustomer, initialSearch = '', onClearInitialSearch }) {
   const [logs, setLogs] = useState([]);
@@ -367,10 +368,7 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
         {/* Tampilan Mobile: Dense Streamline Micro-Card (Hemat Ruang & Super Ringkas) */}
         <div className="block md:hidden p-2 sm:p-2.5 space-y-1.5">
           {loading ? (
-            <div className="text-center py-6 text-slate-400 font-mono text-xs">
-              <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-              <div>Memuat data riwayat...</div>
-            </div>
+            <MobileCardStackSkeleton count={4} type="generic" />
           ) : logs.length === 0 ? (
             <div className="text-center py-6 text-slate-400 font-mono text-xs">
               Tidak ada rekaman log ditemukan.
@@ -541,12 +539,7 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
-              <tr>
-                <td colSpan="9" className="text-center py-10 text-slate-400 font-mono">
-                  <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-                  <div>Memuat data riwayat...</div>
-                </td>
-              </tr>
+              <DesktopTableSkeleton rows={Math.min(limit || 5, 8)} colCount={9} type="generic" />
             ) : logs.length === 0 ? (
               <tr>
                 <td colSpan="9" className="text-center py-10 text-slate-400 font-mono">

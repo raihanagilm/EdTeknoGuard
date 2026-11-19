@@ -26,6 +26,7 @@ import {
   FilterContainer,
   DataTableContainer
 } from '../common/CommonUI';
+import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton';
 import { ToastNotification } from '../common/ToastNotification';
 
 export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'super admin' }, onNavigateCustomer, initialSearch = '', onClearInitialSearch }) {
@@ -347,10 +348,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
         {/* Tampilan Mobile: Dense Streamline Micro-Card (Hemat Ruang & Bebas Truncate) */}
         <div className="block md:hidden p-2 sm:p-2.5 space-y-1.5">
           {loading ? (
-            <div className="text-center py-6 text-slate-400 font-mono text-xs">
-              <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-              <div>Memuat daftar tiket keluhan...</div>
-            </div>
+            <MobileCardStackSkeleton count={4} type="ticket" />
           ) : paginatedTickets.length === 0 ? (
             <div className="text-center py-6 text-slate-400 font-mono text-xs">
               Tidak ada tiket keluhan ditemukan.
@@ -588,12 +586,7 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
           </thead>
           <tbody className="divide-y divide-sky-100 font-mono text-xs">
             {loading ? (
-              <tr>
-                <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
-                  <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-                  <div>Memuat daftar tiket keluhan...</div>
-                </td>
-              </tr>
+              <DesktopTableSkeleton rows={Math.min(limit || 5, 8)} colCount={8} type="ticket" />
             ) : paginatedTickets.length === 0 ? (
               <tr>
                 <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">

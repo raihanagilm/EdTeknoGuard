@@ -25,6 +25,7 @@ import {
   FilterContainer,
   DataTableContainer
 } from '../common/CommonUI';
+import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton';
 
 export function CustomerLogsTab({ activeOffice }) {
   const [logs, setLogs] = useState([]);
@@ -434,10 +435,7 @@ export function CustomerLogsTab({ activeOffice }) {
         {/* Mobile View */}
         <div className="block md:hidden p-2 sm:p-2.5 space-y-1.5">
           {loading ? (
-            <div className="text-center py-6 text-slate-400 font-mono text-xs">
-              <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-              <div>Memuat log aktivitas pelanggan...</div>
-            </div>
+            <MobileCardStackSkeleton count={4} type="generic" />
           ) : logs.length === 0 ? (
             <div className="text-center py-6 text-slate-400 font-mono text-xs">
               Tidak ada catatan aktivitas pelanggan ditemukan.
@@ -537,12 +535,7 @@ export function CustomerLogsTab({ activeOffice }) {
             </thead>
             <tbody className="divide-y divide-sky-100 font-mono text-xs">
               {loading ? (
-                <tr>
-                  <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
-                    <div className="inline-block animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full mb-2"></div>
-                    <div>Memuat log aktivitas pelanggan...</div>
-                  </td>
-                </tr>
+                <DesktopTableSkeleton rows={Math.min(limit || 5, 8)} colCount={8} type="generic" />
               ) : logs.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center py-10 text-slate-400 font-mono">
