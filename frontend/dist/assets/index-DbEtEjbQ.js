@@ -45163,7 +45163,7 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 	const [searchQuery, setSearchQuery] = (0, import_react.useState)("");
 	const [currentPage, setCurrentPage] = (0, import_react.useState)(1);
 	const ITEMS_PER_PAGE = 5;
-	const [kategori, setKategori] = (0, import_react.useState)("Internet Lambat / Putus-putus");
+	const [kategori, setKategori] = (0, import_react.useState)("Koneksi Internet Lambat atau Terputus-putus");
 	const [deskripsi, setDeskripsi] = (0, import_react.useState)("");
 	const [noWa, setNoWa] = (0, import_react.useState)(customer?.no_hp || "");
 	const [submitting, setSubmitting] = (0, import_react.useState)(false);
@@ -45204,7 +45204,7 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 		try {
 			const res = await PortalKendalaService.create({
 				kategori,
-				deskripsi,
+				deskripsi: deskripsi.trim() || kategori,
 				no_wa: targetWa
 			});
 			if (res.ok && res.data.ok) {
@@ -45510,46 +45510,59 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
 									value: kategori,
 									onChange: (e) => setKategori(e.target.value),
-									className: "w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition",
+									className: "w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition cursor-pointer",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-											value: "Internet Lambat / Putus-putus",
-											children: "Internet Lambat / Putus-putus"
+											value: "Koneksi Internet Lambat atau Terputus-putus",
+											children: "Koneksi Internet Lambat atau Terputus-putus"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-											value: "Lampu Modem Merah (LOS)",
-											children: "Lampu Modem Merah (LOS)"
+											value: "Lampu Indikator Modem Berwarna Merah (LOS)",
+											children: "Lampu Indikator Modem Berwarna Merah (LOS)"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-											value: "Modem Mati Total / Tidak Menyala",
-											children: "Modem Mati Total / Tidak Menyala"
+											value: "Tidak Dapat Mengakses Internet",
+											children: "Tidak Dapat Mengakses Internet"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+											value: "Gagal Terhubung ke Jaringan WiFi",
+											children: "Gagal Terhubung ke Jaringan WiFi"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+											value: "Perangkat Modem Tidak Menyala (Mati Total)",
+											children: "Perangkat Modem Tidak Menyala (Mati Total)"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 											value: "Jangkauan Sinyal WiFi Lemah",
 											children: "Jangkauan Sinyal WiFi Lemah"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-											value: "Kendala Tagihan",
-											children: "Kendala Tagihan"
+											value: "Kendala Tagihan dan Pembayaran",
+											children: "Kendala Tagihan dan Pembayaran"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-											value: "Lainnya",
-											children: "Lainnya"
+											value: "Kendala Lainnya",
+											children: "Kendala Lainnya"
 										})
 									]
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "space-y-1.5",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "text-slate-700 block",
-									children: "Rincian Keluhan"
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center justify-between",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+										className: "text-slate-700 block",
+										children: "Rincian Keluhan"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-[10px] font-normal text-slate-400",
+										children: "Opsional"
+									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
 									rows: 3,
-									required: true,
 									value: deskripsi,
 									onChange: (e) => setDeskripsi(e.target.value),
-									placeholder: "Jelaskan kondisi lampu modem atau kendala yang dialami...",
+									placeholder: "Tuliskan keterangan tambahan jika ada (opsional)...",
 									className: "w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition"
 								})]
 							}),

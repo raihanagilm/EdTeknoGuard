@@ -28,7 +28,7 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
   const ITEMS_PER_PAGE = 5;
 
   // Form State
-  const [kategori, setKategori] = useState('Internet Lambat / Putus-putus');
+  const [kategori, setKategori] = useState('Koneksi Internet Lambat atau Terputus-putus');
   const [deskripsi, setDeskripsi] = useState('');
   const [noWa, setNoWa] = useState(customer?.no_hp || '');
   const [submitting, setSubmitting] = useState(false);
@@ -67,7 +67,7 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
     try {
       const res = await PortalKendalaService.create({
         kategori,
-        deskripsi,
+        deskripsi: deskripsi.trim() || kategori,
         no_wa: targetWa
       });
       if (res.ok && res.data.ok) {
@@ -364,25 +364,29 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                 <select
                   value={kategori}
                   onChange={(e) => setKategori(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                  className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition cursor-pointer"
                 >
-                  <option value="Internet Lambat / Putus-putus">Internet Lambat / Putus-putus</option>
-                  <option value="Lampu Modem Merah (LOS)">Lampu Modem Merah (LOS)</option>
-                  <option value="Modem Mati Total / Tidak Menyala">Modem Mati Total / Tidak Menyala</option>
+                  <option value="Koneksi Internet Lambat atau Terputus-putus">Koneksi Internet Lambat atau Terputus-putus</option>
+                  <option value="Lampu Indikator Modem Berwarna Merah (LOS)">Lampu Indikator Modem Berwarna Merah (LOS)</option>
+                  <option value="Tidak Dapat Mengakses Internet">Tidak Dapat Mengakses Internet</option>
+                  <option value="Gagal Terhubung ke Jaringan WiFi">Gagal Terhubung ke Jaringan WiFi</option>
+                  <option value="Perangkat Modem Tidak Menyala (Mati Total)">Perangkat Modem Tidak Menyala (Mati Total)</option>
                   <option value="Jangkauan Sinyal WiFi Lemah">Jangkauan Sinyal WiFi Lemah</option>
-                  <option value="Kendala Tagihan">Kendala Tagihan</option>
-                  <option value="Lainnya">Lainnya</option>
+                  <option value="Kendala Tagihan dan Pembayaran">Kendala Tagihan dan Pembayaran</option>
+                  <option value="Kendala Lainnya">Kendala Lainnya</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-slate-700 block">Rincian Keluhan</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-700 block">Rincian Keluhan</label>
+                  <span className="text-[10px] font-normal text-slate-400">Opsional</span>
+                </div>
                 <textarea
                   rows={3}
-                  required
                   value={deskripsi}
                   onChange={(e) => setDeskripsi(e.target.value)}
-                  placeholder="Jelaskan kondisi lampu modem atau kendala yang dialami..."
+                  placeholder="Tuliskan keterangan tambahan jika ada (opsional)..."
                   className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition"
                 ></textarea>
               </div>
