@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   AlertTriangle,
   AlertCircle,
@@ -56,6 +56,23 @@ export function ConfirmDialogModal({
   const currentTheme = variantConfig[variant] || variantConfig.danger
   const IconComponent = currentTheme.icon
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (!isLoading && onClose) onClose()
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        if (!isLoading && onConfirm) onConfirm()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, isLoading, onClose, onConfirm])
+
   return (
     <div
       className="fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans"
@@ -83,7 +100,7 @@ export function ConfirmDialogModal({
             onClick={onClose}
             disabled={isLoading}
             className="text-[#64839E] hover:text-[#0B2545] p-1.5 rounded-lg hover:bg-[#F1F6FC] transition disabled:opacity-40 cursor-pointer"
-            title="Tutup dialog"
+            title="Tutup dialog (Esc)"
           >
             <X className="w-4 h-4" />
           </button>
@@ -98,15 +115,18 @@ export function ConfirmDialogModal({
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 rounded-lg text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] font-semibold text-xs min-h-[38px] cursor-pointer disabled:opacity-50 transition border border-[#CCDDF0]"
+            className="px-4 py-2 rounded-lg text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] font-semibold text-xs min-h-[38px] cursor-pointer disabled:opacity-50 transition border border-[#CCDDF0] flex items-center gap-1.5"
+            title="Batal (Esc)"
           >
-            {cancelText}
+            <span>{cancelText}</span>
+            <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]">Esc</kbd>
           </button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
             className={`px-5 py-2 rounded-lg font-bold text-xs shadow-2xs transition flex items-center gap-2 min-h-[38px] cursor-pointer disabled:opacity-50 ${currentTheme.btnConfirm}`}
+            title="Konfirmasi (Enter)"
           >
             {isLoading ? (
               <>
@@ -114,7 +134,10 @@ export function ConfirmDialogModal({
                 <span>{loadingText}</span>
               </>
             ) : (
-              <span>{confirmText}</span>
+              <>
+                <span>{confirmText}</span>
+                <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30">↵ Enter</kbd>
+              </>
             )}
           </button>
         </div>

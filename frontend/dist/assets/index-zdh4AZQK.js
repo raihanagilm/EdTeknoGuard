@@ -14769,6 +14769,25 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 	};
 	const currentTheme = variantConfig[variant] || variantConfig.danger;
 	const IconComponent = currentTheme.icon;
+	(0, import_react.useEffect)(() => {
+		if (!isOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (!isLoading && onClose) onClose();
+			} else if (e.key === "Enter") {
+				e.preventDefault();
+				if (!isLoading && onConfirm) onConfirm();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [
+		isOpen,
+		isLoading,
+		onClose,
+		onConfirm
+	]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans",
 		onClick: (e) => {
@@ -14798,7 +14817,7 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 						onClick: onClose,
 						disabled: isLoading,
 						className: "text-[#64839E] hover:text-[#0B2545] p-1.5 rounded-lg hover:bg-[#F1F6FC] transition disabled:opacity-40 cursor-pointer",
-						title: "Tutup dialog",
+						title: "Tutup dialog (Esc)",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 					})]
 				}),
@@ -14808,18 +14827,26 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-end gap-2.5 pt-1",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: onClose,
 						disabled: isLoading,
-						className: "px-4 py-2 rounded-lg text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] font-semibold text-xs min-h-[38px] cursor-pointer disabled:opacity-50 transition border border-[#CCDDF0]",
-						children: cancelText
+						className: "px-4 py-2 rounded-lg text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] font-semibold text-xs min-h-[38px] cursor-pointer disabled:opacity-50 transition border border-[#CCDDF0] flex items-center gap-1.5",
+						title: "Batal (Esc)",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: cancelText }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]",
+							children: "Esc"
+						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: onConfirm,
 						disabled: isLoading,
 						className: `px-5 py-2 rounded-lg font-bold text-xs shadow-2xs transition flex items-center gap-2 min-h-[38px] cursor-pointer disabled:opacity-50 ${currentTheme.btnConfirm}`,
-						children: isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: loadingText })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: confirmText })
+						title: "Konfirmasi (Enter)",
+						children: isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: loadingText })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: confirmText }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+							children: "↵ Enter"
+						})] })
 					})]
 				})
 			]
@@ -28291,6 +28318,29 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 		}
 		return cells;
 	};
+	const createCyanBlueGradient = (ctx, chartArea) => {
+		if (!ctx || !chartArea) return "rgba(2, 106, 167, 0.15)";
+		const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+		gradient.addColorStop(0, "rgba(0, 242, 254, 0.40)");
+		gradient.addColorStop(.45, "rgba(2, 106, 167, 0.22)");
+		gradient.addColorStop(1, "rgba(11, 37, 69, 0.02)");
+		return gradient;
+	};
+	const createAmberGradient = (ctx, chartArea) => {
+		if (!ctx || !chartArea) return "rgba(245, 158, 11, 0.15)";
+		const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+		gradient.addColorStop(0, "rgba(245, 158, 11, 0.38)");
+		gradient.addColorStop(.5, "rgba(217, 119, 6, 0.18)");
+		gradient.addColorStop(1, "rgba(180, 83, 9, 0.01)");
+		return gradient;
+	};
+	const createMultiSeriesGradient = (ctx, chartArea, hexColor) => {
+		if (!ctx || !chartArea) return "rgba(2, 106, 167, 0.12)";
+		const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+		gradient.addColorStop(0, hexColor ? `${hexColor}40` : "rgba(2, 106, 167, 0.30)");
+		gradient.addColorStop(1, "rgba(255, 255, 255, 0.01)");
+		return gradient;
+	};
 	const loadChartData = (0, import_react.useCallback)(async () => {
 		if (!chartInstanceRef.current) return;
 		try {
@@ -28337,47 +28387,61 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				const warnVal = transformDbm(Math.abs(warnThreshold));
 				const critVal = transformDbm(Math.abs(critThreshold));
 				let datasets = [];
-				if (rawDatasets && rawDatasets.length > 0) {
-					const isMulti = rawDatasets.length > 1;
-					datasets = rawDatasets.map((ds) => {
-						const transformed = (ds.values || []).map((v) => v !== null && !isNaN(v) && typeof v === "number" ? transformDbm(v) : null);
-						return {
-							label: ds.label,
-							data: transformed,
-							rawValues: ds.values || [],
-							details: ds.details || [],
-							borderColor: ds.color || "#026AA7",
-							backgroundColor: !isMulti ? "rgba(2, 106, 167, 0.12)" : "transparent",
-							borderWidth: rawDatasets.length > 2 ? 2 : 2.5,
-							fill: !isMulti,
-							tension: .12,
-							pointRadius: rawDatasets.length > 2 ? 3.5 : 5,
-							pointHoverRadius: rawDatasets.length > 2 ? 6 : 8,
-							pointBackgroundColor: ds.color || "#026AA7",
-							pointBorderColor: "#FFFFFF",
-							pointBorderWidth: 2,
-							showLine: true,
-							spanGaps: true,
-							isThreshold: false
-						};
-					});
-				} else {
+				if (rawDatasets && rawDatasets.length > 0) datasets = rawDatasets.map((ds, dsIdx) => {
+					const transformed = (ds.values || []).map((v) => v !== null && !isNaN(v) && typeof v === "number" ? transformDbm(v) : null);
+					const isFirst = dsIdx === 0;
+					const dsColor = ds.color || (isFirst ? "#0284C7" : "#F59E0B");
+					return {
+						label: ds.label,
+						data: transformed,
+						rawValues: ds.values || [],
+						details: ds.details || [],
+						borderColor: dsColor,
+						backgroundColor: (context) => {
+							const { ctx, chartArea } = context.chart;
+							if (isFirst) return createCyanBlueGradient(ctx, chartArea);
+							if (dsIdx === 1) return createAmberGradient(ctx, chartArea);
+							return createMultiSeriesGradient(ctx, chartArea, dsColor);
+						},
+						borderWidth: 2.5,
+						fill: true,
+						tension: .42,
+						cubicInterpolationMode: "monotone",
+						pointRadius: 4.5,
+						pointHoverRadius: 7.5,
+						pointBackgroundColor: dsColor,
+						pointBorderColor: "#FFFFFF",
+						pointBorderWidth: 2.5,
+						pointHoverBorderColor: "#FFFFFF",
+						pointHoverBorderWidth: 3,
+						showLine: true,
+						spanGaps: true,
+						isThreshold: false
+					};
+				});
+				else {
 					const transformedValues = (singleValues || []).map((v) => v !== null && !isNaN(v) && typeof v === "number" ? transformDbm(v) : null);
 					datasets.push({
 						label: "Nilai Redaman Rata-rata",
 						data: transformedValues,
 						rawValues: json.values || [],
 						details: json.details || [],
-						borderColor: "#026AA7",
-						backgroundColor: "rgba(2, 106, 167, 0.12)",
+						borderColor: "#0284C7",
+						backgroundColor: (context) => {
+							const { ctx, chartArea } = context.chart;
+							return createCyanBlueGradient(ctx, chartArea);
+						},
 						borderWidth: 2.5,
 						fill: true,
-						tension: .12,
-						pointRadius: 5,
-						pointHoverRadius: 8,
-						pointBackgroundColor: "#026AA7",
+						tension: .42,
+						cubicInterpolationMode: "monotone",
+						pointRadius: 4.5,
+						pointHoverRadius: 7.5,
+						pointBackgroundColor: "#0284C7",
 						pointBorderColor: "#FFFFFF",
-						pointBorderWidth: 2,
+						pointBorderWidth: 2.5,
+						pointHoverBorderColor: "#FFFFFF",
+						pointHoverBorderWidth: 3,
 						showLine: true,
 						spanGaps: true,
 						isThreshold: false
@@ -28386,7 +28450,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				datasets.push({
 					label: `Garis Warning (${Number(warnThreshold).toFixed(1)} dBm)`,
 					data: count > 0 ? new Array(count).fill(warnVal) : [],
-					borderColor: "#64839E",
+					borderColor: "rgba(245, 158, 11, 0.75)",
 					borderWidth: 1.5,
 					borderDash: [5, 4],
 					pointRadius: 0,
@@ -28398,9 +28462,9 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 				datasets.push({
 					label: `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`,
 					data: count > 0 ? new Array(count).fill(critVal) : [],
-					borderColor: "#0B2545",
+					borderColor: "rgba(239, 68, 68, 0.85)",
 					borderWidth: 1.5,
-					borderDash: [2, 3],
+					borderDash: [3, 3],
 					pointRadius: 0,
 					pointHoverRadius: 0,
 					fill: false,
@@ -28494,37 +28558,48 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 								weight: "600"
 							}
 						},
-						grid: { color: (ctx) => {
-							if (!ctx.tick) return "#E8F1FA";
-							const dbm = inverseTransformDbm(ctx.tick.value);
-							if (Math.abs(dbm - 26) < .05) return "rgba(100, 131, 158, 0.45)";
-							if (Math.abs(dbm - 27) < .05) return "rgba(11, 37, 69, 0.45)";
-							return "#E8F1FA";
-						} }
+						grid: {
+							color: (ctx) => {
+								if (!ctx.tick) return "rgba(232, 241, 250, 0.6)";
+								const dbm = inverseTransformDbm(ctx.tick.value);
+								if (Math.abs(dbm - 26) < .05) return "rgba(245, 158, 11, 0.35)";
+								if (Math.abs(dbm - 27) < .05) return "rgba(239, 68, 68, 0.35)";
+								return "rgba(232, 241, 250, 0.6)";
+							},
+							drawBorder: false
+						}
 					},
 					x: {
 						ticks: {
 							color: "#64839E",
 							font: {
 								size: 11,
-								family: "'JetBrains Mono', monospace"
+								family: "'JetBrains Mono', monospace",
+								weight: "500"
 							},
 							maxRotation: 0,
 							autoSkip: true,
 							maxTicksLimit: 12
 						},
-						grid: { display: false }
+						grid: {
+							display: true,
+							color: "rgba(226, 232, 240, 0.55)",
+							borderDash: [3, 4],
+							drawBorder: false
+						}
 					}
 				},
 				plugins: {
 					legend: { display: false },
 					tooltip: {
-						backgroundColor: "#0B2545",
-						titleColor: "#BAE6FD",
+						backgroundColor: "rgba(11, 37, 69, 0.94)",
+						titleColor: "#38BDF8",
 						bodyColor: "#FFFFFF",
+						borderColor: "rgba(56, 189, 248, 0.25)",
+						borderWidth: 1,
 						titleFont: {
 							family: "'JetBrains Mono', monospace",
-							size: 11,
+							size: 11.5,
 							weight: "bold"
 						},
 						bodyFont: {
@@ -28533,12 +28608,12 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 							weight: "500"
 						},
 						padding: {
-							top: 8,
-							bottom: 8,
-							left: 10,
-							right: 10
+							top: 10,
+							bottom: 10,
+							left: 12,
+							right: 12
 						},
-						cornerRadius: 8,
+						cornerRadius: 12,
 						displayColors: false,
 						filter: (tooltipItem) => !tooltipItem.dataset.isThreshold,
 						callbacks: {
@@ -29435,7 +29510,15 @@ function SettingsThresholdTab({ onOpenConfirmModal, settingsLoading, pollingInte
 					type: "submit",
 					disabled: settingsLoading,
 					className: "px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Parameter" })]
+					title: "Simpan Parameter (Ctrl+S)",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Parameter" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+							children: "Ctrl+S"
+						})
+					]
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -29610,7 +29693,15 @@ function SettingsCredentialsTab({ onOpenConfirmModal, settingsLoading, modemCred
 					type: "submit",
 					disabled: settingsLoading,
 					className: "w-full sm:w-auto px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition min-h-[42px] cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Kredensial Modem" })]
+					title: "Simpan Kredensial Modem (Ctrl+S)",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Kredensial Modem" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+							children: "Ctrl+S"
+						})
+					]
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -29730,7 +29821,15 @@ function SettingsNotificationsTab({ onOpenConfirmModal, settingsLoading, alertWa
 					type: "submit",
 					disabled: settingsLoading,
 					className: "px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition min-h-[42px] cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Pengaturan Notifikasi" })]
+					title: "Simpan Pengaturan Notifikasi (Ctrl+S)",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { className: "w-4 h-4" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Pengaturan Notifikasi" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+							children: "Ctrl+S"
+						})
+					]
 				})
 			})
 		]
@@ -29754,6 +29853,18 @@ function SettingsProfileTab({ currentUser, setCurrentUser, onLogout, setProfileS
 			setEditNoWa(currentUser.no_wa || "");
 		}
 	}, [currentUser]);
+	(0, import_react.useEffect)(() => {
+		if (!isEditProfile && !isPasswordExpanded) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (isEditProfile) setIsEditProfile(false);
+				if (isPasswordExpanded) setIsPasswordExpanded(false);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isEditProfile, isPasswordExpanded]);
 	const handleSaveDataDiri = async (e) => {
 		e.preventDefault();
 		setProfileLoading(true);
@@ -29872,16 +29983,24 @@ function SettingsProfileTab({ currentUser, setCurrentUser, onLogout, setProfileS
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex gap-2 pt-1",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								type: "button",
 								onClick: () => setIsEditProfile(false),
-								className: "flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer",
-								children: "Batal"
+								className: "flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5",
+								title: "Batal (Esc)",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Batal" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+									className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-200 text-slate-700 border border-slate-300",
+									children: "Esc"
+								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "submit",
 								disabled: profileLoading,
 								className: "flex-1 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer",
-								children: profileLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Data Diri" })
+								title: "Simpan Data Diri (Enter)",
+								children: profileLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Data Diri" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+									className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+									children: "↵ Enter"
+								})] })
 							})]
 						})
 					]
@@ -30060,7 +30179,11 @@ function SettingsProfileTab({ currentUser, setCurrentUser, onLogout, setProfileS
 								type: "submit",
 								disabled: profileLoading,
 								className: "w-full mt-2 py-3 px-4 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm active:scale-[0.99] transition flex items-center justify-center gap-2 min-h-[44px] cursor-pointer",
-								children: profileLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Kata Sandi Baru" })
+								title: "Simpan Kata Sandi Baru (Enter)",
+								children: profileLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Simpan Kata Sandi Baru" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+									className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+									children: "↵ Enter"
+								})] })
 							})
 						]
 					})
@@ -30095,6 +30218,17 @@ function SettingsView({ settingsActiveSubTab, setSettingsActiveSubTab, settingsL
 	(0, import_react.useEffect)(() => {
 		if (fetchBackendSettings && !isTeknisi) fetchBackendSettings(activeOffice);
 	}, [activeOffice, isTeknisi]);
+	(0, import_react.useEffect)(() => {
+		const handleKeyDown = (e) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+				e.preventDefault();
+				const activeSubmitBtn = document.querySelector("form button[type=\"submit\"]");
+				if (activeSubmitBtn && !activeSubmitBtn.disabled) activeSubmitBtn.click();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "space-y-4",
 		children: [
@@ -30619,7 +30753,7 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 //#endregion
 //#region src/components/customers/CustomersTable.jsx
 var import_react_dom = require_react_dom();
-function CustomersTable({ customers = [], loading = false, page = 1, limit = 15, setLimit, setPage, totalRecords = 0, selectedIds = [], setSelectedIds, sortField = "id", sortDir = "asc", handleSort, handleSortIpRouter, probingId, probeCooldowns = {}, handleSingleProbe, activeMenuId, setActiveMenuId, handleOpenDetail, handleOpenEdit, handleDeleteCustomer, isOfficeActive = true, warnThreshold = -26, critThreshold = -27 }) {
+function CustomersTable({ customers = [], loading = false, page = 1, limit = 15, setLimit, setPage, totalRecords = 0, selectedIds = [], setSelectedIds, sortField = "id", sortDir = "asc", handleSort, handleSortIpRouter, probingId, probeCooldowns = {}, handleSingleProbe, activeMenuId, setActiveMenuId, handleOpenDetail, handleOpenEdit, handleDeleteCustomer, handleToggleMonitoring, isOfficeActive = true, warnThreshold = -26, critThreshold = -27 }) {
 	const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
 	const [menuAnchor, setMenuAnchor] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
@@ -30707,13 +30841,20 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-1.5",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: `text-xs font-bold uppercase ${badgeClass}`,
-									children: statusBadge === "UNTESTED" ? "BELUM CEK" : statusBadge
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: `text-xs font-bold uppercase ${isOnline ? "text-emerald-700" : "text-slate-500"}`,
-									children: isOnline ? "ONLINE" : "OFFLINE"
-								})]
+								children: [
+									c.is_monitored === false && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none",
+										children: "SCAN OFF"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: `text-xs font-bold uppercase ${badgeClass}`,
+										children: statusBadge === "UNTESTED" ? "BELUM CEK" : statusBadge
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: `text-xs font-bold uppercase ${isOnline ? "text-emerald-700" : "text-slate-500"}`,
+										children: isOnline ? "ONLINE" : "OFFLINE"
+									})
+								]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -30775,6 +30916,13 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 									className: "p-1.5 rounded-lg border border-sky-200 bg-white hover:bg-cyan-50 text-cyan-800 cursor-pointer",
 									title: "Lihat Detail Lengkap",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" })
+								}),
+								handleToggleMonitoring && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => handleToggleMonitoring(c),
+									className: `p-1.5 rounded-lg border transition cursor-pointer ${c.is_monitored !== false ? "border-emerald-200 bg-white hover:bg-amber-50 text-emerald-700" : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-emerald-50"}`,
+									title: c.is_monitored !== false ? "Scan Redaman Aktif (Klik untuk mematikan)" : "Scan Redaman Nonaktif (Klik untuk mengaktifkan)",
+									children: c.is_monitored !== false ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-4 h-4 text-emerald-600" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4 text-amber-600" })
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									type: "button",
@@ -31089,13 +31237,18 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 								className: "py-2.5 px-3 text-center",
 								children: (() => {
-									if (c.status_lease === "bound" && c.status_koneksi !== "OFFLINE" && c.status !== "OFFLINE" && Boolean(c.is_monitored !== false)) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-xs font-bold uppercase tracking-wider text-emerald-700",
-										children: "ONLINE"
-									});
-									return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-xs font-bold uppercase tracking-wider text-slate-500",
-										children: "OFFLINE"
+									const isOnline = c.status_lease === "bound" && c.status_koneksi !== "OFFLINE" && c.status !== "OFFLINE";
+									const isMonitored = Boolean(c.is_monitored !== false);
+									return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex flex-col items-center gap-0.5",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: `text-xs font-bold uppercase tracking-wider ${isOnline ? "text-emerald-700" : "text-slate-500"}`,
+											children: isOnline ? "ONLINE" : "OFFLINE"
+										}), !isMonitored && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none",
+											title: "Scan redaman dinonaktifkan (dilewati dari scheduler pemindaian)",
+											children: "SCAN OFF"
+										})]
 									});
 								})()
 							}),
@@ -31104,14 +31257,15 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center justify-end gap-1.5 relative",
 									children: [(() => {
-										const isOnline = c.status_lease === "bound" && c.status_koneksi !== "OFFLINE" && c.status !== "OFFLINE" && Boolean(c.is_monitored !== false);
+										const isOnline = c.status_lease === "bound" && c.status_koneksi !== "OFFLINE" && c.status !== "OFFLINE";
+										const isMonitored = Boolean(c.is_monitored !== false);
 										const cooldown = probeCooldowns[cId] || 0;
 										const isProbing = probingId === cId;
 										return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 											onClick: () => handleSingleProbe(cId),
 											disabled: isProbing || cooldown > 0 || !isOfficeActive || !isOnline,
 											className: `px-2.5 py-1 border rounded-lg text-[11px] font-bold transition shadow-2xs ${!isOfficeActive ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60" : !isOnline ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-50" : cooldown > 0 ? "bg-slate-100 text-slate-500 border-slate-300 cursor-not-allowed font-mono" : isProbing ? "bg-cyan-100 text-cyan-800 border-cyan-300 cursor-wait" : "bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-800 border-cyan-200 cursor-pointer"}`,
-											title: !isOfficeActive ? "Kantor nonaktif. Aktifkan kantor untuk menguji sinyal ONT." : !isOnline ? "Perangkat sedang Offline (DHCP/PPPoE tidak aktif). Cek redaman tidak tersedia." : cooldown > 0 ? `Tunggu jeda cooldown (${cooldown} detik) sebelum memeriksa ulang redaman ONT` : "Cek Sinyal Redaman ONT Langsung",
+											title: !isOfficeActive ? "Kantor nonaktif. Aktifkan kantor untuk menguji sinyal ONT." : !isOnline ? "Perangkat sedang Offline (DHCP/PPPoE tidak aktif). Cek redaman tidak tersedia." : cooldown > 0 ? `Tunggu jeda cooldown (${cooldown} detik) sebelum memeriksa ulang redaman ONT` : !isMonitored ? "Scan berkala nonaktif (Klik untuk uji coba sinyal secara manual)" : "Cek Sinyal Redaman ONT Langsung",
 											children: isProbing ? "Mengecek..." : !isOfficeActive ? "Nonaktif" : !isOnline ? "Offline" : cooldown > 0 ? `Tunggu (${cooldown}s)` : "Cek Redaman"
 										});
 									})(), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -31159,27 +31313,41 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 												className: "bg-white rounded-xl shadow-2xl border border-sky-200 py-1.5 font-sans text-xs divide-y divide-slate-100",
 												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 													className: "py-1",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-														type: "button",
-														onClick: (e) => {
-															e.stopPropagation();
-															setActiveMenuId(null);
-															setMenuAnchor(null);
-															handleOpenDetail(c);
-														},
-														className: "w-full text-left px-3 py-1.5 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 font-bold flex items-center gap-2 transition cursor-pointer",
-														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Detail Pelanggan" })]
-													}), c.no_wa && c.no_wa !== "-" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-														href: `https://wa.me/${c.no_wa.replace(/[^0-9]/g, "").replace(/^0/, "62")}`,
-														target: "_blank",
-														rel: "noopener noreferrer",
-														onClick: () => {
-															setActiveMenuId(null);
-															setMenuAnchor(null);
-														},
-														className: "w-full text-left px-3 py-1.5 text-emerald-700 hover:bg-emerald-50 font-bold flex items-center gap-2 transition",
-														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi WA" })]
-													})]
+													children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+															type: "button",
+															onClick: (e) => {
+																e.stopPropagation();
+																setActiveMenuId(null);
+																setMenuAnchor(null);
+																handleOpenDetail(c);
+															},
+															className: "w-full text-left px-3 py-1.5 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 font-bold flex items-center gap-2 transition cursor-pointer",
+															children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-3.5 h-3.5 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Detail Pelanggan" })]
+														}),
+														c.no_wa && c.no_wa !== "-" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+															href: `https://wa.me/${c.no_wa.replace(/[^0-9]/g, "").replace(/^0/, "62")}`,
+															target: "_blank",
+															rel: "noopener noreferrer",
+															onClick: () => {
+																setActiveMenuId(null);
+																setMenuAnchor(null);
+															},
+															className: "w-full text-left px-3 py-1.5 text-emerald-700 hover:bg-emerald-50 font-bold flex items-center gap-2 transition",
+															children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi WA" })]
+														}),
+														handleToggleMonitoring && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+															type: "button",
+															onClick: (e) => {
+																e.stopPropagation();
+																setActiveMenuId(null);
+																setMenuAnchor(null);
+																handleToggleMonitoring(c);
+															},
+															className: "w-full text-left px-3 py-1.5 text-slate-700 hover:bg-[#F1F6FC] hover:text-[#0B2545] font-bold flex items-center gap-2 transition cursor-pointer",
+															children: c.is_monitored !== false ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5 text-[#64839E]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Matikan Scan Redaman" })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-3.5 h-3.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Aktifkan Scan Redaman" })] })
+														})
+													]
 												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 													className: "py-1",
 													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
@@ -31337,17 +31505,29 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-end gap-2 pt-3 border-t border-[#CCDDF0]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: onClose,
-						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer",
-						children: "Batal"
+						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer flex items-center gap-1.5",
+						title: "Batal (Esc)",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Batal" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]",
+							children: "Esc"
+						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						disabled: !importFile || importAnalyzing || importColumns.length === 0,
 						onClick: handleProceedToStep2,
 						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lanjut ke Pemetaan Kolom" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })]
+						title: "Lanjut ke Pemetaan Kolom (Enter)",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lanjut ke Pemetaan Kolom" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+								className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+								children: "↵ Enter"
+							})
+						]
 					})]
 				})]
 			}),
@@ -31411,17 +31591,29 @@ function ImportStepUpload({ importSource, setImportSource, networkBillPops, load
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-end gap-2 pt-3 border-t border-[#CCDDF0]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: onClose,
-						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer",
-						children: "Batal"
+						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer flex items-center gap-1.5",
+						title: "Batal (Esc)",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Batal" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]",
+							children: "Esc"
+						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						disabled: networkBillFetching,
 						onClick: handleFetchNetworkBillPreview,
 						className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
-						children: networkBillFetching ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menghubungi API Network Bill..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tarik & Bandingkan Data di Pratinjau" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })] })
+						title: "Tarik Data (Enter)",
+						children: networkBillFetching ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Menghubungi API Network Bill..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tarik & Bandingkan Data di Pratinjau" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+								className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+								children: "↵ Enter"
+							})
+						] })
 					})]
 				})]
 			})
@@ -31559,13 +31751,29 @@ function ImportStepMapping({ PRIMARY_FIELDS, ADVANCED_FIELDS, importMapping, set
 					type: "button",
 					onClick: () => setImportStep(1),
 					className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] flex items-center gap-1.5 transition cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kembali" })]
+					title: "Kembali ke Upload (Esc)",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-4 h-4" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kembali" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]",
+							children: "Esc"
+						})
+					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					type: "button",
 					disabled: importLoading,
 					onClick: handleProceedToStep3,
 					className: "px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer",
-					children: importLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Memvalidasi Data..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lanjut ke Pratinjau & Simpan" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" })] })
+					title: "Lanjut ke Pratinjau (Enter)",
+					children: importLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Memvalidasi Data..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lanjut ke Pratinjau & Simpan" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-4 h-4" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+							className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+							children: "↵ Enter"
+						})
+					] })
 				})]
 			})
 		]
@@ -32077,7 +32285,15 @@ function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilt
 						type: "button",
 						onClick: () => setImportStep(2),
 						className: "px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition flex items-center gap-1.5 cursor-pointer",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kembali ke Pemetaan" })]
+						title: "Kembali ke Pemetaan (Esc)",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-3.5 h-3.5" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kembali ke Pemetaan" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+								className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]",
+								children: "Esc"
+							})
+						]
 					}),
 					importLoading && handleCloseModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
@@ -32471,6 +32687,50 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 			setImportLoading(false);
 		}
 	};
+	(0, import_react.useEffect)(() => {
+		if (!isOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (importStep === 1) {
+					if (!importLoading && !importAnalyzing && !networkBillFetching) onClose();
+				} else if (importStep === 2) setImportStep(1);
+				else if (importStep === 3) setImportStep(2);
+			} else if (e.key === "Enter") {
+				const activeEl = document.activeElement;
+				const isTyping = activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.tagName === "SELECT");
+				if (importStep === 1) {
+					if (!isTyping || activeEl.type === "file" || activeEl.type === "radio") {
+						if (importSource === "file" && importFile && !importAnalyzing && importColumns.length > 0) {
+							e.preventDefault();
+							handleProceedToStep2();
+						} else if (importSource === "network_bill" && !networkBillFetching) {
+							e.preventDefault();
+							handleFetchNetworkBillPreview();
+						}
+					}
+				} else if (importStep === 2) {
+					if (!isTyping) {
+						e.preventDefault();
+						handleProceedToStep3();
+					}
+				}
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [
+		isOpen,
+		importStep,
+		importFile,
+		importAnalyzing,
+		importColumns,
+		importSource,
+		networkBillFetching,
+		importLoading,
+		importMapping,
+		onClose
+	]);
 	const filteredIndices = importPreviewData.map((row, idx) => ({
 		row,
 		idx
@@ -32940,13 +33200,48 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 	const [currentCustomer, setCurrentCustomer] = (0, import_react.useState)(customer);
 	const [activities, setActivities] = (0, import_react.useState)([]);
 	const [loadingActivities, setLoadingActivities] = (0, import_react.useState)(false);
+	const [togglingMonitoring, setTogglingMonitoring] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
 		setCurrentCustomer(customer);
 	}, [customer]);
 	const activeCust = currentCustomer || customer;
 	const cId = activeCust?.id_pelanggan || activeCust?.id || "";
+	const isMonitored = Boolean(activeCust?.is_monitored !== false);
 	const rawWa = activeCust?.no_wa || activeCust?.no_hp || "";
 	const hasValidWa = Boolean(rawWa && rawWa !== "-");
+	const handleToggleMonitoring = async () => {
+		if (!cId || togglingMonitoring) return;
+		setTogglingMonitoring(true);
+		try {
+			const res = await fetch(`/api/customers/${encodeURIComponent(cId)}/toggle-monitoring`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" }
+			});
+			if (!res.ok) {
+				const errJson = await res.json().catch(() => ({}));
+				throw new Error(errJson.detail || "Gagal mengubah status pemantauan.");
+			}
+			const data = await res.json();
+			const updated = {
+				...activeCust,
+				is_monitored: data.is_monitored
+			};
+			setCurrentCustomer(updated);
+			if (onCustomerUpdated) onCustomerUpdated(updated);
+			if (onNotify) onNotify({
+				type: "success",
+				message: data.message || `Status scan redaman berhasil ${data.is_monitored ? "diaktifkan" : "dinonaktifkan"}.`
+			});
+		} catch (err) {
+			console.error("Gagal mengubah status scan redaman:", err);
+			if (onNotify) onNotify({
+				type: "error",
+				message: err.message || "Gagal mengubah status scan redaman."
+			});
+		} finally {
+			setTogglingMonitoring(false);
+		}
+	};
 	const fetchBilling = async () => {
 		if (!cId) return;
 		setLoadingBilling(true);
@@ -33234,9 +33529,33 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 								})
 							]
 						}),
-						activeTab === "jaringan" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						activeTab === "jaringan" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-3",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] flex items-center justify-between gap-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "space-y-0.5 min-w-0",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "text-xs font-bold text-[#0B2545] flex items-center gap-1.5",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { className: "w-3.5 h-3.5 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pemantauan & Scan Redaman ONT" })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-[10px] text-[#64839E] leading-normal",
+										children: isMonitored ? "Modem ONT diizinkan masuk dan dipindai secara berkala oleh background scheduler." : "Modem ONT dikecualikan dari scan berkala (karena proteksi akses/tidak diizinkan masuk)."
+									})]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									role: "switch",
+									"aria-checked": isMonitored,
+									disabled: togglingMonitoring,
+									onClick: handleToggleMonitoring,
+									className: `relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#026AA7] ${isMonitored ? "bg-[#026AA7]" : "bg-[#CBD5E1]"} ${togglingMonitoring ? "opacity-60 cursor-wait" : ""}`,
+									title: isMonitored ? "Klik untuk menonaktifkan scan redaman" : "Klik untuk mengaktifkan scan redaman",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										"aria-hidden": "true",
+										className: `pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs transition duration-200 ease-in-out ${isMonitored ? "translate-x-5" : "translate-x-0"}`
+									})
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-2.5",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center justify-between gap-2",
@@ -33325,7 +33644,7 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 										})] })
 									]
 								})]
-							})
+							})]
 						}),
 						activeTab === "pembayaran" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-3",
@@ -33560,7 +33879,7 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: () => onOpenEdit && onOpenEdit(activeCust),
-						className: "px-4 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs",
+						className: "px-4 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "w-3.5 h-3.5 text-white" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Edit Informasi" })]
 					})
 				})
@@ -34081,6 +34400,36 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 			setFormSaving(false);
 		}
 	};
+	const handleToggleMonitoring = async (customer) => {
+		const cId = customer.id_pelanggan || customer.id;
+		if (!cId) return;
+		try {
+			const res = await fetch(`/api/customers/${encodeURIComponent(cId)}/toggle-monitoring`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" }
+			});
+			if (!res.ok) {
+				const errJson = await res.json().catch(() => ({}));
+				throw new Error(errJson.detail || "Gagal mengubah status pemantauan.");
+			}
+			const data = await res.json();
+			setCustomers((prev) => prev.map((c) => {
+				if ((c.id_pelanggan || c.id) === cId) return {
+					...c,
+					is_monitored: data.is_monitored
+				};
+				return c;
+			}));
+			if (detailCustomer && (detailCustomer.id_pelanggan || detailCustomer.id) === cId) setDetailCustomer((prev) => ({
+				...prev,
+				is_monitored: data.is_monitored
+			}));
+			showToast("success", data.message || `Status scan redaman pelanggan berhasil diperbarui.`);
+		} catch (err) {
+			console.error("Error toggling monitoring:", err);
+			showToast("error", err.message || "Gagal mengubah status scan redaman.");
+		}
+	};
 	const handleDeleteCustomer = (id_pelanggan) => {
 		setConfirmModal({
 			isOpen: true,
@@ -34221,6 +34570,7 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 				handleOpenDetail,
 				handleOpenEdit,
 				handleDeleteCustomer,
+				handleToggleMonitoring,
 				isOfficeActive,
 				warnThreshold,
 				critThreshold
@@ -34420,6 +34770,33 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 									}),
 									className: "w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-sans font-medium focus:border-cyan-500 focus:outline-none"
 								})] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "p-2.5 rounded-xl border border-[#CCDDF0] bg-[#F1F6FC] flex items-center justify-between gap-3",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "space-y-0.5",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-[11px] font-bold text-[#0B2545]",
+											children: "Scan Redaman Otomatis"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+											className: "text-[10px] text-[#64839E] leading-normal",
+											children: formData.is_monitored !== false ? "Modem ini diizinkan masuk dan dipindai berkala oleh background scheduler." : "Modem ini dilewati dari pemindaian otomatis (karena proteksi akses/tidak diizinkan masuk)."
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										role: "switch",
+										"aria-checked": formData.is_monitored !== false,
+										onClick: () => setFormData({
+											...formData,
+											is_monitored: formData.is_monitored === false ? true : false
+										}),
+										className: `relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#026AA7] ${formData.is_monitored !== false ? "bg-[#026AA7]" : "bg-[#CBD5E1]"}`,
+										title: formData.is_monitored !== false ? "Klik untuk mematikan scan redaman" : "Klik untuk mengaktifkan scan redaman",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											"aria-hidden": "true",
+											className: `pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition duration-200 ease-in-out ${formData.is_monitored !== false ? "translate-x-5" : "translate-x-0"}`
+										})
+									})]
+								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center justify-end gap-2 pt-2 border-t border-sky-100",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -36422,16 +36799,13 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 	const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString("id-ID")}`;
 	const renderStatusBadge = (p) => {
 		if (p.status_pembayaran === "LUNAS") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-			className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3 h-3 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lunas" })]
+			className: "inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5 text-emerald-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Lunas" })]
 		});
 		const isOverdue = p.is_overdue || p.status_pembayaran === "OVERDUE";
-		const Icon = isOverdue ? TriangleAlert : Clock;
-		const color = isOverdue ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-amber-50 text-amber-700 border-amber-200";
-		const iconColor = isOverdue ? "text-rose-600" : "text-amber-600";
 		return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-			className: `inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-bold border ${color}`,
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: `w-3 h-3 ${iconColor}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: isOverdue ? "Jatuh Tempo" : "Belum Bayar" })]
+			className: `inline-flex items-center gap-1.5 text-xs font-bold ${isOverdue ? "text-rose-600" : "text-amber-600"}`,
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(isOverdue ? TriangleAlert : Clock, { className: "w-3.5 h-3.5 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: isOverdue ? "Jatuh Tempo" : "Belum Bayar" })]
 		});
 	};
 	if (loading && data.length === 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -36463,7 +36837,7 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
 					className: "w-full text-left border-collapse text-xs",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-						className: "bg-[#F1F6FC] border-b border-[#CCDDF0] text-[#0B2545] font-mono font-bold",
+						className: "bg-[#F1F6FC] border-b border-[#CCDDF0] text-[#3B5B78] font-sans text-[11px] font-semibold uppercase tracking-wider",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 								className: "py-2.5 px-3 w-10 text-center",
@@ -36669,7 +37043,7 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									onClick: () => onSyncSingle(p.id_pelanggan),
 									disabled: isSyncing,
-									className: "px-2.5 py-1 rounded-lg border border-[#CCDDF0] bg-white text-xs font-mono font-semibold text-[#026AA7] flex items-center gap-1 cursor-pointer",
+									className: "px-2.5 py-1 rounded-lg border border-[#CCDDF0] bg-white text-xs font-sans font-semibold text-[#026AA7] hover:bg-[#F1F6FC] transition flex items-center gap-1 cursor-pointer",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: `w-3 h-3 ${isSyncing ? "animate-spin" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Sync Live" })]
 								})
 							})
@@ -36781,7 +37155,7 @@ function BillingMessageModal({ isOpen, onClose, selectedCustomers = [], onSendRe
 								})]
 							})]
 						}), resultData.wa_targets && resultData.wa_targets.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h6", {
-							className: "text-xs font-bold text-[#0B2545] mb-2 font-mono",
+							className: "text-xs font-bold text-[#0B2545] mb-2 font-sans",
 							children: [
 								"Tautan WhatsApp Siap Kirim (",
 								resultData.wa_targets.length,
@@ -36805,7 +37179,7 @@ function BillingMessageModal({ isOpen, onClose, selectedCustomers = [], onSendRe
 									href: item.link,
 									target: "_blank",
 									rel: "noreferrer",
-									className: "px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-mono font-bold inline-flex items-center gap-1 shadow-2xs",
+									className: "px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-sans font-bold inline-flex items-center gap-1 shadow-2xs",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kirim WA" })]
 								})]
 							}, item.id_pelanggan))
@@ -39104,6 +39478,17 @@ function BranchOfficesView() {
 		setKantorError("");
 		setModalKantorOpen(true);
 	};
+	(0, import_react.useEffect)(() => {
+		if (!modalKantorOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (!kantorSubmitting) setModalKantorOpen(false);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [modalKantorOpen, kantorSubmitting]);
 	const handleKantorFormSubmit = async (e) => {
 		e.preventDefault();
 		setKantorError("");
@@ -39723,16 +40108,25 @@ function BranchOfficesView() {
 										})
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 											type: "button",
 											onClick: () => setModalKantorOpen(false),
-											className: "px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer",
-											children: "Batal"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+											disabled: kantorSubmitting,
+											className: "px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer flex items-center gap-1.5 transition disabled:opacity-50",
+											title: "Batal (Esc)",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Batal" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+												className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-600 border border-slate-200",
+												children: "Esc"
+											})]
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 											type: "submit",
 											disabled: kantorSubmitting,
-											className: "px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition cursor-pointer",
-											children: kantorSubmitting ? "Menyimpan..." : kantorModalMode === "add" ? "Simpan Kantor" : "Simpan Perubahan"
+											className: "px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50",
+											title: "Simpan (Enter)",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: kantorSubmitting ? "Menyimpan..." : kantorModalMode === "add" ? "Simpan Kantor" : "Simpan Perubahan" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("kbd", {
+												className: "px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30",
+												children: "↵ Enter"
+											})]
 										})]
 									})]
 								})

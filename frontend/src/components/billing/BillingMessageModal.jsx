@@ -72,7 +72,7 @@ export function BillingMessageModal({
 
               {resultData.wa_targets && resultData.wa_targets.length > 0 && (
                 <div>
-                  <h6 className="text-xs font-bold text-[#0B2545] mb-2 font-mono">
+                  <h6 className="text-xs font-bold text-[#0B2545] mb-2 font-sans">
                     Tautan WhatsApp Siap Kirim ({resultData.wa_targets.length} Pelanggan):
                   </h6>
                   <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 border border-[#CCDDF0] rounded-xl">
@@ -88,7 +88,7 @@ export function BillingMessageModal({
                           href={item.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-mono font-bold inline-flex items-center gap-1 shadow-2xs"
+                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-sans font-bold inline-flex items-center gap-1 shadow-2xs"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
                           <span>Kirim WA</span>

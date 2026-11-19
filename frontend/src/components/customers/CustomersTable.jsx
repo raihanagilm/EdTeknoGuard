@@ -8,7 +8,8 @@ import {
   Info,
   Phone,
   Activity,
-  MoreVertical
+  MoreVertical,
+  EyeOff
 } from 'lucide-react'
 import { DataTableContainer } from '../common/CommonUI'
 
@@ -34,6 +35,7 @@ export function CustomersTable({
   handleOpenDetail,
   handleOpenEdit,
   handleDeleteCustomer,
+  handleToggleMonitoring,
   isOfficeActive = true,
   warnThreshold = -26.0,
   critThreshold = -27.0
@@ -141,6 +143,11 @@ export function CustomersTable({
                   </div>
 
                   <div className="flex items-center gap-1.5">
+                    {c.is_monitored === false && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none">
+                        SCAN OFF
+                      </span>
+                    )}
                     <span className={`text-xs font-bold uppercase ${badgeClass}`}>
                       {statusBadge === 'UNTESTED' ? 'BELUM CEK' : statusBadge}
                     </span>
@@ -227,6 +234,25 @@ export function CustomersTable({
                   >
                     <Info className="w-4 h-4" />
                   </button>
+
+                  {handleToggleMonitoring && (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleMonitoring(c)}
+                      className={`p-1.5 rounded-lg border transition cursor-pointer ${
+                        c.is_monitored !== false
+                          ? 'border-emerald-200 bg-white hover:bg-amber-50 text-emerald-700'
+                          : 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-emerald-50'
+                      }`}
+                      title={c.is_monitored !== false ? 'Scan Redaman Aktif (Klik untuk mematikan)' : 'Scan Redaman Nonaktif (Klik untuk mengaktifkan)'}
+                    >
+                      {c.is_monitored !== false ? (
+                        <Activity className="w-4 h-4 text-emerald-600" />
+                      ) : (
+                        <EyeOff className="w-4 h-4 text-amber-600" />
+                      )}
+                    </button>
+                  )}
 
                   <button
                     type="button"
@@ -578,19 +604,26 @@ export function CustomersTable({
                       const isOnline =
                         c.status_lease === 'bound' &&
                         c.status_koneksi !== 'OFFLINE' &&
-                        c.status !== 'OFFLINE' &&
-                        Boolean(c.is_monitored !== false)
-                      if (isOnline) {
-                        return (
-                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-                            ONLINE
-                          </span>
-                        )
-                      }
+                        c.status !== 'OFFLINE'
+                      const isMonitored = Boolean(c.is_monitored !== false)
                       return (
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                          OFFLINE
-                        </span>
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span
+                            className={`text-xs font-bold uppercase tracking-wider ${
+                              isOnline ? 'text-emerald-700' : 'text-slate-500'
+                            }`}
+                          >
+                            {isOnline ? 'ONLINE' : 'OFFLINE'}
+                          </span>
+                          {!isMonitored && (
+                            <span
+                              className="text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none"
+                              title="Scan redaman dinonaktifkan (dilewati dari scheduler pemindaian)"
+                            >
+                              SCAN OFF
+                            </span>
+                          )}
+                        </div>
                       )
                     })()}
                   </td>
@@ -600,8 +633,8 @@ export function CustomersTable({
                         const isOnline =
                           c.status_lease === 'bound' &&
                           c.status_koneksi !== 'OFFLINE' &&
-                          c.status !== 'OFFLINE' &&
-                          Boolean(c.is_monitored !== false)
+                          c.status !== 'OFFLINE'
+                        const isMonitored = Boolean(c.is_monitored !== false)
                         const cooldown = probeCooldowns[cId] || 0
                         const isProbing = probingId === cId
                         const isDisabled = isProbing || cooldown > 0 || !isOfficeActive || !isOnline
@@ -628,6 +661,8 @@ export function CustomersTable({
                                 ? 'Perangkat sedang Offline (DHCP/PPPoE tidak aktif). Cek redaman tidak tersedia.'
                                 : cooldown > 0
                                 ? `Tunggu jeda cooldown (${cooldown} detik) sebelum memeriksa ulang redaman ONT`
+                                : !isMonitored
+                                ? 'Scan berkala nonaktif (Klik untuk uji coba sinyal secara manual)'
                                 : 'Cek Sinyal Redaman ONT Langsung'
                             }
                           >
@@ -727,6 +762,31 @@ export function CustomersTable({
                                       <Phone className="w-3.5 h-3.5 text-emerald-600" />
                                       <span>Hubungi WA</span>
                                     </a>
+                                  )}
+
+                                  {handleToggleMonitoring && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setActiveMenuId(null)
+                                        setMenuAnchor(null)
+                                        handleToggleMonitoring(c)
+                                      }}
+                                      className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-[#F1F6FC] hover:text-[#0B2545] font-bold flex items-center gap-2 transition cursor-pointer"
+                                    >
+                                      {c.is_monitored !== false ? (
+                                        <>
+                                          <EyeOff className="w-3.5 h-3.5 text-[#64839E]" />
+                                          <span>Matikan Scan Redaman</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Activity className="w-3.5 h-3.5 text-[#026AA7]" />
+                                          <span>Aktifkan Scan Redaman</span>
+                                        </>
+                                      )}
+                                    </button>
                                   )}
                                 </div>
 

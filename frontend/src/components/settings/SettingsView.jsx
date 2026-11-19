@@ -83,6 +83,22 @@ export function SettingsView({
     }
   }, [activeOffice, isTeknisi])
 
+  // Keyboard shortcut Ctrl+S untuk simpan pengaturan tab aktif
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        const activeSubmitBtn = document.querySelector('form button[type="submit"]')
+        if (activeSubmitBtn && !activeSubmitBtn.disabled) {
+          activeSubmitBtn.click()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   return (
     <div className="space-y-4">
       {/* Floating Toast Notification */}

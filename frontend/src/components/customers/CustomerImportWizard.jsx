@@ -348,6 +348,60 @@ export function CustomerImportWizard({
     }
   }
 
+  // Keyboard navigation & quick event triggers (Esc: Batal/Kembali, Enter: Lanjut)
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (importStep === 1) {
+          if (!importLoading && !importAnalyzing && !networkBillFetching) {
+            onClose()
+          }
+        } else if (importStep === 2) {
+          setImportStep(1)
+        } else if (importStep === 3) {
+          setImportStep(2)
+        }
+      } else if (e.key === 'Enter') {
+        const activeEl = document.activeElement
+        const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')
+
+        if (importStep === 1) {
+          if (!isTyping || activeEl.type === 'file' || activeEl.type === 'radio') {
+            if (importSource === 'file' && importFile && !importAnalyzing && importColumns.length > 0) {
+              e.preventDefault()
+              handleProceedToStep2()
+            } else if (importSource === 'network_bill' && !networkBillFetching) {
+              e.preventDefault()
+              handleFetchNetworkBillPreview()
+            }
+          }
+        } else if (importStep === 2) {
+          if (!isTyping) {
+            e.preventDefault()
+            handleProceedToStep3()
+          }
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [
+    isOpen,
+    importStep,
+    importFile,
+    importAnalyzing,
+    importColumns,
+    importSource,
+    networkBillFetching,
+    importLoading,
+    importMapping,
+    onClose
+  ])
+
   // Filtered rows for Step 3 Preview Table based on KPI card filter & search query
   const filteredIndices = importPreviewData
     .map((row, idx) => ({ row, idx }))

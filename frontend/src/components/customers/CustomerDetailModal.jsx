@@ -47,6 +47,7 @@ export function CustomerDetailModal({
   const [currentCustomer, setCurrentCustomer] = useState(customer)
   const [activities, setActivities] = useState([])
   const [loadingActivities, setLoadingActivities] = useState(false)
+  const [togglingMonitoring, setTogglingMonitoring] = useState(false)
 
   useEffect(() => {
     setCurrentCustomer(customer)
@@ -54,8 +55,49 @@ export function CustomerDetailModal({
 
   const activeCust = currentCustomer || customer
   const cId = activeCust?.id_pelanggan || activeCust?.id || ''
+  const isMonitored = Boolean(activeCust?.is_monitored !== false)
   const rawWa = activeCust?.no_wa || activeCust?.no_hp || ''
   const hasValidWa = Boolean(rawWa && rawWa !== '-')
+
+  const handleToggleMonitoring = async () => {
+    if (!cId || togglingMonitoring) return
+    setTogglingMonitoring(true)
+    try {
+      const res = await fetch(`/api/customers/${encodeURIComponent(cId)}/toggle-monitoring`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        throw new Error(errJson.detail || 'Gagal mengubah status pemantauan.')
+      }
+      const data = await res.json()
+      const updated = {
+        ...activeCust,
+        is_monitored: data.is_monitored
+      }
+      setCurrentCustomer(updated)
+      if (onCustomerUpdated) {
+        onCustomerUpdated(updated)
+      }
+      if (onNotify) {
+        onNotify({
+          type: 'success',
+          message: data.message || `Status scan redaman berhasil ${data.is_monitored ? 'diaktifkan' : 'dinonaktifkan'}.`
+        })
+      }
+    } catch (err) {
+      console.error('Gagal mengubah status scan redaman:', err)
+      if (onNotify) {
+        onNotify({
+          type: 'error',
+          message: err.message || 'Gagal mengubah status scan redaman.'
+        })
+      }
+    } finally {
+      setTogglingMonitoring(false)
+    }
+  }
 
   const fetchBilling = async () => {
     if (!cId) return
@@ -411,6 +453,41 @@ export function CustomerDetailModal({
           {/* TAB 2: JARINGAN */}
           {activeTab === 'jaringan' && (
             <div className="space-y-3">
+              {/* Card Kontrol Scan Redaman ONT (Switch Button) */}
+              <div className="p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] flex items-center justify-between gap-3">
+                <div className="space-y-0.5 min-w-0">
+                  <div className="text-xs font-bold text-[#0B2545] flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
+                    <span>Pemantauan &amp; Scan Redaman ONT</span>
+                  </div>
+                  <p className="text-[10px] text-[#64839E] leading-normal">
+                    {isMonitored
+                      ? 'Modem ONT diizinkan masuk dan dipindai secara berkala oleh background scheduler.'
+                      : 'Modem ONT dikecualikan dari scan berkala (karena proteksi akses/tidak diizinkan masuk).'}
+                  </p>
+                </div>
+
+                {/* Switch Button (SB) */}
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isMonitored}
+                  disabled={togglingMonitoring}
+                  onClick={handleToggleMonitoring}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#026AA7] ${
+                    isMonitored ? 'bg-[#026AA7]' : 'bg-[#CBD5E1]'
+                  } ${togglingMonitoring ? 'opacity-60 cursor-wait' : ''}`}
+                  title={isMonitored ? 'Klik untuk menonaktifkan scan redaman' : 'Klik untuk mengaktifkan scan redaman'}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs transition duration-200 ease-in-out ${
+                      isMonitored ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
               <div className="p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] text-[#026AA7] font-bold uppercase flex items-center gap-1">
@@ -716,7 +793,7 @@ export function CustomerDetailModal({
           <button
             type="button"
             onClick={() => onOpenEdit && onOpenEdit(activeCust)}
-            className="px-4 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            className="px-4 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0"
           >
             <Edit2 className="w-3.5 h-3.5 text-white" />
             <span>Edit Informasi</span>

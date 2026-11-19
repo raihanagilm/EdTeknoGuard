@@ -240,5 +240,63 @@ class TestCustomerModules(unittest.TestCase):
         finally:
             db.close()
 
+    def test_toggle_monitoring_separation_from_offline_online(self):
+        """Memastikan status pemantauan is_monitored terpisah tegas dari status online/offline (status_lease)"""
+        from app.modules.customers.controller import CustomerController
+        from fastapi import Request
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+
+        try:
+            p = models.Pelanggan(
+                id_pelanggan="CUST-TOGGLE-01",
+                nama="Budi Santoso",
+                kantor="cabang",
+                is_active=True,
+                is_monitored=True,
+                status_lease="bound" # ONLINE di router MikroTik
+            )
+            per = models.PerangkatONT(id_perangkat=10, id_pelanggan="CUST-TOGGLE-01", ip_router="10.10.2.15")
+            db.add_all([p, per])
+            db.commit()
+
+            # 1. Matikan pemantauan (is_monitored -> False)
+            user_admin = {"nama": "Admin NOC", "role": "admin", "allowed_kantor": ["cabang"]}
+            mock_req = MagicMock(spec=Request)
+            mock_req.client.host = "127.0.0.1"
+            mock_req.headers = {}
+
+            res_toggle_off = CustomerController.toggle_customer_monitoring(
+                db=db,
+                id_pelanggan="CUST-TOGGLE-01",
+                user=user_admin,
+                request=mock_req
+            )
+            self.assertEqual(res_toggle_off["status"], "success")
+            self.assertFalse(res_toggle_off["is_monitored"])
+
+            # Cek di DB: status_lease harus TETAP "bound" (Online), sedangkan is_monitored = False
+            db.refresh(p)
+            self.assertEqual(p.status_lease, "bound", "Status lease online tidak boleh berubah saat monitoring dimatikan")
+            self.assertFalse(p.is_monitored, "Status is_monitored harus menjadi False")
+
+            # 2. Nyalakan kembali pemantauan (is_monitored -> True)
+            res_toggle_on = CustomerController.toggle_customer_monitoring(
+                db=db,
+                id_pelanggan="CUST-TOGGLE-01",
+                user=user_admin,
+                request=mock_req
+            )
+            self.assertEqual(res_toggle_on["status"], "success")
+            self.assertTrue(res_toggle_on["is_monitored"])
+
+            db.refresh(p)
+            self.assertTrue(p.is_monitored, "Status is_monitored harus kembali menjadi True")
+            self.assertEqual(p.status_lease, "bound")
+        finally:
+            db.close()
+
 if __name__ == "__main__":
     unittest.main()

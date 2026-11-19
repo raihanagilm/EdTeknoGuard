@@ -619,6 +619,38 @@ export function CustomersView({
     }
   }
 
+  // Toggle Customer Monitoring (Scan Redaman ON/OFF)
+  const handleToggleMonitoring = async (customer) => {
+    const cId = customer.id_pelanggan || customer.id
+    if (!cId) return
+    try {
+      const res = await fetch(`/api/customers/${encodeURIComponent(cId)}/toggle-monitoring`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        throw new Error(errJson.detail || 'Gagal mengubah status pemantauan.')
+      }
+      const data = await res.json()
+      setCustomers((prev) =>
+        prev.map((c) => {
+          if ((c.id_pelanggan || c.id) === cId) {
+            return { ...c, is_monitored: data.is_monitored }
+          }
+          return c
+        })
+      )
+      if (detailCustomer && (detailCustomer.id_pelanggan || detailCustomer.id) === cId) {
+        setDetailCustomer((prev) => ({ ...prev, is_monitored: data.is_monitored }))
+      }
+      showToast('success', data.message || `Status scan redaman pelanggan berhasil diperbarui.`)
+    } catch (err) {
+      console.error('Error toggling monitoring:', err)
+      showToast('error', err.message || 'Gagal mengubah status scan redaman.')
+    }
+  }
+
   // Delete Single Customer
   const handleDeleteCustomer = (id_pelanggan) => {
     setConfirmModal({
@@ -758,6 +790,7 @@ export function CustomersView({
         handleOpenDetail={handleOpenDetail}
         handleOpenEdit={handleOpenEdit}
         handleDeleteCustomer={handleDeleteCustomer}
+        handleToggleMonitoring={handleToggleMonitoring}
         isOfficeActive={isOfficeActive}
         warnThreshold={warnThreshold}
         critThreshold={critThreshold}
@@ -952,6 +985,38 @@ export function CustomersView({
                   onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
                   className="w-full px-3 py-1.5 rounded-xl border border-sky-200 text-xs font-sans font-medium focus:border-cyan-500 focus:outline-none"
                 ></textarea>
+              </div>
+
+              {/* Toggle Switch Button Scan Redaman */}
+              <div className="p-2.5 rounded-xl border border-[#CCDDF0] bg-[#F1F6FC] flex items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="text-[11px] font-bold text-[#0B2545]">
+                    Scan Redaman Otomatis
+                  </div>
+                  <p className="text-[10px] text-[#64839E] leading-normal">
+                    {formData.is_monitored !== false
+                      ? 'Modem ini diizinkan masuk dan dipindai berkala oleh background scheduler.'
+                      : 'Modem ini dilewati dari pemindaian otomatis (karena proteksi akses/tidak diizinkan masuk).'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.is_monitored !== false}
+                  onClick={() => setFormData({ ...formData, is_monitored: formData.is_monitored === false ? true : false })}
+                  className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#026AA7] ${
+                    formData.is_monitored !== false ? 'bg-[#026AA7]' : 'bg-[#CBD5E1]'
+                  }`}
+                  title={formData.is_monitored !== false ? 'Klik untuk mematikan scan redaman' : 'Klik untuk mengaktifkan scan redaman'}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition duration-200 ease-in-out ${
+                      formData.is_monitored !== false ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-sky-100">

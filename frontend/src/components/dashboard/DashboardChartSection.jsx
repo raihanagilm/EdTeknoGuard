@@ -180,10 +180,35 @@ const renderCalendarDays = () => {
     return cells
   }
 
-  // 4. Load Chart Data
-  
+  // Helper Pembuat Gradien Modern (Modern Cyber Blue & Amber Glow ala Dribbble)
+  const createCyanBlueGradient = (ctx, chartArea) => {
+    if (!ctx || !chartArea) return 'rgba(2, 106, 167, 0.15)'
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
+    gradient.addColorStop(0, 'rgba(0, 242, 254, 0.40)') // Electric Neon Cyan di puncak
+    gradient.addColorStop(0.45, 'rgba(2, 106, 167, 0.22)') // Deep Ocean Blue di tengah
+    gradient.addColorStop(1, 'rgba(11, 37, 69, 0.02)') // Fading to transparent di dasar
+    return gradient
+  }
 
-const loadChartData = useCallback(async () => {
+  const createAmberGradient = (ctx, chartArea) => {
+    if (!ctx || !chartArea) return 'rgba(245, 158, 11, 0.15)'
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
+    gradient.addColorStop(0, 'rgba(245, 158, 11, 0.38)') // Warm Amber Glow di puncak
+    gradient.addColorStop(0.5, 'rgba(217, 119, 6, 0.18)')
+    gradient.addColorStop(1, 'rgba(180, 83, 9, 0.01)')
+    return gradient
+  }
+
+  const createMultiSeriesGradient = (ctx, chartArea, hexColor) => {
+    if (!ctx || !chartArea) return 'rgba(2, 106, 167, 0.12)'
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
+    gradient.addColorStop(0, hexColor ? `${hexColor}40` : 'rgba(2, 106, 167, 0.30)')
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.01)')
+    return gradient
+  }
+
+  // 4. Load Chart Data
+  const loadChartData = useCallback(async () => {
     if (!chartInstanceRef.current) return
     try {
       const params = { range: chartRange }
@@ -251,26 +276,36 @@ const loadChartData = useCallback(async () => {
         let datasets = []
 
         if (rawDatasets && rawDatasets.length > 0) {
-          const isMulti = rawDatasets.length > 1
-          datasets = rawDatasets.map((ds) => {
+          datasets = rawDatasets.map((ds, dsIdx) => {
             const transformed = (ds.values || []).map((v) =>
               v !== null && !isNaN(v) && typeof v === 'number' ? transformDbm(v) : null
             )
+            const isFirst = dsIdx === 0
+            const dsColor = ds.color || (isFirst ? '#0284C7' : '#F59E0B')
             return {
               label: ds.label,
               data: transformed,
               rawValues: ds.values || [],
               details: ds.details || [],
-              borderColor: ds.color || '#026AA7',
-              backgroundColor: !isMulti ? 'rgba(2, 106, 167, 0.12)' : 'transparent',
-              borderWidth: rawDatasets.length > 2 ? 2 : 2.5,
-              fill: !isMulti,
-              tension: 0.12,
-              pointRadius: rawDatasets.length > 2 ? 3.5 : 5,
-              pointHoverRadius: rawDatasets.length > 2 ? 6 : 8,
-              pointBackgroundColor: ds.color || '#026AA7',
+              borderColor: dsColor,
+              backgroundColor: (context) => {
+                const chart = context.chart
+                const { ctx, chartArea } = chart
+                if (isFirst) return createCyanBlueGradient(ctx, chartArea)
+                if (dsIdx === 1) return createAmberGradient(ctx, chartArea)
+                return createMultiSeriesGradient(ctx, chartArea, dsColor)
+              },
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.42,
+              cubicInterpolationMode: 'monotone',
+              pointRadius: 4.5,
+              pointHoverRadius: 7.5,
+              pointBackgroundColor: dsColor,
               pointBorderColor: '#FFFFFF',
-              pointBorderWidth: 2,
+              pointBorderWidth: 2.5,
+              pointHoverBorderColor: '#FFFFFF',
+              pointHoverBorderWidth: 3,
               showLine: true,
               spanGaps: true,
               isThreshold: false
@@ -285,16 +320,23 @@ const loadChartData = useCallback(async () => {
             data: transformedValues,
             rawValues: json.values || [],
             details: json.details || [],
-            borderColor: '#026AA7',
-            backgroundColor: 'rgba(2, 106, 167, 0.12)',
+            borderColor: '#0284C7',
+            backgroundColor: (context) => {
+              const chart = context.chart
+              const { ctx, chartArea } = chart
+              return createCyanBlueGradient(ctx, chartArea)
+            },
             borderWidth: 2.5,
             fill: true,
-            tension: 0.12,
-            pointRadius: 5,
-            pointHoverRadius: 8,
-            pointBackgroundColor: '#026AA7',
+            tension: 0.42,
+            cubicInterpolationMode: 'monotone',
+            pointRadius: 4.5,
+            pointHoverRadius: 7.5,
+            pointBackgroundColor: '#0284C7',
             pointBorderColor: '#FFFFFF',
-            pointBorderWidth: 2,
+            pointBorderWidth: 2.5,
+            pointHoverBorderColor: '#FFFFFF',
+            pointHoverBorderWidth: 3,
             showLine: true,
             spanGaps: true,
             isThreshold: false
@@ -305,7 +347,7 @@ const loadChartData = useCallback(async () => {
         datasets.push({
           label: `Garis Warning (${Number(warnThreshold).toFixed(1)} dBm)`,
           data: count > 0 ? new Array(count).fill(warnVal) : [],
-          borderColor: '#64839E',
+          borderColor: 'rgba(245, 158, 11, 0.75)',
           borderWidth: 1.5,
           borderDash: [5, 4],
           pointRadius: 0,
@@ -319,9 +361,9 @@ const loadChartData = useCallback(async () => {
         datasets.push({
           label: `Garis Kritis (${Number(critThreshold).toFixed(1)} dBm)`,
           data: count > 0 ? new Array(count).fill(critVal) : [],
-          borderColor: '#0B2545',
+          borderColor: 'rgba(239, 68, 68, 0.85)',
           borderWidth: 1.5,
-          borderDash: [2, 3],
+          borderDash: [3, 3],
           pointRadius: 0,
           pointHoverRadius: 0,
           fill: false,
@@ -429,35 +471,43 @@ const loadChartData = useCallback(async () => {
             },
             grid: {
               color: (ctx) => {
-                if (!ctx.tick) return '#E8F1FA'
+                if (!ctx.tick) return 'rgba(232, 241, 250, 0.6)'
                 const dbm = inverseTransformDbm(ctx.tick.value)
-                if (Math.abs(dbm - 26.0) < 0.05) return 'rgba(100, 131, 158, 0.45)'
-                if (Math.abs(dbm - 27.0) < 0.05) return 'rgba(11, 37, 69, 0.45)'
-                return '#E8F1FA'
-              }
+                if (Math.abs(dbm - 26.0) < 0.05) return 'rgba(245, 158, 11, 0.35)'
+                if (Math.abs(dbm - 27.0) < 0.05) return 'rgba(239, 68, 68, 0.35)'
+                return 'rgba(232, 241, 250, 0.6)'
+              },
+              drawBorder: false
             }
           },
           x: {
             ticks: {
               color: '#64839E',
-              font: { size: 11, family: "'JetBrains Mono', monospace" },
+              font: { size: 11, family: "'JetBrains Mono', monospace", weight: '500' },
               maxRotation: 0,
               autoSkip: true,
               maxTicksLimit: 12
             },
-            grid: { display: false }
+            grid: {
+              display: true,
+              color: 'rgba(226, 232, 240, 0.55)',
+              borderDash: [3, 4],
+              drawBorder: false
+            }
           }
         },
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#0B2545',
-            titleColor: '#BAE6FD',
+            backgroundColor: 'rgba(11, 37, 69, 0.94)',
+            titleColor: '#38BDF8',
             bodyColor: '#FFFFFF',
-            titleFont: { family: "'JetBrains Mono', monospace", size: 11, weight: 'bold' },
+            borderColor: 'rgba(56, 189, 248, 0.25)',
+            borderWidth: 1,
+            titleFont: { family: "'JetBrains Mono', monospace", size: 11.5, weight: 'bold' },
             bodyFont: { family: "'JetBrains Mono', monospace", size: 10.5, weight: '500' },
-            padding: { top: 8, bottom: 8, left: 10, right: 10 },
-            cornerRadius: 8,
+            padding: { top: 10, bottom: 10, left: 12, right: 12 },
+            cornerRadius: 12,
             displayColors: false,
             filter: (tooltipItem) => !tooltipItem.dataset.isThreshold,
             callbacks: {

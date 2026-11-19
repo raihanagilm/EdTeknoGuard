@@ -645,10 +645,6 @@ class MikroTikSyncService:
                 if p_exist.status_lease != lease_status:
                     p_exist.status_lease = lease_status
                     changed = True
-                
-                if p_exist.is_monitored != is_online:
-                    p_exist.is_monitored = is_online
-                    changed = True
 
                 if mac and p_exist.mac_address != mac:
                     p_exist.mac_address = mac
@@ -721,7 +717,7 @@ class MikroTikSyncService:
                     pop=final_pop,
                     kantor=kantor,
                     paket=paket_name,
-                    is_monitored=is_online,
+                    is_monitored=True,
                     is_active=True,
                     status_lease=lease_status,
                     status_verifikasi="TERVERIFIKASI",

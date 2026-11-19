@@ -189,7 +189,7 @@ class CustomerService:
 
         if status and status != "Semua Status" and status != "ALL":
             if status == "OFFLINE":
-                query = query.filter(or_(Pelanggan.status_lease == "waiting", Pelanggan.is_monitored == False))
+                query = query.filter(Pelanggan.status_lease == "waiting")
             elif status == "NORMAL":
                 query = query.filter(
                     Pelanggan.status_lease != "waiting",

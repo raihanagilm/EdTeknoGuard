@@ -148,18 +148,22 @@ export function ImportStepUpload({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer"
+              className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer flex items-center gap-1.5"
+              title="Batal (Esc)"
             >
-              Batal
+              <span>Batal</span>
+              <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]">Esc</kbd>
             </button>
             <button
               type="button"
               disabled={!importFile || importAnalyzing || importColumns.length === 0}
               onClick={handleProceedToStep2}
               className="px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              title="Lanjut ke Pemetaan Kolom (Enter)"
             >
               <span>Lanjut ke Pemetaan Kolom</span>
               <ChevronRight className="w-4 h-4" />
+              <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30">↵ Enter</kbd>
             </button>
           </div>
         </div>
@@ -215,15 +219,18 @@ export function ImportStepUpload({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer"
+              className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition cursor-pointer flex items-center gap-1.5"
+              title="Batal (Esc)"
             >
-              Batal
+              <span>Batal</span>
+              <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]">Esc</kbd>
             </button>
             <button
               type="button"
               disabled={networkBillFetching}
               onClick={handleFetchNetworkBillPreview}
               className="px-5 py-2 rounded-lg bg-[#026AA7] hover:bg-[#035388] text-white text-xs font-bold shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              title="Tarik Data (Enter)"
             >
               {networkBillFetching ? (
                 <>
@@ -234,6 +241,7 @@ export function ImportStepUpload({
                 <>
                   <span>Tarik &amp; Bandingkan Data di Pratinjau</span>
                   <ChevronRight className="w-4 h-4" />
+                  <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30">↵ Enter</kbd>
                 </>
               )}
             </button>

@@ -33,19 +33,18 @@ export function BillingTable({
   const renderStatusBadge = (p) => {
     if (p.status_pembayaran === 'LUNAS') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
           <span>Lunas</span>
         </span>
       )
     }
     const isOverdue = p.is_overdue || p.status_pembayaran === 'OVERDUE'
     const Icon = isOverdue ? AlertTriangle : Clock
-    const color = isOverdue ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-    const iconColor = isOverdue ? 'text-rose-600' : 'text-amber-600'
+    const textColor = isOverdue ? 'text-rose-600' : 'text-amber-600'
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-bold border ${color}`}>
-        <Icon className={`w-3 h-3 ${iconColor}`} />
+      <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${textColor}`}>
+        <Icon className="w-3.5 h-3.5 shrink-0" />
         <span>{isOverdue ? 'Jatuh Tempo' : 'Belum Bayar'}</span>
       </span>
     )
@@ -77,7 +76,7 @@ export function BillingTable({
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="bg-[#F1F6FC] border-b border-[#CCDDF0] text-[#0B2545] font-mono font-bold">
+            <tr className="bg-[#F1F6FC] border-b border-[#CCDDF0] text-[#3B5B78] font-sans text-[11px] font-semibold uppercase tracking-wider">
               <th className="py-2.5 px-3 w-10 text-center">
                 <input
                   type="checkbox"
@@ -240,7 +239,7 @@ export function BillingTable({
                 <button
                   onClick={() => onSyncSingle(p.id_pelanggan)}
                   disabled={isSyncing}
-                  className="px-2.5 py-1 rounded-lg border border-[#CCDDF0] bg-white text-xs font-mono font-semibold text-[#026AA7] flex items-center gap-1 cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg border border-[#CCDDF0] bg-white text-xs font-sans font-semibold text-[#026AA7] hover:bg-[#F1F6FC] transition flex items-center gap-1 cursor-pointer"
                 >
                   <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
                   <span>Sync Live</span>

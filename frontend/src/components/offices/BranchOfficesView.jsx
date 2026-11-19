@@ -148,6 +148,23 @@ export function BranchOfficesView() {
     setModalKantorOpen(true);
   };
 
+  // Keyboard navigation & quick event triggers (Esc: Tutup modal kantor)
+  useEffect(() => {
+    if (!modalKantorOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (!kantorSubmitting) {
+          setModalKantorOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalKantorOpen, kantorSubmitting]);
+
   const handleKantorFormSubmit = async (e) => {
     e.preventDefault();
     setKantorError('');
@@ -853,16 +870,21 @@ export function BranchOfficesView() {
                   <button
                     type="button"
                     onClick={() => setModalKantorOpen(false)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                    disabled={kantorSubmitting}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer flex items-center gap-1.5 transition disabled:opacity-50"
+                    title="Batal (Esc)"
                   >
-                    Batal
+                    <span>Batal</span>
+                    <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-600 border border-slate-200">Esc</kbd>
                   </button>
                   <button
                     type="submit"
                     disabled={kantorSubmitting}
-                    className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+                    className="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                    title="Simpan (Enter)"
                   >
-                    {kantorSubmitting ? 'Menyimpan...' : (kantorModalMode === 'add' ? 'Simpan Kantor' : 'Simpan Perubahan')}
+                    <span>{kantorSubmitting ? 'Menyimpan...' : (kantorModalMode === 'add' ? 'Simpan Kantor' : 'Simpan Perubahan')}</span>
+                    <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30">↵ Enter</kbd>
                   </button>
                 </div>
               </div>

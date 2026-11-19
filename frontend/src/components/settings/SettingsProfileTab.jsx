@@ -37,6 +37,22 @@ export function SettingsProfileTab({
     }
   }, [currentUser])
 
+  // Scoped Escape listener saat edit profil atau form ganti kata sandi terbuka
+  useEffect(() => {
+    if (!isEditProfile && !isPasswordExpanded) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (isEditProfile) setIsEditProfile(false)
+        if (isPasswordExpanded) setIsPasswordExpanded(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isEditProfile, isPasswordExpanded])
+
   // Handler Simpan Data Diri (Nama & No WA)
   const handleSaveDataDiri = async (e) => {
     e.preventDefault()
@@ -174,16 +190,24 @@ export function SettingsProfileTab({
               <button
                 type="button"
                 onClick={() => setIsEditProfile(false)}
-                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5"
+                title="Batal (Esc)"
               >
-                Batal
+                <span>Batal</span>
+                <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-200 text-slate-700 border border-slate-300">Esc</kbd>
               </button>
               <button
                 type="submit"
                 disabled={profileLoading}
                 className="flex-1 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                title="Simpan Data Diri (Enter)"
               >
-                {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Simpan Data Diri</span>}
+                {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : (
+                  <>
+                    <span>Simpan Data Diri</span>
+                    <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30">↵ Enter</kbd>
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -336,8 +360,14 @@ export function SettingsProfileTab({
                 type="submit"
                 disabled={profileLoading}
                 className="w-full mt-2 py-3 px-4 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm active:scale-[0.99] transition flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
+                title="Simpan Kata Sandi Baru (Enter)"
               >
-                {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Simpan Kata Sandi Baru</span>}
+                {profileLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : (
+                  <>
+                    <span>Simpan Kata Sandi Baru</span>
+                    <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30">↵ Enter</kbd>
+                  </>
+                )}
               </button>
             </form>
           </div>

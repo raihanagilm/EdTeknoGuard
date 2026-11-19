@@ -154,9 +154,11 @@ export function SettingsCredentialsTab({
           type="submit"
           disabled={settingsLoading}
           className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition min-h-[42px] cursor-pointer"
+          title="Simpan Kredensial Modem (Ctrl+S)"
         >
           <Save className="w-4 h-4" />
           <span>Simpan Kredensial Modem</span>
+          <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/20 text-white border border-white/30">Ctrl+S</kbd>
         </button>
       </div>
 

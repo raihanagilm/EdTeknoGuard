@@ -627,9 +627,11 @@ export function ImportStepPreview({
           type="button"
           onClick={() => setImportStep(2)}
           className="px-4 py-2 rounded-lg border border-[#CCDDF0] text-xs font-bold text-[#3B5B78] hover:bg-[#F1F6FC] hover:text-[#0B2545] transition flex items-center gap-1.5 cursor-pointer"
+          title="Kembali ke Pemetaan (Esc)"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Kembali ke Pemetaan</span>
+          <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E2EDF8] text-[#3B5B78] border border-[#CCDDF0]">Esc</kbd>
         </button>
         {importLoading && handleCloseModal && (
           <button

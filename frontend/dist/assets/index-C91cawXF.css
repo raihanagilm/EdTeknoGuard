@@ -220,6 +220,7 @@
     --tracking-widest: .1em;
     --leading-tight: 1.25;
     --leading-snug: 1.375;
+    --leading-normal: 1.5;
     --leading-relaxed: 1.625;
     --radius-xs: .125rem;
     --radius-md: .375rem;
@@ -1016,6 +1017,10 @@
 
   .ml-1\.5 {
     margin-left: calc(var(--spacing) * 1.5);
+  }
+
+  .ml-2 {
+    margin-left: calc(var(--spacing) * 2);
   }
 
   .ml-3 {
@@ -2081,6 +2086,11 @@
     border-bottom-width: 1px;
   }
 
+  .border-b-2 {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 2px;
+  }
+
   .border-l-2 {
     border-left-style: var(--tw-border-style);
     border-left-width: 2px;
@@ -2130,6 +2140,14 @@
 
   .border-\[\#DAE7F5\] {
     border-color: #dae7f5;
+  }
+
+  .border-\[\#EF4444\] {
+    border-color: #ef4444;
+  }
+
+  .border-\[\#F59E0B\] {
+    border-color: #f59e0b;
   }
 
   .border-amber-200 {
@@ -2466,6 +2484,10 @@
     background-color: #026aa7;
   }
 
+  .bg-\[\#026AA7\]\/10 {
+    background-color: oklab(50.5992% -.0538662 -.113496 / .1);
+  }
+
   .bg-\[\#13315C\] {
     background-color: #13315c;
   }
@@ -2474,12 +2496,24 @@
     background-color: #035388;
   }
 
+  .bg-\[\#64839E\]\/10 {
+    background-color: oklab(59.648% -.0228626 -.049428 / .1);
+  }
+
+  .bg-\[\#CBD5E1\] {
+    background-color: #cbd5e1;
+  }
+
   .bg-\[\#CCDDF0\] {
     background-color: #ccddf0;
   }
 
   .bg-\[\#E0F0FF\] {
     background-color: #e0f0ff;
+  }
+
+  .bg-\[\#E2EDF8\] {
+    background-color: #e2edf8;
   }
 
   .bg-\[\#E8F1FA\] {
@@ -2542,6 +2576,16 @@
 
   .bg-amber-500 {
     background-color: var(--color-amber-500);
+  }
+
+  .bg-amber-500\/10 {
+    background-color: #f99c001a;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-amber-500\/10 {
+      background-color: color-mix(in oklab, var(--color-amber-500) 10%, transparent);
+    }
   }
 
   .bg-amber-600 {
@@ -2792,6 +2836,16 @@
 
   .bg-emerald-100 {
     background-color: var(--color-emerald-100);
+  }
+
+  .bg-emerald-500\/10 {
+    background-color: #00bb7f1a;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-emerald-500\/10 {
+      background-color: color-mix(in oklab, var(--color-emerald-500) 10%, transparent);
+    }
   }
 
   .bg-emerald-600 {
@@ -3710,6 +3764,11 @@
   .leading-none {
     --tw-leading: 1;
     line-height: 1;
+  }
+
+  .leading-normal {
+    --tw-leading: var(--leading-normal);
+    line-height: var(--leading-normal);
   }
 
   .leading-relaxed {
@@ -4777,6 +4836,10 @@
 
     .hover\:bg-\[\#F8FAFC\]:hover {
       background-color: #f8fafc;
+    }
+
+    .hover\:bg-amber-50:hover {
+      background-color: var(--color-amber-50);
     }
 
     .hover\:bg-amber-200:hover {
