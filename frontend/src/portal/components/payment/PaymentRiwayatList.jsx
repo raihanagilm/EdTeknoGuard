@@ -64,9 +64,22 @@ export function PaymentRiwayatList({ riwayat, memuatRiwayat }) {
     <div className="p-4 bg-white space-y-3.5">
       {/* ═══ SKELETON LOADING STATE ═══ */}
       {memuatRiwayat && !riwayat && (
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 animate-pulse">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
+            <div
+              key={i}
+              className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3"
+            >
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="w-32 h-3.5 bg-slate-200 rounded" />
+                <div className="w-40 h-2.5 bg-slate-100 rounded" />
+                <div className="w-16 h-3 bg-emerald-100 rounded-md mt-1" />
+              </div>
+              <div className="text-right space-y-1.5 shrink-0">
+                <div className="w-20 h-4 bg-slate-200 rounded ml-auto" />
+                <div className="w-14 h-2.5 bg-slate-100 rounded ml-auto" />
+              </div>
+            </div>
           ))}
         </div>
       )}

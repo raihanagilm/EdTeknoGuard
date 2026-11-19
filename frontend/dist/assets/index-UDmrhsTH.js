@@ -46485,7 +46485,7 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-slate-500 font-medium",
 											children: "Nama WiFi (SSID)"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										}), fetchingWifi && !currentWifi.nama_wifi ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-28 h-4 bg-slate-200 rounded animate-pulse" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "font-bold text-slate-900 font-mono text-sm",
 											children: currentWifi.nama_wifi || "-"
 										})]
@@ -46495,7 +46495,7 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-slate-500 font-medium",
 											children: "Kata Sandi Sekarang"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										}), fetchingWifi && !currentWifi.nama_wifi ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-24 h-4 bg-slate-200 rounded animate-pulse" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "flex items-center gap-2",
 											children: [
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -47849,12 +47849,25 @@ function PaymentRiwayatList({ riwayat, memuatRiwayat }) {
 		className: "p-4 bg-white space-y-3.5",
 		children: [
 			memuatRiwayat && !riwayat && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "space-y-2.5",
+				className: "space-y-2.5 animate-pulse",
 				children: [
 					0,
 					1,
 					2
-				].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-16 rounded-xl bg-gray-100 animate-pulse" }, i))
+				].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "p-3.5 rounded-xl border border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-1.5 flex-1 min-w-0",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-32 h-3.5 bg-slate-200 rounded" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-40 h-2.5 bg-slate-100 rounded" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-16 h-3 bg-emerald-100 rounded-md mt-1" })
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "text-right space-y-1.5 shrink-0",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-20 h-4 bg-slate-200 rounded ml-auto" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-14 h-2.5 bg-slate-100 rounded ml-auto" })]
+					})]
+				}, i))
 			}),
 			!memuatRiwayat && invoices.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "py-8 text-center",
@@ -47958,17 +47971,17 @@ var _cachedRiwayatData = null;
 var _cachedKanalTerbuka = null;
 function SkeletonTagihan() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-		className: "mx-3 bg-white rounded-2xl shadow-lg shadow-gray-200/60 overflow-hidden border border-gray-100 p-4 space-y-3",
+		className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90 p-4 space-y-3 animate-pulse",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-2.5 pb-3 border-b border-gray-100",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10 h-10 rounded-xl bg-gray-100 animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-2.5 pb-3 border-b border-slate-100",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 rounded-lg bg-slate-200 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "space-y-1.5 flex-1",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-4 w-32 bg-gray-100 rounded animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-3 w-48 bg-gray-100 rounded animate-pulse" })]
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-3.5 w-32 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-2.5 w-48 bg-slate-100 rounded" })]
 				})]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-10 w-44 bg-gray-100 rounded-xl animate-pulse mt-2" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-24 bg-gray-50 rounded-xl animate-pulse mt-3" })
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-10 w-44 bg-slate-200 rounded-xl mt-2" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-24 bg-slate-100 rounded-xl mt-3" })
 		]
 	});
 }

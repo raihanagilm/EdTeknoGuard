@@ -2474,10 +2474,6 @@
     }
   }
 
-  .border-t-transparent {
-    border-top-color: #0000;
-  }
-
   .bg-\[\#0B2545\] {
     background-color: #0b2545;
   }
@@ -3008,6 +3004,16 @@
     }
   }
 
+  .bg-slate-50\/70 {
+    background-color: #f8fafcb3;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-slate-50\/70 {
+      background-color: color-mix(in oklab, var(--color-slate-50) 70%, transparent);
+    }
+  }
+
   .bg-slate-50\/80 {
     background-color: #f8fafccc;
   }
@@ -3528,10 +3534,6 @@
 
   .py-10 {
     padding-block: calc(var(--spacing) * 10);
-  }
-
-  .py-12 {
-    padding-block: calc(var(--spacing) * 12);
   }
 
   .pt-0 {
@@ -5478,10 +5480,6 @@
       display: inline-block;
     }
 
-    .sm\:h-2 {
-      height: calc(var(--spacing) * 2);
-    }
-
     .sm\:h-3\.5 {
       height: calc(var(--spacing) * 3.5);
     }
@@ -5564,10 +5562,6 @@
 
     .sm\:min-h-\[100dvh\] {
       min-height: 100dvh;
-    }
-
-    .sm\:w-2 {
-      width: calc(var(--spacing) * 2);
     }
 
     .sm\:w-3\.5 {

@@ -238,36 +238,44 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
               {/* Nama WiFi / SSID */}
               <div className="flex items-center justify-between py-2.5">
                 <span className="text-slate-500 font-medium">Nama WiFi (SSID)</span>
-                <span className="font-bold text-slate-900 font-mono text-sm">
-                  {currentWifi.nama_wifi || '-'}
-                </span>
+                {fetchingWifi && !currentWifi.nama_wifi ? (
+                  <div className="w-28 h-4 bg-slate-200 rounded animate-pulse" />
+                ) : (
+                  <span className="font-bold text-slate-900 font-mono text-sm">
+                    {currentWifi.nama_wifi || '-'}
+                  </span>
+                )}
               </div>
 
               {/* Kata Sandi WiFi Sekarang */}
               <div className="flex items-center justify-between py-2.5">
                 <span className="text-slate-500 font-medium">Kata Sandi Sekarang</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-slate-900 text-sm">
-                    {showCurrentPassword ? currentWifi.password_wifi || '-' : '••••••••'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="p-1 rounded-md text-slate-400 hover:text-slate-700 cursor-pointer"
-                    aria-label="Lihat kata sandi"
-                  >
-                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCopyPassword}
-                    className="p-1 rounded-md text-blue-600 hover:text-blue-800 cursor-pointer"
-                    aria-label="Salin kata sandi"
-                    title="Salin Kata Sandi"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                </div>
+                {fetchingWifi && !currentWifi.nama_wifi ? (
+                  <div className="w-24 h-4 bg-slate-200 rounded animate-pulse" />
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-slate-900 text-sm">
+                      {showCurrentPassword ? currentWifi.password_wifi || '-' : '••••••••'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      className="p-1 rounded-md text-slate-400 hover:text-slate-700 cursor-pointer"
+                      aria-label="Lihat kata sandi"
+                    >
+                      {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyPassword}
+                      className="p-1 rounded-md text-blue-600 hover:text-blue-800 cursor-pointer"
+                      aria-label="Salin kata sandi"
+                      title="Salin Kata Sandi"
+                    >
+                      {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Status Lokasi Sambungan (Dalam WiFi Rumah / Luar Jangkauan) */}
