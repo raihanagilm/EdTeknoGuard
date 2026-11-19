@@ -286,11 +286,34 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setSearch('');
+                  setPage(1);
+                }
+              }}
               placeholder="Cari nomor tiket, nama warga, ID pelanggan, atau kategori kendala..."
-              className="w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+              className="w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
             />
-            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" />
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('');
+                  setPage(1);
+                }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer"
+                title="Hapus pencarian (Esc)"
+                aria-label="Hapus pencarian"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2">

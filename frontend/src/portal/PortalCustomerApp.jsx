@@ -21,6 +21,7 @@ import {
 } from './services/portalApi';
 import { PortalErrorView } from './components/common/PortalErrorView';
 import { PortalSemanticSkeleton } from './components/common/PortalSemanticSkeleton';
+import { PortalToastNotification } from './components/common/PortalToastNotification';
 import { checkHasUnreadNotifications } from './utils/notificationUtils';
 import { RefreshCw } from 'lucide-react';
 
@@ -56,6 +57,7 @@ export function PortalCustomerApp() {
   const [loading, setLoading] = useState(true);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [paymentSubTab, setPaymentSubTab] = useState('tagihan');
+  const [gpsToast, setGpsToast] = useState({ show: false, message: '', title: '' });
 
   const switchTab = (tab, updateUrl = true) => {
     setActiveTab(tab);
@@ -156,6 +158,30 @@ export function PortalCustomerApp() {
     } catch (_) {}
   };
 
+  const notifyEnableGps = () => {
+    const alertedGpsKey = 'mytekno_alerted_enable_gps';
+    if (sessionStorage.getItem(alertedGpsKey)) return;
+    sessionStorage.setItem(alertedGpsKey, '1');
+
+    // 1. Notifikasi Native Android Bridge (muncul banner di HP)
+    if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
+      try {
+        window.AndroidBridge.showNativeNotification(
+          'Aktifkan Lokasi Perangkat',
+          'Untuk mempermudah teknisi memetakan titik jaringan rumah Anda, silakan aktifkan Lokasi (GPS) smartphone Anda.',
+          false
+        );
+      } catch (_) {}
+    }
+
+    // 2. Notifikasi Toast Halus di Web
+    setGpsToast({
+      show: true,
+      title: 'Aktifkan Lokasi (GPS)',
+      message: 'Untuk optimalisasi pemetaan titik jaringan rumah Anda, silakan aktifkan izin Lokasi (GPS) pada smartphone Anda.'
+    });
+  };
+
   const syncGpsLocation = (targetCustomer) => {
     if (!targetCustomer) return;
     // Syarat Mutlak: Wajib terhubung ke sinyal WiFi rumah pelanggan
@@ -173,6 +199,9 @@ export function PortalCustomerApp() {
           sessionStorage.setItem(attemptedKey, 'true');
           const newLoc = res.data.lokasi_gps;
           setCustomer((prev) => ({ ...(prev || {}), lokasi_gps: newLoc }));
+        } else if (res.data?.accuracy_too_low) {
+          // Jika akurasi terlalu rendah (misal GPS HP mati), ingatkan pengguna
+          notifyEnableGps();
         }
       } catch (err) {
         console.warn('Gagal mengunci lokasi GPS rumah:', err);
@@ -202,12 +231,16 @@ export function PortalCustomerApp() {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           const acc = pos.coords.accuracy;
+          if (acc && acc > 100) {
+            notifyEnableGps();
+          }
           performSave(lat, lng, acc);
         },
         (err) => {
           console.warn('Geolocation permission or error:', err.message);
-          // Cegah spam permintaan izin dalam sesi aktif jika ditolak pengguna
+          // Cegah spam berulang dalam sesi aktif jika ditolak pengguna
           sessionStorage.setItem(attemptedKey, 'denied');
+          notifyEnableGps();
         },
         {
           enableHighAccuracy: true,
@@ -505,6 +538,16 @@ export function PortalCustomerApp() {
         </div>
 
         
+
+        {/* Floating Toast Notifikasi GPS & Optimalisasi */}
+        <PortalToastNotification
+          show={gpsToast.show}
+          title={gpsToast.title}
+          message={gpsToast.message}
+          type="info"
+          duration={6000}
+          onClose={() => setGpsToast({ show: false, message: '', title: '' })}
+        />
 
         {/* Bottom Navigation Bar di Dalam Shell */}
         <PortalBottomNav activeTab={activeTab} onTabChange={(tab) => switchTab(tab)} />

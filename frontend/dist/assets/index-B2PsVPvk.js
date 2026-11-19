@@ -30520,16 +30520,36 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 				className: "flex items-center gap-1.5 flex-1 min-w-0",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "relative flex-1 min-w-[150px]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "text",
-						value: searchQuery,
-						onChange: (e) => {
-							setSearchQuery(e.target.value);
-							setPage(1);
-						},
-						placeholder: "Cari ID, Nama, Alamat, Modem, WA, IP...",
-						className: "w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
-					})]
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "text",
+							value: searchQuery,
+							onChange: (e) => {
+								setSearchQuery(e.target.value);
+								setPage(1);
+							},
+							onKeyDown: (e) => {
+								if (e.key === "Escape") {
+									setSearchQuery("");
+									setPage(1);
+								}
+							},
+							placeholder: "Cari ID, Nama, Alamat, Modem, WA, IP...",
+							className: "w-full pl-8 pr-8 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
+						}),
+						searchQuery && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: () => {
+								setSearchQuery("");
+								setPage(1);
+							},
+							className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-[#64839E] hover:text-[#0B2545] hover:bg-[#E2EDF8] transition cursor-pointer",
+							title: "Hapus pencarian (Esc)",
+							"aria-label": "Hapus pencarian",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+						})
+					]
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-1.5 justify-end shrink-0",
@@ -31730,6 +31750,9 @@ function ImportStepPreview({ importPreviewData, setImportPreviewData, statusFilt
 							type: "text",
 							value: previewSearchQuery,
 							onChange: (e) => setPreviewSearchQuery(e.target.value),
+							onKeyDown: (e) => {
+								if (e.key === "Escape") setPreviewSearchQuery("");
+							},
 							placeholder: "Cari berdasarkan IP, Nama, No. WhatsApp, Alamat, atau WiFi...",
 							className: "w-full pl-9 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-sans text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 transition"
 						}),
@@ -33170,18 +33193,18 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 											className: "text-[10px] text-[#64839E] font-bold uppercase flex items-center gap-1",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3 h-3 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Titik Lokasi GPS" })]
-										}), currentCustomer?.lokasi_gps || customer.lokasi_gps ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-											href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.lokasi_gps || customer.lokasi_gps)}`,
-											target: "_blank",
-											rel: "noopener noreferrer",
-											className: "font-bold text-[#026AA7] hover:underline flex items-center justify-between gap-1 text-xs truncate transition",
-											title: "Buka titik koordinat di Google Maps",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "truncate font-mono text-[11px]",
+										}), currentCustomer?.lokasi_gps || customer.lokasi_gps ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex items-center justify-between gap-1 text-xs",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+												href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.lokasi_gps || customer.lokasi_gps)}`,
+												target: "_blank",
+												rel: "noopener noreferrer",
+												className: "font-bold text-[#026AA7] hover:underline font-mono text-[11px] truncate transition",
+												title: "Buka titik koordinat di Google Maps",
 												children: currentCustomer?.lokasi_gps || customer.lokasi_gps
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded flex items-center gap-0.5",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-2.5 h-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terkunci" })]
+												className: "shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 select-none",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-2.5 h-2.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terkunci" })]
 											})]
 										}) : currentCustomer?.alamat || customer.alamat ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
 											href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.alamat || customer.alamat)}`,
@@ -34511,9 +34534,10 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 		}
 		setPage(1);
 	};
-	const fetchLogs = async () => {
+	const fetchLogs = async (overrideSearch) => {
 		setLoading(true);
 		try {
+			const activeSearch = overrideSearch !== void 0 ? overrideSearch : search;
 			const params = {
 				page,
 				limit,
@@ -34522,7 +34546,7 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 				sort_dir: sortDir
 			};
 			if (activeOffice && activeOffice !== "all") params.kantor = activeOffice;
-			if (search) params.q = search;
+			if (activeSearch) params.q = activeSearch;
 			if (filterStatus) params.status = filterStatus;
 			if (filterRange === "custom") {
 				if (!appliedStartDate || !appliedEndDate) {
@@ -34571,6 +34595,11 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 		e.preventDefault();
 		setPage(1);
 		fetchLogs();
+	};
+	const handleClearSearch = () => {
+		setSearch("");
+		setPage(1);
+		fetchLogs("");
 	};
 	const handleApplyCustomDate = () => {
 		if (!startDate || !endDate) return;
@@ -34659,13 +34688,27 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 						className: "flex items-center gap-1.5 flex-1 min-w-0",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative flex-1 min-w-[150px]",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "text",
-								value: search,
-								onChange: (e) => setSearch(e.target.value),
-								placeholder: "Cari ID, Nama, atau IP...",
-								className: "w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-							})]
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									value: search,
+									onChange: (e) => setSearch(e.target.value),
+									onKeyDown: (e) => {
+										if (e.key === "Escape") handleClearSearch();
+									},
+									placeholder: "Cari ID, Nama, atau IP...",
+									className: "w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+								}),
+								search && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: handleClearSearch,
+									className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer",
+									title: "Hapus pencarian (Esc)",
+									"aria-label": "Hapus pencarian",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+								})
+							]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
@@ -35268,13 +35311,36 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 				className: "flex flex-wrap items-center justify-between gap-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "relative flex-1 min-w-[200px]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "text",
-						value: search,
-						onChange: (e) => setSearch(e.target.value),
-						placeholder: "Cari nomor tiket, nama warga, ID pelanggan, atau kategori kendala...",
-						className: "w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" })]
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "text",
+							value: search,
+							onChange: (e) => {
+								setSearch(e.target.value);
+								setPage(1);
+							},
+							onKeyDown: (e) => {
+								if (e.key === "Escape") {
+									setSearch("");
+									setPage(1);
+								}
+							},
+							placeholder: "Cari nomor tiket, nama warga, ID pelanggan, atau kategori kendala...",
+							className: "w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-4 h-4 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" }),
+						search && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: () => {
+								setSearch("");
+								setPage(1);
+							},
+							className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer",
+							title: "Hapus pencarian (Esc)",
+							"aria-label": "Hapus pencarian",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+						})
+					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex items-center gap-2",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -35869,16 +35935,36 @@ function QuotaView({ activeOffice = "cabang", onNavigateCustomer }) {
 						className: "flex items-center gap-1.5 flex-1 min-w-0",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative flex-1 min-w-[150px]",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "text",
-								value: search,
-								onChange: (e) => {
-									setSearch(e.target.value);
-									setPage(1);
-								},
-								placeholder: "Cari ID, Nama, atau IP...",
-								className: "w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-							})]
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									value: search,
+									onChange: (e) => {
+										setSearch(e.target.value);
+										setPage(1);
+									},
+									onKeyDown: (e) => {
+										if (e.key === "Escape") {
+											setSearch("");
+											setPage(1);
+										}
+									},
+									placeholder: "Cari ID, Nama, atau IP...",
+									className: "w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+								}),
+								search && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => {
+										setSearch("");
+										setPage(1);
+									},
+									className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer",
+									title: "Hapus pencarian (Esc)",
+									"aria-label": "Hapus pencarian",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+								})
+							]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
@@ -36262,16 +36348,36 @@ function BillingFilterBar({ searchQuery, setSearchQuery, setPage, selectedCount 
 				className: "flex items-center gap-1.5 flex-1 min-w-0",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "relative flex-1 min-w-[180px]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "text",
-						value: searchQuery,
-						onChange: (e) => {
-							setSearchQuery(e.target.value);
-							setPage(1);
-						},
-						placeholder: "Cari ID, Nama, No. WA, Nomor VA...",
-						className: "w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
-					})]
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "text",
+							value: searchQuery,
+							onChange: (e) => {
+								setSearchQuery(e.target.value);
+								setPage(1);
+							},
+							onKeyDown: (e) => {
+								if (e.key === "Escape") {
+									setSearchQuery("");
+									setPage(1);
+								}
+							},
+							placeholder: "Cari ID, Nama, No. WA, Nomor VA...",
+							className: "w-full pl-8 pr-8 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
+						}),
+						searchQuery && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: () => {
+								setSearchQuery("");
+								setPage(1);
+							},
+							className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-[#64839E] hover:text-[#0B2545] hover:bg-[#E2EDF8] transition cursor-pointer",
+							title: "Hapus pencarian (Esc)",
+							"aria-label": "Hapus pencarian",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+						})
+					]
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-1.5 justify-end shrink-0",
@@ -37038,9 +37144,10 @@ function AdminLogsTab({ activeOffice }) {
 		}
 		setPage(1);
 	};
-	const fetchActivityLogs = async () => {
+	const fetchActivityLogs = async (overrideSearch) => {
 		setLoading(true);
 		try {
+			const activeSearch = overrideSearch !== void 0 ? overrideSearch : search;
 			const params = {
 				page,
 				limit,
@@ -37049,7 +37156,7 @@ function AdminLogsTab({ activeOffice }) {
 				sort_dir: sortDir
 			};
 			if (activeOffice && activeOffice !== "all") params.kantor = activeOffice;
-			if (search) params.q = search;
+			if (activeSearch) params.q = activeSearch;
 			if (filterUser && filterUser !== "all") params.username = filterUser;
 			if (filterRange === "custom") {
 				if (appliedStartDate) params.start_date = appliedStartDate;
@@ -37088,6 +37195,11 @@ function AdminLogsTab({ activeOffice }) {
 		setPage(1);
 		fetchActivityLogs();
 	};
+	const handleClearSearch = () => {
+		setSearch("");
+		setPage(1);
+		fetchActivityLogs("");
+	};
 	const handleApplyCustomDate = () => {
 		if (!startDate || !endDate) return;
 		setAppliedStartDate(startDate);
@@ -37106,13 +37218,27 @@ function AdminLogsTab({ activeOffice }) {
 					className: "flex items-center gap-1.5 flex-1 min-w-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "relative flex-1 min-w-[150px]",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							type: "text",
-							value: search,
-							onChange: (e) => setSearch(e.target.value),
-							placeholder: "Cari aksi, username, IP, atau keterangan...",
-							className: "w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-						})]
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "text",
+								value: search,
+								onChange: (e) => setSearch(e.target.value),
+								onKeyDown: (e) => {
+									if (e.key === "Escape") handleClearSearch();
+								},
+								placeholder: "Cari aksi, username, IP, atau keterangan...",
+								className: "w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+							}),
+							search && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								onClick: handleClearSearch,
+								className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer",
+								title: "Hapus pencarian (Esc)",
+								"aria-label": "Hapus pencarian",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+							})
+						]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "relative",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
@@ -37451,9 +37577,10 @@ function CustomerLogsTab({ activeOffice }) {
 		}
 		setPage(1);
 	};
-	const fetchCustomerLogs = async () => {
+	const fetchCustomerLogs = async (overrideSearch) => {
 		setLoading(true);
 		try {
+			const activeSearch = overrideSearch !== void 0 ? overrideSearch : search;
 			const params = {
 				page,
 				limit,
@@ -37462,7 +37589,7 @@ function CustomerLogsTab({ activeOffice }) {
 				sort_dir: sortDir
 			};
 			if (activeOffice && activeOffice !== "all") params.kantor = activeOffice;
-			if (search) params.q = search;
+			if (activeSearch) params.q = activeSearch;
 			if (filterAction && filterAction !== "all") params.aksi = filterAction;
 			if (filterRange === "custom") {
 				if (appliedStartDate) params.start_date = appliedStartDate;
@@ -37500,6 +37627,11 @@ function CustomerLogsTab({ activeOffice }) {
 		e.preventDefault();
 		setPage(1);
 		fetchCustomerLogs();
+	};
+	const handleClearSearch = () => {
+		setSearch("");
+		setPage(1);
+		fetchCustomerLogs("");
 	};
 	const handleApplyCustomDate = () => {
 		if (!startDate || !endDate) return;
@@ -37575,13 +37707,27 @@ function CustomerLogsTab({ activeOffice }) {
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative flex-1 min-w-[150px]",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "text",
-								value: search,
-								onChange: (e) => setSearch(e.target.value),
-								placeholder: "Cari ID, Nama Pelanggan, No WA, Aksi, IP...",
-								className: "w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-							})]
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									value: search,
+									onChange: (e) => setSearch(e.target.value),
+									onKeyDown: (e) => {
+										if (e.key === "Escape") handleClearSearch();
+									},
+									placeholder: "Cari ID, Nama Pelanggan, No WA, Aksi, IP...",
+									className: "w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+								}),
+								search && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: handleClearSearch,
+									className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer",
+									title: "Hapus pencarian (Esc)",
+									"aria-label": "Hapus pencarian",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+								})
+							]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "hidden sm:block",
@@ -38307,16 +38453,36 @@ function UsersView() {
 						className: "flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative flex-1 min-w-[120px] sm:min-w-[180px]",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "text",
-								value: search,
-								onChange: (e) => {
-									setSearch(e.target.value);
-									setPage(1);
-								},
-								placeholder: "Cari user / nama...",
-								className: "w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-							})]
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									value: search,
+									onChange: (e) => {
+										setSearch(e.target.value);
+										setPage(1);
+									},
+									onKeyDown: (e) => {
+										if (e.key === "Escape") {
+											setSearch("");
+											setPage(1);
+										}
+									},
+									placeholder: "Cari user / nama...",
+									className: "w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+								}),
+								search && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => {
+										setSearch("");
+										setPage(1);
+									},
+									className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer",
+									title: "Hapus pencarian (Esc)",
+									"aria-label": "Hapus pencarian",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+								})
+							]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
@@ -39073,16 +39239,36 @@ function BranchOfficesView() {
 						className: "flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative flex-1 min-w-[140px] sm:min-w-[220px]",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "text",
-								value: kantorSearch,
-								onChange: (e) => {
-									setKantorSearch(e.target.value);
-									setPage(1);
-								},
-								placeholder: "Cari nama kantor / kode / router IP...",
-								className: "w-full pl-8 pr-2 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
-							})]
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									value: kantorSearch,
+									onChange: (e) => {
+										setKantorSearch(e.target.value);
+										setPage(1);
+									},
+									onKeyDown: (e) => {
+										if (e.key === "Escape") {
+											setKantorSearch("");
+											setPage(1);
+										}
+									},
+									placeholder: "Cari nama kantor / kode / router IP...",
+									className: "w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+								}),
+								kantorSearch && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => {
+										setKantorSearch("");
+										setPage(1);
+									},
+									className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer",
+									title: "Hapus pencarian (Esc)",
+									"aria-label": "Hapus pencarian",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
+								})
+							]
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-1.5 justify-end shrink-0",
@@ -44640,13 +44826,24 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 												setSearchQuery(e.target.value);
 												setCurrentPage(1);
 											},
+											onKeyDown: (e) => {
+												if (e.key === "Escape") {
+													setSearchQuery("");
+													setCurrentPage(1);
+												}
+											},
 											placeholder: "Cari ID tiket, kategori, atau keluhan...",
 											className: "w-full pl-9 pr-8 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
 										}),
 										searchQuery && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											onClick: () => setSearchQuery(""),
+											type: "button",
+											onClick: () => {
+												setSearchQuery("");
+												setCurrentPage(1);
+											},
 											className: "absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 transition cursor-pointer",
-											title: "Hapus Pencarian",
+											title: "Hapus Pencarian (Esc)",
+											"aria-label": "Hapus Pencarian",
 											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
 										})
 									]
@@ -45992,33 +46189,13 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center justify-between py-1 border-b border-slate-50",
+											className: "flex items-center justify-between py-1",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 												className: "text-slate-500 font-medium",
 												children: "IP Modem Router"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 												className: "font-mono font-bold text-slate-800",
 												children: currentCustomer?.ip_router || currentCustomer?.ip_ont || "-"
-											})]
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center justify-between py-1",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "text-slate-500 font-medium flex items-center gap-1",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Titik Lokasi (GPS)" })]
-											}), currentCustomer?.lokasi_gps ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-												href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer.lokasi_gps)}`,
-												target: "_blank",
-												rel: "noopener noreferrer",
-												className: "inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded hover:bg-emerald-100 transition",
-												title: "Buka titik koordinat di Google Maps",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3 h-3 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terkunci" })]
-											}) : currentCustomer?.is_connected_to_home_wifi ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3 h-3 text-sky-600 animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Mengunci..." })]
-											}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[11px] text-slate-400 italic",
-												children: "WiFi rumah belum terhubung"
 											})]
 										})
 									]
@@ -47285,6 +47462,11 @@ function PortalCustomerApp() {
 	const [loading, setLoading] = (0, import_react.useState)(true);
 	const [hasUnreadNotifications, setHasUnreadNotifications] = (0, import_react.useState)(false);
 	const [paymentSubTab, setPaymentSubTab] = (0, import_react.useState)("tagihan");
+	const [gpsToast, setGpsToast] = (0, import_react.useState)({
+		show: false,
+		message: "",
+		title: ""
+	});
 	const switchTab = (tab, updateUrl = true) => {
 		setActiveTab(tab);
 		if (tab && tab !== "404_not_found") try {
@@ -47356,6 +47538,19 @@ function PortalCustomerApp() {
 			}
 		} catch (_) {}
 	};
+	const notifyEnableGps = () => {
+		const alertedGpsKey = "mytekno_alerted_enable_gps";
+		if (sessionStorage.getItem(alertedGpsKey)) return;
+		sessionStorage.setItem(alertedGpsKey, "1");
+		if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === "function") try {
+			window.AndroidBridge.showNativeNotification("Aktifkan Lokasi Perangkat", "Untuk mempermudah teknisi memetakan titik jaringan rumah Anda, silakan aktifkan Lokasi (GPS) smartphone Anda.", false);
+		} catch (_) {}
+		setGpsToast({
+			show: true,
+			title: "Aktifkan Lokasi (GPS)",
+			message: "Untuk optimalisasi pemetaan titik jaringan rumah Anda, silakan aktifkan izin Lokasi (GPS) pada smartphone Anda."
+		});
+	};
 	const syncGpsLocation = (targetCustomer) => {
 		if (!targetCustomer) return;
 		if (!targetCustomer.is_connected_to_home_wifi) return;
@@ -47372,7 +47567,7 @@ function PortalCustomerApp() {
 						...prev || {},
 						lokasi_gps: newLoc
 					}));
-				}
+				} else if (res.data?.accuracy_too_low) notifyEnableGps();
 			} catch (err) {
 				console.warn("Gagal mengunci lokasi GPS rumah:", err);
 			}
@@ -47393,10 +47588,12 @@ function PortalCustomerApp() {
 			const lat = pos.coords.latitude;
 			const lng = pos.coords.longitude;
 			const acc = pos.coords.accuracy;
+			if (acc && acc > 100) notifyEnableGps();
 			performSave(lat, lng, acc);
 		}, (err) => {
 			console.warn("Geolocation permission or error:", err.message);
 			sessionStorage.setItem(attemptedKey, "denied");
+			notifyEnableGps();
 		}, {
 			enableHighAccuracy: true,
 			timeout: 1e4,
@@ -47571,67 +47768,82 @@ function PortalCustomerApp() {
 		className: "fixed inset-0 sm:relative sm:min-h-[100dvh] bg-slate-200/90 p-0 sm:p-4 pb-0 sm:pb-4 flex justify-center items-center text-slate-900 font-sans antialiased overflow-hidden overscroll-none select-none",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "w-full max-w-[440px] mx-auto h-[100dvh] sm:h-[92dvh] bg-[#F1F5F9] relative flex flex-col sm:rounded-2xl sm:shadow-lg sm:shadow-slate-900/5 sm:border sm:border-slate-300/70 overflow-hidden overscroll-none",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex-1 flex flex-col min-h-0 relative overflow-hidden",
-				children: [
-					activeTab === "beranda" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalDashboardTab, {
-						data: dashboardData,
-						hasUnreadNotifications,
-						onNavigate: (tab) => switchTab(tab),
-						onOpenNotifications: () => switchTab("notifikasi")
-					}),
-					activeTab === "kendala" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalTicketsTab, {
-						customer,
-						dashboardData,
-						hasUnreadNotifications,
-						onOpenNotifications: () => switchTab("notifikasi")
-					}),
-					activeTab === "wifi" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalWifiTab, {
-						customer,
-						dashboardData,
-						hasUnreadNotifications,
-						onOpenNotifications: () => switchTab("notifikasi")
-					}),
-					activeTab === "kuota" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalQuotaTab, {
-						customer,
-						dashboardData,
-						hasUnreadNotifications,
-						onOpenNotifications: () => switchTab("notifikasi")
-					}),
-					activeTab === "profil" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalProfileTab, {
-						customer,
-						dashboardData,
-						hasUnreadNotifications,
-						onNavigate: (tab) => switchTab(tab),
-						onCustomerUpdate: (updated) => setCustomer((prev) => ({
-							...prev,
-							...updated
-						})),
-						onLogout: handleLogout,
-						onOpenNotifications: () => switchTab("notifikasi")
-					}),
-					activeTab === "pembayaran" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalPaymentTab, {
-						customer,
-						dashboardData,
-						hasUnreadNotifications,
-						initialSubTab: paymentSubTab,
-						onBack: () => switchTab("beranda"),
-						onOpenNotifications: () => switchTab("notifikasi")
-					}),
-					activeTab === "notifikasi" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalNotificationsPage, {
-						customer,
-						dashboardData,
-						onBack: () => switchTab("beranda"),
-						onNavigate: (tab, subTab) => {
-							if (subTab) setPaymentSubTab(subTab);
-							switchTab(tab);
-						}
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex-1 flex flex-col min-h-0 relative overflow-hidden",
+					children: [
+						activeTab === "beranda" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalDashboardTab, {
+							data: dashboardData,
+							hasUnreadNotifications,
+							onNavigate: (tab) => switchTab(tab),
+							onOpenNotifications: () => switchTab("notifikasi")
+						}),
+						activeTab === "kendala" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalTicketsTab, {
+							customer,
+							dashboardData,
+							hasUnreadNotifications,
+							onOpenNotifications: () => switchTab("notifikasi")
+						}),
+						activeTab === "wifi" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalWifiTab, {
+							customer,
+							dashboardData,
+							hasUnreadNotifications,
+							onOpenNotifications: () => switchTab("notifikasi")
+						}),
+						activeTab === "kuota" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalQuotaTab, {
+							customer,
+							dashboardData,
+							hasUnreadNotifications,
+							onOpenNotifications: () => switchTab("notifikasi")
+						}),
+						activeTab === "profil" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalProfileTab, {
+							customer,
+							dashboardData,
+							hasUnreadNotifications,
+							onNavigate: (tab) => switchTab(tab),
+							onCustomerUpdate: (updated) => setCustomer((prev) => ({
+								...prev,
+								...updated
+							})),
+							onLogout: handleLogout,
+							onOpenNotifications: () => switchTab("notifikasi")
+						}),
+						activeTab === "pembayaran" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalPaymentTab, {
+							customer,
+							dashboardData,
+							hasUnreadNotifications,
+							initialSubTab: paymentSubTab,
+							onBack: () => switchTab("beranda"),
+							onOpenNotifications: () => switchTab("notifikasi")
+						}),
+						activeTab === "notifikasi" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalNotificationsPage, {
+							customer,
+							dashboardData,
+							onBack: () => switchTab("beranda"),
+							onNavigate: (tab, subTab) => {
+								if (subTab) setPaymentSubTab(subTab);
+								switchTab(tab);
+							}
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalToastNotification, {
+					show: gpsToast.show,
+					title: gpsToast.title,
+					message: gpsToast.message,
+					type: "info",
+					duration: 6e3,
+					onClose: () => setGpsToast({
+						show: false,
+						message: "",
+						title: ""
 					})
-				]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalBottomNav, {
-				activeTab,
-				onTabChange: (tab) => switchTab(tab)
-			})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalBottomNav, {
+					activeTab,
+					onTabChange: (tab) => switchTab(tab)
+				})
+			]
 		})
 	});
 }

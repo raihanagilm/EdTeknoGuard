@@ -40,12 +40,14 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
     - `UBAH_ALAMAT`, `UBAH_NO_WA`, `UBAH_NAMA`, `UBAH_FOTO_PROFIL`: Pencatatan granular/spesifik delta nilai lama -> nilai baru saat pelanggan memperbarui alamat, nomor WhatsApp, nama, atau foto profil secara terpisah.
     - `UBAH_SSID_WIFI` & `UBAH_SANDI_WIFI`: Pencatatan terpisah saat pelanggan hanya mengubah nama SSID atau hanya mengganti kata sandi WiFi (tanpa mengekspos plaintext password).
     - `KUNCI_LOKASI_GPS`: Pencatatan audit saat pelanggan mengunci titik koordinat GPS lokasi fisik rumah secara otomatis via WiFi modem ONT.
-- **Penguncian Titik Lokasi Rumah (GPS) Otomatis Berbasis Jaringan WiFi ONT ([routes.py](app/portal/modules/profile/routes.py), [security.py](app/portal/core/security.py), [PortalCustomerApp.jsx](frontend/src/portal/PortalCustomerApp.jsx), [PortalProfileTab.jsx](frontend/src/portal/components/profile/PortalProfileTab.jsx), [CustomerDetailModal.jsx](frontend/src/components/customers/CustomerDetailModal.jsx), [PROMPT_ANDROID_STUDIO.md](docs/PROMPT_ANDROID_STUDIO.md))**:
-  - **Endpoint Validasi Keras `POST /portal/api/profil/lokasi-gps`**: Mengunci koordinat GPS (`latitude, longitude`) dengan syarat wajib terhubung ke sinyal WiFi rumah pelanggan (`check_is_home_wifi`). Akses dari luar jaringan modem ditolak tegas (HTTP 403 Forbidden).
-  - **Kebijakan One-Time Lock**: Titik koordinat hanya diambil dan disimpan 1 kali secara otomatis saat perangkat warga terkoneksi ke WiFi rumah dan data `lokasi_gps` di database masih kosong, menghemat baterai HP dan menjaga konsistensi titik koordinat instalasi modem/ODP.
-  - **Tampilan Interaktif di Profil MyTekno & Modal NOC**:
-    - Portal MyTekno: Menampilkan status `Terkunci` dengan tautan Google Maps jika sudah tersimpan, atau indikator penguncian otomatis saat terhubung.
-    - Modal Pelanggan NOC: Kartu *Titik Lokasi GPS* menampilkan koordinat presisi ber-badge hijau `Terkunci` yang langsung mengarahkan teknisi ke pin Google Maps.
+    - `ANOMALI_DRIFT_LOKASI`: Pencatatan audit peringatan jika koordinat baru menyimpang melebihi batas toleransi radius 100 meter dari titik pemasangan awal.
+- **Penguncian Titik Lokasi Rumah (GPS) Otomatis & Validasi Spasial Haversine ([routes.py](app/portal/modules/profile/routes.py), [security.py](app/portal/core/security.py), [PortalCustomerApp.jsx](frontend/src/portal/PortalCustomerApp.jsx), [PortalProfileTab.jsx](frontend/src/portal/components/profile/PortalProfileTab.jsx), [CustomerDetailModal.jsx](frontend/src/components/customers/CustomerDetailModal.jsx), [PROMPT_ANDROID_STUDIO.md](docs/PROMPT_ANDROID_STUDIO.md))**:
+  - **Filter Akurasi Satelit (Anti-Loncatan GPS Nonaktif)**: Mewajibkan `accuracy <= 100` meter; koordinat kasar dari Cell Tower BTS atau IP GeoIP ISP (> 100 meter) ditolak secara otomatis (HTTP 422) disertai ajakan menyalakan toggle GPS HP.
+  - **Toleransi Jarak Haversine (100 Meter)**: Menghitung jarak geodesi antara koordinat baseline dengan pembacaan berikutnya. Jika jarak $\le$ 100m dikonfirmasi konsisten; jika $>$ 100m ditolak tegas untuk mencegah pemindahan modem tanpa izin.
+  - **Desain UI Rapi & Discreet**:
+    - Portal MyTekno: Fitur berjalan senyap di latar belakang tanpa mengotori kartu profil pelanggan. Jika GPS HP mati, muncul notifikasi toast dan banner Android yang ramah untuk mengaktifkan lokasi.
+    - Modal Pelanggan NOC: Memisahkan teks link koordinat Google Maps dari badge statis `[✓ Terkunci]`, mengeliminasi efek garis bawah (*underline*) pada teks badge.
+  - **Pembersihan Data Uji & Isolasi Test Suite**: Mereset kolom `lokasi_gps` pelanggan Warung Pak Bayu Smanta kembali ke `NULL` dan memperbarui `test_portal_gps_lock.py` dengan data dummy terisolasi.
   - **Panduan Android Studio**: Konfigurasi izin hardware `ACCESS_FINE_LOCATION`, handler `WebChromeClient.onGeolocationPermissionsShowPrompt`, dan bridge native di `PROMPT_ANDROID_STUDIO.md`.
   - **Antarmuka 2 Tab di Menu Log Aktivitas NOC (`/log`)**:
     - `Tab 1: Log Admin & Sistem`: Audit trail internal operasional NOC (Import, Settings, Monitoring, CRUD User).

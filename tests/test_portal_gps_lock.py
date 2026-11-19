@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.tenant_database import TenantDatabaseManager
@@ -8,31 +8,41 @@ from app.portal.core.security import create_customer_session_token, CUSTOMER_SES
 
 
 @pytest.fixture
-def tengaran_customer():
+def isolated_test_customer():
     db = TenantDatabaseManager.get_tenant_session("tengaran")
-    cust = db.query(Pelanggan).first()
-    if not cust:
-        cust = Pelanggan(
-            id_pelanggan="PLG-TEST-GPS-01",
-            nama="Uji GPS Pelanggan",
-            kantor="tengaran",
-            is_active=True
-        )
-        db.add(cust)
-        db.commit()
-        db.refresh(cust)
+    test_id = "PLG-TEST-GPS-ISOLATED"
+    # Pastikan bersih sebelum uji
+    db.query(LogAktivitasPelanggan).filter(LogAktivitasPelanggan.id_pelanggan == test_id).delete()
+    db.query(Pelanggan).filter(Pelanggan.id_pelanggan == test_id).delete()
+    db.commit()
 
-    c_id = cust.id_pelanggan
-    kantor = cust.kantor
-    nama = cust.nama
-    token = create_customer_session_token(
-        id_pelanggan=c_id,
-        nama=nama,
-        status_verifikasi="TERVERIFIKASI",
-        kantor=kantor
+    cust = Pelanggan(
+        id_pelanggan=test_id,
+        nama="Dummy Test GPS Customer",
+        kantor="tengaran",
+        is_active=True,
+        lokasi_gps=None
     )
+    db.add(cust)
+    db.commit()
+    db.refresh(cust)
+
+    token = create_customer_session_token(
+        id_pelanggan=test_id,
+        nama=cust.nama,
+        status_verifikasi="TERVERIFIKASI",
+        kantor=cust.kantor
+    )
+
     yield cust, token, db
-    db.close()
+
+    # Teardown: Bersihkan 100% tanpa menyentuh pelanggan nyata
+    try:
+        db.query(LogAktivitasPelanggan).filter(LogAktivitasPelanggan.id_pelanggan == test_id).delete()
+        db.query(Pelanggan).filter(Pelanggan.id_pelanggan == test_id).delete()
+        db.commit()
+    finally:
+        db.close()
 
 
 def test_lock_gps_unauthenticated():
@@ -41,12 +51,12 @@ def test_lock_gps_unauthenticated():
     assert res.status_code == 401
 
 
-def test_lock_gps_forbidden_when_not_home_wifi(tengaran_customer):
-    cust, token, db = tengaran_customer
+def test_lock_gps_forbidden_when_not_home_wifi(isolated_test_customer):
+    cust, token, db = isolated_test_customer
     client = TestClient(app)
     client.cookies.set(CUSTOMER_SESSION_COOKIE, token)
 
-    # Mock check_is_home_wifi agar mengembalikan False
+    # Mock check_is_home_wifi -> False
     with patch("app.portal.modules.profile.routes.check_is_home_wifi", return_value=False):
         res = client.post("/portal/api/profil/lokasi-gps", json={"latitude": -7.123, "longitude": 110.456})
         assert res.status_code == 403
@@ -56,18 +66,32 @@ def test_lock_gps_forbidden_when_not_home_wifi(tengaran_customer):
         assert "WiFi modem rumah" in data["message"]
 
 
-def test_lock_gps_success_and_one_time_policy(tengaran_customer):
-    cust, token, db = tengaran_customer
+def test_lock_gps_rejects_low_accuracy_when_gps_off(isolated_test_customer):
+    cust, token, db = isolated_test_customer
     client = TestClient(app)
     client.cookies.set(CUSTOMER_SESSION_COOKIE, token)
 
-    # Reset lokasi_gps awal
-    cust.lokasi_gps = None
-    db.commit()
-
-    # Mock check_is_home_wifi agar mengembalikan True
     with patch("app.portal.modules.profile.routes.check_is_home_wifi", return_value=True):
-        # 1. Kunci pertama kali
+        # Akurasi 1.200 meter (GPS satelit mati, hanya mengandalkan BTS/IP publik)
+        res = client.post("/portal/api/profil/lokasi-gps", json={
+            "latitude": -7.412345,
+            "longitude": 110.512345,
+            "accuracy": 1200.0
+        })
+        assert res.status_code == 422
+        data = res.json()
+        assert data["ok"] is False
+        assert data["accuracy_too_low"] is True
+        assert "Akurasi lokasi tidak memadai" in data["message"]
+
+
+def test_lock_gps_initial_and_haversine_tolerance(isolated_test_customer):
+    cust, token, db = isolated_test_customer
+    client = TestClient(app)
+    client.cookies.set(CUSTOMER_SESSION_COOKIE, token)
+
+    with patch("app.portal.modules.profile.routes.check_is_home_wifi", return_value=True):
+        # 1. Kunci pertama kali (Akurasi baik: 8.5 meter)
         res1 = client.post("/portal/api/profil/lokasi-gps", json={
             "latitude": -7.412345,
             "longitude": 110.512345,
@@ -77,30 +101,35 @@ def test_lock_gps_success_and_one_time_policy(tengaran_customer):
         data1 = res1.json()
         assert data1["ok"] is True
         assert data1["already_locked"] is False
-        assert "-7.412345, 110.512345" in data1["lokasi_gps"]
+        assert data1["lokasi_gps"] == "-7.412345, 110.512345"
 
-        # Cek di database
+        # Cek di database (commit/expire snapshot agar melihat commit sesi API)
+        db.commit()
         db.refresh(cust)
         assert cust.lokasi_gps == "-7.412345, 110.512345"
 
-        # 2. Percobaan kedua (one-time lock): harus mengembalikan already_locked = True
+        # 2. Pengambilan berikutnya masih dalam toleransi (< 100m, misal bergeser ~15 meter)
         res2 = client.post("/portal/api/profil/lokasi-gps", json={
-            "latitude": -7.999999,
-            "longitude": 110.999999
+            "latitude": -7.412445,
+            "longitude": 110.512345,
+            "accuracy": 12.0
         })
         assert res2.status_code == 200
         data2 = res2.json()
         assert data2["ok"] is True
         assert data2["already_locked"] is True
-        assert data2["lokasi_gps"] == "-7.412345, 110.512345"
+        assert data2["distance_meters"] <= 100
+        assert "konsisten dan cocok" in data2["message"]
 
-        # Nilai di database tidak berubah
-        db.refresh(cust)
-        assert cust.lokasi_gps == "-7.412345, 110.512345"
-
-        # Cleanup log uji
-        db.query(LogAktivitasPelanggan).filter(
-            LogAktivitasPelanggan.id_pelanggan == cust.id_pelanggan,
-            LogAktivitasPelanggan.aksi == "KUNCI_LOKASI_GPS"
-        ).delete()
-        db.commit()
+        # 3. Pengambilan berikutnya di luar toleransi (> 100m, misal bergeser ~330 meter)
+        res3 = client.post("/portal/api/profil/lokasi-gps", json={
+            "latitude": -7.415345,
+            "longitude": 110.512345,
+            "accuracy": 15.0
+        })
+        assert res3.status_code == 400
+        data3 = res3.json()
+        assert data3["ok"] is False
+        assert data3["drift_detected"] is True
+        assert data3["distance_meters"] > 100
+        assert "menyimpang" in data3["message"]

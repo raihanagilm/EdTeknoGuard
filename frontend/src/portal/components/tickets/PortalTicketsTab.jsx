@@ -179,14 +179,25 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                     setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setSearchQuery('');
+                      setCurrentPage(1);
+                    }
+                  }}
                   placeholder="Cari ID tiket, kategori, atau keluhan..."
                   className="w-full pl-9 pr-8 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setCurrentPage(1);
+                    }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 transition cursor-pointer"
-                    title="Hapus Pencarian"
+                    title="Hapus Pencarian (Esc)"
+                    aria-label="Hapus Pencarian"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>

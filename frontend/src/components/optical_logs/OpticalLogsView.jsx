@@ -11,7 +11,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  Check
+  Check,
+  X
 } from 'lucide-react';
 import { LogsService } from '../../services/api';
 import {
@@ -60,9 +61,10 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
     setPage(1);
   };
 
-  const fetchLogs = async () => {
+  const fetchLogs = async (overrideSearch) => {
     setLoading(true);
     try {
+      const activeSearch = overrideSearch !== undefined ? overrideSearch : search;
       const params = {
         page,
         limit,
@@ -71,7 +73,7 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
         sort_dir: sortDir
       };
       if (activeOffice && activeOffice !== 'all') params.kantor = activeOffice;
-      if (search) params.q = search;
+      if (activeSearch) params.q = activeSearch;
       if (filterStatus) params.status = filterStatus;
       if (filterRange === 'custom') {
         if (!appliedStartDate || !appliedEndDate) {
@@ -114,6 +116,12 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
     e.preventDefault();
     setPage(1);
     fetchLogs();
+  };
+
+  const handleClearSearch = () => {
+    setSearch('');
+    setPage(1);
+    fetchLogs('');
   };
 
   const handleApplyCustomDate = () => {
@@ -191,14 +199,30 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
             {/* Kotak Pencarian & Tombol Filter Popover */}
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <div className="relative flex-1 min-w-[150px]">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5" />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 sm:top-2.5 pointer-events-none" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      handleClearSearch();
+                    }
+                  }}
                   placeholder="Cari ID, Nama, atau IP..."
-                  className="w-full pl-8 pr-3 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
+                  className="w-full pl-8 pr-8 py-1.5 sm:py-2 bg-slate-50 border border-sky-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition"
                 />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer"
+                    title="Hapus pencarian (Esc)"
+                    aria-label="Hapus pencarian"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
 
               {/* Tombol Popover Filter Rentang Waktu */}

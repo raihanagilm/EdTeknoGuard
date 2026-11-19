@@ -418,36 +418,9 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                   <span className="text-slate-500 font-medium">Paket Internet</span>
                   <span className="font-semibold text-slate-800">{currentCustomer?.paket || '-'}</span>
                 </div>
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                <div className="flex items-center justify-between py-1">
                   <span className="text-slate-500 font-medium">IP Modem Router</span>
                   <span className="font-mono font-bold text-slate-800">{currentCustomer?.ip_router || currentCustomer?.ip_ont || '-'}</span>
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-500 font-medium flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Titik Lokasi (GPS)</span>
-                  </span>
-                  {currentCustomer?.lokasi_gps ? (
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer.lokasi_gps)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded hover:bg-emerald-100 transition"
-                      title="Buka titik koordinat di Google Maps"
-                    >
-                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                      <span>Terkunci</span>
-                    </a>
-                  ) : currentCustomer?.is_connected_to_home_wifi ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded">
-                      <RefreshCw className="w-3 h-3 text-sky-600 animate-spin" />
-                      <span>Mengunci...</span>
-                    </span>
-                  ) : (
-                    <span className="text-[11px] text-slate-400 italic">
-                      WiFi rumah belum terhubung
-                    </span>
-                  )}
                 </div>
               </div>
             </div>

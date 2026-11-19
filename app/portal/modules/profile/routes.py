@@ -1,4 +1,5 @@
 import base64
+import math
 import re
 import time
 from pathlib import Path
@@ -271,12 +272,33 @@ def portal_profil_delete_foto(request: Request, db: Session = Depends(get_portal
     }
 
 
+def haversine_distance_meters(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """
+    Menghitung jarak permukaan bumi (geodesi) dalam meter antara dua koordinat GPS
+    menggunakan formula Haversine (Great-Circle Distance).
+    """
+    R = 6371000.0  # Radius rata-rata bumi dalam meter
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+
+    a = (
+        math.sin(delta_phi / 2.0) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2.0) ** 2
+    )
+    c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+    return R * c
+
+
 @router.post("/lokasi-gps")
 async def portal_profil_lock_gps_location(request: Request, db: Session = Depends(get_portal_db)):
     """
     Mengunci titik koordinat GPS lokasi rumah pelanggan (Latitude & Longitude)
-    dengan syarat mutlak: perangkat WAJIB terhubung ke sinyal WiFi modem rumah pelanggan.
-    Mendukung one-time lock (cukup sekali dikunci secara otomatis saat terhubung).
+    dengan syarat mutlak:
+    1. Perangkat WAJIB terhubung ke sinyal WiFi modem rumah pelanggan.
+    2. Akurasi sensor GPS satelit wajib memadai (accuracy <= 100 meter). Mencegah loncat ke BTS/data center.
+    3. Pengecekan toleransi jarak Haversine (radius 100m) jika lokasi sudah pernah terkunci sebelumnya.
     """
     cust = get_current_customer_optional(request)
     if not cust:
@@ -290,7 +312,7 @@ async def portal_profil_lock_gps_location(request: Request, db: Session = Depend
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
 
-    # Syarat Mutlak: Perangkat klien wajib terhubung ke sinyal WiFi rumah pelanggan
+    # Lapisan 1: Perangkat klien wajib terhubung ke sinyal WiFi rumah pelanggan
     is_home_wifi = check_is_home_wifi(request, pelanggan)
     if not is_home_wifi:
         if target_db != db:
@@ -308,19 +330,25 @@ async def portal_profil_lock_gps_location(request: Request, db: Session = Depend
     raw_lat = body.get("latitude")
     raw_lng = body.get("longitude")
     accuracy = body.get("accuracy")
-    force = body.get("force", False)
 
-    # Kebijakan One-Time Lock: Jika sudah pernah terkunci dan tidak dipaksa (force=False), kembalikan status locked
-    if pelanggan.lokasi_gps and pelanggan.lokasi_gps.strip() and not force:
-        existing_loc = pelanggan.lokasi_gps.strip()
-        if target_db != db:
-            target_db.close()
-        return {
-            "ok": True,
-            "already_locked": True,
-            "lokasi_gps": existing_loc,
-            "message": "Titik lokasi GPS rumah Anda sudah terkunci di sistem."
-        }
+    # Lapisan 2: Filter Akurasi Satelit (Pencegah Lonjakan Jauh Akibat GPS Nonaktif)
+    if accuracy is not None:
+        try:
+            acc_val = float(accuracy)
+            if acc_val > 100.0:
+                if target_db != db:
+                    target_db.close()
+                return JSONResponse(
+                    status_code=422,
+                    content={
+                        "ok": False,
+                        "accuracy_too_low": True,
+                        "accuracy": acc_val,
+                        "message": f"Akurasi lokasi tidak memadai (±{round(acc_val)}m). Mohon aktifkan sensor GPS / Lokasi Presisi Tinggi di smartphone Anda."
+                    }
+                )
+        except (ValueError, TypeError):
+            pass
 
     try:
         lat = float(raw_lat)
@@ -335,13 +363,58 @@ async def portal_profil_lock_gps_location(request: Request, db: Session = Depend
             target_db.close()
         return JSONResponse(status_code=400, content={"ok": False, "message": "Rentang nilai koordinat GPS di luar batas bumi!"})
 
-    # Format koordinat 6 desimal (~10 cm akurasi)
+    # Lapisan 3: Toleransi Jarak Haversine (100 Meter) Jika Sudah Pernah Terkunci
+    if pelanggan.lokasi_gps and pelanggan.lokasi_gps.strip():
+        existing_loc = pelanggan.lokasi_gps.strip()
+        try:
+            parts = [p.strip() for p in existing_loc.split(",")]
+            base_lat = float(parts[0])
+            base_lng = float(parts[1])
+            dist = haversine_distance_meters(base_lat, base_lng, lat, lng)
+        except Exception:
+            dist = 0.0
+
+        from app.portal.services.customer_activity_service import CustomerActivityService
+
+        # Jika pergeseran melebihi batas toleransi 100 meter -> Tolak & catat log anomali
+        if dist > 100.0:
+            CustomerActivityService.record(
+                db=target_db,
+                id_pelanggan=id_pel,
+                aksi="ANOMALI_DRIFT_LOKASI",
+                kategori="PROFIL",
+                keterangan=f"Pembaruan lokasi ditolak karena terdeteksi menyimpang {round(dist)} meter dari titik awal ({existing_loc})",
+                request=request
+            )
+            if target_db != db:
+                target_db.close()
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "ok": False,
+                    "drift_detected": True,
+                    "distance_meters": round(dist),
+                    "message": f"Lokasi ditolak: Terdeteksi menyimpang {round(dist)} meter dari titik awal pemasangan modem (toleransi: 100m)."
+                }
+            )
+
+        # Jika dalam batas toleransi <= 100 meter -> Lokasi konsisten dan cocok
+        if target_db != db:
+            target_db.close()
+        return {
+            "ok": True,
+            "already_locked": True,
+            "distance_meters": round(dist),
+            "lokasi_gps": existing_loc,
+            "message": f"Titik lokasi konsisten dan cocok (terpaut {round(dist)}m, dalam batas toleransi 100m)."
+        }
+
+    # Jika lokasi belum pernah terkunci: Kunci sebagai Titik Baseline Awal
     lokasi_str = f"{lat:.6f}, {lng:.6f}"
     pelanggan.lokasi_gps = lokasi_str
     target_db.commit()
     target_db.refresh(pelanggan)
 
-    # Catat audit trail aktivitas forensik
     from app.portal.services.customer_activity_service import CustomerActivityService
     acc_info = f" (Akurasi: ±{round(float(accuracy))}m)" if accuracy else ""
     CustomerActivityService.record(

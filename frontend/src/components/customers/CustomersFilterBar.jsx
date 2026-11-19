@@ -1,6 +1,7 @@
 import React from 'react'
 import {
   Search,
+  X,
   Activity,
   FileSpreadsheet,
   Download,
@@ -41,9 +42,29 @@ export function CustomersFilterBar({
                     setSearchQuery(e.target.value)
                     setPage(1)
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setSearchQuery('')
+                      setPage(1)
+                    }
+                  }}
                   placeholder="Cari ID, Nama, Alamat, Modem, WA, IP..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
+                  className="w-full pl-8 pr-8 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px]"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('')
+                      setPage(1)
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-[#64839E] hover:text-[#0B2545] hover:bg-[#E2EDF8] transition cursor-pointer"
+                    title="Hapus pencarian (Esc)"
+                    aria-label="Hapus pencarian"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
 

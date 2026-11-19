@@ -268,6 +268,11 @@ export function ImportStepPreview({
             type="text"
             value={previewSearchQuery}
             onChange={(e) => setPreviewSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setPreviewSearchQuery('')
+              }
+            }}
             placeholder="Cari berdasarkan IP, Nama, No. WhatsApp, Alamat, atau WiFi..."
             className="w-full pl-9 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-sans text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 transition"
           />

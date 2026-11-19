@@ -363,19 +363,21 @@ export function CustomerDetailModal({
                     <span>Titik Lokasi GPS</span>
                   </span>
                   {(currentCustomer?.lokasi_gps || customer.lokasi_gps) ? (
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.lokasi_gps || customer.lokasi_gps)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold text-[#026AA7] hover:underline flex items-center justify-between gap-1 text-xs truncate transition"
-                      title="Buka titik koordinat di Google Maps"
-                    >
-                      <span className="truncate font-mono text-[11px]">{currentCustomer?.lokasi_gps || customer.lokasi_gps}</span>
-                      <span className="shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded flex items-center gap-0.5">
-                        <Check className="w-2.5 h-2.5" />
+                    <div className="flex items-center justify-between gap-1 text-xs">
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.lokasi_gps || customer.lokasi_gps)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold text-[#026AA7] hover:underline font-mono text-[11px] truncate transition"
+                        title="Buka titik koordinat di Google Maps"
+                      >
+                        {currentCustomer?.lokasi_gps || customer.lokasi_gps}
+                      </a>
+                      <span className="shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 select-none">
+                        <Check className="w-2.5 h-2.5 text-emerald-600" />
                         <span>Terkunci</span>
                       </span>
-                    </a>
+                    </div>
                   ) : (currentCustomer?.alamat || customer.alamat) ? (
                     <a
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.alamat || customer.alamat)}`}
