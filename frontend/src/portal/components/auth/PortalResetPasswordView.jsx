@@ -331,7 +331,7 @@ export function PortalResetPasswordView({ onBackToLogin }) {
 
             {/* Footer copyright */}
             <div className="pt-3 pb-1 text-center text-[10px] text-slate-400 font-mono shrink-0">
-              &copy; 2026 MyTekno &bull; Layanan Mandiri Pelanggan TeknoIndonet
+              &copy; 2026 MyTekno - Layanan Mandiri Pelanggan TeknoIndonet
             </div>
           </div>
         </div>

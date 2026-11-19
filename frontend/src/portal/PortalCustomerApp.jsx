@@ -480,7 +480,7 @@ export function PortalCustomerApp() {
           />
         </div>
         <div className="py-4 text-center text-[11px] text-slate-500 font-mono">
-          &copy; 2026 MyTekno &bull; Layanan Mandiri Pelanggan Internet
+          &copy; 2026 MyTekno - Layanan Mandiri Pelanggan Internet
         </div>
       </div>
     );

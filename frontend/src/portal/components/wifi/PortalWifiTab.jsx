@@ -340,10 +340,10 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
                       <span className="text-xs font-bold text-blue-900 block">Petunjuk Penggantian WiFi:</span>
                       <ul className="text-xs text-blue-800/90 space-y-1 mt-1 leading-relaxed">
                         <li>
-                          • <b>Sebelum Ganti:</b> Pastikan HP Anda terhubung ke sinyal WiFi rumah ini (tidak dapat diubah dari luar jangkauan).
+                          <strong>1. Sebelum Ganti:</strong> Pastikan HP Anda terhubung ke sinyal WiFi rumah ini (tidak dapat diubah dari luar jangkauan).
                         </li>
                         <li>
-                          • <b>Setelah Ganti:</b> Seluruh HP &amp; laptop di rumah akan terputus sesaat. Cukup sambungkan kembali dengan sandi yang baru.
+                          <strong>2. Setelah Ganti:</strong> Seluruh HP &amp; laptop di rumah akan terputus sesaat. Cukup sambungkan kembali dengan sandi yang baru.
                         </li>
                       </ul>
                     </div>

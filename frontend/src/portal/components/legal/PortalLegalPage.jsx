@@ -8,7 +8,6 @@ import {
   Lock,
   Wifi,
   Radio,
-  CheckCircle2,
   AlertCircle,
   ChevronLeft
 } from 'lucide-react';
@@ -28,10 +27,10 @@ export function PortalLegalPage({ initialTab = 'privasi', onBack }) {
 
   return (
     <div className="fixed inset-0 sm:relative sm:min-h-[100dvh] bg-slate-200/90 p-0 sm:p-4 pb-0 sm:pb-4 flex justify-center items-center text-slate-900 font-sans antialiased overflow-hidden overscroll-none select-none">
-      {/* Mobile Shell Wrapper (Max 440px seragam persis seluruh halaman MyTekno) */}
+      {/* Mobile Shell Wrapper (Max 440px terpadu seragam seluruh MyTekno) */}
       <div className="w-full max-w-[440px] mx-auto h-[100dvh] sm:h-[92dvh] bg-[#F1F5F9] relative flex flex-col sm:rounded-2xl sm:shadow-lg sm:shadow-slate-900/5 sm:border sm:border-slate-300/70 overflow-hidden overscroll-none">
         
-        {/* ═══ HEADER BIRU TERPADU DENGAN GELOMBANG SINYAL (PERSIS SUB-PAGE LAIN) ═══ */}
+        {/* Header Biru Terpadu MyTekno */}
         <div className="shrink-0 relative z-0 bg-gradient-to-br from-blue-600 via-blue-600 to-blue-700 border-b border-blue-700/60 overflow-hidden">
           <div className="absolute inset-0 pointer-events-none overflow-hidden select-none" aria-hidden="true">
             <svg
@@ -65,16 +64,16 @@ export function PortalLegalPage({ initialTab = 'privasi', onBack }) {
                   {activeTab === 'privasi' ? 'Kebijakan Privasi' : 'Syarat & Ketentuan'}
                 </h1>
                 <p className="text-xs font-medium text-white/95 mt-0.5 leading-snug break-words">
-                  MyTekno &bull; Layanan Mandiri Pelanggan
+                  MyTekno Customer Care
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-18) ═══ */}
+        {/* Konten dengan Scroll-Area & Negative Margin (-mt-18) */}
         <main className="scroll-area -mt-18 flex-1 overflow-y-auto relative z-10 px-3.5 pb-6 space-y-3">
-          {/* Segmented Tab Switcher */}
+          {/* Segmented Tab Switcher (Single-Hue Blue Theme) */}
           <div className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-1.5 flex gap-1.5">
             <button
               type="button"
@@ -102,152 +101,164 @@ export function PortalLegalPage({ initialTab = 'privasi', onBack }) {
             </button>
           </div>
 
-          {/* Isi Konten */}
-          <div className="space-y-2.5 text-xs text-slate-600 leading-relaxed">
+          {/* Lembar Dokumen Tunggal (Satu Card Bersih, Anti Box-in-Box) */}
+          <section className="bg-white rounded-xl shadow-xs border border-slate-200/90 p-4 space-y-3.5 text-xs text-slate-600 leading-relaxed">
             {activeTab === 'privasi' ? (
               <>
-                <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-blue-900 space-y-1">
+                {/* Banner Callout Transparansi */}
+                <div className="p-3 rounded-lg bg-blue-50/70 border-l-2 border-blue-600 text-blue-900 space-y-1">
                   <div className="flex items-center gap-1.5 font-bold text-xs">
                     <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-                    <span>Transparansi Sensor &amp; Data Pelanggan</span>
+                    <span>Transparansi Sensor dan Data Pelanggan</span>
                   </div>
                   <p className="text-[11px] text-blue-800 leading-snug">
-                    Aplikasi MyTekno hanya meminta izin perangkat yang benar-benar esensial untuk mendukung kestabilan layanan internet rumah Anda.
+                    Aplikasi MyTekno hanya meminta izin perangkat yang esensial untuk mendukung operasional layanan sambungan internet rumah Anda.
                   </p>
                 </div>
 
-                {/* 1. Lokasi */}
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1.5 shadow-xs">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold">
-                    <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                      <MapPin className="w-4 h-4" />
+                {/* Daftar Klausul dalam 1 Alur Bersih (Divide-Y) */}
+                <div className="divide-y divide-slate-100 space-y-3 pt-1">
+                  {/* 1. Izin Lokasi Presisi (GPS) */}
+                  <article className="space-y-1.5 pt-2 first:pt-0">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <MapPin className="w-3.5 h-3.5" />
+                      </div>
+                      <span>1. Izin Lokasi Presisi (GPS)</span>
                     </div>
-                    <span className="text-xs">1. Izin Lokasi Presisi (GPS)</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    <strong>Tujuan:</strong> Memetakan titik fisik rumah pelanggan pada sistem NOC TeknoGuard saat Anda terhubung ke sinyal WiFi rumah pelanggan.
-                  </p>
-                  <div className="text-[10.5px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100 space-y-0.5">
-                    <div className="font-semibold text-slate-700 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
-                      <span>Jaminan Keamanan:</span>
-                    </div>
-                    <p>
-                      Aplikasi <strong>TIDAK pernah melacak pergerakan lokasi Anda secara berkala di latar belakang</strong>. Koordinat hanya dikunci sekali agar teknisi lapangan cepat sampai saat ada kabel optik putus atau gangguan redaman.
+                    <p className="text-[11.5px] text-slate-600 pl-8">
+                      <strong>Tujuan:</strong> Memetakan titik fisik rumah pelanggan pada sistem NOC TeknoGuard saat Anda terhubung ke sinyal WiFi rumah pelanggan.
                     </p>
-                  </div>
-                </div>
+                    <p className="text-[11px] text-slate-500 pl-8 border-l-2 border-blue-200 ml-8 leading-snug">
+                      Aplikasi <strong>tidak pernah melacak pergerakan lokasi Anda di latar belakang</strong> saat aplikasi ditutup. Koordinat hanya dipetakan agar teknisi lapangan cepat sampai saat ada kabel optik putus atau gangguan redaman.
+                    </p>
+                  </article>
 
-                {/* 2. Galeri */}
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1.5 shadow-xs">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold">
-                    <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                      <Camera className="w-4 h-4" />
+                  {/* 2. Izin Akses Galeri & Kamera */}
+                  <article className="space-y-1.5 pt-3.5">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <Camera className="w-3.5 h-3.5" />
+                      </div>
+                      <span>2. Izin Akses Galeri dan Kamera</span>
                     </div>
-                    <span className="text-xs">2. Izin Akses Galeri &amp; Kamera</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    <strong>Tujuan:</strong> Digunakan saat Anda mengambil atau mengganti foto profil akun MyTekno serta melampirkan foto struk bukti pembayaran tagihan.
-                  </p>
-                  <p className="text-[10.5px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                    Aplikasi <strong>tidak memindai atau membaca berkas foto pribadi lainnya</strong> di memori ponsel Anda.
-                  </p>
-                </div>
+                    <p className="text-[11.5px] text-slate-600 pl-8">
+                      <strong>Tujuan:</strong> Digunakan saat Anda mengambil atau mengganti foto profil akun MyTekno serta melampirkan foto struk bukti pembayaran tagihan.
+                    </p>
+                    <p className="text-[11px] text-slate-500 pl-8 border-l-2 border-blue-200 ml-8 leading-snug">
+                      Aplikasi <strong>tidak memindai atau membaca berkas foto pribadi lainnya</strong> di memori ponsel Anda.
+                    </p>
+                  </article>
 
-                {/* 3. Pembayaran */}
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1.5 shadow-xs">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                      <CreditCard className="w-4 h-4" />
+                  {/* 3. Data Transaksi Pembayaran */}
+                  <article className="space-y-1.5 pt-3.5">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <CreditCard className="w-3.5 h-3.5" />
+                      </div>
+                      <span>3. Data Transaksi Pembayaran</span>
                     </div>
-                    <span className="text-xs">3. Data Transaksi Pembayaran</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Nomor Virtual Account dan riwayat tagihan diproses dengan protokol enkripsi resmi. MyTekno <strong>tidak pernah menyimpan nomor kartu kredit/debit atau PIN perbankan pribadi Anda</strong>.
-                  </p>
-                </div>
+                    <p className="text-[11.5px] text-slate-600 pl-8">
+                      Nomor Virtual Account dan riwayat tagihan diproses menggunakan protokol enkripsi resmi. MyTekno <strong>tidak pernah menyimpan nomor kartu kredit atau PIN perbankan pribadi Anda</strong>.
+                    </p>
+                  </article>
 
-                {/* 4. UU PDP */}
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1.5 shadow-xs">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold">
-                    <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                      <Lock className="w-4 h-4" />
+                  {/* 4. Kepatuhan Perlindungan Data (UU PDP) */}
+                  <article className="space-y-1.5 pt-3.5">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <Lock className="w-3.5 h-3.5" />
+                      </div>
+                      <span>4. Kepatuhan UU Perlindungan Data Pribadi</span>
                     </div>
-                    <span className="text-xs">4. Kepatuhan UU Perlindungan Data Pribadi</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600">
-                    Nomor WhatsApp Anda hanya digunakan untuk verifikasi login resmi dan notifikasi operasional internet. Kata sandi dienkripsi dengan standar <em>cryptographic hash</em>. Data Anda tidak pernah diperjualbelikan kepada pihak ketiga.
-                  </p>
+                    <p className="text-[11.5px] text-slate-600 pl-8">
+                      Nomor WhatsApp Anda hanya digunakan untuk verifikasi login resmi dan notifikasi operasional internet. Kata sandi dienkripsi dengan standar <em>cryptographic hash</em>. Data Anda tidak pernah diperjualbelikan kepada pihak ketiga.
+                    </p>
+                  </article>
                 </div>
               </>
             ) : (
               <>
-                <div className="p-3 rounded-xl bg-slate-100 text-slate-800 space-y-1">
+                {/* Banner Callout Syarat Ketentuan */}
+                <div className="p-3 rounded-lg bg-blue-50/70 border-l-2 border-blue-600 text-blue-900 space-y-1">
                   <div className="flex items-center gap-1.5 font-bold text-xs">
-                    <FileText className="w-4 h-4 text-slate-700 shrink-0" />
-                    <span>Syarat &amp; Ketentuan Layanan Internet</span>
+                    <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>Ketentuan Penggunaan Layanan MyTekno</span>
                   </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
+                  <p className="text-[11px] text-blue-800 leading-snug">
                     Ketentuan ini mengatur tata tertib berlangganan internet dan hak kewajiban pelanggan resmi.
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1 shadow-xs">
-                  <h4 className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                    <Wifi className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Pasal 1 &bull; Layanan Sambungan Internet</span>
-                  </h4>
-                  <p className="text-[11px] text-slate-600">
-                    Penyedia layanan menyediakan sambungan internet tanpa batas (*unlimited*) sesuai paket kecepatan bandwidth yang dipilih pada formulir pemasangan awal.
-                  </p>
-                </div>
+                {/* Pasal-Pasal dalam 1 Alur Bersih */}
+                <div className="divide-y divide-slate-100 space-y-3 pt-1">
+                  <article className="space-y-1 pt-2 first:pt-0">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <Wifi className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Pasal 1: Layanan Sambungan Internet</span>
+                    </div>
+                    <p className="text-[11.5px] text-slate-600 pl-8 leading-relaxed">
+                      Penyedia layanan menyediakan sambungan internet tanpa batas (unlimited) sesuai paket kecepatan bandwidth yang telah dipilih pada formulir pemasangan awal.
+                    </p>
+                  </article>
 
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1 shadow-xs">
-                  <h4 className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                    <Radio className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Pasal 2 &bull; Pemantauan Daya Optik &amp; Pemeliharaan</span>
-                  </h4>
-                  <p className="text-[11px] text-slate-600">
-                    Sistem EdTeknoGuard memantau daya redaman optik modem ONT secara berkala untuk mencegah terjadinya sinyal putus (*LOS*). Tim teknisi berhak melakukan pengecekan kabel fisik demi menjaga kualitas koneksi.
-                  </p>
-                </div>
+                  <article className="space-y-1 pt-3.5">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <Radio className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Pasal 2: Pemantauan Daya Optik dan Pemeliharaan</span>
+                    </div>
+                    <p className="text-[11.5px] text-slate-600 pl-8 leading-relaxed">
+                      Sistem EdTeknoGuard memantau daya terima optik modem ONT secara berkala untuk mencegah terjadinya sinyal putus (LOS). Tim teknisi berhak melakukan pengecekan kabel fisik lapangan demi menjaga kualitas koneksi Anda.
+                    </p>
+                  </article>
 
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1 shadow-xs">
-                  <h4 className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                    <CreditCard className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Pasal 3 &bull; Tagihan &amp; Pembayaran</span>
-                  </h4>
-                  <p className="text-[11px] text-slate-600">
-                    Pelanggan berkewajiban membayar tagihan bulanan sebelum tanggal jatuh tempo. Keterlambatan pembayaran setelah masa tenggang dapat mengakibatkan isolir sementara hingga tagihan dilunasi.
-                  </p>
-                </div>
+                  <article className="space-y-1 pt-3.5">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <CreditCard className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Pasal 3: Kewajiban Pembayaran Tagihan</span>
+                    </div>
+                    <p className="text-[11.5px] text-slate-600 pl-8 leading-relaxed">
+                      Pelanggan berkewajiban menyelesaikan pembayaran iuran bulanan selambat-lambatnya pada tanggal jatuh tempo. Keterlambatan pembayaran setelah masa tenggang dapat mengakibatkan isolir sementara hingga tagihan dilunasi.
+                    </p>
+                  </article>
 
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1 shadow-xs">
-                  <h4 className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                    <AlertCircle className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Pasal 4 &bull; Tanggung Jawab Perangkat ONT</span>
-                  </h4>
-                  <p className="text-[11px] text-slate-600">
-                    Modem ONT dan adaptor listrik merupakan aset operasional penyedia layanan. Pelanggan wajib menjaga fisik perangkat dan tidak memindahtangankannya tanpa persetujuan resmi kantor.
-                  </p>
-                </div>
+                  <article className="space-y-1 pt-3.5">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Pasal 4: Tanggung Jawab Perangkat Modem</span>
+                    </div>
+                    <p className="text-[11.5px] text-slate-600 pl-8 leading-relaxed">
+                      Perangkat modem ONT dan adaptor yang terpasang merupakan aset operasional penyedia layanan. Pelanggan berkewajiban merawat fisik perangkat dan tidak memindahtangankannya tanpa persetujuan resmi kantor cabang.
+                    </p>
+                  </article>
 
-                <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1 shadow-xs">
-                  <h4 className="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Pasal 5 &bull; Pelaporan Kendala Mandiri</span>
-                  </h4>
-                  <p className="text-[11px] text-slate-600">
-                    Pelanggan dapat membuat tiket kendala secara mandiri via aplikasi MyTekno. Tim teknisi piket akan merespons pengaduan sesuai antrean dan prioritas gangguan di lapangan.
-                  </p>
+                  <article className="space-y-1 pt-3.5">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Pasal 5: Pelaporan Kendala Mandiri</span>
+                    </div>
+                    <p className="text-[11.5px] text-slate-600 pl-8 leading-relaxed">
+                      Pelanggan dapat membuat tiket pengaduan secara mandiri melalui aplikasi MyTekno. Tim teknisi piket akan merespons sesuai antrean dan prioritas gangguan di lapangan.
+                    </p>
+                  </article>
                 </div>
               </>
             )}
+          </section>
 
-            {/* Footer Copyright */}
-            <div className="pt-2 pb-2 text-center text-[10px] text-slate-400 font-mono">
-              &copy; 2026 MyTekno &bull; PT Tekno Indo Network
-            </div>
+          {/* Footer Copyright Tanpa Dot */}
+          <div className="pt-2 pb-2 text-center text-[10px] text-slate-400 font-mono">
+            &copy; 2026 MyTekno - PT Tekno Indo Network
           </div>
         </main>
       </div>
