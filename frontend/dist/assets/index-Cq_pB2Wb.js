@@ -48607,13 +48607,6 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 		"not_linked"
 	].includes(tagihan?.va_state);
 	const availableChannels = isVaAvailable ? rawChannels : [];
-	const waAdminLink = (0, import_react.useMemo)(() => {
-		const custNama = customer?.nama || "Pelanggan";
-		const custId = customer?.id_pelanggan || "-";
-		const totalTagihan = rupiah(activeBill?.total || 0);
-		const periode = periodeTeks(activeBill?.billing_period) || activeBill?.number || "Bulan Berjalan";
-		return `https://wa.me/?text=${encodeURIComponent(`Halo Admin TeknoIndo, saya ingin konfirmasi pembayaran tagihan internet.\n\n• Nama: ${custNama}\n• ID Pelanggan: ${custId}\n• Periode: ${periode}\n• Total Tagihan: ${totalTagihan}\n\nMohon informasi nomor rekening transfer bank atau panduan pembayarannya. Terima kasih.`)}`;
-	}, [customer, activeBill]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex-1 flex flex-col min-h-0 bg-slate-50/50 relative overflow-hidden select-none",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalHeader, {
@@ -48763,45 +48756,24 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 												}, k.channel))
 											})
 										]
-									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "mt-4 pt-3.5 border-t border-slate-100 space-y-3",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "p-3.5 rounded-xl bg-sky-50/80 border border-sky-200/80 text-sky-950",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "flex items-start gap-2.5",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 text-sky-600 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-													className: "space-y-1 text-xs",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-														className: "font-bold text-sky-950 leading-tight",
-														children: "Pembayaran Langsung ke Petugas / Kasir Kantor"
-													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-														className: "text-[11px] text-sky-800 leading-relaxed font-medium",
-														children: tagihan?.message || "Pembayaran via Virtual Account otomatis belum aktif untuk kantor cabang ini. Rincian tagihan Anda tetap tercatat resmi dan pembayaran dapat dilakukan langsung atau via transfer manual."
-													})]
+									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "mt-4 pt-3.5 border-t border-slate-100 space-y-2.5",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 flex items-start gap-3",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center shrink-0 mt-0.5",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-4.5 h-4.5" })
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "space-y-1 text-xs",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+													className: "font-bold text-slate-900 leading-tight",
+													children: "Pembayaran Belum Menggunakan Virtual Account"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+													className: "text-[11px] text-slate-600 leading-relaxed font-medium",
+													children: [tagihan?.message || "Pembayaran via Virtual Account otomatis belum aktif untuk kantor cabang ini.", " Rincian tagihan Anda tetap tercatat resmi. Untuk pembayaran atau informasi nomor rekening transfer bank, silakan hubungi admin / kasir kantor melalui WhatsApp."]
 												})]
-											})
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "p-3.5 rounded-xl bg-slate-50/90 border border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "flex items-center gap-2.5",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-													className: "w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center shrink-0",
-													children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-4.5 h-4.5" })
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-													className: "text-xs font-bold text-slate-800 leading-tight",
-													children: "Konfirmasi Pembayaran via WhatsApp"
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-													className: "text-[11px] text-slate-500 font-medium",
-													children: "Hubungi admin untuk info rekening transfer atau kirim bukti bayar"
-												})] })]
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-												href: waAdminLink,
-												target: "_blank",
-												rel: "noopener noreferrer",
-												className: "px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs shrink-0",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi Admin via WA" })]
 											})]
-										})]
+										})
 									})
 								] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "py-6 text-center",
