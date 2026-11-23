@@ -42,7 +42,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-from app.middleware import SlidingSessionMiddleware
+from app.middleware import (
+    SlidingSessionMiddleware,
+    SecurityHeadersMiddleware,
+    LoginRateLimitMiddleware
+)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(LoginRateLimitMiddleware, max_attempts=10, window_seconds=60)
 app.add_middleware(SlidingSessionMiddleware)
 app.add_middleware(
     CORSMiddleware,

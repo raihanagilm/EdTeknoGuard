@@ -171,8 +171,8 @@ class TenantDatabaseManager:
         cls.create_database_if_not_exists(new_kode)
 
         with master_engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
-            # Periksa apakah database lama ada
-            check_old = conn.execute(text(f"SHOW DATABASES LIKE '{old_db}';")).fetchall()
+            # Periksa apakah database lama ada (Prepared Statement / Parameterized Query)
+            check_old = conn.execute(text("SHOW DATABASES LIKE :old_db;"), {"old_db": old_db}).fetchall()
             if check_old:
                 conn.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
                 try:
@@ -185,12 +185,18 @@ class TenantDatabaseManager:
                 finally:
                     conn.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
 
-        # Update nama kantor & field pelanggan.kantor di dalam tenant DB baru
+        # Update nama kantor & field pelanggan.kantor di dalam tenant DB baru dengan Bound Parameters
         try:
             new_engine = cls.get_engine_for_kantor(new_kode)
             with new_engine.connect().execution_options(isolation_level="AUTOCOMMIT") as t_conn:
-                t_conn.execute(text(f"UPDATE `kantors` SET `nama` = '{new_kode.title()}' WHERE 1=1;"))
-                t_conn.execute(text(f"UPDATE `pelanggan` SET `kantor` = '{new_kode}' WHERE 1=1;"))
+                t_conn.execute(
+                    text("UPDATE `kantors` SET `nama` = :nama WHERE 1=1;"),
+                    {"nama": new_kode.title()}
+                )
+                t_conn.execute(
+                    text("UPDATE `pelanggan` SET `kantor` = :kantor WHERE 1=1;"),
+                    {"kantor": new_kode}
+                )
         except Exception as e:
             logger.warning(f"[TENANT_DB] Gagal sinkronisasi data internal kantor di {new_db}: {e}")
 

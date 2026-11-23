@@ -7,16 +7,15 @@
 - Baseline: Green
 
 ## In Progress
-- Integrasi Web Notifications API standar browser (Chrome/Edge/Windows) dan Adaptive Push Notification (Android vs Web)
-- Pemicu FCM push alert ke HP Android saat login akun terdeteksi dari Web Browser
+- Pengerasan Keamanan Sistem (Defense-in-Depth): Bound Parameterized Queries, Anti-Brute-Force Rate Limiting, Security Headers, dan Origin Firewall UFW
 
 ## Next Steps
-- [x] Implementasi Web Notifications API helper (`frontend/src/utils/webNotification.js`)
-- [x] Notifikasi adaptif di MyTekno (`PortalCustomerApp.jsx`) dan TeknoGuard (`App.jsx`)
-- [x] Notifikasi keamanan FCM push ke HP pengguna jika login via Web Browser (`app/main.py` dan `app/portal/modules/auth/routes.py`)
-- [x] Banner izin notifikasi desktop di TeknoGuard dan MyTekno
-- [x] Build frontend production (`npm run build`)
-- [ ] Deploy dan restart service di server VPS produksi
+- [x] Refactoring parameterized queries bound parameters di `app/core/tenant_database.py`
+- [x] Middleware `SecurityHeadersMiddleware` (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy)
+- [x] Middleware `LoginRateLimitMiddleware` (Sliding window rate limit anti-brute force pada `/api/auth/login` dan `/portal/api/auth/login`)
+- [x] Skrip otomasi firewall VPS `scripts/setup-cloudflare-ufw.sh` (Lockdown port 80/443 ke Cloudflare IP & Port SSH 2024)
+- [x] Suite pengujian keamanan `tests/test_security_hardening.py` (78 tests passing)
+- [ ] Deploy dan restart layanan di server VPS produksi
 
 ## Blockers
 - None
