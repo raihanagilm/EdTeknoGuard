@@ -30,10 +30,10 @@ function NotificationCardItem({ item, isRead, onCardClick, onActionClick, onDele
   return (
     <article
       onClick={() => onCardClick(item)}
-      className={`p-3.5 space-y-1.5 transition-colors cursor-pointer select-none border-l-4 ${
+      className={`p-3.5 space-y-1.5 transition-colors cursor-pointer select-none ${
         isRead
-          ? 'bg-slate-50/80 hover:bg-slate-100/70 border-l-transparent text-slate-500'
-          : 'bg-white hover:bg-blue-50/40 border-l-blue-600 text-slate-900 shadow-2xs'
+          ? 'bg-slate-50/80 hover:bg-slate-100/70 text-slate-500'
+          : 'bg-white hover:bg-slate-50/40 text-slate-900 shadow-2xs'
       }`}
     >
       {/* Baris Atas: Judul Kategori & Status Bersih (Tanpa Box) + Tombol Hapus */}
@@ -495,14 +495,14 @@ export function PortalNotificationsPage({
         <div className="px-3.5 pb-24 space-y-3">
           {/* Card Utama Pembungkus List (Sesuai Styling Kartu Menu Lain) */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
-            {/* Action & Filter Bar dengan Ikon Semantik */}
-            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex flex-col xs:flex-row sm:flex-row sm:items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                  <Bell className="w-3.5 h-3.5" />
-                </div>
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-xs font-bold text-slate-900 leading-tight whitespace-nowrap">
+            {/* Header Pemberitahuan & Action Bar Bebas Tabrakan */}
+            <div className="p-3 sm:p-3.5 border-b border-slate-100 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <Bell className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-900 leading-tight">
                     Semua Pemberitahuan
                   </span>
                   {notificationList.length > 0 && (
@@ -513,31 +513,37 @@ export function PortalNotificationsPage({
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
-                {notificationList.some((it) => !readIds.includes(it.id)) && (
-                  <button
-                    type="button"
-                    onClick={handleMarkAllAsRead}
-                    className="px-2 py-1 rounded-lg text-blue-600 hover:bg-blue-50 text-xs font-medium transition flex items-center gap-1 cursor-pointer"
-                    title="Tandai seluruh pemberitahuan sebagai sudah dibaca"
-                  >
-                    <CheckCheck className="w-3.5 h-3.5" />
-                    <span>Tandai Dibaca</span>
-                  </button>
-                )}
+              {(notificationList.some((it) => !readIds.includes(it.id)) || notificationList.some((it) => readIds.includes(it.id))) && (
+                <div className="flex items-center justify-end gap-3 pt-1.5 border-t border-slate-100/80">
+                  {notificationList.some((it) => !readIds.includes(it.id)) && (
+                    <button
+                      type="button"
+                      onClick={handleMarkAllAsRead}
+                      className="text-blue-600 hover:text-blue-700 text-xs font-medium transition inline-flex items-center gap-1 cursor-pointer py-0.5"
+                      title="Tandai seluruh pemberitahuan sebagai sudah dibaca"
+                    >
+                      <CheckCheck className="w-3.5 h-3.5 shrink-0" />
+                      <span>Tandai Dibaca</span>
+                    </button>
+                  )}
 
-                {notificationList.some((it) => readIds.includes(it.id)) && (
-                  <button
-                    type="button"
-                    onClick={handleClearReadNotifications}
-                    className="px-2 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer"
-                    title="Hapus seluruh pemberitahuan yang sudah dibaca"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Hapus Dibaca</span>
-                  </button>
-                )}
-              </div>
+                  {notificationList.some((it) => !readIds.includes(it.id)) && notificationList.some((it) => readIds.includes(it.id)) && (
+                    <span className="w-px h-3 bg-slate-200" aria-hidden="true" />
+                  )}
+
+                  {notificationList.some((it) => readIds.includes(it.id)) && (
+                    <button
+                      type="button"
+                      onClick={handleClearReadNotifications}
+                      className="text-rose-600 hover:text-rose-700 text-xs font-medium transition inline-flex items-center gap-1 cursor-pointer py-0.5"
+                      title="Hapus seluruh pemberitahuan yang sudah dibaca"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                      <span>Hapus Dibaca</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* List Notifikasi */}

@@ -43619,7 +43619,7 @@ function NotificationCardItem({ item, isRead, onCardClick, onActionClick, onDele
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
 		onClick: () => onCardClick(item),
-		className: `p-3.5 space-y-1.5 transition-colors cursor-pointer select-none border-l-4 ${isRead ? "bg-slate-50/80 hover:bg-slate-100/70 border-l-transparent text-slate-500" : "bg-white hover:bg-blue-50/40 border-l-blue-600 text-slate-900 shadow-2xs"}`,
+		className: `p-3.5 space-y-1.5 transition-colors cursor-pointer select-none ${isRead ? "bg-slate-50/80 hover:bg-slate-100/70 text-slate-500" : "bg-white hover:bg-slate-50/40 text-slate-900 shadow-2xs"}`,
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-between gap-2",
@@ -44096,37 +44096,48 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-3 sm:p-3.5 border-b border-slate-100 flex flex-col xs:flex-row sm:flex-row sm:items-center justify-between gap-2.5",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-2 min-w-0",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5" })
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1.5 min-w-0",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-xs font-bold text-slate-900 leading-tight whitespace-nowrap",
-										children: "Semua Pemberitahuan"
-									}), notificationList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full shrink-0",
-										children: notificationList.length
-									})]
-								})]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-1.5 shrink-0 self-end sm:self-auto",
-								children: [notificationList.some((it) => !readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									type: "button",
-									onClick: handleMarkAllAsRead,
-									className: "px-2 py-1 rounded-lg text-blue-600 hover:bg-blue-50 text-xs font-medium transition flex items-center gap-1 cursor-pointer",
-									title: "Tandai seluruh pemberitahuan sebagai sudah dibaca",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tandai Dibaca" })]
-								}), notificationList.some((it) => readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									type: "button",
-									onClick: handleClearReadNotifications,
-									className: "px-2 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer",
-									title: "Hapus seluruh pemberitahuan yang sudah dibaca",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus Dibaca" })]
-								})]
+							className: "p-3 sm:p-3.5 border-b border-slate-100 space-y-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "flex items-center justify-between gap-2",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-2 min-w-0",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5" })
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-xs font-bold text-slate-900 leading-tight",
+											children: "Semua Pemberitahuan"
+										}),
+										notificationList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full shrink-0",
+											children: notificationList.length
+										})
+									]
+								})
+							}), (notificationList.some((it) => !readIds.includes(it.id)) || notificationList.some((it) => readIds.includes(it.id))) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center justify-end gap-3 pt-1.5 border-t border-slate-100/80",
+								children: [
+									notificationList.some((it) => !readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: handleMarkAllAsRead,
+										className: "text-blue-600 hover:text-blue-700 text-xs font-medium transition inline-flex items-center gap-1 cursor-pointer py-0.5",
+										title: "Tandai seluruh pemberitahuan sebagai sudah dibaca",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tandai Dibaca" })]
+									}),
+									notificationList.some((it) => !readIds.includes(it.id)) && notificationList.some((it) => readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "w-px h-3 bg-slate-200",
+										"aria-hidden": "true"
+									}),
+									notificationList.some((it) => readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: handleClearReadNotifications,
+										className: "text-rose-600 hover:text-rose-700 text-xs font-medium transition inline-flex items-center gap-1 cursor-pointer py-0.5",
+										title: "Hapus seluruh pemberitahuan yang sudah dibaca",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus Dibaca" })]
+									})
+								]
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "divide-y divide-slate-100",
