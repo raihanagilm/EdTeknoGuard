@@ -11709,7 +11709,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$97 = {
+var __iconData$96 = {
 	name: "activity",
 	size: 24,
 	node: [["path", {
@@ -11717,8 +11717,8 @@ var __iconData$97 = {
 		key: "169zse"
 	}]]
 };
-__iconData$97.node;
-var Activity = createLucideIcon(__iconData$97);
+__iconData$96.node;
+var Activity = createLucideIcon(__iconData$96);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-down.mjs
 /**
@@ -11727,7 +11727,7 @@ var Activity = createLucideIcon(__iconData$97);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$96 = {
+var __iconData$95 = {
 	name: "arrow-down",
 	size: 24,
 	node: [["path", {
@@ -11738,8 +11738,8 @@ var __iconData$96 = {
 		key: "1idqje"
 	}]]
 };
-__iconData$96.node;
-var ArrowDown = createLucideIcon(__iconData$96);
+__iconData$95.node;
+var ArrowDown = createLucideIcon(__iconData$95);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left.mjs
 /**
@@ -11748,7 +11748,7 @@ var ArrowDown = createLucideIcon(__iconData$96);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$95 = {
+var __iconData$94 = {
 	name: "arrow-left",
 	size: 24,
 	node: [["path", {
@@ -11759,8 +11759,8 @@ var __iconData$95 = {
 		key: "x3x0zl"
 	}]]
 };
-__iconData$95.node;
-var ArrowLeft = createLucideIcon(__iconData$95);
+__iconData$94.node;
+var ArrowLeft = createLucideIcon(__iconData$94);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left-right.mjs
 /**
@@ -11769,7 +11769,7 @@ var ArrowLeft = createLucideIcon(__iconData$95);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$94 = {
+var __iconData$93 = {
 	name: "arrow-left-right",
 	size: 24,
 	node: [
@@ -11791,8 +11791,8 @@ var __iconData$94 = {
 		}]
 	]
 };
-__iconData$94.node;
-var ArrowLeftRight = createLucideIcon(__iconData$94);
+__iconData$93.node;
+var ArrowLeftRight = createLucideIcon(__iconData$93);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up-down.mjs
 /**
@@ -11801,7 +11801,7 @@ var ArrowLeftRight = createLucideIcon(__iconData$94);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$93 = {
+var __iconData$92 = {
 	name: "arrow-up-down",
 	size: 24,
 	node: [
@@ -11823,8 +11823,8 @@ var __iconData$93 = {
 		}]
 	]
 };
-__iconData$93.node;
-var ArrowUpDown = createLucideIcon(__iconData$93);
+__iconData$92.node;
+var ArrowUpDown = createLucideIcon(__iconData$92);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up.mjs
 /**
@@ -11833,7 +11833,7 @@ var ArrowUpDown = createLucideIcon(__iconData$93);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$92 = {
+var __iconData$91 = {
 	name: "arrow-up",
 	size: 24,
 	node: [["path", {
@@ -11844,8 +11844,8 @@ var __iconData$92 = {
 		key: "x0mq9r"
 	}]]
 };
-__iconData$92.node;
-var ArrowUp = createLucideIcon(__iconData$92);
+__iconData$91.node;
+var ArrowUp = createLucideIcon(__iconData$91);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/ban.mjs
 /**
@@ -11854,7 +11854,7 @@ var ArrowUp = createLucideIcon(__iconData$92);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$91 = {
+var __iconData$90 = {
 	name: "ban",
 	size: 24,
 	node: [["circle", {
@@ -11867,8 +11867,8 @@ var __iconData$91 = {
 		key: "196cmz"
 	}]]
 };
-__iconData$91.node;
-var Ban = createLucideIcon(__iconData$91);
+__iconData$90.node;
+var Ban = createLucideIcon(__iconData$90);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/banknote.mjs
 /**
@@ -11877,7 +11877,7 @@ var Ban = createLucideIcon(__iconData$91);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$90 = {
+var __iconData$89 = {
 	name: "banknote",
 	size: 24,
 	node: [
@@ -11901,8 +11901,8 @@ var __iconData$90 = {
 		}]
 	]
 };
-__iconData$90.node;
-var Banknote = createLucideIcon(__iconData$90);
+__iconData$89.node;
+var Banknote = createLucideIcon(__iconData$89);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/bell.mjs
 /**
@@ -11911,7 +11911,7 @@ var Banknote = createLucideIcon(__iconData$90);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$89 = {
+var __iconData$88 = {
 	name: "bell",
 	size: 24,
 	node: [["path", {
@@ -11922,8 +11922,8 @@ var __iconData$89 = {
 		key: "11g9vi"
 	}]]
 };
-__iconData$89.node;
-var Bell = createLucideIcon(__iconData$89);
+__iconData$88.node;
+var Bell = createLucideIcon(__iconData$88);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/building-complex.mjs
 /**
@@ -11932,7 +11932,7 @@ var Bell = createLucideIcon(__iconData$89);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$88 = {
+var __iconData$87 = {
 	name: "building-complex",
 	size: 24,
 	node: [
@@ -11959,8 +11959,8 @@ var __iconData$88 = {
 	],
 	aliases: ["building-2"]
 };
-__iconData$88.node;
-var BuildingComplex = createLucideIcon(__iconData$88);
+__iconData$87.node;
+var BuildingComplex = createLucideIcon(__iconData$87);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/camera.mjs
 /**
@@ -11969,7 +11969,7 @@ var BuildingComplex = createLucideIcon(__iconData$88);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$87 = {
+var __iconData$86 = {
 	name: "camera",
 	size: 24,
 	node: [["path", {
@@ -11982,8 +11982,8 @@ var __iconData$87 = {
 		key: "1vg3eu"
 	}]]
 };
-__iconData$87.node;
-var Camera = createLucideIcon(__iconData$87);
+__iconData$86.node;
+var Camera = createLucideIcon(__iconData$86);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/calendar.mjs
 /**
@@ -11992,7 +11992,7 @@ var Camera = createLucideIcon(__iconData$87);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$86 = {
+var __iconData$85 = {
 	name: "calendar",
 	size: 24,
 	node: [
@@ -12018,8 +12018,8 @@ var __iconData$86 = {
 		}]
 	]
 };
-__iconData$86.node;
-var Calendar = createLucideIcon(__iconData$86);
+__iconData$85.node;
+var Calendar = createLucideIcon(__iconData$85);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chart-column.mjs
 /**
@@ -12028,7 +12028,7 @@ var Calendar = createLucideIcon(__iconData$86);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$85 = {
+var __iconData$84 = {
 	name: "chart-column",
 	size: 24,
 	node: [
@@ -12051,8 +12051,8 @@ var __iconData$85 = {
 	],
 	aliases: ["bar-chart-3"]
 };
-__iconData$85.node;
-var ChartColumn = createLucideIcon(__iconData$85);
+__iconData$84.node;
+var ChartColumn = createLucideIcon(__iconData$84);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chart-pie.mjs
 /**
@@ -12061,7 +12061,7 @@ var ChartColumn = createLucideIcon(__iconData$85);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$84 = {
+var __iconData$83 = {
 	name: "chart-pie",
 	size: 24,
 	node: [["path", {
@@ -12073,8 +12073,8 @@ var __iconData$84 = {
 	}]],
 	aliases: ["pie-chart"]
 };
-__iconData$84.node;
-var ChartPie = createLucideIcon(__iconData$84);
+__iconData$83.node;
+var ChartPie = createLucideIcon(__iconData$83);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/check-check.mjs
 /**
@@ -12083,7 +12083,7 @@ var ChartPie = createLucideIcon(__iconData$84);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$83 = {
+var __iconData$82 = {
 	name: "check-check",
 	size: 24,
 	node: [["path", {
@@ -12094,8 +12094,8 @@ var __iconData$83 = {
 		key: "ke71qq"
 	}]]
 };
-__iconData$83.node;
-var CheckCheck = createLucideIcon(__iconData$83);
+__iconData$82.node;
+var CheckCheck = createLucideIcon(__iconData$82);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/check.mjs
 /**
@@ -12104,7 +12104,7 @@ var CheckCheck = createLucideIcon(__iconData$83);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$82 = {
+var __iconData$81 = {
 	name: "check",
 	size: 24,
 	node: [["path", {
@@ -12112,8 +12112,8 @@ var __iconData$82 = {
 		key: "1gmf2c"
 	}]]
 };
-__iconData$82.node;
-var Check = createLucideIcon(__iconData$82);
+__iconData$81.node;
+var Check = createLucideIcon(__iconData$81);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-down.mjs
 /**
@@ -12122,7 +12122,7 @@ var Check = createLucideIcon(__iconData$82);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$81 = {
+var __iconData$80 = {
 	name: "chevron-down",
 	size: 24,
 	node: [["path", {
@@ -12130,8 +12130,8 @@ var __iconData$81 = {
 		key: "qrunsl"
 	}]]
 };
-__iconData$81.node;
-var ChevronDown = createLucideIcon(__iconData$81);
+__iconData$80.node;
+var ChevronDown = createLucideIcon(__iconData$80);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-left.mjs
 /**
@@ -12140,7 +12140,7 @@ var ChevronDown = createLucideIcon(__iconData$81);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$80 = {
+var __iconData$79 = {
 	name: "chevron-left",
 	size: 24,
 	node: [["path", {
@@ -12148,8 +12148,8 @@ var __iconData$80 = {
 		key: "1wnfg3"
 	}]]
 };
-__iconData$80.node;
-var ChevronLeft = createLucideIcon(__iconData$80);
+__iconData$79.node;
+var ChevronLeft = createLucideIcon(__iconData$79);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-up.mjs
 /**
@@ -12158,7 +12158,7 @@ var ChevronLeft = createLucideIcon(__iconData$80);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$79 = {
+var __iconData$78 = {
 	name: "chevron-up",
 	size: 24,
 	node: [["path", {
@@ -12166,8 +12166,8 @@ var __iconData$79 = {
 		key: "153udz"
 	}]]
 };
-__iconData$79.node;
-var ChevronUp = createLucideIcon(__iconData$79);
+__iconData$78.node;
+var ChevronUp = createLucideIcon(__iconData$78);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/chevron-right.mjs
 /**
@@ -12176,7 +12176,7 @@ var ChevronUp = createLucideIcon(__iconData$79);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$78 = {
+var __iconData$77 = {
 	name: "chevron-right",
 	size: 24,
 	node: [["path", {
@@ -12184,8 +12184,8 @@ var __iconData$78 = {
 		key: "mthhwq"
 	}]]
 };
-__iconData$78.node;
-var ChevronRight = createLucideIcon(__iconData$78);
+__iconData$77.node;
+var ChevronRight = createLucideIcon(__iconData$77);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-alert.mjs
 /**
@@ -12194,7 +12194,7 @@ var ChevronRight = createLucideIcon(__iconData$78);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$77 = {
+var __iconData$76 = {
 	name: "circle-alert",
 	size: 24,
 	node: [
@@ -12221,8 +12221,8 @@ var __iconData$77 = {
 	],
 	aliases: ["alert-circle"]
 };
-__iconData$77.node;
-var CircleAlert = createLucideIcon(__iconData$77);
+__iconData$76.node;
+var CircleAlert = createLucideIcon(__iconData$76);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-check.mjs
 /**
@@ -12231,7 +12231,7 @@ var CircleAlert = createLucideIcon(__iconData$77);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$76 = {
+var __iconData$75 = {
 	name: "circle-check",
 	size: 24,
 	node: [["circle", {
@@ -12245,8 +12245,8 @@ var __iconData$76 = {
 	}]],
 	aliases: ["check-circle-2"]
 };
-__iconData$76.node;
-var CircleCheck = createLucideIcon(__iconData$76);
+__iconData$75.node;
+var CircleCheck = createLucideIcon(__iconData$75);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/circle-x.mjs
 /**
@@ -12255,7 +12255,7 @@ var CircleCheck = createLucideIcon(__iconData$76);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$75 = {
+var __iconData$74 = {
 	name: "circle-x",
 	size: 24,
 	node: [
@@ -12276,8 +12276,8 @@ var __iconData$75 = {
 	],
 	aliases: ["x-circle"]
 };
-__iconData$75.node;
-var CircleX = createLucideIcon(__iconData$75);
+__iconData$74.node;
+var CircleX = createLucideIcon(__iconData$74);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/clock.mjs
 /**
@@ -12286,7 +12286,7 @@ var CircleX = createLucideIcon(__iconData$75);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$74 = {
+var __iconData$73 = {
 	name: "clock",
 	size: 24,
 	node: [["circle", {
@@ -12299,8 +12299,8 @@ var __iconData$74 = {
 		key: "mmk7yg"
 	}]]
 };
-__iconData$74.node;
-var Clock = createLucideIcon(__iconData$74);
+__iconData$73.node;
+var Clock = createLucideIcon(__iconData$73);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/copy.mjs
 /**
@@ -12309,7 +12309,7 @@ var Clock = createLucideIcon(__iconData$74);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$73 = {
+var __iconData$72 = {
 	name: "copy",
 	size: 24,
 	node: [["rect", {
@@ -12325,8 +12325,8 @@ var __iconData$73 = {
 		key: "zix9uf"
 	}]]
 };
-__iconData$73.node;
-var Copy = createLucideIcon(__iconData$73);
+__iconData$72.node;
+var Copy = createLucideIcon(__iconData$72);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/credit-card.mjs
 /**
@@ -12335,7 +12335,7 @@ var Copy = createLucideIcon(__iconData$73);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$72 = {
+var __iconData$71 = {
 	name: "credit-card",
 	size: 24,
 	node: [
@@ -12360,8 +12360,8 @@ var __iconData$72 = {
 		}]
 	]
 };
-__iconData$72.node;
-var CreditCard = createLucideIcon(__iconData$72);
+__iconData$71.node;
+var CreditCard = createLucideIcon(__iconData$71);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/database.mjs
 /**
@@ -12370,7 +12370,7 @@ var CreditCard = createLucideIcon(__iconData$72);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$71 = {
+var __iconData$70 = {
 	name: "database",
 	size: 24,
 	node: [
@@ -12391,8 +12391,8 @@ var __iconData$71 = {
 		}]
 	]
 };
-__iconData$71.node;
-var Database = createLucideIcon(__iconData$71);
+__iconData$70.node;
+var Database = createLucideIcon(__iconData$70);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/download.mjs
 /**
@@ -12401,7 +12401,7 @@ var Database = createLucideIcon(__iconData$71);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$70 = {
+var __iconData$69 = {
 	name: "download",
 	size: 24,
 	node: [
@@ -12419,8 +12419,8 @@ var __iconData$70 = {
 		}]
 	]
 };
-__iconData$70.node;
-var Download = createLucideIcon(__iconData$70);
+__iconData$69.node;
+var Download = createLucideIcon(__iconData$69);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/ellipsis-vertical.mjs
 /**
@@ -12429,7 +12429,7 @@ var Download = createLucideIcon(__iconData$70);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$69 = {
+var __iconData$68 = {
 	name: "ellipsis-vertical",
 	size: 24,
 	node: [
@@ -12454,8 +12454,8 @@ var __iconData$69 = {
 	],
 	aliases: ["more-vertical"]
 };
-__iconData$69.node;
-var EllipsisVertical = createLucideIcon(__iconData$69);
+__iconData$68.node;
+var EllipsisVertical = createLucideIcon(__iconData$68);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/external-link.mjs
 /**
@@ -12464,7 +12464,7 @@ var EllipsisVertical = createLucideIcon(__iconData$69);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$68 = {
+var __iconData$67 = {
 	name: "external-link",
 	size: 24,
 	node: [
@@ -12482,8 +12482,8 @@ var __iconData$68 = {
 		}]
 	]
 };
-__iconData$68.node;
-var ExternalLink = createLucideIcon(__iconData$68);
+__iconData$67.node;
+var ExternalLink = createLucideIcon(__iconData$67);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/eye-off.mjs
 /**
@@ -12492,7 +12492,7 @@ var ExternalLink = createLucideIcon(__iconData$68);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$67 = {
+var __iconData$66 = {
 	name: "eye-off",
 	size: 24,
 	node: [
@@ -12514,8 +12514,8 @@ var __iconData$67 = {
 		}]
 	]
 };
-__iconData$67.node;
-var EyeOff = createLucideIcon(__iconData$67);
+__iconData$66.node;
+var EyeOff = createLucideIcon(__iconData$66);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/eye.mjs
 /**
@@ -12524,7 +12524,7 @@ var EyeOff = createLucideIcon(__iconData$67);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$66 = {
+var __iconData$65 = {
 	name: "eye",
 	size: 24,
 	node: [["path", {
@@ -12537,8 +12537,8 @@ var __iconData$66 = {
 		key: "1v7zrd"
 	}]]
 };
-__iconData$66.node;
-var Eye = createLucideIcon(__iconData$66);
+__iconData$65.node;
+var Eye = createLucideIcon(__iconData$65);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/file-spreadsheet.mjs
 /**
@@ -12547,7 +12547,7 @@ var Eye = createLucideIcon(__iconData$66);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$65 = {
+var __iconData$64 = {
 	name: "file-spreadsheet",
 	size: 24,
 	node: [
@@ -12577,8 +12577,8 @@ var __iconData$65 = {
 		}]
 	]
 };
-__iconData$65.node;
-var FileSpreadsheet = createLucideIcon(__iconData$65);
+__iconData$64.node;
+var FileSpreadsheet = createLucideIcon(__iconData$64);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/file-text.mjs
 /**
@@ -12587,7 +12587,7 @@ var FileSpreadsheet = createLucideIcon(__iconData$65);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$64 = {
+var __iconData$63 = {
 	name: "file-text",
 	size: 24,
 	node: [
@@ -12613,8 +12613,8 @@ var __iconData$64 = {
 		}]
 	]
 };
-__iconData$64.node;
-var FileText = createLucideIcon(__iconData$64);
+__iconData$63.node;
+var FileText = createLucideIcon(__iconData$63);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/funnel.mjs
 /**
@@ -12623,7 +12623,7 @@ var FileText = createLucideIcon(__iconData$64);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$63 = {
+var __iconData$62 = {
 	name: "funnel",
 	size: 24,
 	node: [["path", {
@@ -12632,8 +12632,8 @@ var __iconData$63 = {
 	}]],
 	aliases: ["filter"]
 };
-__iconData$63.node;
-var Funnel = createLucideIcon(__iconData$63);
+__iconData$62.node;
+var Funnel = createLucideIcon(__iconData$62);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/gauge.mjs
 /**
@@ -12642,7 +12642,7 @@ var Funnel = createLucideIcon(__iconData$63);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$62 = {
+var __iconData$61 = {
 	name: "gauge",
 	size: 24,
 	node: [["path", {
@@ -12653,8 +12653,8 @@ var __iconData$62 = {
 		key: "19p75a"
 	}]]
 };
-__iconData$62.node;
-var Gauge = createLucideIcon(__iconData$62);
+__iconData$61.node;
+var Gauge = createLucideIcon(__iconData$61);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/globe.mjs
 /**
@@ -12663,7 +12663,7 @@ var Gauge = createLucideIcon(__iconData$62);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$61 = {
+var __iconData$60 = {
 	name: "globe",
 	size: 24,
 	node: [
@@ -12683,8 +12683,8 @@ var __iconData$61 = {
 		}]
 	]
 };
-__iconData$61.node;
-var Globe = createLucideIcon(__iconData$61);
+__iconData$60.node;
+var Globe = createLucideIcon(__iconData$60);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/house.mjs
 /**
@@ -12693,7 +12693,7 @@ var Globe = createLucideIcon(__iconData$61);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$60 = {
+var __iconData$59 = {
 	name: "house",
 	size: 24,
 	node: [["path", {
@@ -12705,8 +12705,8 @@ var __iconData$60 = {
 	}]],
 	aliases: ["home"]
 };
-__iconData$60.node;
-var House = createLucideIcon(__iconData$60);
+__iconData$59.node;
+var House = createLucideIcon(__iconData$59);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/info.mjs
 /**
@@ -12715,7 +12715,7 @@ var House = createLucideIcon(__iconData$60);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$59 = {
+var __iconData$58 = {
 	name: "info",
 	size: 24,
 	node: [
@@ -12735,8 +12735,8 @@ var __iconData$59 = {
 		}]
 	]
 };
-__iconData$59.node;
-var Info = createLucideIcon(__iconData$59);
+__iconData$58.node;
+var Info = createLucideIcon(__iconData$58);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/infinity.mjs
 /**
@@ -12745,7 +12745,7 @@ var Info = createLucideIcon(__iconData$59);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$58 = {
+var __iconData$57 = {
 	name: "infinity",
 	size: 24,
 	node: [["path", {
@@ -12753,8 +12753,8 @@ var __iconData$58 = {
 		key: "18ogeb"
 	}]]
 };
-__iconData$58.node;
-var Infinity$1 = createLucideIcon(__iconData$58);
+__iconData$57.node;
+var Infinity$1 = createLucideIcon(__iconData$57);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/key-round.mjs
 /**
@@ -12763,7 +12763,7 @@ var Infinity$1 = createLucideIcon(__iconData$58);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$57 = {
+var __iconData$56 = {
 	name: "key-round",
 	size: 24,
 	node: [["path", {
@@ -12777,8 +12777,8 @@ var __iconData$57 = {
 		key: "w0ekpg"
 	}]]
 };
-__iconData$57.node;
-var KeyRound = createLucideIcon(__iconData$57);
+__iconData$56.node;
+var KeyRound = createLucideIcon(__iconData$56);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/key.mjs
 /**
@@ -12787,7 +12787,7 @@ var KeyRound = createLucideIcon(__iconData$57);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$56 = {
+var __iconData$55 = {
 	name: "key",
 	size: 24,
 	node: [
@@ -12807,8 +12807,8 @@ var __iconData$56 = {
 		}]
 	]
 };
-__iconData$56.node;
-var Key = createLucideIcon(__iconData$56);
+__iconData$55.node;
+var Key = createLucideIcon(__iconData$55);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/landmark.mjs
 /**
@@ -12817,7 +12817,7 @@ var Key = createLucideIcon(__iconData$56);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$55 = {
+var __iconData$54 = {
 	name: "landmark",
 	size: 24,
 	node: [
@@ -12847,8 +12847,8 @@ var __iconData$55 = {
 		}]
 	]
 };
-__iconData$55.node;
-var Landmark = createLucideIcon(__iconData$55);
+__iconData$54.node;
+var Landmark = createLucideIcon(__iconData$54);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/laptop.mjs
 /**
@@ -12857,7 +12857,7 @@ var Landmark = createLucideIcon(__iconData$55);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$54 = {
+var __iconData$53 = {
 	name: "laptop",
 	size: 24,
 	node: [["path", {
@@ -12868,8 +12868,8 @@ var __iconData$54 = {
 		key: "14rxg9"
 	}]]
 };
-__iconData$54.node;
-var Laptop = createLucideIcon(__iconData$54);
+__iconData$53.node;
+var Laptop = createLucideIcon(__iconData$53);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/layout-grid.mjs
 /**
@@ -12878,7 +12878,7 @@ var Laptop = createLucideIcon(__iconData$54);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$53 = {
+var __iconData$52 = {
 	name: "layout-grid",
 	size: 24,
 	node: [
@@ -12916,8 +12916,8 @@ var __iconData$53 = {
 		}]
 	]
 };
-__iconData$53.node;
-var LayoutGrid = createLucideIcon(__iconData$53);
+__iconData$52.node;
+var LayoutGrid = createLucideIcon(__iconData$52);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/loader-circle.mjs
 /**
@@ -12926,7 +12926,7 @@ var LayoutGrid = createLucideIcon(__iconData$53);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$52 = {
+var __iconData$51 = {
 	name: "loader-circle",
 	size: 24,
 	node: [["path", {
@@ -12935,8 +12935,8 @@ var __iconData$52 = {
 	}]],
 	aliases: ["loader-2"]
 };
-__iconData$52.node;
-var LoaderCircle = createLucideIcon(__iconData$52);
+__iconData$51.node;
+var LoaderCircle = createLucideIcon(__iconData$51);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/list.mjs
 /**
@@ -12945,7 +12945,7 @@ var LoaderCircle = createLucideIcon(__iconData$52);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$51 = {
+var __iconData$50 = {
 	name: "list",
 	size: 24,
 	node: [
@@ -12975,8 +12975,8 @@ var __iconData$51 = {
 		}]
 	]
 };
-__iconData$51.node;
-var List = createLucideIcon(__iconData$51);
+__iconData$50.node;
+var List = createLucideIcon(__iconData$50);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/lock-open.mjs
 /**
@@ -12985,7 +12985,7 @@ var List = createLucideIcon(__iconData$51);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$50 = {
+var __iconData$49 = {
 	name: "lock-open",
 	size: 24,
 	node: [["rect", {
@@ -13002,8 +13002,8 @@ var __iconData$50 = {
 	}]],
 	aliases: ["unlock"]
 };
-__iconData$50.node;
-var LockOpen = createLucideIcon(__iconData$50);
+__iconData$49.node;
+var LockOpen = createLucideIcon(__iconData$49);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/lock.mjs
 /**
@@ -13012,7 +13012,7 @@ var LockOpen = createLucideIcon(__iconData$50);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$49 = {
+var __iconData$48 = {
 	name: "lock",
 	size: 24,
 	node: [["rect", {
@@ -13028,8 +13028,8 @@ var __iconData$49 = {
 		key: "fwvmzm"
 	}]]
 };
-__iconData$49.node;
-var Lock = createLucideIcon(__iconData$49);
+__iconData$48.node;
+var Lock = createLucideIcon(__iconData$48);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/log-out.mjs
 /**
@@ -13038,7 +13038,7 @@ var Lock = createLucideIcon(__iconData$49);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$48 = {
+var __iconData$47 = {
 	name: "log-out",
 	size: 24,
 	node: [
@@ -13056,8 +13056,8 @@ var __iconData$48 = {
 		}]
 	]
 };
-__iconData$48.node;
-var LogOut = createLucideIcon(__iconData$48);
+__iconData$47.node;
+var LogOut = createLucideIcon(__iconData$47);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/map-pin.mjs
 /**
@@ -13066,7 +13066,7 @@ var LogOut = createLucideIcon(__iconData$48);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$47 = {
+var __iconData$46 = {
 	name: "map-pin",
 	size: 24,
 	node: [["path", {
@@ -13079,8 +13079,8 @@ var __iconData$47 = {
 		key: "ilqhr7"
 	}]]
 };
-__iconData$47.node;
-var MapPin = createLucideIcon(__iconData$47);
+__iconData$46.node;
+var MapPin = createLucideIcon(__iconData$46);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/message-circle.mjs
 /**
@@ -13089,7 +13089,7 @@ var MapPin = createLucideIcon(__iconData$47);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$46 = {
+var __iconData$45 = {
 	name: "message-circle",
 	size: 24,
 	node: [["path", {
@@ -13097,46 +13097,8 @@ var __iconData$46 = {
 		key: "1sd12s"
 	}]]
 };
-__iconData$46.node;
-var MessageCircle = createLucideIcon(__iconData$46);
-//#endregion
-//#region node_modules/lucide-react/dist/esm/icons/monitor.mjs
-/**
-* @license lucide-react v1.53.0 - ISC
-*
-* This source code is licensed under the ISC license.
-* See the LICENSE file in the root directory of this source tree.
-*/
-var __iconData$45 = {
-	name: "monitor",
-	size: 24,
-	node: [
-		["rect", {
-			width: "20",
-			height: "14",
-			x: "2",
-			y: "3",
-			rx: "2",
-			key: "48i651"
-		}],
-		["line", {
-			x1: "8",
-			x2: "16",
-			y1: "21",
-			y2: "21",
-			key: "1svkeh"
-		}],
-		["line", {
-			x1: "12",
-			x2: "12",
-			y1: "17",
-			y2: "21",
-			key: "vw1qmm"
-		}]
-	]
-};
 __iconData$45.node;
-var Monitor = createLucideIcon(__iconData$45);
+var MessageCircle = createLucideIcon(__iconData$45);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/moon.mjs
 /**
@@ -40885,66 +40847,6 @@ function OfficeManagementView({ initialSubTab = "kantor", onSubTabChange }) {
 	});
 }
 //#endregion
-//#region src/utils/webNotification.js
-/**
-* webNotification.js - W3C Web Notifications API Helper
-* Mengintegrasikan notifikasi peramban standar (Chrome/Edge) ke Windows Action Center / Desktop Notification.
-* Mendukung deteksi lingkungan (Web vs Android WebView Bridge).
-*/
-var isAndroidApp = () => {
-	return typeof window !== "undefined" && Boolean(window.AndroidBridge);
-};
-var isWebNotificationSupported = () => {
-	return typeof window !== "undefined" && "Notification" in window;
-};
-var getNotificationPermission = () => {
-	if (!isWebNotificationSupported()) return "unsupported";
-	return Notification.permission;
-};
-var requestDesktopNotificationPermission = async () => {
-	if (!isWebNotificationSupported()) return false;
-	try {
-		return await Notification.requestPermission() === "granted";
-	} catch (e) {
-		console.warn("[WebNotification] Gagal meminta izin notifikasi:", e);
-		return false;
-	}
-};
-/**
-* Menampilkan notifikasi desktop Windows / OS menggunakan Web Notifications API
-* @param {string} title - Judul notifikasi
-* @param {object} options - Opsi notifikasi (body, icon, tag, onClick, dsb)
-*/
-var showDesktopNotification = (title, options = {}) => {
-	if (isAndroidApp()) return null;
-	if (!isWebNotificationSupported()) return null;
-	if (Notification.permission !== "granted") return null;
-	try {
-		const notifOptions = {
-			body: options.body || "",
-			icon: options.icon || "/tekno-indo-logo.png",
-			badge: options.badge || "/favicon.png",
-			tag: options.tag || void 0,
-			renotify: options.renotify || false,
-			silent: false,
-			...options
-		};
-		const notification = new Notification(title, notifOptions);
-		notification.onclick = (event) => {
-			event.preventDefault();
-			try {
-				window.focus();
-			} catch (_) {}
-			if (typeof options.onClick === "function") options.onClick(notification);
-			notification.close();
-		};
-		return notification;
-	} catch (err) {
-		console.warn("[WebNotification] Gagal menampilkan notifikasi desktop:", err);
-		return null;
-	}
-};
-//#endregion
 //#region src/components/notifications/NotificationsView.jsx
 var formatCleanTitle = (title, kantor) => {
 	if (!title) return "";
@@ -40958,11 +40860,6 @@ var formatCleanMessage = (message, kantor) => {
 };
 function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 0, activeOffice = "cabang", currentUser, onItemClick, onMarkAllRead, onDismissItem, loading = false }) {
 	const panelRef = (0, import_react.useRef)(null);
-	const [desktopPerm, setDesktopPerm] = (0, import_react.useState)(() => getNotificationPermission());
-	const handleEnableDesktop = async () => {
-		const granted = await requestDesktopNotificationPermission();
-		setDesktopPerm(granted ? "granted" : "denied");
-	};
 	(0, import_react.useEffect)(() => {
 		function handleClickOutside(event) {
 			if (panelRef.current && !panelRef.current.contains(event.target)) {
@@ -41006,148 +40903,130 @@ function NotificationsView({ isOpen, onClose, notifications = [], unreadCount = 
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		ref: panelRef,
 		className: "fixed top-14 sm:top-16 right-3 sm:right-6 w-[calc(100vw-24px)] sm:w-[410px] max-h-[80vh] sm:max-h-[82vh] bg-white rounded-xl border border-[#CCDDF0] shadow-2xl z-[99999] flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 font-sans",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "p-3.5 sm:p-4 border-b border-[#CCDDF0] flex items-center justify-between bg-[#F1F6FC]",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2.5",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "p-1.5 rounded-lg bg-[#026AA7] text-white shadow-2xs",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1.5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-sm font-bold text-[#0B2545] leading-tight",
-							children: "Pusat Notifikasi"
-						}), unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "font-mono text-xs font-bold text-[#026AA7]",
-							children: [
-								"(",
-								unreadCount,
-								")"
-							]
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-[11px] font-medium text-[#3B5B78] mt-0.5",
-						children: currentUser?.role === "super admin" ? `Kantor Aktif: ${activeOffice?.toUpperCase() || "SEMUA"}` : `Kantor: ${activeOffice?.toUpperCase() || "-"}`
-					})] })]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "p-3.5 sm:p-4 border-b border-[#CCDDF0] flex items-center justify-between bg-[#F1F6FC]",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-2.5",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "p-1.5 rounded-lg bg-[#026AA7] text-white shadow-2xs",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4" })
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-1.5",
-					children: [notifications.length > 0 && onMarkAllRead && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "button",
-						onClick: onMarkAllRead,
-						className: "px-2.5 py-1 rounded-lg text-[#026AA7] hover:bg-[#E2EDF8] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-[#CCDDF0] bg-white",
-						title: "Tandai semua sudah dibaca",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tandai Baca" })]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						type: "button",
-						onClick: onClose,
-						className: "p-1.5 rounded-lg text-[#64839E] hover:text-[#0B2545] hover:bg-[#E2EDF8] transition cursor-pointer",
-						"aria-label": "Tutup panel notifikasi",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
-					})]
-				})]
-			}),
-			isWebNotificationSupported() && desktopPerm !== "granted" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "px-3.5 py-2 bg-sky-50/90 border-b border-sky-100 flex items-center justify-between gap-2 shrink-0",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2 text-xs text-sky-900 min-w-0",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Monitor, { className: "w-3.5 h-3.5 text-sky-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "truncate text-[11px] font-medium",
-						children: "Aktifkan notifikasi desktop Windows (Chrome)"
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					type: "button",
-					onClick: handleEnableDesktop,
-					className: "px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-[10px] shrink-0 transition cursor-pointer shadow-2xs",
-					children: "Izinkan"
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "overflow-y-auto divide-y divide-[#CCDDF0]/60 flex-1 p-1 max-h-[calc(85vh-110px)] bg-white",
-				children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "p-2 space-y-2 animate-pulse",
-					children: [...Array(4)].map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "p-3 rounded-lg border border-[#CCDDF0]/60 bg-white flex items-start gap-3",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 rounded-lg bg-slate-200 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex-1 min-w-0 space-y-1.5",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex justify-between items-center",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-24 h-3.5 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-14 h-3 bg-slate-100 rounded" })]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-48 h-3.5 bg-slate-200 rounded" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-32 h-2.5 bg-slate-100 rounded" })
-							]
-						})]
-					}, i))
-				}) : notifications.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-8 text-center",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-12 h-12 rounded-xl bg-[#F1F6FC] border border-[#CCDDF0] text-[#64839E] flex items-center justify-center mx-auto mb-3",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-6 h-6 stroke-[1.5]" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-							className: "text-xs font-bold text-[#0B2545] mb-1",
-							children: "Tidak Ada Notifikasi Baru"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-[11px] text-[#64839E] max-w-[240px] mx-auto",
-							children: "Seluruh modem dan tiket keluhan dalam kondisi aman atau sudah Anda tangani."
-						})
-					]
-				}) : notifications.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "p-3 sm:p-3.5 hover:bg-[#F1F6FC] transition rounded-lg flex items-start gap-3 group relative cursor-pointer",
-					onClick: () => onItemClick && onItemClick(item),
-					children: [getIconForType(item), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex-1 min-w-0",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-sm font-bold text-[#0B2545] leading-tight",
+						children: "Pusat Notifikasi"
+					}), unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "font-mono text-xs font-bold text-[#026AA7]",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-between gap-1.5 mb-1 text-[11px] font-mono",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1.5 flex-wrap truncate",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: `font-bold uppercase tracking-wider ${getStatusTextClass(item)}`,
-										children: item.badge || "INFO"
-									}), item.kantor && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[#CCDDF0] font-normal",
-										children: "•"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-semibold text-[#3B5B78] uppercase",
-										children: item.kantor
-									})] })]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-[10px] font-medium text-[#64839E] shrink-0 flex items-center gap-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-[#64839E]" }), item.time || "Baru"]
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-								className: "text-xs font-bold text-[#0B2545] group-hover:text-[#026AA7] transition truncate leading-snug",
-								children: formatCleanTitle(item.title, item.kantor)
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[11px] text-[#3B5B78] line-clamp-2 leading-relaxed mt-0.5",
-								children: formatCleanMessage(item.message, item.kantor)
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "mt-2 flex items-center justify-between text-[10px] font-bold",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-[#026AA7] flex items-center gap-0.5 group-hover:translate-x-0.5 transition",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.target_tab === "tiket" ? "Buka Tiket" : item.target_tab === "pelanggan" ? "Buka Data Pelanggan" : item.target_tab === "logs" ? "Cek Riwayat Redaman" : "Lihat Detail" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3 h-3" })]
-								}), item.level === "critical" || item.level === "los" || item.is_critical || item.status_koneksi === "LOS" || item.id?.startsWith("batch_los") || item.id?.startsWith("batch_critical") ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[10px] font-bold text-rose-600",
-									children: "Perlu Tindakan"
-								}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[10px] font-medium text-[#64839E]",
-									children: "Info"
-								})]
-							})
+							"(",
+							unreadCount,
+							")"
 						]
 					})]
-				}, item.id))
-			})
-		]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-[11px] font-medium text-[#3B5B78] mt-0.5",
+					children: currentUser?.role === "super admin" ? `Kantor Aktif: ${activeOffice?.toUpperCase() || "SEMUA"}` : `Kantor: ${activeOffice?.toUpperCase() || "-"}`
+				})] })]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-1.5",
+				children: [notifications.length > 0 && onMarkAllRead && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
+					onClick: onMarkAllRead,
+					className: "px-2.5 py-1 rounded-lg text-[#026AA7] hover:bg-[#E2EDF8] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-[#CCDDF0] bg-white",
+					title: "Tandai semua sudah dibaca",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tandai Baca" })]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					onClick: onClose,
+					className: "p-1.5 rounded-lg text-[#64839E] hover:text-[#0B2545] hover:bg-[#E2EDF8] transition cursor-pointer",
+					"aria-label": "Tutup panel notifikasi",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
+				})]
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "overflow-y-auto divide-y divide-[#CCDDF0]/60 flex-1 p-1 max-h-[calc(85vh-110px)] bg-white",
+			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "p-2 space-y-2 animate-pulse",
+				children: [...Array(4)].map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "p-3 rounded-lg border border-[#CCDDF0]/60 bg-white flex items-start gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 rounded-lg bg-slate-200 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 min-w-0 space-y-1.5",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex justify-between items-center",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-24 h-3.5 bg-slate-200 rounded" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-14 h-3 bg-slate-100 rounded" })]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-48 h-3.5 bg-slate-200 rounded" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-32 h-2.5 bg-slate-100 rounded" })
+						]
+					})]
+				}, i))
+			}) : notifications.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "p-8 text-center",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "w-12 h-12 rounded-xl bg-[#F1F6FC] border border-[#CCDDF0] text-[#64839E] flex items-center justify-center mx-auto mb-3",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-6 h-6 stroke-[1.5]" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+						className: "text-xs font-bold text-[#0B2545] mb-1",
+						children: "Tidak Ada Notifikasi Baru"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-[11px] text-[#64839E] max-w-[240px] mx-auto",
+						children: "Seluruh modem dan tiket keluhan dalam kondisi aman atau sudah Anda tangani."
+					})
+				]
+			}) : notifications.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "p-3 sm:p-3.5 hover:bg-[#F1F6FC] transition rounded-lg flex items-start gap-3 group relative cursor-pointer",
+				onClick: () => onItemClick && onItemClick(item),
+				children: [getIconForType(item), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex-1 min-w-0",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between gap-1.5 mb-1 text-[11px] font-mono",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1.5 flex-wrap truncate",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: `font-bold uppercase tracking-wider ${getStatusTextClass(item)}`,
+									children: item.badge || "INFO"
+								}), item.kantor && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[#CCDDF0] font-normal",
+									children: "•"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-semibold text-[#3B5B78] uppercase",
+									children: item.kantor
+								})] })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "text-[10px] font-medium text-[#64839E] shrink-0 flex items-center gap-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-[#64839E]" }), item.time || "Baru"]
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+							className: "text-xs font-bold text-[#0B2545] group-hover:text-[#026AA7] transition truncate leading-snug",
+							children: formatCleanTitle(item.title, item.kantor)
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[11px] text-[#3B5B78] line-clamp-2 leading-relaxed mt-0.5",
+							children: formatCleanMessage(item.message, item.kantor)
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-2 flex items-center justify-between text-[10px] font-bold",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "text-[#026AA7] flex items-center gap-0.5 group-hover:translate-x-0.5 transition",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.target_tab === "tiket" ? "Buka Tiket" : item.target_tab === "pelanggan" ? "Buka Data Pelanggan" : item.target_tab === "logs" ? "Cek Riwayat Redaman" : "Lihat Detail" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3 h-3" })]
+							}), item.level === "critical" || item.level === "los" || item.is_critical || item.status_koneksi === "LOS" || item.id?.startsWith("batch_los") || item.id?.startsWith("batch_critical") ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[10px] font-bold text-rose-600",
+								children: "Perlu Tindakan"
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[10px] font-medium text-[#64839E]",
+								children: "Info"
+							})]
+						})
+					]
+				})]
+			}, item.id))
+		})]
 	})] }), document.body);
 }
 //#endregion
@@ -43598,11 +43477,6 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 	});
 	const [notifToDelete, setNotifToDelete] = (0, import_react.useState)(null);
 	const [showClearAllModal, setShowClearAllModal] = (0, import_react.useState)(false);
-	const [desktopPerm, setDesktopPerm] = (0, import_react.useState)(() => getNotificationPermission());
-	const handleEnableDesktop = async () => {
-		const granted = await requestDesktopNotificationPermission();
-		setDesktopPerm(granted ? "granted" : "denied");
-	};
 	(0, import_react.useEffect)(() => {
 		if (!notifToDelete && !showClearAllModal) return;
 		const handleKeyDown = (e) => {
@@ -43974,32 +43848,9 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 				className: "scroll-area -mt-18 flex-1 overflow-y-auto relative z-10",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "px-3.5 pb-24 space-y-3",
-					children: [isWebNotificationSupported() && desktopPerm !== "granted" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "p-3 bg-white/95 backdrop-blur-xs rounded-xl border border-sky-200/80 shadow-xs flex items-center justify-between gap-2.5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2.5 text-xs text-sky-950 min-w-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-8 h-8 rounded-lg bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center shrink-0",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Monitor, { className: "w-4 h-4" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "min-w-0",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-bold text-xs text-slate-800 leading-tight",
-									children: "Notifikasi Desktop Windows"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-[11px] text-slate-500 truncate",
-									children: "Aktifkan pemberitahuan instan di Windows / Chrome"
-								})]
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							type: "button",
-							onClick: handleEnableDesktop,
-							className: "px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shrink-0 transition cursor-pointer shadow-xs active:scale-95",
-							children: "Izinkan"
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2",
@@ -44087,7 +43938,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 								}, item.id);
 							})
 						})]
-					})]
+					})
 				})
 			}),
 			notifToDelete && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -49422,6 +49273,80 @@ function PortalLegalPage({ initialTab = "privasi", onBack }) {
 	});
 }
 //#endregion
+//#region src/utils/webNotification.js
+/**
+* webNotification.js - W3C Web Notifications API Helper
+* Mengintegrasikan notifikasi peramban standar (Chrome/Edge) ke Windows Action Center / Desktop Notification.
+* Mendukung deteksi lingkungan (Web vs Android WebView Bridge).
+*/
+var isAndroidApp = () => {
+	return typeof window !== "undefined" && Boolean(window.AndroidBridge);
+};
+var isWebNotificationSupported = () => {
+	return typeof window !== "undefined" && "Notification" in window;
+};
+/**
+* Menampilkan notifikasi desktop Windows / OS menggunakan Web Notifications API
+* @param {string} title - Judul notifikasi
+* @param {object} options - Opsi notifikasi (body, icon, tag, onClick, dsb)
+*/
+var showDesktopNotification = (title, options = {}) => {
+	if (isAndroidApp()) return null;
+	if (!isWebNotificationSupported()) return null;
+	if (Notification.permission !== "granted") return null;
+	try {
+		const notifOptions = {
+			body: options.body || "",
+			icon: options.icon || "/tekno-indo-logo.png",
+			badge: options.badge || "/favicon.png",
+			tag: options.tag || void 0,
+			renotify: options.renotify || false,
+			silent: false,
+			...options
+		};
+		const notification = new Notification(title, notifOptions);
+		notification.onclick = (event) => {
+			event.preventDefault();
+			try {
+				window.focus();
+			} catch (_) {}
+			if (typeof options.onClick === "function") options.onClick(notification);
+			notification.close();
+		};
+		return notification;
+	} catch (err) {
+		console.warn("[WebNotification] Gagal menampilkan notifikasi desktop:", err);
+		return null;
+	}
+};
+/**
+* Meminta izin notifikasi browser secara otomatis langsung ke dialog asli peramban
+* (Google Chrome, Mozilla Firefox, Safari, Microsoft Edge) tanpa banner UI tambahan.
+*/
+var autoRequestDesktopNotificationPermission = () => {
+	if (isAndroidApp() || !isWebNotificationSupported()) return;
+	if (Notification.permission !== "default") return;
+	const triggerPrompt = async () => {
+		if (Notification.permission !== "default") return;
+		try {
+			if (await Notification.requestPermission() === "granted") showDesktopNotification("TeknoGuard Desktop Alert", {
+				body: "Notifikasi desktop aktif! Anda akan menerima peringatan redaman kritis & tiket kendala langsung di Windows.",
+				tag: "tekno-welcome-notif"
+			});
+		} catch (err) {
+			console.warn("[WebNotification] Request permission error:", err);
+		}
+	};
+	try {
+		triggerPrompt();
+	} catch (_) {}
+	const handleInteraction = () => {
+		triggerPrompt();
+	};
+	window.addEventListener("pointerdown", handleInteraction, { once: true });
+	window.addEventListener("keydown", handleInteraction, { once: true });
+};
+//#endregion
 //#region src/portal/PortalCustomerApp.jsx
 function PortalCustomerApp() {
 	const [isAuthenticated, setIsAuthenticated] = (0, import_react.useState)(false);
@@ -49480,6 +49405,9 @@ function PortalCustomerApp() {
 		message: "",
 		title: ""
 	});
+	(0, import_react.useEffect)(() => {
+		if (isAuthenticated) autoRequestDesktopNotificationPermission();
+	}, [isAuthenticated]);
 	const switchTab = (tab, updateUrl = true) => {
 		setActiveTab(tab);
 		if (tab && tab !== "404_not_found") try {
@@ -50026,15 +49954,9 @@ function App() {
 			if (newSubTab) localStorage.setItem("edtekno_settings_subtab", newSubTab);
 		} catch (_) {}
 	};
-	const [desktopPerm, setDesktopPerm] = (0, import_react.useState)(() => getNotificationPermission());
-	const handleEnableDesktopNotification = async () => {
-		const granted = await requestDesktopNotificationPermission();
-		setDesktopPerm(granted ? "granted" : "denied");
-		if (granted) showDesktopNotification("TeknoGuard NOC Alert", {
-			body: "Notifikasi desktop Windows aktif! Peringatan modem LOS & redaman kritis akan muncul langsung di layar desktop.",
-			tag: "tekno-welcome-notif"
-		});
-	};
+	(0, import_react.useEffect)(() => {
+		if (isAuthenticated) autoRequestDesktopNotificationPermission();
+	}, [isAuthenticated]);
 	const [settingsLoading, setSettingsLoading] = (0, import_react.useState)(false);
 	const [settingsSaveSuccess, setSettingsSaveSuccess] = (0, import_react.useState)(false);
 	const [settingsSaveError, setSettingsSaveError] = (0, import_react.useState)("");
@@ -50628,39 +50550,6 @@ function App() {
 						handleLogout: () => setLogoutModalOpen(true),
 						isLiveScanning,
 						liveScanProgress
-					}),
-					isWebNotificationSupported() && desktopPerm === "default" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "mx-4 sm:mx-6 mt-4 p-3 bg-white/95 border border-sky-200 rounded-xl shadow-xs flex items-center justify-between gap-3 text-slate-800",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2.5 min-w-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-8 h-8 rounded-lg bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center shrink-0",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Monitor, { className: "w-4 h-4" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "min-w-0 text-xs",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "font-bold text-slate-900 block leading-tight",
-									children: "Aktifkan Notifikasi Desktop Windows"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-slate-500 text-[11px] truncate block mt-0.5",
-									children: "Dapatkan peringatan instan saat terjadi redaman kritis, modem LOS, atau tiket kendala."
-								})]
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2 shrink-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "button",
-								onClick: handleEnableDesktopNotification,
-								className: "px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition cursor-pointer shadow-xs active:scale-95",
-								children: "Aktifkan"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "button",
-								onClick: () => setDesktopPerm("dismissed"),
-								className: "p-1 text-slate-400 hover:text-slate-600 rounded-lg transition cursor-pointer",
-								title: "Nanti saja",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
-							})]
-						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
 						className: "p-4 sm:p-6 flex-1",

@@ -12,15 +12,8 @@ import {
   Info, 
   ChevronRight, 
   Clock, 
-  Building2,
-  Monitor,
-  ShieldCheck
+  Building2
 } from 'lucide-react';
-import {
-  isWebNotificationSupported,
-  getNotificationPermission,
-  requestDesktopNotificationPermission
-} from '../../utils/webNotification';
 
 // Pembersihan defensif untuk mencegah duplikasi nama kantor di judul atau pesan
 const formatCleanTitle = (title, kantor) => {
@@ -52,12 +45,6 @@ export function NotificationsView({
   loading = false
 }) {
   const panelRef = useRef(null);
-  const [desktopPerm, setDesktopPerm] = useState(() => getNotificationPermission());
-
-  const handleEnableDesktop = async () => {
-    const granted = await requestDesktopNotificationPermission();
-    setDesktopPerm(granted ? 'granted' : 'denied');
-  };
 
   // Close when clicking outside or pressing Escape
   useEffect(() => {
@@ -194,23 +181,6 @@ export function NotificationsView({
             </button>
           </div>
         </div>
-
-        {/* Banner Notifikasi Desktop Windows */}
-        {isWebNotificationSupported() && desktopPerm !== 'granted' && (
-          <div className="px-3.5 py-2 bg-sky-50/90 border-b border-sky-100 flex items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-2 text-xs text-sky-900 min-w-0">
-              <Monitor className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              <span className="truncate text-[11px] font-medium">Aktifkan notifikasi desktop Windows (Chrome)</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleEnableDesktop}
-              className="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-[10px] shrink-0 transition cursor-pointer shadow-2xs"
-            >
-              Izinkan
-            </button>
-          </div>
-        )}
 
         {/* Konten Notifikasi (List) */}
         <div className="overflow-y-auto divide-y divide-[#CCDDF0]/60 flex-1 p-1 max-h-[calc(85vh-110px)] bg-white">

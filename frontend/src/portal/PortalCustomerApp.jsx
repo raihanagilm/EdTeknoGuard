@@ -24,7 +24,7 @@ import { PortalSemanticSkeleton } from './components/common/PortalSemanticSkelet
 import { PortalToastNotification } from './components/common/PortalToastNotification';
 import { PortalLegalPage } from './components/legal/PortalLegalPage';
 import { checkHasUnreadNotifications } from './utils/notificationUtils';
-import { showDesktopNotification } from '../utils/webNotification';
+import { showDesktopNotification, autoRequestDesktopNotificationPermission } from '../utils/webNotification';
 import { RefreshCw } from 'lucide-react';
 
 export function PortalCustomerApp() {
@@ -63,6 +63,13 @@ export function PortalCustomerApp() {
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [paymentSubTab, setPaymentSubTab] = useState('tagihan');
   const [gpsToast, setGpsToast] = useState({ show: false, message: '', title: '' });
+
+  // Minta izin notifikasi desktop langsung ke peramban secara otomatis
+  useEffect(() => {
+    if (isAuthenticated) {
+      autoRequestDesktopNotificationPermission();
+    }
+  }, [isAuthenticated]);
 
   const switchTab = (tab, updateUrl = true) => {
     setActiveTab(tab);

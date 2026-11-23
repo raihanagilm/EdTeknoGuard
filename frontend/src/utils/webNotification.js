@@ -71,3 +71,39 @@ export const showDesktopNotification = (title, options = {}) => {
     return null;
   }
 };
+
+/**
+ * Meminta izin notifikasi browser secara otomatis langsung ke dialog asli peramban
+ * (Google Chrome, Mozilla Firefox, Safari, Microsoft Edge) tanpa banner UI tambahan.
+ */
+export const autoRequestDesktopNotificationPermission = () => {
+  if (isAndroidApp() || !isWebNotificationSupported()) return;
+  if (Notification.permission !== 'default') return;
+
+  const triggerPrompt = async () => {
+    if (Notification.permission !== 'default') return;
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        showDesktopNotification('TeknoGuard Desktop Alert', {
+          body: 'Notifikasi desktop aktif! Anda akan menerima peringatan redaman kritis & tiket kendala langsung di Windows.',
+          tag: 'tekno-welcome-notif'
+        });
+      }
+    } catch (err) {
+      console.warn('[WebNotification] Request permission error:', err);
+    }
+  };
+
+  // 1. Panggil langsung (berhasil langsung di Firefox, Chrome desktop)
+  try {
+    triggerPrompt();
+  } catch (_) {}
+
+  // 2. Fallback untuk browser yang mewajibkan interaksi pengguna (Safari & strict Chrome)
+  const handleInteraction = () => {
+    triggerPrompt();
+  };
+  window.addEventListener('pointerdown', handleInteraction, { once: true });
+  window.addEventListener('keydown', handleInteraction, { once: true });
+};

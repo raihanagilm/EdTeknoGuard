@@ -8,16 +8,10 @@ import {
   CheckCircle2,
   CheckCheck,
   ReceiptText,
-  RefreshCw,
-  Monitor
+  RefreshCw
 } from 'lucide-react';
 import { PortalKendalaService, PortalPembayaranService } from '../../services/portalApi';
 import { rupiah, periodeTeks } from '../payment/paymentUtils';
-import {
-  isWebNotificationSupported,
-  getNotificationPermission,
-  requestDesktopNotificationPermission
-} from '../../../utils/webNotification';
 
 function NotificationCardItem({ item, isRead, onClick, onDelete }) {
   const getStatusColor = () => {
@@ -158,12 +152,6 @@ export function PortalNotificationsPage({
 
   const [notifToDelete, setNotifToDelete] = useState(null);
   const [showClearAllModal, setShowClearAllModal] = useState(false);
-  const [desktopPerm, setDesktopPerm] = useState(() => getNotificationPermission());
-
-  const handleEnableDesktop = async () => {
-    const granted = await requestDesktopNotificationPermission();
-    setDesktopPerm(granted ? 'granted' : 'denied');
-  };
 
   useEffect(() => {
     if (!notifToDelete && !showClearAllModal) return;
@@ -484,28 +472,6 @@ export function PortalNotificationsPage({
       {/* ═══ KONTEN DENGAN SCROLL-AREA & NEGATIVE MARGIN (-mt-18) PERSIS TAB LAIN ═══ */}
       <main className="scroll-area -mt-18 flex-1 overflow-y-auto relative z-10">
         <div className="px-3.5 pb-24 space-y-3">
-          {/* Banner Notifikasi Desktop Windows jika diakses via Browser Web PC */}
-          {isWebNotificationSupported() && desktopPerm !== 'granted' && (
-            <div className="p-3 bg-white/95 backdrop-blur-xs rounded-xl border border-sky-200/80 shadow-xs flex items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2.5 text-xs text-sky-950 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center shrink-0">
-                  <Monitor className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-xs text-slate-800 leading-tight">Notifikasi Desktop Windows</p>
-                  <p className="text-[11px] text-slate-500 truncate">Aktifkan pemberitahuan instan di Windows / Chrome</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleEnableDesktop}
-                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shrink-0 transition cursor-pointer shadow-xs active:scale-95"
-              >
-                Izinkan
-              </button>
-            </div>
-          )}
-
           {/* Card Utama Pembungkus List (Sesuai Styling Kartu Menu Lain) */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
             {/* Action & Filter Bar dengan Ikon Semantik */}
