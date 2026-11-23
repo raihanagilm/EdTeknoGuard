@@ -256,6 +256,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                       id="identifier"
                       type="tel"
                       required
+                      autoComplete="tel"
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                       placeholder="Contoh: 081234567890"
@@ -284,6 +285,7 @@ export function PortalLoginView({ onLoginSuccess, onGoToReset }) {
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       required
+                      autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"

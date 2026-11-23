@@ -386,6 +386,7 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
                           required
                           disabled={!currentWifi.is_connected_to_home_wifi}
                           minLength={8}
+                          autoComplete="new-password"
                           value={passwordWifi}
                           onChange={(e) => setPasswordWifi(e.target.value)}
                           placeholder="Minimal 8 karakter kombinasi"
@@ -411,6 +412,7 @@ export function PortalWifiTab({ customer, dashboardData, onOpenNotifications , h
                           required
                           disabled={!currentWifi.is_connected_to_home_wifi}
                           minLength={8}
+                          autoComplete="new-password"
                           value={konfirmasiPassword}
                           onChange={(e) => setKonfirmasiPassword(e.target.value)}
                           placeholder="Ketik ulang kata sandi baru"

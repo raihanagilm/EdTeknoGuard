@@ -65,6 +65,21 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
     }
   }, [customer]);
 
+  useEffect(() => {
+    if (!isEditModalOpen && !isLogoutConfirmOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (isEditModalOpen && !profileSaving) setIsEditModalOpen(false);
+        if (isLogoutConfirmOpen) setIsLogoutConfirmOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditModalOpen, isLogoutConfirmOpen, profileSaving]);
+
   /**
    * Mengompresi file gambar dari HP menjadi WebP maksimal 400x400 px, kualitas 80%
    */
@@ -582,18 +597,23 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
       {/* ═══ MODAL POPUP EDIT DATA DIRI (NAMA, NO WA, ALAMAT) ═══ */}
       {isEditModalOpen && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn"
           onClick={(e) => {
             if (e.target === e.currentTarget && !profileSaving) setIsEditModalOpen(false);
           }}
         >
-          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-scaleUp">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="portal-profile-edit-title"
+            className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-scaleUp"
+          >
             <div className="p-4 pb-3 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                   <Pencil className="w-4 h-4" />
                 </div>
-                <h3 className="text-sm font-black text-gray-900">Ubah Data Diri</h3>
+                <h3 id="portal-profile-edit-title" className="text-sm font-black text-gray-900">Ubah Data Diri</h3>
               </div>
               <button
                 type="button"
@@ -673,10 +693,10 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
         document.body
       )}
 
-      {/* ═══ MODAL KONFIRMASI LOGOUT DENGAN MASKOT SEDIH (PORTAL BODY Z-9999) ═══ */}
+      {/* ═══ MODAL KONFIRMASI LOGOUT DENGAN MASKOT SEDIH (PORTAL BODY Z-50) ═══ */}
       {isLogoutConfirmOpen && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn"
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsLogoutConfirmOpen(false);
           }}
@@ -684,6 +704,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
           <div
             role="dialog"
             aria-modal="true"
+            aria-labelledby="portal-profile-logout-title"
             className="w-full max-w-xs sm:max-w-sm bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden p-5 space-y-4 animate-scaleUp text-center"
           >
             {/* Maskot Router Sedih */}
@@ -692,7 +713,7 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
             </div>
 
             <div className="space-y-1.5 px-2">
-              <h3 className="text-base font-black text-gray-900 leading-tight">
+              <h3 id="portal-profile-logout-title" className="text-base font-black text-gray-900 leading-tight">
                 Keluar dari Akun?
               </h3>
               <p className="text-xs text-gray-600 leading-relaxed font-medium">

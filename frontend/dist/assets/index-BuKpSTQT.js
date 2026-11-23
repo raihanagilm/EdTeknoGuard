@@ -14745,7 +14745,6 @@ var import_jsx_runtime = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 * ConfirmDialogModal - Komponen pop-up konfirmasi kustom profesional (60-30-10 Light Architecture)
 */
 function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Tindakan", message = "Apakah Anda yakin ingin melanjutkan tindakan ini?", confirmText = "Ya, Lanjutkan", cancelText = "Batal", variant = "danger", isLoading = false, loadingText = "Memproses..." }) {
-	if (!isOpen) return null;
 	const variantConfig = {
 		danger: {
 			icon: CircleAlert,
@@ -14781,6 +14780,7 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 				e.preventDefault();
 				if (!isLoading && onClose) onClose();
 			} else if (e.key === "Enter") {
+				if (e.isComposing || e.keyCode === 229) return;
 				e.preventDefault();
 				if (!isLoading && onConfirm) onConfirm();
 			}
@@ -14793,6 +14793,7 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 		onClose,
 		onConfirm
 	]);
+	if (!isOpen) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-xs flex items-center justify-center p-4 font-sans",
 		onClick: (e) => {
@@ -14801,6 +14802,7 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			role: "dialog",
 			"aria-modal": "true",
+			"aria-labelledby": "confirm-dialog-title",
 			className: `bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border ${currentTheme.border} space-y-4 animate-in fade-in zoom-in-95 duration-150`,
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -14811,6 +14813,7 @@ function ConfirmDialogModal({ isOpen, onClose, onConfirm, title = "Konfirmasi Ti
 							className: `h-10 w-10 rounded-lg ${currentTheme.iconBg} border flex items-center justify-center shrink-0`,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconComponent, { className: "w-5 h-5" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							id: "confirm-dialog-title",
 							className: "text-sm sm:text-base font-bold text-[#0B2545] leading-snug",
 							children: title
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -30541,7 +30544,10 @@ function DataTableContainer({ children, page = 1, totalPages = 1, totalCount, to
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "bg-white rounded-xl border border-[#CCDDF0] shadow-2xs overflow-hidden",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "overflow-x-auto",
+			className: "overflow-x-auto focus:outline-none focus:ring-1 focus:ring-[#026AA7]/20",
+			role: "region",
+			tabIndex: 0,
+			"aria-label": "Tabel Data Sistem",
 			children
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "p-3 sm:p-3.5 border-t border-[#DAE7F5] flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-[#3B5B78] bg-[#F1F6FC]",
@@ -31264,10 +31270,13 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						scope: "col",
 						className: "py-2.5 px-2 w-12 text-center",
 						children: "No"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						scope: "col",
+						"aria-sort": sortField === "id" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 						className: `py-2.5 px-3 cursor-pointer select-none transition w-32 ${sortField === "id" ? "bg-cyan-100/90 text-cyan-950 font-black" : "hover:bg-cyan-100/60"}`,
 						onClick: () => handleSort("id"),
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -31283,6 +31292,8 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						scope: "col",
+						"aria-sort": sortField === "nama" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 						className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "nama" ? "bg-cyan-100/90 text-cyan-950 font-black" : "hover:bg-cyan-100/60"}`,
 						onClick: () => handleSort("nama"),
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -31298,6 +31309,12 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						scope: "col",
+						"aria-sort": [
+							"ip_router",
+							"ip_ont",
+							"jenis_modem"
+						].includes(sortField) ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 						className: `py-2.5 px-3 cursor-pointer select-none transition w-36 ${[
 							"ip_router",
 							"ip_ont",
@@ -31326,6 +31343,8 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						scope: "col",
+						"aria-sort": sortField === "status_kredensial" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 						className: `py-2.5 px-3 cursor-pointer select-none transition w-44 ${sortField === "status_kredensial" ? "bg-cyan-100/90 text-cyan-950 font-black" : "hover:bg-cyan-100/60"}`,
 						onClick: () => handleSort("status_kredensial"),
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -31341,6 +31360,8 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						scope: "col",
+						"aria-sort": sortField === "rx_power" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 						className: `py-2.5 px-3 text-right cursor-pointer select-none transition w-32 ${sortField === "rx_power" ? "bg-cyan-100/90 text-cyan-950 font-black" : "hover:bg-cyan-100/60"}`,
 						onClick: () => handleSort("rx_power"),
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -31356,6 +31377,8 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						scope: "col",
+						"aria-sort": sortField === "status_koneksi" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 						className: `py-2.5 px-3 text-center cursor-pointer select-none transition w-28 ${sortField === "status_koneksi" ? "bg-cyan-100/90 text-cyan-950 font-black" : "hover:bg-cyan-100/60"}`,
 						onClick: () => handleSort("status_koneksi"),
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -31371,6 +31394,7 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						scope: "col",
 						className: "py-2.5 px-3 text-right w-32",
 						children: "Aksi"
 					})
@@ -33043,6 +33067,7 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 				} else if (importStep === 2) setImportStep(1);
 				else if (importStep === 3) setImportStep(2);
 			} else if (e.key === "Enter") {
+				if (e.isComposing || e.keyCode === 229) return;
 				const activeEl = document.activeElement;
 				const isTyping = activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.tagName === "SELECT");
 				if (importStep === 1) {
@@ -33216,6 +33241,9 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs overflow-y-auto font-sans",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-labelledby": "customer-import-wizard-title",
 			className: `bg-white rounded-xl border border-[#CCDDF0] shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 w-full my-auto ${importStep === 3 ? "max-w-5xl" : "max-w-2xl"} p-5 sm:p-6 transition-all`,
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -33230,6 +33258,7 @@ function CustomerImportWizard({ isOpen, onClose, activeOffice = "cabang", onSucc
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+									id: "customer-import-wizard-title",
 									className: "text-base font-bold text-[#0B2545] font-sans",
 									children: "Lengkapi Data Pelanggan"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
@@ -33372,6 +33401,22 @@ function CustomerWifiModal({ isOpen, onClose, customer, onSuccess, onNotify }) {
 			setErrorMsg("");
 		}
 	}, [customer, isOpen]);
+	(0, import_react.useEffect)(() => {
+		if (!isOpen || !customer) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (!loading && onClose) onClose();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [
+		isOpen,
+		customer,
+		loading,
+		onClose
+	]);
 	if (!isOpen || !customer) return null;
 	const ipTarget = (customer.ip_ont || customer.ip_router || "").trim();
 	const cId = customer.id_pelanggan || customer.id || "-";
@@ -33418,8 +33463,14 @@ function CustomerWifiModal({ isOpen, onClose, customer, onSuccess, onNotify }) {
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/60 backdrop-blur-2xs animate-in fade-in duration-150 font-sans",
+		className: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/60 backdrop-blur-2xs animate-in fade-in duration-150 font-sans",
+		onClick: (e) => {
+			if (e.target === e.currentTarget && !loading && onClose) onClose();
+		},
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-labelledby": "customer-wifi-modal-title",
 			className: "bg-white rounded-xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 max-h-[92vh] flex flex-col",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-between border-b border-[#CCDDF0] pb-3 shrink-0",
@@ -33431,6 +33482,7 @@ function CustomerWifiModal({ isOpen, onClose, customer, onSuccess, onNotify }) {
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "min-w-0",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							id: "customer-wifi-modal-title",
 							className: "text-sm sm:text-base font-bold text-[#0B2545] truncate",
 							children: "Ubah WiFi Pelanggan"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
@@ -33450,7 +33502,7 @@ function CustomerWifiModal({ isOpen, onClose, customer, onSuccess, onNotify }) {
 					onClick: onClose,
 					disabled: loading,
 					className: "p-1.5 rounded-lg hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#0B2545] transition shrink-0 cursor-pointer disabled:opacity-50",
-					title: "Tutup Modal",
+					title: "Tutup Modal (Esc)",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
@@ -33487,6 +33539,7 @@ function CustomerWifiModal({ isOpen, onClose, customer, onSuccess, onNotify }) {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							type: "text",
 							required: true,
+							minLength: 3,
 							disabled: loading,
 							value: namaWifi,
 							onChange: (e) => setNamaWifi(e.target.value),
@@ -33508,6 +33561,8 @@ function CustomerWifiModal({ isOpen, onClose, customer, onSuccess, onNotify }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: showPassword ? "text" : "password",
 								required: true,
+								minLength: 8,
+								autoComplete: "new-password",
 								disabled: loading,
 								value: passwordWifi,
 								onChange: (e) => setPasswordWifi(e.target.value),
@@ -33586,6 +33641,17 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 	(0, import_react.useEffect)(() => {
 		setCurrentCustomer(customer);
 	}, [customer]);
+	(0, import_react.useEffect)(() => {
+		if (!customer) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (onClose) onClose();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [customer, onClose]);
 	const activeCust = currentCustomer || customer;
 	const cId = activeCust?.id_pelanggan || activeCust?.id || "";
 	const isMonitored = Boolean(activeCust?.is_monitored !== false);
@@ -33737,7 +33803,13 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans",
+		onClick: (e) => {
+			if (e.target === e.currentTarget && onClose) onClose();
+		},
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-labelledby": "customer-detail-modal-title",
 			className: "bg-white rounded-xl max-w-xl sm:max-w-2xl w-full p-3 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-3 sm:space-y-4 max-h-[92vh] flex flex-col",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -33750,6 +33822,7 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "min-w-0",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "customer-detail-modal-title",
 								className: "text-sm sm:text-base font-bold text-[#0B2545] truncate",
 								children: customer.nama || customer.name
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
@@ -33772,7 +33845,7 @@ function CustomerDetailModal({ customer, onClose, activeOffice = "cabang", onOpe
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onClose,
 						className: "p-1.5 rounded-lg hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#0B2545] transition shrink-0 cursor-pointer",
-						title: "Tutup Modal",
+						title: "Tutup Modal (Esc)",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 					})]
 				}),
@@ -34348,6 +34421,18 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 		return null;
 	});
 	const [probeResult, setProbeResult] = (0, import_react.useState)(null);
+	(0, import_react.useEffect)(() => {
+		if (!modalOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				setModalOpen(false);
+				if (returnToDetailCustomer) setDetailCustomer(returnToDetailCustomer);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [modalOpen, returnToDetailCustomer]);
 	(0, import_react.useEffect)(() => {
 		if (!probingId) return;
 		const saved = sessionStorage.getItem("tekno_active_probing");
@@ -34968,8 +35053,18 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 			}),
 			modalOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs",
+				onClick: (e) => {
+					if (e.target === e.currentTarget) {
+						setModalOpen(false);
+						if (returnToDetailCustomer) setDetailCustomer(returnToDetailCustomer);
+					}
+				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "edit-customer-modal-title",
 					className: "bg-white rounded-3xl max-w-lg w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono",
+					onClick: (e) => e.stopPropagation(),
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between border-b border-sky-100 pb-2.5",
@@ -34981,13 +35076,14 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 										setModalOpen(false);
 										setDetailCustomer(returnToDetailCustomer);
 									},
-									className: "p-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 hover:text-cyan-700 text-slate-600 transition flex items-center gap-1 text-[11px] font-bold",
+									className: "p-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 hover:text-cyan-700 text-slate-600 transition flex items-center gap-1 text-[11px] font-bold cursor-pointer",
 									title: "Kembali ke Detail Pelanggan",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 										className: "hidden sm:inline",
 										children: "Detail"
 									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+									id: "edit-customer-modal-title",
 									className: "text-sm font-black text-slate-900",
 									children: ["Edit Pelanggan: ", formData.nama]
 								})]
@@ -34997,9 +35093,9 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 									setModalOpen(false);
 									if (returnToDetailCustomer) setDetailCustomer(returnToDetailCustomer);
 								},
-								className: "p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition",
-								title: "Tutup Modal",
-								children: "?"
+								className: "p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer",
+								title: "Tutup Modal (Esc)",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 							})]
 						}),
 						formError && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -35705,10 +35801,13 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 							className: "bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
 									className: "py-2.5 px-3 w-12 text-center whitespace-nowrap",
 									children: "No"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
+									"aria-sort": sortField === "waktu_cek" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 									onClick: () => handleSort("waktu_cek"),
 									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[140px]",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -35717,6 +35816,8 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
+									"aria-sort": sortField === "id_pelanggan" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 									onClick: () => handleSort("id_pelanggan"),
 									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[150px]",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -35725,6 +35826,8 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
+									"aria-sort": sortField === "nama" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 									onClick: () => handleSort("nama"),
 									className: "py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[200px]",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -35733,10 +35836,13 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
 									className: "py-2.5 px-3 whitespace-nowrap min-w-[140px]",
 									children: "IP Router ONT"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
+									"aria-sort": sortField === "rx_power" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 									onClick: () => handleSort("rx_power"),
 									className: "py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[130px]",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -35745,14 +35851,18 @@ function OpticalLogsView({ activeOffice = "cabang", warnThreshold = -26, critThr
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
 									className: "py-2.5 px-3 text-center whitespace-nowrap min-w-[80px]",
 									children: "Suhu"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
 									className: "py-2.5 px-3 text-center whitespace-nowrap min-w-[90px]",
 									children: "Latency"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+									scope: "col",
+									"aria-sort": sortField === "status_koneksi" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
 									onClick: () => handleSort("status_koneksi"),
 									className: "py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[100px]",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -35933,6 +36043,17 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 			window.removeEventListener("resize", handleCloseMenu);
 		};
 	}, [activeMenuId]);
+	(0, import_react.useEffect)(() => {
+		if (!selectedTicket) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				setSelectedTicket(null);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [selectedTicket]);
 	const handleOpenModal = (ticket) => {
 		setSelectedTicket(ticket);
 		setNewStatus(ticket.status || "MENUNGGU");
@@ -36489,11 +36610,19 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 			}),
 			selectedTicket && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs",
+				onClick: (e) => {
+					if (e.target === e.currentTarget) setSelectedTicket(null);
+				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "ticket-modal-title",
 					className: "bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono",
+					onClick: (e) => e.stopPropagation(),
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center justify-between border-b border-sky-100 pb-2.5",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							id: "ticket-modal-title",
 							className: "text-sm font-black text-slate-900",
 							children: "Kelola Status Tiket"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
@@ -36504,9 +36633,10 @@ function TicketsView({ activeOffice = "cabang", currentUser = { role: "super adm
 								selectedTicket.nama_pelanggan
 							]
 						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
 							onClick: () => setSelectedTicket(null),
-							className: "p-1 rounded-lg hover:bg-slate-100 text-slate-400 transition cursor-pointer",
-							title: "Tutup Modal",
+							className: "p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer",
+							title: "Tutup Modal (Esc)",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
@@ -37542,13 +37672,42 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 function BillingMessageModal({ isOpen, onClose, selectedCustomers = [], onSendReminders, sending = false, resultData = null, onResetResult }) {
 	const [sendFcm, setSendFcm] = (0, import_react.useState)(true);
 	const [customMsg, setCustomMsg] = (0, import_react.useState)("");
+	(0, import_react.useEffect)(() => {
+		if (!isOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (!sending) {
+					if (onResetResult) onResetResult();
+					onClose();
+				}
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [
+		isOpen,
+		sending,
+		onClose,
+		onResetResult
+	]);
 	if (!isOpen) return null;
 	const totalSum = selectedCustomers.reduce((acc, c) => acc + (c.total_tagihan || 0), 0);
 	const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString("id-ID")}`;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200",
+		onClick: (e) => {
+			if (e.target === e.currentTarget && !sending) {
+				if (onResetResult) onResetResult();
+				onClose();
+			}
+		},
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-labelledby": "billing-modal-title",
 			className: "bg-white rounded-2xl border border-[#CCDDF0] shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]",
+			onClick: (e) => e.stopPropagation(),
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-between px-5 py-3.5 bg-[#F1F6FC] border-b border-[#CCDDF0]",
@@ -37558,6 +37717,7 @@ function BillingMessageModal({ isOpen, onClose, selectedCustomers = [], onSendRe
 							className: "w-8 h-8 rounded-lg bg-[#E0F0FF] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center shrink-0",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-4 h-4" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+							id: "billing-modal-title",
 							className: "text-sm font-bold text-[#0B2545]",
 							children: "Kirim Pengingat Tagihan"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
@@ -39030,6 +39190,17 @@ function UsersView() {
 	(0, import_react.useEffect)(() => {
 		fetchUsers();
 	}, []);
+	(0, import_react.useEffect)(() => {
+		if (!modalOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				setModalOpen(false);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [modalOpen]);
 	const openAddModal = () => {
 		setModalMode("add");
 		setCurrentUserId(null);
@@ -39662,18 +39833,27 @@ function UsersView() {
 			}),
 			modalOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs",
+				onClick: (e) => {
+					if (e.target === e.currentTarget) setModalOpen(false);
+				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "user-modal-title",
 					className: "bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono",
+					onClick: (e) => e.stopPropagation(),
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between border-b border-sky-100 pb-2.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "user-modal-title",
 								className: "text-sm font-black text-slate-900",
 								children: modalMode === "add" ? "Tambah Pengguna Baru" : `Edit Pengguna: ${formUsername}`
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
 								onClick: () => setModalOpen(false),
-								className: "p-1 rounded-lg hover:bg-slate-100 text-slate-400 transition cursor-pointer",
-								title: "Tutup Modal",
+								className: "p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer",
+								title: "Tutup Modal (Esc)",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 							})]
 						}),
@@ -39691,6 +39871,7 @@ function UsersView() {
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									type: "text",
 									required: true,
+									autoComplete: "username",
 									value: formUsername,
 									onChange: (e) => setFormUsername(e.target.value),
 									disabled: modalMode === "edit",
@@ -39725,6 +39906,7 @@ function UsersView() {
 									value: formPassword,
 									onChange: (e) => setFormPassword(e.target.value),
 									placeholder: modalMode === "add" ? "Kata sandi akun..." : "••••••••",
+									autoComplete: "new-password",
 									className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
 								})] }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
@@ -39890,6 +40072,17 @@ function BranchOfficesView() {
 	(0, import_react.useEffect)(() => {
 		fetchKantors();
 	}, []);
+	(0, import_react.useEffect)(() => {
+		if (!modalKantorOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				setModalKantorOpen(false);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [modalKantorOpen]);
 	const openAddKantorModal = () => {
 		setKantorModalMode("add");
 		setCurrentKantorId(null);
@@ -40354,17 +40547,27 @@ function BranchOfficesView() {
 			}),
 			modalKantorOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto",
+				onClick: (e) => {
+					if (e.target === e.currentTarget) setModalKantorOpen(false);
+				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "office-modal-title",
 					className: "bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full border border-sky-200 shadow-2xl space-y-4 my-8",
+					onClick: (e) => e.stopPropagation(),
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between pb-3 border-b border-sky-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								id: "office-modal-title",
 								className: "text-sm sm:text-base font-black font-mono text-slate-800 flex items-center gap-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuildingComplex, { className: "w-4 h-4 text-cyan-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: kantorModalMode === "add" ? "Tambah Kantor Wilayah Baru" : `Edit Kantor: ${kantorNama}` })]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
 								onClick: () => setModalKantorOpen(false),
-								className: "p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600",
+								className: "p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer",
+								title: "Tutup Modal (Esc)",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 							})]
 						}),
@@ -41468,10 +41671,36 @@ function ErrorView({ errorCode = 404, title = "Halaman Tidak Ditemukan", descrip
 //#endregion
 //#region src/components/common/Modals.jsx
 function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval, warnThreshold, critThreshold, nightModeStart, nightModeEnd, modemCredentialsCount }) {
+	(0, import_react.useEffect)(() => {
+		if (!isOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (!saving && onClose) onClose();
+			} else if (e.key === "Enter") {
+				if (e.isComposing || e.keyCode === 229) return;
+				e.preventDefault();
+				if (!saving && onConfirm) onConfirm();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [
+		isOpen,
+		saving,
+		onClose,
+		onConfirm
+	]);
 	if (!isOpen) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-2xs flex items-center justify-center p-4 font-sans",
+		onClick: (e) => {
+			if (e.target === e.currentTarget && !saving) onClose();
+		},
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-labelledby": "confirm-save-modal-title",
 			className: "bg-white rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 animate-in fade-in zoom-in-95 duration-150",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -41482,6 +41711,7 @@ function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval,
 							className: "w-8 h-8 rounded-lg bg-[#F1F6FC] text-[#026AA7] border border-[#CCDDF0] flex items-center justify-center shrink-0",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4 text-[#026AA7]" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							id: "confirm-save-modal-title",
 							className: "text-sm sm:text-base font-bold text-[#0B2545]",
 							children: "Konfirmasi Simpan Pengaturan"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -41491,7 +41721,7 @@ function ConfirmSaveModal({ isOpen, onClose, onConfirm, saving, pollingInterval,
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onClose,
 						className: "text-[#64839E] hover:text-[#0B2545] p-1.5 rounded-lg hover:bg-[#F1F6FC] transition cursor-pointer",
-						title: "Tutup dialog",
+						title: "Tutup dialog (Esc)",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 					})]
 				}),
@@ -42025,13 +42255,27 @@ new PortalApiService();
 //#region src/portal/components/modals/PortalLegalModal.jsx
 function PortalLegalModal({ isOpen, onClose, initialTab = "privasi" }) {
 	const [activeTab, setActiveTab] = (0, import_react.useState)(initialTab);
+	(0, import_react.useEffect)(() => {
+		if (!isOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (onClose) onClose();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen, onClose]);
 	if (!isOpen) return null;
 	return typeof document !== "undefined" ? (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150 font-sans",
+		className: "fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150 font-sans",
 		onClick: (e) => {
 			if (e.target === e.currentTarget) onClose();
 		},
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-labelledby": "portal-legal-modal-title",
 			className: "w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150 max-h-[62vh] sm:max-h-[480px]",
 			onClick: (e) => e.stopPropagation(),
 			children: [
@@ -42045,6 +42289,7 @@ function PortalLegalModal({ isOpen, onClose, initialTab = "privasi" }) {
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "min-w-0",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "portal-legal-modal-title",
 								className: "text-xs font-bold text-slate-900 leading-tight truncate",
 								children: activeTab === "privasi" ? "Kebijakan Privasi & Izin" : "Syarat & Ketentuan Layanan"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -42538,6 +42783,7 @@ function PortalResetPasswordView({ onBackToLogin }) {
 											id: "reset-phone",
 											type: "tel",
 											required: true,
+											autoComplete: "tel",
 											value: noHp,
 											onChange: (e) => setNoHp(e.target.value),
 											placeholder: "Contoh: 081234567890 atau 628...",
@@ -42888,6 +43134,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 												id: "identifier",
 												type: "tel",
 												required: true,
+												autoComplete: "tel",
 												value: identifier,
 												onChange: (e) => setIdentifier(e.target.value),
 												placeholder: "Contoh: 081234567890",
@@ -42917,6 +43164,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 													id: "password",
 													type: showPassword ? "text" : "password",
 													required: true,
+													autoComplete: "current-password",
 													value: password,
 													onChange: (e) => setPassword(e.target.value),
 													placeholder: "••••••••",
@@ -43226,6 +43474,18 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 	});
 	const [notifToDelete, setNotifToDelete] = (0, import_react.useState)(null);
 	const [showClearAllModal, setShowClearAllModal] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		if (!notifToDelete && !showClearAllModal) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (notifToDelete) setNotifToDelete(null);
+				if (showClearAllModal) setShowClearAllModal(false);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [notifToDelete, showClearAllModal]);
 	const [deletedIds, setDeletedIds] = (0, import_react.useState)(() => {
 		try {
 			const saved = localStorage.getItem("teknocust_deleted_notifications");
@@ -43679,9 +43939,16 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 				})
 			}),
 			notifToDelete && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4",
+				className: "fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4",
+				onClick: (e) => {
+					if (e.target === e.currentTarget) setNotifToDelete(null);
+				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "delete-notification-title",
 					className: "max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4",
+					onClick: (e) => e.stopPropagation(),
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto",
@@ -43690,6 +43957,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "text-center space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "delete-notification-title",
 								className: "text-sm font-bold text-gray-900",
 								children: "Hapus Pemberitahuan Ini?"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
@@ -43710,7 +43978,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 								type: "button",
 								onClick: () => setNotifToDelete(null),
 								className: "flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition cursor-pointer",
-								children: "Tidak"
+								children: "Tidak (Esc)"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
 								onClick: handleConfirmDelete,
@@ -43722,9 +43990,16 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 				})
 			}),
 			showClearAllModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4",
+				className: "fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4",
+				onClick: (e) => {
+					if (e.target === e.currentTarget) setShowClearAllModal(false);
+				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "clear-all-notifications-title",
 					className: "max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4",
+					onClick: (e) => e.stopPropagation(),
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto",
@@ -43733,6 +44008,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "text-center space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "clear-all-notifications-title",
 								className: "text-sm font-bold text-gray-900",
 								children: "Hapus Semua Notifikasi?"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -43746,7 +44022,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 								type: "button",
 								onClick: () => setShowClearAllModal(false),
 								className: "flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition cursor-pointer",
-								children: "Batal"
+								children: "Batal (Esc)"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
 								onClick: handleConfirmClearAll,
@@ -44140,6 +44416,17 @@ function ConnectedDevicesModal({ isOpen, onClose, devices, loading, scanning, on
 	(0, import_react.useEffect)(() => {
 		if (devices) setInternalDevices(devices);
 	}, [devices]);
+	(0, import_react.useEffect)(() => {
+		if (!isOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (onClose) onClose();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen, onClose]);
 	if (!isOpen) return null;
 	const currentList = internalDevices;
 	const onlineDevices = currentList.filter((d) => d.status === "ONLINE" && !d.is_blocked);
@@ -44203,9 +44490,12 @@ function ConnectedDevicesModal({ isOpen, onClose, devices, loading, scanning, on
 		return "Perangkat Terhubung";
 	};
 	const modalContent = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-[9999] flex items-center justify-center p-3 pb-24 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150",
+		className: "fixed inset-0 z-50 flex items-center justify-center p-3 pb-24 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150",
 		onClick: onClose,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-labelledby": "connected-devices-modal-title",
 			className: "w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150 max-h-[calc(100dvh-7.5rem)] sm:max-h-[85vh]",
 			onClick: (e) => e.stopPropagation(),
 			children: [
@@ -44219,6 +44509,7 @@ function ConnectedDevicesModal({ isOpen, onClose, devices, loading, scanning, on
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center gap-1.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "connected-devices-modal-title",
 								className: "text-sm sm:text-base font-bold text-slate-900 leading-tight truncate",
 								children: "Perangkat Terhubung"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
@@ -44578,6 +44869,17 @@ function SpeedTestModal({ isOpen, onClose, targetSpeed = 10, latencyValue = null
 	(0, import_react.useEffect)(() => {
 		if (isOpen) handleRecheckConnection();
 	}, [isOpen]);
+	(0, import_react.useEffect)(() => {
+		if (!isOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (onClose) onClose();
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen, onClose]);
 	const abortControllerRef = (0, import_react.useRef)(null);
 	const isMountedRef = (0, import_react.useRef)(true);
 	const targetSpeedRef = (0, import_react.useRef)(0);
@@ -44941,9 +45243,12 @@ function SpeedTestModal({ isOpen, onClose, targetSpeed = 10, latencyValue = null
 		};
 	};
 	const modalContent = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150",
+		className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150",
 		onClick: onClose,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "dialog",
+			"aria-modal": "true",
+			"aria-labelledby": "speed-test-modal-title",
 			className: "w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150",
 			onClick: (e) => e.stopPropagation(),
 			children: [
@@ -44955,6 +45260,7 @@ function SpeedTestModal({ isOpen, onClose, targetSpeed = 10, latencyValue = null
 							className: "w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Gauge, { className: "w-4 h-4 text-white" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							id: "speed-test-modal-title",
 							className: "text-sm font-bold tracking-tight text-white block leading-tight",
 							children: "Uji Kecepatan Modem ONT"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -45880,6 +46186,22 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 	(0, import_react.useEffect)(() => {
 		fetchTickets();
 	}, []);
+	(0, import_react.useEffect)(() => {
+		if (!ticketToDelete && !showCreateModal) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (ticketToDelete) setTicketToDelete(null);
+				if (showCreateModal && !submitting) setShowCreateModal(false);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [
+		ticketToDelete,
+		showCreateModal,
+		submitting
+	]);
 	const handleCreateTicket = async (e) => {
 		e.preventDefault();
 		setSubmitting(true);
@@ -46115,9 +46437,16 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 				})
 			}),
 			ticketToDelete && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4",
+				className: "fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4",
+				onClick: (e) => {
+					if (e.target === e.currentTarget && !deletingId) setTicketToDelete(null);
+				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "delete-ticket-title",
 					className: "max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4",
+					onClick: (e) => e.stopPropagation(),
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto",
@@ -46126,6 +46455,7 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "text-center space-y-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "delete-ticket-title",
 								className: "text-sm font-bold text-gray-900",
 								children: "Hapus Laporan Gangguan?"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
@@ -46148,7 +46478,7 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 								type: "button",
 								onClick: () => setTicketToDelete(null),
 								className: "flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition cursor-pointer",
-								children: "Batal"
+								children: "Batal (Esc)"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
 								onClick: () => handleDeleteTicket(ticketToDelete.id_tiket),
@@ -46161,9 +46491,16 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 				})
 			}),
 			showCreateModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4",
+				className: "fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4",
+				onClick: (e) => {
+					if (e.target === e.currentTarget && !submitting) setShowCreateModal(false);
+				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "create-ticket-title",
 					className: "max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4",
+					onClick: (e) => e.stopPropagation(),
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center justify-between pb-2 border-b border-gray-100",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -46172,13 +46509,14 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 								className: "w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-4 h-4 stroke-[2.5]" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "create-ticket-title",
 								className: "text-sm font-black text-gray-900",
 								children: "Formulir Lapor Gangguan"
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: () => setShowCreateModal(false),
 							className: "text-gray-400 hover:text-gray-600 p-1 transition cursor-pointer",
-							title: "Tutup Modal",
+							title: "Tutup Modal (Esc)",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
@@ -46631,6 +46969,7 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 														required: true,
 														disabled: !currentWifi.is_connected_to_home_wifi,
 														minLength: 8,
+														autoComplete: "new-password",
 														value: passwordWifi,
 														onChange: (e) => setPasswordWifi(e.target.value),
 														placeholder: "Minimal 8 karakter kombinasi",
@@ -46660,6 +46999,7 @@ function PortalWifiTab({ customer, dashboardData, onOpenNotifications, hasUnread
 														required: true,
 														disabled: !currentWifi.is_connected_to_home_wifi,
 														minLength: 8,
+														autoComplete: "new-password",
 														value: konfirmasiPassword,
 														onChange: (e) => setKonfirmasiPassword(e.target.value),
 														placeholder: "Ketik ulang kata sandi baru",
@@ -47024,6 +47364,22 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 			setAlamat(customer.alamat || "");
 		}
 	}, [customer]);
+	(0, import_react.useEffect)(() => {
+		if (!isEditModalOpen && !isLogoutConfirmOpen) return;
+		const handleKeyDown = (e) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				if (isEditModalOpen && !profileSaving) setIsEditModalOpen(false);
+				if (isLogoutConfirmOpen) setIsLogoutConfirmOpen(false);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [
+		isEditModalOpen,
+		isLogoutConfirmOpen,
+		profileSaving
+	]);
 	/**
 	* Mengompresi file gambar dari HP menjadi WebP maksimal 400x400 px, kualitas 80%
 	*/
@@ -47528,11 +47884,14 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 				})
 			}),
 			isEditModalOpen && typeof document !== "undefined" && (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn",
+				className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn",
 				onClick: (e) => {
 					if (e.target === e.currentTarget && !profileSaving) setIsEditModalOpen(false);
 				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					role: "dialog",
+					"aria-modal": "true",
+					"aria-labelledby": "portal-profile-edit-title",
 					className: "w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-scaleUp",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "p-4 pb-3 border-b border-gray-100 flex items-center justify-between",
@@ -47542,6 +47901,7 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 								className: "w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "portal-profile-edit-title",
 								className: "text-sm font-black text-gray-900",
 								children: "Ubah Data Diri"
 							})]
@@ -47617,13 +47977,14 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 				})
 			}), document.body),
 			isLogoutConfirmOpen && typeof document !== "undefined" && (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn",
+				className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn",
 				onClick: (e) => {
 					if (e.target === e.currentTarget) setIsLogoutConfirmOpen(false);
 				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					role: "dialog",
 					"aria-modal": "true",
+					"aria-labelledby": "portal-profile-logout-title",
 					className: "w-full max-w-xs sm:max-w-sm bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden p-5 space-y-4 animate-scaleUp text-center",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -47636,6 +47997,7 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "space-y-1.5 px-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								id: "portal-profile-logout-title",
 								className: "text-base font-black text-gray-900 leading-tight",
 								children: "Keluar dari Akun?"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -48050,7 +48412,7 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 	}, [subTab, muatRiwayat]);
 	const rawPaket = tagihan?.package_speed || dashboardData?.kuota?.kecepatan_paket || customer?.paket || "-";
 	const paketNama = /paket/i.test(String(rawPaket)) ? rawPaket : `Paket ${rawPaket}`;
-	const sortedUnpaidInvoices = [...tagihan?.unpaid || tagihan?.unpaid_invoices || []].sort((a, b) => {
+	const sortedUnpaidInvoices = (tagihan?.unpaid || tagihan?.unpaid_invoices || []).toSorted((a, b) => {
 		const periodA = String(a.due_date || a.billing_period || "");
 		const periodB = String(b.due_date || b.billing_period || "");
 		const cmp = periodA.localeCompare(periodB);

@@ -29,6 +29,18 @@ export function PaymentCheckModal({ invoiceId, onTutup, onLunas }) {
     if (timerRef.current) clearTimeout(timerRef.current);
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onTutup?.();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onTutup]);
+
   const periksa = useCallback(async () => {
     const res = await PortalPembayaranService.periksaPembayaran(invoiceId);
     if (!hidupRef.current) return;
@@ -106,9 +118,10 @@ export function PaymentCheckModal({ invoiceId, onTutup, onLunas }) {
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 pb-24 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 pb-24 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="payment-check-modal-title"
       onClick={onTutup}
     >
       <div
@@ -123,7 +136,7 @@ export function PaymentCheckModal({ invoiceId, onTutup, onLunas }) {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
+                <h3 id="payment-check-modal-title" className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
                   Status Pembayaran
                 </h3>
               </div>

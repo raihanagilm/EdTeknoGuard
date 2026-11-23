@@ -152,6 +152,21 @@ export function PortalNotificationsPage({
 
   const [notifToDelete, setNotifToDelete] = useState(null);
   const [showClearAllModal, setShowClearAllModal] = useState(false);
+
+  useEffect(() => {
+    if (!notifToDelete && !showClearAllModal) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (notifToDelete) setNotifToDelete(null);
+        if (showClearAllModal) setShowClearAllModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [notifToDelete, showClearAllModal]);
   const [deletedIds, setDeletedIds] = useState(() => {
     try {
       const saved = localStorage.getItem('teknocust_deleted_notifications');
@@ -561,13 +576,24 @@ export function PortalNotificationsPage({
       </main>
       {/* Modal Konfirmasi Hapus Notifikasi Tunggal */}
       {notifToDelete && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
-          <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setNotifToDelete(null);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-notification-title"
+            className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-5 h-5" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="text-sm font-bold text-gray-900">Hapus Pemberitahuan Ini?</h3>
+              <h3 id="delete-notification-title" className="text-sm font-bold text-gray-900">Hapus Pemberitahuan Ini?</h3>
               <p className="text-xs text-gray-500 leading-relaxed">
                 Pemberitahuan <strong className="text-gray-800 font-semibold">{notifToDelete.title}</strong> akan disembunyikan dari riwayat Anda.
               </p>
@@ -578,7 +604,7 @@ export function PortalNotificationsPage({
                 onClick={() => setNotifToDelete(null)}
                 className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition cursor-pointer"
               >
-                Tidak
+                Tidak (Esc)
               </button>
               <button
                 type="button"
@@ -594,13 +620,24 @@ export function PortalNotificationsPage({
 
       {/* Modal Konfirmasi Hapus Semua Notifikasi yang Sudah Dibaca */}
       {showClearAllModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
-          <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowClearAllModal(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="clear-all-notifications-title"
+            className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-5 h-5" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="text-sm font-bold text-gray-900">Hapus Semua Notifikasi?</h3>
+              <h3 id="clear-all-notifications-title" className="text-sm font-bold text-gray-900">Hapus Semua Notifikasi?</h3>
               <p className="text-xs text-gray-500 leading-relaxed">
                 Seluruh pemberitahuan yang sudah dibaca akan dihapus dari daftar Anda.
               </p>
@@ -611,7 +648,7 @@ export function PortalNotificationsPage({
                 onClick={() => setShowClearAllModal(false)}
                 className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition cursor-pointer"
               >
-                Batal
+                Batal (Esc)
               </button>
               <button
                 type="button"

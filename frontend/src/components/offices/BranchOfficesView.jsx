@@ -113,6 +113,20 @@ export function BranchOfficesView() {
     fetchKantors();
   }, []);
 
+  useEffect(() => {
+    if (!modalKantorOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setModalKantorOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalKantorOpen]);
+
   const openAddKantorModal = () => {
     setKantorModalMode('add');
     setCurrentKantorId(null);
@@ -624,16 +638,29 @@ export function BranchOfficesView() {
 
       {/* Modal Tambah / Edit Kantor Wilayah & Setting Router MikroTik */}
       {modalKantorOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full border border-sky-200 shadow-2xl space-y-4 my-8">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalKantorOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="office-modal-title"
+            className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full border border-sky-200 shadow-2xl space-y-4 my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between pb-3 border-b border-sky-100">
-              <h3 className="text-sm sm:text-base font-black font-mono text-slate-800 flex items-center gap-2">
+              <h3 id="office-modal-title" className="text-sm sm:text-base font-black font-mono text-slate-800 flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-cyan-600" />
                 <span>{kantorModalMode === 'add' ? 'Tambah Kantor Wilayah Baru' : `Edit Kantor: ${kantorNama}`}</span>
               </h3>
               <button
+                type="button"
                 onClick={() => setModalKantorOpen(false)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                title="Tutup Modal (Esc)"
               >
                 <X className="w-4 h-4" />
               </button>

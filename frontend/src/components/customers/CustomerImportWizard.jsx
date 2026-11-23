@@ -367,6 +367,7 @@ export function CustomerImportWizard({
           setImportStep(2)
         }
       } else if (e.key === 'Enter') {
+        if (e.isComposing || e.keyCode === 229) return
         const activeEl = document.activeElement
         const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')
 
@@ -666,6 +667,9 @@ export function CustomerImportWizard({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs overflow-y-auto font-sans">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="customer-import-wizard-title"
         className={`bg-white rounded-xl border border-[#CCDDF0] shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 w-full my-auto ${importStep === 3 ? 'max-w-5xl' : 'max-w-2xl'
           } p-5 sm:p-6 transition-all`}
       >
@@ -678,7 +682,7 @@ export function CustomerImportWizard({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-[#0B2545] font-sans">
+                  <h3 id="customer-import-wizard-title" className="text-base font-bold text-[#0B2545] font-sans">
                     Lengkapi Data Pelanggan
                   </h3>
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-[#026AA7] bg-[#E0F0FF] border border-[#CCDDF0] px-2 py-0.5 rounded uppercase tracking-tight">

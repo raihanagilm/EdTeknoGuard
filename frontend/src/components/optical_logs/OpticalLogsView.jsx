@@ -466,8 +466,10 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
           <table className="w-full text-left border-collapse table-auto">
           <thead>
             <tr className="bg-cyan-50/80 border-y border-sky-200 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
-              <th className="py-2.5 px-3 w-12 text-center whitespace-nowrap">No</th>
+              <th scope="col" className="py-2.5 px-3 w-12 text-center whitespace-nowrap">No</th>
               <th
+                scope="col"
+                aria-sort={sortField === 'waktu_cek' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                 onClick={() => handleSort('waktu_cek')}
                 className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[140px]"
               >
@@ -481,6 +483,8 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
                 </div>
               </th>
               <th
+                scope="col"
+                aria-sort={sortField === 'id_pelanggan' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                 onClick={() => handleSort('id_pelanggan')}
                 className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[150px]"
               >
@@ -494,6 +498,8 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
                 </div>
               </th>
               <th
+                scope="col"
+                aria-sort={sortField === 'nama' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                 onClick={() => handleSort('nama')}
                 className="py-2.5 px-3 cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[200px]"
               >
@@ -506,8 +512,10 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3 whitespace-nowrap min-w-[140px]">IP Router ONT</th>
+              <th scope="col" className="py-2.5 px-3 whitespace-nowrap min-w-[140px]">IP Router ONT</th>
               <th
+                scope="col"
+                aria-sort={sortField === 'rx_power' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                 onClick={() => handleSort('rx_power')}
                 className="py-2.5 px-3 text-right cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[130px]"
               >
@@ -520,9 +528,11 @@ export function OpticalLogsView({ activeOffice = 'cabang', warnThreshold = -26.0
                   )}
                 </div>
               </th>
-              <th className="py-2.5 px-3 text-center whitespace-nowrap min-w-[80px]">Suhu</th>
-              <th className="py-2.5 px-3 text-center whitespace-nowrap min-w-[90px]">Latency</th>
+              <th scope="col" className="py-2.5 px-3 text-center whitespace-nowrap min-w-[80px]">Suhu</th>
+              <th scope="col" className="py-2.5 px-3 text-center whitespace-nowrap min-w-[90px]">Latency</th>
               <th
+                scope="col"
+                aria-sort={sortField === 'status_koneksi' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                 onClick={() => handleSort('status_koneksi')}
                 className="py-2.5 px-3 text-center cursor-pointer hover:bg-cyan-100/70 transition select-none whitespace-nowrap min-w-[100px]"
               >

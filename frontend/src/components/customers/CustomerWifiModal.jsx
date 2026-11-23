@@ -26,6 +26,20 @@ export function CustomerWifiModal({
     }
   }, [customer, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || !customer) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (!loading && onClose) onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, customer, loading, onClose]);
+
   if (!isOpen || !customer) return null;
 
   const ipTarget = (customer.ip_ont || customer.ip_router || '').trim();
@@ -89,8 +103,18 @@ export function CustomerWifiModal({
   };
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/60 backdrop-blur-2xs animate-in fade-in duration-150 font-sans">
-      <div className="bg-white rounded-xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 max-h-[92vh] flex flex-col">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/60 backdrop-blur-2xs animate-in fade-in duration-150 font-sans"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !loading && onClose) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="customer-wifi-modal-title"
+        className="bg-white rounded-xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 max-h-[92vh] flex flex-col"
+      >
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-[#CCDDF0] pb-3 shrink-0">
           <div className="flex items-center gap-2.5">
@@ -98,7 +122,7 @@ export function CustomerWifiModal({
               <Wifi className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-bold text-[#0B2545] truncate">
+              <h3 id="customer-wifi-modal-title" className="text-sm sm:text-base font-bold text-[#0B2545] truncate">
                 Ubah WiFi Pelanggan
               </h3>
               <p className="text-[11px] text-[#3B5B78] font-medium truncate">
@@ -111,7 +135,7 @@ export function CustomerWifiModal({
             onClick={onClose}
             disabled={loading}
             className="p-1.5 rounded-lg hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#0B2545] transition shrink-0 cursor-pointer disabled:opacity-50"
-            title="Tutup Modal"
+            title="Tutup Modal (Esc)"
           >
             <X className="w-4 h-4" />
           </button>
@@ -143,6 +167,7 @@ export function CustomerWifiModal({
             <input
               type="text"
               required
+              minLength={3}
               disabled={loading}
               value={namaWifi}
               onChange={(e) => setNamaWifi(e.target.value)}
@@ -161,6 +186,8 @@ export function CustomerWifiModal({
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
+                minLength={8}
+                autoComplete="new-password"
                 disabled={loading}
                 value={passwordWifi}
                 onChange={(e) => setPasswordWifi(e.target.value)}

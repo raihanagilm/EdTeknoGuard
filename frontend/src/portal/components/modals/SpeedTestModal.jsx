@@ -51,6 +51,20 @@ export function SpeedTestModal({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (onClose) onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const abortControllerRef = useRef(null);
   const isMountedRef = useRef(true);
   const targetSpeedRef = useRef(0);
@@ -537,10 +551,13 @@ export function SpeedTestModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="speed-test-modal-title"
         className="w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
@@ -551,7 +568,7 @@ export function SpeedTestModal({
               <Gauge className="w-4 h-4 text-white" />
             </div>
             <div>
-              <span className="text-sm font-bold tracking-tight text-white block leading-tight">
+              <span id="speed-test-modal-title" className="text-sm font-bold tracking-tight text-white block leading-tight">
                 Uji Kecepatan Modem ONT
               </span>
               <span className="text-xs text-blue-100 leading-none">

@@ -294,8 +294,10 @@ export function CustomersTable({
                 className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
               />
             </th>
-            <th className="py-2.5 px-2 w-12 text-center">No</th>
+            <th scope="col" className="py-2.5 px-2 w-12 text-center">No</th>
             <th
+              scope="col"
+              aria-sort={sortField === 'id' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
               className={`py-2.5 px-3 cursor-pointer select-none transition w-32 ${
                 sortField === 'id' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'
               }`}
@@ -312,6 +314,8 @@ export function CustomersTable({
               </div>
             </th>
             <th
+              scope="col"
+              aria-sort={sortField === 'nama' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
               className={`py-2.5 px-3 cursor-pointer select-none transition ${
                 sortField === 'nama' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'
               }`}
@@ -328,6 +332,8 @@ export function CustomersTable({
               </div>
             </th>
             <th
+              scope="col"
+              aria-sort={['ip_router', 'ip_ont', 'jenis_modem'].includes(sortField) ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
               className={`py-2.5 px-3 cursor-pointer select-none transition w-36 ${
                 ['ip_router', 'ip_ont', 'jenis_modem'].includes(sortField)
                   ? 'bg-cyan-100/90 text-cyan-950 font-black'
@@ -359,6 +365,8 @@ export function CustomersTable({
               </div>
             </th>
             <th
+              scope="col"
+              aria-sort={sortField === 'status_kredensial' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
               className={`py-2.5 px-3 cursor-pointer select-none transition w-44 ${
                 sortField === 'status_kredensial'
                   ? 'bg-cyan-100/90 text-cyan-950 font-black'
@@ -379,6 +387,8 @@ export function CustomersTable({
               </div>
             </th>
             <th
+              scope="col"
+              aria-sort={sortField === 'rx_power' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
               className={`py-2.5 px-3 text-right cursor-pointer select-none transition w-32 ${
                 sortField === 'rx_power' ? 'bg-cyan-100/90 text-cyan-950 font-black' : 'hover:bg-cyan-100/60'
               }`}
@@ -395,6 +405,8 @@ export function CustomersTable({
               </div>
             </th>
             <th
+              scope="col"
+              aria-sort={sortField === 'status_koneksi' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
               className={`py-2.5 px-3 text-center cursor-pointer select-none transition w-28 ${
                 sortField === 'status_koneksi'
                   ? 'bg-cyan-100/90 text-cyan-950 font-black'
@@ -414,7 +426,7 @@ export function CustomersTable({
                 )}
               </div>
             </th>
-            <th className="py-2.5 px-3 text-right w-32">Aksi</th>
+            <th scope="col" className="py-2.5 px-3 text-right w-32">Aksi</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[#DAE7F5] font-mono text-xs">

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -18,11 +18,39 @@ export function ConfirmSaveModal({
   nightModeEnd,
   modemCredentialsCount
 }) {
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (!saving && onClose) onClose()
+      } else if (e.key === 'Enter') {
+        if (e.isComposing || e.keyCode === 229) return
+        e.preventDefault()
+        if (!saving && onConfirm) onConfirm()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, saving, onClose, onConfirm])
+
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-2xs flex items-center justify-center p-4 font-sans">
-      <div className="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 animate-in fade-in zoom-in-95 duration-150">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-[#0B2545]/50 backdrop-blur-2xs flex items-center justify-center p-4 font-sans"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !saving) onClose()
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-save-modal-title"
+        className="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-4 animate-in fade-in zoom-in-95 duration-150"
+      >
         
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -30,14 +58,14 @@ export function ConfirmSaveModal({
               <AlertTriangle className="w-4 h-4 text-[#026AA7]" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0B2545]">Konfirmasi Simpan Pengaturan</h3>
+              <h3 id="confirm-save-modal-title" className="text-sm sm:text-base font-bold text-[#0B2545]">Konfirmasi Simpan Pengaturan</h3>
               <p className="text-xs text-[#64839E] mt-0.5">Tinjau kembali parameter yang akan diterapkan ke sistem</p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="text-[#64839E] hover:text-[#0B2545] p-1.5 rounded-lg hover:bg-[#F1F6FC] transition cursor-pointer"
-            title="Tutup dialog"
+            title="Tutup dialog (Esc)"
           >
             <X className="w-4 h-4" />
           </button>

@@ -46,6 +46,20 @@ export function ConnectedDevicesModal({
     }
   }, [devices]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (onClose) onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const currentList = internalDevices;
@@ -133,10 +147,13 @@ export function ConnectedDevicesModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 pb-24 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 pb-24 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="connected-devices-modal-title"
         className="w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150 max-h-[calc(100dvh-7.5rem)] sm:max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
@@ -148,7 +165,7 @@ export function ConnectedDevicesModal({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
+                <h3 id="connected-devices-modal-title" className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
                   Perangkat Terhubung
                 </h3>
                 <span className="text-xs font-bold text-blue-600">

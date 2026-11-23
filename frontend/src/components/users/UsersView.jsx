@@ -101,6 +101,20 @@ export function UsersView() {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    if (!modalOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setModalOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalOpen]);
+
   const openAddModal = () => {
     setModalMode('add');
     setCurrentUserId(null);
@@ -766,16 +780,28 @@ export function UsersView() {
 
       {/* Modal Form User */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-modal-title"
+            className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-sky-100 pb-2.5">
-              <h3 className="text-sm font-black text-slate-900">
+              <h3 id="user-modal-title" className="text-sm font-black text-slate-900">
                 {modalMode === 'add' ? 'Tambah Pengguna Baru' : `Edit Pengguna: ${formUsername}`}
               </h3>
               <button
+                type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 transition cursor-pointer"
-                title="Tutup Modal"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                title="Tutup Modal (Esc)"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -793,6 +819,7 @@ export function UsersView() {
                 <input
                   type="text"
                   required
+                  autoComplete="username"
                   value={formUsername}
                   onChange={(e) => setFormUsername(e.target.value)}
                   disabled={modalMode === 'edit'}
@@ -832,6 +859,7 @@ export function UsersView() {
                   value={formPassword}
                   onChange={(e) => setFormPassword(e.target.value)}
                   placeholder={modalMode === 'add' ? 'Kata sandi akun...' : '••••••••'}
+                  autoComplete="new-password"
                   className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
                 />
               </div>

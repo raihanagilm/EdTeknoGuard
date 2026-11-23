@@ -1,0 +1,9 @@
+{
+  "mcpServers": {},
+  "scopedTools": [
+    "run_command",
+    "read_file",
+    "edit_file",
+    "write_file"
+  ]
+}

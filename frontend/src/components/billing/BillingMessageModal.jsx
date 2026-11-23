@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   X,
   Send,
@@ -22,14 +22,45 @@ export function BillingMessageModal({
   const [sendFcm, setSendFcm] = useState(true)
   const [customMsg, setCustomMsg] = useState('')
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (!sending) {
+          if (onResetResult) onResetResult()
+          onClose()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, sending, onClose, onResetResult])
+
   if (!isOpen) return null
 
   const totalSum = selectedCustomers.reduce((acc, c) => acc + (c.total_tagihan || 0), 0)
   const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString('id-ID')}`
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl border border-[#CCDDF0] shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !sending) {
+          if (onResetResult) onResetResult()
+          onClose()
+        }
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="billing-modal-title"
+        className="bg-white rounded-2xl border border-[#CCDDF0] shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header Modal */}
         <div className="flex items-center justify-between px-5 py-3.5 bg-[#F1F6FC] border-b border-[#CCDDF0]">
           <div className="flex items-center gap-2.5">
@@ -37,7 +68,7 @@ export function BillingMessageModal({
               <Send className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-[#0B2545]">Kirim Pengingat Tagihan</h4>
+              <h4 id="billing-modal-title" className="text-sm font-bold text-[#0B2545]">Kirim Pengingat Tagihan</h4>
               <p className="text-[11px] font-sans text-[#64839E]">
                 <span className="font-semibold text-[#0B2545]">{selectedCustomers.length}</span> pelanggan terpilih ({formatRupiah(totalSum)})
               </p>

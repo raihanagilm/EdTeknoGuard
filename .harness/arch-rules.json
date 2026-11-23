@@ -1,0 +1,11 @@
+[
+  {
+    "id": "ARCH-001",
+    "description": "No direct database queries in controllers or routes",
+    "check": "grep -rn 'db.query' app/modules/*/routes.py",
+    "expect": "empty",
+    "what": "Database query found in route/controller layer",
+    "why": "Violates Universal Laravel Pattern and separation of concerns",
+    "fix": "Move query logic to service or repository layer"
+  }
+]

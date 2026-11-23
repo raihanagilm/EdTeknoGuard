@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allowCommands": [
+      "make check",
+      "make test",
+      "make dev",
+      "make clean-check"
+    ]
+  }
+}

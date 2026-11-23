@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ShieldCheck,
@@ -16,17 +16,34 @@ import {
 export function PortalLegalModal({ isOpen, onClose, initialTab = 'privasi' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (onClose) onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return typeof document !== 'undefined'
     ? createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150 font-sans"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150 font-sans"
           onClick={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="portal-legal-modal-title"
             className="w-full max-w-sm bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-150 max-h-[62vh] sm:max-h-[480px]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -41,7 +58,7 @@ export function PortalLegalModal({ isOpen, onClose, initialTab = 'privasi' }) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-xs font-bold text-slate-900 leading-tight truncate">
+                  <h3 id="portal-legal-modal-title" className="text-xs font-bold text-slate-900 leading-tight truncate">
                     {activeTab === 'privasi'
                       ? 'Kebijakan Privasi & Izin'
                       : 'Syarat & Ketentuan Layanan'}

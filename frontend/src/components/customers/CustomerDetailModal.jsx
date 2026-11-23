@@ -53,6 +53,20 @@ export function CustomerDetailModal({
     setCurrentCustomer(customer)
   }, [customer])
 
+  useEffect(() => {
+    if (!customer) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (onClose) onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [customer, onClose])
+
   const activeCust = currentCustomer || customer
   const cId = activeCust?.id_pelanggan || activeCust?.id || ''
   const isMonitored = Boolean(activeCust?.is_monitored !== false)
@@ -271,8 +285,18 @@ export function CustomerDetailModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans">
-      <div className="bg-white rounded-xl max-w-xl sm:max-w-2xl w-full p-3 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-3 sm:space-y-4 max-h-[92vh] flex flex-col">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B2545]/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) onClose()
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="customer-detail-modal-title"
+        className="bg-white rounded-xl max-w-xl sm:max-w-2xl w-full p-3 sm:p-6 shadow-2xl border border-[#CCDDF0] space-y-3 sm:space-y-4 max-h-[92vh] flex flex-col"
+      >
         
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-[#CCDDF0] pb-2.5 sm:pb-3 shrink-0">
@@ -281,7 +305,7 @@ export function CustomerDetailModal({
               <UserPlus className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-bold text-[#0B2545] truncate">
+              <h3 id="customer-detail-modal-title" className="text-sm sm:text-base font-bold text-[#0B2545] truncate">
                 {customer.nama || customer.name}
               </h3>
               <p className="text-[11px] sm:text-xs text-[#64839E] font-medium truncate">
@@ -294,7 +318,7 @@ export function CustomerDetailModal({
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#0B2545] transition shrink-0 cursor-pointer"
-            title="Tutup Modal"
+            title="Tutup Modal (Esc)"
           >
             <X className="w-4 h-4" />
           </button>

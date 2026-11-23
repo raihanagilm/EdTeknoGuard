@@ -58,6 +58,21 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
     fetchTickets();
   }, []);
 
+  useEffect(() => {
+    if (!ticketToDelete && !showCreateModal) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (ticketToDelete) setTicketToDelete(null);
+        if (showCreateModal && !submitting) setShowCreateModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [ticketToDelete, showCreateModal, submitting]);
+
   const handleCreateTicket = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -306,13 +321,24 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
 
       {/* Modal Konfirmasi Hapus Tiket */}
       {ticketToDelete && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
-          <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !deletingId) setTicketToDelete(null);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-ticket-title"
+            className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-5 h-5" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="text-sm font-bold text-gray-900">Hapus Laporan Gangguan?</h3>
+              <h3 id="delete-ticket-title" className="text-sm font-bold text-gray-900">Hapus Laporan Gangguan?</h3>
               <p className="text-xs text-gray-500">
                 Tiket <strong className="font-mono text-gray-800">{ticketToDelete.id_tiket}</strong> ({ticketToDelete.kategori}) akan dihapus secara permanen.
               </p>
@@ -323,7 +349,7 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                 onClick={() => setTicketToDelete(null)}
                 className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition cursor-pointer"
               >
-                Batal
+                Batal (Esc)
               </button>
               <button
                 type="button"
@@ -340,19 +366,30 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
 
       {/* Modal Buat Tiket */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
-          <div className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4">
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !submitting) setShowCreateModal(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-ticket-title"
+            className="max-w-sm w-full bg-white rounded-2xl p-5 border border-gray-200 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
                   <Plus className="w-4 h-4 stroke-[2.5]" />
                 </div>
-                <h3 className="text-sm font-black text-gray-900">Formulir Lapor Gangguan</h3>
+                <h3 id="create-ticket-title" className="text-sm font-black text-gray-900">Formulir Lapor Gangguan</h3>
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="text-gray-400 hover:text-gray-600 p-1 transition cursor-pointer"
-                title="Tutup Modal"
+                title="Tutup Modal (Esc)"
               >
                 <X className="w-4 h-4" />
               </button>

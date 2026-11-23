@@ -1,0 +1,26 @@
+[
+  {
+    "id": "F01",
+    "behavior": "Sistem pemantauan redaman optik ONT dan early warning system",
+    "verification": "pytest tests/test_models_and_thresholds.py",
+    "state": "passing",
+    "evidence": "Seluruh model threshold redaman -26.0 dBm dan -27.0 dBm terverifikasi lulus",
+    "layers": [
+      {
+        "label": "Syntax & Static",
+        "cmd": "python -m py_compile app/main.py",
+        "repair": "Perbaiki kesalahan sintaks pada app/main.py"
+      },
+      {
+        "label": "Runtime Behavior",
+        "cmd": "pytest tests/test_models_and_thresholds.py",
+        "repair": "Pastikan threshold optik sesuai SOP: normal > -26dBm, warning -26 s/d -27dBm, critical <= -27dBm"
+      },
+      {
+        "label": "System Confirmation",
+        "cmd": "python -c 'import app.main; print(\"OK\")'",
+        "repair": "Pastikan modul app.main dapat diimpor tanpa error dependensi"
+      }
+    ]
+  }
+]

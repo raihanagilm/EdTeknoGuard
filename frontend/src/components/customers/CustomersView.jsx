@@ -130,6 +130,23 @@ export function CustomersView({
   })
   const [probeResult, setProbeResult] = useState(null)
 
+  useEffect(() => {
+    if (!modalOpen) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setModalOpen(false)
+        if (returnToDetailCustomer) {
+          setDetailCustomer(returnToDetailCustomer)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [modalOpen, returnToDetailCustomer])
+
   // Timer pemulihan jika halaman direload saat probe masih berlangsung
   useEffect(() => {
     if (!probingId) return
@@ -798,8 +815,24 @@ export function CustomersView({
 
       {/* Modal Edit Pelanggan */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setModalOpen(false)
+              if (returnToDetailCustomer) {
+                setDetailCustomer(returnToDetailCustomer)
+              }
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-customer-modal-title"
+            className="bg-white rounded-3xl max-w-lg w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-sky-100 pb-2.5">
               <div className="flex items-center gap-2">
                 {returnToDetailCustomer && (
@@ -809,14 +842,14 @@ export function CustomersView({
                       setModalOpen(false)
                       setDetailCustomer(returnToDetailCustomer)
                     }}
-                    className="p-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 hover:text-cyan-700 text-slate-600 transition flex items-center gap-1 text-[11px] font-bold"
+                    className="p-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-200 hover:text-cyan-700 text-slate-600 transition flex items-center gap-1 text-[11px] font-bold cursor-pointer"
                     title="Kembali ke Detail Pelanggan"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Detail</span>
                   </button>
                 )}
-                <h3 className="text-sm font-black text-slate-900">
+                <h3 id="edit-customer-modal-title" className="text-sm font-black text-slate-900">
                   Edit Pelanggan: {formData.nama}
                 </h3>
               </div>
@@ -828,10 +861,10 @@ export function CustomersView({
                     setDetailCustomer(returnToDetailCustomer)
                   }
                 }}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
-                title="Tutup Modal"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                title="Tutup Modal (Esc)"
               >
-                ?
+                <X className="w-4 h-4" />
               </button>
             </div>
 

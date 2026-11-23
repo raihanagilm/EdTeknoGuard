@@ -150,7 +150,7 @@ export function PortalPaymentTab({
   const unpaidInvoices = tagihan?.unpaid || tagihan?.unpaid_invoices || [];
 
   // Urutkan tagihan belum lunas dari yang paling lama/jatuh tempo awal (FIFO)
-  const sortedUnpaidInvoices = [...unpaidInvoices].sort((a, b) => {
+  const sortedUnpaidInvoices = unpaidInvoices.toSorted((a, b) => {
     const periodA = String(a.due_date || a.billing_period || '');
     const periodB = String(b.due_date || b.billing_period || '');
     const cmp = periodA.localeCompare(periodB);

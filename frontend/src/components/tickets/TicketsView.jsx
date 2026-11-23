@@ -113,6 +113,20 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
     };
   }, [activeMenuId]);
 
+  useEffect(() => {
+    if (!selectedTicket) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setSelectedTicket(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedTicket]);
+
   const handleOpenModal = (ticket) => {
     setSelectedTicket(ticket);
     setNewStatus(ticket.status || 'MENUNGGU');
@@ -714,17 +728,29 @@ export function TicketsView({ activeOffice = 'cabang', currentUser = { role: 'su
 
       {/* Modal Kelola Status Tiket */}
       {selectedTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedTicket(null);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ticket-modal-title"
+            className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-sky-200 space-y-3 font-mono"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-sky-100 pb-2.5">
               <div>
-                <h3 className="text-sm font-black text-slate-900">Kelola Status Tiket</h3>
+                <h3 id="ticket-modal-title" className="text-sm font-black text-slate-900">Kelola Status Tiket</h3>
                 <p className="text-[11px] text-cyan-700 font-bold">{selectedTicket.id_tiket} • {selectedTicket.nama_pelanggan}</p>
               </div>
               <button
+                type="button"
                 onClick={() => setSelectedTicket(null)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 transition cursor-pointer"
-                title="Tutup Modal"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                title="Tutup Modal (Esc)"
               >
                 <X className="w-4 h-4" />
               </button>

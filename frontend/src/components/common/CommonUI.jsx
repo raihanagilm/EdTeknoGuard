@@ -222,7 +222,12 @@ export function DataTableContainer({
 
   return (
     <div className="bg-white rounded-xl border border-[#CCDDF0] shadow-2xs overflow-hidden">
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto focus:outline-none focus:ring-1 focus:ring-[#026AA7]/20"
+        role="region"
+        tabIndex={0}
+        aria-label="Tabel Data Sistem"
+      >
         {children}
       </div>
 

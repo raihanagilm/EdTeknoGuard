@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import {
   AlertTriangle,
   AlertCircle,
-  HelpCircle,
   Info,
   CheckCircle2,
   RefreshCw,
@@ -24,8 +23,6 @@ export function ConfirmDialogModal({
   isLoading = false,
   loadingText = 'Memproses...'
 }) {
-  if (!isOpen) return null
-
   const variantConfig = {
     danger: {
       icon: AlertCircle,
@@ -64,6 +61,7 @@ export function ConfirmDialogModal({
         e.preventDefault()
         if (!isLoading && onClose) onClose()
       } else if (e.key === 'Enter') {
+        if (e.isComposing || e.keyCode === 229) return
         e.preventDefault()
         if (!isLoading && onConfirm) onConfirm()
       }
@@ -72,6 +70,8 @@ export function ConfirmDialogModal({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, isLoading, onClose, onConfirm])
+
+  if (!isOpen) return null
 
   return (
     <div
@@ -83,6 +83,7 @@ export function ConfirmDialogModal({
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
         className={`bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border ${currentTheme.border} space-y-4 animate-in fade-in zoom-in-95 duration-150`}
       >
         <div className="flex items-start justify-between gap-3">
@@ -91,7 +92,7 @@ export function ConfirmDialogModal({
               <IconComponent className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0B2545] leading-snug">{title}</h3>
+              <h3 id="confirm-dialog-title" className="text-sm sm:text-base font-bold text-[#0B2545] leading-snug">{title}</h3>
               <p className="text-xs text-[#64839E] mt-0.5">Harap konfirmasi sebelum sistem melanjutkan</p>
             </div>
           </div>

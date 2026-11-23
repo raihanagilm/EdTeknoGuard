@@ -258,6 +258,7 @@ export function PortalResetPasswordView({ onBackToLogin }) {
                           id="reset-phone"
                           type="tel"
                           required
+                          autoComplete="tel"
                           value={noHp}
                           onChange={(e) => setNoHp(e.target.value)}
                           placeholder="Contoh: 081234567890 atau 628..."
