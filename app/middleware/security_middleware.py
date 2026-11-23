@@ -51,8 +51,13 @@ class LoginRateLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path.rstrip("/")
-        # Hanya batasi request POST pada endpoint login autentikasi
-        if request.method == "POST" and (path.endswith("/auth/login") or path.endswith("/api/auth/login")):
+        # Batasi request POST pada endpoint sensitif otentikasi (Login Admin, Login Pelanggan MyTekno, & Reset Password)
+        is_sensitive_auth = request.method == "POST" and (
+            path.endswith("/auth/login")
+            or path.endswith("/api/auth/login")
+            or "reset-password" in path
+        )
+        if is_sensitive_auth:
             # Ambil client IP (prioritaskan header resmi Cloudflare cf-connecting-ip jika ada)
             client_ip = (
                 request.headers.get("cf-connecting-ip")

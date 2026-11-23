@@ -34,3 +34,18 @@ class TestSecurityHardening(unittest.TestCase):
                 break
 
         self.assertTrue(blocked, "Rate limiter harus memblokir dengan status HTTP 429 jika melebihi batas percobaan.")
+
+    def test_mytekno_auth_rate_limiting(self):
+        """Memastikan rate limiting juga melindungi login dan reset password portal MyTekno"""
+        test_ip = "192.0.2.100"
+        blocked = False
+        for i in range(15):
+            res = self.client.post(
+                "/portal/api/auth/minta-reset-password",
+                json={"no_hp": "081234567890"},
+                headers={"X-Forwarded-For": test_ip}
+            )
+            if res.status_code == 429:
+                blocked = True
+                break
+        self.assertTrue(blocked, "Rate limiter harus memblokir flooding reset password MyTekno dengan HTTP 429.")
