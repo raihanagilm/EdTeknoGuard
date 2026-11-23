@@ -56,6 +56,22 @@ def sync_single_customer_billing(
     )
 
 
+@router.post("/sync-all")
+def sync_all_customers_billing(
+    request: Request,
+    kantor: Optional[str] = Query(None, description="Kode kantor target"),
+    db: Session = Depends(get_db)
+):
+    """Sinkronisasi live seluruh tagihan pelanggan kantor dari Network Bill."""
+    user = require_login(request)
+    return BillingController.sync_all(
+        request=request,
+        kantor=kantor,
+        db=db,
+        user=user
+    )
+
+
 @router.post("/kirim-pengingat")
 def send_bulk_billing_reminders(
     payload: BillingBulkReminderRequest,

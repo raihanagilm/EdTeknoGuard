@@ -77,7 +77,14 @@ app.include_router(portal_api_router)
 @app.get("/{full_path:path}")
 def serve_portal_spa(request: Request, full_path: str = ""):
     if DIST_INDEX.exists():
-        return FileResponse(str(DIST_INDEX))
+        return FileResponse(
+            str(DIST_INDEX),
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return JSONResponse(
         status_code=404,
         content={"error": "Frontend dist belum dibuild. Jalankan 'npm run build' di folder frontend."}

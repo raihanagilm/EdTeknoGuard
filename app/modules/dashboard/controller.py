@@ -13,7 +13,14 @@ class DashboardController:
     @staticmethod
     def render_dashboard(request: Request, db: Session):
         if DIST_INDEX.exists():
-            return FileResponse(str(DIST_INDEX))
+            return FileResponse(
+                str(DIST_INDEX),
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
+            )
 
         templates_dir = Path("templates")
         if templates_dir.exists() and (templates_dir / "dashboard/index.html").exists():

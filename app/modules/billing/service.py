@@ -218,27 +218,77 @@ class BillingService:
 
     @staticmethod
     def _resolve_and_save_nb_id(db: Session, cust: Pelanggan, pop_slug: str) -> Optional[str]:
-        """Helper memetakan kode pelanggan lokal (BMS-0001, dll) ke ID numerik Network Bill."""
+        """Helper memetakan kode/nama pelanggan lokal ke ID numerik Network Bill."""
+        from app.modules.billing.sync_worker import BillingSyncWorker
+        return BillingSyncWorker.resolve_nb_id(db, cust, pop_slug)
+
+    @staticmethod
+    def sync_all_office_customers(db: Session, kantor: str) -> Dict[str, Any]:
+        """Menyinkronkan seluruh tagihan pelanggan di kantor tertentu dengan Network Bill."""
+        from app.modules.billing.sync_worker import BillingSyncWorker
+        from app.core.tenant_database import TenantDatabaseManager
+        pop_slug = (kantor or "slawi").strip().lower()
+        if pop_slug == "cabang":
+            pop_slug = "slawi"
+
+        t_db = TenantDatabaseManager.get_tenant_session(pop_slug)
         try:
-            res = NetworkBillService.fetch_customers(pop_slug, per_page=500)
-            items = res.get("data") or []
-            target_code = (cust.id_pelanggan or "").strip().upper()
-            target_wa = (cust.no_hp or "").strip()
-            matched_id = None
-            for item in items:
-                i_code = (item.get("code") or "").strip().upper()
-                i_id = str(item.get("id") or "").strip()
-                i_wa = str(item.get("whatsapp") or "").strip()
-                if (target_code and i_code == target_code) or (target_wa and i_wa and target_wa.endswith(i_wa[-9:])):
-                    matched_id = i_id
-                    break
-            if matched_id:
-                cust.network_bill_id = matched_id
-                db.commit()
-                return matched_id
-        except Exception as e:
-            logger.warning(f"Gagal resolve nb_id untuk {cust.id_pelanggan}: {e}")
-        return None
+            customers = t_db.query(Pelanggan).filter(Pelanggan.is_active == True).all()
+            synced_count = 0
+            unpaid_count = 0
+            now = get_now_wib()
+
+            for cust in customers:
+                nb_id = BillingSyncWorker.resolve_nb_id(t_db, cust, pop_slug)
+                if not nb_id:
+                    cust.last_billing_sync = now
+                    continue
+
+                inv_res = NetworkBillService.fetch_invoices(pop_slug, nb_id, status="unpaid", limit=12)
+                if inv_res.get("ok"):
+                    unpaid_list = inv_res.get("data") or []
+                    if not unpaid_list:
+                        cust.status_pembayaran = "LUNAS"
+                        cust.total_tagihan = 0
+                        cust.is_overdue = False
+                        cust.periode_tagihan = None
+                        cust.jatuh_tempo = None
+                    else:
+                        unpaid_count += 1
+                        cust.status_pembayaran = "BELUM_BAYAR"
+                        cust.total_tagihan = sum(float(i.get("total") or 0.0) for i in unpaid_list)
+                        cust.is_overdue = any(bool(i.get("overdue")) for i in unpaid_list)
+                        if cust.is_overdue:
+                            cust.status_pembayaran = "OVERDUE"
+                        oldest_inv = unpaid_list[-1]
+                        cust.periode_tagihan = oldest_inv.get("billing_period")
+                        due_str = oldest_inv.get("due_date")
+                        if due_str:
+                            try:
+                                cust.jatuh_tempo = datetime.strptime(due_str[:10], "%Y-%m-%d").date()
+                            except Exception:
+                                pass
+
+                if not cust.nomor_va or cust.nomor_va == "-":
+                    va_res = NetworkBillService.fetch_virtual_account(pop_slug, nb_id)
+                    if va_res.get("ok") and isinstance(va_res.get("data"), dict):
+                        channels = va_res["data"].get("channels") or []
+                        if channels and channels[0].get("va_number"):
+                            cust.nomor_va = channels[0]["va_number"]
+
+                cust.last_billing_sync = now
+                synced_count += 1
+
+            t_db.commit()
+            return {
+                "ok": True,
+                "synced_count": synced_count,
+                "unpaid_count": unpaid_count,
+                "total_customers": len(customers),
+                "message": f"Berhasil sinkronisasi tagihan {synced_count} pelanggan ({unpaid_count} belum lunas/jatuh tempo)."
+            }
+        finally:
+            t_db.close()
 
     @staticmethod
     def prepare_whatsapp_message(cust: Pelanggan) -> str:

@@ -237,7 +237,14 @@ register_api_routes(app)
 def serve_noc_spa_pages(request: Request):
     dist_index = Path("frontend/dist/index.html")
     if dist_index.exists():
-        return FileResponse(str(dist_index))
+        return FileResponse(
+            str(dist_index),
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return RedirectResponse("/", status_code=303)
 
 # Mount Portal Pelanggan via Gerbang Rute routes/portal.py

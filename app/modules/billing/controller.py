@@ -67,6 +67,33 @@ class BillingController:
         return res
 
     @staticmethod
+    def sync_all(
+        request: Request,
+        kantor: Optional[str],
+        db: Session,
+        user: dict
+    ) -> Dict[str, Any]:
+        active_kantor = kantor or getattr(request.state, "active_kantor", None) or get_active_kantor(request, user)
+        res = BillingService.sync_all_office_customers(db=db, kantor=active_kantor)
+        if not res.get("ok"):
+            raise HTTPException(status_code=400, detail=res.get("message", "Gagal sinkronisasi masal"))
+
+        try:
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="SYNC_TAGIHAN_MASAL",
+                status="SUCCESS",
+                keterangan=f"Sinkronisasi live tagihan kantor '{active_kantor}': {res.get('synced_count', 0)} diproses, {res.get('unpaid_count', 0)} belum bayar",
+                user=user
+            )
+        except Exception:
+            pass
+
+        return res
+
+
+    @staticmethod
     def send_reminders(
         request: Request,
         payload: BillingBulkReminderRequest,
@@ -98,3 +125,4 @@ class BillingController:
             pass
 
         return res
+

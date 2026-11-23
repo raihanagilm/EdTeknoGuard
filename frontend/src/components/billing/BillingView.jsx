@@ -18,6 +18,7 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
   const [sortDir, setSortDir] = useState('asc')
   const [selectedIds, setSelectedIds] = useState([])
   const [syncingId, setSyncingId] = useState(null)
+  const [syncingAll, setSyncingAll] = useState(false)
   const [copiedVA, setCopiedVA] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [sending, setSending] = useState(false)
@@ -83,6 +84,23 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
       showToast('Error sinkronisasi: ' + (err.message || 'Koneksi gagal'), 'error', 'Gagal')
     } finally {
       setSyncingId(null)
+    }
+  }
+
+  const handleSyncAll = async () => {
+    setSyncingAll(true)
+    try {
+      const res = await BillingService.syncAll(activeOffice)
+      if (res && res.ok) {
+        showToast(res.message || 'Sinkronisasi tagihan kantor berhasil', 'success', 'Berhasil')
+        await loadData()
+      } else {
+        showToast(res.message || 'Gagal sinkronisasi data kantor', 'error', 'Peringatan')
+      }
+    } catch (err) {
+      showToast('Error sinkronisasi kantor: ' + (err.message || 'Koneksi gagal'), 'error', 'Gagal')
+    } finally {
+      setSyncingAll(false)
     }
   }
 
@@ -211,6 +229,8 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
         }}
         onClearSelection={handleClearSelection}
         onRefresh={loadData}
+        onSyncAll={handleSyncAll}
+        syncingAll={syncingAll}
         loading={loading}
         lastSyncTime={summary.terakhir_sinkron || '-'}
       />

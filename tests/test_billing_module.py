@@ -116,3 +116,31 @@ class TestBillingModule(unittest.TestCase):
         synced = BillingSyncWorker.sync_office_batch(mock_db, "karanggede", batch_size=4)
         self.assertEqual(synced, 0)
         self.assertFalse(mock_inv.called)
+
+    @patch("app.core.tenant_database.TenantDatabaseManager.get_tenant_session")
+    @patch("app.modules.billing.sync_worker.BillingSyncWorker.resolve_nb_id")
+    @patch("app.services.network_bill_service.NetworkBillService.fetch_invoices")
+    def test_sync_all_office_customers(self, mock_inv, mock_resolve, mock_get_sess):
+        """Memastikan BillingService.sync_all_office_customers menyinkronkan seluruh pelanggan di kantor."""
+        mock_t_db = MagicMock()
+        mock_get_sess.return_value = mock_t_db
+        mock_resolve.return_value = "101"
+
+        mock_cust = MagicMock(spec=Pelanggan)
+        mock_cust.id_pelanggan = "PLG-001"
+        mock_cust.nomor_va = "123456"
+        mock_t_db.query().filter().all.return_value = [mock_cust]
+
+        mock_inv.return_value = {
+            "ok": True,
+            "data": [{"total": 200000, "overdue": True, "billing_period": "2026-11", "due_date": "2026-11-15"}]
+        }
+
+        res = BillingService.sync_all_office_customers(MagicMock(), "tengaran")
+        self.assertTrue(res.get("ok"))
+        self.assertEqual(res.get("synced_count"), 1)
+        self.assertEqual(res.get("unpaid_count"), 1)
+        self.assertEqual(mock_cust.status_pembayaran, "OVERDUE")
+        self.assertEqual(mock_cust.total_tagihan, 200000)
+        self.assertTrue(mock_t_db.commit.called)
+        self.assertTrue(mock_t_db.close.called)

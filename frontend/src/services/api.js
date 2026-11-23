@@ -299,6 +299,13 @@ export class BillingService {
     return res.data || {};
   }
 
+  static async syncAll(kantor) {
+    const params = new URLSearchParams();
+    if (kantor && kantor !== 'all') params.append('kantor', kantor);
+    const res = await new ApiService().post(`/api/pembayaran/sync-all?${params.toString()}`);
+    return res.data || {};
+  }
+
   static async sendReminders(payload) {
     const res = await new ApiService().post('/api/pembayaran/kirim-pengingat', payload);
     return res.data || {};

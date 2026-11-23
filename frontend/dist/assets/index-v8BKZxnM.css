@@ -4810,6 +4810,10 @@
       background-color: #035388;
     }
 
+    .hover\:bg-\[\#D0E2F4\]:hover {
+      background-color: #d0e2f4;
+    }
+
     .hover\:bg-\[\#E0F0FF\]:hover {
       background-color: #e0f0ff;
     }

@@ -11709,7 +11709,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$96 = {
+var __iconData$97 = {
 	name: "activity",
 	size: 24,
 	node: [["path", {
@@ -11717,8 +11717,36 @@ var __iconData$96 = {
 		key: "169zse"
 	}]]
 };
+__iconData$97.node;
+var Activity = createLucideIcon(__iconData$97);
+//#endregion
+//#region node_modules/lucide-react/dist/esm/icons/arrow-down-to-line.mjs
+/**
+* @license lucide-react v1.53.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var __iconData$96 = {
+	name: "arrow-down-to-line",
+	size: 24,
+	node: [
+		["path", {
+			d: "M12 17V3",
+			key: "1cwfxf"
+		}],
+		["path", {
+			d: "m6 11 6 6 6-6",
+			key: "12ii2o"
+		}],
+		["path", {
+			d: "M19 21H5",
+			key: "150jfl"
+		}]
+	]
+};
 __iconData$96.node;
-var Activity = createLucideIcon(__iconData$96);
+var ArrowDownToLine = createLucideIcon(__iconData$96);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-down.mjs
 /**
@@ -14697,6 +14725,11 @@ var BillingService = class {
 	}
 	static async syncSingle(idPelanggan) {
 		return (await new ApiService().post(`/api/pembayaran/sync-single/${idPelanggan}`)).data || {};
+	}
+	static async syncAll(kantor) {
+		const params = new URLSearchParams();
+		if (kantor && kantor !== "all") params.append("kantor", kantor);
+		return (await new ApiService().post(`/api/pembayaran/sync-all?${params.toString()}`)).data || {};
 	}
 	static async sendReminders(payload) {
 		return (await new ApiService().post("/api/pembayaran/kirim-pengingat", payload)).data || {};
@@ -37236,7 +37269,7 @@ function QuotaView({ activeOffice = "cabang", onNavigateCustomer }) {
 }
 //#endregion
 //#region src/components/billing/BillingFilterBar.jsx
-function BillingFilterBar({ searchQuery, setSearchQuery, setPage, selectedCount = 0, onOpenReminderModal, onClearSelection, onRefresh, loading = false, lastSyncTime = "-" }) {
+function BillingFilterBar({ searchQuery, setSearchQuery, setPage, selectedCount = 0, onOpenReminderModal, onClearSelection, onRefresh, onSyncAll, syncingAll = false, loading = false, lastSyncTime = "-" }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "relative z-30",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FilterContainer, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -37301,10 +37334,18 @@ function BillingFilterBar({ searchQuery, setSearchQuery, setPage, selectedCount 
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						type: "button",
 						onClick: onRefresh,
-						disabled: loading,
+						disabled: loading || syncingAll,
 						className: "px-3 py-1.5 rounded-lg border border-[#CCDDF0] bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] text-[11px] sm:text-xs font-sans font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] cursor-pointer",
 						title: `Sinkronisasi Latar Terakhir: ${lastSyncTime}`,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: `w-3.5 h-3.5 ${loading ? "animate-spin" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: loading ? "Memuat..." : "Segarkan" })]
+					}),
+					onSyncAll && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: onSyncAll,
+						disabled: loading || syncingAll,
+						className: "px-3 py-1.5 rounded-lg border border-[#026AA7] bg-[#E2EDF8] hover:bg-[#D0E2F4] text-[#026AA7] text-[11px] sm:text-xs font-sans font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] cursor-pointer",
+						title: "Tarik live seluruh data tagihan & status jatuh tempo kantor dari Network Bill",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDownToLine, { className: `w-3.5 h-3.5 ${syncingAll ? "animate-bounce" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: syncingAll ? "Menyinkronkan..." : "Sinkronkan POP" })]
 					})
 				]
 			})]
@@ -38021,6 +38062,7 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 	const [sortDir, setSortDir] = (0, import_react.useState)("asc");
 	const [selectedIds, setSelectedIds] = (0, import_react.useState)([]);
 	const [syncingId, setSyncingId] = (0, import_react.useState)(null);
+	const [syncingAll, setSyncingAll] = (0, import_react.useState)(false);
 	const [copiedVA, setCopiedVA] = (0, import_react.useState)(null);
 	const [modalOpen, setModalOpen] = (0, import_react.useState)(false);
 	const [sending, setSending] = (0, import_react.useState)(false);
@@ -38099,6 +38141,20 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 			showToast("Error sinkronisasi: " + (err.message || "Koneksi gagal"), "error", "Gagal");
 		} finally {
 			setSyncingId(null);
+		}
+	};
+	const handleSyncAll = async () => {
+		setSyncingAll(true);
+		try {
+			const res = await BillingService.syncAll(activeOffice);
+			if (res && res.ok) {
+				showToast(res.message || "Sinkronisasi tagihan kantor berhasil", "success", "Berhasil");
+				await loadData();
+			} else showToast(res.message || "Gagal sinkronisasi data kantor", "error", "Peringatan");
+		} catch (err) {
+			showToast("Error sinkronisasi kantor: " + (err.message || "Koneksi gagal"), "error", "Gagal");
+		} finally {
+			setSyncingAll(false);
 		}
 	};
 	const handleCopyVA = (va) => {
@@ -38211,6 +38267,8 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 				},
 				onClearSelection: handleClearSelection,
 				onRefresh: loadData,
+				onSyncAll: handleSyncAll,
+				syncingAll,
 				loading,
 				lastSyncTime: summary.terakhir_sinkron || "-"
 			}),

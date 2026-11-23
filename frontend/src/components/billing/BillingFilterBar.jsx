@@ -4,7 +4,8 @@ import {
   Send,
   RefreshCw,
   X,
-  Clock
+  Clock,
+  ArrowDownToLine
 } from 'lucide-react'
 import { FilterContainer } from '../common/CommonUI'
 
@@ -16,6 +17,8 @@ export function BillingFilterBar({
   onOpenReminderModal,
   onClearSelection,
   onRefresh,
+  onSyncAll,
+  syncingAll = false,
   loading = false,
   lastSyncTime = '-'
 }) {
@@ -92,13 +95,26 @@ export function BillingFilterBar({
             <button
               type="button"
               onClick={onRefresh}
-              disabled={loading}
+              disabled={loading || syncingAll}
               className="px-3 py-1.5 rounded-lg border border-[#CCDDF0] bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] text-[11px] sm:text-xs font-sans font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
               title={`Sinkronisasi Latar Terakhir: ${lastSyncTime}`}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span>{loading ? 'Memuat...' : 'Segarkan'}</span>
             </button>
+
+            {onSyncAll && (
+              <button
+                type="button"
+                onClick={onSyncAll}
+                disabled={loading || syncingAll}
+                className="px-3 py-1.5 rounded-lg border border-[#026AA7] bg-[#E2EDF8] hover:bg-[#D0E2F4] text-[#026AA7] text-[11px] sm:text-xs font-sans font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
+                title="Tarik live seluruh data tagihan & status jatuh tempo kantor dari Network Bill"
+              >
+                <ArrowDownToLine className={`w-3.5 h-3.5 ${syncingAll ? 'animate-bounce' : ''}`} />
+                <span>{syncingAll ? 'Menyinkronkan...' : 'Sinkronkan POP'}</span>
+              </button>
+            )}
           </div>
         </div>
       </FilterContainer>

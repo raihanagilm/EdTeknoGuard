@@ -23,6 +23,20 @@ class BillingSyncWorker:
     _customer_cache: Dict[str, Dict[str, Any]] = {}  # {pop_slug: {"ts": float, "by_code": {}, "by_wa": {}}}
     CACHE_TTL_SECONDS = 900  # 15 menit
 
+    @staticmethod
+    def clean_name_key(name: Optional[str]) -> str:
+        """Membersihkan nama pelanggan: menghilangkan prefix port OLT, timestamp, dan spasi/simbol."""
+        if not name:
+            return ""
+        # 1. Hilangkan prefix port OLT ZTE jika ada (contoh: 1/3/1:21_ atau 1/1/1:5_)
+        n = re.sub(r'^\d+/\d+/\d+:\d+[_ ]*', '', str(name).strip())
+        # 2. Hilangkan prefix ID/timestamp jika ada (contoh: 150120265457 - )
+        n = re.sub(r'^\d{8,}\s*-\s*', '', n)
+        # 3. Hilangkan trailing keterangan paket/perumahan jika ada pemisah '@'
+        if '@' in n:
+            n = n.split('@', 1)[0]
+        return re.sub(r'[^a-z0-9]', '', n.lower())
+
     @classmethod
     def _get_or_load_customer_map(cls, pop_slug: str) -> Dict[str, Any]:
         now_ts = time.time()
@@ -33,6 +47,7 @@ class BillingSyncWorker:
         by_code = {}
         by_wa = {}
         by_name = {}
+        raw_items = []
         try:
             res = NetworkBillService.fetch_customers(pop_slug, per_page=500)
             items = res.get("data") or []
@@ -40,19 +55,27 @@ class BillingSyncWorker:
                 i_id = str(item.get("id") or "").strip()
                 i_code = (item.get("code") or "").strip().upper()
                 i_wa = str(item.get("whatsapp") or "").replace("+", "").replace("-", "").replace(" ", "").strip()
-                i_name = re.sub(r'[^a-zA-Z0-9]', '', item.get("name") or "").lower()
+                i_name = cls.clean_name_key(item.get("name") or "")
+                payload = (i_id, item)
                 if i_code and i_id:
-                    by_code[i_code] = i_id
+                    by_code[i_code] = payload
                 if i_wa and i_id:
-                    by_wa[i_wa[-9:]] = i_id
+                    by_wa[i_wa[-9:]] = payload
                 if i_name and i_id:
-                    by_name[i_name] = i_id
-            cls._customer_cache[pop_slug] = {"ts": now_ts, "by_code": by_code, "by_wa": by_wa, "by_name": by_name}
+                    by_name[i_name] = payload
+                raw_items.append(item)
+            cls._customer_cache[pop_slug] = {
+                "ts": now_ts,
+                "by_code": by_code,
+                "by_wa": by_wa,
+                "by_name": by_name,
+                "raw_items": raw_items
+            }
             logger.info(f"[BILLING_WORKER] Cache mapping pelanggan Network Bill diperbarui ({pop_slug}): {len(items)} items.")
         except Exception as e:
             logger.warning(f"[BILLING_WORKER] Gagal memuat customer map Network Bill {pop_slug}: {e}")
             if not cached:
-                cls._customer_cache[pop_slug] = {"ts": now_ts, "by_code": {}, "by_wa": {}, "by_name": {}}
+                cls._customer_cache[pop_slug] = {"ts": now_ts, "by_code": {}, "by_wa": {}, "by_name": {}, "raw_items": []}
 
         return cls._customer_cache[pop_slug]
 
@@ -68,26 +91,44 @@ class BillingSyncWorker:
             return cust.id_pelanggan
 
         mapping = cls._get_or_load_customer_map(pop_slug)
+        matched_id = None
+        matched_item = None
+
+        # 1. Cek berdasarkan kode pelanggan (misal PLG-0001 / CUST-...)
         target_code = (cust.id_pelanggan or "").strip().upper()
         if target_code in mapping.get("by_code", {}):
-            matched_id = mapping["by_code"][target_code]
-            cust.network_bill_id = matched_id
-            db.commit()
-            return matched_id
+            matched_id, matched_item = mapping["by_code"][target_code]
 
-        target_wa = (cust.no_hp or "").replace("+", "").replace("-", "").replace(" ", "").strip()
-        if target_wa and len(target_wa) >= 9:
-            wa_suffix = target_wa[-9:]
-            if wa_suffix in mapping.get("by_wa", {}):
-                matched_id = mapping["by_wa"][wa_suffix]
-                cust.network_bill_id = matched_id
-                db.commit()
-                return matched_id
+        # 2. Cek berdasarkan nomor WhatsApp terdaftar (9 digit terakhir)
+        if not matched_id:
+            target_wa = (cust.no_hp or "").replace("+", "").replace("-", "").replace(" ", "").strip()
+            if target_wa and len(target_wa) >= 9:
+                wa_suffix = target_wa[-9:]
+                if wa_suffix in mapping.get("by_wa", {}):
+                    matched_id, matched_item = mapping["by_wa"][wa_suffix]
 
-        target_name = re.sub(r'[^a-zA-Z0-9]', '', cust.nama or "").lower()
-        if target_name and target_name in mapping.get("by_name", {}):
-            matched_id = mapping["by_name"][target_name]
+        # 3. Cek berdasarkan nama yang sudah dinormalisasi (membersihkan prefix OLT/timestamp)
+        target_name = cls.clean_name_key(cust.nama)
+        if not matched_id and target_name:
+            if target_name in mapping.get("by_name", {}):
+                matched_id, matched_item = mapping["by_name"][target_name]
+
+        # 4. Fallback: Pencocokan substring nama (jika panjang karakter alfanumerik >= 5)
+        if not matched_id and target_name and len(target_name) >= 5:
+            for item in mapping.get("raw_items", []):
+                nb_name = cls.clean_name_key(item.get("name"))
+                if nb_name and (target_name in nb_name or nb_name in target_name):
+                    matched_id = str(item.get("id")).strip()
+                    matched_item = item
+                    break
+
+        if matched_id:
             cust.network_bill_id = matched_id
+            # Auto-populate nomor WhatsApp dari Network Bill jika di database lokal belum ada
+            if matched_item and not cust.no_hp:
+                nb_wa = (matched_item.get("whatsapp") or "").strip()
+                if nb_wa:
+                    cust.no_hp = nb_wa
             db.commit()
             return matched_id
 
