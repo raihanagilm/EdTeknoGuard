@@ -50026,6 +50026,15 @@ function App() {
 			if (newSubTab) localStorage.setItem("edtekno_settings_subtab", newSubTab);
 		} catch (_) {}
 	};
+	const [desktopPerm, setDesktopPerm] = (0, import_react.useState)(() => getNotificationPermission());
+	const handleEnableDesktopNotification = async () => {
+		const granted = await requestDesktopNotificationPermission();
+		setDesktopPerm(granted ? "granted" : "denied");
+		if (granted) showDesktopNotification("TeknoGuard NOC Alert", {
+			body: "Notifikasi desktop Windows aktif! Peringatan modem LOS & redaman kritis akan muncul langsung di layar desktop.",
+			tag: "tekno-welcome-notif"
+		});
+	};
 	const [settingsLoading, setSettingsLoading] = (0, import_react.useState)(false);
 	const [settingsSaveSuccess, setSettingsSaveSuccess] = (0, import_react.useState)(false);
 	const [settingsSaveError, setSettingsSaveError] = (0, import_react.useState)("");
@@ -50619,6 +50628,39 @@ function App() {
 						handleLogout: () => setLogoutModalOpen(true),
 						isLiveScanning,
 						liveScanProgress
+					}),
+					isWebNotificationSupported() && desktopPerm === "default" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mx-4 sm:mx-6 mt-4 p-3 bg-white/95 border border-sky-200 rounded-xl shadow-xs flex items-center justify-between gap-3 text-slate-800",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2.5 min-w-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-8 h-8 rounded-lg bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center shrink-0",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Monitor, { className: "w-4 h-4" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "min-w-0 text-xs",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "font-bold text-slate-900 block leading-tight",
+									children: "Aktifkan Notifikasi Desktop Windows"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-slate-500 text-[11px] truncate block mt-0.5",
+									children: "Dapatkan peringatan instan saat terjadi redaman kritis, modem LOS, atau tiket kendala."
+								})]
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2 shrink-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								onClick: handleEnableDesktopNotification,
+								className: "px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition cursor-pointer shadow-xs active:scale-95",
+								children: "Aktifkan"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								onClick: () => setDesktopPerm("dismissed"),
+								className: "p-1 text-slate-400 hover:text-slate-600 rounded-lg transition cursor-pointer",
+								title: "Nanti saja",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
+							})]
+						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
 						className: "p-4 sm:p-6 flex-1",

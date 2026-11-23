@@ -5446,6 +5446,10 @@
       grid-column: span 2 / span 2;
     }
 
+    .sm\:mx-6 {
+      margin-inline: calc(var(--spacing) * 6);
+    }
+
     .sm\:mt-1 {
       margin-top: var(--spacing);
     }

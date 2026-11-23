@@ -12,7 +12,9 @@ import {
   Bell,
   MoreVertical,
   LogOut,
-  Settings
+  Settings,
+  Monitor,
+  X
 } from 'lucide-react'
 
 // Technical English Standard View Components (P9-01)
@@ -35,7 +37,12 @@ import { ConfirmSaveModal } from './components/common/Modals'
 import { ConfirmDialogModal } from './components/common/ConfirmDialogModal'
 import { LoginView } from './components/auth/LoginView'
 import { PortalCustomerApp as PortalPelangganApp } from './portal/PortalCustomerApp'
-import { showDesktopNotification } from './utils/webNotification'
+import {
+  showDesktopNotification,
+  isWebNotificationSupported,
+  getNotificationPermission,
+  requestDesktopNotificationPermission
+} from './utils/webNotification'
 
 // URL Path to Module Tab Mapping Helper (Tersedia secara global di atas komponen App)
 function getTabFromPath(path) {
@@ -218,6 +225,20 @@ export default function App() {
         localStorage.setItem('edtekno_settings_subtab', newSubTab)
       }
     } catch (_) {}
+  }
+
+  // Notifikasi Desktop Windows (Chrome/Edge Web Notifications API)
+  const [desktopPerm, setDesktopPerm] = useState(() => getNotificationPermission())
+
+  const handleEnableDesktopNotification = async () => {
+    const granted = await requestDesktopNotificationPermission()
+    setDesktopPerm(granted ? 'granted' : 'denied')
+    if (granted) {
+      showDesktopNotification('TeknoGuard NOC Alert', {
+        body: 'Notifikasi desktop Windows aktif! Peringatan modem LOS & redaman kritis akan muncul langsung di layar desktop.',
+        tag: 'tekno-welcome-notif'
+      })
+    }
   }
   const [settingsLoading, setSettingsLoading] = useState(false)
   const [settingsSaveSuccess, setSettingsSaveSuccess] = useState(false)
@@ -1005,6 +1026,40 @@ export default function App() {
           isLiveScanning={isLiveScanning}
           liveScanProgress={liveScanProgress}
         />
+
+        {/* Banner Notifikasi Desktop Windows (Chrome/Edge Web Notifications API) */}
+        {isWebNotificationSupported() && desktopPerm === 'default' && (
+          <div className="mx-4 sm:mx-6 mt-4 p-3 bg-white/95 border border-sky-200 rounded-xl shadow-xs flex items-center justify-between gap-3 text-slate-800">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center shrink-0">
+                <Monitor className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 text-xs">
+                <span className="font-bold text-slate-900 block leading-tight">Aktifkan Notifikasi Desktop Windows</span>
+                <span className="text-slate-500 text-[11px] truncate block mt-0.5">
+                  Dapatkan peringatan instan saat terjadi redaman kritis, modem LOS, atau tiket kendala.
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleEnableDesktopNotification}
+                className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition cursor-pointer shadow-xs active:scale-95"
+              >
+                Aktifkan
+              </button>
+              <button
+                type="button"
+                onClick={() => setDesktopPerm('dismissed')}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg transition cursor-pointer"
+                title="Nanti saja"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Dynamic Page Content (Modular Architecture) */}
         <main className="p-4 sm:p-6 flex-1">
