@@ -322,18 +322,13 @@ export function PortalPaymentTab({
                       ) : (
                         /* Tampilan Jika Belum Ada VA: Tagihan Tetap Tampil + Pemberitahuan Kontak WhatsApp Tanpa Direct Link */
                         <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-2.5">
-                          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 flex items-start gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center shrink-0 mt-0.5">
-                              <MessageCircle className="w-4.5 h-4.5" />
-                            </div>
-                            <div className="space-y-1 text-xs">
-                              <p className="font-bold text-slate-900 leading-tight">
-                                Pembayaran Belum Menggunakan Virtual Account
-                              </p>
-                              <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                                {tagihan?.message || 'Pembayaran via Virtual Account otomatis belum aktif untuk kantor cabang ini.'} Rincian tagihan Anda tetap tercatat resmi. Untuk pembayaran atau informasi nomor rekening transfer bank, silakan hubungi admin / kasir kantor melalui WhatsApp.
-                              </p>
-                            </div>
+                          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-1 text-xs">
+                            <p className="font-bold text-slate-900 leading-tight">
+                              Pembayaran Belum Menggunakan Virtual Account
+                            </p>
+                            <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                              {tagihan?.message || 'Pembayaran via Virtual Account otomatis belum aktif untuk kantor cabang ini.'} Rincian tagihan Anda tetap tercatat resmi. Untuk pembayaran atau informasi nomor rekening transfer bank, silakan hubungi admin / kasir kantor melalui WhatsApp.
+                            </p>
                           </div>
                         </div>
                       )}

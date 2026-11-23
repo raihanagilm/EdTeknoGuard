@@ -46,18 +46,18 @@ function NotificationCardItem({ item, isRead, onCardClick, onActionClick, onDele
 
         <div className="flex items-center gap-1.5 shrink-0">
           <span
-            className={`text-xs font-semibold uppercase inline-flex items-center gap-1 tracking-tight ${
-              isRead ? 'opacity-70' : ''
+            className={`text-[10px] font-medium inline-flex items-center gap-1 tracking-normal ${
+              isRead ? 'opacity-65' : ''
             } ${getStatusColor()}`}
           >
             {item.statusType === 'success' ? (
-              <CheckCircle2 className="w-3.5 h-3.5" />
+              <CheckCircle2 className="w-3 h-3 shrink-0" />
             ) : item.statusType === 'info' && item.statusText !== 'MENUNGGU' ? (
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className="w-3 h-3 shrink-0" />
             ) : (
-              <Clock className="w-3.5 h-3.5" />
+              <Clock className="w-3 h-3 shrink-0" />
             )}
-            <span>{item.statusText}</span>
+            <span className="capitalize">{item.statusText?.toLowerCase() || ''}</span>
           </span>
 
           {/* Tombol Hapus Tunggal per Notifikasi */}

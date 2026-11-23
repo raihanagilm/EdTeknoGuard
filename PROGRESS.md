@@ -1,13 +1,16 @@
 # PROGRESS.md — Status Pelacakan Sesi & Keberlanjutan Sistem
 
 ## Current State
-- Last commit: ff31254
-- Test status: passing
-- Active module: Customer Portal Notification Clean Toolbar & Anti-Slop
+- Last commit: In Progress
+- Test status: passing (Vite build OK)
+- Active module: Customer Portal Anti-Slop (Badge Notifikasi, Kartu Non-VA, Redesain Editorial Legal Modal & Page)
 - Baseline: Green
 
 ## In Progress
-- Selesai & Terverifikasi (PASS): Eliminasi Sub-Header Redundant, Penempatan Action Bar di Kanan Atas, & Penghapusan Total Garis Biru Kartu
+- Selesai & Terverifikasi (PASS):
+  1. Penyesuaian ukuran badge status notifikasi: font mikro `text-[10px] font-medium`, title case `Lunas`/`Belum bayar`, icon `w-3 h-3`.
+  2. Penghapusan kotak ikon chat hijau pastel di kartu pemberitahuan non-VA `PortalPaymentTab.jsx`.
+  3. Redesain menyeluruh `PortalLegalModal.jsx` dan `PortalLegalPage.jsx` ke tata letak dokumen editorial murni bebas AI-slop (tanpa kotak icon pastel bertumpuk, tanpa callout bergaris samping biru, tanpa `font-mono`, dan segmented tab netral minimalis).
 
 ## Next Steps
 - [x] Multi-strategy resolution (`BillingSyncWorker.resolve_nb_id`) dengan pembersihan prefix port OLT (`1/3/1:21_`) dan ID timestamp
@@ -26,8 +29,11 @@
 - [x] Penghapusan fake monospace `font-mono` pada baris waktu notifikasi & tiket sesuai panduan `DESIGN.md`
 - [x] Penghapusan sub-header redundant ("Semua Pemberitahuan 6") dan pemindahan tombol aksi ke kanan atas kartu
 - [x] Penghapusan garis samping biru (border-l) pada kartu notifikasi untuk visual yang tenang dan murni anti-slop
-- [x] Build frontend production terbaru (`index-CwTqaqjH.js` & `index-DQcAIXpQ.css`)
-- [ ] Push ke origin main dan restart daemon di server produksi
+- [x] Pengecilan badge status notifikasi `LUNAS` menjadi title case mikro `text-[10px]`
+- [x] Penghapusan kotak ikon chat hijau pastel pada kartu pembayaran non-VA
+- [x] Redesain editorial bersih bebas AI-slop pada `PortalLegalModal.jsx` & `PortalLegalPage.jsx`
+- [x] Build frontend production terbaru (`index-Ddlp0CA8.js` & `index-DhnQKq5G.css`)
+- [ ] Push ke origin main dan restart daemon di server produksi VPS
 
 ## Blockers
 - None
