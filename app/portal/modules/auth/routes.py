@@ -88,8 +88,8 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
     body = await request.json()
     identifier = body.get("identifier", "").strip()
     password = body.get("password", "").strip()
-    
     remember_me = body.get("remember_me", True)
+    platform = str(body.get("platform") or "WEB").upper().strip()
     
     success, msg, data = AuthService.authenticate(db, identifier, password)
     if not success or not data:
@@ -124,7 +124,7 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
                 id_pelanggan=data.get("id_pelanggan"),
                 aksi="LOGIN_PORTAL",
                 kategori="AUTH",
-                keterangan=f"Pelanggan berhasil login ke portal MyTekno ({data.get('nama')})",
+                keterangan=f"Pelanggan berhasil login ke portal MyTekno ({data.get('nama')}) [Platform: {platform}]",
                 request=request
             )
         finally:
@@ -132,6 +132,30 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
                 t_db_log.close()
     except Exception as e:
         logger.warning(f"Gagal mencatat log aktivitas login portal: {e}")
+
+    # Notifikasi Keamanan ke HP Android jika login dilakukan dari Web Browser (Chrome/Edge)
+    if platform == "WEB":
+        try:
+            cust_kantor = data.get("kantor")
+            t_db_cust = TenantDatabaseManager.get_tenant_session(cust_kantor) if cust_kantor else db
+            try:
+                from app.db.models import Pelanggan
+                from app.services.fcm_service import send_push_notification
+                cust_obj = t_db_cust.query(Pelanggan).filter(Pelanggan.id_pelanggan == data.get("id_pelanggan")).first()
+                if cust_obj and cust_obj.fcm_token and cust_obj.fcm_token.strip():
+                    send_push_notification(
+                        tokens=[cust_obj.fcm_token.strip()],
+                        title="Pemberitahuan Keamanan MyTekno",
+                        body=f"Halo {cust_obj.nama}, akun Anda baru saja login melalui Web Browser (Chrome/Windows).",
+                        data={"type": "security_login", "platform": "WEB"},
+                        channel_id="tekno_customer_channel",
+                        sound="default"
+                    )
+            finally:
+                if t_db_cust != db:
+                    t_db_cust.close()
+        except Exception as fcm_err:
+            logger.warning(f"FCM: Gagal mengirimkan push notifikasi login web pelanggan: {fcm_err}")
 
     response = JSONResponse(
         content={

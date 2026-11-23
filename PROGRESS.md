@@ -7,13 +7,16 @@
 - Baseline: Green
 
 ## In Progress
-- Integrasi Harness Engineering WalkingLabs pada repositori EdTeknoGuard
-- Standarisasi pelacakan sesi (cross-session continuity)
+- Integrasi Web Notifications API standar browser (Chrome/Edge/Windows) dan Adaptive Push Notification (Android vs Web)
+- Pemicu FCM push alert ke HP Android saat login akun terdeteksi dari Web Browser
 
 ## Next Steps
-- [ ] Verifikasi seluruh test suite backend dan frontend via single command `make check`
-- [ ] Monitoring periodik redaman optik ONT ZTE/XPON di lapangan
-- [ ] Validasi notifikasi native APK Android untuk teknisi lapangan
+- [x] Implementasi Web Notifications API helper (`frontend/src/utils/webNotification.js`)
+- [x] Notifikasi adaptif di MyTekno (`PortalCustomerApp.jsx`) dan TeknoGuard (`App.jsx`)
+- [x] Notifikasi keamanan FCM push ke HP pengguna jika login via Web Browser (`app/main.py` dan `app/portal/modules/auth/routes.py`)
+- [x] Banner izin notifikasi desktop di TeknoGuard dan MyTekno
+- [x] Build frontend production (`npm run build`)
+- [ ] Deploy dan restart service di server VPS produksi
 
 ## Blockers
 - None

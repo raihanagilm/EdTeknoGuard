@@ -76,8 +76,14 @@ export class PortalAuthService {
     return new PortalApiService().get('/auth/me');
   }
 
-  static async login(identifier, password, rememberMe = true) {
-    return new PortalApiService().post('/auth/login', { identifier, password, remember_me: rememberMe });
+  static async login(identifier, password, rememberMe = true, platform = null) {
+    const plat = platform || (typeof window !== 'undefined' && window.AndroidBridge ? 'APP' : 'WEB');
+    return new PortalApiService().post('/auth/login', {
+      identifier,
+      password,
+      remember_me: rememberMe,
+      platform: plat
+    });
   }
 
   static async logout() {

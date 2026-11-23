@@ -34,7 +34,8 @@ export function LoginView({
         body: JSON.stringify({
           username: username.trim(),
           password: password,
-          remember_me: Boolean(rememberMe)
+          remember_me: Boolean(rememberMe),
+          platform: window.AndroidBridge ? 'APP' : 'WEB'
         })
       })
       const data = await res.json().catch(() => ({}))

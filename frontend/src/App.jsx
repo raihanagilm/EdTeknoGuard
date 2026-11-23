@@ -35,6 +35,7 @@ import { ConfirmSaveModal } from './components/common/Modals'
 import { ConfirmDialogModal } from './components/common/ConfirmDialogModal'
 import { LoginView } from './components/auth/LoginView'
 import { PortalCustomerApp as PortalPelangganApp } from './portal/PortalCustomerApp'
+import { showDesktopNotification } from './utils/webNotification'
 
 // URL Path to Module Tab Mapping Helper (Tersedia secara global di atas komponen App)
 function getTabFromPath(path) {
@@ -414,6 +415,38 @@ export default function App() {
 
         if (Array.isArray(notifRes.notifications)) {
           setNotificationList(notifRes.notifications)
+
+          // ═══ WEB NOTIFICATIONS API (WINDOWS DESKTOP CHROME/EDGE) ═══
+          // Memunculkan pop-up Windows Desktop Notification untuk event Kritis (LOS/Kritis) & Tiket Baru
+          try {
+            const alertedKey = 'edtekno_alerted_desktop_notifs'
+            let alertedSet = new Set()
+            try {
+              const saved = sessionStorage.getItem(alertedKey)
+              if (saved) alertedSet = new Set(JSON.parse(saved))
+            } catch (_) {}
+
+            notifRes.notifications.forEach((item) => {
+              const isCritical = item.is_critical || item.level === 'los' || item.level === 'critical'
+              const isTicket = item.type === 'ticket' || item.target_tab === 'tiket'
+
+              if ((isCritical || isTicket) && item.id && !alertedSet.has(item.id)) {
+                alertedSet.add(item.id)
+                showDesktopNotification(item.title, {
+                  body: item.message,
+                  tag: item.id,
+                  icon: '/tekno-indo-logo.png',
+                  onClick: () => {
+                    handleNotificationItemClick(item)
+                  }
+                })
+              }
+            })
+
+            sessionStorage.setItem(alertedKey, JSON.stringify(Array.from(alertedSet)))
+          } catch (notifErr) {
+            console.warn('[DesktopNotif] Error triggering desktop notification:', notifErr)
+          }
         }
       }
     } catch (e) {

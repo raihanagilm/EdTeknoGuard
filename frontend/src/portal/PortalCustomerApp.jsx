@@ -24,6 +24,7 @@ import { PortalSemanticSkeleton } from './components/common/PortalSemanticSkelet
 import { PortalToastNotification } from './components/common/PortalToastNotification';
 import { PortalLegalPage } from './components/legal/PortalLegalPage';
 import { checkHasUnreadNotifications } from './utils/notificationUtils';
+import { showDesktopNotification } from '../utils/webNotification';
 import { RefreshCw } from 'lucide-react';
 
 export function PortalCustomerApp() {
@@ -285,86 +286,99 @@ export function PortalCustomerApp() {
         const unread = checkHasUnreadNotifications(pel, tickets, payments);
         setHasUnreadNotifications(unread);
 
-        // Picu Notifikasi Native (Android Bridge)
-        if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
-          // 1. Notifikasi Status Sinyal / Gangguan Jaringan (LOS & Pemulihan Kembali Normal)
-          const lastLogConn = dashboardData?.last_log?.status_koneksi?.toUpperCase?.();
-          const alertedLosKey = 'mytekno_alerted_los_status';
-          const lastAlertedStatus = sessionStorage.getItem(alertedLosKey);
-
-          if (lastLogConn === 'LOS') {
-            if (lastAlertedStatus !== 'LOS') {
-              sessionStorage.setItem(alertedLosKey, 'LOS');
-              try {
-                window.AndroidBridge.showNativeNotification(
-                  'Pemberitahuan Gangguan Jaringan',
-                  'Mohon maaf atas ketidaknyamanannya, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.',
-                  false
-                );
-              } catch (_) {}
-            }
-          } else if (lastLogConn && lastLogConn !== 'LOS') {
-            // Jika sebelumnya pernah mengalami LOS dan sekarang sudah kembali pulih/normal
-            if (lastAlertedStatus === 'LOS') {
-              sessionStorage.setItem(alertedLosKey, 'NORMAL');
-              try {
-                window.AndroidBridge.showNativeNotification(
-                  'Koneksi Internet Telah Pulih',
-                  'Koneksi internet Anda telah kembali normal dan aktif. Terima kasih atas kesabaran Anda telah menggunakan layanan kami!',
-                  false
-                );
-              } catch (_) {}
-            } else if (!lastAlertedStatus) {
-              sessionStorage.setItem(alertedLosKey, lastLogConn);
-            }
+        // Pengiriman Notifikasi Adaptif: Android Bridge (in-app/push) & Web Notifications API (Chrome/Windows)
+        const notifyCustomer = (title, message, isEmergency = false, tag = undefined, onClick = undefined) => {
+          if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
+            try {
+              window.AndroidBridge.showNativeNotification(title, message, isEmergency);
+            } catch (_) {}
+          } else {
+            showDesktopNotification(title, {
+              body: message,
+              tag: tag || title,
+              icon: '/tekno-indo-logo.png',
+              onClick
+            });
           }
+        };
 
-          // 2. Notifikasi jika status tiket pelanggan berubah
-          const alertedTicketStorageKey = 'mytekno_alerted_ticket_status';
-          let lastTicketStatusMap = {};
-          try {
-            const rawMap = localStorage.getItem(alertedTicketStorageKey);
-            if (rawMap) lastTicketStatusMap = JSON.parse(rawMap);
-          } catch (_) {}
+        // 1. Notifikasi Status Sinyal / Gangguan Jaringan (LOS & Pemulihan Kembali Normal)
+        const lastLogConn = dashboardData?.last_log?.status_koneksi?.toUpperCase?.();
+        const alertedLosKey = 'mytekno_alerted_los_status';
+        const lastAlertedStatus = sessionStorage.getItem(alertedLosKey);
 
-          tickets.forEach((t) => {
-            const ticketKey = `${t.id_tiket || t.id}:${t.status}`;
-            if (t.id_tiket && lastTicketStatusMap[t.id_tiket] !== t.status) {
-              lastTicketStatusMap[t.id_tiket] = t.status;
-              const labelStatus = t.status === 'SELESAI'
-                ? 'Laporan kendala WiFi Anda telah selesai ditangani'
-                : t.status === 'DIPROSES'
-                ? 'Teknisi kami sedang menuju lokasi untuk perbaikan'
-                : `Status laporan Anda: ${t.status}`;
+        if (lastLogConn === 'LOS') {
+          if (lastAlertedStatus !== 'LOS') {
+            sessionStorage.setItem(alertedLosKey, 'LOS');
+            notifyCustomer(
+              'Pemberitahuan Gangguan Jaringan',
+              'Mohon maaf atas ketidaknyamanannya, koneksi internet Anda saat ini terdeteksi mengalami gangguan (LOS). Tim teknisi kami sedang segera menangani kendala ini.',
+              true,
+              'mytekno-los-alert',
+              () => switchTab('beranda')
+            );
+          }
+        } else if (lastLogConn && lastLogConn !== 'LOS') {
+          // Jika sebelumnya pernah mengalami LOS dan sekarang sudah kembali pulih/normal
+          if (lastAlertedStatus === 'LOS') {
+            sessionStorage.setItem(alertedLosKey, 'NORMAL');
+            notifyCustomer(
+              'Koneksi Internet Telah Pulih',
+              'Koneksi internet Anda telah kembali normal dan aktif. Terima kasih atas kesabaran Anda telah menggunakan layanan kami!',
+              false,
+              'mytekno-recovered-alert',
+              () => switchTab('beranda')
+            );
+          } else if (!lastAlertedStatus) {
+            sessionStorage.setItem(alertedLosKey, lastLogConn);
+          }
+        }
 
-              try {
-                window.AndroidBridge.showNativeNotification(
-                  `Tiket ${t.id_tiket}`,
-                  labelStatus,
-                  false
-                );
-              } catch (_) {}
-            }
-          });
+        // 2. Notifikasi jika status tiket pelanggan berubah
+        const alertedTicketStorageKey = 'mytekno_alerted_ticket_status';
+        let lastTicketStatusMap = {};
+        try {
+          const rawMap = localStorage.getItem(alertedTicketStorageKey);
+          if (rawMap) lastTicketStatusMap = JSON.parse(rawMap);
+        } catch (_) {}
 
-          try {
-            localStorage.setItem(alertedTicketStorageKey, JSON.stringify(lastTicketStatusMap));
-          } catch (_) {}
+        tickets.forEach((t) => {
+          const ticketKey = `${t.id_tiket || t.id}:${t.status}`;
+          if (t.id_tiket && lastTicketStatusMap[t.id_tiket] !== t.status) {
+            lastTicketStatusMap[t.id_tiket] = t.status;
+            const labelStatus = t.status === 'SELESAI'
+              ? 'Laporan kendala WiFi Anda telah selesai ditangani'
+              : t.status === 'DIPROSES'
+              ? 'Teknisi kami sedang menuju lokasi untuk perbaikan'
+              : `Status laporan Anda: ${t.status}`;
 
-          // 3. Notifikasi Native Pengingat Tagihan dari Admin NOC
-          const billingAlert = pel.billing_reminder;
-          if (billingAlert && billingAlert.id) {
-            const alertedBillingKey = `mytekno_alerted_billing_${billingAlert.id}`;
-            if (!sessionStorage.getItem(alertedBillingKey)) {
-              sessionStorage.setItem(alertedBillingKey, '1');
-              try {
-                window.AndroidBridge.showNativeNotification(
-                  'Pengingat Tagihan Internet',
-                  billingAlert.pesan || 'Tagihan internet bulanan Anda telah terbit. Silakan lakukan pembayaran agar layanan tetap aktif.',
-                  false
-                );
-              } catch (_) {}
-            }
+            notifyCustomer(
+              `Tiket #${t.id_tiket}`,
+              labelStatus,
+              false,
+              `ticket-${t.id_tiket}-${t.status}`,
+              () => switchTab('kendala')
+            );
+          }
+        });
+
+        try {
+          localStorage.setItem(alertedTicketStorageKey, JSON.stringify(lastTicketStatusMap));
+        } catch (_) {}
+
+        // 3. Notifikasi Native Pengingat Tagihan dari Admin NOC
+        const billingAlert = pel.billing_reminder;
+        if (billingAlert && billingAlert.id) {
+          const alertedBillingKey = `mytekno_alerted_billing_${billingAlert.id}`;
+          if (!sessionStorage.getItem(alertedBillingKey)) {
+            sessionStorage.setItem(alertedBillingKey, '1');
+            notifyCustomer(
+              'Pengingat Tagihan Internet',
+              billingAlert.pesan || 'Tagihan internet bulanan Anda telah terbit. Silakan lakukan pembayaran agar layanan tetap aktif.',
+              false,
+              alertedBillingKey,
+              () => switchTab('pembayaran')
+            );
           }
         }
       })

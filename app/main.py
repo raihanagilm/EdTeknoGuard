@@ -377,6 +377,7 @@ async def api_auth_login(request: Request):
     username = body.get("username", "").strip()
     password = body.get("password", "")
     remember_me = body.get("remember_me", True)
+    platform = str(body.get("platform") or "WEB").upper().strip()
     
     db = SessionLocal()
     try:
@@ -409,8 +410,25 @@ async def api_auth_login(request: Request):
             ip_address=ip,
             user_agent=user_agent,
             status="SUCCESS",
-            keterangan="Login berhasil melalui antarmuka web TeknoGuard"
+            keterangan=f"Login berhasil melalui antarmuka TeknoGuard [Platform: {platform}]"
         )
+
+        # Notifikasi Keamanan ke HP Android jika login admin dilakukan dari Web Browser (Chrome/Edge)
+        if platform == "WEB":
+            try:
+                from app.services.fcm_service import send_push_notification
+                # Kirim push alert ke perangkat Android admin yang bersangkutan jika token FCM terdaftar
+                if getattr(user, "fcm_token", None) and str(user.fcm_token).strip():
+                    send_push_notification(
+                        tokens=[str(user.fcm_token).strip()],
+                        title="Aktivitas Login TeknoGuard",
+                        body=f"Akun Anda ({user.username}) baru saja masuk melalui Web Browser (Chrome/Windows).",
+                        data={"type": "security_login", "platform": "WEB"},
+                        channel_id="tekno_emergency_v3_channel",
+                        sound="default"
+                    )
+            except Exception as fcm_err:
+                logging.getLogger("auth").warning(f"FCM: Gagal mengirimkan push notifikasi web login admin: {fcm_err}")
         
         response = JSONResponse(
             content={
