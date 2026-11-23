@@ -1,13 +1,13 @@
 # PROGRESS.md — Status Pelacakan Sesi & Keberlanjutan Sistem
 
 ## Current State
-- Last commit: 7cfc2c8
+- Last commit: ff31254
 - Test status: passing
-- Active module: Customer Portal Notification UX & Typography Fix
+- Active module: Customer Portal Notification Clean Toolbar & Anti-Slop
 - Baseline: Green
 
 ## In Progress
-- Selesai & Terverifikasi (PASS): Perbaikan Tipografi & Pemisahan Handler Klik Kartu Notifikasi (Card Body = Toggle Read Abu-abu, Action Link = Direct Link)
+- Selesai & Terverifikasi (PASS): Eliminasi Sub-Header Redundant, Penempatan Action Bar di Kanan Atas, & Penghapusan Total Garis Biru Kartu
 
 ## Next Steps
 - [x] Multi-strategy resolution (`BillingSyncWorker.resolve_nb_id`) dengan pembersihan prefix port OLT (`1/3/1:21_`) dan ID timestamp
@@ -24,8 +24,9 @@
 - [x] Pemisahan target klik kartu notifikasi: klik bodi kartu hanya menandai dibaca dan mengubah warna jadi abu-abu (`PortalNotificationsPage.jsx`)
 - [x] Direct link navigasi hanya dipicu saat pengguna menekan tautan aksi mikro (`Bayar Sekarang >` / `Lihat Struk >`)
 - [x] Penghapusan fake monospace `font-mono` pada baris waktu notifikasi & tiket sesuai panduan `DESIGN.md`
-- [x] Perbaikan layout header kartu notifikasi mobile agar judul tidak terpotong menjadi "p..."
-- [x] Build frontend production terbaru (`index-ClVmTyZS.js` & `index-CwxYZuUU.css`)
+- [x] Penghapusan sub-header redundant ("Semua Pemberitahuan 6") dan pemindahan tombol aksi ke kanan atas kartu
+- [x] Penghapusan garis samping biru (border-l) pada kartu notifikasi untuk visual yang tenang dan murni anti-slop
+- [x] Build frontend production terbaru (`index-CwTqaqjH.js` & `index-DQcAIXpQ.css`)
 - [ ] Push ke origin main dan restart daemon di server produksi
 
 ## Blockers

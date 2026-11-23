@@ -495,56 +495,38 @@ export function PortalNotificationsPage({
         <div className="px-3.5 pb-24 space-y-3">
           {/* Card Utama Pembungkus List (Sesuai Styling Kartu Menu Lain) */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
-            {/* Header Pemberitahuan & Action Bar Bebas Tabrakan */}
-            <div className="p-3 sm:p-3.5 border-b border-slate-100 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <Bell className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-900 leading-tight">
-                    Semua Pemberitahuan
-                  </span>
-                  {notificationList.length > 0 && (
-                    <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full shrink-0">
-                      {notificationList.length}
-                    </span>
-                  )}
-                </div>
+            {/* Action Bar Kanan Atas (Tandai Dibaca & Hapus Dibaca) */}
+            {(notificationList.some((it) => !readIds.includes(it.id)) || notificationList.some((it) => readIds.includes(it.id))) && (
+              <div className="px-3.5 py-2.5 border-b border-slate-100 flex items-center justify-end gap-3 bg-white">
+                {notificationList.some((it) => !readIds.includes(it.id)) && (
+                  <button
+                    type="button"
+                    onClick={handleMarkAllAsRead}
+                    className="text-blue-600 hover:text-blue-700 text-xs font-semibold transition inline-flex items-center gap-1 cursor-pointer py-0.5"
+                    title="Tandai seluruh pemberitahuan sebagai sudah dibaca"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5 shrink-0" />
+                    <span>Tandai Dibaca</span>
+                  </button>
+                )}
+
+                {notificationList.some((it) => !readIds.includes(it.id)) && notificationList.some((it) => readIds.includes(it.id)) && (
+                  <span className="w-px h-3 bg-slate-200" aria-hidden="true" />
+                )}
+
+                {notificationList.some((it) => readIds.includes(it.id)) && (
+                  <button
+                    type="button"
+                    onClick={handleClearReadNotifications}
+                    className="text-rose-600 hover:text-rose-700 text-xs font-semibold transition inline-flex items-center gap-1 cursor-pointer py-0.5"
+                    title="Hapus seluruh pemberitahuan yang sudah dibaca"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>Hapus Dibaca</span>
+                  </button>
+                )}
               </div>
-
-              {(notificationList.some((it) => !readIds.includes(it.id)) || notificationList.some((it) => readIds.includes(it.id))) && (
-                <div className="flex items-center justify-end gap-3 pt-1.5 border-t border-slate-100/80">
-                  {notificationList.some((it) => !readIds.includes(it.id)) && (
-                    <button
-                      type="button"
-                      onClick={handleMarkAllAsRead}
-                      className="text-blue-600 hover:text-blue-700 text-xs font-medium transition inline-flex items-center gap-1 cursor-pointer py-0.5"
-                      title="Tandai seluruh pemberitahuan sebagai sudah dibaca"
-                    >
-                      <CheckCheck className="w-3.5 h-3.5 shrink-0" />
-                      <span>Tandai Dibaca</span>
-                    </button>
-                  )}
-
-                  {notificationList.some((it) => !readIds.includes(it.id)) && notificationList.some((it) => readIds.includes(it.id)) && (
-                    <span className="w-px h-3 bg-slate-200" aria-hidden="true" />
-                  )}
-
-                  {notificationList.some((it) => readIds.includes(it.id)) && (
-                    <button
-                      type="button"
-                      onClick={handleClearReadNotifications}
-                      className="text-rose-600 hover:text-rose-700 text-xs font-medium transition inline-flex items-center gap-1 cursor-pointer py-0.5"
-                      title="Hapus seluruh pemberitahuan yang sudah dibaca"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                      <span>Hapus Dibaca</span>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+            )}
 
             {/* List Notifikasi */}
             <div className="divide-y divide-slate-100">
