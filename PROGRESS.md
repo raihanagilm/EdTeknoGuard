@@ -1,13 +1,13 @@
 # PROGRESS.md — Status Pelacakan Sesi & Keberlanjutan Sistem
 
 ## Current State
-- Last commit: c5c2fd3
-- Test status: passing (87 unit tests passing)
-- Active module: Billing Table Reminder Status Badge
+- Last commit: 7cfc2c8
+- Test status: passing
+- Active module: Customer Portal Notification UX & Typography Fix
 - Baseline: Green
 
 ## In Progress
-- Selesai & Terverifikasi (PASS): Indikator Visual Pengingat Tagihan (Badge Diingatkan vs Belum Diingatkan pada Tabel & Kartu Mobile Pembayaran)
+- Selesai & Terverifikasi (PASS): Perbaikan Tipografi & Pemisahan Handler Klik Kartu Notifikasi (Card Body = Toggle Read Abu-abu, Action Link = Direct Link)
 
 ## Next Steps
 - [x] Multi-strategy resolution (`BillingSyncWorker.resolve_nb_id`) dengan pembersihan prefix port OLT (`1/3/1:21_`) dan ID timestamp
@@ -21,7 +21,11 @@
 - [x] Agregasi riwayat pengingat tagihan `AlertLog` (`TAGIHAN_REMINDER`) di `BillingService.get_billing_overview`
 - [x] Penambahan badge pengingat (`Send` / `BellOff`) pada kolom STATUS di `BillingTable.jsx` (desktop table & mobile cards)
 - [x] Auto-refresh data pembayaran setelah modal kirim pengingat diproses di `BillingView.jsx`
-- [x] Build frontend production terbaru (`index-Cc-Z6Ncd.js` & `index-BbGnUoSn.css`)
+- [x] Pemisahan target klik kartu notifikasi: klik bodi kartu hanya menandai dibaca dan mengubah warna jadi abu-abu (`PortalNotificationsPage.jsx`)
+- [x] Direct link navigasi hanya dipicu saat pengguna menekan tautan aksi mikro (`Bayar Sekarang >` / `Lihat Struk >`)
+- [x] Penghapusan fake monospace `font-mono` pada baris waktu notifikasi & tiket sesuai panduan `DESIGN.md`
+- [x] Perbaikan layout header kartu notifikasi mobile agar judul tidak terpotong menjadi "p..."
+- [x] Build frontend production terbaru (`index-ClVmTyZS.js` & `index-CwxYZuUU.css`)
 - [ ] Push ke origin main dan restart daemon di server produksi
 
 ## Blockers

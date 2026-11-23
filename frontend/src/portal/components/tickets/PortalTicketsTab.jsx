@@ -286,12 +286,12 @@ export function PortalTicketsTab({ customer, dashboardData, onOpenNotifications 
                       </div>
                       <div className="text-xs font-bold text-slate-900">{t.kategori}</div>
                       <p className="text-xs text-slate-600 leading-relaxed">{t.deskripsi}</p>
-                      <div className="pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                      <div className="pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-sans">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3 text-slate-400" />
-                          {t.created_at?.slice(0, 16)}
+                          <span>{t.created_at?.slice(0, 16)}</span>
                         </span>
-                        {t.redaman_saat_lapor && <span className="text-[11px] font-semibold text-slate-600">Redaman: {t.redaman_saat_lapor} dBm</span>}
+                        {t.redaman_saat_lapor && <span className="text-[11px] font-semibold text-slate-600">Redaman: <span className="font-mono">{t.redaman_saat_lapor} dBm</span></span>}
                       </div>
                     </article>
                   ))}

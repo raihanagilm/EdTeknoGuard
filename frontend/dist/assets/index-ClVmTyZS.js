@@ -43608,7 +43608,7 @@ var jenisTagihanTeks = (type) => {
 };
 //#endregion
 //#region src/portal/components/notifications/PortalNotificationsPage.jsx
-function NotificationCardItem({ item, isRead, onClick, onDelete }) {
+function NotificationCardItem({ item, isRead, onCardClick, onActionClick, onDelete }) {
 	const getStatusColor = () => {
 		switch (item.statusType) {
 			case "info": return "text-blue-600";
@@ -43618,25 +43618,21 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-		onClick: () => onClick(item),
-		className: `p-3.5 space-y-1.5 transition cursor-pointer select-none ${isRead ? "bg-white hover:bg-slate-50/70" : "bg-blue-50/30 hover:bg-blue-50/50"}`,
+		onClick: () => onCardClick(item),
+		className: `p-3.5 space-y-1.5 transition-colors cursor-pointer select-none border-l-4 ${isRead ? "bg-slate-50/80 hover:bg-slate-100/70 border-l-transparent text-slate-500" : "bg-white hover:bg-blue-50/40 border-l-blue-600 text-slate-900 shadow-2xs"}`,
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-between gap-2",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex items-center gap-2 min-w-0",
-					children: [!isRead && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "inline-flex items-center justify-center text-blue-600 shrink-0",
-						title: "Pemberitahuan baru belum dibaca",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `text-xs font-bold truncate ${isRead ? "text-slate-700" : "text-slate-900"}`,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: `text-xs truncate ${isRead ? "font-medium text-slate-600" : "font-bold text-slate-900"}`,
 						children: item.title
-					})]
+					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-1.5 shrink-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: `text-xs font-bold uppercase inline-flex items-center gap-1 tracking-tight ${getStatusColor()}`,
+						className: `text-xs font-semibold uppercase inline-flex items-center gap-1 tracking-tight ${isRead ? "opacity-70" : ""} ${getStatusColor()}`,
 						children: [item.statusType === "success" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-3.5 h-3.5" }) : item.statusType === "info" && item.statusText !== "MENUNGGU" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.statusText })]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
@@ -43651,16 +43647,22 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: `text-xs leading-relaxed ${isRead ? "text-slate-500" : "text-slate-600"}`,
+				className: `text-xs leading-relaxed ${isRead ? "text-slate-400" : "text-slate-600 font-normal"}`,
 				children: item.desc
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono",
+				className: "pt-1 flex items-center justify-between text-[11px] font-sans",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-					className: "flex items-center gap-1",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-slate-400" }), item.timestamp]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-					className: "font-bold text-blue-600 inline-flex items-center gap-0.5 hover:underline cursor-pointer",
+					className: `flex items-center gap-1 ${isRead ? "text-slate-400" : "text-slate-500"}`,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-slate-400 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.timestamp })]
+				}), item.actionText && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
+					onClick: (e) => {
+						e.stopPropagation();
+						onActionClick(item);
+					},
+					className: `font-semibold inline-flex items-center gap-0.5 transition cursor-pointer font-sans ${isRead ? "text-slate-500 hover:text-blue-600" : "text-blue-600 hover:text-blue-700 hover:underline"}`,
+					title: `Buka ${item.actionText}`,
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.actionText }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5" })]
 				})]
 			})
@@ -43884,7 +43886,19 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 		}
 		setNotifToDelete(null);
 	};
-	const handleItemClick = (item) => {
+	const handleToggleRead = (item) => {
+		if (!readIds.includes(item.id)) {
+			const next = [...readIds, item.id];
+			setReadIds(next);
+			try {
+				localStorage.setItem("teknocust_read_notifications", JSON.stringify(next));
+				window.dispatchEvent(new Event("teknocust_notifications_updated"));
+			} catch (e) {
+				console.error(e);
+			}
+		}
+	};
+	const handleActionNavigate = (item) => {
 		if (!readIds.includes(item.id)) {
 			const next = [...readIds, item.id];
 			setReadIds(next);
@@ -44082,38 +44096,34 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 						className: "bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2",
+							className: "p-3 sm:p-3.5 border-b border-slate-100 flex flex-col xs:flex-row sm:flex-row sm:items-center justify-between gap-2.5",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-2.5 min-w-0",
+								className: "flex items-center gap-2 min-w-0",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-4 h-4" })
+									className: "w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5" })
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-baseline gap-1.5 min-w-0",
+									className: "flex items-center gap-1.5 min-w-0",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-xs font-bold text-slate-900 leading-tight",
+										className: "text-xs font-bold text-slate-900 leading-tight whitespace-nowrap",
 										children: "Semua Pemberitahuan"
-									}), notificationList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "text-xs text-slate-500 font-normal",
-										children: [
-											"· ",
-											notificationList.length,
-											" pesan"
-										]
+									}), notificationList.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full shrink-0",
+										children: notificationList.length
 									})]
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-1.5 shrink-0",
+								className: "flex items-center gap-1.5 shrink-0 self-end sm:self-auto",
 								children: [notificationList.some((it) => !readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									type: "button",
 									onClick: handleMarkAllAsRead,
-									className: "px-2.5 py-1 rounded-lg text-blue-600 hover:bg-blue-50 text-xs font-medium transition flex items-center gap-1 cursor-pointer",
+									className: "px-2 py-1 rounded-lg text-blue-600 hover:bg-blue-50 text-xs font-medium transition flex items-center gap-1 cursor-pointer",
 									title: "Tandai seluruh pemberitahuan sebagai sudah dibaca",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckCheck, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tandai Dibaca" })]
 								}), notificationList.some((it) => readIds.includes(it.id)) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									type: "button",
 									onClick: handleClearReadNotifications,
-									className: "px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer",
+									className: "px-2 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer",
 									title: "Hapus seluruh pemberitahuan yang sudah dibaca",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hapus Dibaca" })]
 								})]
@@ -44154,16 +44164,9 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 								return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NotificationCardItem, {
 									item,
 									isRead,
-									onClick: handleItemClick,
-									onDelete: (it) => {
-										const next = [...deletedIds, it.id];
-										setDeletedIds(next);
-										try {
-											localStorage.setItem("teknocust_deleted_notifications", JSON.stringify(next));
-										} catch (err) {
-											console.error(err);
-										}
-									}
+									onCardClick: handleToggleRead,
+									onActionClick: handleActionNavigate,
+									onDelete: (it) => setNotifToDelete(it)
 								}, item.id);
 							})
 						})]
@@ -46627,17 +46630,16 @@ function PortalTicketsTab({ customer, dashboardData, onOpenNotifications, hasUnr
 												children: t.deskripsi
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono",
+												className: "pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-sans",
 												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 													className: "flex items-center gap-1",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-slate-400" }), t.created_at?.slice(0, 16)]
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-3 h-3 text-slate-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: t.created_at?.slice(0, 16) })]
 												}), t.redaman_saat_lapor && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 													className: "text-[11px] font-semibold text-slate-600",
-													children: [
-														"Redaman: ",
-														t.redaman_saat_lapor,
-														" dBm"
-													]
+													children: ["Redaman: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+														className: "font-mono",
+														children: [t.redaman_saat_lapor, " dBm"]
+													})]
 												})]
 											})
 										]

@@ -13,7 +13,7 @@ import {
 import { PortalKendalaService, PortalPembayaranService } from '../../services/portalApi';
 import { rupiah, periodeTeks } from '../payment/paymentUtils';
 
-function NotificationCardItem({ item, isRead, onClick, onDelete }) {
+function NotificationCardItem({ item, isRead, onCardClick, onActionClick, onDelete }) {
   const getStatusColor = () => {
     switch (item.statusType) {
       case 'info':
@@ -29,30 +29,26 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
 
   return (
     <article
-      onClick={() => onClick(item)}
-      className={`p-3.5 space-y-1.5 transition cursor-pointer select-none ${
-        isRead ? 'bg-white hover:bg-slate-50/70' : 'bg-blue-50/30 hover:bg-blue-50/50'
+      onClick={() => onCardClick(item)}
+      className={`p-3.5 space-y-1.5 transition-colors cursor-pointer select-none border-l-4 ${
+        isRead
+          ? 'bg-slate-50/80 hover:bg-slate-100/70 border-l-transparent text-slate-500'
+          : 'bg-white hover:bg-blue-50/40 border-l-blue-600 text-slate-900 shadow-2xs'
       }`}
     >
       {/* Baris Atas: Judul Kategori & Status Bersih (Tanpa Box) + Tombol Hapus */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          {!isRead && (
-            <span
-              className="inline-flex items-center justify-center text-blue-600 shrink-0"
-              title="Pemberitahuan baru belum dibaca"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-            </span>
-          )}
-          <span className={`text-xs font-bold truncate ${isRead ? 'text-slate-700' : 'text-slate-900'}`}>
+          <span className={`text-xs truncate ${isRead ? 'font-medium text-slate-600' : 'font-bold text-slate-900'}`}>
             {item.title}
           </span>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           <span
-            className={`text-xs font-bold uppercase inline-flex items-center gap-1 tracking-tight ${getStatusColor()}`}
+            className={`text-xs font-semibold uppercase inline-flex items-center gap-1 tracking-tight ${
+              isRead ? 'opacity-70' : ''
+            } ${getStatusColor()}`}
           >
             {item.statusType === 'success' ? (
               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -80,23 +76,35 @@ function NotificationCardItem({ item, isRead, onClick, onDelete }) {
       </div>
 
       {/* Isi Pesan Notifikasi */}
-      <p className={`text-xs leading-relaxed ${isRead ? 'text-slate-500' : 'text-slate-600'}`}>
+      <p className={`text-xs leading-relaxed ${isRead ? 'text-slate-400' : 'text-slate-600 font-normal'}`}>
         {item.desc}
       </p>
 
-      {/* Baris Bawah: Waktu & Link Aksi */}
-      <div className="pt-1.5 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-        <span className="flex items-center gap-1">
-          <Clock className="w-3 h-3 text-slate-400" />
-          {item.timestamp}
+      {/* Baris Bawah: Waktu & Link Aksi (Sans-serif Murni, Tanpa Fake Monospace) */}
+      <div className="pt-1 flex items-center justify-between text-[11px] font-sans">
+        <span className={`flex items-center gap-1 ${isRead ? 'text-slate-400' : 'text-slate-500'}`}>
+          <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+          <span>{item.timestamp}</span>
         </span>
 
-        <span
-          className="font-bold text-blue-600 inline-flex items-center gap-0.5 hover:underline cursor-pointer"
-        >
-          <span>{item.actionText}</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </span>
+        {item.actionText && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onActionClick(item);
+            }}
+            className={`font-semibold inline-flex items-center gap-0.5 transition cursor-pointer font-sans ${
+              isRead
+                ? 'text-slate-500 hover:text-blue-600'
+                : 'text-blue-600 hover:text-blue-700 hover:underline'
+            }`}
+            title={`Buka ${item.actionText}`}
+          >
+            <span>{item.actionText}</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
     </article>
   );
@@ -373,7 +381,20 @@ export function PortalNotificationsPage({
     setNotifToDelete(null);
   };
 
-  const handleItemClick = (item) => {
+  const handleToggleRead = (item) => {
+    if (!readIds.includes(item.id)) {
+      const next = [...readIds, item.id];
+      setReadIds(next);
+      try {
+        localStorage.setItem('teknocust_read_notifications', JSON.stringify(next));
+        window.dispatchEvent(new Event('teknocust_notifications_updated'));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const handleActionNavigate = (item) => {
     if (!readIds.includes(item.id)) {
       const next = [...readIds, item.id];
       setReadIds(next);
@@ -475,29 +496,29 @@ export function PortalNotificationsPage({
           {/* Card Utama Pembungkus List (Sesuai Styling Kartu Menu Lain) */}
           <section className="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-200/90">
             {/* Action & Filter Bar dengan Ikon Semantik */}
-            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                  <Bell className="w-4 h-4" />
+            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex flex-col xs:flex-row sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <Bell className="w-3.5 h-3.5" />
                 </div>
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <span className="text-xs font-bold text-slate-900 leading-tight">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-xs font-bold text-slate-900 leading-tight whitespace-nowrap">
                     Semua Pemberitahuan
                   </span>
                   {notificationList.length > 0 && (
-                    <span className="text-xs text-slate-500 font-normal">
-                      · {notificationList.length} pesan
+                    <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full shrink-0">
+                      {notificationList.length}
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
                 {notificationList.some((it) => !readIds.includes(it.id)) && (
                   <button
                     type="button"
                     onClick={handleMarkAllAsRead}
-                    className="px-2.5 py-1 rounded-lg text-blue-600 hover:bg-blue-50 text-xs font-medium transition flex items-center gap-1 cursor-pointer"
+                    className="px-2 py-1 rounded-lg text-blue-600 hover:bg-blue-50 text-xs font-medium transition flex items-center gap-1 cursor-pointer"
                     title="Tandai seluruh pemberitahuan sebagai sudah dibaca"
                   >
                     <CheckCheck className="w-3.5 h-3.5" />
@@ -509,7 +530,7 @@ export function PortalNotificationsPage({
                   <button
                     type="button"
                     onClick={handleClearReadNotifications}
-                    className="px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer"
+                    className="px-2 py-1 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-medium transition flex items-center gap-1 cursor-pointer"
                     title="Hapus seluruh pemberitahuan yang sudah dibaca"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -556,16 +577,9 @@ export function PortalNotificationsPage({
                       key={item.id}
                       item={item}
                       isRead={isRead}
-                      onClick={handleItemClick}
-                      onDelete={(it) => {
-                        const next = [...deletedIds, it.id];
-                        setDeletedIds(next);
-                        try {
-                          localStorage.setItem('teknocust_deleted_notifications', JSON.stringify(next));
-                        } catch (err) {
-                          console.error(err);
-                        }
-                      }}
+                      onCardClick={handleToggleRead}
+                      onActionClick={handleActionNavigate}
+                      onDelete={(it) => setNotifToDelete(it)}
                     />
                   );
                 })
