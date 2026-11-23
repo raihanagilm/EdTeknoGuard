@@ -3,11 +3,11 @@
 ## Current State
 - Last commit: c5c2fd3
 - Test status: passing (87 unit tests passing)
-- Active module: Portal Customer Payment Non-VA Notice
+- Active module: Billing Table Reminder Status Badge
 - Baseline: Green
 
 ## In Progress
-- Selesai & Terverifikasi (PASS): Penyederhanaan Tampilan Tagihan Non-VA (Pemberitahuan Kontak WA Tanpa Direct Link)
+- Selesai & Terverifikasi (PASS): Indikator Visual Pengingat Tagihan (Badge Diingatkan vs Belum Diingatkan pada Tabel & Kartu Mobile Pembayaran)
 
 ## Next Steps
 - [x] Multi-strategy resolution (`BillingSyncWorker.resolve_nb_id`) dengan pembersihan prefix port OLT (`1/3/1:21_`) dan ID timestamp
@@ -18,7 +18,10 @@
 - [x] Eksekusi sinkronisasi database Tengaran di VPS (146 total, 104 lunas, 42 belum bayar, 20 jatuh tempo, Rp 6.955.000 tunggakan)
 - [x] Eliminasi nomor VA palsu saat `va_state !== 'payable'` di `PortalPaymentTab.jsx`
 - [x] Penghapusan tombol direct link WA, menggantinya dengan pemberitahuan kontak WA yang ringkas dan bersih
-- [x] Build frontend production terbaru (`index-Cq_pB2Wb.js` & `index-CUbl-PTy.css`)
+- [x] Agregasi riwayat pengingat tagihan `AlertLog` (`TAGIHAN_REMINDER`) di `BillingService.get_billing_overview`
+- [x] Penambahan badge pengingat (`Send` / `BellOff`) pada kolom STATUS di `BillingTable.jsx` (desktop table & mobile cards)
+- [x] Auto-refresh data pembayaran setelah modal kirim pengingat diproses di `BillingView.jsx`
+- [x] Build frontend production terbaru (`index-Cc-Z6Ncd.js` & `index-BbGnUoSn.css`)
 - [ ] Push ke origin main dan restart daemon di server produksi
 
 ## Blockers

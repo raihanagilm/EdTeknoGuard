@@ -10,7 +10,9 @@ import {
   ChevronRight,
   ExternalLink,
   Smartphone,
-  ArrowUpDown
+  ArrowUpDown,
+  Send,
+  BellOff
 } from 'lucide-react'
 import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton'
 
@@ -51,6 +53,32 @@ export function BillingTable({
       <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${textColor}`}>
         <Icon className="w-3.5 h-3.5 shrink-0" />
         <span>{isOverdue ? 'Jatuh Tempo' : 'Belum Bayar'}</span>
+      </span>
+    )
+  }
+
+  const renderReminderBadge = (p) => {
+    if (p.status_pembayaran === 'LUNAS') {
+      return null
+    }
+    if (p.has_reminder) {
+      return (
+        <span
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
+          title={p.last_reminder_full ? `Terakhir diingatkan: ${p.last_reminder_full}` : 'Sudah dikirimi pengingat'}
+        >
+          <Send className="w-2.5 h-2.5 shrink-0 text-emerald-600" />
+          <span>Diingatkan {p.last_reminder}</span>
+        </span>
+      )
+    }
+    return (
+      <span
+        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200"
+        title="Belum pernah dikirimi pengingat tagihan"
+      >
+        <BellOff className="w-2.5 h-2.5 shrink-0 text-slate-400" />
+        <span>Belum Diingatkan</span>
       </span>
     )
   }
@@ -277,7 +305,12 @@ export function BillingTable({
                     <div className="font-bold text-[#0B2545]">{formatRupiah(p.total_tagihan)}</div>
                     <div className="text-[11px] text-[#64839E]">{p.periode_tagihan}</div>
                   </td>
-                  <td className="py-2.5 px-3">{renderStatusBadge(p)}</td>
+                  <td className="py-2.5 px-3">
+                    <div className="flex flex-col gap-1 items-start">
+                      {renderStatusBadge(p)}
+                      {renderReminderBadge(p)}
+                    </div>
+                  </td>
                   <td className="py-2.5 px-3 font-mono text-[#0B2545]">{p.jatuh_tempo}</td>
                   <td className="py-2.5 px-3 font-mono">
                     {p.nomor_va && p.nomor_va !== '-' ? (
@@ -374,7 +407,10 @@ export function BillingTable({
                     <p className="text-[11px] font-mono text-[#64839E]">{p.id_pelanggan}</p>
                   </div>
                 </div>
-                {renderStatusBadge(p)}
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  {renderStatusBadge(p)}
+                  {renderReminderBadge(p)}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs font-mono my-2.5 p-2 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0]">
                 <div>

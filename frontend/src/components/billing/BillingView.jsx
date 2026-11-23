@@ -149,6 +149,7 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
       })
       setResultReminder(res)
       showToast(res.message || 'Pengingat berhasil diproses', 'success', 'Terkirim')
+      loadData()
     } catch (err) {
       showToast('Gagal kirim pengingat: ' + (err.message || 'Error server'), 'error', 'Gagal')
     } finally {

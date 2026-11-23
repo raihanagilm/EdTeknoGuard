@@ -2988,16 +2988,6 @@
     background-color: var(--color-sky-50);
   }
 
-  .bg-sky-50\/80 {
-    background-color: #f0f9ffcc;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-sky-50\/80 {
-      background-color: color-mix(in oklab, var(--color-sky-50) 80%, transparent);
-    }
-  }
-
   .bg-slate-50 {
     background-color: var(--color-slate-50);
   }
@@ -4200,16 +4190,8 @@
     color: var(--color-sky-700);
   }
 
-  .text-sky-800 {
-    color: var(--color-sky-800);
-  }
-
   .text-sky-900 {
     color: var(--color-sky-900);
-  }
-
-  .text-sky-950 {
-    color: var(--color-sky-950);
   }
 
   .text-slate-50 {

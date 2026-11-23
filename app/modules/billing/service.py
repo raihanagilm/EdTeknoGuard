@@ -8,7 +8,7 @@ from sqlalchemy import func, or_, case
 from sqlalchemy.orm import Session
 
 from app.core.timezone import get_now_wib
-from app.db.models import Pelanggan, PerangkatONT
+from app.db.models import Pelanggan, PerangkatONT, AlertLog
 from app.services.network_bill_service import NetworkBillService
 from app.portal.modules.payment.service import PaymentService
 from app.services.fcm_service import send_push_notification
@@ -114,8 +114,27 @@ class BillingService:
         offset = (page - 1) * limit
         rows = sorted_query.offset(offset).limit(limit).all()
 
+        # Ambil riwayat pengingat tagihan terbaru untuk pelanggan di halaman ini
+        latest_reminders = {}
+        customer_ids = [p.id_pelanggan for p in rows if p.id_pelanggan]
+        if customer_ids:
+            try:
+                subq = db.query(
+                    AlertLog.id_pelanggan,
+                    func.max(AlertLog.waktu_kirim).label("latest_time")
+                ).filter(
+                    AlertLog.id_pelanggan.in_(customer_ids),
+                    AlertLog.tipe_alert == "TAGIHAN_REMINDER"
+                ).group_by(AlertLog.id_pelanggan).all()
+                for cid, l_time in subq:
+                    if l_time:
+                        latest_reminders[cid] = l_time
+            except Exception as e:
+                logger.warning(f"Gagal mengambil riwayat reminder tagihan: {e}")
+
         data_list = []
         for p in rows:
+            rem_dt = latest_reminders.get(p.id_pelanggan)
             data_list.append({
                 "id_pelanggan": p.id_pelanggan,
                 "nama": p.nama,
@@ -131,7 +150,10 @@ class BillingService:
                 "nomor_va": p.nomor_va or "-",
                 "network_bill_id": p.network_bill_id or (p.id_pelanggan if p.id_pelanggan.isdigit() else "-"),
                 "has_fcm": bool(p.fcm_token),
-                "last_sync": p.last_billing_sync.strftime("%d/%m %H:%M") if p.last_billing_sync else "-"
+                "last_sync": p.last_billing_sync.strftime("%d/%m %H:%M") if p.last_billing_sync else "-",
+                "has_reminder": bool(rem_dt),
+                "last_reminder": rem_dt.strftime("%d/%m %H:%M") if rem_dt else None,
+                "last_reminder_full": rem_dt.strftime("%d/%m/%Y %H:%M") if rem_dt else None
             })
 
         return {

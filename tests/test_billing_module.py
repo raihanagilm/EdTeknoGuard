@@ -48,6 +48,13 @@ class TestBillingModule(unittest.TestCase):
         self.assertIn("total_overdue", summary)
         self.assertIn("total_nominal_tunggakan", summary)
 
+        # Verifikasi field reminder pada data item
+        if res["data"]:
+            first_item = res["data"][0]
+            self.assertIn("has_reminder", first_item)
+            self.assertIn("last_reminder", first_item)
+            self.assertIn("last_reminder_full", first_item)
+
     def test_billing_overview_sorting(self):
         """Memastikan endpoint /api/pembayaran mendukung parameter sort_by dan sort_dir."""
         token = create_session_token("admin", role="super admin")
