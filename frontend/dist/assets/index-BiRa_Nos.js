@@ -43554,41 +43554,6 @@ var jenisTagihanTeks = (type) => {
 	if (t === "pemasangan") return "Biaya Pemasangan";
 	return type ? type.charAt(0).toUpperCase() + type.slice(1) : "Tagihan";
 };
-/** Kanal bank default sesuai spesifikasi api-v1.md jika API PoP belum mengaktifkan VA */
-var getDefaultChannels = (customerId = "1", total = 125e3) => {
-	const cleanId = String(customerId || "1").padStart(4, "0");
-	const fee = 4e3;
-	return [
-		{
-			channel: "802",
-			bank: "Mandiri",
-			va_number: `371849720000${cleanId}`,
-			admin_fee: fee,
-			amount_to_pay: total + fee
-		},
-		{
-			channel: "800",
-			bank: "BRI",
-			va_number: `888849720000${cleanId}`,
-			admin_fee: fee,
-			amount_to_pay: total + fee
-		},
-		{
-			channel: "702",
-			bank: "BCA",
-			va_number: `123449720000${cleanId}`,
-			admin_fee: fee,
-			amount_to_pay: total + fee
-		},
-		{
-			channel: "723",
-			bank: "BSI",
-			va_number: `456749720000${cleanId}`,
-			admin_fee: fee,
-			amount_to_pay: total + fee
-		}
-	];
-};
 //#endregion
 //#region src/portal/components/notifications/PortalNotificationsPage.jsx
 function NotificationCardItem({ item, isRead, onClick, onDelete }) {
@@ -48636,7 +48601,19 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 	const activeBill = tagihan?.next_bill || (sortedUnpaidInvoices.length > 0 ? sortedUnpaidInvoices[0] : null);
 	const otherUnpaidInvoices = activeBill ? sortedUnpaidInvoices.filter((inv) => String(inv.id || inv.invoice_id) !== String(activeBill.id || activeBill.invoice_id)) : sortedUnpaidInvoices;
 	const rawChannels = tagihan?.channels || [];
-	const availableChannels = rawChannels.length > 0 ? rawChannels : activeBill ? getDefaultChannels(customer?.id_pelanggan || "1", activeBill.total || 125e3) : [];
+	const isVaAvailable = rawChannels.length > 0 && ![
+		"inactive",
+		"not_issued",
+		"not_linked"
+	].includes(tagihan?.va_state);
+	const availableChannels = isVaAvailable ? rawChannels : [];
+	const waAdminLink = (0, import_react.useMemo)(() => {
+		const custNama = customer?.nama || "Pelanggan";
+		const custId = customer?.id_pelanggan || "-";
+		const totalTagihan = rupiah(activeBill?.total || 0);
+		const periode = periodeTeks(activeBill?.billing_period) || activeBill?.number || "Bulan Berjalan";
+		return `https://wa.me/?text=${encodeURIComponent(`Halo Admin TeknoIndo, saya ingin konfirmasi pembayaran tagihan internet.\n\n• Nama: ${custNama}\n• ID Pelanggan: ${custId}\n• Periode: ${periode}\n• Total Tagihan: ${totalTagihan}\n\nMohon informasi nomor rekening transfer bank atau panduan pembayarannya. Terima kasih.`)}`;
+	}, [customer, activeBill]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex-1 flex flex-col min-h-0 bg-slate-50/50 relative overflow-hidden select-none",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalHeader, {
@@ -48755,7 +48732,7 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 											})
 										]
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									isVaAvailable && availableChannels.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "mt-4 pt-3 border-t border-gray-100 space-y-2.5",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -48786,6 +48763,45 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 												}, k.channel))
 											})
 										]
+									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "mt-4 pt-3.5 border-t border-slate-100 space-y-3",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "p-3.5 rounded-xl bg-sky-50/80 border border-sky-200/80 text-sky-950",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "flex items-start gap-2.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 text-sky-600 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "space-y-1 text-xs",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+														className: "font-bold text-sky-950 leading-tight",
+														children: "Pembayaran Langsung ke Petugas / Kasir Kantor"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+														className: "text-[11px] text-sky-800 leading-relaxed font-medium",
+														children: tagihan?.message || "Pembayaran via Virtual Account otomatis belum aktif untuk kantor cabang ini. Rincian tagihan Anda tetap tercatat resmi dan pembayaran dapat dilakukan langsung atau via transfer manual."
+													})]
+												})]
+											})
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "p-3.5 rounded-xl bg-slate-50/90 border border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "flex items-center gap-2.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: "w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center shrink-0",
+													children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-4.5 h-4.5" })
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+													className: "text-xs font-bold text-slate-800 leading-tight",
+													children: "Konfirmasi Pembayaran via WhatsApp"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+													className: "text-[11px] text-slate-500 font-medium",
+													children: "Hubungi admin untuk info rekening transfer atau kirim bukti bayar"
+												})] })]
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+												href: waAdminLink,
+												target: "_blank",
+												rel: "noopener noreferrer",
+												className: "px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs shrink-0",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Hubungi Admin via WA" })]
+											})]
+										})]
 									})
 								] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "py-6 text-center",
@@ -48807,9 +48823,9 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 							}),
 							subTab === "tagihan" && activeBill && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "px-4 py-3 border-t border-gray-100 flex items-start gap-2.5 bg-blue-50/60",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-4 h-4 mt-0.5 shrink-0 text-blue-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-4 h-4 mt-0.5 shrink-0 text-blue-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 									className: "text-xs text-gray-700 leading-relaxed font-normal",
-									children: [
+									children: isVaAvailable ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 										"Bayar via menu ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
 											className: "text-gray-900 font-semibold",
@@ -48821,7 +48837,14 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 											children: "otomatis"
 										}),
 										" dalam 1–5 menit tanpa perlu kirim konfirmasi manual."
-									]
+									] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+										"Setelah melakukan pembayaran melalui admin atau petugas kasir kantor, status tagihan Anda akan diperbarui dan kuitansi pembayaran resmi dapat dilihat pada tab ",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+											className: "text-gray-900 font-semibold",
+											children: "Riwayat"
+										}),
+										"."
+									] })
 								})]
 							}),
 							subTab === "riwayat" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PaymentRiwayatList, {

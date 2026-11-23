@@ -39,7 +39,8 @@ export const jenisTagihanTeks = (type) => {
 
 /** Kanal bank default sesuai spesifikasi api-v1.md jika API PoP belum mengaktifkan VA */
 export const getDefaultChannels = (customerId = '1', total = 125000) => {
-  const cleanId = String(customerId || '1').padStart(4, '0');
+  const numericOnly = String(customerId || '').replace(/\D/g, '') || '1';
+  const cleanId = numericOnly.padStart(4, '0').slice(-4);
   const fee = 4000;
   return [
     {
