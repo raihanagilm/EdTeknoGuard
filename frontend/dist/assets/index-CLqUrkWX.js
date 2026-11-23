@@ -43061,7 +43061,7 @@ function PortalLoginView({ onLoginSuccess, onGoToReset }) {
 					window.AndroidBridge.notifyLoginSuccess();
 				} catch (_) {}
 				onLoginSuccess(res.data.customer);
-			} else setError(res.data?.message || "Nomor WhatsApp atau Kata Sandi salah!");
+			} else setError(res.data?.message || res.data?.detail || "Nomor WhatsApp atau Kata Sandi salah!");
 		} catch {
 			setError("Gagal menghubungi server TeknoIndonet.");
 		} finally {

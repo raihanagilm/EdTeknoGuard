@@ -178,6 +178,13 @@ class AuthService:
         if not clean_phone_input or len(clean_phone_input) < 6:
             return False, "Format Nomor WhatsApp tidak valid. Masukkan nomor WhatsApp yang terdaftar.", None
 
+        # 0. Proteksi Account Lockout: Periksa apakah nomor WhatsApp sedang terkunci sementara
+        from app.core.account_lockout import account_lockout_manager
+        is_locked, remaining_seconds = account_lockout_manager.is_locked(clean_phone_input)
+        if is_locked:
+            sisa_menit = max(1, (remaining_seconds + 59) // 60)
+            return False, f"Akun Anda terkunci sementara demi keamanan karena 5 kali percobaan gagal berturut-turut. Silakan coba lagi dalam {sisa_menit} menit atau gunakan fitur Lupa Password.", {"locked": True, "remaining_seconds": remaining_seconds}
+
         # 1. Cari pelanggan berdasarkan Nomor WhatsApp di DB sesi saat ini
         cust = AuthService._match_phone_customer(db, clean_phone_input)
 
@@ -210,6 +217,10 @@ class AuthService:
                 m_db.close()
 
         if not cust:
+            is_now_locked, attempts, remaining = account_lockout_manager.record_failure(clean_phone_input)
+            if is_now_locked:
+                sisa_menit = max(1, (remaining + 59) // 60)
+                return False, f"Nomor WhatsApp belum terdaftar. Akun ini dikunci sementara selama {sisa_menit} menit karena 5 kali percobaan gagal.", {"locked": True, "remaining_seconds": remaining}
             return False, "Nomor WhatsApp belum terdaftar di sistem. Mohon lengkapi atau hubungi kantor ISP Anda.", None
 
         if not cust.is_active:
@@ -237,9 +248,15 @@ class AuthService:
         if not is_valid:
             if is_tenant_db_opened:
                 active_session.close()
-            return False, "Kata sandi salah. Kata sandi awal adalah Nomor WhatsApp terdaftar Anda.", None
+            is_now_locked, attempts, remaining = account_lockout_manager.record_failure(clean_phone_input)
+            if is_now_locked:
+                sisa_menit = max(1, (remaining + 59) // 60)
+                msg = f"Kata sandi salah. Akun Anda telah dikunci sementara selama {sisa_menit} menit karena 5 kali percobaan gagal berturut-turut."
+                return False, msg, {"locked": True, "remaining_seconds": remaining}
+            return False, f"Kata sandi salah (Percobaan {attempts} dari 5). Sisa {remaining} kali kesempatan sebelum akun dikunci sementara.", {"locked": False, "attempts": attempts, "remaining_attempts": remaining}
 
-        # 4. Perbarui waktu login terakhir
+        # 4. Login Berhasil: Reset counter lockout & perbarui waktu login terakhir
+        account_lockout_manager.record_success(clean_phone_input)
         cust.last_login = get_now_wib()
         active_session.commit()
 

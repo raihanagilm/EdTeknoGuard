@@ -93,9 +93,16 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
     
     success, msg, data = AuthService.authenticate(db, identifier, password)
     if not success or not data:
+        is_locked = bool(data and data.get("locked"))
+        status_code = 423 if is_locked else 401
         return JSONResponse(
-            status_code=401,
-            content={"ok": False, "message": msg or "ID Pelanggan / No WhatsApp / IP atau Kata Sandi salah!"}
+            status_code=status_code,
+            content={
+                "ok": False,
+                "message": msg or "ID Pelanggan / No WhatsApp / IP atau Kata Sandi salah!",
+                "locked": is_locked,
+                "remaining_seconds": data.get("remaining_seconds", 0) if data else 0
+            }
         )
         
     token = data.get("token")
@@ -300,6 +307,10 @@ async def portal_auth_minta_reset_password(request: Request, db: Session = Depen
 
     if target_db != db:
         target_db.close()
+
+    # Buka status lockout akun setelah permintaan reset password berhasil dibuat
+    from app.core.account_lockout import account_lockout_manager
+    account_lockout_manager.unlock(cust_no_hp)
 
     return {
         "ok": True,

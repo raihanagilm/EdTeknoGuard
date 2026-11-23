@@ -2969,20 +2969,6 @@
     background-color: var(--color-sky-50);
   }
 
-  .bg-sky-50\/90 {
-    background-color: #f0f9ffe6;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-sky-50\/90 {
-      background-color: color-mix(in oklab, var(--color-sky-50) 90%, transparent);
-    }
-  }
-
-  .bg-sky-600 {
-    background-color: var(--color-sky-600);
-  }
-
   .bg-slate-50 {
     background-color: var(--color-slate-50);
   }
@@ -4189,10 +4175,6 @@
     color: var(--color-sky-900);
   }
 
-  .text-sky-950 {
-    color: var(--color-sky-950);
-  }
-
   .text-slate-50 {
     color: var(--color-slate-50);
   }
@@ -5031,10 +5013,6 @@
       background-color: var(--color-sky-100);
     }
 
-    .hover\:bg-sky-700:hover {
-      background-color: var(--color-sky-700);
-    }
-
     .hover\:bg-slate-50:hover {
       background-color: var(--color-slate-50);
     }
@@ -5444,10 +5422,6 @@
 
     .sm\:col-span-2 {
       grid-column: span 2 / span 2;
-    }
-
-    .sm\:mx-6 {
-      margin-inline: calc(var(--spacing) * 6);
     }
 
     .sm\:mt-1 {
