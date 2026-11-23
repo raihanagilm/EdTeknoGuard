@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  Smartphone
+  Smartphone,
+  ArrowUpDown
 } from 'lucide-react'
 import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton'
 
@@ -25,7 +26,10 @@ export function BillingTable({
   copiedVA,
   pagination = {},
   onPageChange,
-  onNavigateCustomer
+  onNavigateCustomer,
+  sortField = '',
+  sortDir = 'asc',
+  onSort
 }) {
   const { page = 1, total_pages = 1, total_records = 0 } = pagination
   const allSelected = data.length > 0 && data.every((p) => selectedIds.includes(p.id_pelanggan))
@@ -109,12 +113,108 @@ export function BillingTable({
                   className="rounded border-slate-300 text-[#026AA7] focus:ring-[#026AA7] cursor-pointer"
                 />
               </th>
-              <th className="py-2.5 px-3">Pelanggan</th>
-              <th className="py-2.5 px-3">Kontak WA</th>
-              <th className="py-2.5 px-3">Tagihan & Periode</th>
-              <th className="py-2.5 px-3">Status</th>
-              <th className="py-2.5 px-3">Jatuh Tempo</th>
-              <th className="py-2.5 px-3">Nomor VA</th>
+              <th
+                scope="col"
+                aria-sort={sortField === 'nama' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+                className={`py-2.5 px-3 cursor-pointer select-none transition ${
+                  sortField === 'nama' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
+                }`}
+                onClick={() => onSort && onSort('nama')}
+                title="Urutkan berdasarkan Nama Pelanggan"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Pelanggan</span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'nama' ? 'text-[#026AA7]' : 'text-slate-400'}`} />
+                  {sortField === 'nama' && (
+                    <span className="text-[10px] text-[#026AA7] font-bold">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </div>
+              </th>
+              <th
+                scope="col"
+                aria-sort={sortField === 'no_wa' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+                className={`py-2.5 px-3 cursor-pointer select-none transition ${
+                  sortField === 'no_wa' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
+                }`}
+                onClick={() => onSort && onSort('no_wa')}
+                title="Urutkan berdasarkan Nomor WhatsApp"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Kontak WA</span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'no_wa' ? 'text-[#026AA7]' : 'text-slate-400'}`} />
+                  {sortField === 'no_wa' && (
+                    <span className="text-[10px] text-[#026AA7] font-bold">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </div>
+              </th>
+              <th
+                scope="col"
+                aria-sort={sortField === 'total_tagihan' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+                className={`py-2.5 px-3 cursor-pointer select-none transition ${
+                  sortField === 'total_tagihan' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
+                }`}
+                onClick={() => onSort && onSort('total_tagihan')}
+                title="Urutkan berdasarkan Total Tagihan"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Tagihan & Periode</span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'total_tagihan' ? 'text-[#026AA7]' : 'text-slate-400'}`} />
+                  {sortField === 'total_tagihan' && (
+                    <span className="text-[10px] text-[#026AA7] font-bold">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </div>
+              </th>
+              <th
+                scope="col"
+                aria-sort={sortField === 'status_pembayaran' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+                className={`py-2.5 px-3 cursor-pointer select-none transition ${
+                  sortField === 'status_pembayaran' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
+                }`}
+                onClick={() => onSort && onSort('status_pembayaran')}
+                title="Urutkan berdasarkan Status Pembayaran"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Status</span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'status_pembayaran' ? 'text-[#026AA7]' : 'text-slate-400'}`} />
+                  {sortField === 'status_pembayaran' && (
+                    <span className="text-[10px] text-[#026AA7] font-bold">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </div>
+              </th>
+              <th
+                scope="col"
+                aria-sort={sortField === 'jatuh_tempo' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+                className={`py-2.5 px-3 cursor-pointer select-none transition ${
+                  sortField === 'jatuh_tempo' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
+                }`}
+                onClick={() => onSort && onSort('jatuh_tempo')}
+                title="Urutkan berdasarkan Tanggal Jatuh Tempo"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Jatuh Tempo</span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'jatuh_tempo' ? 'text-[#026AA7]' : 'text-slate-400'}`} />
+                  {sortField === 'jatuh_tempo' && (
+                    <span className="text-[10px] text-[#026AA7] font-bold">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </div>
+              </th>
+              <th
+                scope="col"
+                aria-sort={sortField === 'nomor_va' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+                className={`py-2.5 px-3 cursor-pointer select-none transition ${
+                  sortField === 'nomor_va' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
+                }`}
+                onClick={() => onSort && onSort('nomor_va')}
+                title="Urutkan berdasarkan Nomor Virtual Account"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Nomor VA</span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'nomor_va' ? 'text-[#026AA7]' : 'text-slate-400'}`} />
+                  {sortField === 'nomor_va' && (
+                    <span className="text-[10px] text-[#026AA7] font-bold">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  )}
+                </div>
+              </th>
               <th className="py-2.5 px-3 text-right">Aksi</th>
             </tr>
           </thead>
@@ -210,6 +310,37 @@ export function BillingTable({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Sorting Controls */}
+      <div className="md:hidden px-3.5 py-2 bg-[#F1F6FC] border-b border-[#CCDDF0] flex items-center justify-between text-xs">
+        <span className="text-[11px] font-semibold text-[#3B5B78]">Urutkan:</span>
+        <div className="flex items-center gap-1.5">
+          <select
+            value={sortField || 'default'}
+            onChange={(e) => onSort && onSort(e.target.value === 'default' ? '' : e.target.value)}
+            className="text-xs bg-white border border-[#CCDDF0] rounded-md px-2 py-1 text-[#0B2545] focus:outline-none focus:border-[#026AA7]"
+            aria-label="Urutkan data tagihan"
+          >
+            <option value="default">Prioritas (Overdue)</option>
+            <option value="nama">Pelanggan</option>
+            <option value="no_wa">Kontak WA</option>
+            <option value="total_tagihan">Total Tagihan</option>
+            <option value="status_pembayaran">Status</option>
+            <option value="jatuh_tempo">Jatuh Tempo</option>
+            <option value="nomor_va">Nomor VA</option>
+          </select>
+          {sortField && (
+            <button
+              type="button"
+              onClick={() => onSort && onSort(sortField)}
+              className="px-2 py-1 rounded bg-white border border-[#CCDDF0] text-[#026AA7] text-xs font-bold hover:bg-[#E2EDF8]"
+              title="Balik arah urutan"
+            >
+              {sortDir === 'asc' ? '▲' : '▼'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Mobile Card Stack View */}

@@ -127,7 +127,6 @@
     --color-sky-600: oklch(58.8% .158 241.966);
     --color-sky-700: oklch(50% .134 242.749);
     --color-sky-900: oklch(39.1% .09 240.876);
-    --color-sky-950: oklch(29.3% .066 243.157);
     --color-blue-50: oklch(97% .014 254.604);
     --color-blue-100: oklch(93.2% .032 255.585);
     --color-blue-200: oklch(88.2% .059 254.128);
@@ -4817,6 +4816,10 @@
 
     .hover\:bg-\[\#E2EDF8\]:hover {
       background-color: #e2edf8;
+    }
+
+    .hover\:bg-\[\#E2EDF8\]\/60:hover {
+      background-color: oklab(94.1079% -.00710076 -.0176017 / .6);
     }
 
     .hover\:bg-\[\#E8F1FA\]:hover {

@@ -22,6 +22,8 @@ class BillingController:
         kantor: Optional[str] = None,
         q: Optional[str] = None,
         status: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        sort_dir: Optional[str] = "asc",
         page: int = 1,
         limit: int = 15
     ) -> Dict[str, Any]:
@@ -32,6 +34,8 @@ class BillingController:
             kantor=active_kantor,
             q=q,
             status=status,
+            sort_by=sort_by,
+            sort_dir=sort_dir,
             page=page,
             limit=limit
         )

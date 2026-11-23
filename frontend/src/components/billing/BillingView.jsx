@@ -14,6 +14,8 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [page, setPage] = useState(1)
+  const [sortField, setSortField] = useState('')
+  const [sortDir, setSortDir] = useState('asc')
   const [selectedIds, setSelectedIds] = useState([])
   const [syncingId, setSyncingId] = useState(null)
   const [copiedVA, setCopiedVA] = useState(null)
@@ -35,6 +37,8 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
         kantor: activeOffice,
         q: searchQuery,
         status: statusFilter,
+        sort_by: sortField || undefined,
+        sort_dir: sortDir || undefined,
         page,
         limit: 15
       })
@@ -49,11 +53,21 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
     } finally {
       setLoading(false)
     }
-  }, [activeOffice, searchQuery, statusFilter, page])
+  }, [activeOffice, searchQuery, statusFilter, page, sortField, sortDir])
 
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDir(field === 'total_tagihan' ? 'desc' : 'asc')
+    }
+    setPage(1)
+  }
 
   const handleSyncSingle = async (idPelanggan) => {
     setSyncingId(idPelanggan)
@@ -215,6 +229,9 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
         pagination={pagination}
         onPageChange={(p) => setPage(p)}
         onNavigateCustomer={onNavigateCustomer}
+        sortField={sortField}
+        sortDir={sortDir}
+        onSort={handleSort}
       />
 
       {/* Modal Pengiriman Pesan */}

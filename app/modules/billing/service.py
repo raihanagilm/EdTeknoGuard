@@ -23,6 +23,8 @@ class BillingService:
         kantor: str,
         q: Optional[str] = None,
         status: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        sort_dir: Optional[str] = "asc",
         page: int = 1,
         limit: int = 15
     ) -> Dict[str, Any]:
@@ -78,12 +80,35 @@ class BillingService:
             elif st_clean == "ISOLIR":
                 filtered_query = filtered_query.filter(Pelanggan.status_pembayaran == "ISOLIR")
 
-        # 4. Pengurutan Prioritas: Overdue -> Belum Bayar -> Nominal Tertinggi -> Nama
-        sorted_query = filtered_query.order_by(
-            case((Pelanggan.is_overdue == True, 0), (Pelanggan.status_pembayaran != "LUNAS", 1), else_=2),
-            Pelanggan.total_tagihan.desc(),
-            Pelanggan.nama.asc()
-        )
+        # 4. Pengurutan Data (Sorting)
+        sort_dir_clean = (sort_dir or "asc").lower().strip()
+        is_desc = sort_dir_clean == "desc"
+
+        if sort_by == "nama":
+            order_expr = Pelanggan.nama.desc() if is_desc else Pelanggan.nama.asc()
+            sorted_query = filtered_query.order_by(order_expr)
+        elif sort_by == "no_wa":
+            order_expr = Pelanggan.no_hp.desc() if is_desc else Pelanggan.no_hp.asc()
+            sorted_query = filtered_query.order_by(order_expr)
+        elif sort_by == "total_tagihan":
+            order_expr = Pelanggan.total_tagihan.desc() if is_desc else Pelanggan.total_tagihan.asc()
+            sorted_query = filtered_query.order_by(order_expr)
+        elif sort_by == "status_pembayaran":
+            order_expr = Pelanggan.status_pembayaran.desc() if is_desc else Pelanggan.status_pembayaran.asc()
+            sorted_query = filtered_query.order_by(order_expr, Pelanggan.total_tagihan.desc())
+        elif sort_by == "jatuh_tempo":
+            order_expr = Pelanggan.jatuh_tempo.desc() if is_desc else Pelanggan.jatuh_tempo.asc()
+            sorted_query = filtered_query.order_by(order_expr)
+        elif sort_by == "nomor_va":
+            order_expr = Pelanggan.nomor_va.desc() if is_desc else Pelanggan.nomor_va.asc()
+            sorted_query = filtered_query.order_by(order_expr)
+        else:
+            # Default prioritas: Overdue -> Belum Bayar -> Nominal Tertinggi -> Nama
+            sorted_query = filtered_query.order_by(
+                case((Pelanggan.is_overdue == True, 0), (Pelanggan.status_pembayaran != "LUNAS", 1), else_=2),
+                Pelanggan.total_tagihan.desc(),
+                Pelanggan.nama.asc()
+            )
 
         total_filtered = sorted_query.count()
         offset = (page - 1) * limit

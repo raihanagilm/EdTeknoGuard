@@ -14684,11 +14684,13 @@ var UsersService = class {
 	}
 };
 var BillingService = class {
-	static async getOverview({ kantor, q, status, page = 1, limit = 15 } = {}) {
+	static async getOverview({ kantor, q, status, sort_by, sort_dir, page = 1, limit = 15 } = {}) {
 		const params = new URLSearchParams();
 		if (kantor && kantor !== "all") params.append("kantor", kantor);
 		if (q) params.append("q", q);
 		if (status && status !== "ALL") params.append("status", status);
+		if (sort_by) params.append("sort_by", sort_by);
+		if (sort_dir) params.append("sort_dir", sort_dir);
 		params.append("page", page);
 		params.append("limit", limit);
 		return (await new ApiService().get(`/api/pembayaran?${params.toString()}`)).data || {};
@@ -37311,7 +37313,7 @@ function BillingFilterBar({ searchQuery, setSearchQuery, setPage, selectedCount 
 }
 //#endregion
 //#region src/components/billing/BillingTable.jsx
-function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSelect, onSelectAllCurrentPage, onSyncSingle, syncingId, onCopyVA, copiedVA, pagination = {}, onPageChange, onNavigateCustomer }) {
+function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSelect, onSelectAllCurrentPage, onSyncSingle, syncingId, onCopyVA, copiedVA, pagination = {}, onPageChange, onNavigateCustomer, sortField = "", sortDir = "asc", onSort }) {
 	const { page = 1, total_pages = 1, total_records = 0 } = pagination;
 	const allSelected = data.length > 0 && data.every((p) => selectedIds.includes(p.id_pelanggan));
 	const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString("id-ID")}`;
@@ -37422,28 +37424,112 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3",
-								children: "Pelanggan"
+								scope: "col",
+								"aria-sort": sortField === "nama" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
+								className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "nama" ? "bg-[#E2EDF8] text-[#026AA7] font-bold" : "hover:bg-[#E2EDF8]/60"}`,
+								onClick: () => onSort && onSort("nama"),
+								title: "Urutkan berdasarkan Nama Pelanggan",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Pelanggan" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: `w-3.5 h-3.5 ${sortField === "nama" ? "text-[#026AA7]" : "text-slate-400"}` }),
+										sortField === "nama" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] text-[#026AA7] font-bold",
+											children: sortDir === "asc" ? "▲" : "▼"
+										})
+									]
+								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3",
-								children: "Kontak WA"
+								scope: "col",
+								"aria-sort": sortField === "no_wa" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
+								className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "no_wa" ? "bg-[#E2EDF8] text-[#026AA7] font-bold" : "hover:bg-[#E2EDF8]/60"}`,
+								onClick: () => onSort && onSort("no_wa"),
+								title: "Urutkan berdasarkan Nomor WhatsApp",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Kontak WA" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: `w-3.5 h-3.5 ${sortField === "no_wa" ? "text-[#026AA7]" : "text-slate-400"}` }),
+										sortField === "no_wa" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] text-[#026AA7] font-bold",
+											children: sortDir === "asc" ? "▲" : "▼"
+										})
+									]
+								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3",
-								children: "Tagihan & Periode"
+								scope: "col",
+								"aria-sort": sortField === "total_tagihan" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
+								className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "total_tagihan" ? "bg-[#E2EDF8] text-[#026AA7] font-bold" : "hover:bg-[#E2EDF8]/60"}`,
+								onClick: () => onSort && onSort("total_tagihan"),
+								title: "Urutkan berdasarkan Total Tagihan",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tagihan & Periode" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: `w-3.5 h-3.5 ${sortField === "total_tagihan" ? "text-[#026AA7]" : "text-slate-400"}` }),
+										sortField === "total_tagihan" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] text-[#026AA7] font-bold",
+											children: sortDir === "asc" ? "▲" : "▼"
+										})
+									]
+								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3",
-								children: "Status"
+								scope: "col",
+								"aria-sort": sortField === "status_pembayaran" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
+								className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "status_pembayaran" ? "bg-[#E2EDF8] text-[#026AA7] font-bold" : "hover:bg-[#E2EDF8]/60"}`,
+								onClick: () => onSort && onSort("status_pembayaran"),
+								title: "Urutkan berdasarkan Status Pembayaran",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: `w-3.5 h-3.5 ${sortField === "status_pembayaran" ? "text-[#026AA7]" : "text-slate-400"}` }),
+										sortField === "status_pembayaran" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] text-[#026AA7] font-bold",
+											children: sortDir === "asc" ? "▲" : "▼"
+										})
+									]
+								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3",
-								children: "Jatuh Tempo"
+								scope: "col",
+								"aria-sort": sortField === "jatuh_tempo" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
+								className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "jatuh_tempo" ? "bg-[#E2EDF8] text-[#026AA7] font-bold" : "hover:bg-[#E2EDF8]/60"}`,
+								onClick: () => onSort && onSort("jatuh_tempo"),
+								title: "Urutkan berdasarkan Tanggal Jatuh Tempo",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Jatuh Tempo" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: `w-3.5 h-3.5 ${sortField === "jatuh_tempo" ? "text-[#026AA7]" : "text-slate-400"}` }),
+										sortField === "jatuh_tempo" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] text-[#026AA7] font-bold",
+											children: sortDir === "asc" ? "▲" : "▼"
+										})
+									]
+								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
-								className: "py-2.5 px-3",
-								children: "Nomor VA"
+								scope: "col",
+								"aria-sort": sortField === "nomor_va" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
+								className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "nomor_va" ? "bg-[#E2EDF8] text-[#026AA7] font-bold" : "hover:bg-[#E2EDF8]/60"}`,
+								onClick: () => onSort && onSort("nomor_va"),
+								title: "Urutkan berdasarkan Nomor Virtual Account",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Nomor VA" }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: `w-3.5 h-3.5 ${sortField === "nomor_va" ? "text-[#026AA7]" : "text-slate-400"}` }),
+										sortField === "nomor_va" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] text-[#026AA7] font-bold",
+											children: sortDir === "asc" ? "▲" : "▼"
+										})
+									]
+								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 								className: "py-2.5 px-3 text-right",
@@ -37549,6 +37635,57 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 						})
 					})]
 				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "md:hidden px-3.5 py-2 bg-[#F1F6FC] border-b border-[#CCDDF0] flex items-center justify-between text-xs",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-[11px] font-semibold text-[#3B5B78]",
+					children: "Urutkan:"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-1.5",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+						value: sortField || "default",
+						onChange: (e) => onSort && onSort(e.target.value === "default" ? "" : e.target.value),
+						className: "text-xs bg-white border border-[#CCDDF0] rounded-md px-2 py-1 text-[#0B2545] focus:outline-none focus:border-[#026AA7]",
+						"aria-label": "Urutkan data tagihan",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "default",
+								children: "Prioritas (Overdue)"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "nama",
+								children: "Pelanggan"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "no_wa",
+								children: "Kontak WA"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "total_tagihan",
+								children: "Total Tagihan"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "status_pembayaran",
+								children: "Status"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "jatuh_tempo",
+								children: "Jatuh Tempo"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "nomor_va",
+								children: "Nomor VA"
+							})
+						]
+					}), sortField && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: () => onSort && onSort(sortField),
+						className: "px-2 py-1 rounded bg-white border border-[#CCDDF0] text-[#026AA7] text-xs font-bold hover:bg-[#E2EDF8]",
+						title: "Balik arah urutan",
+						children: sortDir === "asc" ? "▲" : "▼"
+					})]
+				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "md:hidden divide-y divide-[#CCDDF0]/60",
@@ -37880,6 +38017,8 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 	const [searchQuery, setSearchQuery] = (0, import_react.useState)("");
 	const [statusFilter, setStatusFilter] = (0, import_react.useState)("ALL");
 	const [page, setPage] = (0, import_react.useState)(1);
+	const [sortField, setSortField] = (0, import_react.useState)("");
+	const [sortDir, setSortDir] = (0, import_react.useState)("asc");
 	const [selectedIds, setSelectedIds] = (0, import_react.useState)([]);
 	const [syncingId, setSyncingId] = (0, import_react.useState)(null);
 	const [copiedVA, setCopiedVA] = (0, import_react.useState)(null);
@@ -37908,6 +38047,8 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 				kantor: activeOffice,
 				q: searchQuery,
 				status: statusFilter,
+				sort_by: sortField || void 0,
+				sort_dir: sortDir || void 0,
 				page,
 				limit: 15
 			});
@@ -37931,11 +38072,21 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 		activeOffice,
 		searchQuery,
 		statusFilter,
-		page
+		page,
+		sortField,
+		sortDir
 	]);
 	(0, import_react.useEffect)(() => {
 		loadData();
 	}, [loadData]);
+	const handleSort = (field) => {
+		if (sortField === field) setSortDir((prev) => prev === "asc" ? "desc" : "asc");
+		else {
+			setSortField(field);
+			setSortDir(field === "total_tagihan" ? "desc" : "asc");
+		}
+		setPage(1);
+	};
 	const handleSyncSingle = async (idPelanggan) => {
 		setSyncingId(idPelanggan);
 		try {
@@ -38075,7 +38226,10 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 				copiedVA,
 				pagination,
 				onPageChange: (p) => setPage(p),
-				onNavigateCustomer
+				onNavigateCustomer,
+				sortField,
+				sortDir,
+				onSort: handleSort
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BillingMessageModal, {
 				isOpen: modalOpen,

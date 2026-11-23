@@ -19,11 +19,13 @@ def get_billing_overview(
     kantor: Optional[str] = Query(None, description="Kode kantor target"),
     q: Optional[str] = Query(None, description="Kata kunci pencarian"),
     status: Optional[str] = Query(None, description="Filter status: ALL, LUNAS, BELUM_BAYAR, OVERDUE, ISOLIR"),
+    sort_by: Optional[str] = Query(None, description="Kolom pengurutan: nama, no_wa, total_tagihan, status_pembayaran, jatuh_tempo, nomor_va"),
+    sort_dir: Optional[str] = Query("asc", description="Arah pengurutan: asc atau desc"),
     page: int = Query(1, ge=1),
     limit: int = Query(15, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    """Mengambil rekapitulasi pembayaran pelanggan per kantor (KPI, tabel, pagination)."""
+    """Mengambil rekapitulasi pembayaran pelanggan per kantor (KPI, tabel, pagination, sorting)."""
     require_login(request)
     return BillingController.get_overview(
         request=request,
@@ -31,6 +33,8 @@ def get_billing_overview(
         kantor=kantor,
         q=q,
         status=status,
+        sort_by=sort_by,
+        sort_dir=sort_dir,
         page=page,
         limit=limit
     )

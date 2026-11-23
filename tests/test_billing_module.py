@@ -48,6 +48,21 @@ class TestBillingModule(unittest.TestCase):
         self.assertIn("total_overdue", summary)
         self.assertIn("total_nominal_tunggakan", summary)
 
+    def test_billing_overview_sorting(self):
+        """Memastikan endpoint /api/pembayaran mendukung parameter sort_by dan sort_dir."""
+        token = create_session_token("admin", role="super admin")
+        self.client.cookies.set("edteknoguard_session", token)
+        self.client.cookies.set("active_kantor", "karanggede")
+
+        # Uji sorting berdasarkan nama asc dan total_tagihan desc
+        r_nama = self.client.get("/api/pembayaran?kantor=karanggede&sort_by=nama&sort_dir=asc&page=1&limit=5")
+        self.assertEqual(r_nama.status_code, 200)
+        self.assertIn("data", r_nama.json())
+
+        r_tagihan = self.client.get("/api/pembayaran?kantor=karanggede&sort_by=total_tagihan&sort_dir=desc&page=1&limit=5")
+        self.assertEqual(r_tagihan.status_code, 200)
+        self.assertIn("data", r_tagihan.json())
+
     def test_prepare_whatsapp_message(self):
         """Memastikan generator draf WhatsApp menghasilkan teks personal yang rapi dan informatif."""
         mock_cust = MagicMock(spec=Pelanggan)

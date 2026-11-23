@@ -281,11 +281,13 @@ export class AuthService {
 }
 
 export class BillingService {
-  static async getOverview({ kantor, q, status, page = 1, limit = 15 } = {}) {
+  static async getOverview({ kantor, q, status, sort_by, sort_dir, page = 1, limit = 15 } = {}) {
     const params = new URLSearchParams();
     if (kantor && kantor !== 'all') params.append('kantor', kantor);
     if (q) params.append('q', q);
     if (status && status !== 'ALL') params.append('status', status);
+    if (sort_by) params.append('sort_by', sort_by);
+    if (sort_dir) params.append('sort_dir', sort_dir);
     params.append('page', page);
     params.append('limit', limit);
     const res = await new ApiService().get(`/api/pembayaran?${params.toString()}`);
