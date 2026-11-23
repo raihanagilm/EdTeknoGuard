@@ -49,7 +49,8 @@ def portal_auth_me(request: Request, db: Session = Depends(get_portal_db)):
         ).order_by(AlertLog.waktu_kirim.desc()).first()
 
     billing_reminder = None
-    if latest_billing_alert:
+    is_unpaid = bool(pelanggan and (pelanggan.status_pembayaran in ["BELUM_BAYAR", "OVERDUE", "ISOLIR"] or getattr(pelanggan, "is_overdue", False) or (getattr(pelanggan, "total_tagihan", None) and pelanggan.total_tagihan > 0)))
+    if latest_billing_alert and is_unpaid:
         billing_reminder = {
             "id": f"billing-alert-{latest_billing_alert.id_alert}",
             "pesan": latest_billing_alert.pesan,

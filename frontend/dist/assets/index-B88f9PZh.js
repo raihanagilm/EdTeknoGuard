@@ -43592,7 +43592,7 @@ function NotificationCardItem({ item, isRead, onCardClick, onActionClick, onDele
 							className: "capitalize",
 							children: item.statusText?.toLowerCase() || ""
 						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					}), item.statusType !== "danger" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						type: "button",
 						onClick: (e) => {
 							e.stopPropagation();
@@ -43686,13 +43686,19 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 			return [];
 		}
 	});
+	const [billingData, setBillingData] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
 		let isMounted = true;
 		setLoading(true);
-		Promise.allSettled([PortalKendalaService.list(), PortalPembayaranService.getRiwayat(5)]).then(([ticketRes, paymentRes]) => {
+		Promise.allSettled([
+			PortalKendalaService.list(),
+			PortalPembayaranService.getRiwayat(5),
+			PortalPembayaranService.getTagihan()
+		]).then(([ticketRes, paymentRes, billingRes]) => {
 			if (!isMounted) return;
 			if (ticketRes.status === "fulfilled" && ticketRes.value?.ok && ticketRes.value.data?.tickets) setTickets(ticketRes.value.data.tickets);
 			if (paymentRes.status === "fulfilled" && paymentRes.value?.ok && paymentRes.value.data?.invoices) setPayments(paymentRes.value.data.invoices);
+			if (billingRes.status === "fulfilled" && billingRes.value) setBillingData(billingRes.value.data || billingRes.value);
 		}).catch((err) => console.error("Gagal mengambil data notifikasi:", err)).finally(() => {
 			if (isMounted) setLoading(false);
 		});
@@ -43704,10 +43710,13 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 		...customer || {},
 		...dashboardData?.customer || {}
 	};
-	const isBelumBayar = pel.status_pembayaran === "BELUM_BAYAR";
+	const isBelumBayar = pel.status_pembayaran === "BELUM_BAYAR" || pel.status_pembayaran === "OVERDUE" || pel.status_pembayaran === "ISOLIR";
 	const notificationList = (0, import_react.useMemo)(() => {
 		const items = [];
-		if (pel.billing_reminder) items.push({
+		const unpaidInvoices = billingData?.unpaid || [];
+		const activeBill = billingData?.next_bill || (unpaidInvoices.length > 0 ? unpaidInvoices[0] : null);
+		const hasUnpaidBill = Boolean(activeBill || unpaidInvoices.length > 0) || isBelumBayar || pel.total_tagihan && pel.total_tagihan > 0 || pel.is_overdue;
+		if (pel.billing_reminder && hasUnpaidBill) items.push({
 			id: pel.billing_reminder.id,
 			category: "BILLING",
 			title: "Pengingat Tagihan Internet (NOC)",
@@ -43716,46 +43725,50 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 			actionText: "Bayar Sekarang",
 			actionTab: "pembayaran",
 			actionSubTab: "tagihan",
-			statusText: pel.status_pembayaran || "BELUM BAYAR",
+			statusText: pel.status_pembayaran || "Belum bayar",
 			statusType: "danger"
 		});
-		if ((isBelumBayar || pel.total_tagihan && pel.total_tagihan > 0 || pel.is_overdue) && !pel.billing_reminder) {
-			const hargaFormatted = pel.total_tagihan ? new Intl.NumberFormat("id-ID", {
+		if (hasUnpaidBill && !pel.billing_reminder) {
+			const nominalValue = activeBill?.total || billingData?.unpaid_total || pel.total_tagihan || pel.harga_paket;
+			const hargaFormatted = nominalValue ? new Intl.NumberFormat("id-ID", {
 				style: "currency",
 				currency: "IDR",
 				maximumFractionDigits: 0
-			}).format(pel.total_tagihan) : pel.harga_paket ? new Intl.NumberFormat("id-ID", {
-				style: "currency",
-				currency: "IDR",
-				maximumFractionDigits: 0
-			}).format(pel.harga_paket) : "Rp -";
+			}).format(nominalValue) : "Rp -";
+			let periodeLabel = "bulan ini";
+			if (activeBill?.billing_period) periodeLabel = periodeTeks(activeBill.billing_period);
+			else if (pel.periode_tagihan) periodeLabel = pel.periode_tagihan.includes("-") ? periodeTeks(pel.periode_tagihan) : pel.periode_tagihan;
 			const now = /* @__PURE__ */ new Date();
 			const todayDateStr = now.toISOString().slice(0, 10);
 			const reminderTimeLabel = now.getHours() >= 10 ? "Hari ini, 10:00" : "Kemarin, 10:00";
+			const isOverdue = Boolean(activeBill?.overdue || pel.is_overdue || pel.status_pembayaran === "OVERDUE");
 			items.push({
 				id: `billing-unpaid-${pel.id_pelanggan || "cust"}-${todayDateStr}`,
 				category: "BILLING",
 				title: "Pengingat Tagihan Belum Dibayar",
-				desc: `Tagihan internet periode ${pel.periode_tagihan || "bulan ini"} (${hargaFormatted}) belum dibayar. Mohon segera melakukan pembayaran tagihan internet bulanan Anda.`,
+				desc: `Tagihan internet periode ${periodeLabel} (${hargaFormatted}) belum dibayar. Mohon segera melakukan pembayaran tagihan internet bulanan Anda.`,
 				timestamp: reminderTimeLabel,
 				actionText: "Bayar Sekarang",
 				actionTab: "pembayaran",
 				actionSubTab: "tagihan",
-				statusText: "BELUM BAYAR",
+				statusText: isOverdue ? "Terlambat" : "Belum bayar",
 				statusType: "danger"
 			});
-		} else if (!pel.billing_reminder) items.push({
-			id: `billing-paid-${pel.periode_tagihan || "current"}`,
-			category: "BILLING",
-			title: "Tagihan Lunas Terverifikasi",
-			desc: `Iuran internet periode ${pel.periode_tagihan || "bulan ini"} sudah lunas dan aktif lancar.`,
-			timestamp: "Periode aktif",
-			actionText: "Lihat Detail",
-			actionTab: "pembayaran",
-			actionSubTab: "tagihan",
-			statusText: "LUNAS",
-			statusType: "success"
-		});
+		} else if (!hasUnpaidBill && !pel.billing_reminder) {
+			const periodeLabel = pel.periode_tagihan ? pel.periode_tagihan.includes("-") ? periodeTeks(pel.periode_tagihan) : pel.periode_tagihan : "bulan ini";
+			items.push({
+				id: `billing-paid-${pel.periode_tagihan || "current"}`,
+				category: "BILLING",
+				title: "Tagihan Lunas Terverifikasi",
+				desc: `Iuran internet periode ${periodeLabel} sudah lunas dan aktif lancar.`,
+				timestamp: "Periode aktif",
+				actionText: "Lihat Detail",
+				actionTab: "pembayaran",
+				actionSubTab: "tagihan",
+				statusText: "Lunas",
+				statusType: "success"
+			});
+		}
 		payments.forEach((inv) => {
 			const timeStr = formatRelativeTime(inv.payment?.date || inv.issue_date);
 			const periodeLabel = inv.billing_period ? periodeTeks(inv.billing_period) : inv.number || "Bulan Ini";
@@ -43801,6 +43814,7 @@ function PortalNotificationsPage({ customer, dashboardData, onBack, onNavigate }
 		pel,
 		tickets,
 		payments,
+		billingData,
 		deletedIds
 	]);
 	const handleMarkAllAsRead = () => {
@@ -44319,7 +44333,7 @@ function PortalActiveMascot({ data, mascotKey: customMascotKey, className = "w-2
 */
 function getActiveNotificationList(customer, tickets = [], payments = []) {
 	const pel = customer || {};
-	const isBelumBayar = pel.status_pembayaran === "BELUM_BAYAR";
+	const isBelumBayar = pel.status_pembayaran === "BELUM_BAYAR" || pel.status_pembayaran === "OVERDUE" || pel.status_pembayaran === "ISOLIR";
 	const items = [];
 	if (pel.billing_reminder && pel.billing_reminder.id) items.push({ id: pel.billing_reminder.id });
 	if (isBelumBayar || pel.total_tagihan && pel.total_tagihan > 0 || pel.is_overdue) {

@@ -60,18 +60,20 @@ function NotificationCardItem({ item, isRead, onCardClick, onActionClick, onDele
             <span className="capitalize">{item.statusText?.toLowerCase() || ''}</span>
           </span>
 
-          {/* Tombol Hapus Tunggal per Notifikasi */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(item);
-            }}
-            className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
-            title="Hapus Pemberitahuan Ini"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          {/* Tombol Hapus Tunggal per Notifikasi (Hanya jika bukan tagihan aktif yang belum lunas) */}
+          {item.statusType !== 'danger' && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(item);
+              }}
+              className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+              title="Hapus Pemberitahuan Ini"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -183,6 +185,7 @@ export function PortalNotificationsPage({
       return [];
     }
   });
+  const [billingData, setBillingData] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -190,15 +193,19 @@ export function PortalNotificationsPage({
 
     Promise.allSettled([
       PortalKendalaService.list(),
-      PortalPembayaranService.getRiwayat(5)
+      PortalPembayaranService.getRiwayat(5),
+      PortalPembayaranService.getTagihan()
     ])
-      .then(([ticketRes, paymentRes]) => {
+      .then(([ticketRes, paymentRes, billingRes]) => {
         if (!isMounted) return;
         if (ticketRes.status === 'fulfilled' && ticketRes.value?.ok && ticketRes.value.data?.tickets) {
           setTickets(ticketRes.value.data.tickets);
         }
         if (paymentRes.status === 'fulfilled' && paymentRes.value?.ok && paymentRes.value.data?.invoices) {
           setPayments(paymentRes.value.data.invoices);
+        }
+        if (billingRes.status === 'fulfilled' && billingRes.value) {
+          setBillingData(billingRes.value.data || billingRes.value);
         }
       })
       .catch((err) => console.error('Gagal mengambil data notifikasi:', err))
@@ -212,14 +219,23 @@ export function PortalNotificationsPage({
   }, []);
 
   const pel = { ...(customer || {}), ...(dashboardData?.customer || {}) };
-  const isBelumBayar = pel.status_pembayaran === 'BELUM_BAYAR';
+  const isBelumBayar =
+    pel.status_pembayaran === 'BELUM_BAYAR' ||
+    pel.status_pembayaran === 'OVERDUE' ||
+    pel.status_pembayaran === 'ISOLIR';
 
   // Bangun daftar notifikasi dengan skema monokromatik biru & slate konsisten
   const notificationList = useMemo(() => {
     const items = [];
 
+    // Deteksi tagihan aktif langsung dari API Network Bill live (prioritas)
+    const unpaidInvoices = billingData?.unpaid || [];
+    const activeBill = billingData?.next_bill || (unpaidInvoices.length > 0 ? unpaidInvoices[0] : null);
+    const hasLiveUnpaid = Boolean(activeBill || unpaidInvoices.length > 0);
+    const hasUnpaidBill = hasLiveUnpaid || isBelumBayar || (pel.total_tagihan && pel.total_tagihan > 0) || pel.is_overdue;
+
     // 0. Notifikasi Pesan Pengingat Resmi dari Admin NOC
-    if (pel.billing_reminder) {
+    if (pel.billing_reminder && hasUnpaidBill) {
       items.push({
         id: pel.billing_reminder.id,
         category: 'BILLING',
@@ -229,50 +245,60 @@ export function PortalNotificationsPage({
         actionText: 'Bayar Sekarang',
         actionTab: 'pembayaran',
         actionSubTab: 'tagihan',
-        statusText: pel.status_pembayaran || 'BELUM BAYAR',
+        statusText: pel.status_pembayaran || 'Belum bayar',
         statusType: 'danger'
       });
     }
 
     // 1. Notifikasi Pengingat Tagihan Harian (Setiap Hari Pukul 10:00 WIB sampai lunas)
-    const hasUnpaidBill = isBelumBayar || (pel.total_tagihan && pel.total_tagihan > 0) || pel.is_overdue;
     if (hasUnpaidBill && !pel.billing_reminder) {
-      const hargaFormatted = pel.total_tagihan
-        ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(pel.total_tagihan)
-        : (pel.harga_paket
-          ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(pel.harga_paket)
-          : 'Rp -');
+      const nominalValue = activeBill?.total || billingData?.unpaid_total || pel.total_tagihan || pel.harga_paket;
+      const hargaFormatted = nominalValue
+        ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(nominalValue)
+        : 'Rp -';
+
+      let periodeLabel = 'bulan ini';
+      if (activeBill?.billing_period) {
+        periodeLabel = periodeTeks(activeBill.billing_period);
+      } else if (pel.periode_tagihan) {
+        periodeLabel = pel.periode_tagihan.includes('-') ? periodeTeks(pel.periode_tagihan) : pel.periode_tagihan;
+      }
 
       // Tanggal hari ini format YYYY-MM-DD
       const now = new Date();
       const todayDateStr = now.toISOString().slice(0, 10);
       const isPastTenAM = now.getHours() >= 10;
       const reminderTimeLabel = isPastTenAM ? 'Hari ini, 10:00' : 'Kemarin, 10:00';
+      const isOverdue = Boolean(activeBill?.overdue || pel.is_overdue || pel.status_pembayaran === 'OVERDUE');
 
       items.push({
-        // ID berganti per hari (todayDateStr) sehingga jika dihapus hari ini, besok jam 10:00 akan muncul notifikasi pengingat baru lagi
+        // ID berganti per hari (todayDateStr) sehingga pengingat selalu sinkron tiap hari pukul 10:00
         id: `billing-unpaid-${pel.id_pelanggan || 'cust'}-${todayDateStr}`,
         category: 'BILLING',
         title: 'Pengingat Tagihan Belum Dibayar',
-        desc: `Tagihan internet periode ${pel.periode_tagihan || 'bulan ini'} (${hargaFormatted}) belum dibayar. Mohon segera melakukan pembayaran tagihan internet bulanan Anda.`,
+        desc: `Tagihan internet periode ${periodeLabel} (${hargaFormatted}) belum dibayar. Mohon segera melakukan pembayaran tagihan internet bulanan Anda.`,
         timestamp: reminderTimeLabel,
         actionText: 'Bayar Sekarang',
         actionTab: 'pembayaran',
         actionSubTab: 'tagihan',
-        statusText: 'BELUM BAYAR',
+        statusText: isOverdue ? 'Terlambat' : 'Belum bayar',
         statusType: 'danger'
       });
-    } else if (!pel.billing_reminder) {
+    } else if (!hasUnpaidBill && !pel.billing_reminder) {
+      const periodeLabel = pel.periode_tagihan
+        ? (pel.periode_tagihan.includes('-') ? periodeTeks(pel.periode_tagihan) : pel.periode_tagihan)
+        : 'bulan ini';
+
       items.push({
         id: `billing-paid-${pel.periode_tagihan || 'current'}`,
         category: 'BILLING',
         title: 'Tagihan Lunas Terverifikasi',
-        desc: `Iuran internet periode ${pel.periode_tagihan || 'bulan ini'} sudah lunas dan aktif lancar.`,
+        desc: `Iuran internet periode ${periodeLabel} sudah lunas dan aktif lancar.`,
         timestamp: 'Periode aktif',
         actionText: 'Lihat Detail',
         actionTab: 'pembayaran',
         actionSubTab: 'tagihan',
-        statusText: 'LUNAS',
+        statusText: 'Lunas',
         statusType: 'success'
       });
     }
@@ -329,7 +355,7 @@ export function PortalNotificationsPage({
     });
 
     return items.filter((item) => !deletedIds.includes(item.id));
-  }, [isBelumBayar, pel, tickets, payments, deletedIds]);
+  }, [isBelumBayar, pel, tickets, payments, billingData, deletedIds]);
 
   const handleMarkAllAsRead = () => {
     const allIds = notificationList.map((n) => n.id);

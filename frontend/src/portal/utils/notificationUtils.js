@@ -5,7 +5,7 @@ import { PortalKendalaService } from '../services/portalApi';
  */
 export function getActiveNotificationList(customer, tickets = [], payments = []) {
   const pel = customer || {};
-  const isBelumBayar = pel.status_pembayaran === 'BELUM_BAYAR';
+  const isBelumBayar = pel.status_pembayaran === 'BELUM_BAYAR' || pel.status_pembayaran === 'OVERDUE' || pel.status_pembayaran === 'ISOLIR';
   const items = [];
 
   // 0. Pengingat Tagihan dari Admin NOC

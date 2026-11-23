@@ -489,13 +489,46 @@ class ONTSchedulerService:
                 try:
                     t_db = TenantDatabaseManager.get_tenant_session(k.kode)
                     try:
-                        from app.db.models import Pelanggan
+                        from app.db.models import Pelanggan, AlertLog
                         from app.services.fcm_service import send_push_notification
+                        from app.core.timezone import get_now_wib
+                        from sqlalchemy import or_
+
+                        now_wib = get_now_wib()
+                        today_start = now_wib.replace(hour=0, minute=0, second=0, microsecond=0)
 
                         unpaid_customers = t_db.query(Pelanggan).filter(
-                            (Pelanggan.status_pembayaran == 'BELUM_BAYAR')
+                            or_(
+                                Pelanggan.status_pembayaran.in_(["BELUM_BAYAR", "OVERDUE", "ISOLIR"]),
+                                Pelanggan.is_overdue == True,
+                                Pelanggan.total_tagihan > 0
+                            )
                         ).all()
                         logger.info(f"[BILLING_REMINDER] Kantor {k.nama}: {len(unpaid_customers)} pelanggan belum lunas tercatat pada audit harian.")
+
+                        # Catat ke AlertLog in-app harian (maksimal 1 entri per hari per pelanggan)
+                        for p in unpaid_customers:
+                            try:
+                                existing_alert = t_db.query(AlertLog).filter(
+                                    AlertLog.id_pelanggan == p.id_pelanggan,
+                                    AlertLog.tipe_alert == "TAGIHAN_REMINDER",
+                                    AlertLog.waktu_kirim >= today_start
+                                ).first()
+                                if not existing_alert:
+                                    tagihan_txt = f"Rp {int(p.total_tagihan):,}".replace(",", ".") if (p.total_tagihan and p.total_tagihan > 0) else "bulanan Anda"
+                                    periode_txt = f"periode {p.periode_tagihan}" if p.periode_tagihan else "bulan ini"
+                                    alert_entry = AlertLog(
+                                        id_pelanggan=p.id_pelanggan,
+                                        tipe_alert="TAGIHAN_REMINDER",
+                                        pesan=f"Pengingat Tagihan Internet: Tagihan {periode_txt} sebesar {tagihan_txt} belum diselesaikan. Mohon lakukan pembayaran agar koneksi internet Anda tetap lancar.",
+                                        target_recipients=p.no_wa or p.no_hp or p.id_pelanggan,
+                                        status_kirim="SUCCESS",
+                                        waktu_kirim=now_wib
+                                    )
+                                    t_db.add(alert_entry)
+                            except Exception as alert_err:
+                                logger.debug(f"[BILLING_REMINDER] Gagal mencatat AlertLog untuk {p.id_pelanggan}: {alert_err}")
+                        t_db.commit()
 
                         unpaid_tokens = [p.fcm_token.strip() for p in unpaid_customers if p.fcm_token and p.fcm_token.strip()]
                         if unpaid_tokens:
@@ -503,7 +536,7 @@ class ONTSchedulerService:
                                 send_push_notification(
                                     tokens=unpaid_tokens,
                                     title="Pengingat Tagihan Internet",
-                                    body="Tagihan internet bulanan Anda telah jatuh tempo. Mohon lakukan pembayaran agar layanan tetap aktif dan lancar.",
+                                    body="Tagihan internet bulanan Anda belum lunas. Mohon lakukan pembayaran agar layanan tetap aktif dan lancar.",
                                     data={
                                         "target_tab": "pembayaran",
                                         "level": "warning",

@@ -2,15 +2,16 @@
 
 ## Current State
 - Last commit: In Progress
-- Test status: passing (Vite build OK)
-- Active module: Customer Portal Anti-Slop (Badge Notifikasi, Kartu Non-VA, Redesain Editorial Legal Modal & Page)
+- Test status: passing (Vite build OK, Python compile OK)
+- Active module: Customer Portal Live Billing Notification & Scheduler 10:00 AM Sync
 - Baseline: Green
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
-  1. Penyesuaian ukuran badge status notifikasi: font mikro `text-[10px] font-medium`, title case `Lunas`/`Belum bayar`, icon `w-3 h-3`.
-  2. Penghapusan kotak ikon chat hijau pastel di kartu pemberitahuan non-VA `PortalPaymentTab.jsx`.
-  3. Redesain menyeluruh `PortalLegalModal.jsx` dan `PortalLegalPage.jsx` ke tata letak dokumen editorial murni bebas AI-slop (tanpa kotak icon pastel bertumpuk, tanpa callout bergaris samping biru, tanpa `font-mono`, dan segmented tab netral minimalis).
+  1. Sinkronisasi live tagihan pada `PortalNotificationsPage.jsx` melalui `PortalPembayaranService.getTagihan()`: jika ada tagihan aktif/tertunggak di Network Bill, Pusat Notifikasi secara deterministik menampilkan kartu "Pengingat Tagihan Belum Dibayar" (nominal & periode riil) dan dilarang menampilkan "Tagihan Lunas Terverifikasi".
+  2. Pengecualian tombol hapus untuk tagihan aktif: pengingat tagihan belum lunas (`statusType === 'danger'`) tidak dapat dihapus sebelum diselesaikan agar notifikasi 10:00 selalu terpantau.
+  3. Perluasan kueri scheduler harian jam 10:00 WIB (`app/services/scheduler_service.py`) mencakup status `OVERDUE`, `ISOLIR`, dan `total_tagihan > 0`, serta otomatis mencatat ke `AlertLog` in-app harian.
+  4. Pengamanan `dashboard/routes.py` dan `auth/routes.py` agar pesan pengingat tagihan hanya aktif jika pelanggan berstatus belum lunas.
 
 ## Next Steps
 - [x] Multi-strategy resolution (`BillingSyncWorker.resolve_nb_id`) dengan pembersihan prefix port OLT (`1/3/1:21_`) dan ID timestamp
@@ -32,7 +33,9 @@
 - [x] Pengecilan badge status notifikasi `LUNAS` menjadi title case mikro `text-[10px]`
 - [x] Penghapusan kotak ikon chat hijau pastel pada kartu pembayaran non-VA
 - [x] Redesain editorial bersih bebas AI-slop pada `PortalLegalModal.jsx` & `PortalLegalPage.jsx`
-- [x] Build frontend production terbaru (`index-Ddlp0CA8.js` & `index-DhnQKq5G.css`)
+- [x] Penyelarasan notifikasi tagihan live di `PortalNotificationsPage.jsx` & `notificationUtils.js`
+- [x] Perbaikan scheduler harian jam 10:00 WIB dan pencatatan in-app `AlertLog` di `app/services/scheduler_service.py`
+- [x] Build frontend production terbaru (`index-B88f9PZh.js` & `index-Cj_nKd7e.css`)
 - [ ] Push ke origin main dan restart daemon di server produksi VPS
 
 ## Blockers
