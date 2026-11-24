@@ -8,7 +8,8 @@
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
-  1. Penerapan Matriks Notifikasi Desktop (Chrome/Edge) & Polling In-App berbasis Role dan Kantor (`App.jsx`, `service.py`, `routes.py`):
+  1. Penyederhanaan info tunggakan: menghapus akumulasi total nominal rupiah dari notifikasi backend (`NotificationService.get_realtime_notifications`) dan kartu KPI ringkasan tagihan (`BillingView.jsx`), difokuskan murni pada jumlah pelanggan/orang tertunggak.
+  2. Penerapan Matriks Notifikasi Desktop (Chrome/Edge) & Polling In-App berbasis Role dan Kantor (`App.jsx`, `service.py`, `routes.py`):
      - `teknisi`: Khusus notifikasi Tiket Kendala dan Sinyal Terputus (LOS) / Redaman Kritis sesuai `allowed_kantor`.
      - `admin` (Kantor): Khusus notifikasi Tiket Kendala, Kredensial Modem Invalid, dan Tagihan Jatuh Tempo/Isolir sesuai `allowed_kantor` (terbebas dari alarm redaman optik teknis).
      - `super admin`: Menerima seluruh jenis notifikasi secara komprehensif dari seluruh kantor.

@@ -70,7 +70,7 @@ export function BillingMessageModal({
             <div>
               <h4 id="billing-modal-title" className="text-sm font-bold text-[#0B2545]">Kirim Pengingat Tagihan</h4>
               <p className="text-[11px] font-sans text-[#64839E]">
-                <span className="font-semibold text-[#0B2545]">{selectedCustomers.length}</span> pelanggan terpilih ({formatRupiah(totalSum)})
+                <span className="font-semibold text-[#0B2545]">{selectedCustomers.length}</span> pelanggan terpilih
               </p>
             </div>
           </div>

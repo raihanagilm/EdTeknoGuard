@@ -180,7 +180,7 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
               setStatusFilter('ALL')
               setPage(1)
             },
-            subLabel: `Tunggakan: ${formatRupiah(summary.total_nominal_tunggakan || 0)}`
+            subLabel: `${summary.total_overdue || 0} Tertunggak`
           },
           {
             label: 'Sudah Lunas',

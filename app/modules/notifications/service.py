@@ -372,7 +372,7 @@ class NotificationService:
         # 6. PENGINGAT TAGIHAN JATUH TEMPO & ISOLIR (Khusus Admin Kantor & Super Admin)
         # -------------------------------------------------------------
         if user_role in ["super admin", "admin"]:
-            overdue_q = db.query(func.count(Pelanggan.id), func.sum(Pelanggan.total_tagihan)).filter(
+            overdue_q = db.query(func.count(Pelanggan.id)).filter(
                 Pelanggan.is_active == True,
                 or_(Pelanggan.is_overdue == True, Pelanggan.status_pembayaran.in_(["OVERDUE", "ISOLIR"]))
             )
@@ -381,22 +381,19 @@ class NotificationService:
             elif user_role != "super admin" and user_allowed_kantors:
                 overdue_q = overdue_q.filter(Pelanggan.kantor.in_(user_allowed_kantors))
 
-            overdue_res = overdue_q.first()
-            overdue_count = overdue_res[0] if overdue_res else 0
-            total_tunggakan = overdue_res[1] if overdue_res else 0
+            overdue_count = overdue_q.scalar() or 0
 
             if overdue_count and overdue_count > 0:
                 kantor_slug = (kantor or "all").lower()
                 billing_notif_key = f"billing_overdue_{kantor_slug}_{get_now_wib().strftime('%Y%m%d')}"
                 if billing_notif_key not in read_ref_ids:
-                    nominal_str = f"Rp {int(total_tunggakan or 0):,}".replace(",", ".")
                     k_label = (kantor or "SEMUA").upper()
                     items_list.append({
                         "id": billing_notif_key,
                         "reference_id": billing_notif_key,
                         "type": "billing",
                         "title": f"Tagihan Jatuh Tempo / Isolir: {k_label}",
-                        "message": f"Terdapat {overdue_count} pelanggan tertunggak ({nominal_str}). Segera tindak lanjuti pembayaran.",
+                        "message": f"Terdapat {overdue_count} pelanggan dengan tagihan jatuh tempo / terisolir. Segera tindak lanjuti pembayaran.",
                         "target_tab": "pembayaran",
                         "target_filter": "OVERDUE",
                         "level": "warning",

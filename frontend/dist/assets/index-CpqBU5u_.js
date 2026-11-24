@@ -37936,7 +37936,7 @@ function BillingMessageModal({ isOpen, onClose, selectedCustomers = [], onSendRe
 		onResetResult
 	]);
 	if (!isOpen) return null;
-	const totalSum = selectedCustomers.reduce((acc, c) => acc + (c.total_tagihan || 0), 0);
+	selectedCustomers.reduce((acc, c) => acc + (c.total_tagihan || 0), 0);
 	const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString("id-ID")}`;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200",
@@ -37966,15 +37966,10 @@ function BillingMessageModal({ isOpen, onClose, selectedCustomers = [], onSendRe
 							children: "Kirim Pengingat Tagihan"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 							className: "text-[11px] font-sans text-[#64839E]",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "font-semibold text-[#0B2545]",
-									children: selectedCustomers.length
-								}),
-								" pelanggan terpilih (",
-								formatRupiah(totalSum),
-								")"
-							]
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "font-semibold text-[#0B2545]",
+								children: selectedCustomers.length
+							}), " pelanggan terpilih"]
 						})] })]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => {
@@ -38147,7 +38142,6 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 			title
 		});
 	};
-	const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString("id-ID")}`;
 	const loadData = (0, import_react.useCallback)(async () => {
 		setLoading(true);
 		try {
@@ -38287,7 +38281,7 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 						setStatusFilter("ALL");
 						setPage(1);
 					},
-					subLabel: `Tunggakan: ${formatRupiah(summary.total_nominal_tunggakan || 0)}`
+					subLabel: `${summary.total_overdue || 0} Tertunggak`
 				},
 				{
 					label: "Sudah Lunas",
