@@ -1,10 +1,10 @@
 # PROGRESS.md — Status Pelacakan Sesi & Keberlanjutan Sistem
 
 ## Current State
-- Last commit: In Progress
+- Last commit: 3184d8f
 - Test status: passing (Vite build OK, 89 pytest passed)
 - Active module: Customer Portal Password Visibility, WhatsApp Reset & Custom Password Setting by Admin
-- Baseline: Green
+- Baseline: Green (Deployed to VPS Production https://portal.teknoindo.net/)
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
