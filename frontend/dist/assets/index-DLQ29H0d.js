@@ -31226,9 +31226,16 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 										className: `text-xs font-bold uppercase ${badgeClass}`,
 										children: statusBadge === "UNTESTED" ? "BELUM CEK" : statusBadge
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: `text-xs font-bold uppercase ${isOnline ? "text-emerald-700" : "text-slate-500"}`,
-										children: isOnline ? "ONLINE" : "OFFLINE"
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex flex-col items-end",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: `text-xs font-bold uppercase ${isOnline ? "text-emerald-700" : "text-slate-500"}`,
+											children: isOnline ? "ONLINE" : "OFFLINE"
+										}), Boolean(c.status_isolir || c.status_pembayaran === "ISOLIR") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[10px] font-bold uppercase tracking-wider text-amber-600 select-none",
+											title: "Pelanggan terisolir di router / Network Bill",
+											children: "ISOLIR"
+										})]
 									})
 								]
 							})]
@@ -31635,14 +31642,22 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 									const isMonitored = Boolean(c.is_monitored !== false);
 									return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "flex flex-col items-center gap-0.5",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: `text-xs font-bold uppercase tracking-wider ${isOnline ? "text-emerald-700" : "text-slate-500"}`,
-											children: isOnline ? "ONLINE" : "OFFLINE"
-										}), !isMonitored && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none",
-											title: "Scan redaman dinonaktifkan (dilewati dari scheduler pemindaian)",
-											children: "SCAN OFF"
-										})]
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: `text-xs font-bold uppercase tracking-wider ${isOnline ? "text-emerald-700" : "text-slate-500"}`,
+												children: isOnline ? "ONLINE" : "OFFLINE"
+											}),
+											Boolean(c.status_isolir || c.status_pembayaran === "ISOLIR") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-[10px] font-bold uppercase tracking-wider text-amber-600 select-none",
+												title: "Pelanggan terisolir di router / Network Bill",
+												children: "ISOLIR"
+											}),
+											!isMonitored && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none",
+												title: "Scan redaman dinonaktifkan (dilewati dari scheduler pemindaian)",
+												children: "SCAN OFF"
+											})
+										]
 									});
 								})()
 							}),
@@ -35064,7 +35079,7 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 					colorScheme: "purple",
 					isActive: filterStatus === "LOS",
 					onClick: () => setFilterStatus("LOS"),
-					subLabel: "Putus"
+					subLabel: stats.isolated ? `Putus • ${stats.isolated} Isolir` : "Putus"
 				},
 				{
 					label: "Invalid",

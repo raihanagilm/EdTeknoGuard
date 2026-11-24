@@ -753,7 +753,7 @@ export function CustomersView({
             colorScheme: 'purple',
             isActive: filterStatus === 'LOS',
             onClick: () => setFilterStatus('LOS'),
-            subLabel: 'Putus'
+            subLabel: stats.isolated ? `Putus • ${stats.isolated} Isolir` : 'Putus'
           },
           {
             label: 'Invalid',

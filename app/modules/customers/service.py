@@ -226,6 +226,13 @@ class CustomerService:
                         LogPerformaONT.status_koneksi == "INVALID"
                     )
                 )
+            elif status == "ISOLIR":
+                query = query.filter(
+                    or_(
+                        Pelanggan.status_isolir == True,
+                        Pelanggan.status_pembayaran == "ISOLIR"
+                    )
+                )
             else:
                 query = query.filter(LogPerformaONT.status_koneksi == status)
 
@@ -371,6 +378,7 @@ class CustomerService:
                 "status_kredensial": getattr(c, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(c, "is_monitored", True)),
                 "status_lease": getattr(c, "status_lease", "bound") or "bound",
+                "status_isolir": bool(getattr(c, "status_isolir", False) or getattr(c, "status_pembayaran", "") == "ISOLIR"),
                 "status_pembayaran": getattr(c, "status_pembayaran", "LUNAS") or "LUNAS",
                 "kantor": getattr(c, "kantor", None) or (db.bind.url.database.replace("edtekno_", "") if (hasattr(db, "bind") and db.bind and hasattr(db.bind, "url") and db.bind.url and db.bind.url.database and db.bind.url.database.startswith("edtekno_")) else None),
                 "queue_name": getattr(c, "queue_name", None) or c.nama,
@@ -532,6 +540,20 @@ class CustomerService:
             invalid_q = invalid_q.filter(Pelanggan.kantor.in_(allowed_kantor))
         invalid_count = invalid_q.scalar() or 0
 
+        # Hitung jumlah pelanggan terisolir
+        isolated_q = db.query(func.count(Pelanggan.id)).filter(
+            Pelanggan.is_active == True,
+            or_(
+                Pelanggan.status_isolir == True,
+                Pelanggan.status_pembayaran == "ISOLIR"
+            )
+        )
+        if kantor and kantor != "all":
+            isolated_q = isolated_q.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            isolated_q = isolated_q.filter(Pelanggan.kantor.in_(allowed_kantor))
+        isolated_count = isolated_q.scalar() or 0
+
         return {
             "total": total_pelanggan,
             "total_all": total_all,
@@ -540,6 +562,7 @@ class CustomerService:
             "critical": critical_count,
             "los": los_count,
             "invalid": invalid_count,
+            "isolated": isolated_count,
             "critical_los": critical_count + los_count,
             "monitored_active": monitored_active,
             "monitored_inactive": monitored_inactive,

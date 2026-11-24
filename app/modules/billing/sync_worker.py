@@ -21,6 +21,7 @@ class BillingSyncWorker:
     """Worker background untuk mencicil sinkronisasi data tagihan ke Network Bill secara bertahap."""
 
     _customer_cache: Dict[str, Dict[str, Any]] = {}  # {pop_slug: {"ts": float, "by_code": {}, "by_wa": {}}}
+    _conn_cache: Dict[str, Dict[str, Any]] = {}  # {pop_slug: {"ts": float, "map": {}}}
     CACHE_TTL_SECONDS = 900  # 15 menit
 
     @staticmethod
@@ -192,10 +193,38 @@ class BillingSyncWorker:
 
         synced_count = 0
         now = get_now_wib()
+        now_ts = time.time()
+
+        # Cache koneksi/isolir router per PoP (TTL 5 menit)
+        conn_cache = cls._conn_cache.get(pop_slug)
+        if not conn_cache or (now_ts - conn_cache.get("ts", 0) > 300):
+            try:
+                conn_res = NetworkBillService.fetch_connection_status(pop_slug)
+                iso_map = {}
+                if conn_res.get("ok") and isinstance(conn_res.get("data"), list):
+                    for row in conn_res.get("data") or []:
+                        cid = str(row.get("customer_id") or "").strip()
+                        if cid:
+                            iso_map[cid] = bool(row.get("router_isolated") or row.get("status") == "isolir")
+                cls._conn_cache[pop_slug] = {"ts": now_ts, "map": iso_map}
+            except Exception:
+                cls._conn_cache[pop_slug] = {"ts": now_ts, "map": {}}
+
+        iso_map = cls._conn_cache.get(pop_slug, {}).get("map", {})
 
         for cust in candidates:
             try:
                 nb_id = cls.resolve_nb_id(db, cust, pop_slug)
+
+                # Sinkronkan status isolir jika ada di pemetaan router
+                matched_cid = str(nb_id) if nb_id else str(cust.id_pelanggan or "")
+                if matched_cid in iso_map:
+                    cust.status_isolir = iso_map[matched_cid]
+                elif str(cust.id_pelanggan or "") in iso_map:
+                    cust.status_isolir = iso_map[str(cust.id_pelanggan)]
+                elif cust.status_pembayaran == "ISOLIR":
+                    cust.status_isolir = True
+
                 if not nb_id:
                     # Tandai last_billing_sync agar tidak terus tersangkut di antrean prioritas pertama
                     cust.last_billing_sync = now

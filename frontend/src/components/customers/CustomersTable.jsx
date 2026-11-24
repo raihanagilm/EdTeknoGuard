@@ -149,13 +149,23 @@ export function CustomersTable({
                     <span className={`text-xs font-bold uppercase ${badgeClass}`}>
                       {statusBadge === 'UNTESTED' ? 'BELUM CEK' : statusBadge}
                     </span>
-                    <span
-                      className={`text-xs font-bold uppercase ${
-                        isOnline ? 'text-emerald-700' : 'text-slate-500'
-                      }`}
-                    >
-                      {isOnline ? 'ONLINE' : 'OFFLINE'}
-                    </span>
+                    <div className="flex flex-col items-end">
+                      <span
+                        className={`text-xs font-bold uppercase ${
+                          isOnline ? 'text-emerald-700' : 'text-slate-500'
+                        }`}
+                      >
+                        {isOnline ? 'ONLINE' : 'OFFLINE'}
+                      </span>
+                      {Boolean(c.status_isolir || c.status_pembayaran === 'ISOLIR') && (
+                        <span
+                          className="text-[10px] font-bold uppercase tracking-wider text-amber-600 select-none"
+                          title="Pelanggan terisolir di router / Network Bill"
+                        >
+                          ISOLIR
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -620,6 +630,14 @@ export function CustomersTable({
                           >
                             {isOnline ? 'ONLINE' : 'OFFLINE'}
                           </span>
+                          {Boolean(c.status_isolir || c.status_pembayaran === 'ISOLIR') && (
+                            <span
+                              className="text-[10px] font-bold uppercase tracking-wider text-amber-600 select-none"
+                              title="Pelanggan terisolir di router / Network Bill"
+                            >
+                              ISOLIR
+                            </span>
+                          )}
                           {!isMonitored && (
                             <span
                               className="text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none"

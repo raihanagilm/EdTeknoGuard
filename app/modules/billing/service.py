@@ -260,8 +260,31 @@ class BillingService:
             unpaid_count = 0
             now = get_now_wib()
 
+            # Ambil pemetaan koneksi & status isolir router dari Network Bill
+            isolated_map = {}
+            try:
+                conn_res = NetworkBillService.fetch_connection_status(pop_slug)
+                if conn_res.get("ok") and isinstance(conn_res.get("data"), list):
+                    for row in conn_res.get("data") or []:
+                        cid = str(row.get("customer_id") or "").strip()
+                        is_iso = bool(row.get("router_isolated") or row.get("status") == "isolir")
+                        if cid:
+                            isolated_map[cid] = is_iso
+            except Exception as e:
+                logger.warning(f"[BILLING_SERVICE] Gagal mengambil connection status {pop_slug}: {e}")
+
             for cust in customers:
                 nb_id = BillingSyncWorker.resolve_nb_id(t_db, cust, pop_slug)
+
+                # Sinkronkan status isolir jika ada dalam data router Network Bill
+                matched_cid = str(nb_id) if nb_id else str(cust.id_pelanggan or "")
+                if matched_cid in isolated_map:
+                    cust.status_isolir = isolated_map[matched_cid]
+                elif str(cust.id_pelanggan or "") in isolated_map:
+                    cust.status_isolir = isolated_map[str(cust.id_pelanggan)]
+                elif cust.status_pembayaran == "ISOLIR":
+                    cust.status_isolir = True
+
                 if not nb_id:
                     cust.last_billing_sync = now
                     continue
