@@ -2,13 +2,22 @@
 
 ## Current State
 - Last commit: 3184d8f
-- Test status: passing (Vite build OK, 89 pytest passed)
-- Active module: Customer Portal Password Visibility, WhatsApp Reset & Custom Password Setting by Admin
-- Baseline: Green (Deployed to VPS Production https://portal.teknoindo.net/)
+- Test status: passing (Vite build OK, 87+ pytest passed)
+- Active module: Harmonize WhatsApp Contact Button, Icon-Only Refresh, and Unified Pagination on Status Tagihan
+- Baseline: Green (Deploying to VPS Production https://portal.teknoindo.net/)
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
-  1. Fitur Visibilitas, Reset & Ganti Sandi Akun Portal Pelanggan ([CustomerDetailModal.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/customers/CustomerDetailModal.jsx)):
+  1. Penyelarasan Tombol Kontak WhatsApp di Status Tagihan ([BillingTable.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingTable.jsx)):
+     - Menggantikan link teks raw (`628xxxx ↗`) dengan komponen tombol interaktif `[📞 Hubungi WA]` bergaya emerald (`bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border-emerald-200`) yang 100% konsisten dengan tabel Tiket Keluhan.
+     - Menyediakan template pesan WhatsApp otomatis yang memuat rincian nama pelanggan, total tagihan, periode tagihan, tanggal jatuh tempo, dan nomor Virtual Account (VA).
+     - Menambahkan tombol kontak WhatsApp serupa pada kartu seluler (mobile card stack) untuk aksesibilitas smartphone teknisi/admin.
+  2. Standardisasi Komponen Pagination ([BillingTable.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingTable.jsx), [BillingView.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingView.jsx)):
+     - Menghapus pagination bar manual kustom dan menggantikannya dengan komponen standar repositori `<DataTableContainer>` dari `CommonUI.jsx`.
+     - Menghubungkan state `limit` (default: 15) dan callback `onLimitChange` sehingga pengguna dapat memilih jumlah baris per halaman (10, 15, 25, 50) layaknya tabel Tiket Keluhan dan Data Pelanggan.
+  3. Penyelarasan Tombol Segarkan ([BillingFilterBar.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingFilterBar.jsx)):
+     - Mengubah tombol "Segarkan" menjadi tombol berbasis ikon saja (`RefreshCw`) tanpa teks label, dengan ukuran touch-target terkalibrasi (`min-h-[34px] sm:min-h-[36px] min-w-[34px] sm:min-w-[36px]`) yang selaras 100% dengan filter bar Tiket Keluhan.
+  4. Fitur Visibilitas, Reset & Ganti Sandi Akun Portal Pelanggan ([CustomerDetailModal.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/customers/CustomerDetailModal.jsx)):
      - Penambahan kartu khusus **"Akun Portal Pelanggan (MyTekno)"** pada tab Profil & Kontak modal Detail Pelanggan.
      - **Koreksi Username & Kata Sandi Kosong:** Jika pelanggan belum memiliki nomor WhatsApp atau sandi belum terdaftar, nilai ditampilkan kosong sebagai strip (`-`) dengan tipografi subtle abu-abu (`text-slate-400 font-sans`), bukan string literal `null`.
      - **Badge Status Cerdas:** Jika pelanggan belum memiliki nomor WA dan sandi, badge menampilkan `Belum Terdaftar` (abu-abu netral). Hanya menampilkan badge `Default (No. WA)` jika nomor WA valid tersedia.

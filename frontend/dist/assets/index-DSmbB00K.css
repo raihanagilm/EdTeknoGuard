@@ -1565,6 +1565,10 @@
     min-width: 28px;
   }
 
+  .min-w-\[34px\] {
+    min-width: 34px;
+  }
+
   .min-w-\[66px\] {
     min-width: 66px;
   }
@@ -3509,6 +3513,10 @@
 
   .py-10 {
     padding-block: calc(var(--spacing) * 10);
+  }
+
+  .py-12 {
+    padding-block: calc(var(--spacing) * 12);
   }
 
   .pt-0 {
@@ -5657,6 +5665,10 @@
 
     .sm\:min-w-\[30px\] {
       min-width: 30px;
+    }
+
+    .sm\:min-w-\[36px\] {
+      min-width: 36px;
     }
 
     .sm\:min-w-\[180px\] {

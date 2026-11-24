@@ -6,15 +6,14 @@ import {
   RefreshCw,
   Copy,
   Check,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
   Smartphone,
   ArrowUpDown,
   Send,
-  BellOff
+  BellOff,
+  Phone
 } from 'lucide-react'
 import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton'
+import { DataTableContainer } from '../common/CommonUI'
 
 export function BillingTable({
   data = [],
@@ -28,12 +27,13 @@ export function BillingTable({
   copiedVA,
   pagination = {},
   onPageChange,
+  onLimitChange,
   onNavigateCustomer,
   sortField = '',
   sortDir = 'asc',
   onSort
 }) {
-  const { page = 1, total_pages = 1, total_records = 0 } = pagination
+  const { page = 1, total_pages = 1, total_records = 0, limit = 15 } = pagination
   const allSelected = data.length > 0 && data.every((p) => selectedIds.includes(p.id_pelanggan))
   const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString('id-ID')}`
 
@@ -83,51 +83,18 @@ export function BillingTable({
     )
   }
 
-  if (loading && data.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-[#CCDDF0] shadow-2xs overflow-hidden mb-4">
-        {/* Desktop Skeleton */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-[#F1F6FC] border-b border-[#CCDDF0] text-[#3B5B78] font-sans text-[11px] font-semibold uppercase tracking-wider">
-                <th className="py-2.5 px-3 w-10 text-center"><div className="w-4 h-4 bg-slate-200 rounded mx-auto" /></th>
-                <th className="py-2.5 px-3">Pelanggan</th>
-                <th className="py-2.5 px-3">Kontak WA</th>
-                <th className="py-2.5 px-3">Tagihan & Periode</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3">Jatuh Tempo</th>
-                <th className="py-2.5 px-3">Nomor VA</th>
-                <th className="py-2.5 px-3 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#CCDDF0]/60 font-mono text-xs">
-              <DesktopTableSkeleton rows={6} colCount={8} type="billing" />
-            </tbody>
-          </table>
-        </div>
-        {/* Mobile Skeleton */}
-        <div className="md:hidden p-3">
-          <MobileCardStackSkeleton count={4} type="billing" />
-        </div>
-      </div>
-    )
-  }
-
-  if (data.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-[#CCDDF0] p-12 text-center">
-        <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
-          <CheckCircle2 className="w-6 h-6" />
-        </div>
-        <h4 className="text-sm font-bold text-[#0B2545]">Tidak Ada Data Tagihan</h4>
-        <p className="text-xs text-[#64839E] mt-1">Tidak ditemukan data pelanggan sesuai kriteria pencarian dan filter status ini.</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="bg-white rounded-xl border border-[#CCDDF0] shadow-2xs overflow-hidden mb-4">
+    <DataTableContainer
+      page={page}
+      totalPages={total_pages}
+      totalCount={total_records}
+      limit={limit}
+      onLimitChange={onLimitChange}
+      onPageChange={onPageChange}
+      onPrevPage={() => onPageChange && onPageChange(Math.max(1, page - 1))}
+      onNextPage={() => onPageChange && onPageChange(Math.min(total_pages, page + 1))}
+      loading={loading}
+    >
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
@@ -165,7 +132,7 @@ export function BillingTable({
                   sortField === 'no_wa' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
                 }`}
                 onClick={() => onSort && onSort('no_wa')}
-                title="Urutkan berdasarkan Nomor WhatsApp"
+                title="Urutkan berdasarkan Kontak WhatsApp"
               >
                 <div className="flex items-center gap-1.5">
                   <span>Kontak WA</span>
@@ -247,225 +214,221 @@ export function BillingTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#CCDDF0]/60">
-            {data.map((p) => {
-              const isChecked = selectedIds.includes(p.id_pelanggan)
-              const isSyncing = syncingId === p.id_pelanggan
-              const isCopied = copiedVA === p.nomor_va
-              return (
-                <tr
-                  key={p.id_pelanggan}
-                  className={`hover:bg-[#F8FAFC] transition-colors ${isChecked ? 'bg-[#F1F6FC]/60' : ''}`}
-                >
-                  <td className="py-2.5 px-3 text-center">
+            {loading && data.length === 0 ? (
+              <DesktopTableSkeleton rows={Math.min(limit || 6, 8)} colCount={8} type="billing" />
+            ) : data.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-12 text-center text-[#64839E]">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-2">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div className="font-bold text-xs text-[#0B2545]">Tidak Ada Data Tagihan</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">Tidak ditemukan data pelanggan sesuai kriteria pencarian dan filter status ini.</div>
+                </td>
+              </tr>
+            ) : (
+              data.map((p) => {
+                const isChecked = selectedIds.includes(p.id_pelanggan)
+                const isSyncing = syncingId === p.id_pelanggan
+                const isCopied = copiedVA === p.nomor_va
+                const cleanWa = p.no_wa && p.no_wa !== '-' ? p.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62') : ''
+                const tagihanStr = formatRupiah(p.total_tagihan)
+                const vaStr = p.nomor_va && p.nomor_va !== '-' ? p.nomor_va : '-'
+                const waText = `Halo Bapak/Ibu ${p.nama}, kami dari Tim Layanan Pelanggan TeknoGuard menginformasikan tagihan internet Anda periode ${p.periode_tagihan || '-'} sebesar ${tagihanStr} (Jatuh tempo: ${p.jatuh_tempo || '-'}). Pembayaran dapat dilakukan via Virtual Account: ${vaStr}. Terima kasih.`
+
+                return (
+                  <tr
+                    key={p.id_pelanggan}
+                    className={`hover:bg-[#F8FAFC] transition-colors ${isChecked ? 'bg-[#F1F6FC]/60' : ''}`}
+                  >
+                    <td className="py-2.5 px-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => onToggleSelect(p.id_pelanggan)}
+                        className="rounded border-slate-300 text-[#026AA7] focus:ring-[#026AA7] cursor-pointer"
+                      />
+                    </td>
+                    <td className="py-2.5 px-3">
+                      {onNavigateCustomer ? (
+                        <button
+                          type="button"
+                          onClick={() => onNavigateCustomer(p.id_pelanggan || p.nama)}
+                          className="font-bold text-[#026AA7] hover:text-[#035388] hover:underline text-left cursor-pointer transition block"
+                          title={`Lihat detail ${p.nama} di Data Pelanggan`}
+                        >
+                          {p.nama}
+                        </button>
+                      ) : (
+                        <div className="font-bold text-[#0B2545]">{p.nama}</div>
+                      )}
+                      <div className="font-mono text-[11px] text-[#64839E] flex items-center gap-1.5 mt-0.5">
+                        <span>{p.id_pelanggan}</span>
+                        {p.has_fcm && (
+                          <span className="inline-flex items-center text-[10px] text-emerald-600" title="Terhubung Aplikasi MyTekno">
+                            <Smartphone className="w-3 h-3" />
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      {cleanWa ? (
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="font-mono text-[11px] text-[#64839E] font-medium">{p.no_wa}</span>
+                          <a
+                            href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 text-xs font-bold transition shadow-2xs group cursor-pointer"
+                            title={`Hubungi ${p.nama} (${p.no_wa}) via WhatsApp`}
+                          >
+                            <Phone className="w-3.5 h-3.5 text-emerald-600 group-hover:text-white" />
+                            <span>Hubungi WA</span>
+                          </a>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 font-mono text-xs">-</span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-3 font-mono">
+                      <div className="font-bold text-[#0B2545]">{formatRupiah(p.total_tagihan)}</div>
+                      <div className="text-[11px] text-[#64839E]">{p.periode_tagihan}</div>
+                    </td>
+                    <td className="py-2.5 px-3">
+                      <div className="flex flex-col gap-1 items-start">
+                        {renderStatusBadge(p)}
+                        {renderReminderBadge(p)}
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-3 font-mono text-[#0B2545]">{p.jatuh_tempo}</td>
+                    <td className="py-2.5 px-3 font-mono">
+                      {p.nomor_va && p.nomor_va !== '-' ? (
+                        <button
+                          onClick={() => onCopyVA(p.nomor_va)}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-[#CCDDF0] bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[11px] text-[#0B2545] cursor-pointer transition-colors"
+                          title="Klik untuk salin VA"
+                        >
+                          <span>{p.nomor_va}</span>
+                          {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3 text-[#64839E]" />}
+                        </button>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => onSyncSingle(p.id_pelanggan)}
+                          disabled={isSyncing}
+                          className="p-1.5 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#026AA7] cursor-pointer transition-colors"
+                          title="Sync Live dari Network Bill"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card Stack */}
+      <div className="md:hidden divide-y divide-[#CCDDF0]/60">
+        {loading && data.length === 0 ? (
+          <div className="p-3">
+            <MobileCardStackSkeleton count={4} type="billing" />
+          </div>
+        ) : data.length === 0 ? (
+          <div className="p-8 text-center text-[#64839E]">
+            <p className="text-xs font-bold text-[#0B2545]">Tidak Ada Data Tagihan</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Tidak ditemukan data pelanggan pada filter ini.</p>
+          </div>
+        ) : (
+          data.map((p) => {
+            const isChecked = selectedIds.includes(p.id_pelanggan)
+            const isSyncing = syncingId === p.id_pelanggan
+            const cleanWa = p.no_wa && p.no_wa !== '-' ? p.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62') : ''
+            const tagihanStr = formatRupiah(p.total_tagihan)
+            const vaStr = p.nomor_va && p.nomor_va !== '-' ? p.nomor_va : '-'
+            const waText = `Halo Bapak/Ibu ${p.nama}, kami dari Tim Layanan Pelanggan TeknoGuard menginformasikan tagihan internet Anda periode ${p.periode_tagihan || '-'} sebesar ${tagihanStr} (Jatuh tempo: ${p.jatuh_tempo || '-'}). Pembayaran dapat dilakukan via Virtual Account: ${vaStr}. Terima kasih.`
+
+            return (
+              <div key={p.id_pelanggan} className={`p-3.5 ${isChecked ? 'bg-[#F1F6FC]/60' : 'bg-white'}`}>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => onToggleSelect(p.id_pelanggan)}
                       className="rounded border-slate-300 text-[#026AA7] focus:ring-[#026AA7] cursor-pointer"
                     />
-                  </td>
-                  <td className="py-2.5 px-3">
-                    {onNavigateCustomer ? (
-                      <button
-                        type="button"
-                        onClick={() => onNavigateCustomer(p.id_pelanggan || p.nama)}
-                        className="font-bold text-[#026AA7] hover:text-[#035388] hover:underline text-left cursor-pointer transition block"
-                        title={`Lihat detail ${p.nama} di Data Pelanggan`}
-                      >
-                        {p.nama}
-                      </button>
-                    ) : (
-                      <div className="font-bold text-[#0B2545]">{p.nama}</div>
-                    )}
-                    <div className="font-mono text-[11px] text-[#64839E] flex items-center gap-1.5 mt-0.5">
-                      <span>{p.id_pelanggan}</span>
-                      {p.has_fcm && (
-                        <span className="inline-flex items-center text-[10px] text-emerald-600" title="Terhubung Aplikasi MyTekno">
-                          <Smartphone className="w-3 h-3" />
-                        </span>
+                    <div>
+                      {onNavigateCustomer ? (
+                        <button
+                          type="button"
+                          onClick={() => onNavigateCustomer(p.id_pelanggan || p.nama)}
+                          className="text-xs font-bold text-[#026AA7] hover:text-[#035388] hover:underline text-left cursor-pointer transition block"
+                          title={`Lihat detail ${p.nama} di Data Pelanggan`}
+                        >
+                          {p.nama}
+                        </button>
+                      ) : (
+                        <h5 className="text-xs font-bold text-[#0B2545]">{p.nama}</h5>
                       )}
+                      <p className="text-[11px] font-mono text-[#64839E]">{p.id_pelanggan}</p>
                     </div>
-                  </td>
-                  <td className="py-2.5 px-3 font-mono text-[#0B2545]">
-                    {p.no_wa && p.no_wa !== '-' ? (
-                      <a
-                        href={`https://wa.me/${p.no_wa.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[#026AA7] hover:underline inline-flex items-center gap-1"
-                      >
-                        <span>{p.no_wa}</span>
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
-                    ) : (
-                      <span className="text-slate-400">-</span>
-                    )}
-                  </td>
-                  <td className="py-2.5 px-3 font-mono">
-                    <div className="font-bold text-[#0B2545]">{formatRupiah(p.total_tagihan)}</div>
-                    <div className="text-[11px] text-[#64839E]">{p.periode_tagihan}</div>
-                  </td>
-                  <td className="py-2.5 px-3">
-                    <div className="flex flex-col gap-1 items-start">
-                      {renderStatusBadge(p)}
-                      {renderReminderBadge(p)}
-                    </div>
-                  </td>
-                  <td className="py-2.5 px-3 font-mono text-[#0B2545]">{p.jatuh_tempo}</td>
-                  <td className="py-2.5 px-3 font-mono">
-                    {p.nomor_va && p.nomor_va !== '-' ? (
-                      <button
-                        onClick={() => onCopyVA(p.nomor_va)}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-[#CCDDF0] bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[11px] text-[#0B2545] cursor-pointer transition-colors"
-                        title="Klik untuk salin VA"
-                      >
-                        <span>{p.nomor_va}</span>
-                        {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3 text-[#64839E]" />}
-                      </button>
-                    ) : (
-                      <span className="text-slate-400">-</span>
-                    )}
-                  </td>
-                  <td className="py-2.5 px-3 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => onSyncSingle(p.id_pelanggan)}
-                        disabled={isSyncing}
-                        className="p-1.5 rounded-lg border border-[#CCDDF0] bg-white hover:bg-[#F1F6FC] text-[#026AA7] cursor-pointer transition-colors"
-                        title="Sync Live dari Network Bill"
-                      >
-                        <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Sorting Controls */}
-      <div className="md:hidden px-3.5 py-2 bg-[#F1F6FC] border-b border-[#CCDDF0] flex items-center justify-between text-xs">
-        <span className="text-[11px] font-semibold text-[#3B5B78]">Urutkan:</span>
-        <div className="flex items-center gap-1.5">
-          <select
-            value={sortField || 'default'}
-            onChange={(e) => onSort && onSort(e.target.value === 'default' ? '' : e.target.value)}
-            className="text-xs bg-white border border-[#CCDDF0] rounded-md px-2 py-1 text-[#0B2545] focus:outline-none focus:border-[#026AA7]"
-            aria-label="Urutkan data tagihan"
-          >
-            <option value="default">Prioritas (Overdue)</option>
-            <option value="nama">Pelanggan</option>
-            <option value="no_wa">Kontak WA</option>
-            <option value="total_tagihan">Total Tagihan</option>
-            <option value="status_pembayaran">Status</option>
-            <option value="jatuh_tempo">Jatuh Tempo</option>
-            <option value="nomor_va">Nomor VA</option>
-          </select>
-          {sortField && (
-            <button
-              type="button"
-              onClick={() => onSort && onSort(sortField)}
-              className="px-2 py-1 rounded bg-white border border-[#CCDDF0] text-[#026AA7] text-xs font-bold hover:bg-[#E2EDF8]"
-              title="Balik arah urutan"
-            >
-              {sortDir === 'asc' ? '▲' : '▼'}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile Card Stack View */}
-      <div className="md:hidden divide-y divide-[#CCDDF0]/60">
-        {data.map((p) => {
-          const isChecked = selectedIds.includes(p.id_pelanggan)
-          const isSyncing = syncingId === p.id_pelanggan
-          return (
-            <div key={p.id_pelanggan} className={`p-3.5 ${isChecked ? 'bg-[#F1F6FC]/60' : 'bg-white'}`}>
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => onToggleSelect(p.id_pelanggan)}
-                    className="rounded border-slate-300 text-[#026AA7] focus:ring-[#026AA7] cursor-pointer"
-                  />
-                  <div>
-                    {onNavigateCustomer ? (
-                      <button
-                        type="button"
-                        onClick={() => onNavigateCustomer(p.id_pelanggan || p.nama)}
-                        className="text-xs font-bold text-[#026AA7] hover:text-[#035388] hover:underline text-left cursor-pointer transition block"
-                        title={`Lihat detail ${p.nama} di Data Pelanggan`}
-                      >
-                        {p.nama}
-                      </button>
-                    ) : (
-                      <h5 className="text-xs font-bold text-[#0B2545]">{p.nama}</h5>
-                    )}
-                    <p className="text-[11px] font-mono text-[#64839E]">{p.id_pelanggan}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    {renderStatusBadge(p)}
+                    {renderReminderBadge(p)}
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  {renderStatusBadge(p)}
-                  {renderReminderBadge(p)}
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono my-2.5 p-2 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0]">
+                  <div>
+                    <span className="text-[10px] text-[#64839E] block">Total Tagihan:</span>
+                    <span className="font-bold text-[#0B2545]">{formatRupiah(p.total_tagihan)}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#64839E] block">Jatuh Tempo:</span>
+                    <span className="text-[#0B2545]">{p.jatuh_tempo}</span>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-between">
+                    <span className="text-[10px] text-[#64839E]">Nomor VA:</span>
+                    <span className="font-bold text-[#026AA7]">{p.nomor_va || '-'}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono my-2.5 p-2 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0]">
-                <div>
-                  <span className="text-[10px] text-[#64839E] block">Total Tagihan:</span>
-                  <span className="font-bold text-[#0B2545]">{formatRupiah(p.total_tagihan)}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#64839E] block">Jatuh Tempo:</span>
-                  <span className="text-[#0B2545]">{p.jatuh_tempo}</span>
-                </div>
-                <div className="col-span-2 flex items-center justify-between">
-                  <span className="text-[10px] text-[#64839E]">Nomor VA:</span>
-                  <span className="font-bold text-[#026AA7]">{p.nomor_va || '-'}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-end gap-1.5 pt-1">
-                <button
-                  onClick={() => onSyncSingle(p.id_pelanggan)}
-                  disabled={isSyncing}
-                  className="px-2.5 py-1 rounded-lg border border-[#CCDDF0] bg-white text-xs font-sans font-semibold text-[#026AA7] hover:bg-[#F1F6FC] transition flex items-center gap-1 cursor-pointer"
-                >
-                  <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
-                  <span>Sync Live</span>
-                </button>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+                <div className="flex items-center justify-end gap-1.5 pt-1">
+                  {cleanWa && (
+                    <a
+                      href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 text-xs font-bold transition shadow-2xs group cursor-pointer"
+                      title={`Hubungi ${p.nama} (${p.no_wa}) via WhatsApp`}
+                    >
+                      <Phone className="w-3.5 h-3.5 text-emerald-600 group-hover:text-white" />
+                      <span>Hubungi WA</span>
+                    </a>
+                  )}
 
-      {/* Pagination Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2.5 px-3 py-2.5 bg-[#F1F6FC] border-t border-[#CCDDF0] text-xs font-sans text-center sm:text-left">
-        <span className="text-[#64839E]">
-          Total <strong className="text-[#0B2545] font-mono">{total_records}</strong> data (Halaman{' '}
-          <strong className="text-[#0B2545] font-mono">{page}</strong> dari <strong className="text-[#0B2545] font-mono">{total_pages}</strong>)
-        </span>
-        <div className="flex items-center gap-1 justify-center">
-          <button
-            onClick={() => onPageChange(page - 1)}
-            disabled={page <= 1}
-            className="p-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer shadow-2xs"
-            title="Halaman Sebelumnya"
-          >
-            <ChevronLeft className="w-4 h-4 text-[#0B2545]" />
-          </button>
-          <button
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= total_pages}
-            className="p-1 rounded-lg border border-[#CCDDF0] bg-white hover:bg-slate-50 disabled:opacity-50 cursor-pointer shadow-2xs"
-            title="Halaman Berikutnya"
-          >
-            <ChevronRight className="w-4 h-4 text-[#0B2545]" />
-          </button>
-        </div>
+                  <button
+                    onClick={() => onSyncSingle(p.id_pelanggan)}
+                    disabled={isSyncing}
+                    className="px-2.5 py-1 rounded-lg border border-[#CCDDF0] bg-white text-xs font-sans font-semibold text-[#026AA7] hover:bg-[#F1F6FC] transition flex items-center gap-1 cursor-pointer"
+                    title="Sync Live dari Network Bill"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
+                    <span>Sync Live</span>
+                  </button>
+                </div>
+              </div>
+            )
+          })
+        )}
       </div>
-    </div>
+    </DataTableContainer>
   )
 }

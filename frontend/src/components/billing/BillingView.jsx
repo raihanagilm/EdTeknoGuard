@@ -14,6 +14,7 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(15)
   const [sortField, setSortField] = useState('')
   const [sortDir, setSortDir] = useState('asc')
   const [selectedIds, setSelectedIds] = useState([])
@@ -41,20 +42,20 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
         sort_by: sortField || undefined,
         sort_dir: sortDir || undefined,
         page,
-        limit: 15
+        limit
       })
       if (res) {
         const items = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : [])
         setData(items)
         setSummary(res.summary || {})
-        setPagination(res.pagination || { page: 1, limit: 15, total_records: 0, total_pages: 1 })
+        setPagination(res.pagination || { page: 1, limit, total_records: 0, total_pages: 1 })
       }
     } catch (err) {
       showToast('Gagal memuat data pembayaran: ' + (err.message || 'Error server'), 'error')
     } finally {
       setLoading(false)
     }
-  }, [activeOffice, searchQuery, statusFilter, page, sortField, sortDir])
+  }, [activeOffice, searchQuery, statusFilter, page, limit, sortField, sortDir])
 
   useEffect(() => {
     loadData()
@@ -249,6 +250,10 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
         copiedVA={copiedVA}
         pagination={pagination}
         onPageChange={(p) => setPage(p)}
+        onLimitChange={(newLimit) => {
+          setLimit(newLimit)
+          setPage(1)
+        }}
         onNavigateCustomer={onNavigateCustomer}
         sortField={sortField}
         sortDir={sortDir}

@@ -96,11 +96,11 @@ export function BillingFilterBar({
               type="button"
               onClick={onRefresh}
               disabled={loading || syncingAll}
-              className="px-3 py-1.5 rounded-lg border border-[#CCDDF0] bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] text-[11px] sm:text-xs font-sans font-semibold flex items-center justify-center gap-1.5 transition shadow-2xs min-h-[34px] sm:min-h-[36px] cursor-pointer"
-              title={`Sinkronisasi Latar Terakhir: ${lastSyncTime}`}
+              className="p-2 rounded-lg border border-[#CCDDF0] bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[#026AA7] transition shadow-2xs min-h-[34px] sm:min-h-[36px] min-w-[34px] sm:min-w-[36px] flex items-center justify-center cursor-pointer disabled:opacity-50"
+              title={`Segarkan Data (Sinkronisasi Terakhir: ${lastSyncTime})`}
+              aria-label="Segarkan Data"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span>{loading ? 'Memuat...' : 'Segarkan'}</span>
             </button>
 
             {onSyncAll && (
