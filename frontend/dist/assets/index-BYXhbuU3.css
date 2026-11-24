@@ -3419,10 +3419,6 @@
     padding: calc(var(--spacing) * 8);
   }
 
-  .p-12 {
-    padding: calc(var(--spacing) * 12);
-  }
-
   .px-0 {
     padding-inline: 0;
   }
@@ -5703,10 +5699,6 @@
       align-items: center;
     }
 
-    .sm\:justify-between {
-      justify-content: space-between;
-    }
-
     .sm\:justify-start {
       justify-content: flex-start;
     }
@@ -5911,10 +5903,6 @@
 
     .sm\:pb-22 {
       padding-bottom: calc(var(--spacing) * 22);
-    }
-
-    .sm\:text-left {
-      text-align: left;
     }
 
     .sm\:text-2xl {

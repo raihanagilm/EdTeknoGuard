@@ -1,14 +1,24 @@
 # PROGRESS.md — Status Pelacakan Sesi & Keberlanjutan Sistem
 
 ## Current State
-- Last commit: 3184d8f
+- Last commit: 050229e
 - Test status: passing (Vite build OK, 87+ pytest passed)
-- Active module: Harmonize WhatsApp Contact Button, Icon-Only Refresh, and Unified Pagination on Status Tagihan
+- Active module: Harmonize Windows/Chrome Desktop Notifications with Mobile & Fix Direct Links Per Kantor
 - Baseline: Green (Deploying to VPS Production https://portal.teknoindo.net/)
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
-  1. Penyelarasan Tombol Kontak WhatsApp di Status Tagihan ([BillingTable.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingTable.jsx)):
+  1. Penyelarasan Notifikasi Desktop Windows / Chrome dengan Format Mobile ([app/modules/notifications/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/notifications/service.py)):
+     - Memformat seluruh judul notifikasi secara deterministik menggunakan pola standar mobile: `[KATEGORI] Kantor: {KANTOR}` (contoh: `[SINYAL TERPUTUS] Kantor: KARANGGEDE`, `[REDAMAN KRITIS] Kantor: TENGARAN`, `[TIKET BARU] Kantor: KARANGGEDE`, `[SCHEDULER] Kantor: PUSAT`, `[TAGIHAN JATUH TEMPO] Kantor: TENGARAN`).
+     - Menyederhanakan isi pesan notifikasi (*concise messages*) agar padat, akurat, dan 100% identik dengan push notification FCM di Android: `{count} modem LOS (terputus)...`, `{count} modem Kritis...`, `{count} tiket MENUNGGU...`.
+     - Menyematkan atribut `target_kantor` dan `kantor` di seluruh objek notifikasi agar routing direct link bekerja tanpa ambigu.
+  2. Perbaikan Sistem Direct Link Per Kantor Backend & Frontend ([app/main.py](file:///d:/databaru/Magang/EdTeknoGuard/app/main.py), [frontend/src/App.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/App.jsx)):
+     - **Inisialisasi Cerdas di Frontend:** `activeOffice` di `App.jsx` kini membaca query parameter URL `?kantor=` / `?target_kantor=` terlebih dahulu, dilanjutkan dengan cookie `active_kantor`, dan terakhir `localStorage`.
+     - **Sinkronisasi Address Bar Real-Time:** Setiap kali kantor aktif berganti (baik via dropdown switcher, klik notifikasi desktop/lonceng, atau deep link `window.navigateToTab`), URL browser otomatis disinkronkan dengan `?kantor={cleanOffice}` secara real-time tanpa refresh halaman (`history.replaceState`).
+     - **Preservasi Direct Link saat Navigasi Tab:** Saat berpindah tab (`handleTabChange`), parameter `?kantor=` dipertahankan di address bar browser, sehingga tautan halaman mana pun dapat langsung di-copy atau di-bookmark dengan wewenang kantor yang tepat.
+     - **Navigasi Klik Notifikasi Desktop:** Klik pada notifikasi Windows/Chrome langsung mengarahkan user ke kantor terkait (`targetKantor`), tab terkait (`target_tab`), dan filter status/pencarian pelanggan terkait (`target_status`, `target_filter`).
+     - **Perbaikan Endpoint `/switch-kantor`:** Backend kini menyertakan `?kantor={kantor_clean}` pada redirect URL selain menyetel cookie `active_kantor`.
+  3. Penyelarasan Tombol Kontak WhatsApp di Status Tagihan ([BillingTable.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingTable.jsx)):
      - Menggantikan link teks raw (`628xxxx ↗`) dengan komponen tombol interaktif `[📞 Hubungi WA]` bergaya emerald (`bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border-emerald-200`) yang 100% konsisten dengan tabel Tiket Keluhan.
      - Menyediakan template pesan WhatsApp otomatis yang memuat rincian nama pelanggan, total tagihan, periode tagihan, tanggal jatuh tempo, dan nomor Virtual Account (VA).
      - Menambahkan tombol kontak WhatsApp serupa pada kartu seluler (mobile card stack) untuk aksesibilitas smartphone teknisi/admin.

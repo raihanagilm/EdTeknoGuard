@@ -151,19 +151,33 @@ async def inject_current_user_middleware(request: Request, call_next):
 @app.get("/switch-kantor")
 async def switch_kantor(request: Request, kantor: str = "cabang"):
     from app.core.security import get_current_user_optional, get_user_allowed_kantor
+    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
     user = get_current_user_optional(request)
     referer = request.headers.get("referer", "/")
     # Hindari redirect loop jika referer adalah /switch-kantor
     if "/switch-kantor" in referer:
         referer = "/"
-    response = RedirectResponse(url=referer, status_code=303)
+
+    kantor_clean = kantor.strip().lower()
+    
+    # Tambahkan atau mutasikan query param ?kantor= pada redirect URL
+    target_url = referer
+    if kantor_clean:
+        try:
+            parsed = urlparse(referer)
+            qs = parse_qs(parsed.query)
+            qs["kantor"] = [kantor_clean]
+            new_query = urlencode(qs, doseq=True)
+            target_url = urlunparse((parsed.scheme, parsed.netloc, parsed.path or "/", parsed.params, new_query, parsed.fragment))
+        except Exception:
+            target_url = f"/?kantor={kantor_clean}"
+
+    response = RedirectResponse(url=target_url, status_code=303)
     
     if not user:
         return response
         
-    kantor_clean = kantor.strip().lower()
     allowed = get_user_allowed_kantor(user)
-    
     if kantor_clean in allowed and kantor_clean != "all":
         response.set_cookie("active_kantor", kantor_clean, max_age=86400 * 30, path="/")
         

@@ -50216,11 +50216,40 @@ function App() {
 		}
 	});
 	const [officeSubTab, setOfficeSubTab] = (0, import_react.useState)("kantor");
-	const [customerSearchQuery, setCustomerSearchQuery] = (0, import_react.useState)("");
-	const [customerStatusFilter, setCustomerStatusFilter] = (0, import_react.useState)("ALL");
+	const [customerSearchQuery, setCustomerSearchQuery] = (0, import_react.useState)(() => {
+		try {
+			const params = new URLSearchParams(window.location.search);
+			return params.get("filter") || params.get("q") || params.get("target_filter") || "";
+		} catch (_) {
+			return "";
+		}
+	});
+	const [customerStatusFilter, setCustomerStatusFilter] = (0, import_react.useState)(() => {
+		try {
+			const params = new URLSearchParams(window.location.search);
+			return (params.get("status") || params.get("target_status") || "ALL").toUpperCase();
+		} catch (_) {
+			return "ALL";
+		}
+	});
 	const [activeOffice, setActiveOffice] = (0, import_react.useState)(() => {
-		const saved = localStorage.getItem("edtekno_active_office");
-		return saved && saved !== "cabang" ? saved : "pusat";
+		try {
+			const params = new URLSearchParams(window.location.search);
+			const urlOffice = params.get("kantor") || params.get("target_kantor");
+			if (urlOffice) {
+				const clean = urlOffice.trim().toLowerCase();
+				if (clean && clean !== "cabang") return clean;
+			}
+			const match = document.cookie.match(/(?:^|;\s*)active_kantor=([^;]+)/);
+			if (match && match[1]) {
+				const cookieVal = decodeURIComponent(match[1]).trim().toLowerCase();
+				if (cookieVal && cookieVal !== "cabang") return cookieVal;
+			}
+			const saved = localStorage.getItem("edtekno_active_office");
+			return saved && saved !== "cabang" ? saved.trim().toLowerCase() : "pusat";
+		} catch (_) {
+			return "pusat";
+		}
 	});
 	const [kantorList, setKantorList] = (0, import_react.useState)([{
 		kode: "pusat",
@@ -50271,9 +50300,17 @@ function App() {
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
 	const handleSwitchOffice = (officeKey) => {
-		setActiveOffice(officeKey);
-		localStorage.setItem("edtekno_active_office", officeKey);
-		document.cookie = `active_kantor=${officeKey}; path=/; max-age=2592000; samesite=lax`;
+		if (!officeKey) return;
+		const clean = officeKey.trim().toLowerCase();
+		setActiveOffice(clean);
+		try {
+			localStorage.setItem("edtekno_active_office", clean);
+			document.cookie = `active_kantor=${clean}; path=/; max-age=2592000; samesite=lax`;
+			const url = new URL(window.location.href);
+			if (clean && clean !== "all") url.searchParams.set("kantor", clean);
+			else url.searchParams.delete("kantor");
+			window.history.replaceState({}, "", url.pathname + url.search);
+		} catch (_) {}
 	};
 	const fetchKantorList = async () => {
 		try {
@@ -50524,7 +50561,8 @@ function App() {
 	]);
 	const handleNotificationItemClick = async (item) => {
 		setIsNotificationOpen(false);
-		if (item.kantor && item.kantor.toLowerCase() !== activeOffice.toLowerCase()) handleSwitchOffice(item.kantor);
+		const targetKantor = (item.target_kantor || item.kantor || "").trim().toLowerCase();
+		if (targetKantor && targetKantor !== "all") handleSwitchOffice(targetKantor);
 		if (!(item.level === "critical" || item.level === "los" || item.is_critical || item.status_koneksi === "LOS" || item.status_koneksi === "CRITICAL" || item.id?.startsWith("batch_los") || item.id?.startsWith("batch_critical"))) try {
 			await fetch("/api/notifications/read", {
 				method: "POST",
@@ -50532,7 +50570,7 @@ function App() {
 				body: JSON.stringify({
 					type: item.type,
 					reference_id: item.reference_id || item.id,
-					kantor: item.kantor || activeOffice
+					kantor: targetKantor || activeOffice
 				})
 			});
 			setNotificationList((prev) => prev.filter((n) => n.id !== item.id));
@@ -50541,37 +50579,43 @@ function App() {
 		} catch (e) {
 			console.warn("Failed to mark notification read:", e);
 		}
-		if (item.target_tab === "tiket") {
+		const targetTab = item.target_tab || "beranda";
+		if (targetTab === "tiket") {
 			if (item.target_filter) setTicketInitialSearch(item.target_filter);
-			handleTabChange("tiket");
-		} else if (item.target_tab === "logs" || item.target_tab === "riwayat") {
+			handleTabChange("tiket", targetKantor);
+		} else if (targetTab === "logs" || targetTab === "riwayat") {
 			if (item.target_filter) setLogsInitialSearch(item.target_filter);
-			handleTabChange("riwayat");
-		} else if (item.target_tab === "pelanggan") {
-			if (item.target_status) setCustomerStatusFilter(item.target_status);
+			handleTabChange("riwayat", targetKantor);
+		} else if (targetTab === "pelanggan") {
+			if (item.target_status) setCustomerStatusFilter(item.target_status.toUpperCase());
 			else setCustomerStatusFilter("ALL");
 			if (item.target_filter) setCustomerSearchQuery(item.target_filter);
 			else setCustomerSearchQuery("");
-			handleTabChange("pelanggan");
-		} else if (item.target_tab === "beranda") handleTabChange("beranda");
-		else handleTabChange(item.target_tab || "beranda");
+			handleTabChange("pelanggan", targetKantor);
+		} else if (targetTab === "pembayaran") handleTabChange("pembayaran", targetKantor);
+		else if (targetTab === "pengaturan") handleTabChange("pengaturan", targetKantor);
+		else handleTabChange(targetTab, targetKantor);
 	};
 	(0, import_react.useEffect)(() => {
 		window.navigateToTab = (tab, filter = "", targetKantor = "", targetStatus = "") => {
-			if (targetKantor && targetKantor.toLowerCase() !== activeOffice.toLowerCase()) handleSwitchOffice(targetKantor.toLowerCase());
-			if (tab === "tiket") {
+			const cleanKantor = (targetKantor || "").trim().toLowerCase();
+			if (cleanKantor && cleanKantor !== "all") handleSwitchOffice(cleanKantor);
+			const targetTab = tab || "beranda";
+			if (targetTab === "tiket") {
 				if (filter) setTicketInitialSearch(filter);
-				handleTabChange("tiket");
-			} else if (tab === "riwayat" || tab === "logs") {
+				handleTabChange("tiket", cleanKantor);
+			} else if (targetTab === "riwayat" || targetTab === "logs") {
 				if (filter) setLogsInitialSearch(filter);
-				handleTabChange("riwayat");
-			} else if (tab === "pelanggan") {
+				handleTabChange("riwayat", cleanKantor);
+			} else if (targetTab === "pelanggan") {
 				if (targetStatus) setCustomerStatusFilter(targetStatus.toUpperCase());
 				else setCustomerStatusFilter("ALL");
 				if (filter) setCustomerSearchQuery(filter);
 				else setCustomerSearchQuery("");
-				handleTabChange("pelanggan");
-			} else handleTabChange(tab || "beranda");
+				handleTabChange("pelanggan", cleanKantor);
+			} else if (targetTab === "pembayaran") handleTabChange("pembayaran", cleanKantor);
+			else if (targetTab === "pengaturan") handleTabChange("pengaturan", cleanKantor);
+			else handleTabChange(targetTab, cleanKantor);
 		};
 		return () => {
 			delete window.navigateToTab;
@@ -50763,19 +50807,40 @@ function App() {
 			window.history.pushState({}, "", "/login");
 		}
 	};
-	const handleTabChange = (newTab) => {
+	const handleTabChange = (newTab, explicitOffice = null) => {
 		setActiveTab(newTab);
 		try {
 			if (newTab && newTab !== "login" && newTab !== "404_not_found") localStorage.setItem("edtekno_active_tab", newTab);
 		} catch (_) {}
 		const newPath = getPathFromTab(newTab);
-		if (window.location.pathname !== newPath) window.history.pushState({}, "", newPath);
+		try {
+			const url = new URL(window.location.href);
+			url.pathname = newPath;
+			const effOffice = (explicitOffice || activeOffice || "").trim().toLowerCase();
+			if (effOffice && effOffice !== "all") url.searchParams.set("kantor", effOffice);
+			else url.searchParams.delete("kantor");
+			window.history.pushState({}, "", url.pathname + url.search);
+		} catch (_) {
+			if (window.location.pathname !== newPath) window.history.pushState({}, "", newPath);
+		}
 	};
 	(0, import_react.useEffect)(() => {
 		const isPortalRoute = window.location.pathname.startsWith("/portal") || window.location.pathname.startsWith("/teknocust");
 		const syncFromLocation = (authOverride = null) => {
 			const auth = authOverride !== null ? authOverride : isAuthenticated;
 			const currentPath = window.location.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
+			try {
+				const params = new URLSearchParams(window.location.search);
+				const urlOffice = params.get("kantor") || params.get("target_kantor");
+				if (urlOffice) {
+					const cleanK = urlOffice.trim().toLowerCase();
+					if (cleanK && cleanK !== activeOffice.toLowerCase()) handleSwitchOffice(cleanK);
+				}
+				const urlStatus = params.get("status") || params.get("target_status");
+				if (urlStatus) setCustomerStatusFilter(urlStatus.toUpperCase());
+				const urlFilter = params.get("filter") || params.get("q") || params.get("target_filter");
+				if (urlFilter) setCustomerSearchQuery(urlFilter);
+			} catch (_) {}
 			if (auth && currentPath === "login") {
 				const savedTab = localStorage.getItem("edtekno_active_tab") || "beranda";
 				const targetPath = getPathFromTab(savedTab);

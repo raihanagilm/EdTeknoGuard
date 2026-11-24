@@ -73,35 +73,40 @@ class NotificationService:
             if batch_key not in read_ref_ids:
                 kantor_tags = list(set([t.kantor.title() for t in unread_tickets if t.kantor]))
                 kantor_desc = ", ".join(kantor_tags[:3])
+                k_label = (first_t.kantor or kantor or "SEMUA").upper()
                 items_list.append({
                     "id": batch_key,
+                    "reference_id": batch_key,
                     "type": "tiket_batch",
-                    "title": f"{len(unread_tickets)} Tiket Keluhan Masuk",
-                    "message": f"Terdapat {len(unread_tickets)} tiket keluhan belum selesai. Segera tindak lanjuti!",
+                    "title": f"[TIKET] Kantor: {k_label}",
+                    "message": f"{len(unread_tickets)} tiket MENUNGGU belum diproses.",
                     "target_tab": "tiket",
+                    "target_kantor": first_t.kantor or kantor or "all",
                     "target_filter": "",
                     "level": "warning",
                     "badge": f"{len(unread_tickets)} Tiket",
                     "time": first_t.created_at.strftime("%H:%M") if first_t.created_at else "",
                     "count": len(unread_tickets),
-                    "kantor": first_t.kantor
+                    "kantor": first_t.kantor or kantor or "all"
                 })
         else:
             for t in unread_tickets:
                 c = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == t.id_pelanggan).first()
                 c_name = c.nama if c else t.id_pelanggan
+                t_k_label = (t.kantor or kantor or "SEMUA").upper()
                 items_list.append({
                     "id": f"tiket_{t.id}",
                     "reference_id": str(t.id),
                     "type": "tiket",
-                    "title": f"Tiket Kendala: {c_name}",
-                    "message": f"{t.kategori} - {t.deskripsi[:75]}..." if len(t.deskripsi or "") > 75 else (t.deskripsi or t.kategori),
+                    "title": f"[TIKET BARU] Kantor: {t_k_label}",
+                    "message": f"[{t.id_tiket}] {c_name}: {t.kategori}",
                     "target_tab": "tiket",
+                    "target_kantor": t.kantor or kantor or "all",
                     "target_filter": t.id_tiket,
                     "level": "warning" if t.status == "MENUNGGU" else "info",
                     "badge": f"Tiket {t.status}",
                     "time": t.created_at.strftime("%H:%M") if t.created_at else "",
-                    "kantor": t.kantor,
+                    "kantor": t.kantor or kantor or "all",
                     "id_tiket": t.id_tiket,
                     "id_pelanggan": t.id_pelanggan
                 })
@@ -153,19 +158,33 @@ class NotificationService:
 
                 status_label = "Sinyal Terputus" if is_los else ("Redaman Kritis" if is_critical else "Redaman Waspada")
                 badge_label = "TERPUTUS" if is_los else ("KRITIS" if is_critical else "WASPADA")
+                k_label = (cust.kantor or kantor or "SEMUA").upper()
+                if is_los:
+                    notif_title = f"[SINYAL TERPUTUS] Kantor: {k_label}"
+                    notif_msg = f"{cust.nama}: Modem LOS (terputus). Segera cek kabel fisik."
+                elif is_critical:
+                    notif_title = f"[REDAMAN KRITIS] Kantor: {k_label}"
+                    rx_str = f"{log_entry.rx_power} dBm" if log_entry.rx_power is not None else "N/A"
+                    notif_msg = f"{cust.nama}: Redaman kritis ({rx_str} <= -27.0 dBm). Segera cek redaman."
+                else:
+                    notif_title = f"[REDAMAN WASPADA] Kantor: {k_label}"
+                    rx_str = f"{log_entry.rx_power} dBm" if log_entry.rx_power is not None else "N/A"
+                    notif_msg = f"{cust.nama}: Redaman waspada ({rx_str})."
+
                 item_data = {
                     "id": ref_key,
                     "reference_id": ref_key,
                     "type": "monitoring",
-                    "title": f"{status_label}: {cust.nama}",
-                    "message": f"IP: {cust.ip_router or '-'} • Redaman: {log_entry.rx_power if log_entry.rx_power is not None else 'N/A'} dBm ({log_entry.keterangan or status_conn})",
+                    "title": notif_title,
+                    "message": notif_msg,
                     "target_tab": "pelanggan",
+                    "target_kantor": cust.kantor or kantor or "all",
                     "target_filter": cust.id_pelanggan,
                     "target_status": status_conn,
                     "level": "los" if is_los else ("critical" if is_critical else "warning"),
                     "badge": badge_label,
                     "time": log_entry.waktu_cek.strftime("%H:%M") if log_entry.waktu_cek else "",
-                    "kantor": cust.kantor,
+                    "kantor": cust.kantor or kantor or "all",
                     "id_pelanggan": cust.id_pelanggan,
                     "nama_pelanggan": cust.nama,
                     "rx_power": float(log_entry.rx_power) if log_entry.rx_power is not None else None,
@@ -183,23 +202,25 @@ class NotificationService:
             # 1. Grouping LOS (Ungu, >= 5 items digabung jadi 1)
             if len(los_items) >= 5:
                 first_los = los_items[0]
-                kantor_slug = (first_los.get('kantor') or 'all').lower()
+                kantor_slug = (first_los.get('kantor') or kantor or 'all').lower()
+                k_label = (first_los.get('kantor') or kantor or 'SEMUA').upper()
                 batch_key = f"batch_los_{kantor_slug}"
                 if batch_key not in read_ref_ids:
                     items_list.append({
                         "id": batch_key,
                         "reference_id": batch_key,
                         "type": "monitoring_batch",
-                        "title": f"{len(los_items)} Modem Sinyal Terputus (LOS)",
-                        "message": f"Terdeteksi {len(los_items)} pelanggan mengalami sinyal terputus (kabel lepas / redaman hilang).",
+                        "title": f"[SINYAL TERPUTUS] Kantor: {k_label}",
+                        "message": f"{len(los_items)} modem LOS (terputus). Segera cek kabel fisik.",
                         "target_tab": "pelanggan",
+                        "target_kantor": first_los.get('kantor') or kantor or "all",
                         "target_filter": "",
                         "target_status": "LOS",
                         "level": "los",
                         "badge": f"{len(los_items)} TERPUTUS",
                         "time": first_los["time"],
                         "count": len(los_items),
-                        "kantor": first_los["kantor"],
+                        "kantor": first_los.get('kantor') or kantor or "all",
                         "is_critical": True
                     })
             else:
@@ -208,23 +229,25 @@ class NotificationService:
             # 2. Grouping KRITIS (Merah, >= 5 items digabung jadi 1)
             if len(critical_items) >= 5:
                 first_crit = critical_items[0]
-                kantor_slug = (first_crit.get('kantor') or 'all').lower()
+                kantor_slug = (first_crit.get('kantor') or kantor or 'all').lower()
+                k_label = (first_crit.get('kantor') or kantor or 'SEMUA').upper()
                 batch_key = f"batch_critical_{kantor_slug}"
                 if batch_key not in read_ref_ids:
                     items_list.append({
                         "id": batch_key,
                         "reference_id": batch_key,
                         "type": "monitoring_batch",
-                        "title": f"{len(critical_items)} Modem Redaman Kritis (<= -27 dBm)",
-                        "message": f"Terdeteksi {len(critical_items)} pelanggan mendekati/melebihi batas kritis redaman. Wajib segera ditindaklanjuti!",
+                        "title": f"[REDAMAN KRITIS] Kantor: {k_label}",
+                        "message": f"{len(critical_items)} modem Kritis (<= -27.0 dBm). Segera cek redaman.",
                         "target_tab": "pelanggan",
+                        "target_kantor": first_crit.get('kantor') or kantor or "all",
                         "target_filter": "",
                         "target_status": "CRITICAL",
                         "level": "critical",
                         "badge": f"{len(critical_items)} KRITIS",
                         "time": first_crit["time"],
                         "count": len(critical_items),
-                        "kantor": first_crit["kantor"],
+                        "kantor": first_crit.get('kantor') or kantor or "all",
                         "is_critical": True
                     })
             else:
@@ -234,22 +257,24 @@ class NotificationService:
             if len(warning_items) >= 5:
                 first_warn = warning_items[0]
                 kantor_slug = (first_warn.get('kantor') or 'all').lower()
+                k_label = (first_warn.get('kantor') or kantor or 'SEMUA').upper()
                 batch_key = f"batch_warning_{kantor_slug}"
                 if batch_key not in read_ref_ids:
                     items_list.append({
                         "id": batch_key,
                         "reference_id": batch_key,
                         "type": "monitoring_batch",
-                        "title": f"{len(warning_items)} Modem Redaman Waspada",
-                        "message": f"Terdeteksi {len(warning_items)} pelanggan dalam rentang redaman waspada (-26.0 s/d -27.0 dBm).",
+                        "title": f"[REDAMAN WASPADA] Kantor: {k_label}",
+                        "message": f"{len(warning_items)} modem Waspada (-26.0 s/d -27.0 dBm).",
                         "target_tab": "pelanggan",
+                        "target_kantor": first_warn.get('kantor') or kantor or "all",
                         "target_filter": "",
                         "target_status": "WARNING",
                         "level": "warning",
                         "badge": f"{len(warning_items)} WASPADA",
                         "time": first_warn["time"],
                         "count": len(warning_items),
-                        "kantor": first_warn["kantor"],
+                        "kantor": first_warn.get('kantor') or kantor or "all",
                         "is_critical": False
                     })
             else:
@@ -279,19 +304,21 @@ class NotificationService:
                     inv_key = f"invalid_cred_{inv_c.id_pelanggan}"
                     if inv_key in read_ref_ids:
                         continue
+                    inv_k_label = (inv_c.kantor or kantor or "SEMUA").upper()
                     invalid_items.append({
                         "id": inv_key,
                         "reference_id": inv_key,
                         "type": "monitoring",
-                        "title": f"Kredensial Modem Tidak Cocok: {inv_c.nama}",
-                        "message": f"IP: {inv_c.ip_router or '-'} • Seluruh kredensial ditolak oleh modem. Perlu verifikasi fisik ke pelanggan.",
+                        "title": f"[KREDENSIAL MODEM] Kantor: {inv_k_label}",
+                        "message": f"{inv_c.nama}: Kredensial modem tidak cocok (verifikasi fisik).",
                         "target_tab": "pelanggan",
+                        "target_kantor": inv_c.kantor or kantor or "all",
                         "target_filter": inv_c.id_pelanggan,
                         "target_status": "INVALID",
                         "level": "invalid",
                         "badge": "INVALID",
                         "time": get_now_wib().strftime("%H:%M"),
-                        "kantor": inv_c.kantor,
+                        "kantor": inv_c.kantor or kantor or "all",
                         "id_pelanggan": inv_c.id_pelanggan,
                         "nama_pelanggan": inv_c.nama,
                         "is_critical": False
@@ -301,23 +328,24 @@ class NotificationService:
                 if len(invalid_items) >= 5:
                     first_inv = invalid_items[0]
                     kantor_slug = (kantor or first_inv.get("kantor") or "all").lower()
-                    target_k_label = (kantor or first_inv.get("kantor") or "SEMUA").title()
+                    target_k_label = (kantor or first_inv.get("kantor") or "SEMUA").upper()
                     batch_inv_key = f"batch_invalid_{kantor_slug}"
                     if batch_inv_key not in read_ref_ids:
                         items_list.append({
                             "id": batch_inv_key,
                             "reference_id": batch_inv_key,
                             "type": "monitoring_batch",
-                            "title": f"{len(invalid_items)} Modem Gagal Login (Kredensial Tidak Cocok)",
-                            "message": f"Terdeteksi {len(invalid_items)} pelanggan dengan kredensial tidak cocok. Klik untuk melihat data pelanggan.",
+                            "title": f"[KREDENSIAL MODEM] Kantor: {target_k_label}",
+                            "message": f"{len(invalid_items)} modem gagal login (kredensial tidak cocok).",
                             "target_tab": "pelanggan",
+                            "target_kantor": first_inv.get("kantor") or kantor or "all",
                             "target_filter": "",
                             "target_status": "INVALID",
                             "level": "invalid",
                             "badge": f"{len(invalid_items)} INVALID",
                             "time": first_inv.get("time") or get_now_wib().strftime("%H:%M"),
                             "count": len(invalid_items),
-                            "kantor": first_inv.get("kantor"),
+                            "kantor": first_inv.get("kantor") or kantor or "all",
                             "is_critical": False
                         })
                 else:
@@ -331,16 +359,20 @@ class NotificationService:
             from app.services.scheduler_service import ont_scheduler
             paused_reminder = ont_scheduler.check_paused_reminder(db)
             if paused_reminder:
+                k_label = (kantor or "SEMUA").upper()
                 items_list.insert(0, {
                     "id": "paused_scheduler_reminder",
+                    "reference_id": "paused_scheduler_reminder",
                     "type": "system",
-                    "title": "Pengingat: Jadwal Terjeda",
-                    "message": paused_reminder.get("message", "Jadwal pemantauan sedang terjeda."),
+                    "title": f"[SCHEDULER] Kantor: {k_label}",
+                    "message": paused_reminder.get("message", "Status TERJEDA. Segera aktifkan kembali pemantauan."),
                     "target_tab": "beranda",
+                    "target_kantor": kantor or "all",
                     "target_filter": "",
                     "level": "info",
                     "badge": "SISTEM",
-                    "time": get_now_wib().strftime("%H:%M")
+                    "time": get_now_wib().strftime("%H:%M"),
+                    "kantor": kantor or "all"
                 })
 
         # -------------------------------------------------------------
@@ -357,9 +389,10 @@ class NotificationService:
                         "id": config_notif_key,
                         "reference_id": config_notif_key,
                         "type": "config_missing",
-                        "title": f"Pengaturan Kantor {k_tag} Belum Lengkap",
-                        "message": f"{cfg_check['error_message']} Pemantauan otomatis dan manual dihentikan sampai data disimpan.",
+                        "title": f"[PENGATURAN] Kantor: {k_tag}",
+                        "message": f"{cfg_check['error_message']} Pemantauan otomatis dan manual dihentikan.",
                         "target_tab": "pengaturan",
+                        "target_kantor": kantor or "all",
                         "target_filter": "",
                         "level": "critical",
                         "badge": "PENGATURAN",
@@ -392,9 +425,10 @@ class NotificationService:
                         "id": billing_notif_key,
                         "reference_id": billing_notif_key,
                         "type": "billing",
-                        "title": f"Tagihan Jatuh Tempo / Isolir: {k_label}",
-                        "message": f"Terdapat {overdue_count} pelanggan dengan tagihan jatuh tempo / terisolir. Segera tindak lanjuti pembayaran.",
+                        "title": f"[TAGIHAN JATUH TEMPO] Kantor: {k_label}",
+                        "message": f"{overdue_count} pelanggan jatuh tempo / terisolir.",
                         "target_tab": "pembayaran",
+                        "target_kantor": kantor or "all",
                         "target_filter": "OVERDUE",
                         "level": "warning",
                         "badge": "TAGIHAN",
