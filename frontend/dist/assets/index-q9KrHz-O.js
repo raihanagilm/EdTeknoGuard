@@ -50317,10 +50317,24 @@ function App() {
 							const saved = sessionStorage.getItem(alertedKey);
 							if (saved) alertedSet = new Set(JSON.parse(saved));
 						} catch (_) {}
+						const userRole = (currentUser?.role || "teknisi").toLowerCase();
+						const userAllowed = Array.isArray(currentUser?.allowed_kantor) ? currentUser.allowed_kantor.map((k) => String(k).toLowerCase()) : [];
+						const isSuperAdmin = userRole === "super admin" || currentUser?.username === "admin";
 						notifRes.notifications.forEach((item) => {
-							const isCritical = item.is_critical || item.level === "los" || item.level === "critical";
+							const itemKantor = (item.kantor || "").toLowerCase();
+							if (!isSuperAdmin && itemKantor && itemKantor !== "all" && userAllowed.length > 0) {
+								if (!userAllowed.includes(itemKantor)) return;
+							}
+							const isCriticalOptik = item.is_critical || item.level === "los" || item.level === "critical";
 							const isTicket = item.type === "ticket" || item.target_tab === "tiket";
-							if ((isCritical || isTicket) && item.id && !alertedSet.has(item.id)) {
+							const isCredential = item.level === "invalid" || item.target_status === "INVALID" || item.type === "invalid_cred";
+							const isBilling = item.type === "billing" || item.target_tab === "pembayaran";
+							const isSystem = item.type === "system" || item.type === "config_missing";
+							let shouldShowDesktop = false;
+							if (isSuperAdmin) shouldShowDesktop = isCriticalOptik || isTicket || isCredential || isBilling || isSystem;
+							else if (userRole === "admin") shouldShowDesktop = isTicket || isCredential || isBilling;
+							else if (userRole === "teknisi") shouldShowDesktop = isTicket || isCriticalOptik;
+							if (shouldShowDesktop && item.id && !alertedSet.has(item.id)) {
 								alertedSet.add(item.id);
 								showDesktopNotification(item.title, {
 									body: item.message,

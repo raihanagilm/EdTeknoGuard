@@ -429,7 +429,7 @@ export default function App() {
           setNotificationList(notifRes.notifications)
 
           // ═══ WEB NOTIFICATIONS API (WINDOWS DESKTOP CHROME/EDGE) ═══
-          // Memunculkan pop-up Windows Desktop Notification untuk event Kritis (LOS/Kritis) & Tiket Baru
+          // Memunculkan pop-up Windows Desktop Notification sesuai matriks Hak Akses Role
           try {
             const alertedKey = 'edtekno_alerted_desktop_notifs'
             let alertedSet = new Set()
@@ -438,11 +438,42 @@ export default function App() {
               if (saved) alertedSet = new Set(JSON.parse(saved))
             } catch (_) {}
 
-            notifRes.notifications.forEach((item) => {
-              const isCritical = item.is_critical || item.level === 'los' || item.level === 'critical'
-              const isTicket = item.type === 'ticket' || item.target_tab === 'tiket'
+            const userRole = (currentUser?.role || 'teknisi').toLowerCase()
+            const userAllowed = Array.isArray(currentUser?.allowed_kantor)
+              ? currentUser.allowed_kantor.map(k => String(k).toLowerCase())
+              : []
+            const isSuperAdmin = userRole === 'super admin' || currentUser?.username === 'admin'
 
-              if ((isCritical || isTicket) && item.id && !alertedSet.has(item.id)) {
+            notifRes.notifications.forEach((item) => {
+              // 1. Validasi Batasan Wilayah Kantor (hanya loloskan jika kantor wewenang user)
+              const itemKantor = (item.kantor || '').toLowerCase()
+              if (!isSuperAdmin && itemKantor && itemKantor !== 'all' && userAllowed.length > 0) {
+                if (!userAllowed.includes(itemKantor)) {
+                  return // Lewati notifikasi dari kantor di luar wewenang user
+                }
+              }
+
+              // 2. Klasifikasi Tipe Notifikasi
+              const isCriticalOptik = item.is_critical || item.level === 'los' || item.level === 'critical'
+              const isTicket = item.type === 'ticket' || item.target_tab === 'tiket'
+              const isCredential = item.level === 'invalid' || item.target_status === 'INVALID' || item.type === 'invalid_cred'
+              const isBilling = item.type === 'billing' || item.target_tab === 'pembayaran'
+              const isSystem = item.type === 'system' || item.type === 'config_missing'
+
+              // 3. Matriks Hak Akses Notifikasi Desktop per Role
+              let shouldShowDesktop = false
+              if (isSuperAdmin) {
+                // Super Admin: Menerima seluruh jenis notifikasi desktop dari semua kantor
+                shouldShowDesktop = isCriticalOptik || isTicket || isCredential || isBilling || isSystem
+              } else if (userRole === 'admin') {
+                // Admin Kantor: Tiket Kendala, Kredensial Invalid, & Tagihan Jatuh Tempo (bebas dari alarm redaman optik)
+                shouldShowDesktop = isTicket || isCredential || isBilling
+              } else if (userRole === 'teknisi') {
+                // Teknisi: Tiket Kendala & Sinyal Terputus (LOS) / Redaman Kritis
+                shouldShowDesktop = isTicket || isCriticalOptik
+              }
+
+              if (shouldShowDesktop && item.id && !alertedSet.has(item.id)) {
                 alertedSet.add(item.id)
                 showDesktopNotification(item.title, {
                   body: item.message,

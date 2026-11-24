@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.models import TiketKendala, Pelanggan, UserNotificationRead, LogPerformaONT, User
 from app.core.timezone import get_now_wib
 from datetime import timedelta
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 class NotificationService:
     @staticmethod
@@ -20,7 +20,7 @@ class NotificationService:
         from app.db.models import UserNotificationRead, LogPerformaONT, Pelanggan, User
         from app.core.timezone import get_now_wib
         from datetime import timedelta
-        from sqlalchemy import func
+        from sqlalchemy import func, or_
 
         user_id = user.get("user_id") if user else None
         if not user_id and user and user.get("user"):
@@ -108,150 +108,152 @@ class NotificationService:
 
         # -------------------------------------------------------------
         # 2. HASIL PEMANTAUAN REDAMAN ONT (LOS, CRITICAL, WARNING, GAGAL JARINGAN)
+        # Khusus Teknisi Lapangan dan Super Admin (Admin kantor tidak dibebani alarm redaman teknis)
         # -------------------------------------------------------------
-        # Ambil log pembacaan terakhir masing-masing pelanggan (persisten sesuai hasil scan terakhir)
-        sub_latest = db.query(
-            LogPerformaONT.id_pelanggan,
-            func.max(LogPerformaONT.waktu_cek).label("max_waktu")
-        ).group_by(LogPerformaONT.id_pelanggan).subquery()
+        if user_role in ["super admin", "teknisi"]:
+            # Ambil log pembacaan terakhir masing-masing pelanggan (persisten sesuai hasil scan terakhir)
+            sub_latest = db.query(
+                LogPerformaONT.id_pelanggan,
+                func.max(LogPerformaONT.waktu_cek).label("max_waktu")
+            ).group_by(LogPerformaONT.id_pelanggan).subquery()
 
-        ont_logs_query = db.query(LogPerformaONT, Pelanggan).join(
-            sub_latest,
-            (LogPerformaONT.id_pelanggan == sub_latest.c.id_pelanggan) & (LogPerformaONT.waktu_cek == sub_latest.c.max_waktu)
-        ).join(
-            Pelanggan,
-            LogPerformaONT.id_pelanggan == Pelanggan.id_pelanggan
-        ).filter(
-            LogPerformaONT.status_koneksi.in_(["LOS", "CRITICAL", "WARNING"]),
-            Pelanggan.is_active == True,
-            Pelanggan.is_monitored == True
-        )
+            ont_logs_query = db.query(LogPerformaONT, Pelanggan).join(
+                sub_latest,
+                (LogPerformaONT.id_pelanggan == sub_latest.c.id_pelanggan) & (LogPerformaONT.waktu_cek == sub_latest.c.max_waktu)
+            ).join(
+                Pelanggan,
+                LogPerformaONT.id_pelanggan == Pelanggan.id_pelanggan
+            ).filter(
+                LogPerformaONT.status_koneksi.in_(["LOS", "CRITICAL", "WARNING"]),
+                Pelanggan.is_active == True,
+                Pelanggan.is_monitored == True
+            )
 
-        if user_role != "super admin" and kantor and kantor != "all":
-            ont_logs_query = ont_logs_query.filter(Pelanggan.kantor == kantor)
-        elif kantor and kantor != "all":
-            ont_logs_query = ont_logs_query.filter(Pelanggan.kantor == kantor)
+            if kantor and kantor != "all":
+                ont_logs_query = ont_logs_query.filter(Pelanggan.kantor == kantor)
+            elif user_role != "super admin" and user_allowed_kantors:
+                ont_logs_query = ont_logs_query.filter(Pelanggan.kantor.in_(user_allowed_kantors))
 
-        problem_logs = ont_logs_query.order_by(LogPerformaONT.waktu_cek.desc()).all()
+            problem_logs = ont_logs_query.order_by(LogPerformaONT.waktu_cek.desc()).all()
 
-        los_items = []
-        critical_items = []
-        warning_items = []
+            los_items = []
+            critical_items = []
+            warning_items = []
 
-        for log_entry, cust in problem_logs:
-            ref_key = f"log_{log_entry.id}"
-            status_conn = log_entry.status_koneksi
-            is_critical = (status_conn == "CRITICAL")
-            is_los = (status_conn == "LOS")
-            is_emergency = is_critical or is_los
+            for log_entry, cust in problem_logs:
+                ref_key = f"log_{log_entry.id}"
+                status_conn = log_entry.status_koneksi
+                is_critical = (status_conn == "CRITICAL")
+                is_los = (status_conn == "LOS")
+                is_emergency = is_critical or is_los
 
-            # Cek apakah notifikasi (termasuk LOS & Kritis) sudah pernah ditandai baca oleh user
-            if ref_key in read_ref_ids:
-                continue
+                # Cek apakah notifikasi (termasuk LOS & Kritis) sudah pernah ditandai baca oleh user
+                if ref_key in read_ref_ids:
+                    continue
 
-            status_label = "Sinyal Terputus" if is_los else ("Redaman Kritis" if is_critical else "Redaman Waspada")
-            badge_label = "TERPUTUS" if is_los else ("KRITIS" if is_critical else "WASPADA")
-            item_data = {
-                "id": ref_key,
-                "reference_id": ref_key,
-                "type": "monitoring",
-                "title": f"{status_label}: {cust.nama}",
-                "message": f"IP: {cust.ip_router or '-'} • Redaman: {log_entry.rx_power if log_entry.rx_power is not None else 'N/A'} dBm ({log_entry.keterangan or status_conn})",
-                "target_tab": "pelanggan",
-                "target_filter": cust.id_pelanggan,
-                "target_status": status_conn,
-                "level": "los" if is_los else ("critical" if is_critical else "warning"),
-                "badge": badge_label,
-                "time": log_entry.waktu_cek.strftime("%H:%M") if log_entry.waktu_cek else "",
-                "kantor": cust.kantor,
-                "id_pelanggan": cust.id_pelanggan,
-                "nama_pelanggan": cust.nama,
-                "rx_power": float(log_entry.rx_power) if log_entry.rx_power is not None else None,
-                "status_koneksi": status_conn,
-                "is_critical": is_emergency
-            }
+                status_label = "Sinyal Terputus" if is_los else ("Redaman Kritis" if is_critical else "Redaman Waspada")
+                badge_label = "TERPUTUS" if is_los else ("KRITIS" if is_critical else "WASPADA")
+                item_data = {
+                    "id": ref_key,
+                    "reference_id": ref_key,
+                    "type": "monitoring",
+                    "title": f"{status_label}: {cust.nama}",
+                    "message": f"IP: {cust.ip_router or '-'} • Redaman: {log_entry.rx_power if log_entry.rx_power is not None else 'N/A'} dBm ({log_entry.keterangan or status_conn})",
+                    "target_tab": "pelanggan",
+                    "target_filter": cust.id_pelanggan,
+                    "target_status": status_conn,
+                    "level": "los" if is_los else ("critical" if is_critical else "warning"),
+                    "badge": badge_label,
+                    "time": log_entry.waktu_cek.strftime("%H:%M") if log_entry.waktu_cek else "",
+                    "kantor": cust.kantor,
+                    "id_pelanggan": cust.id_pelanggan,
+                    "nama_pelanggan": cust.nama,
+                    "rx_power": float(log_entry.rx_power) if log_entry.rx_power is not None else None,
+                    "status_koneksi": status_conn,
+                    "is_critical": is_emergency
+                }
 
-            if is_los:
-                los_items.append(item_data)
-            elif is_critical:
-                critical_items.append(item_data)
+                if is_los:
+                    los_items.append(item_data)
+                elif is_critical:
+                    critical_items.append(item_data)
+                else:
+                    warning_items.append(item_data)
+
+            # 1. Grouping LOS (Ungu, >= 5 items digabung jadi 1)
+            if len(los_items) >= 5:
+                first_los = los_items[0]
+                kantor_slug = (first_los.get('kantor') or 'all').lower()
+                batch_key = f"batch_los_{kantor_slug}"
+                if batch_key not in read_ref_ids:
+                    items_list.append({
+                        "id": batch_key,
+                        "reference_id": batch_key,
+                        "type": "monitoring_batch",
+                        "title": f"{len(los_items)} Modem Sinyal Terputus (LOS)",
+                        "message": f"Terdeteksi {len(los_items)} pelanggan mengalami sinyal terputus (kabel lepas / redaman hilang).",
+                        "target_tab": "pelanggan",
+                        "target_filter": "",
+                        "target_status": "LOS",
+                        "level": "los",
+                        "badge": f"{len(los_items)} TERPUTUS",
+                        "time": first_los["time"],
+                        "count": len(los_items),
+                        "kantor": first_los["kantor"],
+                        "is_critical": True
+                    })
             else:
-                warning_items.append(item_data)
+                items_list.extend(los_items)
 
-        # 1. Grouping LOS (Ungu, >= 5 items digabung jadi 1)
-        if len(los_items) >= 5:
-            first_los = los_items[0]
-            kantor_slug = (first_los.get('kantor') or 'all').lower()
-            batch_key = f"batch_los_{kantor_slug}"
-            if batch_key not in read_ref_ids:
-                items_list.append({
-                    "id": batch_key,
-                    "reference_id": batch_key,
-                    "type": "monitoring_batch",
-                    "title": f"{len(los_items)} Modem Sinyal Terputus (LOS)",
-                    "message": f"Terdeteksi {len(los_items)} pelanggan mengalami sinyal terputus (kabel lepas / redaman hilang).",
-                    "target_tab": "pelanggan",
-                    "target_filter": "",
-                    "target_status": "LOS",
-                    "level": "los",
-                    "badge": f"{len(los_items)} TERPUTUS",
-                    "time": first_los["time"],
-                    "count": len(los_items),
-                    "kantor": first_los["kantor"],
-                    "is_critical": True
-                })
-        else:
-            items_list.extend(los_items)
+            # 2. Grouping KRITIS (Merah, >= 5 items digabung jadi 1)
+            if len(critical_items) >= 5:
+                first_crit = critical_items[0]
+                kantor_slug = (first_crit.get('kantor') or 'all').lower()
+                batch_key = f"batch_critical_{kantor_slug}"
+                if batch_key not in read_ref_ids:
+                    items_list.append({
+                        "id": batch_key,
+                        "reference_id": batch_key,
+                        "type": "monitoring_batch",
+                        "title": f"{len(critical_items)} Modem Redaman Kritis (<= -27 dBm)",
+                        "message": f"Terdeteksi {len(critical_items)} pelanggan mendekati/melebihi batas kritis redaman. Wajib segera ditindaklanjuti!",
+                        "target_tab": "pelanggan",
+                        "target_filter": "",
+                        "target_status": "CRITICAL",
+                        "level": "critical",
+                        "badge": f"{len(critical_items)} KRITIS",
+                        "time": first_crit["time"],
+                        "count": len(critical_items),
+                        "kantor": first_crit["kantor"],
+                        "is_critical": True
+                    })
+            else:
+                items_list.extend(critical_items)
 
-        # 2. Grouping KRITIS (Merah, >= 5 items digabung jadi 1)
-        if len(critical_items) >= 5:
-            first_crit = critical_items[0]
-            kantor_slug = (first_crit.get('kantor') or 'all').lower()
-            batch_key = f"batch_critical_{kantor_slug}"
-            if batch_key not in read_ref_ids:
-                items_list.append({
-                    "id": batch_key,
-                    "reference_id": batch_key,
-                    "type": "monitoring_batch",
-                    "title": f"{len(critical_items)} Modem Redaman Kritis (<= -27 dBm)",
-                    "message": f"Terdeteksi {len(critical_items)} pelanggan mendekati/melebihi batas kritis redaman. Wajib segera ditindaklanjuti!",
-                    "target_tab": "pelanggan",
-                    "target_filter": "",
-                    "target_status": "CRITICAL",
-                    "level": "critical",
-                    "badge": f"{len(critical_items)} KRITIS",
-                    "time": first_crit["time"],
-                    "count": len(critical_items),
-                    "kantor": first_crit["kantor"],
-                    "is_critical": True
-                })
-        else:
-            items_list.extend(critical_items)
-
-        # 3. Grouping WARNING (Kuning/Amber, Waspada, >= 5 items digabung jadi 1)
-        if len(warning_items) >= 5:
-            first_warn = warning_items[0]
-            kantor_slug = (first_warn.get('kantor') or 'all').lower()
-            batch_key = f"batch_warning_{kantor_slug}"
-            if batch_key not in read_ref_ids:
-                items_list.append({
-                    "id": batch_key,
-                    "reference_id": batch_key,
-                    "type": "monitoring_batch",
-                    "title": f"{len(warning_items)} Modem Redaman Waspada",
-                    "message": f"Terdeteksi {len(warning_items)} pelanggan dalam rentang redaman waspada (-26.0 s/d -27.0 dBm).",
-                    "target_tab": "pelanggan",
-                    "target_filter": "",
-                    "target_status": "WARNING",
-                    "level": "warning",
-                    "badge": f"{len(warning_items)} WASPADA",
-                    "time": first_warn["time"],
-                    "count": len(warning_items),
-                    "kantor": first_warn["kantor"],
-                    "is_critical": False
-                })
-        else:
-            items_list.extend(warning_items)
+            # 3. Grouping WARNING (Kuning/Amber, Waspada, >= 5 items digabung jadi 1)
+            if len(warning_items) >= 5:
+                first_warn = warning_items[0]
+                kantor_slug = (first_warn.get('kantor') or 'all').lower()
+                batch_key = f"batch_warning_{kantor_slug}"
+                if batch_key not in read_ref_ids:
+                    items_list.append({
+                        "id": batch_key,
+                        "reference_id": batch_key,
+                        "type": "monitoring_batch",
+                        "title": f"{len(warning_items)} Modem Redaman Waspada",
+                        "message": f"Terdeteksi {len(warning_items)} pelanggan dalam rentang redaman waspada (-26.0 s/d -27.0 dBm).",
+                        "target_tab": "pelanggan",
+                        "target_filter": "",
+                        "target_status": "WARNING",
+                        "level": "warning",
+                        "badge": f"{len(warning_items)} WASPADA",
+                        "time": first_warn["time"],
+                        "count": len(warning_items),
+                        "kantor": first_warn["kantor"],
+                        "is_critical": False
+                    })
+            else:
+                items_list.extend(warning_items)
 
         # -------------------------------------------------------------
         # 3. NOTIFIKASI KREDENSIAL TIDAK COCOK / INVALID (Oranye, Khusus Super Admin & Admin)
@@ -265,10 +267,10 @@ class NotificationService:
                 Pelanggan.is_active == True,
                 Pelanggan.is_monitored == True
             )
-            if user_role != "super admin" and kantor and kantor != "all":
+            if kantor and kantor != "all":
                 inv_query = inv_query.filter(Pelanggan.kantor == kantor)
-            elif kantor and kantor != "all":
-                inv_query = inv_query.filter(Pelanggan.kantor == kantor)
+            elif user_role != "super admin" and user_allowed_kantors:
+                inv_query = inv_query.filter(Pelanggan.kantor.in_(user_allowed_kantors))
 
             invalid_customers = inv_query.all()
             if invalid_customers:
@@ -325,7 +327,7 @@ class NotificationService:
         # 4. PENGINGAT PEMANTAUAN TERJEDA (Khusus Super Admin)
         # -------------------------------------------------------------
         paused_reminder = None
-        if user and user.get("role") == "super admin":
+        if user and user_role == "super admin":
             from app.services.scheduler_service import ont_scheduler
             paused_reminder = ont_scheduler.check_paused_reminder(db)
             if paused_reminder:
@@ -342,27 +344,68 @@ class NotificationService:
                 })
 
         # -------------------------------------------------------------
-        # 5. PERINGATAN KONFIGURASI DATABASE BELUM LENGKAP
+        # 5. PERINGATAN KONFIGURASI DATABASE BELUM LENGKAP (Khusus Super Admin)
         # -------------------------------------------------------------
-        from app.services.scheduler_service import ont_scheduler
-        cfg_check = ont_scheduler.check_office_configuration(db, kantor=kantor)
-        if not cfg_check["is_configured"]:
-            k_tag = (kantor or "SEMUA").upper()
-            config_notif_key = f"cfg_missing_{kantor or 'all'}"
-            items_list.insert(0, {
-                "id": config_notif_key,
-                "reference_id": config_notif_key,
-                "type": "config_missing",
-                "title": f"Pengaturan Kantor {k_tag} Belum Lengkap",
-                "message": f"{cfg_check['error_message']} Pemantauan otomatis dan manual dihentikan sampai data disimpan.",
-                "target_tab": "pengaturan",
-                "target_filter": "",
-                "level": "critical",
-                "badge": "PENGATURAN",
-                "time": get_now_wib().strftime("%H:%M"),
-                "kantor": kantor or "all",
-                "is_critical": True
-            })
+        if user_role == "super admin":
+            from app.services.scheduler_service import ont_scheduler
+            cfg_check = ont_scheduler.check_office_configuration(db, kantor=kantor)
+            if not cfg_check["is_configured"]:
+                k_tag = (kantor or "SEMUA").upper()
+                config_notif_key = f"cfg_missing_{kantor or 'all'}"
+                if config_notif_key not in read_ref_ids:
+                    items_list.insert(0, {
+                        "id": config_notif_key,
+                        "reference_id": config_notif_key,
+                        "type": "config_missing",
+                        "title": f"Pengaturan Kantor {k_tag} Belum Lengkap",
+                        "message": f"{cfg_check['error_message']} Pemantauan otomatis dan manual dihentikan sampai data disimpan.",
+                        "target_tab": "pengaturan",
+                        "target_filter": "",
+                        "level": "critical",
+                        "badge": "PENGATURAN",
+                        "time": get_now_wib().strftime("%H:%M"),
+                        "kantor": kantor or "all",
+                        "is_critical": True
+                    })
+
+        # -------------------------------------------------------------
+        # 6. PENGINGAT TAGIHAN JATUH TEMPO & ISOLIR (Khusus Admin Kantor & Super Admin)
+        # -------------------------------------------------------------
+        if user_role in ["super admin", "admin"]:
+            overdue_q = db.query(func.count(Pelanggan.id), func.sum(Pelanggan.total_tagihan)).filter(
+                Pelanggan.is_active == True,
+                or_(Pelanggan.is_overdue == True, Pelanggan.status_pembayaran.in_(["OVERDUE", "ISOLIR"]))
+            )
+            if kantor and kantor != "all":
+                overdue_q = overdue_q.filter(Pelanggan.kantor == kantor)
+            elif user_role != "super admin" and user_allowed_kantors:
+                overdue_q = overdue_q.filter(Pelanggan.kantor.in_(user_allowed_kantors))
+
+            overdue_res = overdue_q.first()
+            overdue_count = overdue_res[0] if overdue_res else 0
+            total_tunggakan = overdue_res[1] if overdue_res else 0
+
+            if overdue_count and overdue_count > 0:
+                kantor_slug = (kantor or "all").lower()
+                billing_notif_key = f"billing_overdue_{kantor_slug}_{get_now_wib().strftime('%Y%m%d')}"
+                if billing_notif_key not in read_ref_ids:
+                    nominal_str = f"Rp {int(total_tunggakan or 0):,}".replace(",", ".")
+                    k_label = (kantor or "SEMUA").upper()
+                    items_list.append({
+                        "id": billing_notif_key,
+                        "reference_id": billing_notif_key,
+                        "type": "billing",
+                        "title": f"Tagihan Jatuh Tempo / Isolir: {k_label}",
+                        "message": f"Terdapat {overdue_count} pelanggan tertunggak ({nominal_str}). Segera tindak lanjuti pembayaran.",
+                        "target_tab": "pembayaran",
+                        "target_filter": "OVERDUE",
+                        "level": "warning",
+                        "badge": "TAGIHAN",
+                        "time": get_now_wib().strftime("%H:%M"),
+                        "kantor": kantor or "all",
+                        "count": overdue_count,
+                        "is_critical": False
+                    })
 
         # Ambil konfigurasi notifikasi (Getaran, Interval, Mode Malam, Interval Pemantauan)
         from app.modules.settings.service import SystemSettingsService

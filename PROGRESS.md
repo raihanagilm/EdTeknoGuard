@@ -8,9 +8,14 @@
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
-  1. Integrasi status isolir router Network Bill: penempatan label `ISOLIR` di bawah status koneksi `ONLINE` / `OFFLINE` pada tabel data pelanggan (`CustomersTable.jsx`) baik pada tampilan desktop maupun mobile card.
-  2. Penggabungan filter pelanggan terisolir ke dalam kategori kartu LOS (`CustomerService.get_customers` status == 'LOS'): menyaring `LogPerformaONT.status_koneksi == "LOS" OR Pelanggan.status_isolir == True OR Pelanggan.status_pembayaran == "ISOLIR"` sehingga seluruh 8 pelanggan terisolir muncul lengkap di tabel saat kartu LOS diklik.
-  3. Penghitungan `combined_los` pada `CustomerService.get_customer_stats` dan penyajian nilai kartu LOS gabungan (18 total) dengan sub-label `${stats.los} Putus • ${stats.isolated} Isolir` di `CustomersView.jsx`.
+  1. Penerapan Matriks Notifikasi Desktop (Chrome/Edge) & Polling In-App berbasis Role dan Kantor (`App.jsx`, `service.py`, `routes.py`):
+     - `teknisi`: Khusus notifikasi Tiket Kendala dan Sinyal Terputus (LOS) / Redaman Kritis sesuai `allowed_kantor`.
+     - `admin` (Kantor): Khusus notifikasi Tiket Kendala, Kredensial Modem Invalid, dan Tagihan Jatuh Tempo/Isolir sesuai `allowed_kantor` (terbebas dari alarm redaman optik teknis).
+     - `super admin`: Menerima seluruh jenis notifikasi secara komprehensif dari seluruh kantor.
+  2. Isolasi wilayah kantor (`allowed_kantor`) deterministik: notifikasi pop-up desktop Chrome dan polling backend dilarang keras membocorkan notifikasi lintas cabang di luar wewenang user.
+  3. Integrasi status isolir router Network Bill: penempatan label `ISOLIR` di bawah status koneksi `ONLINE` / `OFFLINE` pada tabel data pelanggan (`CustomersTable.jsx`) baik pada tampilan desktop maupun mobile card.
+  4. Penggabungan filter pelanggan terisolir ke dalam kategori kartu LOS (`CustomerService.get_customers` status == 'LOS'): menyaring `LogPerformaONT.status_koneksi == "LOS" OR Pelanggan.status_isolir == True OR Pelanggan.status_pembayaran == "ISOLIR"` sehingga seluruh 8 pelanggan terisolir muncul lengkap di tabel saat kartu LOS diklik.
+  5. Penghitungan `combined_los` pada `CustomerService.get_customer_stats` dan penyajian nilai kartu LOS gabungan (18 total) dengan sub-label `${stats.los} Putus • ${stats.isolated} Isolir` di `CustomersView.jsx`.
   3. Penambahan pemetaan `status_isolir` pada model `Pelanggan` (`app/db/models.py`), payload return `list_customers`, dan penghitungan agregasi `isolated` pada `get_customer_stats` (`app/modules/customers/service.py`).
   4. Sinkronisasi status isolir otomatis via `NetworkBillService.fetch_connection_status` di `BillingService.sync_all_office_customers` dan pembaruan berkala ber-cache pada `BillingSyncWorker.sync_customer_billing`.
   5. Sinkronisasi live tagihan pada `PortalNotificationsPage.jsx` melalui `PortalPembayaranService.getTagihan()`: jika ada tagihan aktif/tertunggak di Network Bill, Pusat Notifikasi secara deterministik menampilkan kartu "Pengingat Tagihan Belum Dibayar" (nominal & periode riil) dan dilarang menampilkan "Tagihan Lunas Terverifikasi".

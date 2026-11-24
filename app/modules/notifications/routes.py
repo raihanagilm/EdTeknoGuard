@@ -33,6 +33,13 @@ def poll_realtime_notifications(request: Request, kantor: Optional[str] = Query(
                 return NotificationService.get_realtime_notifications(db=active_db, kantor=target_k, user=user)
             finally:
                 active_db.close()
+        else:
+            return {
+                "status": "success",
+                "total_unread": 0,
+                "unread_tickets_count": 0,
+                "notifications": []
+            }
 
     # Jika user berhak atas lebih dari 1 kantor (misal background polling Android tanpa filter kantor),
     # kumpulkan notifikasi dari seluruh database tenant yang menjadi hak aksesnya.
