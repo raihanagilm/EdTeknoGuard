@@ -157,6 +157,10 @@ class CustomerController:
         rx_val = float(latest_log.rx_power) if (latest_log and latest_log.rx_power is not None) else None
         status_val = latest_log.status_koneksi if latest_log else "UNTESTED"
 
+        from app.core.security import is_default_customer_password
+        is_default_pw = is_default_customer_password(cust)
+        portal_password = cust.password_portal or (cust.no_hp if is_default_pw else None)
+
         return {
             "customer": {
                 "id_pelanggan": cust.id_pelanggan,
@@ -179,6 +183,8 @@ class CustomerController:
                 "password_wifi": cust.password_wifi or "-",
                 "user_admin": cust.user_admin or "-",
                 "pass_admin": cust.pass_admin or "-",
+                "password_portal": portal_password,
+                "is_default_password": is_default_pw,
                 "status_kredensial": getattr(cust, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(cust, "is_monitored", True)),
                 "status_pembayaran": getattr(cust, "status_pembayaran", "LUNAS") or "LUNAS",
@@ -285,6 +291,9 @@ class CustomerController:
 
     @staticmethod
     def reset_portal_password(db: Session, id_pelanggan: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") in ("operator", "teknisi", "karyawan"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan mereset kata sandi akun pelanggan")
+
         from app.modules.activity_logs.service import ActivityLogService
         cust = CustomerService.reset_customer_portal_password(db=db, id_pelanggan=id_pelanggan)
         if not cust:
@@ -295,13 +304,53 @@ class CustomerController:
                 request=request,
                 action="RESET_PASSWORD_PORTAL",
                 status="SUCCESS",
-                keterangan=f"Reset kata sandi aplikasi TeknoCust pelanggan '{cust.nama}' (ID: {cust.id_pelanggan}) ke default '123456'",
+                keterangan=f"Reset kata sandi aplikasi MyTekno pelanggan '{cust.nama}' (ID: {cust.id_pelanggan}) kembali ke Nomor WhatsApp ({cust.no_hp or '123456'})",
                 user=user
             )
         return {
             "status": "success",
-            "message": f"Kata sandi aplikasi TeknoCust pelanggan '{cust.nama}' berhasil di-reset ke Nomor WhatsApp terdaftar",
-            "id_pelanggan": cust.id_pelanggan
+            "message": f"Kata sandi aplikasi MyTekno pelanggan '{cust.nama}' berhasil di-reset ke Nomor WhatsApp ({cust.no_hp or '123456'})",
+            "id_pelanggan": cust.id_pelanggan,
+            "password_portal": cust.password_portal or cust.no_hp or "123456",
+            "is_default_password": True
+        }
+
+    @staticmethod
+    def change_portal_password(db: Session, id_pelanggan: str, password_baru: str, request: Optional[Request] = None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        if user and user.get("role") in ("operator", "teknisi", "karyawan"):
+            raise HTTPException(status_code=403, detail="Akses ditolak: Teknisi tidak diizinkan mengubah kata sandi akun pelanggan")
+
+        clean_pwd = str(password_baru or "").strip()
+        if len(clean_pwd) < 6:
+            raise HTTPException(status_code=400, detail="Kata sandi baru minimal 6 karakter!")
+
+        from app.modules.activity_logs.service import ActivityLogService
+        try:
+            cust = CustomerService.change_customer_portal_password(db=db, id_pelanggan=id_pelanggan, password_baru=clean_pwd)
+        except ValueError as ve:
+            raise HTTPException(status_code=400, detail=str(ve))
+
+        if not cust:
+            raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
+
+        from app.core.security import is_default_customer_password
+        is_default_pw = is_default_customer_password(cust)
+
+        if request:
+            ActivityLogService.log_from_request(
+                db=db,
+                request=request,
+                action="UBAH_PASSWORD_PORTAL",
+                status="SUCCESS",
+                keterangan=f"Admin mengubah kata sandi akun MyTekno pelanggan '{cust.nama}' (ID: {cust.id_pelanggan}) secara manual",
+                user=user
+            )
+        return {
+            "status": "success",
+            "message": f"Kata sandi akun MyTekno pelanggan '{cust.nama}' berhasil diubah!",
+            "id_pelanggan": cust.id_pelanggan,
+            "password_portal": cust.password_portal,
+            "is_default_password": is_default_pw
         }
 
     @staticmethod

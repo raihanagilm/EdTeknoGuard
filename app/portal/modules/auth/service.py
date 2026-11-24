@@ -348,6 +348,7 @@ class AuthService:
 
         # 3. Simpan password baru langsung di tabel Pelanggan
         matched_cust.password_hash = get_password_hash(pwd_baru)
+        matched_cust.password_portal = pwd_baru
         if no_hp_raw and not matched_cust.no_hp:
             matched_cust.no_hp = no_hp_raw
 

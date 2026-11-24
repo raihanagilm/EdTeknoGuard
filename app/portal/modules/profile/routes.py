@@ -39,6 +39,7 @@ async def portal_profil_change_password(request: Request, db: Session = Depends(
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
         
     pelanggan.password_hash = get_password_hash(password_baru)
+    pelanggan.password_portal = password_baru
     target_db.commit()
 
     from app.portal.services.customer_activity_service import CustomerActivityService

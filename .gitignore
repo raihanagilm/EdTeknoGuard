@@ -47,5 +47,12 @@ frontend/node_modules/
 app/.tmp/
 *.tmp
 
-# Documentation & Internal System Guides (Sensitive IP & Infrastructure Specs)
+# Documentation, Offline Reports & Artifacts (Sensitive IP & Infrastructure Specs)
 docs/
+reports/
+dokumentasi_internal/
+*.pdf
+*.zip
+extracted_*/
+desktop_screenshots/
+popup_screenshots/

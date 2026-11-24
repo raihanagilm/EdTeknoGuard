@@ -647,7 +647,8 @@ class CustomerService:
             paket=data.paket,
             is_monitored=getattr(data, "is_monitored", True) if getattr(data, "is_monitored", None) is not None else True,
             is_active=True,
-            password_hash=get_password_hash(init_pwd)
+            password_hash=get_password_hash(init_pwd),
+            password_portal=init_pwd
         )
         db.add(new_cust)
         db.flush()
@@ -705,6 +706,7 @@ class CustomerService:
             cust.no_hp = new_wa_val
             if is_still_default and new_wa_val and new_wa_val != "-":
                 cust.password_hash = get_password_hash(new_wa_val)
+                cust.password_portal = new_wa_val
 
         for field, val in update_dict.items():
             if hasattr(cust, field) and val is not None:
@@ -716,13 +718,36 @@ class CustomerService:
 
     @staticmethod
     def reset_customer_portal_password(db: Session, id_pelanggan: str) -> Optional[Pelanggan]:
-        """Reset kata sandi aplikasi TeknoCust pelanggan kembali ke default '123456'."""
+        """Reset kata sandi aplikasi MyTekno pelanggan kembali ke default Nomor WA / '123456'."""
         from app.core.security import get_password_hash, DEFAULT_CUSTOMER_PASSWORD
+        from app.core.account_lockout import account_lockout_manager
         cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
         if not cust:
             return None
         target_pwd = cust.no_hp.strip() if cust.no_hp else DEFAULT_CUSTOMER_PASSWORD
         cust.password_hash = get_password_hash(target_pwd)
+        cust.password_portal = target_pwd
+        if cust.no_hp:
+            account_lockout_manager.unlock(cust.no_hp.strip())
+        db.commit()
+        db.refresh(cust)
+        return cust
+
+    @staticmethod
+    def change_customer_portal_password(db: Session, id_pelanggan: str, password_baru: str) -> Optional[Pelanggan]:
+        """Ubah kata sandi akun portal MyTekno pelanggan secara manual oleh Admin (minimal 6 karakter)."""
+        clean_pwd = str(password_baru or "").strip()
+        if len(clean_pwd) < 6:
+            raise ValueError("Kata sandi baru minimal 6 karakter!")
+        from app.core.security import get_password_hash
+        from app.core.account_lockout import account_lockout_manager
+        cust = db.query(Pelanggan).filter(Pelanggan.id_pelanggan == id_pelanggan).first()
+        if not cust:
+            return None
+        cust.password_hash = get_password_hash(clean_pwd)
+        cust.password_portal = clean_pwd
+        if cust.no_hp:
+            account_lockout_manager.unlock(cust.no_hp.strip())
         db.commit()
         db.refresh(cust)
         return cust

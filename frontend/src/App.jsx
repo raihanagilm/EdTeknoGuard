@@ -1095,6 +1095,7 @@ export default function App() {
           {activeTab === 'pelanggan' && (
             <CustomersView
               activeOffice={activeOffice}
+              currentUser={currentUser}
               isOfficeActive={
                 activeOffice === 'all'
                   ? true

@@ -47,6 +47,9 @@ class CustomerWifiUpdateSchema(BaseModel):
     password_wifi: Optional[str] = Field(None, max_length=100, description="Password WiFi Baru")
     dry_run: bool = Field(True, description="Proteksi mode aman (True = tidak modifikasi modem fisik)")
 
+class CustomerPortalPasswordChangeSchema(BaseModel):
+    password_baru: str = Field(..., min_length=6, max_length=100, description="Kata sandi baru akun portal pelanggan")
+
 class BulkDeleteSchema(BaseModel):
     ids: list[str] = Field(..., description="Daftar ID pelanggan yang akan dihapus")
 

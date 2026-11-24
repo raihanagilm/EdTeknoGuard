@@ -5,17 +5,13 @@ import {
   Thermometer,
   Timer,
   Wifi,
-  AlertTriangle,
-  PieChart,
   ShieldCheck,
   Info,
   Bell,
-  CreditCard,
   ChevronRight,
   Receipt,
   CheckCircle2,
-  Clock,
-  User
+  Clock
 } from 'lucide-react';
 import { PortalActiveMascot } from '../common/PortalActiveMascot';
 import { PortalHeader } from '../layout/PortalHeader';
@@ -282,9 +278,9 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
             </div>
           </section>
 
-          {/* ═══ MENU LAYANAN (SQUIRCLE BIRU SOLID SESUAI DESAIN ACUAN) ═══ */}
+          {/* ═══ MENU LAYANAN (2 PILAR LAYANAN MODEM MANDIRI SIMETRIS) ═══ */}
           <section className="bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)] border border-slate-200/70 p-3.5 sm:p-4">
-            <div className="flex items-center justify-between mb-3.5 px-0.5">
+            <div className="flex items-center justify-between mb-3 px-0.5">
               <h2 className="text-sm font-bold text-slate-900 tracking-tight">
                 Menu Layanan
               </h2>
@@ -293,89 +289,43 @@ export function PortalDashboardTab({ data, onNavigate, onOpenNotifications , has
               </span>
             </div>
 
-            <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
-              {/* 1. Perangkat */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {/* 1. Perangkat Terhubung */}
               <button
                 type="button"
                 onClick={openDevicesModal}
-                className="flex flex-col items-center justify-start gap-1.5 active:scale-95 transition-all cursor-pointer group"
+                className="flex items-center gap-3 p-3 rounded-xl bg-slate-50/80 hover:bg-blue-50/60 border border-slate-100 hover:border-blue-200 active:scale-[0.98] transition-all cursor-pointer group text-left"
               >
-                <div className="w-12 h-12 rounded-[18px] bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+                <div className="w-11 h-11 rounded-[16px] bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105 shrink-0">
                   <Smartphone className="w-5 h-5 stroke-[2]" />
                 </div>
-                <span className="text-[11px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors tracking-tight text-center leading-tight">
-                  Perangkat
-                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors tracking-tight">
+                    Perangkat
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-medium mt-0.5">
+                    Cek Terhubung
+                  </div>
+                </div>
               </button>
 
-              {/* 2. WiFi */}
+              {/* 2. Pengaturan WiFi */}
               <button
                 type="button"
                 onClick={() => onNavigate('wifi')}
-                className="flex flex-col items-center justify-start gap-1.5 active:scale-95 transition-all cursor-pointer group"
+                className="flex items-center gap-3 p-3 rounded-xl bg-slate-50/80 hover:bg-blue-50/60 border border-slate-100 hover:border-blue-200 active:scale-[0.98] transition-all cursor-pointer group text-left"
               >
-                <div className="w-12 h-12 rounded-[18px] bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+                <div className="w-11 h-11 rounded-[16px] bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105 shrink-0">
                   <Wifi className="w-5 h-5 stroke-[2]" />
                 </div>
-                <span className="text-[11px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors tracking-tight text-center leading-tight">
-                  WiFi
-                </span>
-              </button>
-
-              {/* 3. Kendala */}
-              <button
-                type="button"
-                onClick={() => onNavigate('kendala')}
-                className="flex flex-col items-center justify-start gap-1.5 active:scale-95 transition-all cursor-pointer group"
-              >
-                <div className="w-12 h-12 rounded-[18px] bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <AlertTriangle className="w-5 h-5 stroke-[2]" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors tracking-tight">
+                    Kelola WiFi
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-medium mt-0.5">
+                    Nama &amp; Sandi
+                  </div>
                 </div>
-                <span className="text-[11px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors tracking-tight text-center leading-tight">
-                  Kendala
-                </span>
-              </button>
-
-              {/* 4. Kuota */}
-              <button
-                type="button"
-                onClick={() => onNavigate('kuota')}
-                className="flex flex-col items-center justify-start gap-1.5 active:scale-95 transition-all cursor-pointer group"
-              >
-                <div className="w-12 h-12 rounded-[18px] bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <PieChart className="w-5 h-5 stroke-[2]" />
-                </div>
-                <span className="text-[11px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors tracking-tight text-center leading-tight">
-                  Kuota
-                </span>
-              </button>
-
-              {/* 5. Bayar */}
-              <button
-                type="button"
-                onClick={() => onNavigate('pembayaran')}
-                className="flex flex-col items-center justify-start gap-1.5 active:scale-95 transition-all cursor-pointer group"
-              >
-                <div className="w-12 h-12 rounded-[18px] bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <CreditCard className="w-5 h-5 stroke-[2]" />
-                </div>
-                <span className="text-[11px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors tracking-tight text-center leading-tight">
-                  Bayar
-                </span>
-              </button>
-
-              {/* 6. Profil */}
-              <button
-                type="button"
-                onClick={() => onNavigate('profil')}
-                className="flex flex-col items-center justify-start gap-1.5 active:scale-95 transition-all cursor-pointer group mt-2"
-              >
-                <div className="w-12 h-12 rounded-[18px] bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-                  <User className="w-5 h-5 stroke-[2]" />
-                </div>
-                <span className="text-[11px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors tracking-tight text-center leading-tight">
-                  Profil
-                </span>
               </button>
             </div>
           </section>

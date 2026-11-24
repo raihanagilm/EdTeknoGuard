@@ -112,6 +112,13 @@ class TenantDatabaseManager:
 
         # Otomatis membuat seluruh tabel yang terdaftar pada TenantBase
         models.TenantBase.metadata.create_all(bind=tenant_engine)
+        try:
+            with tenant_engine.connect() as conn:
+                from sqlalchemy import text
+                conn.execute(text("ALTER TABLE pelanggan ADD COLUMN password_portal VARCHAR(100) NULL"))
+                conn.commit()
+        except Exception:
+            pass
         logger.info(f"[TENANT_DB] Seluruh skema tabel TenantBase ({len(models.TenantBase.metadata.tables)} tabel) berhasil dibuat di database '{db_name}'.")
 
     @classmethod

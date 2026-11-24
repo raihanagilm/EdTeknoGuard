@@ -57,6 +57,9 @@ export function ToastNotification({
   const current = config[type] || config.info
   const displayTitle = title || current.defaultTitle
   const IconComponent = current.Icon
+  const safeMessage = typeof message === 'object' && message !== null
+    ? (message.message || JSON.stringify(message))
+    : message
 
   return (
     <div
@@ -70,7 +73,7 @@ export function ToastNotification({
         <IconComponent className={`w-4 h-4 mt-0.5 shrink-0 ${current.iconClass}`} aria-hidden="true" />
         <div className="flex-1 text-xs leading-relaxed">
           <div className="font-bold mb-0.5 text-white">{displayTitle}</div>
-          <div className="break-words text-sky-100/80">{message}</div>
+          <div className="break-words text-sky-100/80">{safeMessage}</div>
         </div>
         <button
           type="button"

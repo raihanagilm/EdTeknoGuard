@@ -298,5 +298,125 @@ class TestCustomerModules(unittest.TestCase):
         finally:
             db.close()
 
+    def test_reset_portal_password_and_view_credentials(self):
+        """Memastikan Admin berhasil mereset password akun pelanggan ke nomor WA dan melihat kredensial"""
+        from fastapi import HTTPException
+        from app.modules.customers.controller import CustomerController
+        from app.core.security import verify_password
+
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+
+        try:
+            p = models.Pelanggan(
+                id_pelanggan="CUST-PW-01",
+                nama="Bapak Supiyanto",
+                no_hp="085863763153",
+                kantor="cabang",
+                is_active=True,
+                is_monitored=True
+            )
+            per = models.PerangkatONT(id_perangkat=1, id_pelanggan="CUST-PW-01", ip_router="192.168.1.100")
+            db.add_all([p, per])
+            db.commit()
+
+            admin_user = {"username": "admin", "role": "super admin", "allowed_kantor": ["cabang"]}
+            teknisi_user = {"username": "budi", "role": "teknisi", "allowed_kantor": ["cabang"]}
+
+            # 1. Pastikan teknisi ditolak 403 saat mencoba reset sandi
+            with self.assertRaises(HTTPException) as cm:
+                CustomerController.reset_portal_password(db=db, id_pelanggan="CUST-PW-01", user=teknisi_user)
+            self.assertEqual(cm.exception.status_code, 403)
+
+            # 2. Admin mereset password pelanggan
+            res = CustomerController.reset_portal_password(db=db, id_pelanggan="CUST-PW-01", user=admin_user)
+            self.assertEqual(res["status"], "success")
+            self.assertEqual(res["password_portal"], "085863763153")
+            self.assertTrue(res["is_default_password"])
+
+            # 3. Verifikasi hash di database cocok dengan nomor WA
+            db.refresh(p)
+            self.assertEqual(p.password_portal, "085863763153")
+            self.assertTrue(verify_password("085863763153", p.password_hash))
+
+            # 4. Detail pelanggan menampilkan password_portal
+            detail = CustomerController.get_customer_detail(db=db, id_pelanggan="CUST-PW-01")
+            self.assertEqual(detail["customer"]["password_portal"], "085863763153")
+            self.assertTrue(detail["customer"]["is_default_password"])
+        finally:
+            db.close()
+
+    def test_change_portal_password_custom(self):
+        """Memastikan Admin berhasil mengatur kata sandi kustom dan role teknisi ditolak"""
+        from fastapi import HTTPException
+        from app.modules.customers.controller import CustomerController
+        from app.core.security import verify_password
+
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+
+        try:
+            p = models.Pelanggan(
+                id_pelanggan="CUST-PW-02",
+                nama="Ibu Siti",
+                no_hp="081234567890",
+                kantor="cabang",
+                is_active=True,
+                is_monitored=True
+            )
+            per = models.PerangkatONT(id_perangkat=2, id_pelanggan="CUST-PW-02", ip_router="192.168.1.101")
+            db.add_all([p, per])
+            db.commit()
+
+            admin_user = {"username": "admin", "role": "admin", "allowed_kantor": ["cabang"]}
+            teknisi_user = {"username": "teko", "role": "teknisi", "allowed_kantor": ["cabang"]}
+
+            # 1. Teknisi ditolak HTTP 403 Forbidden
+            with self.assertRaises(HTTPException) as cm_tek:
+                CustomerController.change_portal_password(
+                    db=db,
+                    id_pelanggan="CUST-PW-02",
+                    password_baru="sandiOrangTua123",
+                    user=teknisi_user
+                )
+            self.assertEqual(cm_tek.exception.status_code, 403)
+
+            # 2. Password kurang dari 6 karakter ditolak HTTP 400 Bad Request
+            with self.assertRaises(HTTPException) as cm_short:
+                CustomerController.change_portal_password(
+                    db=db,
+                    id_pelanggan="CUST-PW-02",
+                    password_baru="12345",
+                    user=admin_user
+                )
+            self.assertEqual(cm_short.exception.status_code, 400)
+
+            # 3. Admin berhasil mengubah kata sandi kustom
+            res = CustomerController.change_portal_password(
+                db=db,
+                id_pelanggan="CUST-PW-02",
+                password_baru="mudah123",
+                user=admin_user
+            )
+            self.assertEqual(res["status"], "success")
+            self.assertEqual(res["password_portal"], "mudah123")
+            self.assertFalse(res["is_default_password"])
+
+            # 4. Verifikasi di DB
+            db.refresh(p)
+            self.assertEqual(p.password_portal, "mudah123")
+            self.assertTrue(verify_password("mudah123", p.password_hash))
+
+            # 5. Detail pelanggan menampilkan kata sandi baru dan status bukan default
+            detail = CustomerController.get_customer_detail(db=db, id_pelanggan="CUST-PW-02")
+            self.assertEqual(detail["customer"]["password_portal"], "mudah123")
+            self.assertFalse(detail["customer"]["is_default_password"])
+        finally:
+            db.close()
+
 if __name__ == "__main__":
     unittest.main()

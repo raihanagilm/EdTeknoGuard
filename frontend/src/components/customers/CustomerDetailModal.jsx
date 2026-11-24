@@ -25,12 +25,15 @@ import {
   Key,
   Camera,
   UserCheck,
-  User
+  User,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import { CustomerWifiModal } from './CustomerWifiModal'
 
 export function CustomerDetailModal({
   customer,
+  currentUser = { role: 'super admin' },
   onClose,
   activeOffice = 'cabang',
   onOpenEdit,
@@ -48,6 +51,15 @@ export function CustomerDetailModal({
   const [activities, setActivities] = useState([])
   const [loadingActivities, setLoadingActivities] = useState(false)
   const [togglingMonitoring, setTogglingMonitoring] = useState(false)
+  const [showPortalPassword, setShowPortalPassword] = useState(false)
+  const [resettingPassword, setResettingPassword] = useState(false)
+  const [copiedField, setCopiedField] = useState(null)
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false)
+  const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false)
+  const [newPasswordInput, setNewPasswordInput] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [savingNewPassword, setSavingNewPassword] = useState(false)
+  const [changePasswordError, setChangePasswordError] = useState('')
 
   useEffect(() => {
     setCurrentCustomer(customer)
@@ -73,6 +85,106 @@ export function CustomerDetailModal({
   const rawWa = activeCust?.no_wa || activeCust?.no_hp || ''
   const hasValidWa = Boolean(rawWa && rawWa !== '-')
 
+  const userRole = (currentUser?.role || '').toLowerCase()
+  const isAdminOrSuperAdmin = userRole === 'super admin' || userRole === 'admin' || !userRole
+  const portalUsername = hasValidWa ? rawWa : ''
+  const rawPortalPass = activeCust?.password_portal || (activeCust?.is_default_password ? (portalUsername || '') : '')
+  const isDefaultPw = Boolean(activeCust?.is_default_password)
+  const hasKnownPassword = Boolean(rawPortalPass)
+  const portalPasswordDisplay = hasKnownPassword
+    ? (showPortalPassword ? rawPortalPass : '••••••••')
+    : (activeCust?.is_default_password === false ? 'Sandi Kustom (Disetel Pelanggan)' : '-')
+
+  const handleCopyText = (text, fieldName) => {
+    if (!text) return
+    navigator.clipboard.writeText(text)
+    setCopiedField(fieldName)
+    setTimeout(() => setCopiedField(null), 2000)
+  }
+
+  const handleResetPasswordToWa = async () => {
+    if (!cId || resettingPassword) return
+    setResettingPassword(true)
+    try {
+      const res = await fetch(`/api/customers/${encodeURIComponent(cId)}/reset-portal-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        throw new Error(errJson.detail || 'Gagal mereset kata sandi akun pelanggan.')
+      }
+      const data = await res.json()
+      const updated = {
+        ...activeCust,
+        password_portal: data.password_portal,
+        is_default_password: true
+      }
+      setCurrentCustomer(updated)
+      if (onCustomerUpdated) {
+        onCustomerUpdated(updated)
+      }
+      setConfirmResetOpen(false)
+      if (onNotify) {
+        onNotify(
+          data.message || `Kata sandi berhasil di-reset ke Nomor WhatsApp: ${data.password_portal}`,
+          'success'
+        )
+      }
+    } catch (err) {
+      console.error('Gagal reset kata sandi:', err)
+      if (onNotify) {
+        onNotify(err.message || 'Gagal mereset kata sandi akun pelanggan.', 'error')
+      }
+    } finally {
+      setResettingPassword(false)
+    }
+  }
+
+  const handleSaveNewPassword = async () => {
+    const trimmed = String(newPasswordInput || '').trim()
+    if (trimmed.length < 6) {
+      setChangePasswordError('Kata sandi baru minimal 6 karakter!')
+      return
+    }
+    setSavingNewPassword(true)
+    setChangePasswordError('')
+    try {
+      const res = await fetch(`/api/customers/${encodeURIComponent(cId)}/change-portal-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password_baru: trimmed })
+      })
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        throw new Error(errJson.detail || 'Gagal mengubah kata sandi akun pelanggan.')
+      }
+      const data = await res.json()
+      const updated = {
+        ...activeCust,
+        password_portal: data.password_portal,
+        is_default_password: false
+      }
+      setCurrentCustomer(updated)
+      if (onCustomerUpdated) {
+        onCustomerUpdated(updated)
+      }
+      setChangePasswordModalOpen(false)
+      setNewPasswordInput('')
+      if (onNotify) {
+        onNotify(data.message || 'Kata sandi akun pelanggan berhasil diperbarui!', 'success')
+      }
+    } catch (err) {
+      console.error('Gagal ubah kata sandi:', err)
+      setChangePasswordError(err.message || 'Gagal mengubah kata sandi.')
+      if (onNotify) {
+        onNotify(err.message || 'Gagal mengubah kata sandi akun pelanggan.', 'error')
+      }
+    } finally {
+      setSavingNewPassword(false)
+    }
+  }
+
   const handleToggleMonitoring = async () => {
     if (!cId || togglingMonitoring) return
     setTogglingMonitoring(true)
@@ -95,18 +207,15 @@ export function CustomerDetailModal({
         onCustomerUpdated(updated)
       }
       if (onNotify) {
-        onNotify({
-          type: 'success',
-          message: data.message || `Status scan redaman berhasil ${data.is_monitored ? 'diaktifkan' : 'dinonaktifkan'}.`
-        })
+        onNotify(
+          data.message || `Status scan redaman berhasil ${data.is_monitored ? 'diaktifkan' : 'dinonaktifkan'}.`,
+          'success'
+        )
       }
     } catch (err) {
       console.error('Gagal mengubah status scan redaman:', err)
       if (onNotify) {
-        onNotify({
-          type: 'error',
-          message: err.message || 'Gagal mengubah status scan redaman.'
-        })
+        onNotify(err.message || 'Gagal mengubah status scan redaman.', 'error')
       }
     } finally {
       setTogglingMonitoring(false)
@@ -412,6 +521,121 @@ export function CustomerDetailModal({
                     <Phone className="w-3.5 h-3.5" />
                     <span>Kirim Pesan WA</span>
                   </a>
+                )}
+              </div>
+
+              {/* Box Kredensial Akun Portal Pelanggan (MyTekno) */}
+              <div className="p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-[#3B5B78] flex items-center gap-1.5">
+                    <Key className="w-3.5 h-3.5 text-[#026AA7] shrink-0" />
+                    <span>Akun Portal Pelanggan (MyTekno)</span>
+                  </span>
+                  {!hasValidWa && !rawPortalPass ? (
+                    <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md flex items-center gap-1 select-none">
+                      <span>Belum Terdaftar</span>
+                    </span>
+                  ) : isDefaultPw ? (
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md flex items-center gap-1 select-none">
+                      <Check className="w-2.5 h-2.5 text-emerald-600" />
+                      <span>Default (No. WA)</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md flex items-center gap-1 select-none">
+                      <ShieldAlert className="w-2.5 h-2.5 text-amber-600" />
+                      <span>Sandi Kustom</span>
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Nomor WhatsApp (Username) */}
+                  <div className="p-2 rounded-md bg-white border border-[#CCDDF0] flex items-center justify-between">
+                    <div className="min-w-0 flex-1 pr-1">
+                      <div className="text-[10px] font-bold text-[#64839E] uppercase">Nomor WhatsApp (Username)</div>
+                      <div className={`text-xs font-bold ${portalUsername ? 'text-[#0B2545] font-mono' : 'text-slate-400 font-sans'} truncate`}>
+                        {portalUsername || '-'}
+                      </div>
+                    </div>
+                    {portalUsername && (
+                      <button
+                        type="button"
+                        onClick={() => handleCopyText(portalUsername, 'username')}
+                        className="p-1 rounded hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#026AA7] transition cursor-pointer shrink-0"
+                        title="Salin Nomor WhatsApp (Username)"
+                      >
+                        {copiedField === 'username' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Kata Sandi Akun */}
+                  <div className="p-2 rounded-md bg-white border border-[#CCDDF0] flex items-center justify-between">
+                    <div className="min-w-0 flex-1 pr-1">
+                      <div className="text-[10px] font-bold text-[#64839E] uppercase">Kata Sandi Akun</div>
+                      <div className={`text-xs font-bold ${hasKnownPassword ? 'text-[#0B2545] font-mono tracking-wide' : 'text-slate-400 font-sans'} truncate`}>
+                        {portalPasswordDisplay}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      {hasKnownPassword && (
+                        <button
+                          type="button"
+                          onClick={() => setShowPortalPassword(!showPortalPassword)}
+                          className="p-1 rounded hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#026AA7] transition cursor-pointer"
+                          title={showPortalPassword ? 'Sembunyikan Sandi' : 'Lihat Sandi'}
+                        >
+                          {showPortalPassword ? <EyeOff className="w-3.5 h-3.5 text-[#026AA7]" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                      {hasKnownPassword && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopyText(rawPortalPass, 'password')}
+                          className="p-1 rounded hover:bg-[#F1F6FC] text-[#64839E] hover:text-[#026AA7] transition cursor-pointer"
+                          title="Salin Kata Sandi"
+                        >
+                          {copiedField === 'password' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Baris Aksi Reset Sandi & Ganti Sandi (Khusus Admin / Super Admin) */}
+                {isAdminOrSuperAdmin && (
+                  <div className="pt-1.5 border-t border-[#CCDDF0]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <p className="text-[11px] text-[#64839E] leading-snug">
+                      Pelanggan lupa kata sandi? Kembalikan sandi akun ke Nomor WhatsApp atau atur sandi kustom.
+                    </p>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewPasswordInput('')
+                          setChangePasswordError('')
+                          setShowNewPassword(false)
+                          setChangePasswordModalOpen(true)
+                        }}
+                        className="px-2.5 py-1.5 rounded-md border border-[#CCDDF0] hover:bg-white active:scale-95 text-[#026AA7] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs"
+                        title="Setel kata sandi baru untuk akun pelanggan"
+                      >
+                        <Key className="w-3.5 h-3.5" />
+                        <span>Ganti Sandi</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={resettingPassword || !hasValidWa}
+                        onClick={() => setConfirmResetOpen(true)}
+                        className="px-3 py-1.5 rounded-md bg-[#026AA7] hover:bg-[#035388] active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                        title={hasValidWa ? "Kembalikan kata sandi akun pelanggan ke Nomor WhatsApp" : "Nomor WhatsApp belum terdaftar"}
+                      >
+                        <RotateCw className={`w-3.5 h-3.5 ${resettingPassword ? 'animate-spin' : ''}`} />
+                        <span>{resettingPassword ? 'Mereset...' : 'Reset ke No. WA'}</span>
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -851,6 +1075,125 @@ export function CustomerDetailModal({
         }}
         onNotify={onNotify}
       />
+
+      {/* Modal Dialog Konfirmasi Reset Kata Sandi Akun Portal */}
+      {confirmResetOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-100">
+          <div className="bg-white rounded-xl max-w-sm w-full p-4.5 shadow-2xl border border-slate-200 space-y-3 font-sans">
+            <div className="flex items-center gap-2.5 text-[#026AA7]">
+              <div className="p-2 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0]">
+                <RotateCw className="w-5 h-5 text-[#026AA7]" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">Reset Sandi Akun?</h4>
+                <p className="text-[11px] text-slate-500 font-medium">Konfirmasi pemulihan akses pelanggan</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Kata sandi login aplikasi MyTekno milik <strong className="text-slate-900">{customer.nama || customer.name}</strong> akan dikembalikan ke Nomor WhatsApp terdaftar: <span className="font-mono font-bold text-[#026AA7]">{hasValidWa ? rawWa : '-'}</span>.
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setConfirmResetOpen(false)}
+                disabled={resettingPassword}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleResetPasswordToWa}
+                disabled={resettingPassword}
+                className="px-3.5 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                <RotateCw className={`w-3.5 h-3.5 ${resettingPassword ? 'animate-spin' : ''}`} />
+                <span>{resettingPassword ? 'Mereset...' : 'Ya, Reset ke No. WA'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Dialog Ganti Kata Sandi Akun Portal */}
+      {changePasswordModalOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-100">
+          <div className="bg-white rounded-xl max-w-sm w-full p-4.5 shadow-2xl border border-slate-200 space-y-3 font-sans">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center gap-2.5 text-[#026AA7]">
+                <div className="p-2 rounded-lg bg-[#E0F0FF] border border-[#CCDDF0]">
+                  <Key className="w-4 h-4 text-[#026AA7]" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Ganti Sandi Akun</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">Setel kata sandi login MyTekno</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setChangePasswordModalOpen(false)}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-700">
+                Kata Sandi Baru untuk {customer.nama || customer.name}
+              </label>
+              <div className="relative flex items-center">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPasswordInput}
+                  onChange={(e) => {
+                    setNewPasswordInput(e.target.value)
+                    if (changePasswordError) setChangePasswordError('')
+                  }}
+                  placeholder="Minimal 6 karakter..."
+                  className="w-full px-3 py-2 pr-9 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#026AA7] focus:border-transparent font-mono"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-2.5 p-1 text-slate-400 hover:text-[#026AA7] transition cursor-pointer"
+                  title={showNewPassword ? 'Sembunyikan' : 'Tampilkan'}
+                >
+                  {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+              {changePasswordError ? (
+                <p className="text-[10px] font-medium text-rose-600">{changePasswordError}</p>
+              ) : (
+                <p className="text-[10px] text-slate-500">
+                  Minimal 6 karakter angka atau huruf bebas. Ramah untuk pelanggan orang tua.
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setChangePasswordModalOpen(false)}
+                disabled={savingNewPassword}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveNewPassword}
+                disabled={savingNewPassword || newPasswordInput.trim().length < 6}
+                className="px-3.5 py-1.5 rounded-lg bg-[#026AA7] hover:bg-[#035388] active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>{savingNewPassword ? 'Menyimpan...' : 'Simpan Sandi Baru'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

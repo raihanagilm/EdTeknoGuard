@@ -48,6 +48,7 @@ import { ToastNotification } from '../common/ToastNotification'
 
 export function CustomersView({
   activeOffice = 'cabang',
+  currentUser = { role: 'super admin' },
   isOfficeActive = true,
   warnThreshold,
   critThreshold,
@@ -171,8 +172,14 @@ export function CustomersView({
 
   // Floating Toast Notification (Pojok Kanan Bawah)
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' })
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type })
+  const showToast = (messageOrObj, type = 'success') => {
+    let msg = messageOrObj
+    let toastType = type
+    if (messageOrObj && typeof messageOrObj === 'object') {
+      msg = messageOrObj.message || ''
+      toastType = messageOrObj.type || type
+    }
+    setToast({ show: true, message: msg, type: toastType })
     setTimeout(() => {
       setToast(prev => ({ ...prev, show: false }))
     }, 5000)
@@ -1081,6 +1088,7 @@ export function CustomersView({
       {/* Modal Detail Pelanggan (Komponen Terpisah 2-Tab: Profil & Jaringan) */}
       <CustomerDetailModal
         customer={detailCustomer}
+        currentUser={currentUser}
         onClose={() => setDetailCustomer(null)}
         activeOffice={activeOffice}
         onOpenEdit={(targetToEdit) => {

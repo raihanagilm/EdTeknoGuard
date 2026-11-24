@@ -281,6 +281,7 @@ async def portal_auth_minta_reset_password(request: Request, db: Session = Depen
     random_password = f"{secrets.randbelow(900000) + 100000}"
 
     matched_cust.password_hash = get_password_hash(random_password)
+    matched_cust.password_portal = random_password
     target_db.commit()
 
     ticket_desc = (

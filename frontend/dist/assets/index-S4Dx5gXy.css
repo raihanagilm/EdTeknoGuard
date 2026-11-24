@@ -813,6 +813,10 @@
     z-index: 50;
   }
 
+  .z-60 {
+    z-index: 60;
+  }
+
   .z-\[100\] {
     z-index: 100;
   }
@@ -1829,10 +1833,6 @@
     justify-content: flex-end;
   }
 
-  .justify-start {
-    justify-content: flex-start;
-  }
-
   .gap-0\.5 {
     gap: calc(var(--spacing) * .5);
   }
@@ -2006,8 +2006,8 @@
     border-radius: var(--radius-3xl);
   }
 
-  .rounded-\[18px\] {
-    border-radius: 18px;
+  .rounded-\[16px\] {
+    border-radius: 16px;
   }
 
   .rounded-full {
@@ -3399,6 +3399,10 @@
     padding: calc(var(--spacing) * 4);
   }
 
+  .p-4\.5 {
+    padding: calc(var(--spacing) * 4.5);
+  }
+
   .p-5 {
     padding: calc(var(--spacing) * 5);
   }
@@ -4581,6 +4585,11 @@
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
 
+  .duration-100 {
+    --tw-duration: .1s;
+    transition-duration: .1s;
+  }
+
   .duration-150 {
     --tw-duration: .15s;
     transition-duration: .15s;
@@ -4643,6 +4652,10 @@
 
     .group-hover\:border-sky-300:is(:where(.group):hover *) {
       border-color: var(--color-sky-300);
+    }
+
+    .group-hover\:bg-blue-600:is(:where(.group):hover *) {
+      background-color: var(--color-blue-600);
     }
 
     .group-hover\:text-\[\#026AA7\]:is(:where(.group):hover *) {
@@ -4848,6 +4861,16 @@
 
     .hover\:bg-blue-50:hover {
       background-color: var(--color-blue-50);
+    }
+
+    .hover\:bg-blue-50\/60:hover {
+      background-color: #eff6ff99;
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-blue-50\/60:hover {
+        background-color: color-mix(in oklab, var(--color-blue-50) 60%, transparent);
+      }
     }
 
     .hover\:bg-blue-100:hover {
@@ -5255,6 +5278,10 @@
 
   .focus\:border-cyan-700:focus {
     border-color: var(--color-cyan-700);
+  }
+
+  .focus\:border-transparent:focus {
+    border-color: #0000;
   }
 
   .focus\:bg-white:focus {

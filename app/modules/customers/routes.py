@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import require_admin
 from app.modules.customers.controller import CustomerController
-from app.modules.customers.schemas import CustomerCreate, CustomerUpdate, BulkDeleteSchema, CustomerWifiUpdateSchema
+from app.modules.customers.schemas import CustomerCreate, CustomerUpdate, BulkDeleteSchema, CustomerWifiUpdateSchema, CustomerPortalPasswordChangeSchema
 
 router = APIRouter(tags=["customers"])
 
@@ -172,6 +172,31 @@ def toggle_customer_monitoring(
     """Route untuk mengubah toggle status pemantauan berkala pelanggan (ON / OFF)"""
     return CustomerController.toggle_customer_monitoring(
         db=db, id_pelanggan=id_pelanggan, user=user, request=request
+    )
+
+@router.post("/api/customers/{id_pelanggan}/reset-portal-password")
+def reset_customer_portal_password(
+    request: Request,
+    id_pelanggan: str,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Reset kata sandi aplikasi portal pelanggan kembali ke Nomor WhatsApp terdaftar."""
+    return CustomerController.reset_portal_password(
+        db=db, id_pelanggan=id_pelanggan, user=user, request=request
+    )
+
+@router.post("/api/customers/{id_pelanggan}/change-portal-password")
+def change_customer_portal_password(
+    request: Request,
+    id_pelanggan: str,
+    payload: CustomerPortalPasswordChangeSchema,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    """Mengubah kata sandi akun portal pelanggan secara manual oleh admin."""
+    return CustomerController.change_portal_password(
+        db=db, id_pelanggan=id_pelanggan, password_baru=payload.password_baru, user=user, request=request
     )
 
 @router.get("/api/customers/{id_pelanggan}/perangkat-terhubung")
