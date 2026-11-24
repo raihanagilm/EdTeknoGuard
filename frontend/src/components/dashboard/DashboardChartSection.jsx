@@ -752,7 +752,7 @@ const toggleDataset = (idx) => {
 
         <div className="py-2.5 sm:py-3 px-3 sm:px-4">
           <span className="text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate">
-            Sinyal Terbaik
+            Redaman Terendah
           </span>
           <span className="text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block">
             {chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : '-'}
@@ -761,7 +761,7 @@ const toggleDataset = (idx) => {
 
         <div className="py-2.5 sm:py-3 px-3 sm:px-4">
           <span className="text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate">
-            Sinyal Terendah
+            Redaman Tertinggi
           </span>
           <span className="text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block">
             {chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : '-'}

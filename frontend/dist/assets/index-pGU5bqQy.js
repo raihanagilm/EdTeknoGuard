@@ -28911,7 +28911,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 						className: "py-2.5 sm:py-3 px-3 sm:px-4",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate",
-							children: "Sinyal Terbaik"
+							children: "Redaman Terendah"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block",
 							children: chartStats.min_dbm !== null ? `${chartStats.min_dbm} dBm` : "-"
@@ -28921,7 +28921,7 @@ function DashboardChartSection({ activeOffice, kpi, isScanning = false, lastScan
 						className: "py-2.5 sm:py-3 px-3 sm:px-4",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-[10px] sm:text-[11px] font-sans font-medium text-[#3B5B78] block truncate",
-							children: "Sinyal Terendah"
+							children: "Redaman Tertinggi"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-xs sm:text-sm font-bold font-mono tabular-nums text-[#0B2545] mt-0.5 block",
 							children: chartStats.max_dbm !== null ? `${chartStats.max_dbm} dBm` : "-"
