@@ -208,7 +208,13 @@ class CustomerService:
                     Pelanggan.status_lease != "waiting"
                 )
             elif status == "LOS":
-                query = query.filter(LogPerformaONT.status_koneksi == "LOS")
+                query = query.filter(
+                    or_(
+                        LogPerformaONT.status_koneksi == "LOS",
+                        Pelanggan.status_isolir == True,
+                        Pelanggan.status_pembayaran == "ISOLIR"
+                    )
+                )
             elif status in ("NONAKTIF", "OFF"):
                 query = query.filter(Pelanggan.is_monitored == False)
             elif status == "UNTESTED":
@@ -554,6 +560,26 @@ class CustomerService:
             isolated_q = isolated_q.filter(Pelanggan.kantor.in_(allowed_kantor))
         isolated_count = isolated_q.scalar() or 0
 
+        # Hitung jumlah gabungan pelanggan LOS dan Terisolir
+        combined_los_q = (
+            db.query(func.count(Pelanggan.id))
+            .outerjoin(subq, subq.c.id_pelanggan == Pelanggan.id_pelanggan)
+            .outerjoin(LogPerformaONT, LogPerformaONT.id == subq.c.max_log_id)
+            .filter(
+                Pelanggan.is_active == True,
+                or_(
+                    LogPerformaONT.status_koneksi == "LOS",
+                    Pelanggan.status_isolir == True,
+                    Pelanggan.status_pembayaran == "ISOLIR"
+                )
+            )
+        )
+        if kantor and kantor != "all":
+            combined_los_q = combined_los_q.filter(Pelanggan.kantor == kantor)
+        elif allowed_kantor:
+            combined_los_q = combined_los_q.filter(Pelanggan.kantor.in_(allowed_kantor))
+        combined_los_count = combined_los_q.scalar() or 0
+
         return {
             "total": total_pelanggan,
             "total_all": total_all,
@@ -563,6 +589,7 @@ class CustomerService:
             "los": los_count,
             "invalid": invalid_count,
             "isolated": isolated_count,
+            "combined_los": combined_los_count,
             "critical_los": critical_count + los_count,
             "monitored_active": monitored_active,
             "monitored_inactive": monitored_inactive,

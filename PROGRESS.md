@@ -9,7 +9,8 @@
 ## In Progress
 - Selesai & Terverifikasi (PASS):
   1. Integrasi status isolir router Network Bill: penempatan label `ISOLIR` di bawah status koneksi `ONLINE` / `OFFLINE` pada tabel data pelanggan (`CustomersTable.jsx`) baik pada tampilan desktop maupun mobile card.
-  2. Restorasi kartu KPI `LOS` pada `CustomersView.jsx` dengan sub-label murni `Putus` (melepaskan agregasi isolir dari kartu LOS agar murni merepresentasikan status fisik optik LOS tanpa bias jumlah isolir global).
+  2. Penggabungan filter pelanggan terisolir ke dalam kategori kartu LOS (`CustomerService.get_customers` status == 'LOS'): menyaring `LogPerformaONT.status_koneksi == "LOS" OR Pelanggan.status_isolir == True OR Pelanggan.status_pembayaran == "ISOLIR"` sehingga seluruh 8 pelanggan terisolir muncul lengkap di tabel saat kartu LOS diklik.
+  3. Penghitungan `combined_los` pada `CustomerService.get_customer_stats` dan penyajian nilai kartu LOS gabungan (18 total) dengan sub-label `${stats.los} Putus • ${stats.isolated} Isolir` di `CustomersView.jsx`.
   3. Penambahan pemetaan `status_isolir` pada model `Pelanggan` (`app/db/models.py`), payload return `list_customers`, dan penghitungan agregasi `isolated` pada `get_customer_stats` (`app/modules/customers/service.py`).
   4. Sinkronisasi status isolir otomatis via `NetworkBillService.fetch_connection_status` di `BillingService.sync_all_office_customers` dan pembaruan berkala ber-cache pada `BillingSyncWorker.sync_customer_billing`.
   5. Sinkronisasi live tagihan pada `PortalNotificationsPage.jsx` melalui `PortalPembayaranService.getTagihan()`: jika ada tagihan aktif/tertunggak di Network Bill, Pusat Notifikasi secara deterministik menampilkan kartu "Pengingat Tagihan Belum Dibayar" (nominal & periode riil) dan dilarang menampilkan "Tagihan Lunas Terverifikasi".

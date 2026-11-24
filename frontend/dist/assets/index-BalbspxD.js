@@ -35075,11 +35075,11 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 				},
 				{
 					label: "LOS",
-					value: stats.los || 0,
+					value: stats.combined_los !== void 0 ? stats.combined_los : stats.los || 0,
 					colorScheme: "purple",
 					isActive: filterStatus === "LOS",
 					onClick: () => setFilterStatus("LOS"),
-					subLabel: "Putus"
+					subLabel: stats.isolated ? `${stats.los || 0} Putus • ${stats.isolated} Isolir` : "Putus"
 				},
 				{
 					label: "Invalid",
