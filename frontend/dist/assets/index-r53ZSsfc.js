@@ -35079,7 +35079,7 @@ function CustomersView({ activeOffice = "cabang", isOfficeActive = true, warnThr
 					colorScheme: "purple",
 					isActive: filterStatus === "LOS",
 					onClick: () => setFilterStatus("LOS"),
-					subLabel: stats.isolated ? `Putus • ${stats.isolated} Isolir` : "Putus"
+					subLabel: "Putus"
 				},
 				{
 					label: "Invalid",
