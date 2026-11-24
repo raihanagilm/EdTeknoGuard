@@ -72,8 +72,15 @@ class TenantDatabaseManager:
             try:
                 from app.db import models
                 models.TenantBase.metadata.create_all(bind=engine)
+                # Auto-alter: pastikan kolom baru pada tabel pelanggan selalu ada
+                with engine.connect() as conn:
+                    res = conn.execute(text("SHOW COLUMNS FROM pelanggan LIKE 'password_portal';")).fetchone()
+                    if not res:
+                        conn.execute(text("ALTER TABLE pelanggan ADD COLUMN password_portal VARCHAR(100) NULL;"))
+                        conn.commit()
+                        logger.info(f"[TENANT_DB] Kolom 'password_portal' berhasil ditambahkan ke '{db_name}'.pelanggan")
             except Exception as tbl_err:
-                logger.warning(f"[TENANT_DB] Gagal sinkronisasi tabel TenantBase untuk '{db_name}': {tbl_err}")
+                logger.warning(f"[TENANT_DB] Gagal sinkronisasi tabel/kolom TenantBase untuk '{db_name}': {tbl_err}")
 
             cls._engines[db_name] = engine
             cls._sessionmakers[db_name] = sessionmaker(autocommit=False, autoflush=False, bind=engine)
