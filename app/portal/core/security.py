@@ -4,7 +4,15 @@ from fastapi import Request, HTTPException
 from fastapi.responses import RedirectResponse
 from app.core.config import settings
 from app.core.security import is_default_customer_password
+import ipaddress
 import bcrypt
+
+# Subnet IP Publik resmi PT Tekno Indo Jaya (AS153729) untuk klien yang terhubung ke jaringan ISP
+TEKNO_ISP_PUBLIC_SUBNETS = [
+    ipaddress.ip_network("38.253.120.0/24"),
+    ipaddress.ip_network("38.253.121.0/24"),
+    ipaddress.ip_network("163.223.112.0/24"),
+]
 
 CUSTOMER_SESSION_COOKIE = "edtekno_pelanggan_session"
 MAX_SESSION_AGE = 86400 * 60  # 60 Hari (2 Bulan) Inaktivitas Sesi Pelanggan
@@ -125,7 +133,18 @@ def check_is_home_wifi(request: Request, pelanggan) -> bool:
     if client_gateway_mac and cust_mac and client_gateway_mac == cust_mac:
         return True
 
-    # 3. Pengecekan perangkat lokal (Localhost / Development)
+    # 3. Pengecekan jaringan ISP Tekno Indo Jaya (Klien Web Browser melalui CGNAT / IP Publik ISP)
+    if client_ip:
+        try:
+            c_addr = ipaddress.ip_address(client_ip)
+            if any(c_addr in net for net in TEKNO_ISP_PUBLIC_SUBNETS):
+                st_lease = getattr(pelanggan, "status_lease", None)
+                if st_lease != "waiting":
+                    return True
+        except Exception:
+            pass
+
+    # 4. Pengecekan perangkat lokal (Localhost / Development)
     if client_ip in ["127.0.0.1", "::1", "localhost"]:
         import subprocess, re
         

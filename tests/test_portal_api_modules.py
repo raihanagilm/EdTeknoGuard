@@ -133,7 +133,18 @@ class TestPortalApiModules(unittest.TestCase):
         mock_req_apk_diff.client = MagicMock(host="10.10.7.8")
         self.assertFalse(check_is_home_wifi(mock_req_apk_diff, mock_pelanggan))
 
-        # 4. Pelanggan None
+        # 4. Klien Web Browser melalui IP Publik ISP Tekno Indo Jaya (CGNAT)
+        mock_pelanggan.status_lease = "bound"
+        mock_req_tekno_public = MagicMock()
+        mock_req_tekno_public.headers = {"x-forwarded-for": "38.253.121.5"}
+        mock_req_tekno_public.client = MagicMock(host="38.253.121.5")
+        self.assertTrue(check_is_home_wifi(mock_req_tekno_public, mock_pelanggan))
+
+        # Klien dari IP Tekno tapi modem sedang offline/waiting
+        mock_pelanggan.status_lease = "waiting"
+        self.assertFalse(check_is_home_wifi(mock_req_tekno_public, mock_pelanggan))
+
+        # 5. Pelanggan None
         self.assertFalse(check_is_home_wifi(mock_req_match, None))
 
 if __name__ == "__main__":

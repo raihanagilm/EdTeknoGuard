@@ -8,7 +8,8 @@
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
-  1. Penyederhanaan info tunggakan: menghapus akumulasi total nominal rupiah dari notifikasi backend (`NotificationService.get_realtime_notifications`) dan kartu KPI ringkasan tagihan (`BillingView.jsx`), difokuskan murni pada jumlah pelanggan/orang tertunggak.
+  1. Perbaikan validasi jaringan WiFi rumah di portal pelanggan (`check_is_home_wifi` di `app/portal/core/security.py`): menambahkan pengenalan subnet IP publik ISP PT Tekno Indo Jaya (AS153729: `38.253.120.0/24`, `38.253.121.0/24`, `163.223.112.0/24`) melalui CGNAT saat pelanggan mengakses portal via browser laptop/HP ketika tersambung ke modem WiFi rumah, sehingga fitur Speed Test dan Pengaturan WiFi tidak lagi terblokir oleh pesan proteksi keliru.
+  2. Penyederhanaan info tunggakan: menghapus akumulasi total nominal rupiah dari notifikasi backend (`NotificationService.get_realtime_notifications`) dan kartu KPI ringkasan tagihan (`BillingView.jsx`), difokuskan murni pada jumlah pelanggan/orang tertunggak.
   2. Penerapan Matriks Notifikasi Desktop (Chrome/Edge) & Polling In-App berbasis Role dan Kantor (`App.jsx`, `service.py`, `routes.py`):
      - `teknisi`: Khusus notifikasi Tiket Kendala dan Sinyal Terputus (LOS) / Redaman Kritis sesuai `allowed_kantor`.
      - `admin` (Kantor): Khusus notifikasi Tiket Kendala, Kredensial Modem Invalid, dan Tagihan Jatuh Tempo/Isolir sesuai `allowed_kantor` (terbebas dari alarm redaman optik teknis).
