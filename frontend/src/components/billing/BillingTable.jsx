@@ -273,19 +273,16 @@ export function BillingTable({
                     </td>
                     <td className="py-2.5 px-3 whitespace-nowrap">
                       {cleanWa ? (
-                        <div className="flex flex-col gap-1 items-start">
-                          <span className="font-mono text-[11px] text-[#64839E] font-medium">{p.no_wa}</span>
-                          <a
-                            href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 text-xs font-bold transition shadow-2xs group cursor-pointer"
-                            title={`Hubungi ${p.nama} (${p.no_wa}) via WhatsApp`}
-                          >
-                            <Phone className="w-3.5 h-3.5 text-emerald-600 group-hover:text-white" />
-                            <span>Hubungi WA</span>
-                          </a>
-                        </div>
+                        <a
+                          href={`https://wa.me/${cleanWa}?text=${encodeURIComponent(waText)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 text-xs font-bold transition shadow-2xs group cursor-pointer"
+                          title={`Hubungi ${p.nama} (${p.no_wa}) via WhatsApp`}
+                        >
+                          <Phone className="w-3.5 h-3.5 text-emerald-600 group-hover:text-white" />
+                          <span>Hubungi WA</span>
+                        </a>
                       ) : (
                         <span className="text-slate-400 font-mono text-xs">-</span>
                       )}
