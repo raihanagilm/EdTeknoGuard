@@ -234,11 +234,12 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (!isAuthenticated) return
     fetchKantorList()
     const handleKantorUpdate = () => fetchKantorList()
     window.addEventListener('edtekno_kantor_updated', handleKantorUpdate)
     return () => window.removeEventListener('edtekno_kantor_updated', handleKantorUpdate)
-  }, [])
+  }, [isAuthenticated])
 
   // Telemetry Scanner & Realtime Clock State
   const [isScanningActive, setIsScanningActive] = useState(true)

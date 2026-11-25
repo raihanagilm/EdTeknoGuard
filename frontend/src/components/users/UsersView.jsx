@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ShieldCheck,
@@ -14,7 +14,9 @@ import {
   Check,
   Users,
   MoreVertical,
-  Shield
+  Shield,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { UsersService } from '../../services/api';
 import {
@@ -65,6 +67,7 @@ export function UsersView() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [formUsername, setFormUsername] = useState('');
   const [formPassword, setFormPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [formNama, setFormNama] = useState('');
   const [formNoWa, setFormNoWa] = useState('');
   const [formRole, setFormRole] = useState('teknisi');
@@ -120,6 +123,7 @@ export function UsersView() {
     setCurrentUserId(null);
     setFormUsername('');
     setFormPassword('');
+    setShowPassword(false);
     setFormNama('');
     setFormNoWa('');
     setFormRole('teknisi');
@@ -133,6 +137,7 @@ export function UsersView() {
     setCurrentUserId(user.id);
     setFormUsername(user.username);
     setFormPassword('');
+    setShowPassword(false);
     setFormNama(user.nama_karyawan || '');
     setFormNoWa(user.no_wa || '');
     setFormRole(user.role);
@@ -854,14 +859,25 @@ export function UsersView() {
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
                   {modalMode === 'add' ? 'Password' : 'Password Baru (Kosongkan jika tetap)'}
                 </label>
-                <input
-                  type="password"
-                  value={formPassword}
-                  onChange={(e) => setFormPassword(e.target.value)}
-                  placeholder={modalMode === 'add' ? 'Kata sandi akun...' : '••••••••'}
-                  autoComplete="new-password"
-                  className="w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formPassword}
+                    onChange={(e) => setFormPassword(e.target.value)}
+                    placeholder={modalMode === 'add' ? 'Kata sandi akun...' : '••••••••'}
+                    autoComplete="new-password"
+                    className="w-full pl-3 pr-10 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? 'Sembunyikan password' : 'Lihat password'}
+                    title={showPassword ? 'Sembunyikan password' : 'Lihat password'}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-700 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <div>

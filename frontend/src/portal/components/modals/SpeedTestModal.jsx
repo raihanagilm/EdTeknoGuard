@@ -240,6 +240,7 @@ export function SpeedTestModal({
           if (signal.aborted) throw e;
           response = await fetch(`/portal/api/speedtest/download?bytes=${fetchSize}&t=${Date.now()}_s${streamIndex}`, {
             cache: 'no-store',
+            credentials: 'include',
             signal
           });
         }
@@ -348,6 +349,7 @@ export function SpeedTestModal({
             body: uploadBlob,
             headers: { 'Content-Type': 'application/octet-stream' },
             cache: 'no-store',
+            credentials: 'include',
             signal
           });
           if (res.ok) uploadOk = true;

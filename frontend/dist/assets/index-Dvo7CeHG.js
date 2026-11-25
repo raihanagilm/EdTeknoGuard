@@ -37717,14 +37717,14 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 	const renderReminderBadge = (p) => {
 		if (p.status_pembayaran === "LUNAS") return null;
 		if (p.has_reminder) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-			className: "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200",
+			className: "inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700",
 			title: p.last_reminder_full ? `Terakhir diingatkan: ${p.last_reminder_full}` : "Sudah dikirimi pengingat",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-2.5 h-2.5 shrink-0 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Diingatkan ", p.last_reminder] })]
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-3 h-3 shrink-0 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["Diingatkan ", p.last_reminder] })]
 		});
 		return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-			className: "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200",
+			className: "inline-flex items-center gap-1 text-[11px] font-medium text-slate-500",
 			title: "Belum pernah dikirimi pengingat tagihan",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BellOff, { className: "w-2.5 h-2.5 shrink-0 text-slate-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Belum Diingatkan" })]
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BellOff, { className: "w-3 h-3 shrink-0 text-slate-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Belum Diingatkan" })]
 		});
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DataTableContainer, {
@@ -39617,6 +39617,7 @@ function UsersView() {
 	const [currentUserId, setCurrentUserId] = (0, import_react.useState)(null);
 	const [formUsername, setFormUsername] = (0, import_react.useState)("");
 	const [formPassword, setFormPassword] = (0, import_react.useState)("");
+	const [showPassword, setShowPassword] = (0, import_react.useState)(false);
 	const [formNama, setFormNama] = (0, import_react.useState)("");
 	const [formNoWa, setFormNoWa] = (0, import_react.useState)("");
 	const [formRole, setFormRole] = (0, import_react.useState)("teknisi");
@@ -39674,6 +39675,7 @@ function UsersView() {
 		setCurrentUserId(null);
 		setFormUsername("");
 		setFormPassword("");
+		setShowPassword(false);
 		setFormNama("");
 		setFormNoWa("");
 		setFormRole("teknisi");
@@ -39686,6 +39688,7 @@ function UsersView() {
 		setCurrentUserId(user.id);
 		setFormUsername(user.username);
 		setFormPassword("");
+		setShowPassword(false);
 		setFormNama(user.nama_karyawan || "");
 		setFormNoWa(user.no_wa || "");
 		setFormRole(user.role);
@@ -40369,13 +40372,23 @@ function UsersView() {
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 									className: "block text-[10px] font-bold uppercase text-slate-500 mb-1",
 									children: modalMode === "add" ? "Password" : "Password Baru (Kosongkan jika tetap)"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "password",
-									value: formPassword,
-									onChange: (e) => setFormPassword(e.target.value),
-									placeholder: modalMode === "add" ? "Kata sandi akun..." : "••••••••",
-									autoComplete: "new-password",
-									className: "w-full px-3 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "relative",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: showPassword ? "text" : "password",
+										value: formPassword,
+										onChange: (e) => setFormPassword(e.target.value),
+										placeholder: modalMode === "add" ? "Kata sandi akun..." : "••••••••",
+										autoComplete: "new-password",
+										className: "w-full pl-3 pr-10 py-2 rounded-xl border border-sky-200 text-xs font-bold focus:border-cyan-500 focus:outline-none"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: () => setShowPassword((prev) => !prev),
+										"aria-label": showPassword ? "Sembunyikan password" : "Lihat password",
+										title: showPassword ? "Sembunyikan password" : "Lihat password",
+										className: "absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-700 cursor-pointer",
+										children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
+									})]
 								})] }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 									className: "block text-[10px] font-bold uppercase text-slate-500 mb-1",
@@ -45407,6 +45420,7 @@ function SpeedTestModal({ isOpen, onClose, targetSpeed = 10, latencyValue = null
 					if (signal.aborted) throw e;
 					response = await fetch(`/portal/api/speedtest/download?bytes=${fetchSize}&t=${Date.now()}_s${streamIndex}`, {
 						cache: "no-store",
+						credentials: "include",
 						signal
 					});
 				}
@@ -45489,6 +45503,7 @@ function SpeedTestModal({ isOpen, onClose, targetSpeed = 10, latencyValue = null
 						body: uploadBlob,
 						headers: { "Content-Type": "application/octet-stream" },
 						cache: "no-store",
+						credentials: "include",
 						signal
 					})).ok) uploadOk = true;
 				}
@@ -50318,11 +50333,12 @@ function App() {
 		}
 	};
 	(0, import_react.useEffect)(() => {
+		if (!isAuthenticated) return;
 		fetchKantorList();
 		const handleKantorUpdate = () => fetchKantorList();
 		window.addEventListener("edtekno_kantor_updated", handleKantorUpdate);
 		return () => window.removeEventListener("edtekno_kantor_updated", handleKantorUpdate);
-	}, []);
+	}, [isAuthenticated]);
 	const [isScanningActive, setIsScanningActive] = (0, import_react.useState)(true);
 	const [scanPercent, setScanPercent] = (0, import_react.useState)(78);
 	const [filterStatus, setFilterStatus] = (0, import_react.useState)("ALL");

@@ -2,12 +2,21 @@
 
 ## Current State
 - Last commit: 050229e
-- Test status: passing (Vite build OK, 87+ pytest passed)
-- Active module: Harmonize Windows/Chrome Desktop Notifications with Mobile & Fix Direct Links Per Kantor
-- Baseline: Green (Deploying to VPS Production https://portal.teknoindo.net/)
+- Test status: passing (Vite build OK, 97 pytest passed)
+- Active module: Security Hardening (TeknoGuard Admin, MyTekno Portal, & Konfigurasi VPS)
+- Baseline: Green (Siap deploy/sinkronisasi ke VPS Produksi https://portal.teknoindo.net/)
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
+  0. Pengerasan Keamanan (Security Hardening) TeknoGuard, Portal MyTekno, & VPS:
+     - Mengunci endpoint admin/monitoring yang sebelumnya terbuka tanpa autentikasi (`GET /api/kantor/list`, `GET /api/customers`, `GET /api/pelanggan`, `GET /api/customers/{id_pelanggan}`, `GET /api/customers/{id_pelanggan}/billing`, `GET /api/monitoring/*`) dengan `require_admin`, membatasi `mikrotik_pass` khusus `super admin`, membatasi `password_portal` khusus `admin`/`super admin`, dan menyesuaikan `frontend/src/App.jsx` agar memuat daftar kantor setelah login.
+     - Menutup celah IDOR pada `POST /portal/api/auth/register-fcm` agar wajib memakai cookie sesi pelanggan terverifikasi.
+     - Mengamankan `POST /portal/api/auth/minta-reset-password` agar tidak langsung menimpa `password_hash` aktif sebelum disetujui Admin NOC pada tiket `RESET_PASSWORD`, mencegah enumerasi nomor HP/nama, dan mencegah duplikasi tiket `MENUNGGU`.
+     - Mencegah spoofing IP dan bypass validasi WiFi rumah pada `check_is_home_wifi` serta `LoginRateLimitMiddleware` lewat helper `get_trusted_client_ip` (`_TRUSTED_PROXY_NETWORKS`) dan menghapus kepercayaan terhadap header tak terverifikasi `X-Client-SSID`/`X-Client-Gateway-MAC`.
+     - Menambahkan validasi `SECRET_KEY` produksi (`APP_ENV=production`), pembatasan `CORS_ORIGINS`, flag cookie `Secure` dinamis (`is_https_request`), pengamanan identifier SQL di `tenant_database.py`, serta pengerasan `docker-compose.yml` (`127.0.0.1` binding) dan panduan Nginx/Uvicorn di `docs/DEPLOY_SERVER_LINUX.md`.
+     - Menutup celah Cross-Role Token Confusion antara sesi pelanggan dan admin dengan memisahkan `salt` kriptografis + klaim `token_type` (`app/core/security.py`, `app/portal/core/security.py`), mengunci scope `kantor` sesuai `allowed_kantor` di `get_db`/`customers/routes.py`, dan menambahkan validasi magic bytes WebP/PNG/JPEG pada unggahan foto profil portal (`app/portal/modules/profile/routes.py`).
+     - Mengunci akses lintas kantor pada `activity_logs/controller.py` & `notifications/routes.py` (`403` jika di luar `allowed_kantor`), mewajibkan sesi pelanggan + batas byte (16 MB download / 10 MB upload) di `portal/modules/speedtest/routes.py` (+ `credentials: 'include'` di `SpeedTestModal.jsx`), serta menghapus password bawaan hardcoded di `app/db/init_db.py` dan `docs/DEPLOY_SERVER_LINUX.md`.
+     - Perbaikan UI: menghapus blok/pill berwarna pada status `Diingatkan` / `Belum Diingatkan` di [BillingTable.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingTable.jsx) agar polos inline bebas *pill soup*, dan menambahkan toggle ikon mata lihat/sembunyikan password pada modal Tambah/Edit Pengguna di [UsersView.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/users/UsersView.jsx) (+ build produksi Vite `dist/assets/index-Dvo7CeHG.js`).
   1. Penyelarasan Notifikasi Desktop Windows / Chrome dengan Format Mobile ([app/modules/notifications/service.py](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/notifications/service.py)):
      - Memformat seluruh judul notifikasi secara deterministik menggunakan pola standar mobile: `[KATEGORI] Kantor: {KANTOR}` (contoh: `[SINYAL TERPUTUS] Kantor: KARANGGEDE`, `[REDAMAN KRITIS] Kantor: TENGARAN`, `[TIKET BARU] Kantor: KARANGGEDE`, `[SCHEDULER] Kantor: PUSAT`, `[TAGIHAN JATUH TEMPO] Kantor: TENGARAN`).
      - Menyederhanakan isi pesan notifikasi (*concise messages*) agar padat, akurat, dan 100% identik dengan push notification FCM di Android: `{count} modem LOS (terputus)...`, `{count} modem Kritis...`, `{count} tiket MENUNGGU...`.
