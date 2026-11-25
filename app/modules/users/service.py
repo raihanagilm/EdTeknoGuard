@@ -15,7 +15,7 @@ VALID_ROLES = ["super admin", "admin", "teknisi"]
 class UsersService:
 
     @staticmethod
-    def get_kantors_list(db: Session) -> List[Dict[str, Any]]:
+    def get_kantors_list(db: Session, include_secrets: bool = False) -> List[Dict[str, Any]]:
         """Mengambil seluruh daftar kantor, auto-seed default jika kosong"""
         kantors = db.query(Kantor).order_by(Kantor.id.asc()).all()
         if not kantors:
@@ -42,10 +42,10 @@ class UsersService:
             "nama": k.nama,
             "is_active": k.is_active if k.is_active is not None else True,
             "alamat": k.alamat or "",
-            "mikrotik_host": k.mikrotik_host or "",
-            "mikrotik_port": k.mikrotik_port or "",
-            "mikrotik_user": k.mikrotik_user or "",
-            "mikrotik_pass": k.mikrotik_pass or "",
+            "mikrotik_host": (k.mikrotik_host or "") if include_secrets else "",
+            "mikrotik_port": (k.mikrotik_port or "") if include_secrets else "",
+            "mikrotik_user": (k.mikrotik_user or "") if include_secrets else "",
+            "mikrotik_pass": (k.mikrotik_pass or "") if include_secrets else "",
             "mikrotik_sync_interval": k.mikrotik_sync_interval if k.mikrotik_sync_interval is not None else 3,
             "last_mikrotik_sync": k.last_mikrotik_sync.strftime("%Y-%m-%d %H:%M:%S") if k.last_mikrotik_sync else None
         } for k in kantors]

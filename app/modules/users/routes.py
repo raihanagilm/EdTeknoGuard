@@ -18,8 +18,8 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.get("/api/kantor/list")
 async def get_kantors_json(request: Request, db: Session = Depends(get_master_db)):
     """Mengambil seluruh daftar kantor (kode & nama) untuk switcher dan manajemen kantor"""
-    require_admin(request)
-    kantors = UsersService.get_kantors_list(db)
+    user = require_admin(request)
+    kantors = UsersService.get_kantors_list(db, include_secrets=(user.get("role") == "super admin"))
     return {"status": "success", "kantors": kantors}
 
 

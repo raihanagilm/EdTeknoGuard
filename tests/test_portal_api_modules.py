@@ -122,11 +122,11 @@ class TestPortalApiModules(unittest.TestCase):
         mock_req_neighbor.client = MagicMock(host="10.10.7.8")
         self.assertFalse(check_is_home_wifi(mock_req_neighbor, mock_pelanggan))
 
-        # 3. Header verifikasi APK (SSID cocok -> True, beda -> False)
-        mock_req_apk_match = MagicMock()
-        mock_req_apk_match.headers = {"x-client-ssid": "myhomewifi"}
-        mock_req_apk_match.client = MagicMock(host="10.10.7.8")
-        self.assertTrue(check_is_home_wifi(mock_req_apk_match, mock_pelanggan))
+        # 3. Header X-Client-SSID tidak terverifikasi dari IP luar harus ditolak (anti-spoofing)
+        mock_req_apk_spoof = MagicMock()
+        mock_req_apk_spoof.headers = {"x-client-ssid": "myhomewifi", "x-client-gateway-mac": "AA:BB:CC:DD:EE:FF"}
+        mock_req_apk_spoof.client = MagicMock(host="103.150.20.55")
+        self.assertFalse(check_is_home_wifi(mock_req_apk_spoof, mock_pelanggan))
 
         mock_req_apk_diff = MagicMock()
         mock_req_apk_diff.headers = {"x-client-ssid": "tetanggawifi"}

@@ -29,10 +29,18 @@ def speedtest_ping():
     )
 
 
+MAX_SPEEDTEST_DOWNLOAD_BYTES = 16 * 1024 * 1024  # 16 MB maks per request
+MAX_SPEEDTEST_UPLOAD_BYTES = 10 * 1024 * 1024    # 10 MB maks per request
+
+
 @router.get("/download")
-def speedtest_download(bytes: int = 15728640):
-    """Endpoint Download mengalirkan bytes acak (incompressible) untuk mengukur throughput riil."""
-    safe_size = max(1048576, min(bytes, 52428800))  # 1MB - 50MB
+def speedtest_download(request: Request, bytes: int = 8388608):
+    """Endpoint Download mengalirkan bytes acak (incompressible) untuk mengukur throughput riil (khusus pelanggan login)."""
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Unauthorized"})
+
+    safe_size = max(1048576, min(bytes, MAX_SPEEDTEST_DOWNLOAD_BYTES))  # 1MB - 16MB
     headers = {
         "Content-Type": "application/octet-stream",
         "Content-Length": str(safe_size),
@@ -44,10 +52,19 @@ def speedtest_download(bytes: int = 15728640):
 
 @router.post("/upload")
 async def speedtest_upload(request: Request):
-    """Endpoint Upload menerima binary payload dan menghitung throughput upload riil."""
+    """Endpoint Upload menerima binary payload (maks 10 MB) dan menghitung throughput upload riil (khusus pelanggan login)."""
+    cust = get_current_customer_optional(request)
+    if not cust:
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Unauthorized"})
+
     total_bytes = 0
     async for chunk in request.stream():
         total_bytes += len(chunk)
+        if total_bytes > MAX_SPEEDTEST_UPLOAD_BYTES:
+            return JSONResponse(
+                status_code=413,
+                content={"ok": False, "message": "Ukuran payload upload melebihi batas maksimal 10 MB."}
+            )
     return Response(
         content=f'{{"ok":true,"received_bytes":{total_bytes}}}',
         media_type="application/json",

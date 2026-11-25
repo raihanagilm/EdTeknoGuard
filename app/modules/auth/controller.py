@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.core.security import SESSION_COOKIE_NAME, MAX_SESSION_AGE, get_current_user_optional
+from app.core.security import SESSION_COOKIE_NAME, MAX_SESSION_AGE, get_current_user_optional, is_https_request
 from app.modules.auth.service import AuthService
 from app.modules.activity_logs.service import ActivityLogService
 from app.core.config import settings
@@ -132,6 +132,7 @@ class AuthController:
             max_age=MAX_SESSION_AGE,
             httponly=True,
             samesite="lax",
+            secure=is_https_request(request),
             path="/"
         )
         return response

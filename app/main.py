@@ -52,10 +52,10 @@ app.add_middleware(LoginRateLimitMiddleware, max_attempts=10, window_seconds=60)
 app.add_middleware(SlidingSessionMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Active-Kantor", "Cache-Control", "Pragma"],
 )
 
 # Custom Exception Handler untuk Redirect Auth (HTTP 303) & Error Terstruktur
@@ -110,11 +110,8 @@ async def inject_current_user_middleware(request: Request, call_next):
             except Exception:
                 pass
 
-        from app.core.security import get_all_kantor_codes
-        all_k = get_all_kantor_codes()
-        fallback_k = cust_kantor or (all_k[0] if all_k else None)
-        request.state.allowed_kantor = all_k
-        request.state.active_kantor = fallback_k
+        request.state.allowed_kantor = []
+        request.state.active_kantor = cust_kantor
     response = await call_next(request)
 
     # Aturan Sesi Inaktivitas 30 Hari:
@@ -137,12 +134,14 @@ async def inject_current_user_middleware(request: Request, call_next):
             allowed_kantor=current_user.get("allowed_kantor", ["cabang"]),
             user_id=current_user.get("user_id")
         )
+        from app.core.security import is_https_request
         response.set_cookie(
             key=SESSION_COOKIE_NAME,
             value=refreshed_token,
             max_age=MAX_SESSION_AGE,
             httponly=True,
             samesite="lax",
+            secure=is_https_request(request),
             path="/"
         )
 
@@ -278,7 +277,10 @@ async def get_users_alias(request: Request):
 @app.get("/api/kantor/list")
 async def get_kantor_list_alias(request: Request):
     from app.core.database import SessionLocal
+    from app.core.security import require_admin
     from app.db.models import Kantor
+    user = require_admin(request)
+    is_super_admin = user.get("role") == "super admin"
     db = SessionLocal()
     try:
         kantors = db.query(Kantor).order_by(Kantor.id.asc()).all()
@@ -300,10 +302,10 @@ async def get_kantor_list_alias(request: Request):
                 "nama": k.nama,
                 "is_active": k.is_active if k.is_active is not None else True,
                 "alamat": k.alamat or "",
-                "mikrotik_host": k.mikrotik_host or "",
-                "mikrotik_port": k.mikrotik_port or "",
-                "mikrotik_user": k.mikrotik_user or "",
-                "mikrotik_pass": k.mikrotik_pass or "",
+                "mikrotik_host": (k.mikrotik_host or "") if is_super_admin else "",
+                "mikrotik_port": (k.mikrotik_port or "") if is_super_admin else "",
+                "mikrotik_user": (k.mikrotik_user or "") if is_super_admin else "",
+                "mikrotik_pass": (k.mikrotik_pass or "") if is_super_admin else "",
                 "mikrotik_sync_interval": k.mikrotik_sync_interval if k.mikrotik_sync_interval is not None else 3,
                 "last_mikrotik_sync": k.last_mikrotik_sync.strftime("%Y-%m-%d %H:%M:%S") if k.last_mikrotik_sync else None
             } for k in kantors]
@@ -471,11 +473,13 @@ async def api_auth_login(request: Request):
         )
         # Jika 'Ingat Saya' dicentang, cookie bertahan 30 hari (MAX_SESSION_AGE = 2.592.000 detik)
         # Jika tidak dicentang, cookie menjadi Session Cookie (otomatis hangus saat browser ditutup)
+        from app.core.security import is_https_request
         cookie_kwargs = {
             "key": SESSION_COOKIE_NAME,
             "value": token,
             "httponly": True,
             "samesite": "lax",
+            "secure": is_https_request(request),
             "path": "/"
         }
         if remember_me:

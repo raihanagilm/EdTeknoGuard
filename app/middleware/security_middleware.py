@@ -58,12 +58,8 @@ class LoginRateLimitMiddleware(BaseHTTPMiddleware):
             or "reset-password" in path
         )
         if is_sensitive_auth:
-            # Ambil client IP (prioritaskan header resmi Cloudflare cf-connecting-ip jika ada)
-            client_ip = (
-                request.headers.get("cf-connecting-ip")
-                or request.headers.get("x-forwarded-for", "").split(",")[0].strip()
-                or (request.client.host if request.client else "unknown")
-            )
+            from app.core.security import get_trusted_client_ip
+            client_ip = get_trusted_client_ip(request)
 
             now = time.time()
             self._cleanup_old_entries(now)

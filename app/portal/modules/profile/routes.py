@@ -189,6 +189,13 @@ async def portal_profil_upload_foto(request: Request, db: Session = Depends(get_
         
     if len(binary_data) > 1024 * 1024:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Ukuran foto terlalu besar (maksimal 1 MB)!"})
+
+    # Validasi magic bytes gambar (WebP, PNG, JPEG) agar file non-gambar ditolak
+    is_webp = len(binary_data) >= 12 and binary_data[:4] == b"RIFF" and binary_data[8:12] == b"WEBP"
+    is_png = binary_data.startswith(b"\x89PNG\r\n\x1a\n")
+    is_jpeg = binary_data.startswith(b"\xff\xd8\xff")
+    if not (is_webp or is_png or is_jpeg):
+        return JSONResponse(status_code=400, content={"ok": False, "message": "Format file foto tidak valid. Gunakan gambar WebP, PNG, atau JPEG."})
         
     upload_dir = Path("static/uploads/profil")
     upload_dir.mkdir(parents=True, exist_ok=True)

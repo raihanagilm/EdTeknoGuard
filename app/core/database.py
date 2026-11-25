@@ -109,7 +109,9 @@ def get_db(request: Request = None):
                 except Exception:
                     pass
 
-        # 2. Cek query param ?kantor=, sesi admin state, header, atau cookie
+        # 2. Jika ada sesi admin terverifikasi, prioritaskan active_kantor yang sudah divalidasi allowed_kantor
+        if not active_kantor and not is_portal and getattr(request.state, "current_user", None):
+            active_kantor = getattr(request.state, "active_kantor", None)
         if not active_kantor:
             active_kantor = request.query_params.get("kantor")
         if not active_kantor:

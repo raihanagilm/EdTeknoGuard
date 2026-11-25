@@ -24,10 +24,14 @@ def get_tickets_json(request: Request, status: str = "SEMUA", db: Session = Depe
         kantor=kantor
     )
     
+    can_view_reset_secret = user.get("role") in ("admin", "super admin")
     serialized_tickets = []
     for item in ticket_items:
         t = item["tiket"]
         p = item["pelanggan"]
+        deskripsi_val = t.deskripsi or ''
+        if t.kategori == "RESET_PASSWORD" and not can_view_reset_secret:
+            deskripsi_val = "Permintaan reset kata sandi pelanggan (khusus Admin / Super Admin)."
         serialized_tickets.append({
             "id_tiket": t.id_tiket,
             "created_at_str": t.created_at.strftime('%d/%m/%Y %H:%M') if t.created_at else '-',
@@ -38,7 +42,7 @@ def get_tickets_json(request: Request, status: str = "SEMUA", db: Session = Depe
             "alamat_pelanggan": p.alamat if (p and p.alamat) else '-',
             "no_wa": t.no_wa_pelapor or (p.no_hp if p else '') or '',
             "kategori": t.kategori or 'Lainnya',
-            "deskripsi": t.deskripsi or '',
+            "deskripsi": deskripsi_val,
             "redaman_saat_lapor": float(t.redaman_saat_lapor) if t.redaman_saat_lapor is not None else None,
             "status_ont_saat_lapor": t.status_ont_saat_lapor or 'STATUS',
             "status": t.status or 'MENUNGGU',
@@ -67,7 +71,8 @@ def update_ticket_status(
         db=db,
         ticket_id=id_tiket,
         new_status=status,
-        catatan=catatan
+        catatan=catatan,
+        user=user
     )
     if res.get("status") == "success":
         ActivityLogService.log_from_request(
@@ -100,7 +105,8 @@ async def update_ticket_status_json(
         db=db,
         ticket_id=ticket_id,
         new_status=new_status,
-        catatan=catatan
+        catatan=catatan,
+        user=user
     )
     if res.get("status") == "success":
         ActivityLogService.log_from_request(

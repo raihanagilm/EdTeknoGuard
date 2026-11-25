@@ -49,12 +49,14 @@ async def customer_session_middleware(request: Request, call_next):
             status_verifikasi=cust.get("status_verifikasi", ""),
             kantor=cust.get("kantor", "")
         )
+        from app.core.security import is_https_request
         response.set_cookie(
             key=CUSTOMER_SESSION_COOKIE,
             value=refreshed_token,
             max_age=MAX_SESSION_AGE,
             httponly=True,
             samesite="lax",
+            secure=is_https_request(request),
             path="/"
         )
     return response

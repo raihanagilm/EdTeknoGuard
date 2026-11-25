@@ -113,6 +113,20 @@ class ActivityLogController:
         current_user: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Endpoint JSON untuk mengambil riwayat aktivitas pelanggan MyTekno"""
+        if current_user and current_user.get("role") != "super admin":
+            from app.core.security import get_user_allowed_kantor
+            allowed = get_user_allowed_kantor(current_user)
+            k_clean = (kantor or "").lower().strip()
+            if k_clean and k_clean != "all":
+                if k_clean not in allowed:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Akses ditolak: Anda tidak memiliki wewenang melihat log pelanggan kantor '{k_clean}'."
+                    )
+                kantor = k_clean
+            elif allowed:
+                kantor = allowed[0]
+
         total, data, min_date_str = ActivityLogService.get_customer_activity_logs(
             kantor=kantor,
             id_pelanggan=id_pelanggan,

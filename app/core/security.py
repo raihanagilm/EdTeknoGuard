@@ -1,3 +1,4 @@
+import ipaddress
 import json
 import re
 from typing import Optional, Dict, Any, List
@@ -14,7 +15,67 @@ DEFAULT_CUSTOMER_PASSWORD = "123456"
 DEFAULT_KANTORS = ["banyumas", "pusat"]
 ALL_KANTOR = DEFAULT_KANTORS
 
-_serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
+_serializer = URLSafeTimedSerializer(settings.SECRET_KEY, salt="edteknoguard-admin-session")
+
+
+_TRUSTED_PROXY_NETWORKS = (
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("::1/128"),
+    ipaddress.ip_network("fc00::/7"),
+)
+
+
+def _is_trusted_proxy_peer(peer_host: Optional[str]) -> bool:
+    """Memeriksa apakah peer koneksi langsung adalah reverse proxy lokal / TestClient terpercaya."""
+    if not peer_host:
+        return False
+    if peer_host in ("127.0.0.1", "::1", "localhost", "testclient"):
+        return True
+    try:
+        ip_obj = ipaddress.ip_address(peer_host)
+        return any(ip_obj in net for net in _TRUSTED_PROXY_NETWORKS)
+    except ValueError:
+        return False
+
+
+def get_trusted_client_ip(request: Request) -> str:
+    """
+    Mengambil IP klien secara aman tanpa rentan spoofing header:
+    - Jika koneksi langsung bukan dari reverse proxy lokal/private, abaikan header proxy.
+    - Jika di belakang reverse proxy (Nginx/Cloudflare Tunnel), prioritaskan cf-connecting-ip,
+      lalu x-real-ip, lalu IP paling kanan pada x-forwarded-for.
+    """
+    peer_host = request.client.host if getattr(request, "client", None) else ""
+    if not _is_trusted_proxy_peer(peer_host):
+        return peer_host or "unknown"
+
+    cf_ip = (request.headers.get("cf-connecting-ip") or "").strip()
+    if cf_ip:
+        return cf_ip
+
+    real_ip = (request.headers.get("x-real-ip") or "").strip()
+    if real_ip:
+        return real_ip
+
+    xff = (request.headers.get("x-forwarded-for") or "").strip()
+    if xff:
+        parts = [p.strip() for p in xff.split(",") if p.strip()]
+        if parts:
+            return parts[-1]
+
+    return peer_host or "unknown"
+
+
+def is_https_request(request: Request) -> bool:
+    """Mendeteksi apakah request masuk melalui HTTPS (langsung atau via proxy header)."""
+    proto = (request.headers.get("x-forwarded-proto") or "").split(",")[0].strip().lower()
+    if proto == "https":
+        return True
+    scheme = getattr(getattr(request, "url", None), "scheme", "")
+    return str(scheme).lower() == "https"
 
 def get_all_kantor_codes(db=None, active_only: bool = True) -> List[str]:
     """Mengambil seluruh kode kantor aktif secara dinamis dari tabel master `kantors` di database."""
@@ -162,6 +223,7 @@ def create_session_token(username: str, role: Optional[str] = None, nama_karyawa
     else:
         kantor_list = parse_allowed_kantor(allowed_kantor, all_k) if allowed_kantor else [all_k[0] if all_k else "banyumas"]
     return _serializer.dumps({
+        "token_type": "admin",
         "user_id": user_id,
         "user": username,
         "role": actual_role,
@@ -174,6 +236,12 @@ def verify_session_token(token: str) -> Optional[Dict[str, Any]]:
         return None
     try:
         data = _serializer.loads(token, max_age=MAX_SESSION_AGE)
+        if not isinstance(data, dict):
+            return None
+        if data.get("token_type") != "admin" or not data.get("user"):
+            return None
+        if data.get("role") not in ("super admin", "admin", "teknisi"):
+            return None
         all_k = get_all_kantor_codes()
         # Pastikan allowed_kantor selalu ada dan up to date
         if "allowed_kantor" not in data or data.get("role") == "super admin" or data.get("user") == "admin":

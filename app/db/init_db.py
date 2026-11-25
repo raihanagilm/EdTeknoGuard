@@ -47,13 +47,19 @@ def init_db():
             print("  -> [OK] Kantor default dibuat.")
 
         # Inisialisasi Super Admin default jika belum ada
+        import secrets
         from app.core.security import get_password_hash
         admin_user = db.query(User).filter(User.username == "admin").first()
         if not admin_user:
-            print("\n[INFO] Membuat Super Admin default (admin / agiltampan)...")
+            initial_pw = os.getenv("ADMIN_INITIAL_PASSWORD", "").strip()
+            generated_pw = False
+            if not initial_pw:
+                initial_pw = secrets.token_urlsafe(12)
+                generated_pw = True
+            print("\n[INFO] Membuat akun Super Admin awal (username: admin)...")
             admin_user = User(
                 username="admin",
-                hashed_password=get_password_hash("agiltampan"),
+                hashed_password=get_password_hash(initial_pw),
                 nama_karyawan="Super Administrator NOC",
                 no_wa="081234567890",
                 role="super admin",
@@ -67,7 +73,11 @@ def init_db():
             for kt in all_kantors:
                 db.add(UserKantor(user_id=admin_user.id, id_kantor=kt.id_kantor))
             db.commit()
-            print("  -> [OK] Super Admin & hak akses kantor berhasil dibuat.")
+            if generated_pw:
+                print(f"  -> [OK] Super Admin dibuat dengan password acak awal: {initial_pw}")
+                print("  -> [PENTING] Segera simpan dan ganti password ini setelah login pertama.")
+            else:
+                print("  -> [OK] Super Admin & hak akses kantor berhasil dibuat dari ADMIN_INITIAL_PASSWORD.")
 
         # 2. Sinkronkan skema seluruh database tenant (per-kantor)
         print("\n[2/3] Memastikan skema seluruh database tenant aktif...")

@@ -341,10 +341,12 @@ class TestCustomerModules(unittest.TestCase):
             self.assertEqual(p.password_portal, "085863763153")
             self.assertTrue(verify_password("085863763153", p.password_hash))
 
-            # 4. Detail pelanggan menampilkan password_portal
-            detail = CustomerController.get_customer_detail(db=db, id_pelanggan="CUST-PW-01")
+            # 4. Detail pelanggan menampilkan password_portal untuk Admin, namun disembunyikan untuk Teknisi
+            detail = CustomerController.get_customer_detail(db=db, id_pelanggan="CUST-PW-01", user=admin_user)
             self.assertEqual(detail["customer"]["password_portal"], "085863763153")
             self.assertTrue(detail["customer"]["is_default_password"])
+            detail_tek = CustomerController.get_customer_detail(db=db, id_pelanggan="CUST-PW-01", user=teknisi_user)
+            self.assertIsNone(detail_tek["customer"]["password_portal"])
         finally:
             db.close()
 
@@ -411,10 +413,12 @@ class TestCustomerModules(unittest.TestCase):
             self.assertEqual(p.password_portal, "mudah123")
             self.assertTrue(verify_password("mudah123", p.password_hash))
 
-            # 5. Detail pelanggan menampilkan kata sandi baru dan status bukan default
-            detail = CustomerController.get_customer_detail(db=db, id_pelanggan="CUST-PW-02")
+            # 5. Detail pelanggan menampilkan kata sandi baru untuk Admin dan disembunyikan untuk Teknisi
+            detail = CustomerController.get_customer_detail(db=db, id_pelanggan="CUST-PW-02", user=admin_user)
             self.assertEqual(detail["customer"]["password_portal"], "mudah123")
             self.assertFalse(detail["customer"]["is_default_password"])
+            detail_tek = CustomerController.get_customer_detail(db=db, id_pelanggan="CUST-PW-02", user=teknisi_user)
+            self.assertIsNone(detail_tek["customer"]["password_portal"])
         finally:
             db.close()
 

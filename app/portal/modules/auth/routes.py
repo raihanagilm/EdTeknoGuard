@@ -172,6 +172,7 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
             "customer": payload
         }
     )
+    from app.core.security import is_https_request
     cookie_max_age = MAX_SESSION_AGE if remember_me else 86400
     response.set_cookie(
         key=CUSTOMER_SESSION_COOKIE,
@@ -179,6 +180,7 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
         max_age=cookie_max_age,
         httponly=True,
         samesite="lax",
+        secure=is_https_request(request),
         path="/"
     )
     return response
@@ -227,18 +229,18 @@ def portal_auth_logout(request: Request, db: Session = Depends(get_portal_db)):
 async def portal_auth_minta_reset_password(request: Request, db: Session = Depends(get_portal_db)):
     """
     Pelanggan memasukkan Nomor WhatsApp terdaftar untuk meminta reset kata sandi:
-    1. Sistem memverifikasi nomor WA pelanggan di database multi-tenant.
-    2. Sistem secara otomatis men-generate kata sandi acak baru (6 digit angka).
-    3. Password baru langsung di-hash dan disimpan ke database pelanggan.
-    4. Sistem otomatis membuat Tiket Keluhan (kategori: RESET_PASSWORD, status: MENUNGGU) lengkap dengan password baru.
-    5. Admin NOC menerima notifikasi di menu Tiket dan cukup 1-klik untuk mengirimkan password baru ke WhatsApp pelanggan.
+    1. Sistem mencari nomor WA pelanggan secara internal di database multi-tenant.
+    2. Sistem membuat Tiket Keluhan (kategori: RESET_PASSWORD, status: MENUNGGU) tanpa langsung menimpa
+       kata sandi aktif (mencegah DoS/penguncian akun sepihak oleh pihak tak dikenal).
+    3. Kata sandi baru baru akan diaktifkan saat Admin NOC menyetujui dan mengirimkannya via WhatsApp.
+    4. Response bersifat generik (anti-enumerasi nomor HP & nama pelanggan).
     """
     import secrets
     from app.portal.modules.tickets.service import KendalaService
-    from app.modules.activity_logs.service import ActivityLogService
+    from app.db.models import TiketKendala
 
     body = await request.json()
-    no_hp_input = body.get("no_hp", "").strip()
+    no_hp_input = (body.get("no_hp") or "").strip()
     if not no_hp_input:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Mohon masukkan Nomor WhatsApp terdaftar Anda!"})
 
@@ -247,7 +249,6 @@ async def portal_auth_minta_reset_password(request: Request, db: Session = Depen
         return JSONResponse(status_code=400, content={"ok": False, "message": "Format Nomor WhatsApp tidak valid!"})
 
     matched_cust = AuthService._match_phone_customer(db, clean_phone)
-    target_kantor = getattr(db, "_tenant_kantor", None)
     target_db = db
 
     if not matched_cust:
@@ -260,67 +261,55 @@ async def portal_auth_minta_reset_password(request: Request, db: Session = Depen
                 if t_cust:
                     matched_cust = t_cust
                     target_db = t_db
-                    target_kantor = k_code
                     break
                 else:
                     t_db.close()
             except Exception:
                 pass
 
-    if not matched_cust:
-        return JSONResponse(
-            status_code=404,
-            content={"ok": False, "message": "Nomor WhatsApp belum terdaftar di sistem. Mohon periksa kembali nomor Anda atau hubungi kantor ISP."}
-        )
+    if matched_cust:
+        try:
+            cust_id = matched_cust.id_pelanggan
+            cust_no_hp = matched_cust.no_hp or clean_phone
 
-    cust_id = matched_cust.id_pelanggan
-    cust_nama = matched_cust.nama
-    cust_no_hp = matched_cust.no_hp or clean_phone
-    cust_kantor = matched_cust.kantor or target_kantor or "cabang"
+            # Cegah spam pembuatan tiket ganda jika masih ada tiket RESET_PASSWORD yang MENUNGGU
+            existing_open = target_db.query(TiketKendala).filter(
+                TiketKendala.id_pelanggan == cust_id,
+                TiketKendala.kategori == "RESET_PASSWORD",
+                TiketKendala.status == "MENUNGGU"
+            ).first()
 
-    random_password = f"{secrets.randbelow(900000) + 100000}"
+            if not existing_open:
+                random_password = f"{secrets.randbelow(900000) + 100000}"
+                ticket_desc = (
+                    f"Permintaan Reset Kata Sandi TeknoCust untuk No. WA: {cust_no_hp}.\n"
+                    f"Kata Sandi Baru yang Dihasilkan: {random_password}"
+                )
+                new_ticket = KendalaService.create_ticket(
+                    db=target_db,
+                    id_pelanggan=cust_id,
+                    kategori="RESET_PASSWORD",
+                    deskripsi=ticket_desc,
+                    no_wa=cust_no_hp
+                )
+                id_tiket_created = new_ticket.id_tiket if new_ticket else "-"
 
-    matched_cust.password_hash = get_password_hash(random_password)
-    matched_cust.password_portal = random_password
-    target_db.commit()
-
-    ticket_desc = (
-        f"Permintaan Reset Kata Sandi TeknoCust untuk No. WA: {cust_no_hp}.\n"
-        f"Kata Sandi Baru yang Dihasilkan: {random_password}"
-    )
-    new_ticket = KendalaService.create_ticket(
-        db=target_db,
-        id_pelanggan=cust_id,
-        kategori="RESET_PASSWORD",
-        deskripsi=ticket_desc,
-        no_wa=cust_no_hp
-    )
-    id_tiket_created = new_ticket.id_tiket if new_ticket else "-"
-
-    from app.portal.services.customer_activity_service import CustomerActivityService
-    CustomerActivityService.record(
-        db=target_db,
-        id_pelanggan=cust_id,
-        aksi="RESET_PASSWORD",
-        kategori="AUTH",
-        keterangan=f"Reset kata sandi mandiri digenerate ({random_password}) dan diteruskan ke Tiket #{id_tiket_created}",
-        request=request
-    )
-
-    if target_db != db:
-        target_db.close()
-
-    # Buka status lockout akun setelah permintaan reset password berhasil dibuat
-    from app.core.account_lockout import account_lockout_manager
-    account_lockout_manager.unlock(cust_no_hp)
+                from app.portal.services.customer_activity_service import CustomerActivityService
+                CustomerActivityService.record(
+                    db=target_db,
+                    id_pelanggan=cust_id,
+                    aksi="RESET_PASSWORD",
+                    kategori="AUTH",
+                    keterangan=f"Permintaan reset kata sandi mandiri diajukan ke Tiket #{id_tiket_created} (menunggu konfirmasi Admin NOC)",
+                    request=request
+                )
+        finally:
+            if target_db != db:
+                target_db.close()
 
     return {
         "ok": True,
-        "message": f"Permintaan reset kata sandi telah diterima. Admin NOC TeknoIndonet akan segera mengirimkan kata sandi baru ke WhatsApp Anda ({cust_no_hp}).",
-        "id_pelanggan": cust_id,
-        "nama": cust_nama,
-        "no_hp": cust_no_hp,
-        "id_tiket": id_tiket_created
+        "message": "Jika Nomor WhatsApp terdaftar di sistem, permintaan reset kata sandi telah diteruskan ke Admin NOC TeknoIndonet."
     }
 
 
@@ -332,19 +321,19 @@ async def register_portal_fcm_token(
     """
     Mendaftarkan atau memperbarui token FCM perangkat Android
     ke data pelanggan yang sedang login di Portal MyTekno.
-    Mendukung verifikasi berbasis cookie sesi aktif maupun fallback identitas pelanggan.
+    Wajib menyertakan cookie sesi pelanggan yang sah (anti-IDOR).
     """
+    customer_session = get_current_customer_optional(request)
+    if not customer_session or not customer_session.get("id_pelanggan"):
+        return JSONResponse(status_code=401, content={"ok": False, "message": "Sesi login pelanggan tidak valid atau telah berakhir."})
+
     body = await request.json()
-    token = body.get("fcm_token", "").strip()
+    token = (body.get("fcm_token") or "").strip()
     if not token:
         return JSONResponse(status_code=400, content={"ok": False, "message": "Token FCM tidak boleh kosong."})
 
-    customer_session = get_current_customer_optional(request)
-    cust_id = customer_session.get("id_pelanggan") if customer_session else (body.get("id_pelanggan") or "").strip()
-    hint_kantor = customer_session.get("kantor") if customer_session else (body.get("kantor") or "").strip()
-
-    if not cust_id:
-        return JSONResponse(status_code=401, content={"ok": False, "message": "Sesi atau identitas pelanggan tidak ditemukan."})
+    cust_id = customer_session.get("id_pelanggan")
+    hint_kantor = (customer_session.get("kantor") or "").strip()
 
     try:
         cust, target_db = PortalCustomerService.get_customer_by_id(cust_id, db=db, hint_kantor=hint_kantor)

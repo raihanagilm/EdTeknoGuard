@@ -20,11 +20,8 @@ def portal_wifi_get(request: Request, db: Session = Depends(get_portal_db)):
     if not pelanggan:
         return JSONResponse(status_code=404, content={"ok": False, "message": "Data pelanggan tidak ditemukan!"})
         
-    client_ip = request.headers.get("x-forwarded-for")
-    if client_ip:
-        client_ip = client_ip.split(",")[0].strip()
-    else:
-        client_ip = request.client.host if request.client else ""
+    from app.core.security import get_trusted_client_ip
+    client_ip = get_trusted_client_ip(request)
         
     ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
     

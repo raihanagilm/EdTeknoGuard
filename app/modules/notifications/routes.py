@@ -105,7 +105,11 @@ async def mark_single_notification_read(request: Request, db: Session = Depends(
         raise HTTPException(status_code=400, detail="reference_id wajib diisi")
 
     # Ambil kantor target dari payload jika dikirim, fallback ke active kantor
-    item_kantor = body.get("kantor") or get_active_kantor(request, user)
+    item_kantor = (body.get("kantor") or get_active_kantor(request, user)).lower().strip()
+    if user.get("role") != "super admin":
+        from app.core.security import get_user_allowed_kantor
+        if item_kantor not in get_user_allowed_kantor(user):
+            raise HTTPException(status_code=403, detail="Akses ditolak untuk kantor di luar wewenang Anda.")
     active_db = TenantDatabaseManager.get_tenant_session(item_kantor)
     try:
         return NotificationService.mark_notification_read(db=active_db, user=user, notification_type=n_type, reference_id=str(ref_id))
@@ -127,10 +131,16 @@ async def mark_all_notifications_read(request: Request, db: Session = Depends(ge
 
     # Kelompokkan item berdasarkan kantor agar disimpan ke database tenant masing-masing
     from collections import defaultdict
+    from app.core.security import get_user_allowed_kantor
+    allowed = get_user_allowed_kantor(user)
+    is_super_admin = user.get("role") == "super admin"
+
     items_by_kantor = defaultdict(list)
     default_k = get_active_kantor(request, user)
     for it in items:
-        k = it.get("kantor") or default_k
+        k = (it.get("kantor") or default_k).lower().strip()
+        if not is_super_admin and k not in allowed:
+            raise HTTPException(status_code=403, detail="Akses ditolak untuk kantor di luar wewenang Anda.")
         items_by_kantor[k].append(it)
 
     total_marked = 0

@@ -9,7 +9,7 @@ from app.modules.monitoring.controller import MonitoringController
 router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
 
 @router.get("/status")
-def get_monitoring_status(kantor: Optional[str] = Query(None)):
+def get_monitoring_status(kantor: Optional[str] = Query(None), user: dict = Depends(require_admin)):
     """Route status engine monitoring dan interval"""
     return MonitoringController.get_status(kantor=kantor)
 
@@ -65,7 +65,7 @@ def check_single_alias(id_pelanggan: str, db: Session = Depends(get_db), user: d
     }
 
 @router.get("/kpi")
-def get_kpi_metrics(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db)):
+def get_kpi_metrics(request: Request, kantor: Optional[str] = Query(None), db: Session = Depends(get_db), user: dict = Depends(require_admin)):
     """Route ringkasan metrik kesehatan jaringan ONT (Office-aware)"""
     return MonitoringController.get_kpi(request=request, db=db, kantor=kantor)
 
@@ -76,7 +76,8 @@ def get_chart_data(
     date_filter: Optional[str] = Query(None, alias="date"),
     id_pelanggan: Optional[str] = None,
     kantor: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
 ):
     """Route data historis redaman optik untuk Chart.js dengan filter tanggal (date=YYYY-MM-DD) atau range (today, yesterday, week, month)"""
     return MonitoringController.get_chart_data(
@@ -87,7 +88,8 @@ def get_chart_data(
 def get_available_dates(
     request: Request,
     kantor: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
 ):
     """Route untuk mengambil daftar tanggal yang memiliki data riil di database"""
     return MonitoringController.get_available_dates(request=request, db=db, kantor=kantor)

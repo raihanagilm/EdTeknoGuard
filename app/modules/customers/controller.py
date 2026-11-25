@@ -128,7 +128,7 @@ class CustomerController:
         }
 
     @staticmethod
-    def get_customer_detail(db: Session, id_pelanggan: str) -> Dict[str, Any]:
+    def get_customer_detail(db: Session, id_pelanggan: str, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         result = CustomerService.get_customer_detail(db=db, id_pelanggan=id_pelanggan)
         if not result:
             raise HTTPException(status_code=404, detail="Pelanggan tidak ditemukan")
@@ -159,7 +159,8 @@ class CustomerController:
 
         from app.core.security import is_default_customer_password
         is_default_pw = is_default_customer_password(cust)
-        portal_password = cust.password_portal or (cust.no_hp if is_default_pw else None)
+        can_view_portal_pw = bool(user and user.get("role") in ("admin", "super admin"))
+        portal_password = (cust.password_portal or (cust.no_hp if is_default_pw else None)) if can_view_portal_pw else None
 
         return {
             "customer": {

@@ -30,7 +30,16 @@ def sanitize_db_name(kode_kantor: str) -> str:
     # Hapus spasi dan ubah ke huruf kecil secara generik untuk seluruh nama kantor
     normalized = unquoted.strip().lower().replace(' ', '')
     cleaned = re.sub(r'[^a-zA-Z0-9_]', '_', normalized)
-    return f"edtekno_{cleaned}"
+    db_name = f"edtekno_{cleaned}"
+    if not re.fullmatch(r"edtekno_[a-z0-9_]+", db_name):
+        raise ValueError(f"Nama database tenant tidak valid: {db_name}")
+    return db_name
+
+
+def _assert_safe_sql_identifier(identifier: str) -> str:
+    if not re.fullmatch(r"[a-zA-Z0-9_]+", identifier or ""):
+        raise ValueError(f"Identifier SQL tidak valid: {identifier}")
+    return identifier
 
 class TenantDatabaseManager:
     _engines: Dict[str, any] = {}
@@ -192,7 +201,7 @@ class TenantDatabaseManager:
                 try:
                     tables_res = conn.execute(text(f"SHOW TABLES FROM `{old_db}`;")).fetchall()
                     for row in tables_res:
-                        tbl = row[0]
+                        tbl = _assert_safe_sql_identifier(row[0])
                         conn.execute(text(f"RENAME TABLE `{old_db}`.`{tbl}` TO `{new_db}`.`{tbl}`;"))
                     conn.execute(text(f"DROP DATABASE IF EXISTS `{old_db}`;"))
                     logger.info(f"[TENANT_DB] Database fisik berhasil di-rename dari '{old_db}' ke '{new_db}'.")

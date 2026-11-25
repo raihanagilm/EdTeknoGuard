@@ -17,7 +17,8 @@ TEKNO_ISP_PUBLIC_SUBNETS = [
 CUSTOMER_SESSION_COOKIE = "edtekno_pelanggan_session"
 MAX_SESSION_AGE = 86400 * 60  # 60 Hari (2 Bulan) Inaktivitas Sesi Pelanggan
 
-_serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
+_customer_serializer = URLSafeTimedSerializer(settings.SECRET_KEY, salt="edtekno-customer-session")
+_reset_serializer = URLSafeTimedSerializer(settings.SECRET_KEY, salt="edtekno-password-reset")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
@@ -35,7 +36,8 @@ def create_customer_session_token(
     kantor: str,
     account_id: Optional[int] = None
 ) -> str:
-    return _serializer.dumps({
+    return _customer_serializer.dumps({
+        "token_type": "customer",
         "id_pelanggan": id_pelanggan,
         "nama": nama,
         "status_verifikasi": status_verifikasi,
@@ -47,14 +49,16 @@ def verify_customer_session_token(token: str) -> Optional[Dict[str, Any]]:
     if not token:
         return None
     try:
-        data = _serializer.loads(token, max_age=MAX_SESSION_AGE)
+        data = _customer_serializer.loads(token, max_age=MAX_SESSION_AGE)
+        if not isinstance(data, dict) or data.get("token_type") != "customer" or not data.get("id_pelanggan"):
+            return None
         return data
     except (BadSignature, SignatureExpired):
         return None
 
 def create_password_reset_token(id_pelanggan: str, no_hp: str, kantor: str) -> str:
     """Membuat token bertanda tangan kriptografis untuk reset kata sandi mandiri berbatas 15 menit."""
-    return _serializer.dumps({
+    return _reset_serializer.dumps({
         "type": "password_reset",
         "id_pelanggan": id_pelanggan,
         "no_hp": no_hp,
@@ -66,7 +70,7 @@ def verify_password_reset_token(token: str, max_age: int = 900) -> Optional[Dict
     if not token:
         return None
     try:
-        data = _serializer.loads(token, max_age=max_age)
+        data = _reset_serializer.loads(token, max_age=max_age)
         if isinstance(data, dict) and data.get("type") == "password_reset":
             return data
         return None
@@ -102,19 +106,16 @@ def require_customer_login(request: Request) -> Dict[str, Any]:
 def check_is_home_wifi(request: Request, pelanggan) -> bool:
     """
     Validasi ketat apakah perangkat klien saat ini benar-benar terhubung ke WiFi modem pelanggan:
-    1. Kecocokan IP WAN/Router persis (client_ip == ip_target).
-    2. Header verifikasi dari APK Android / Native Client (x-client-ssid atau x-client-gateway-mac).
+    1. Kecocokan IP WAN/Router persis (client_ip == ip_target) dari IP terverifikasi.
+    2. Pengecekan jaringan ISP Tekno Indo Jaya (Klien Web Browser melalui CGNAT / IP Publik ISP).
     3. Pengecekan perangkat lokal (Localhost / Development) mencocokkan SSID atau ARP MAC.
-    4. Klien dari luar jangkauan / subnet lain / modem tetangga -> False (Ditolak).
+    4. Klien dari luar jangkauan / subnet lain / header palsu -> False (Ditolak).
     """
     if not pelanggan:
         return False
 
-    client_ip = request.headers.get("x-forwarded-for")
-    if client_ip:
-        client_ip = client_ip.split(",")[0].strip()
-    else:
-        client_ip = request.headers.get("x-real-ip") or (request.client.host if request.client else "")
+    from app.core.security import get_trusted_client_ip
+    client_ip = get_trusted_client_ip(request)
 
     ip_target = (pelanggan.ip_router or pelanggan.ip_ont or "").strip()
     cust_mac = (pelanggan.mac_address or (pelanggan.perangkat.mac_address if pelanggan.perangkat else "") or "").strip().upper()
@@ -124,16 +125,7 @@ def check_is_home_wifi(request: Request, pelanggan) -> bool:
     if ip_target and client_ip and client_ip == ip_target:
         return True
 
-    # 2. Header verifikasi dari APK Android / Native Client (jika tersedia)
-    client_ssid = request.headers.get("x-client-ssid", "").strip().lower()
-    if client_ssid and cust_ssid and client_ssid == cust_ssid:
-        return True
-
-    client_gateway_mac = request.headers.get("x-client-gateway-mac", "").strip().upper()
-    if client_gateway_mac and cust_mac and client_gateway_mac == cust_mac:
-        return True
-
-    # 3. Pengecekan jaringan ISP Tekno Indo Jaya (Klien Web Browser melalui CGNAT / IP Publik ISP)
+    # 2. Pengecekan jaringan ISP Tekno Indo Jaya (Klien Web Browser melalui CGNAT / IP Publik ISP)
     if client_ip:
         try:
             c_addr = ipaddress.ip_address(client_ip)

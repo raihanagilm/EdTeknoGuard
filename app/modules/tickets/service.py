@@ -37,7 +37,8 @@ class TicketService:
         db: Session,
         ticket_id: str,
         new_status: str,
-        catatan: Optional[str] = None
+        catatan: Optional[str] = None,
+        user: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         target_db = db
         t = db.query(TiketKendala).filter(TiketKendala.id_tiket == ticket_id).first()
@@ -64,6 +65,27 @@ class TicketService:
 
         if not t:
             return {"status": "error", "message": "Tiket tidak ditemukan."}
+
+        # Keamanan: Hanya Admin / Super Admin yang boleh memproses tiket RESET_PASSWORD
+        if t.kategori == "RESET_PASSWORD" and user and user.get("role") not in ("admin", "super admin"):
+            if target_db != db:
+                target_db.close()
+            return {"status": "error", "message": "Akses ditolak: Hanya Admin atau Super Admin yang dapat memproses tiket reset kata sandi."}
+
+        # Aktifkan password baru hanya saat Admin menyetujui/menyelesaikan tiket RESET_PASSWORD
+        if t.kategori == "RESET_PASSWORD" and new_status == "SELESAI" and t.status != "SELESAI":
+            import re
+            match_pw = re.search(r'(?:Kata Sandi Baru.*?|password.*?):?\s*(\d{6})', t.deskripsi or '', re.IGNORECASE)
+            if match_pw:
+                new_pw = match_pw.group(1)
+                cust_reset = target_db.query(Pelanggan).filter(Pelanggan.id_pelanggan == t.id_pelanggan).first()
+                if cust_reset:
+                    from app.core.security import get_password_hash
+                    from app.core.account_lockout import account_lockout_manager
+                    cust_reset.password_hash = get_password_hash(new_pw)
+                    cust_reset.password_portal = new_pw
+                    if cust_reset.no_hp:
+                        account_lockout_manager.unlock(cust_reset.no_hp.strip())
 
         t.status = new_status
         if catatan is not None:

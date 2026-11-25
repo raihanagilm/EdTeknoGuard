@@ -37,12 +37,18 @@ def list_customers(
     sort_dir: str = Query("asc", description="Arah urutan: asc atau desc"),
     page: int = Query(1, ge=1),
     limit: int = Query(15, ge=5, le=200),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
 ):
     """Route untuk mendapatkan daftar pelanggan dengan filter, sorting, dan pagination"""
-    active_kantor = getattr(request.state, "active_kantor", "cabang")
-    allowed_kantor = getattr(request.state, "allowed_kantor", ["cabang"])
-    target_kantor = kantor if (kantor and kantor != "all") else active_kantor
+    from app.core.security import get_user_allowed_kantor
+    active_kantor = getattr(request.state, "active_kantor", None)
+    allowed_kantor = getattr(request.state, "allowed_kantor", None) or get_user_allowed_kantor(user)
+    req_kantor = (kantor or "").strip().lower()
+    if req_kantor and req_kantor != "all" and req_kantor in allowed_kantor:
+        target_kantor = req_kantor
+    else:
+        target_kantor = active_kantor or (allowed_kantor[0] if allowed_kantor else "cabang")
 
     return CustomerController.list_customers(
         db=db, q=q, pop=pop, status=status, monitoring=monitoring,
@@ -80,17 +86,19 @@ def export_customers_excel(
 @router.get("/api/customers/{id_pelanggan}")
 def get_customer_detail(
     id_pelanggan: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
 ):
     """Route untuk mendapatkan data detail pelanggan beserta riwayat log ONT"""
     return CustomerController.get_customer_detail(
-        db=db, id_pelanggan=id_pelanggan
+        db=db, id_pelanggan=id_pelanggan, user=user
     )
 
 @router.get("/api/customers/{id_pelanggan}/billing")
 def get_customer_billing(
     id_pelanggan: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
 ):
     """Route untuk mendapatkan data tagihan live & nomor Virtual Account dari Network Bill API v1"""
     return CustomerController.get_customer_billing(

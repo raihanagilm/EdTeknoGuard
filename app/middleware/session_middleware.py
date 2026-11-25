@@ -7,6 +7,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.core.security import (
     get_current_user_optional,
     create_session_token,
+    is_https_request,
     SESSION_COOKIE_NAME,
     MAX_SESSION_AGE
 )
@@ -43,6 +44,7 @@ class SlidingSessionMiddleware(BaseHTTPMiddleware):
                 max_age=MAX_SESSION_AGE,
                 httponly=True,
                 samesite="lax",
+                secure=is_https_request(request),
                 path="/"
             )
 
