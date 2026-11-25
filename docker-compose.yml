@@ -13,7 +13,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-rootpassword}
       TZ: Asia/Jakarta
     ports:
-      - "${DB_PORT:-33070}:3306"
+      - "127.0.0.1:${DB_PORT:-33070}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/migrations/001_init_schema.sql:/docker-entrypoint-initdb.d/001_init_schema.sql:ro
@@ -45,7 +45,7 @@ services:
       - TZ=Asia/Jakarta
       - PYTHONUNBUFFERED=1
     ports:
-      - "7890:7890"   # Port Akses Aplikasi NOC & Portal (Custom non-standar)
+      - "127.0.0.1:7890:7890"   # Bind lokal saja agar wajib lewat Nginx / Cloudflare Tunnel (tidak bypass UFW)
     volumes:
       - ./data:/app/data                           # Persistensi scan_state.json & runtime data
       - ./static/uploads:/app/static/uploads       # Persistensi berkas unggahan foto profil
