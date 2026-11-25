@@ -290,7 +290,8 @@ class AuthService:
             "ip_router": ip_display,
             "nama_wifi": cust.nama_wifi or "",
             "pop": cust.pop or "",
-            "lokasi_gps": cust.lokasi_gps or ""
+            "lokasi_gps": cust.lokasi_gps or "",
+            "billing_mode": getattr(cust, "billing_mode", None)
         }
         if is_tenant_db_opened:
             active_session.close()

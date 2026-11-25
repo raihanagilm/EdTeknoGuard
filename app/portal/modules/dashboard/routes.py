@@ -71,6 +71,7 @@ def portal_dashboard_data(request: Request, db: Session = Depends(get_portal_db)
             "pop": pel.pop if (pel and pel.pop) else "",
             "is_active": pel.is_active if pel else True,
             "status_pembayaran": status_bayar,
+            "billing_mode": getattr(pel, "billing_mode", None) if pel else None,
             "periode_tagihan": periode_teks,
             "total_tagihan": float(pel.total_tagihan or 0.0) if (pel and getattr(pel, "total_tagihan", None)) else 0.0,
             "is_overdue": bool(getattr(pel, "is_overdue", False)) if pel else False,

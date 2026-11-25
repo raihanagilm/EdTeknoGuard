@@ -160,6 +160,12 @@ class TestBillingPageStates(unittest.TestCase):
         page = self._page(ok([]), ok(VA_PAYABLE), pel=pelanggan("slawi", "PLG-0002"))
         self.assertEqual(page["va_state"], "not_linked")
         self.assertEqual(page["channels"], [])
+        self.assertIsNone(page["billing_mode"])
+
+    def test_billing_mode_diteruskan_ke_halaman_tagihan(self):
+        pel = type("PelangganStub", (), {"kantor": "slawi", "id_pelanggan": "2", "billing_mode": "prabayar"})()
+        page = self._page(ok([INVOICE_UNPAID]), ok(VA_PAYABLE), pel=pel)
+        self.assertEqual(page["billing_mode"], "prabayar")
 
     def test_va_nonaktif_di_pop_itu_404(self):
         """404 = pembayaran VA belum aktif. Tagihan tetap tampil, tanpa kartu bayar."""

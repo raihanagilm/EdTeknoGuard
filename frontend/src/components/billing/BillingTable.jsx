@@ -4,8 +4,6 @@ import {
   Clock,
   AlertTriangle,
   RefreshCw,
-  Copy,
-  Check,
   Smartphone,
   ArrowUpDown,
   Send,
@@ -13,7 +11,7 @@ import {
   Phone
 } from 'lucide-react'
 import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton'
-import { DataTableContainer } from '../common/CommonUI'
+import { DataTableContainer, BillingModeLabel } from '../common/CommonUI'
 
 export function BillingTable({
   data = [],
@@ -36,6 +34,7 @@ export function BillingTable({
   const { page = 1, total_pages = 1, total_records = 0, limit = 15 } = pagination
   const allSelected = data.length > 0 && data.every((p) => selectedIds.includes(p.id_pelanggan))
   const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString('id-ID')}`
+  const renderBillingModeLabel = (mode) => <BillingModeLabel mode={mode} />
 
   const renderStatusBadge = (p) => {
     if (p.status_pembayaran === 'LUNAS') {
@@ -195,17 +194,17 @@ export function BillingTable({
               </th>
               <th
                 scope="col"
-                aria-sort={sortField === 'nomor_va' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+                aria-sort={sortField === 'billing_mode' ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                 className={`py-2.5 px-3 cursor-pointer select-none transition ${
-                  sortField === 'nomor_va' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
+                  sortField === 'billing_mode' ? 'bg-[#E2EDF8] text-[#026AA7] font-bold' : 'hover:bg-[#E2EDF8]/60'
                 }`}
-                onClick={() => onSort && onSort('nomor_va')}
-                title="Urutkan berdasarkan Nomor Virtual Account"
+                onClick={() => onSort && onSort('billing_mode')}
+                title="Urutkan berdasarkan Jenis Tagihan (Prabayar / Pascabayar)"
               >
                 <div className="flex items-center gap-1.5">
-                  <span>Nomor VA</span>
-                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'nomor_va' ? 'text-[#026AA7]' : 'text-slate-400'}`} />
-                  {sortField === 'nomor_va' && (
+                  <span>Jenis Tagihan</span>
+                  <ArrowUpDown className={`w-3.5 h-3.5 ${sortField === 'billing_mode' ? 'text-[#026AA7]' : 'text-slate-400'}`} />
+                  {sortField === 'billing_mode' && (
                     <span className="text-[10px] text-[#026AA7] font-bold">{sortDir === 'asc' ? '▲' : '▼'}</span>
                   )}
                 </div>
@@ -230,7 +229,6 @@ export function BillingTable({
               data.map((p) => {
                 const isChecked = selectedIds.includes(p.id_pelanggan)
                 const isSyncing = syncingId === p.id_pelanggan
-                const isCopied = copiedVA === p.nomor_va
                 const cleanWa = p.no_wa && p.no_wa !== '-' ? p.no_wa.replace(/[^0-9]/g, '').replace(/^0/, '62') : ''
                 const tagihanStr = formatRupiah(p.total_tagihan)
                 const vaStr = p.nomor_va && p.nomor_va !== '-' ? p.nomor_va : '-'
@@ -298,19 +296,8 @@ export function BillingTable({
                       </div>
                     </td>
                     <td className="py-2.5 px-3 font-mono text-[#0B2545]">{p.jatuh_tempo}</td>
-                    <td className="py-2.5 px-3 font-mono">
-                      {p.nomor_va && p.nomor_va !== '-' ? (
-                        <button
-                          onClick={() => onCopyVA(p.nomor_va)}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-[#CCDDF0] bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[11px] text-[#0B2545] cursor-pointer transition-colors"
-                          title="Klik untuk salin VA"
-                        >
-                          <span>{p.nomor_va}</span>
-                          {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3 text-[#64839E]" />}
-                        </button>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
+                    <td className="py-2.5 px-3">
+                      {renderBillingModeLabel(p.billing_mode)}
                     </td>
                     <td className="py-2.5 px-3 text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -393,8 +380,8 @@ export function BillingTable({
                     <span className="text-[#0B2545]">{p.jatuh_tempo}</span>
                   </div>
                   <div className="col-span-2 flex items-center justify-between">
-                    <span className="text-[10px] text-[#64839E]">Nomor VA:</span>
-                    <span className="font-bold text-[#026AA7]">{p.nomor_va || '-'}</span>
+                    <span className="text-[10px] text-[#64839E] font-sans">Jenis Tagihan:</span>
+                    {renderBillingModeLabel(p.billing_mode)}
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-1.5 pt-1">

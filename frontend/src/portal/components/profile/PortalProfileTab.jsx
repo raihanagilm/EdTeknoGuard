@@ -28,6 +28,7 @@ import { PortalActiveMascot } from '../common/PortalActiveMascot';
 import { PortalHeader } from '../layout/PortalHeader';
 import { PortalToastNotification } from '../common/PortalToastNotification';
 import { PortalLegalModal } from '../modals/PortalLegalModal';
+import { billingModeTeks } from '../payment/paymentUtils';
 
 export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdate, onLogout, onOpenNotifications, hasUnreadNotifications }) {
   const [isPasswordExpanded, setIsPasswordExpanded] = useState(false);
@@ -435,6 +436,12 @@ export function PortalProfileTab({ customer, dashboardData, onNavigate, onCustom
                 <div className="flex items-center justify-between py-1 border-b border-slate-50">
                   <span className="text-slate-500 font-medium">Paket Internet</span>
                   <span className="font-semibold text-slate-800">{currentCustomer?.paket || '-'}</span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-slate-50">
+                  <span className="text-slate-500 font-medium">Jenis Tagihan</span>
+                  <span className={`font-semibold ${billingModeTeks(currentCustomer?.billing_mode || dashboardData?.customer?.billing_mode) === '-' ? 'text-slate-400' : 'text-slate-800'}`}>
+                    {billingModeTeks(currentCustomer?.billing_mode || dashboardData?.customer?.billing_mode)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
                   <span className="text-slate-500 font-medium">IP Modem Router</span>

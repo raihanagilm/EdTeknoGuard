@@ -151,3 +151,71 @@ class TestBillingModule(unittest.TestCase):
         self.assertEqual(mock_cust.total_tagihan, 200000)
         self.assertTrue(mock_t_db.commit.called)
         self.assertTrue(mock_t_db.close.called)
+
+    def test_billing_mode_normalization_and_filter(self):
+        """Memastikan normalisasi, penyimpanan, dan filter billing_mode (prabayar/pascabayar/unset)."""
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        from app.db import models
+        from app.services.network_bill_service import NetworkBillService
+
+        self.assertEqual(NetworkBillService.normalize_billing_mode("Prabayar"), "prabayar")
+        self.assertEqual(NetworkBillService.normalize_billing_mode("prepaid"), "prabayar")
+        self.assertEqual(NetworkBillService.normalize_billing_mode("PASCABAYAR"), "pascabayar")
+        self.assertEqual(NetworkBillService.normalize_billing_mode("postpaid"), "pascabayar")
+        self.assertIsNone(NetworkBillService.normalize_billing_mode(None))
+        self.assertIsNone(NetworkBillService.normalize_billing_mode("unknown"))
+
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+        try:
+            db.add_all([
+                Pelanggan(id_pelanggan="1", nama="Ani", kantor="slawi", billing_mode="prabayar", is_active=True),
+                Pelanggan(id_pelanggan="2", nama="Budi", kantor="slawi", billing_mode="pascabayar", is_active=True),
+                Pelanggan(id_pelanggan="3", nama="Cici", kantor="slawi", billing_mode=None, is_active=True),
+            ])
+            db.commit()
+
+            res_pra = BillingService.get_billing_overview(db, kantor="slawi", billing_mode="prabayar")
+            self.assertEqual(res_pra["summary"]["total_prabayar"], 1)
+            self.assertEqual(res_pra["summary"]["total_pascabayar"], 1)
+            self.assertEqual([r["id_pelanggan"] for r in res_pra["data"]], ["1"])
+            self.assertEqual(res_pra["data"][0]["billing_mode"], "prabayar")
+
+            res_pasca = BillingService.get_billing_overview(db, kantor="slawi", billing_mode="pascabayar")
+            self.assertEqual([r["id_pelanggan"] for r in res_pasca["data"]], ["2"])
+
+            res_unset = BillingService.get_billing_overview(db, kantor="slawi", billing_mode="unset")
+            self.assertEqual([r["id_pelanggan"] for r in res_unset["data"]], ["3"])
+            self.assertIsNone(res_unset["data"][0]["billing_mode"])
+        finally:
+            db.close()
+
+    @patch("app.modules.billing.sync_worker.NetworkBillService.fetch_customers")
+    def test_sync_worker_maps_billing_mode_from_api(self, mock_fetch):
+        """Memastikan resolve_nb_id dan sync_billing_mode_from_cache menyalin billing_mode dari API Network Bill."""
+        BillingSyncWorker._customer_cache.clear()
+        mock_fetch.return_value = {
+            "data": [
+                {"id": 12, "code": "PLG-0012", "name": "Budi Santoso", "whatsapp": "628123456789", "billing_mode": "prabayar"}
+            ],
+            "meta": {}
+        }
+        mock_db = MagicMock()
+        mock_cust = MagicMock(spec=Pelanggan)
+        mock_cust.id_pelanggan = "PLG-0012"
+        mock_cust.network_bill_id = None
+        mock_cust.no_hp = None
+        mock_cust.nama = "Budi Santoso"
+        mock_cust.billing_mode = None
+
+        matched = BillingSyncWorker.resolve_nb_id(mock_db, mock_cust, "slawi")
+        self.assertEqual(matched, "12")
+        self.assertEqual(mock_cust.billing_mode, "prabayar")
+
+        # Uji pembaruan cache saat billing_mode berubah
+        mock_cust.billing_mode = "pascabayar"
+        BillingSyncWorker.sync_billing_mode_from_cache(mock_cust, "slawi", "12")
+        self.assertEqual(mock_cust.billing_mode, "prabayar")

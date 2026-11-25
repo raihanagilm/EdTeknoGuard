@@ -2,12 +2,17 @@
 
 ## Current State
 - Last commit: 050229e
-- Test status: passing (Vite build OK, 97 pytest passed)
-- Active module: Security Hardening (TeknoGuard Admin, MyTekno Portal, & Konfigurasi VPS)
+- Test status: passing (Vite build OK, 101 pytest passed)
+- Active module: Pembedaan Mode Tagihan Pelanggan (Prabayar & Pascabayar) dari Network Bill API
 - Baseline: Green (Siap deploy/sinkronisasi ke VPS Produksi https://portal.teknoindo.net/)
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
+  - Penambahan pembedaan pelanggan **Prabayar** vs **Pascabayar** (`billing_mode`, *read-only* mengikuti Network Bill API v1):
+    - Menambahkan kolom `billing_mode` (`VARCHAR(20) NULL`, terindeks) pada model `Pelanggan` ([app/db/models.py](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py)) serta *auto-alter* multi-tenant di [app/core/tenant_database.py](file:///d:/databaru/Magang/EdTeknoGuard/app/core/tenant_database.py).
+    - Menambahkan normalisasi & sinkronisasi `billing_mode` hemat kuota API pada [NetworkBillService](file:///d:/databaru/Magang/EdTeknoGuard/app/services/network_bill_service.py), [CustomerImporter](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/importer.py), [BillingSyncWorker](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/billing/sync_worker.py), dan [BillingService](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/billing/service.py).
+    - Menambahkan filter & field `billing_mode` pada REST API `/api/pembayaran`, `/api/customers`, `/api/pelanggan`, serta endpoint Portal MyTekno (`/portal/api/auth/*`, `/portal/api/dashboard`, `/portal/api/pembayaran`).
+    - Memperbarui UI Admin NOC ([BillingFilterBar.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingFilterBar.jsx), [BillingTable.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/billing/BillingTable.jsx) — mengganti kolom `Nomor VA` dengan kolom `Jenis Tagihan` yang dapat diurutkan, [CustomersFilterBar.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/customers/CustomersFilterBar.jsx), [CustomersTable.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/customers/CustomersTable.jsx), [CustomerDetailModal.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/customers/CustomerDetailModal.jsx)) dan Portal MyTekno ([PortalPaymentTab.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/payment/PortalPaymentTab.jsx), [PortalProfileTab.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/portal/components/profile/PortalProfileTab.jsx)) dengan label teks inline bersih tanpa *pill soup* maupun emoji (`-` jika belum tertaut/diset).
   0. Pengerasan Keamanan (Security Hardening) TeknoGuard, Portal MyTekno, & VPS:
      - Mengunci endpoint admin/monitoring yang sebelumnya terbuka tanpa autentikasi (`GET /api/kantor/list`, `GET /api/customers`, `GET /api/pelanggan`, `GET /api/customers/{id_pelanggan}`, `GET /api/customers/{id_pelanggan}/billing`, `GET /api/monitoring/*`) dengan `require_admin`, membatasi `mikrotik_pass` khusus `super admin`, membatasi `password_portal` khusus `admin`/`super admin`, dan menyesuaikan `frontend/src/App.jsx` agar memuat daftar kantor setelah login.
      - Menutup celah IDOR pada `POST /portal/api/auth/register-fcm` agar wajib memakai cookie sesi pelanggan terverifikasi.

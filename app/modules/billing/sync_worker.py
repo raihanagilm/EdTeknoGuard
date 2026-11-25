@@ -45,38 +45,48 @@ class BillingSyncWorker:
         if cached and (now_ts - cached.get("ts", 0) < cls.CACHE_TTL_SECONDS):
             return cached
 
+        by_id = {}
         by_code = {}
         by_wa = {}
         by_name = {}
         raw_items = []
         try:
-            res = NetworkBillService.fetch_customers(pop_slug, per_page=500)
-            items = res.get("data") or []
-            for item in items:
-                i_id = str(item.get("id") or "").strip()
-                i_code = (item.get("code") or "").strip().upper()
-                i_wa = str(item.get("whatsapp") or "").replace("+", "").replace("-", "").replace(" ", "").strip()
-                i_name = cls.clean_name_key(item.get("name") or "")
-                payload = (i_id, item)
-                if i_code and i_id:
-                    by_code[i_code] = payload
-                if i_wa and i_id:
-                    by_wa[i_wa[-9:]] = payload
-                if i_name and i_id:
-                    by_name[i_name] = payload
-                raw_items.append(item)
+            cursor = None
+            for _ in range(20):
+                res = NetworkBillService.fetch_customers(pop_slug, per_page=500, cursor=cursor)
+                items = res.get("data") or []
+                for item in items:
+                    i_id = str(item.get("id") or "").strip()
+                    i_code = (item.get("code") or "").strip().upper()
+                    i_wa = str(item.get("whatsapp") or "").replace("+", "").replace("-", "").replace(" ", "").strip()
+                    i_name = cls.clean_name_key(item.get("name") or "")
+                    payload = (i_id, item)
+                    if i_id:
+                        by_id[i_id] = item
+                    if i_code and i_id:
+                        by_code[i_code] = payload
+                    if i_wa and i_id:
+                        by_wa[i_wa[-9:]] = payload
+                    if i_name and i_id:
+                        by_name[i_name] = payload
+                    raw_items.append(item)
+                next_cursor = (res.get("meta") or {}).get("next_cursor")
+                if not next_cursor or not items:
+                    break
+                cursor = next_cursor
             cls._customer_cache[pop_slug] = {
                 "ts": now_ts,
+                "by_id": by_id,
                 "by_code": by_code,
                 "by_wa": by_wa,
                 "by_name": by_name,
                 "raw_items": raw_items
             }
-            logger.info(f"[BILLING_WORKER] Cache mapping pelanggan Network Bill diperbarui ({pop_slug}): {len(items)} items.")
+            logger.info(f"[BILLING_WORKER] Cache mapping pelanggan Network Bill diperbarui ({pop_slug}): {len(raw_items)} items.")
         except Exception as e:
             logger.warning(f"[BILLING_WORKER] Gagal memuat customer map Network Bill {pop_slug}: {e}")
             if not cached:
-                cls._customer_cache[pop_slug] = {"ts": now_ts, "by_code": {}, "by_wa": {}, "by_name": {}, "raw_items": []}
+                cls._customer_cache[pop_slug] = {"ts": now_ts, "by_id": {}, "by_code": {}, "by_wa": {}, "by_name": {}, "raw_items": []}
 
         return cls._customer_cache[pop_slug]
 
@@ -125,15 +135,31 @@ class BillingSyncWorker:
 
         if matched_id:
             cust.network_bill_id = matched_id
-            # Auto-populate nomor WhatsApp dari Network Bill jika di database lokal belum ada
-            if matched_item and not cust.no_hp:
-                nb_wa = (matched_item.get("whatsapp") or "").strip()
-                if nb_wa:
-                    cust.no_hp = nb_wa
+            # Auto-populate nomor WhatsApp & mode tagihan dari Network Bill
+            if matched_item:
+                if not cust.no_hp:
+                    nb_wa = (matched_item.get("whatsapp") or "").strip()
+                    if nb_wa:
+                        cust.no_hp = nb_wa
+                nb_mode = NetworkBillService.normalize_billing_mode(matched_item.get("billing_mode"))
+                if nb_mode:
+                    cust.billing_mode = nb_mode
             db.commit()
             return matched_id
 
         return None
+
+    @classmethod
+    def sync_billing_mode_from_cache(cls, cust: Pelanggan, pop_slug: str, nb_id: Optional[str]) -> None:
+        """Memperbarui billing_mode pelanggan dari cache daftar pelanggan Network Bill tanpa request tambahan."""
+        if not nb_id:
+            return
+        mapping = cls._get_or_load_customer_map(pop_slug)
+        nb_item = mapping.get("by_id", {}).get(str(nb_id).strip())
+        if nb_item:
+            nb_mode = NetworkBillService.normalize_billing_mode(nb_item.get("billing_mode"))
+            if nb_mode and getattr(cust, "billing_mode", None) != nb_mode:
+                cust.billing_mode = nb_mode
 
     @classmethod
     def sync_office_batch(cls, db: Session, pop_slug: str, batch_size: int = 4) -> int:
@@ -231,6 +257,7 @@ class BillingSyncWorker:
                     db.commit()
                     continue
 
+                cls.sync_billing_mode_from_cache(cust, pop_slug, nb_id)
                 inv_res = NetworkBillService.fetch_invoices(pop_slug, nb_id, status="unpaid", limit=12)
                 time.sleep(0.3)  # Jeda aman per panggilan API
 

@@ -330,3 +330,39 @@ export function DataTableContainer({
     </div>
   );
 }
+
+/**
+ * Label teks inline polos untuk jenis tagihan pelanggan (Prabayar / Pascabayar).
+ */
+export function formatBillingModeText(mode) {
+  const m = String(mode || '').trim().toLowerCase();
+  if (m === 'prabayar' || m === 'prepaid') return 'Prabayar';
+  if (m === 'pascabayar' || m === 'postpaid') return 'Pascabayar';
+  return '-';
+}
+
+export function BillingModeLabel({ mode, className = 'text-[11px]' }) {
+  const label = formatBillingModeText(mode);
+  if (label === 'Prabayar') {
+    return (
+      <span className={`font-sans font-semibold text-[#026AA7] ${className}`}>
+        Prabayar
+      </span>
+    );
+  }
+  if (label === 'Pascabayar') {
+    return (
+      <span className={`font-sans font-semibold text-amber-700 ${className}`}>
+        Pascabayar
+      </span>
+    );
+  }
+  return (
+    <span
+      className={`font-sans text-slate-400 ${className}`}
+      title="Jenis tagihan belum diset / belum tertaut Network Bill"
+    >
+      -
+    </span>
+  );
+}

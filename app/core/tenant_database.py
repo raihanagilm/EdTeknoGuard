@@ -49,6 +49,21 @@ class TenantDatabaseManager:
     def get_database_url_for_tenant(cls, db_name: str) -> str:
         return f"mysql+pymysql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{db_name}?charset=utf8mb4"
 
+    @staticmethod
+    def _ensure_pelanggan_columns(engine, db_name: str) -> None:
+        """Menambahkan kolom baru pada tabel pelanggan jika database tenant sudah terlanjur dibuat."""
+        column_specs = [
+            ("password_portal", "ALTER TABLE pelanggan ADD COLUMN password_portal VARCHAR(100) NULL;"),
+            ("billing_mode", "ALTER TABLE pelanggan ADD COLUMN billing_mode VARCHAR(20) NULL, ADD INDEX ix_pelanggan_billing_mode (billing_mode);"),
+        ]
+        with engine.connect() as conn:
+            for col_name, alter_sql in column_specs:
+                res = conn.execute(text(f"SHOW COLUMNS FROM pelanggan LIKE '{col_name}';")).fetchone()
+                if not res:
+                    conn.execute(text(alter_sql))
+                    conn.commit()
+                    logger.info(f"[TENANT_DB] Kolom '{col_name}' berhasil ditambahkan ke '{db_name}'.pelanggan")
+
     @classmethod
     def get_engine_for_kantor(cls, kode_kantor: Optional[str]):
         if not kode_kantor or kode_kantor.lower() in ["master", "global", "all"]:
@@ -81,13 +96,7 @@ class TenantDatabaseManager:
             try:
                 from app.db import models
                 models.TenantBase.metadata.create_all(bind=engine)
-                # Auto-alter: pastikan kolom baru pada tabel pelanggan selalu ada
-                with engine.connect() as conn:
-                    res = conn.execute(text("SHOW COLUMNS FROM pelanggan LIKE 'password_portal';")).fetchone()
-                    if not res:
-                        conn.execute(text("ALTER TABLE pelanggan ADD COLUMN password_portal VARCHAR(100) NULL;"))
-                        conn.commit()
-                        logger.info(f"[TENANT_DB] Kolom 'password_portal' berhasil ditambahkan ke '{db_name}'.pelanggan")
+                cls._ensure_pelanggan_columns(engine, db_name)
             except Exception as tbl_err:
                 logger.warning(f"[TENANT_DB] Gagal sinkronisasi tabel/kolom TenantBase untuk '{db_name}': {tbl_err}")
 
@@ -129,10 +138,7 @@ class TenantDatabaseManager:
         # Otomatis membuat seluruh tabel yang terdaftar pada TenantBase
         models.TenantBase.metadata.create_all(bind=tenant_engine)
         try:
-            with tenant_engine.connect() as conn:
-                from sqlalchemy import text
-                conn.execute(text("ALTER TABLE pelanggan ADD COLUMN password_portal VARCHAR(100) NULL"))
-                conn.commit()
+            cls._ensure_pelanggan_columns(tenant_engine, db_name)
         except Exception:
             pass
         logger.info(f"[TENANT_DB] Seluruh skema tabel TenantBase ({len(models.TenantBase.metadata.tables)} tabel) berhasil dibuat di database '{db_name}'.")

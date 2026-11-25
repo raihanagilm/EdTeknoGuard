@@ -14716,11 +14716,12 @@ var UsersService = class {
 	}
 };
 var BillingService = class {
-	static async getOverview({ kantor, q, status, sort_by, sort_dir, page = 1, limit = 15 } = {}) {
+	static async getOverview({ kantor, q, status, billing_mode, sort_by, sort_dir, page = 1, limit = 15 } = {}) {
 		const params = new URLSearchParams();
 		if (kantor && kantor !== "all") params.append("kantor", kantor);
 		if (q) params.append("q", q);
 		if (status && status !== "ALL") params.append("status", status);
+		if (billing_mode && billing_mode !== "ALL") params.append("billing_mode", billing_mode);
 		if (sort_by) params.append("sort_by", sort_by);
 		if (sort_dir) params.append("sort_dir", sort_dir);
 		params.append("page", page);
@@ -30694,16 +30695,41 @@ function DataTableContainer({ children, page = 1, totalPages = 1, totalCount, to
 		})]
 	});
 }
+/**
+* Label teks inline polos untuk jenis tagihan pelanggan (Prabayar / Pascabayar).
+*/
+function formatBillingModeText(mode) {
+	const m = String(mode || "").trim().toLowerCase();
+	if (m === "prabayar" || m === "prepaid") return "Prabayar";
+	if (m === "pascabayar" || m === "postpaid") return "Pascabayar";
+	return "-";
+}
+function BillingModeLabel({ mode, className = "text-[11px]" }) {
+	const label = formatBillingModeText(mode);
+	if (label === "Prabayar") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		className: `font-sans font-semibold text-[#026AA7] ${className}`,
+		children: "Prabayar"
+	});
+	if (label === "Pascabayar") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		className: `font-sans font-semibold text-amber-700 ${className}`,
+		children: "Pascabayar"
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		className: `font-sans text-slate-400 ${className}`,
+		title: "Jenis tagihan belum diset / belum tertaut Network Bill",
+		children: "-"
+	});
+}
 //#endregion
 //#region src/components/customers/CustomersFilterBar.jsx
-function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMikrotik, mikrotikSyncing, isOfficeActive, setImportModalOpen, activeOffice, fetchCustomers, loading, selectedIds, setSelectedIds, handleBulkDelete, bulkDeleting }) {
+function CustomersFilterBar({ searchQuery, setSearchQuery, filterBillingMode = "ALL", setFilterBillingMode, setPage, handleSyncMikrotik, mikrotikSyncing, isOfficeActive, setImportModalOpen, activeOffice, fetchCustomers, loading, selectedIds, setSelectedIds, handleBulkDelete, bulkDeleting }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "relative z-30",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FilterContainer, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "flex items-center gap-1.5 flex-1 min-w-0",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 flex-1 min-w-0",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "relative flex-1 min-w-[150px]",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" }),
@@ -30735,7 +30761,33 @@ function CustomersFilterBar({ searchQuery, setSearchQuery, setPage, handleSyncMi
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
 						})
 					]
-				})
+				}), setFilterBillingMode && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+					value: filterBillingMode,
+					onChange: (e) => {
+						setFilterBillingMode(e.target.value);
+						setPage(1);
+					},
+					"aria-label": "Filter jenis tagihan",
+					className: "px-2.5 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans font-semibold text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px] cursor-pointer shrink-0",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: "ALL",
+							children: "Semua Jenis"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: "prabayar",
+							children: "Prabayar"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: "pascabayar",
+							children: "Pascabayar"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: "unset",
+							children: "Belum Diset"
+						})
+					]
+				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-1.5 justify-end shrink-0",
 				children: [
@@ -31177,17 +31229,26 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 							className: "flex items-center justify-between gap-2 pb-2 border-b border-sky-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "checkbox",
-									checked: isSelected,
-									onChange: () => {
-										setSelectedIds((prev) => prev.includes(cId) ? prev.filter((id) => id !== cId) : [...prev, cId]);
-									},
-									className: "rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer w-4 h-4"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "font-bold text-xs text-cyan-900",
-									children: cId
-								})]
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "checkbox",
+										checked: isSelected,
+										onChange: () => {
+											setSelectedIds((prev) => prev.includes(cId) ? prev.filter((id) => id !== cId) : [...prev, cId]);
+										},
+										className: "rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer w-4 h-4"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "font-bold text-xs text-cyan-900",
+										children: cId
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-slate-300",
+										"aria-hidden": "true",
+										children: "·"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BillingModeLabel, { mode: c.billing_mode })
+								]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-1.5",
 								children: [
@@ -31478,9 +31539,12 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 								className: "py-2.5 px-2 text-center text-[#64839E] font-semibold text-xs",
 								children: rowNo
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
 								className: "py-2.5 px-3 font-bold text-[#0B2545]",
-								children: cId
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: cId }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "mt-0.5",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BillingModeLabel, { mode: c.billing_mode })
+								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
 								className: "py-2.5 px-3",
@@ -34164,49 +34228,65 @@ function CustomerDetailModal({ customer, currentUser = { role: "super admin" }, 
 										]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "grid grid-cols-2 gap-2.5",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[10px] text-[#64839E] font-bold uppercase",
-												children: "Paket Layanan"
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-												className: "font-bold text-[#0B2545] truncate",
-												children: customer.paket || "-"
-											})]
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-												className: "text-[10px] text-[#64839E] font-bold uppercase flex items-center gap-1",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3 h-3 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Titik Lokasi GPS" })]
-											}), currentCustomer?.lokasi_gps || customer.lokasi_gps ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "flex items-center justify-between gap-1 text-xs",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-													href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.lokasi_gps || customer.lokasi_gps)}`,
+										className: "grid grid-cols-2 sm:grid-cols-3 gap-2.5",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "text-[10px] text-[#64839E] font-bold uppercase",
+													children: "Paket Layanan"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: "font-bold text-[#0B2545] truncate",
+													children: customer.paket || "-"
+												})]
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "text-[10px] text-[#64839E] font-bold uppercase",
+													children: "Jenis Tagihan"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+													className: "truncate",
+													children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BillingModeLabel, {
+														mode: activeCust.billing_mode || customer.billing_mode,
+														className: "text-xs font-bold"
+													})
+												})]
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5 col-span-2 sm:col-span-1",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+													className: "text-[10px] text-[#64839E] font-bold uppercase flex items-center gap-1",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, { className: "w-3 h-3 text-[#026AA7] shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Titik Lokasi GPS" })]
+												}), currentCustomer?.lokasi_gps || customer.lokasi_gps ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "flex items-center justify-between gap-1 text-xs",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+														href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.lokasi_gps || customer.lokasi_gps)}`,
+														target: "_blank",
+														rel: "noopener noreferrer",
+														className: "font-bold text-[#026AA7] hover:underline font-mono text-[11px] truncate transition",
+														title: "Buka titik koordinat di Google Maps",
+														children: currentCustomer?.lokasi_gps || customer.lokasi_gps
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+														className: "shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 select-none",
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-2.5 h-2.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terkunci" })]
+													})]
+												}) : currentCustomer?.alamat || customer.alamat ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+													href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.alamat || customer.alamat)}`,
 													target: "_blank",
 													rel: "noopener noreferrer",
-													className: "font-bold text-[#026AA7] hover:underline font-mono text-[11px] truncate transition",
-													title: "Buka titik koordinat di Google Maps",
-													children: currentCustomer?.lokasi_gps || customer.lokasi_gps
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-													className: "shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 select-none",
-													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-2.5 h-2.5 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Terkunci" })]
+													className: "font-bold text-[#026AA7] hover:underline flex items-center gap-1 text-xs truncate transition",
+													title: "Cari alamat di Google Maps",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "truncate",
+														children: "Cari di GMaps"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5 shrink-0" })]
+												}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "text-[#64839E] italic text-[11px] block",
+													children: "-"
 												})]
-											}) : currentCustomer?.alamat || customer.alamat ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-												href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentCustomer?.alamat || customer.alamat)}`,
-												target: "_blank",
-												rel: "noopener noreferrer",
-												className: "font-bold text-[#026AA7] hover:underline flex items-center gap-1 text-xs truncate transition",
-												title: "Cari alamat di Google Maps",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-													className: "truncate",
-													children: "Cari di GMaps"
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-3.5 h-3.5 shrink-0" })]
-											}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[#64839E] italic text-[11px] block",
-												children: "-"
-											})]
-										})]
+											})
+										]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "p-3 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-1",
@@ -34424,7 +34504,7 @@ function CustomerDetailModal({ customer, currentUser = { role: "super admin" }, 
 											});
 										})(),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]",
+											className: "grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]",
 											children: [
 												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 													className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5",
@@ -34447,7 +34527,20 @@ function CustomerDetailModal({ customer, currentUser = { role: "super admin" }, 
 													})]
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-													className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5 col-span-2 sm:col-span-1",
+													className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "text-[10px] text-[#64839E] font-bold uppercase",
+														children: "Jenis Tagihan"
+													}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+														className: "truncate",
+														children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BillingModeLabel, {
+															mode: billingData.billing_mode || activeCust.billing_mode || customer.billing_mode,
+															className: "text-[11px] font-bold"
+														})
+													})]
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5",
 													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 														className: "text-[10px] text-[#64839E] font-bold uppercase flex items-center gap-1",
 														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { className: "w-2.5 h-2.5 text-[#026AA7]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Jatuh Tempo" })]
@@ -34740,6 +34833,7 @@ function CustomersView({ activeOffice = "cabang", currentUser = { role: "super a
 	const [loading, setLoading] = (0, import_react.useState)(false);
 	const [searchQuery, setSearchQuery] = (0, import_react.useState)(initialSearch || "");
 	const [filterStatus, setFilterStatus] = (0, import_react.useState)(initialStatus || "ALL");
+	const [filterBillingMode, setFilterBillingMode] = (0, import_react.useState)("ALL");
 	const [filterPop, setFilterPop] = (0, import_react.useState)("ALL");
 	const [filterDropdownOpen, setFilterDropdownOpen] = (0, import_react.useState)(false);
 	const [page, setPage] = (0, import_react.useState)(1);
@@ -34975,6 +35069,7 @@ function CustomersView({ activeOffice = "cabang", currentUser = { role: "super a
 			if (activeOffice && activeOffice !== "all") url += `&kantor=${encodeURIComponent(activeOffice)}`;
 			if (debouncedSearch && debouncedSearch.trim()) url += `&q=${encodeURIComponent(debouncedSearch.trim())}`;
 			if (filterStatus !== "ALL") url += `&status=${filterStatus}`;
+			if (filterBillingMode !== "ALL") url += `&billing_mode=${encodeURIComponent(filterBillingMode)}`;
 			if (filterPop !== "ALL") url += `&pop=${encodeURIComponent(filterPop)}`;
 			const res = await fetch(url);
 			if (res.ok) {
@@ -35001,6 +35096,7 @@ function CustomersView({ activeOffice = "cabang", currentUser = { role: "super a
 		page,
 		limit,
 		filterStatus,
+		filterBillingMode,
 		filterPop,
 		activeOffice,
 		sortField,
@@ -35389,6 +35485,8 @@ function CustomersView({ activeOffice = "cabang", currentUser = { role: "super a
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomersFilterBar, {
 				searchQuery,
 				setSearchQuery,
+				filterBillingMode,
+				setFilterBillingMode,
 				setPage,
 				handleSyncMikrotik,
 				mikrotikSyncing,
@@ -37613,14 +37711,14 @@ function QuotaView({ activeOffice = "cabang", onNavigateCustomer }) {
 }
 //#endregion
 //#region src/components/billing/BillingFilterBar.jsx
-function BillingFilterBar({ searchQuery, setSearchQuery, setPage, selectedCount = 0, onOpenReminderModal, onClearSelection, onRefresh, onSyncAll, syncingAll = false, loading = false, lastSyncTime = "-" }) {
+function BillingFilterBar({ searchQuery, setSearchQuery, billingModeFilter = "ALL", setBillingModeFilter, setPage, selectedCount = 0, onOpenReminderModal, onClearSelection, onRefresh, onSyncAll, syncingAll = false, loading = false, lastSyncTime = "-" }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "relative z-30",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FilterContainer, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "flex items-center gap-1.5 flex-1 min-w-0",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 flex-1 min-w-0",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "relative flex-1 min-w-[180px]",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" }),
@@ -37652,7 +37750,33 @@ function BillingFilterBar({ searchQuery, setSearchQuery, setPage, selectedCount 
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-3.5 h-3.5" })
 						})
 					]
-				})
+				}), setBillingModeFilter && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+					value: billingModeFilter,
+					onChange: (e) => {
+						setBillingModeFilter(e.target.value);
+						setPage(1);
+					},
+					"aria-label": "Filter jenis tagihan",
+					className: "px-2.5 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans font-semibold text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px] cursor-pointer shrink-0",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: "ALL",
+							children: "Semua Jenis"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: "prabayar",
+							children: "Prabayar"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: "pascabayar",
+							children: "Pascabayar"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: "unset",
+							children: "Belum Diset"
+						})
+					]
+				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-1.5 justify-end shrink-0",
 				children: [
@@ -37703,6 +37827,7 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 	const { page = 1, total_pages = 1, total_records = 0, limit = 15 } = pagination;
 	const allSelected = data.length > 0 && data.every((p) => selectedIds.includes(p.id_pelanggan));
 	const formatRupiah = (val) => `Rp ${Math.round(val || 0).toLocaleString("id-ID")}`;
+	const renderBillingModeLabel = (mode) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BillingModeLabel, { mode });
 	const renderStatusBadge = (p) => {
 		if (p.status_pembayaran === "LUNAS") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 			className: "inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700",
@@ -37845,16 +37970,16 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
 							scope: "col",
-							"aria-sort": sortField === "nomor_va" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
-							className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "nomor_va" ? "bg-[#E2EDF8] text-[#026AA7] font-bold" : "hover:bg-[#E2EDF8]/60"}`,
-							onClick: () => onSort && onSort("nomor_va"),
-							title: "Urutkan berdasarkan Nomor Virtual Account",
+							"aria-sort": sortField === "billing_mode" ? sortDir === "asc" ? "ascending" : "descending" : void 0,
+							className: `py-2.5 px-3 cursor-pointer select-none transition ${sortField === "billing_mode" ? "bg-[#E2EDF8] text-[#026AA7] font-bold" : "hover:bg-[#E2EDF8]/60"}`,
+							onClick: () => onSort && onSort("billing_mode"),
+							title: "Urutkan berdasarkan Jenis Tagihan (Prabayar / Pascabayar)",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-1.5",
 								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Nomor VA" }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: `w-3.5 h-3.5 ${sortField === "nomor_va" ? "text-[#026AA7]" : "text-slate-400"}` }),
-									sortField === "nomor_va" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Jenis Tagihan" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpDown, { className: `w-3.5 h-3.5 ${sortField === "billing_mode" ? "text-[#026AA7]" : "text-slate-400"}` }),
+									sortField === "billing_mode" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 										className: "text-[10px] text-[#026AA7] font-bold",
 										children: sortDir === "asc" ? "▲" : "▼"
 									})
@@ -37892,7 +38017,6 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 					}) }) : data.map((p) => {
 						const isChecked = selectedIds.includes(p.id_pelanggan);
 						const isSyncing = syncingId === p.id_pelanggan;
-						const isCopied = copiedVA === p.nomor_va;
 						const cleanWa = p.no_wa && p.no_wa !== "-" ? p.no_wa.replace(/[^0-9]/g, "").replace(/^0/, "62") : "";
 						const tagihanStr = formatRupiah(p.total_tagihan);
 						const vaStr = p.nomor_va && p.nomor_va !== "-" ? p.nomor_va : "-";
@@ -37965,16 +38089,8 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 									children: p.jatuh_tempo
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-									className: "py-2.5 px-3 font-mono",
-									children: p.nomor_va && p.nomor_va !== "-" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-										onClick: () => onCopyVA(p.nomor_va),
-										className: "inline-flex items-center gap-1 px-2 py-0.5 rounded border border-[#CCDDF0] bg-[#F1F6FC] hover:bg-[#E2EDF8] text-[11px] text-[#0B2545] cursor-pointer transition-colors",
-										title: "Klik untuk salin VA",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: p.nomor_va }), isCopied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-3 h-3 text-emerald-600" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-3 h-3 text-[#64839E]" })]
-									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-slate-400",
-										children: "-"
-									})
+									className: "py-2.5 px-3",
+									children: renderBillingModeLabel(p.billing_mode)
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 									className: "py-2.5 px-3 text-right",
@@ -38068,12 +38184,9 @@ function BillingTable({ data = [], loading = false, selectedIds = [], onToggleSe
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "col-span-2 flex items-center justify-between",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[10px] text-[#64839E]",
-										children: "Nomor VA:"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-bold text-[#026AA7]",
-										children: p.nomor_va || "-"
-									})]
+										className: "text-[10px] text-[#64839E] font-sans",
+										children: "Jenis Tagihan:"
+									}), renderBillingModeLabel(p.billing_mode)]
 								})
 							]
 						}),
@@ -38307,6 +38420,7 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 	});
 	const [searchQuery, setSearchQuery] = (0, import_react.useState)("");
 	const [statusFilter, setStatusFilter] = (0, import_react.useState)("ALL");
+	const [billingModeFilter, setBillingModeFilter] = (0, import_react.useState)("ALL");
 	const [page, setPage] = (0, import_react.useState)(1);
 	const [limit, setLimit] = (0, import_react.useState)(15);
 	const [sortField, setSortField] = (0, import_react.useState)("");
@@ -38339,6 +38453,7 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 				kantor: activeOffice,
 				q: searchQuery,
 				status: statusFilter,
+				billing_mode: billingModeFilter,
 				sort_by: sortField || void 0,
 				sort_dir: sortDir || void 0,
 				page,
@@ -38364,6 +38479,7 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 		activeOffice,
 		searchQuery,
 		statusFilter,
+		billingModeFilter,
 		page,
 		limit,
 		sortField,
@@ -38511,6 +38627,8 @@ function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BillingFilterBar, {
 				searchQuery,
 				setSearchQuery,
+				billingModeFilter,
+				setBillingModeFilter,
 				setPage,
 				selectedCount: selectedIds.length,
 				onOpenReminderModal: () => {
@@ -43778,6 +43896,12 @@ var jenisTagihanTeks = (type) => {
 	if (t === "pemasangan") return "Biaya Pemasangan";
 	return type ? type.charAt(0).toUpperCase() + type.slice(1) : "Tagihan";
 };
+var billingModeTeks = (mode) => {
+	const m = String(mode || "").trim().toLowerCase();
+	if (m === "prabayar" || m === "prepaid") return "Prabayar";
+	if (m === "pascabayar" || m === "postpaid") return "Pascabayar";
+	return "-";
+};
 //#endregion
 //#region src/portal/components/notifications/PortalNotificationsPage.jsx
 function NotificationCardItem({ item, isRead, onCardClick, onActionClick, onDelete }) {
@@ -48089,6 +48213,16 @@ function PortalProfileTab({ customer, dashboardData, onNavigate, onCustomerUpdat
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex items-center justify-between py-1 border-b border-slate-50",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-slate-500 font-medium",
+												children: "Jenis Tagihan"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: `font-semibold ${billingModeTeks(currentCustomer?.billing_mode || dashboardData?.customer?.billing_mode) === "-" ? "text-slate-400" : "text-slate-800"}`,
+												children: billingModeTeks(currentCustomer?.billing_mode || dashboardData?.customer?.billing_mode)
+											})]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "flex items-center justify-between py-1",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 												className: "text-slate-500 font-medium",
@@ -48787,6 +48921,7 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 	}, [subTab, muatRiwayat]);
 	const rawPaket = tagihan?.package_speed || dashboardData?.kuota?.kecepatan_paket || customer?.paket || "-";
 	const paketNama = /paket/i.test(String(rawPaket)) ? rawPaket : `Paket ${rawPaket}`;
+	const billingModeLabel = billingModeTeks(tagihan?.billing_mode || customer?.billing_mode || dashboardData?.customer?.billing_mode);
 	const sortedUnpaidInvoices = (tagihan?.unpaid || tagihan?.unpaid_invoices || []).toSorted((a, b) => {
 		const periodA = String(a.due_date || a.billing_period || "");
 		const periodB = String(b.due_date || b.billing_period || "");
@@ -48893,6 +49028,16 @@ function PortalPaymentTab({ customer, dashboardData, onBack, onOpenNotifications
 												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 													className: "font-bold text-blue-700",
 													children: paketNama
+												})]
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "flex items-center justify-between py-2",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "text-gray-500 font-medium",
+													children: "Jenis langganan"
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: `font-bold ${billingModeLabel === "-" ? "text-slate-400" : "text-gray-900"}`,
+													children: billingModeLabel
 												})]
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {

@@ -245,10 +245,12 @@ class PaymentService:
         - `error`       : gangguan pembacaan (termasuk 429)
         """
         ident = cls.resolve_identity(pelanggan)
+        billing_mode = NetworkBillService.normalize_billing_mode(getattr(pelanggan, "billing_mode", None)) if pelanggan else None
         if not ident:
             return {
                 "ok": True,
                 "va_state": "not_linked",
+                "billing_mode": billing_mode,
                 "message": "Data langganan Anda belum tertaut ke sistem tagihan. Hubungi petugas kantor.",
                 "unpaid": [], "next_bill": None, "channels": [], "other_unpaid": [],
             }
@@ -261,6 +263,7 @@ class PaymentService:
             return {
                 "ok": False,
                 "va_state": "error",
+                "billing_mode": billing_mode,
                 "status": inv_res.get("status"),
                 "retry_after": inv_res.get("retry_after"),
                 "message": inv_res.get("message") or "Gagal membaca tagihan.",
@@ -329,6 +332,7 @@ class PaymentService:
         return {
             "ok": True,
             "va_state": va_state,
+            "billing_mode": billing_mode,
             "message": message,
             "unpaid": unpaid,
             "unpaid_count": len(unpaid),

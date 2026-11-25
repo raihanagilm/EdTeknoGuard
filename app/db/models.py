@@ -100,6 +100,7 @@ class Pelanggan(TenantBase):
     status_lease = Column(String(20), default="bound", nullable=False, index=True) # bound (online), waiting (offline)
     status_isolir = Column(Boolean, default=False, nullable=False, index=True) # True jika terisolir di router / Network Bill
     status_pembayaran = Column(String(20), default="LUNAS", nullable=True, index=True) # LUNAS, BELUM_BAYAR, OVERDUE, ISOLIR
+    billing_mode = Column(String(20), nullable=True, index=True) # prabayar, pascabayar, atau None jika belum diset
     network_bill_id = Column(String(32), nullable=True, index=True)
     total_tagihan = Column(Numeric(12, 2), default=0, nullable=True)
     periode_tagihan = Column(String(20), nullable=True)

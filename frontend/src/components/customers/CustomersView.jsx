@@ -62,6 +62,7 @@ export function CustomersView({
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState(initialSearch || '')
   const [filterStatus, setFilterStatus] = useState(initialStatus || 'ALL')
+  const [filterBillingMode, setFilterBillingMode] = useState('ALL')
   const [filterPop, setFilterPop] = useState('ALL')
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false)
   const [page, setPage] = useState(1)
@@ -347,6 +348,7 @@ export function CustomersView({
       if (activeOffice && activeOffice !== 'all') url += `&kantor=${encodeURIComponent(activeOffice)}`
       if (debouncedSearch && debouncedSearch.trim()) url += `&q=${encodeURIComponent(debouncedSearch.trim())}`
       if (filterStatus !== 'ALL') url += `&status=${filterStatus}`
+      if (filterBillingMode !== 'ALL') url += `&billing_mode=${encodeURIComponent(filterBillingMode)}`
       if (filterPop !== 'ALL') url += `&pop=${encodeURIComponent(filterPop)}`
 
       const res = await fetch(url)
@@ -373,7 +375,7 @@ export function CustomersView({
 
   useEffect(() => {
     fetchCustomers()
-  }, [page, limit, filterStatus, filterPop, activeOffice, sortField, sortDir, debouncedSearch])
+  }, [page, limit, filterStatus, filterBillingMode, filterPop, activeOffice, sortField, sortDir, debouncedSearch])
 
   // State Modal Konfirmasi Kustom
   const [confirmModal, setConfirmModal] = useState({
@@ -777,6 +779,8 @@ export function CustomersView({
       <CustomersFilterBar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        filterBillingMode={filterBillingMode}
+        setFilterBillingMode={setFilterBillingMode}
         setPage={setPage}
         handleSyncMikrotik={handleSyncMikrotik}
         mikrotikSyncing={mikrotikSyncing}

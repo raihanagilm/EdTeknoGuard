@@ -473,6 +473,8 @@ class CustomerImporter:
                     new_alamat = str(row_data.get("alamat", "")).strip()
                     new_wifi_ssid = str(row_data.get("nama_wifi", "")).strip()
                     new_wifi_pass = str(row_data.get("password_wifi", "")).strip()
+                    from app.services.network_bill_service import NetworkBillService
+                    new_billing_mode = NetworkBillService.normalize_billing_mode(row_data.get("billing_mode"))
 
                     if existing_pel:
                         # MODE LENGKAPI DATA (Enrichment Update)
@@ -512,6 +514,11 @@ class CustomerImporter:
                         nb_kantor = str(row_data.get("kantor") or "").strip().lower()
                         if nb_kantor and (existing_pel.kantor or "").strip().lower() != nb_kantor:
                             existing_pel.kantor = nb_kantor
+                            has_change = True
+
+                        # 0c. Selaraskan mode tagihan (prabayar / pascabayar) dari Network Bill
+                        if new_billing_mode and getattr(existing_pel, "billing_mode", None) != new_billing_mode:
+                            existing_pel.billing_mode = new_billing_mode
                             has_change = True
 
                         # 1. Update No. WhatsApp & Kata Sandi Portal
@@ -614,6 +621,7 @@ class CustomerImporter:
                             pop=raw_pop,
                             kantor=row_kantor,
                             paket=raw_paket,
+                            billing_mode=new_billing_mode,
                             is_monitored=False,
                             is_active=True,
                             status_lease="waiting",

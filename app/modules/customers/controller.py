@@ -49,6 +49,7 @@ class CustomerController:
         q: Optional[str] = None,
         pop: Optional[str] = None,
         status: Optional[str] = None,
+        billing_mode: Optional[str] = None,
         monitoring: Optional[str] = None,
         range_type: Optional[str] = "all",
         start_date: Optional[str] = None,
@@ -61,7 +62,7 @@ class CustomerController:
         allowed_kantor: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         total, data = CustomerService.get_customers(
-            db=db, q=q, pop=pop, status=status, monitoring=monitoring,
+            db=db, q=q, pop=pop, status=status, billing_mode=billing_mode, monitoring=monitoring,
             range_type=range_type, start_date=start_date, end_date=end_date,
             sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit,
             kantor=kantor, allowed_kantor=allowed_kantor
@@ -189,6 +190,7 @@ class CustomerController:
                 "status_kredensial": getattr(cust, "status_kredensial", "UNTESTED") or "UNTESTED",
                 "is_monitored": bool(getattr(cust, "is_monitored", True)),
                 "status_pembayaran": getattr(cust, "status_pembayaran", "LUNAS") or "LUNAS",
+                "billing_mode": getattr(cust, "billing_mode", None),
                 "snmp_community": cust.snmp_community,
                 "queue_name": getattr(cust, "queue_name", None) or cust.nama,
                 "kuota_terpakai_gb": kuota_gb,
@@ -658,13 +660,22 @@ class CustomerController:
         pop_slug, nb_id = ident if ident else (None, None)
 
         due_date_day = None
-        billing_mode = None
+        billing_mode = getattr(cust, "billing_mode", None)
         if linked and pop_slug and nb_id:
             cust_prof = PaymentService.read_customer_profile(pop_slug, nb_id)
             if cust_prof and isinstance(cust_prof.get("data"), dict):
                 cdata = cust_prof["data"]
                 due_date_day = cdata.get("due_date_day")
-                billing_mode = cdata.get("billing_mode")
+                from app.services.network_bill_service import NetworkBillService
+                live_mode = NetworkBillService.normalize_billing_mode(cdata.get("billing_mode"))
+                if live_mode:
+                    billing_mode = live_mode
+                    if getattr(cust, "billing_mode", None) != live_mode:
+                        try:
+                            cust.billing_mode = live_mode
+                            db.commit()
+                        except Exception:
+                            db.rollback()
 
         active_due_date = None
         unpaid_list = billing_page.get("unpaid") or []

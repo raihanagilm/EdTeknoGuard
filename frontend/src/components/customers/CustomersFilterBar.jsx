@@ -13,6 +13,8 @@ import { FilterContainer } from '../common/CommonUI'
 export function CustomersFilterBar({
   searchQuery,
   setSearchQuery,
+  filterBillingMode = 'ALL',
+  setFilterBillingMode,
   setPage,
   handleSyncMikrotik,
   mikrotikSyncing,
@@ -31,8 +33,8 @@ export function CustomersFilterBar({
       <div className="relative z-30">
         <FilterContainer>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-            {/* Kotak Pencarian */}
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            {/* Kotak Pencarian & Filter Jenis Tagihan */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 flex-1 min-w-0">
               <div className="relative flex-1 min-w-[150px]">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#64839E]" />
                 <input
@@ -66,6 +68,22 @@ export function CustomersFilterBar({
                   </button>
                 )}
               </div>
+              {setFilterBillingMode && (
+                <select
+                  value={filterBillingMode}
+                  onChange={(e) => {
+                    setFilterBillingMode(e.target.value)
+                    setPage(1)
+                  }}
+                  aria-label="Filter jenis tagihan"
+                  className="px-2.5 py-1.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] text-xs font-sans font-semibold text-[#0B2545] focus:outline-none focus:border-[#026AA7] min-h-[34px] sm:min-h-[36px] cursor-pointer shrink-0"
+                >
+                  <option value="ALL">Semua Jenis</option>
+                  <option value="prabayar">Prabayar</option>
+                  <option value="pascabayar">Pascabayar</option>
+                  <option value="unset">Belum Diset</option>
+                </select>
+              )}
             </div>
 
             {/* Tombol Aksi Lengkapi Data, Ekspor, Reload */}

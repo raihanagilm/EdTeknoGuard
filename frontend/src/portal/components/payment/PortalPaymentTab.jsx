@@ -21,6 +21,7 @@ import {
   periodeTeks,
   tanggalTeks,
   jenisTagihanTeks,
+  billingModeTeks,
   getDefaultChannels
 } from './paymentUtils';
 
@@ -145,9 +146,12 @@ export function PortalPaymentTab({
     }
   }, [subTab, muatRiwayat]);
 
-  // Resolusi nama paket
+  // Resolusi nama paket & jenis langganan
   const rawPaket = tagihan?.package_speed || dashboardData?.kuota?.kecepatan_paket || customer?.paket || '-';
   const paketNama = /paket/i.test(String(rawPaket)) ? rawPaket : `Paket ${rawPaket}`;
+  const billingModeLabel = billingModeTeks(
+    tagihan?.billing_mode || customer?.billing_mode || dashboardData?.customer?.billing_mode
+  );
 
   const unpaidInvoices = tagihan?.unpaid || tagihan?.unpaid_invoices || [];
 
@@ -267,6 +271,12 @@ export function PortalPaymentTab({
                         <div className="flex items-center justify-between py-2">
                           <span className="text-gray-500 font-medium">Paket aktif</span>
                           <span className="font-bold text-blue-700">{paketNama}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <span className="text-gray-500 font-medium">Jenis langganan</span>
+                          <span className={`font-bold ${billingModeLabel === '-' ? 'text-slate-400' : 'text-gray-900'}`}>
+                            {billingModeLabel}
+                          </span>
                         </div>
                         <div className="flex items-center justify-between py-2">
                           <span className="text-gray-500 font-medium">Periode tagihan</span>

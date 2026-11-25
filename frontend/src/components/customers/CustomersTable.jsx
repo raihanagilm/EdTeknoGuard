@@ -11,7 +11,7 @@ import {
   MoreVertical,
   EyeOff
 } from 'lucide-react'
-import { DataTableContainer } from '../common/CommonUI'
+import { DataTableContainer, BillingModeLabel } from '../common/CommonUI'
 import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton'
 
 export function CustomersTable({
@@ -138,6 +138,8 @@ export function CustomersTable({
                       className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer w-4 h-4"
                     />
                     <span className="font-bold text-xs text-cyan-900">{cId}</span>
+                    <span className="text-slate-300" aria-hidden="true">·</span>
+                    <BillingModeLabel mode={c.billing_mode} />
                   </div>
 
                   <div className="flex items-center gap-1.5">
@@ -469,7 +471,12 @@ export function CustomersTable({
                     />
                   </td>
                   <td className="py-2.5 px-2 text-center text-[#64839E] font-semibold text-xs">{rowNo}</td>
-                  <td className="py-2.5 px-3 font-bold text-[#0B2545]">{cId}</td>
+                  <td className="py-2.5 px-3 font-bold text-[#0B2545]">
+                    <div>{cId}</div>
+                    <div className="mt-0.5">
+                      <BillingModeLabel mode={c.billing_mode} />
+                    </div>
+                  </td>
                   <td className="py-2.5 px-3">
                     <button
                       type="button"

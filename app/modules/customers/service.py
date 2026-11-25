@@ -116,6 +116,7 @@ class CustomerService:
         q: Optional[str] = None,
         pop: Optional[str] = None,
         status: Optional[str] = None,
+        billing_mode: Optional[str] = None,
         monitoring: Optional[str] = None,
         range_type: Optional[str] = "all",
         start_date: Optional[str] = None,
@@ -247,6 +248,11 @@ class CustomerService:
                 query = query.filter(Pelanggan.is_monitored == True)
             elif monitoring in ("inactive", "false", "0"):
                 query = query.filter(Pelanggan.is_monitored == False)
+
+        from app.services.network_bill_service import NetworkBillService
+        query = NetworkBillService.apply_billing_mode_filter(
+            query, Pelanggan.billing_mode, billing_mode
+        )
 
         # Filter Rentang Waktu Tanggal (Berdasarkan waktu cek log terakhir atau tanggal terdaftar)
         now = get_now_wib()
@@ -386,6 +392,7 @@ class CustomerService:
                 "status_lease": getattr(c, "status_lease", "bound") or "bound",
                 "status_isolir": bool(getattr(c, "status_isolir", False) or getattr(c, "status_pembayaran", "") == "ISOLIR"),
                 "status_pembayaran": getattr(c, "status_pembayaran", "LUNAS") or "LUNAS",
+                "billing_mode": getattr(c, "billing_mode", None),
                 "kantor": getattr(c, "kantor", None) or (db.bind.url.database.replace("edtekno_", "") if (hasattr(db, "bind") and db.bind and hasattr(db.bind, "url") and db.bind.url and db.bind.url.database and db.bind.url.database.startswith("edtekno_")) else None),
                 "queue_name": getattr(c, "queue_name", None) or c.nama,
                 "kuota_terpakai_gb": kuota_gb,

@@ -37,6 +37,13 @@ export const jenisTagihanTeks = (type) => {
   return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Tagihan';
 };
 
+export const billingModeTeks = (mode) => {
+  const m = String(mode || '').trim().toLowerCase();
+  if (m === 'prabayar' || m === 'prepaid') return 'Prabayar';
+  if (m === 'pascabayar' || m === 'postpaid') return 'Pascabayar';
+  return '-';
+};
+
 /** Kanal bank default sesuai spesifikasi api-v1.md jika API PoP belum mengaktifkan VA */
 export const getDefaultChannels = (customerId = '1', total = 125000) => {
   const numericOnly = String(customerId || '').replace(/\D/g, '') || '1';

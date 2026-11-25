@@ -14,6 +14,32 @@ class NetworkBillService:
     Scopes: customers:read, network:read, billing:read
     """
 
+    @staticmethod
+    def normalize_billing_mode(raw_mode: Optional[str]) -> Optional[str]:
+        """Menormalisasi nilai mode tagihan dari API/input ke 'prabayar', 'pascabayar', atau None."""
+        val = str(raw_mode or "").strip().lower()
+        if val in ("prabayar", "prepaid"):
+            return "prabayar"
+        if val in ("pascabayar", "postpaid"):
+            return "pascabayar"
+        return None
+
+    @staticmethod
+    def apply_billing_mode_filter(query, column, billing_mode: Optional[str]):
+        """Menerapkan filter SQLAlchemy untuk mode tagihan (prabayar, pascabayar, unset)."""
+        if not billing_mode:
+            return query
+        mode_clean = str(billing_mode).strip().lower()
+        if mode_clean in ("all", "semua"):
+            return query
+        if mode_clean in ("unset", "none", "kosong", "-"):
+            from sqlalchemy import or_
+            return query.filter(or_(column.is_(None), column == ""))
+        normalized = NetworkBillService.normalize_billing_mode(mode_clean)
+        if normalized:
+            return query.filter(column == normalized)
+        return query
+
     @classmethod
     def get_base_url(cls) -> str:
         return (settings.NETWORK_BILL_BASE_URL or "https://pop.teknoindo.net/api/v1").rstrip("/")
@@ -355,6 +381,7 @@ class NetworkBillService:
                 "network_bill_id": nb_id,
                 "network_bill_code": official_code,
                 "network_bill_display_code": nb_code or str(nb_id or ""),
+                "billing_mode": cls.normalize_billing_mode(item.get("billing_mode")),
                 "status_langganan": item.get("status")
             }
 

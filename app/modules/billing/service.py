@@ -23,6 +23,7 @@ class BillingService:
         kantor: str,
         q: Optional[str] = None,
         status: Optional[str] = None,
+        billing_mode: Optional[str] = None,
         sort_by: Optional[str] = None,
         sort_dir: Optional[str] = "asc",
         page: int = 1,
@@ -38,6 +39,8 @@ class BillingService:
         total_lunas = base_query.filter(Pelanggan.status_pembayaran == "LUNAS").count()
         total_belum_bayar = base_query.filter(Pelanggan.status_pembayaran.in_(["BELUM_BAYAR", "OVERDUE", "ISOLIR"])).count()
         total_overdue = base_query.filter(or_(Pelanggan.is_overdue == True, Pelanggan.status_pembayaran == "OVERDUE")).count()
+        total_prabayar = base_query.filter(Pelanggan.billing_mode == "prabayar").count()
+        total_pascabayar = base_query.filter(Pelanggan.billing_mode == "pascabayar").count()
 
         sum_tunggakan = db.query(func.coalesce(func.sum(Pelanggan.total_tagihan), 0)).filter(
             Pelanggan.is_active == True,
@@ -68,7 +71,7 @@ class BillingService:
                 )
             )
 
-        # 3. Filter Status Pembayaran
+        # 3. Filter Status Pembayaran & Mode Tagihan
         if status and status.upper() != "ALL":
             st_clean = status.strip().upper()
             if st_clean == "LUNAS":
@@ -80,6 +83,10 @@ class BillingService:
             elif st_clean == "ISOLIR":
                 filtered_query = filtered_query.filter(Pelanggan.status_pembayaran == "ISOLIR")
 
+        filtered_query = NetworkBillService.apply_billing_mode_filter(
+            filtered_query, Pelanggan.billing_mode, billing_mode
+        )
+
         # 4. Pengurutan Data (Sorting)
         sort_dir_clean = (sort_dir or "asc").lower().strip()
         is_desc = sort_dir_clean == "desc"
@@ -87,6 +94,9 @@ class BillingService:
         if sort_by == "nama":
             order_expr = Pelanggan.nama.desc() if is_desc else Pelanggan.nama.asc()
             sorted_query = filtered_query.order_by(order_expr)
+        elif sort_by == "billing_mode":
+            order_expr = Pelanggan.billing_mode.desc() if is_desc else Pelanggan.billing_mode.asc()
+            sorted_query = filtered_query.order_by(Pelanggan.billing_mode.is_(None), order_expr, Pelanggan.nama.asc())
         elif sort_by == "no_wa":
             order_expr = Pelanggan.no_hp.desc() if is_desc else Pelanggan.no_hp.asc()
             sorted_query = filtered_query.order_by(order_expr)
@@ -143,6 +153,7 @@ class BillingService:
                 "paket": p.paket or "-",
                 "ip_router": p.ip_router or "-",
                 "status_pembayaran": p.status_pembayaran or "LUNAS",
+                "billing_mode": getattr(p, "billing_mode", None),
                 "is_overdue": bool(p.is_overdue),
                 "total_tagihan": float(p.total_tagihan or 0.0),
                 "periode_tagihan": p.periode_tagihan or "-",
@@ -162,6 +173,8 @@ class BillingService:
                 "total_lunas": total_lunas,
                 "total_belum_bayar": total_belum_bayar,
                 "total_overdue": total_overdue,
+                "total_prabayar": total_prabayar,
+                "total_pascabayar": total_pascabayar,
                 "total_nominal_tunggakan": total_nominal_tunggakan,
                 "terakhir_sinkron": latest_sync_str
             },
@@ -193,9 +206,17 @@ class BillingService:
         if not nb_id:
             return {"ok": False, "message": f"Pelanggan {cust.nama} ({cust.id_pelanggan}) belum terdaftar di Network Bill"}
 
-        # Tarik data tagihan live dari Network Bill
+        # Tarik data tagihan & profil pelanggan live dari Network Bill
         inv_res = NetworkBillService.fetch_invoices(pop_slug, nb_id, status="unpaid", limit=12)
         va_res = NetworkBillService.fetch_virtual_account(pop_slug, nb_id)
+        try:
+            cust_res = NetworkBillService.fetch_customer(pop_slug, nb_id)
+            if isinstance(cust_res, dict) and isinstance(cust_res.get("data"), dict):
+                nb_mode = NetworkBillService.normalize_billing_mode(cust_res["data"].get("billing_mode"))
+                if nb_mode:
+                    cust.billing_mode = nb_mode
+        except Exception as cust_err:
+            logger.debug(f"Gagal ambil billing_mode live {id_pelanggan}: {cust_err}")
 
         now = get_now_wib()
         cust.last_billing_sync = now
@@ -234,6 +255,7 @@ class BillingService:
             "ok": True,
             "message": f"Tagihan {cust.nama} berhasil disinkronkan ({cust.status_pembayaran})",
             "status_pembayaran": cust.status_pembayaran,
+            "billing_mode": getattr(cust, "billing_mode", None),
             "total_tagihan": float(cust.total_tagihan or 0.0),
             "nomor_va": cust.nomor_va
         }
@@ -289,6 +311,7 @@ class BillingService:
                     cust.last_billing_sync = now
                     continue
 
+                BillingSyncWorker.sync_billing_mode_from_cache(cust, pop_slug, nb_id)
                 inv_res = NetworkBillService.fetch_invoices(pop_slug, nb_id, status="unpaid", limit=12)
                 if inv_res.get("ok"):
                     unpaid_list = inv_res.get("data") or []

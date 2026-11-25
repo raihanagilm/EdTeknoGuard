@@ -422,5 +422,68 @@ class TestCustomerModules(unittest.TestCase):
         finally:
             db.close()
 
+    def test_billing_mode_filter_and_import_persistence(self):
+        """Memastikan filter billing_mode (prabayar/pascabayar/unset) dan pembaruan dari import Network Bill akurat."""
+        engine = create_engine("sqlite:///:memory:")
+        models.TenantBase.metadata.create_all(bind=engine)
+        Session = sessionmaker(bind=engine)
+        db = Session()
+
+        try:
+            p1 = models.Pelanggan(
+                id_pelanggan="PLG-0001", nama="Warga Prabayar", kantor="tengaran",
+                billing_mode=None, is_active=True
+            )
+            ont1 = models.PerangkatONT(id_perangkat=1, id_pelanggan="PLG-0001", ip_router="10.10.2.10")
+            p2 = models.Pelanggan(
+                id_pelanggan="PLG-0002", nama="Warga Pascabayar", kantor="tengaran",
+                billing_mode="pascabayar", is_active=True
+            )
+            ont2 = models.PerangkatONT(id_perangkat=2, id_pelanggan="PLG-0002", ip_router="10.10.2.11")
+            p3 = models.Pelanggan(
+                id_pelanggan="PLG-0003", nama="Warga Lokal", kantor="tengaran",
+                billing_mode=None, is_active=True
+            )
+            ont3 = models.PerangkatONT(id_perangkat=3, id_pelanggan="PLG-0003", ip_router="10.10.2.12")
+            db.add_all([p1, ont1, p2, ont2, p3, ont3])
+            db.commit()
+
+            # Jalankan enrichment update dari Network Bill untuk menyetel billing_mode prabayar ke p1
+            imp_res = CustomerImporter.execute_json_import(
+                db,
+                [
+                    {
+                        "_status": "match",
+                        "_action": "update",
+                        "selected_version": "new",
+                        "data": {
+                            "id_pelanggan": "PLG-0001",
+                            "nama": "Warga Prabayar",
+                            "ip_router": "10.10.2.10",
+                            "kantor": "tengaran",
+                            "billing_mode": "prabayar"
+                        }
+                    }
+                ],
+                default_kantor="tengaran"
+            )
+            self.assertEqual(imp_res["updated"], 1)
+
+            t_pra, items_pra = CustomerService.get_customers(db, kantor="tengaran", billing_mode="prabayar")
+            self.assertEqual(t_pra, 1)
+            self.assertEqual(items_pra[0]["id_pelanggan"], "PLG-0001")
+            self.assertEqual(items_pra[0]["billing_mode"], "prabayar")
+
+            t_pasca, items_pasca = CustomerService.get_customers(db, kantor="tengaran", billing_mode="pascabayar")
+            self.assertEqual(t_pasca, 1)
+            self.assertEqual(items_pasca[0]["id_pelanggan"], "PLG-0002")
+
+            t_unset, items_unset = CustomerService.get_customers(db, kantor="tengaran", billing_mode="unset")
+            self.assertEqual(t_unset, 1)
+            self.assertEqual(items_unset[0]["id_pelanggan"], "PLG-0003")
+            self.assertIsNone(items_unset[0]["billing_mode"])
+        finally:
+            db.close()
+
 if __name__ == "__main__":
     unittest.main()

@@ -29,6 +29,7 @@ def list_customers(
     pop: Optional[str] = Query(None, description="Filter POP"),
     kantor: Optional[str] = Query(None, description="Filter kantor"),
     status: Optional[str] = Query(None, description="Filter status NORMAL, WARNING, CRITICAL, LOS, NONAKTIF"),
+    billing_mode: Optional[str] = Query(None, description="Filter jenis tagihan: ALL, prabayar, pascabayar, unset"),
     monitoring: Optional[str] = Query(None, description="Filter pemantauan: all, active, inactive"),
     range: Optional[str] = Query("all", description="Filter rentang waktu: all, today, 7d, 30d, custom"),
     start_date: Optional[str] = Query(None, description="Tanggal awal (YYYY-MM-DD)"),
@@ -51,7 +52,7 @@ def list_customers(
         target_kantor = active_kantor or (allowed_kantor[0] if allowed_kantor else "cabang")
 
     return CustomerController.list_customers(
-        db=db, q=q, pop=pop, status=status, monitoring=monitoring,
+        db=db, q=q, pop=pop, status=status, billing_mode=billing_mode, monitoring=monitoring,
         range_type=range, start_date=start_date, end_date=end_date,
         sort_by=sort_by, sort_dir=sort_dir, page=page, limit=limit,
         kantor=target_kantor, allowed_kantor=allowed_kantor

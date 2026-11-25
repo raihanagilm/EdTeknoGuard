@@ -30,6 +30,7 @@ import {
   EyeOff
 } from 'lucide-react'
 import { CustomerWifiModal } from './CustomerWifiModal'
+import { BillingModeLabel } from '../common/CommonUI'
 
 export function CustomerDetailModal({
   customer,
@@ -640,14 +641,21 @@ export function CustomerDetailModal({
               </div>
 
               {/* Grid Informasi Pribadi & Layanan */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 <div className="p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5">
                   <span className="text-[10px] text-[#64839E] font-bold uppercase">Paket Layanan</span>
                   <div className="font-bold text-[#0B2545] truncate">{customer.paket || '-'}</div>
                 </div>
 
-                {/* Titik Lokasi GPS */}
                 <div className="p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5">
+                  <span className="text-[10px] text-[#64839E] font-bold uppercase">Jenis Tagihan</span>
+                  <div className="truncate">
+                    <BillingModeLabel mode={activeCust.billing_mode || customer.billing_mode} className="text-xs font-bold" />
+                  </div>
+                </div>
+
+                {/* Titik Lokasi GPS */}
+                <div className="p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5 col-span-2 sm:col-span-1">
                   <span className="text-[10px] text-[#64839E] font-bold uppercase flex items-center gap-1">
                     <MapPin className="w-3 h-3 text-[#026AA7] shrink-0" />
                     <span>Titik Lokasi GPS</span>
@@ -916,7 +924,7 @@ export function CustomerDetailModal({
                   })()}
 
                   {/* Rincian Paket & Info Langganan */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
                     <div className="p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5">
                       <span className="text-[10px] text-[#64839E] font-bold uppercase">Paket Layanan</span>
                       <div className="font-bold text-[#0B2545] truncate">
@@ -931,7 +939,16 @@ export function CustomerDetailModal({
                           : '-'}
                       </div>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5 col-span-2 sm:col-span-1">
+                    <div className="p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5">
+                      <span className="text-[10px] text-[#64839E] font-bold uppercase">Jenis Tagihan</span>
+                      <div className="truncate">
+                        <BillingModeLabel
+                          mode={billingData.billing_mode || activeCust.billing_mode || customer.billing_mode}
+                          className="text-[11px] font-bold"
+                        />
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-[#F1F6FC] border border-[#CCDDF0] space-y-0.5">
                       <span className="text-[10px] text-[#64839E] font-bold uppercase flex items-center gap-1">
                         <Calendar className="w-2.5 h-2.5 text-[#026AA7]" />
                         <span>Jatuh Tempo</span>

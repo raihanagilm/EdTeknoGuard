@@ -13,6 +13,7 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
   const [pagination, setPagination] = useState({ page: 1, limit: 15, total_records: 0, total_pages: 1 })
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [billingModeFilter, setBillingModeFilter] = useState('ALL')
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(15)
   const [sortField, setSortField] = useState('')
@@ -39,6 +40,7 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
         kantor: activeOffice,
         q: searchQuery,
         status: statusFilter,
+        billing_mode: billingModeFilter,
         sort_by: sortField || undefined,
         sort_dir: sortDir || undefined,
         page,
@@ -55,7 +57,7 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
     } finally {
       setLoading(false)
     }
-  }, [activeOffice, searchQuery, statusFilter, page, limit, sortField, sortDir])
+  }, [activeOffice, searchQuery, statusFilter, billingModeFilter, page, limit, sortField, sortDir])
 
   useEffect(() => {
     loadData()
@@ -223,6 +225,8 @@ export function BillingView({ activeOffice, currentUser, onNavigateCustomer }) {
       <BillingFilterBar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        billingModeFilter={billingModeFilter}
+        setBillingModeFilter={setBillingModeFilter}
         setPage={setPage}
         selectedCount={selectedIds.length}
         onOpenReminderModal={() => {
