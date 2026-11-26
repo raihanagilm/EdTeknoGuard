@@ -50410,6 +50410,7 @@ function App() {
 	const [headerMenuOpen, setHeaderMenuOpen] = (0, import_react.useState)(false);
 	const [logoutModalOpen, setLogoutModalOpen] = (0, import_react.useState)(false);
 	const headerMenuRef = (0, import_react.useRef)(null);
+	const isSyncingFcmRef = (0, import_react.useRef)(false);
 	const [sidebarCollapsed, setSidebarCollapsed] = (0, import_react.useState)(() => {
 		try {
 			return localStorage.getItem("edtekno_sidebar_collapsed") === "true";
@@ -50638,14 +50639,20 @@ function App() {
 				if (window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === "function") try {
 					const token = window.AndroidBridge.getFcmToken();
 					if (token && token.length > 20) {
-						if (sessionStorage.getItem("edtekno_synced_fcm_token") !== token) fetch("/api/notifications/register-fcm", {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							credentials: "include",
-							body: JSON.stringify({ fcm_token: token })
-						}).then((r) => {
-							if (r.ok) sessionStorage.setItem("edtekno_synced_fcm_token", token);
-						}).catch(() => {});
+						const syncKey = `edtekno_synced_fcm_token_${meRes.user.id || meRes.user.username || "user"}`;
+						if (sessionStorage.getItem(syncKey) !== token && !isSyncingFcmRef.current) {
+							isSyncingFcmRef.current = true;
+							fetch("/api/notifications/register-fcm", {
+								method: "POST",
+								headers: { "Content-Type": "application/json" },
+								credentials: "include",
+								body: JSON.stringify({ fcm_token: token })
+							}).then((r) => {
+								if (r.ok) sessionStorage.setItem(syncKey, token);
+							}).catch(() => {}).finally(() => {
+								isSyncingFcmRef.current = false;
+							});
+						}
 					}
 				} catch (_) {}
 				if (window.AndroidBridge && typeof window.AndroidBridge.notifyLoginSuccess === "function") try {
@@ -50952,8 +50959,17 @@ function App() {
 		return () => clearInterval(interval);
 	}, [isScanningActive]);
 	const handleLogout = async () => {
+		let fcmToken = null;
+		if (window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === "function") try {
+			fcmToken = window.AndroidBridge.getFcmToken() || null;
+		} catch (_) {}
 		try {
-			await fetch("/api/auth/logout", { method: "POST" });
+			await fetch("/api/auth/logout", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ fcm_token: fcmToken })
+			});
 		} catch (e) {
 			console.warn("Logout API error:", e);
 		} finally {
@@ -50961,7 +50977,11 @@ function App() {
 			localStorage.removeItem("edtekno_auth_status");
 			localStorage.removeItem("edtekno_last_active_time");
 			localStorage.removeItem("edtekno_active_tab");
-			sessionStorage.removeItem("edtekno_synced_fcm_token");
+			try {
+				Object.keys(sessionStorage).forEach((k) => {
+					if (k.startsWith("edtekno_synced_fcm_token")) sessionStorage.removeItem(k);
+				});
+			} catch (_) {}
 			document.cookie = "edteknoguard_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 			window.history.pushState({}, "", "/login");
 		}

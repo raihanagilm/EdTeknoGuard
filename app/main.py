@@ -491,12 +491,20 @@ async def api_auth_login(request: Request):
 
 @app.post("/api/auth/logout")
 @app.get("/api/auth/logout")
-def api_auth_logout(request: Request):
+async def api_auth_logout(request: Request):
     from app.core.database import SessionLocal
     from app.core.security import SESSION_COOKIE_NAME, get_current_user_optional
     from app.modules.activity_logs.service import ActivityLogService
     from fastapi.responses import JSONResponse
     
+    req_fcm_token = None
+    try:
+        body = await request.json()
+        if isinstance(body, dict):
+            req_fcm_token = (body.get("fcm_token") or "").strip() or None
+    except Exception:
+        pass
+
     db = SessionLocal()
     try:
         user = get_current_user_optional(request)
@@ -504,8 +512,15 @@ def api_auth_logout(request: Request):
         ip = request.client.host if request.client else "unknown"
         user_agent = request.headers.get("user-agent")
         
+        from app.db.models import User as MasterUser
+        changed = False
+        if req_fcm_token:
+            stale_users = db.query(MasterUser).filter(MasterUser.fcm_token == req_fcm_token).all()
+            for su in stale_users:
+                su.fcm_token = None
+                changed = True
+
         if user:
-            from app.db.models import User as MasterUser
             u_id = user.get("user_id") or user.get("id")
             u_name = user.get("user") or user.get("username")
             db_u = None
@@ -513,9 +528,12 @@ def api_auth_logout(request: Request):
                 db_u = db.query(MasterUser).filter(MasterUser.id == u_id).first()
             if not db_u and u_name:
                 db_u = db.query(MasterUser).filter(MasterUser.username == u_name).first()
-            if db_u:
+            if db_u and db_u.fcm_token is not None:
                 db_u.fcm_token = None
-                db.commit()
+                changed = True
+
+        if changed:
+            db.commit()
 
         ActivityLogService.log_activity(
             db=db,

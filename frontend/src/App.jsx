@@ -170,6 +170,7 @@ export default function App() {
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false)
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
   const headerMenuRef = useRef(null)
+  const isSyncingFcmRef = useRef(false)
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
@@ -456,16 +457,20 @@ export default function App() {
           try {
             const token = window.AndroidBridge.getFcmToken()
             if (token && token.length > 20) {
-              const lastSyncedToken = sessionStorage.getItem('edtekno_synced_fcm_token')
-              if (lastSyncedToken !== token) {
+              const syncKey = `edtekno_synced_fcm_token_${meRes.user.id || meRes.user.username || 'user'}`
+              const lastSyncedToken = sessionStorage.getItem(syncKey)
+              if (lastSyncedToken !== token && !isSyncingFcmRef.current) {
+                isSyncingFcmRef.current = true
                 fetch('/api/notifications/register-fcm', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   credentials: 'include',
                   body: JSON.stringify({ fcm_token: token })
                 }).then(r => {
-                  if (r.ok) sessionStorage.setItem('edtekno_synced_fcm_token', token)
-                }).catch(() => {})
+                  if (r.ok) sessionStorage.setItem(syncKey, token)
+                }).catch(() => {}).finally(() => {
+                  isSyncingFcmRef.current = false
+                })
               }
             }
           } catch (_) {}
@@ -891,8 +896,19 @@ export default function App() {
 
   // Handle Real Backend Logout
   const handleLogout = async () => {
+    let fcmToken = null
+    if (window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === 'function') {
+      try {
+        fcmToken = window.AndroidBridge.getFcmToken() || null
+      } catch (_) {}
+    }
     try {
-      await fetch('/api/auth/logout', { method: 'POST' })
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ fcm_token: fcmToken })
+      })
     } catch (e) {
       console.warn('Logout API error:', e)
     } finally {
@@ -900,7 +916,11 @@ export default function App() {
       localStorage.removeItem('edtekno_auth_status')
       localStorage.removeItem('edtekno_last_active_time')
       localStorage.removeItem('edtekno_active_tab')
-      sessionStorage.removeItem('edtekno_synced_fcm_token')
+      try {
+        Object.keys(sessionStorage).forEach((k) => {
+          if (k.startsWith('edtekno_synced_fcm_token')) sessionStorage.removeItem(k)
+        })
+      } catch (_) {}
       document.cookie = "edteknoguard_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT"
       window.history.pushState({}, '', '/login')
     }
