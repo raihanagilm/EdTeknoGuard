@@ -1,13 +1,14 @@
 # PROGRESS.md — Status Pelacakan Sesi & Keberlanjutan Sistem
 
 ## Current State
-- Last commit: 050229e
-- Test status: passing (Vite build OK `index-DsadI07J.js`, 18 pytest passed untuk `test_portal_fcm_token_binding.py` + `make check`)
-- Active module: Perbaikan Notifikasi Lokasi Senyap & Pengikatan Token FCM Portal MyTekno
-- Baseline: Green (Siap deploy/sinkronisasi ke VPS Produksi https://portal.teknoindo.net/)
+- Last commit: ead9731
+- Test status: passing (Vite build OK `index-2vNyla15.js`, `oxlint` 0 warning/error pada file terkait, `node --test` 4 passed untuk `networkLinks.test.mjs`, dan 27 pytest passed untuk `test_models_and_thresholds.py` + `test_scraper_modules.py` + `test_scheduler_modules.py` + `test_customers_module.py`)
+- Active module: Tautan Ikon Panah GUI Modem/Router pada Tabel Data Pelanggan (`CustomersTable.jsx`)
+- Baseline: Green (Perubahan siap di-commit dan disinkronkan ke VPS Produksi https://portal.teknoindo.net/)
 
 ## In Progress
 - Selesai & Terverifikasi (PASS):
+  - Penambahan ikon panah tautan GUI modem/router (`ArrowUpRight`) di samping IP pada tabel Data Pelanggan ([CustomersTable.jsx](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/components/customers/CustomersTable.jsx)) baik pada kolom desktop `IP & Router` (`ONT` dan `Router`) maupun kartu mobile, menggunakan helper sanitasi URL [networkLinks.js](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/utils/networkLinks.js) (`target="_blank" rel="noopener noreferrer"`, aksesibilitas keyboard `focus-visible` + `aria-label` unik, dan unit test [networkLinks.test.mjs](file:///d:/databaru/Magang/EdTeknoGuard/frontend/src/utils/networkLinks.test.mjs)).
   - Penambahan pembedaan pelanggan **Prabayar** vs **Pascabayar** (`billing_mode`, *read-only* mengikuti Network Bill API v1):
     - Menambahkan kolom `billing_mode` (`VARCHAR(20) NULL`, terindeks) pada model `Pelanggan` ([app/db/models.py](file:///d:/databaru/Magang/EdTeknoGuard/app/db/models.py)) serta *auto-alter* multi-tenant di [app/core/tenant_database.py](file:///d:/databaru/Magang/EdTeknoGuard/app/core/tenant_database.py).
     - Menambahkan normalisasi & sinkronisasi `billing_mode` hemat kuota API pada [NetworkBillService](file:///d:/databaru/Magang/EdTeknoGuard/app/services/network_bill_service.py), [CustomerImporter](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/customers/importer.py), [BillingSyncWorker](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/billing/sync_worker.py), dan [BillingService](file:///d:/databaru/Magang/EdTeknoGuard/app/modules/billing/service.py).
@@ -87,10 +88,9 @@
   8. Pengamanan `dashboard/routes.py` dan `auth/routes.py` agar pesan pengingat tagihan hanya aktif jika pelanggan berstatus belum lunas.
 
 ## Next Steps
-- [x] Hapus notifikasi & toast GPS di Beranda MyTekno (`syncGpsLocation` berjalan senyap di latar belakang)
-- [x] Perbaiki pengikatan & pembersihan `fcm_token` lintas akun saat `register-fcm` dan `logout` aplikasi Android
-- [x] Build frontend production terbaru (`index-DsadI07J.js`) & verifikasi unit test (`test_portal_fcm_token_binding.py`)
-- [ ] Push ke origin main dan jalankan sinkronisasi / restart di VPS produksi
+- [x] Tambah helper `buildRouterGuiUrl` dan ikon tautan panah `ArrowUpRight` GUI router di `CustomersTable.jsx` (desktop & mobile)
+- [x] Verifikasi `node --test`, `oxlint`, Vite production build (`index-2vNyla15.js`), dan `pytest` inti (27 passed)
+- [ ] Uji klik langsung ke IP ONT/Router lokal di browser terautentikasi dan lakukan commit + push jika sudah sesuai
 
 ## Blockers
 - None

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import {
   ArrowUpDown,
+  ArrowUpRight,
   Wifi,
   Edit2,
   Trash2,
@@ -13,6 +14,30 @@ import {
 } from 'lucide-react'
 import { DataTableContainer, BillingModeLabel } from '../common/CommonUI'
 import { DesktopTableSkeleton, MobileCardStackSkeleton } from '../common/DeviceAdaptiveSkeleton'
+import { buildRouterGuiUrl } from '../../utils/networkLinks'
+
+function RouterGuiLink({ ip, targetName = 'Router', isMobile = false }) {
+  const url = buildRouterGuiUrl(ip)
+  if (!url) return null
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      aria-label={`Buka GUI ${targetName} ${ip} di tab baru`}
+      title={`Buka GUI ${targetName} (${ip}) di tab baru`}
+      className={`relative inline-flex items-center justify-center rounded text-[#026AA7] hover:bg-[#CFE6FC] hover:text-[#035388] active:bg-[#CFE6FC] transition shrink-0 focus-visible:outline-2 focus-visible:outline-[#026AA7] focus-visible:outline-offset-1 ${
+        isMobile
+          ? "w-6 h-6 before:content-[''] before:absolute before:-inset-y-2.5 before:-right-2.5 before:-left-1"
+          : "w-5 h-5 before:content-[''] before:absolute before:-inset-0.5"
+      }`}
+    >
+      <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
+    </a>
+  )
+}
 
 export function CustomersTable({
   customers = [],
@@ -185,9 +210,12 @@ export function CustomersTable({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2 rounded-lg border border-sky-100">
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-[10px] text-slate-400 uppercase font-bold">IP ONT / Router</div>
-                      <div className="font-bold text-slate-800">{c.ip_ont || c.ip_router || '-'}</div>
+                      <div className="font-bold text-slate-800 flex items-center gap-1 min-w-0">
+                        <span className="truncate">{c.ip_ont || c.ip_router || '-'}</span>
+                        <RouterGuiLink ip={c.ip_ont || c.ip_router} targetName="Router" isMobile />
+                      </div>
                       <div className="text-[10px] text-slate-500">{c.jenis_modem || 'ZTE GM220-S'}</div>
                     </div>
 
@@ -491,19 +519,21 @@ export function CustomersTable({
                     </div>
                   </td>
                   <td className="py-2.5 px-3">
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       {c.ip_ont && (
-                        <div className="text-slate-900 font-bold font-mono text-[11px] flex items-center gap-1.5">
+                        <div className="text-slate-900 font-bold font-mono text-[11px] flex items-center gap-1 whitespace-nowrap">
                           <span className="text-[9px] text-cyan-800 font-black tracking-tight uppercase">ONT</span>
                           <span>{c.ip_ont}</span>
+                          <RouterGuiLink ip={c.ip_ont} targetName="ONT" />
                         </div>
                       )}
                       {c.ip_router && c.ip_router !== c.ip_ont && (
-                        <div className="text-slate-700 font-mono text-[11px] flex items-center gap-1.5">
+                        <div className="text-slate-700 font-mono text-[11px] flex items-center gap-1 whitespace-nowrap">
                           <span className="text-[9px] text-slate-600 font-black tracking-tight uppercase">
                             Router
                           </span>
                           <span>{c.ip_router}</span>
+                          <RouterGuiLink ip={c.ip_router} targetName="Router" />
                         </div>
                       )}
                       {!c.ip_ont && !c.ip_router && (

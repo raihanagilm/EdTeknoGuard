@@ -72,6 +72,8 @@
       --tw-backdrop-sepia: initial;
       --tw-duration: initial;
       --tw-ease: initial;
+      --tw-content: "";
+      --tw-outline-style: solid;
     }
   }
 }
@@ -4779,6 +4781,36 @@
     color: var(--color-white);
   }
 
+  .before\:absolute:before {
+    content: var(--tw-content);
+    position: absolute;
+  }
+
+  .before\:-inset-0\.5:before {
+    content: var(--tw-content);
+    inset: calc(var(--spacing) * -.5);
+  }
+
+  .before\:-inset-y-2\.5:before {
+    content: var(--tw-content);
+    inset-block: calc(var(--spacing) * -2.5);
+  }
+
+  .before\:-right-2\.5:before {
+    content: var(--tw-content);
+    right: calc(var(--spacing) * -2.5);
+  }
+
+  .before\:-left-1:before {
+    content: var(--tw-content);
+    left: calc(var(--spacing) * -1);
+  }
+
+  .before\:content-\[\'\'\]:before {
+    --tw-content: "";
+    content: var(--tw-content);
+  }
+
   .first\:pt-0:first-child {
     padding-top: 0;
   }
@@ -4825,6 +4857,10 @@
 
     .hover\:bg-\[\#035388\]:hover {
       background-color: #035388;
+    }
+
+    .hover\:bg-\[\#CFE6FC\]:hover {
+      background-color: #cfe6fc;
     }
 
     .hover\:bg-\[\#D0E2F4\]:hover {
@@ -5344,6 +5380,19 @@
     outline-style: none;
   }
 
+  .focus-visible\:outline-2:focus-visible {
+    outline-style: var(--tw-outline-style);
+    outline-width: 2px;
+  }
+
+  .focus-visible\:outline-offset-1:focus-visible {
+    outline-offset: 1px;
+  }
+
+  .focus-visible\:outline-\[\#026AA7\]:focus-visible {
+    outline-color: #026aa7;
+  }
+
   .active\:scale-90:active {
     --tw-scale-x: 90%;
     --tw-scale-y: 90%;
@@ -5375,6 +5424,14 @@
 
   .active\:cursor-grabbing:active {
     cursor: grabbing;
+  }
+
+  .active\:bg-\[\#CFE6FC\]:active {
+    background-color: #cfe6fc;
+  }
+
+  .active\:bg-\[\#E0F0FF\]:active {
+    background-color: #e0f0ff;
   }
 
   .active\:bg-gray-100\/70:active {
@@ -6583,6 +6640,18 @@
 @property --tw-ease {
   syntax: "*";
   inherits: false
+}
+
+@property --tw-content {
+  syntax: "*";
+  inherits: false;
+  initial-value: "";
+}
+
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
 }
 
 @keyframes spin {

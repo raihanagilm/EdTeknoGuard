@@ -11709,7 +11709,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$97 = {
+var __iconData$98 = {
 	name: "activity",
 	size: 24,
 	node: [["path", {
@@ -11717,8 +11717,8 @@ var __iconData$97 = {
 		key: "169zse"
 	}]]
 };
-__iconData$97.node;
-var Activity = createLucideIcon(__iconData$97);
+__iconData$98.node;
+var Activity = createLucideIcon(__iconData$98);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-down-to-line.mjs
 /**
@@ -11727,7 +11727,7 @@ var Activity = createLucideIcon(__iconData$97);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$96 = {
+var __iconData$97 = {
 	name: "arrow-down-to-line",
 	size: 24,
 	node: [
@@ -11745,8 +11745,8 @@ var __iconData$96 = {
 		}]
 	]
 };
-__iconData$96.node;
-var ArrowDownToLine = createLucideIcon(__iconData$96);
+__iconData$97.node;
+var ArrowDownToLine = createLucideIcon(__iconData$97);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-down.mjs
 /**
@@ -11755,7 +11755,7 @@ var ArrowDownToLine = createLucideIcon(__iconData$96);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$95 = {
+var __iconData$96 = {
 	name: "arrow-down",
 	size: 24,
 	node: [["path", {
@@ -11766,8 +11766,8 @@ var __iconData$95 = {
 		key: "1idqje"
 	}]]
 };
-__iconData$95.node;
-var ArrowDown = createLucideIcon(__iconData$95);
+__iconData$96.node;
+var ArrowDown = createLucideIcon(__iconData$96);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left.mjs
 /**
@@ -11776,7 +11776,7 @@ var ArrowDown = createLucideIcon(__iconData$95);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$94 = {
+var __iconData$95 = {
 	name: "arrow-left",
 	size: 24,
 	node: [["path", {
@@ -11787,8 +11787,8 @@ var __iconData$94 = {
 		key: "x3x0zl"
 	}]]
 };
-__iconData$94.node;
-var ArrowLeft = createLucideIcon(__iconData$94);
+__iconData$95.node;
+var ArrowLeft = createLucideIcon(__iconData$95);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-left-right.mjs
 /**
@@ -11797,7 +11797,7 @@ var ArrowLeft = createLucideIcon(__iconData$94);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$93 = {
+var __iconData$94 = {
 	name: "arrow-left-right",
 	size: 24,
 	node: [
@@ -11819,8 +11819,8 @@ var __iconData$93 = {
 		}]
 	]
 };
-__iconData$93.node;
-var ArrowLeftRight = createLucideIcon(__iconData$93);
+__iconData$94.node;
+var ArrowLeftRight = createLucideIcon(__iconData$94);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up-down.mjs
 /**
@@ -11829,7 +11829,7 @@ var ArrowLeftRight = createLucideIcon(__iconData$93);
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
-var __iconData$92 = {
+var __iconData$93 = {
 	name: "arrow-up-down",
 	size: 24,
 	node: [
@@ -11851,8 +11851,29 @@ var __iconData$92 = {
 		}]
 	]
 };
+__iconData$93.node;
+var ArrowUpDown = createLucideIcon(__iconData$93);
+//#endregion
+//#region node_modules/lucide-react/dist/esm/icons/arrow-up-right.mjs
+/**
+* @license lucide-react v1.53.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var __iconData$92 = {
+	name: "arrow-up-right",
+	size: 24,
+	node: [["path", {
+		d: "M7 7h10v10",
+		key: "1tivn9"
+	}], ["path", {
+		d: "M7 17 17 7",
+		key: "1vkiza"
+	}]]
+};
 __iconData$92.node;
-var ArrowUpDown = createLucideIcon(__iconData$92);
+var ArrowUpRight = createLucideIcon(__iconData$92);
 //#endregion
 //#region node_modules/lucide-react/dist/esm/icons/arrow-up.mjs
 /**
@@ -31157,7 +31178,79 @@ function MobileCardStackSkeleton({ count = 3, type = "customer" }) {
 	});
 }
 //#endregion
+//#region src/utils/networkLinks.js
+var IPV4_WITH_OPTIONAL_PORT_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?::(\d{1,5}))?$/;
+/**
+* Memvalidasi apakah string merupakan IPv4 yang valid (tiap oktet 0..255)
+* beserta port opsional (1..65535), lalu mengembalikan string ternormalisasi.
+* @param {string} value
+* @returns {string|null}
+*/
+function parseValidIpv4WithPort(value) {
+	const match = IPV4_WITH_OPTIONAL_PORT_RE.exec(value);
+	if (!match) return null;
+	for (let i = 1; i <= 4; i += 1) {
+		const octet = Number(match[i]);
+		if (!Number.isInteger(octet) || octet < 0 || octet > 255) return null;
+	}
+	const host = `${Number(match[1])}.${Number(match[2])}.${Number(match[3])}.${Number(match[4])}`;
+	if (!match[5]) return host;
+	const port = Number(match[5]);
+	if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
+	return `${host}:${port}`;
+}
+/**
+* Membentuk URL GUI web modem/router yang aman untuk dibuka di tab baru.
+* Mengembalikan null bila nilai kosong, "-", atau berpotensi injeksi skema URI.
+* @param {string|null|undefined} rawIp
+* @returns {string|null}
+*/
+function buildRouterGuiUrl(rawIp) {
+	if (typeof rawIp !== "string") return null;
+	const trimmed = rawIp.trim();
+	if (!trimmed || trimmed === "-" || /\s/.test(trimmed)) return null;
+	const lower = trimmed.toLowerCase();
+	if (lower === "null" || lower === "undefined" || lower === "n/a") return null;
+	if (/^https?:\/\//i.test(trimmed)) try {
+		const parsed = new URL(trimmed);
+		if ((parsed.protocol === "http:" || parsed.protocol === "https:") && parsed.hostname && !parsed.username && !parsed.password) return parsed.href;
+		return null;
+	} catch {
+		return null;
+	}
+	if (trimmed.includes("/") || trimmed.includes("\\") || trimmed.includes("@")) return null;
+	const validIpv4 = parseValidIpv4WithPort(trimmed);
+	if (validIpv4) return `http://${validIpv4}`;
+	if (trimmed.includes(":")) {
+		const candidate = trimmed.startsWith("[") ? `http://${trimmed}` : `http://[${trimmed}]`;
+		try {
+			const parsed = new URL(candidate);
+			if (parsed.hostname && !parsed.username && !parsed.password) return parsed.href;
+		} catch {
+			return null;
+		}
+	}
+	return null;
+}
+//#endregion
 //#region src/components/customers/CustomersTable.jsx
+function RouterGuiLink({ ip, targetName = "Router", isMobile = false }) {
+	const url = buildRouterGuiUrl(ip);
+	if (!url) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+		href: url,
+		target: "_blank",
+		rel: "noopener noreferrer",
+		onClick: (e) => e.stopPropagation(),
+		"aria-label": `Buka GUI ${targetName} ${ip} di tab baru`,
+		title: `Buka GUI ${targetName} (${ip}) di tab baru`,
+		className: `relative inline-flex items-center justify-center rounded text-[#026AA7] hover:bg-[#CFE6FC] hover:text-[#035388] active:bg-[#CFE6FC] transition shrink-0 focus-visible:outline-2 focus-visible:outline-[#026AA7] focus-visible:outline-offset-1 ${isMobile ? "w-6 h-6 before:content-[''] before:absolute before:-inset-y-2.5 before:-right-2.5 before:-left-1" : "w-5 h-5 before:content-[''] before:absolute before:-inset-0.5"}`,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpRight, {
+			className: "w-3.5 h-3.5",
+			"aria-hidden": "true"
+		})
+	});
+}
 function CustomersTable({ customers = [], loading = false, page = 1, limit = 15, setLimit, setPage, totalRecords = 0, selectedIds = [], setSelectedIds, sortField = "id", sortDir = "asc", handleSort, handleSortIpRouter, probingId, probeCooldowns = {}, handleSingleProbe, activeMenuId, setActiveMenuId, handleOpenDetail, handleOpenEdit, handleDeleteCustomer, handleToggleMonitoring, isOfficeActive = true, warnThreshold = -26, critThreshold = -27 }) {
 	const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
 	const [menuAnchor, setMenuAnchor] = (0, import_react.useState)(null);
@@ -31290,20 +31383,30 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 								children: c.alamat || "-"
 							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2 rounded-lg border border-sky-100",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-[10px] text-slate-400 uppercase font-bold",
-										children: "IP ONT / Router"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "font-bold text-slate-800",
-										children: c.ip_ont || c.ip_router || "-"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "text-[10px] text-slate-500",
-										children: c.jenis_modem || "ZTE GM220-S"
-									})
-								] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "min-w-0",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-[10px] text-slate-400 uppercase font-bold",
+											children: "IP ONT / Router"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "font-bold text-slate-800 flex items-center gap-1 min-w-0",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "truncate",
+												children: c.ip_ont || c.ip_router || "-"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterGuiLink, {
+												ip: c.ip_ont || c.ip_router,
+												targetName: "Router",
+												isMobile: true
+											})]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "text-[10px] text-slate-500",
+											children: c.jenis_modem || "ZTE GM220-S"
+										})
+									]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "text-right",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -31566,21 +31669,35 @@ function CustomersTable({ customers = [], loading = false, page = 1, limit = 15,
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 								className: "py-2.5 px-3",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "space-y-1",
+									className: "space-y-1.5",
 									children: [
 										c.ip_ont && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "text-slate-900 font-bold font-mono text-[11px] flex items-center gap-1.5",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[9px] text-cyan-800 font-black tracking-tight uppercase",
-												children: "ONT"
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.ip_ont })]
+											className: "text-slate-900 font-bold font-mono text-[11px] flex items-center gap-1 whitespace-nowrap",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "text-[9px] text-cyan-800 font-black tracking-tight uppercase",
+													children: "ONT"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.ip_ont }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterGuiLink, {
+													ip: c.ip_ont,
+													targetName: "ONT"
+												})
+											]
 										}),
 										c.ip_router && c.ip_router !== c.ip_ont && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "text-slate-700 font-mono text-[11px] flex items-center gap-1.5",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "text-[9px] text-slate-600 font-black tracking-tight uppercase",
-												children: "Router"
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.ip_router })]
+											className: "text-slate-700 font-mono text-[11px] flex items-center gap-1 whitespace-nowrap",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "text-[9px] text-slate-600 font-black tracking-tight uppercase",
+													children: "Router"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.ip_router }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RouterGuiLink, {
+													ip: c.ip_router,
+													targetName: "Router"
+												})
+											]
 										}),
 										!c.ip_ont && !c.ip_router && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 											className: "text-slate-400 font-mono text-[11px] italic",
