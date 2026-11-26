@@ -2,8 +2,8 @@
 
 ## Current State
 - Last commit: 050229e
-- Test status: passing (Vite build OK, 101 pytest passed)
-- Active module: Pembedaan Mode Tagihan Pelanggan (Prabayar & Pascabayar) dari Network Bill API
+- Test status: passing (Vite build OK `index-DsadI07J.js`, 18 pytest passed untuk `test_portal_fcm_token_binding.py` + `make check`)
+- Active module: Perbaikan Notifikasi Lokasi Senyap & Pengikatan Token FCM Portal MyTekno
 - Baseline: Green (Siap deploy/sinkronisasi ke VPS Produksi https://portal.teknoindo.net/)
 
 ## In Progress
@@ -87,12 +87,9 @@
   8. Pengamanan `dashboard/routes.py` dan `auth/routes.py` agar pesan pengingat tagihan hanya aktif jika pelanggan berstatus belum lunas.
 
 ## Next Steps
-- [x] Status ISOLIR di bawah status ONLINE/OFFLINE pada kolom STATUS tabel pelanggan
-- [x] Sub-label kartu ringkasan KPI LOS menampilkan jumlah isolir (`Putus • X Isolir`)
-- [x] Filter status ISOLIR di backend (`CustomerService.list_customers`)
-- [x] Sinkronisasi `status_isolir` dari Network Bill `fetch_connection_status`
-- [x] Build frontend production terbaru (`index-DLQ29H0d.js`)
-- [x] Rangkaian 87 pengujian unit lulus 100% (`pytest tests/`)
+- [x] Hapus notifikasi & toast GPS di Beranda MyTekno (`syncGpsLocation` berjalan senyap di latar belakang)
+- [x] Perbaiki pengikatan & pembersihan `fcm_token` lintas akun saat `register-fcm` dan `logout` aplikasi Android
+- [x] Build frontend production terbaru (`index-DsadI07J.js`) & verifikasi unit test (`test_portal_fcm_token_binding.py`)
 - [ ] Push ke origin main dan jalankan sinkronisasi / restart di VPS produksi
 
 ## Blockers

@@ -74,7 +74,7 @@ export function PortalToastNotification({
     <div
       role="alert"
       aria-live="polite"
-      className="absolute bottom-16 left-3 right-3 sm:left-auto sm:right-3 sm:max-w-xs z-50 pointer-events-auto transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+      className="absolute bottom-16 inset-x-0 mx-auto w-[calc(100%-2rem)] max-w-[300px] z-50 pointer-events-auto transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
     >
       <div
         className={`px-3 py-2 rounded-xl shadow-lg shadow-slate-950/20 border backdrop-blur-md flex items-center gap-2.5 ${current.bgClass}`}

@@ -190,8 +190,18 @@ async def portal_auth_login(request: Request, db: Session = Depends(get_portal_d
 
 @router.post("/logout")
 @router.get("/logout")
-def portal_auth_logout(request: Request, db: Session = Depends(get_portal_db)):
+async def portal_auth_logout(request: Request, db: Session = Depends(get_portal_db)):
     cust = get_current_customer_optional(request)
+    platform = "WEB"
+    fcm_token = None
+    try:
+        body = await request.json()
+        if isinstance(body, dict):
+            platform = str(body.get("platform") or "WEB").upper().strip()
+            fcm_token = (body.get("fcm_token") or "").strip() or None
+    except Exception:
+        pass
+
     if cust and cust.get("id_pelanggan"):
         # Audit Trail: Catat riwayat logout pelanggan (dengan proteksi fail-safe)
         try:
@@ -212,6 +222,18 @@ def portal_auth_logout(request: Request, db: Session = Depends(get_portal_db)):
                     t_db_out.close()
         except Exception as e:
             logger.warning(f"Gagal mencatat log aktivitas logout portal: {e}")
+
+        # Lepas ikatan FCM token hanya jika logout dari aplikasi Android atau menyertakan token perangkat
+        try:
+            PortalCustomerService.clear_fcm_token_on_logout(
+                cust_id=cust.get("id_pelanggan"),
+                platform=platform,
+                fcm_token=fcm_token,
+                db=db,
+                hint_kantor=cust.get("kantor")
+            )
+        except Exception as e:
+            logger.warning(f"FCM: Gagal membersihkan token saat logout pelanggan {cust.get('id_pelanggan')}: {e}")
 
     response = JSONResponse(content={"ok": True, "message": "Logout berhasil!"})
     response.delete_cookie(CUSTOMER_SESSION_COOKIE, path="/")
@@ -338,13 +360,14 @@ async def register_portal_fcm_token(
     hint_kantor = (customer_session.get("kantor") or "").strip()
 
     try:
-        cust, target_db = PortalCustomerService.get_customer_by_id(cust_id, db=db, hint_kantor=hint_kantor)
-        if cust and target_db:
-            cust.fcm_token = token
-            target_db.commit()
-            logger.info(f"FCM: Token pelanggan {cust_id} ({cust.nama}) berhasil didaftarkan di kantor {cust.kantor or hint_kantor}.")
-            if target_db != db:
-                target_db.close()
+        saved, cust_name, cust_kantor = PortalCustomerService.reassign_fcm_token(
+            cust_id=cust_id,
+            token=token,
+            db=db,
+            hint_kantor=hint_kantor
+        )
+        if saved:
+            logger.info(f"FCM: Token pelanggan {cust_id} ({cust_name}) berhasil didaftarkan di kantor {cust_kantor}.")
             return {"ok": True, "message": "Token FCM pelanggan berhasil didaftarkan."}
     except Exception as e:
         logger.error(f"FCM: Gagal mendaftarkan token pelanggan {cust_id}: {e}")

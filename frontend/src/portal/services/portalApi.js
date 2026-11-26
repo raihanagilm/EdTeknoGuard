@@ -86,8 +86,12 @@ export class PortalAuthService {
     });
   }
 
-  static async logout() {
-    return new PortalApiService().post('/auth/logout');
+  static async logout(fcmToken = null, platform = null) {
+    const plat = platform || (typeof window !== 'undefined' && window.AndroidBridge ? 'APP' : 'WEB');
+    return new PortalApiService().post('/auth/logout', {
+      platform: plat,
+      fcm_token: fcmToken || null,
+    });
   }
 
   static async mintaResetPassword(no_hp) {

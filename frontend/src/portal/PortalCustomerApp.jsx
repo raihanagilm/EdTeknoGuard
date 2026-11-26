@@ -21,7 +21,6 @@ import {
 } from './services/portalApi';
 import { PortalErrorView } from './components/common/PortalErrorView';
 import { PortalSemanticSkeleton } from './components/common/PortalSemanticSkeleton';
-import { PortalToastNotification } from './components/common/PortalToastNotification';
 import { PortalLegalPage } from './components/legal/PortalLegalPage';
 import { checkHasUnreadNotifications } from './utils/notificationUtils';
 import { showDesktopNotification, autoRequestDesktopNotificationPermission } from '../utils/webNotification';
@@ -62,7 +61,6 @@ export function PortalCustomerApp() {
   const [loading, setLoading] = useState(true);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   const [paymentSubTab, setPaymentSubTab] = useState('tagihan');
-  const [gpsToast, setGpsToast] = useState({ show: false, message: '', title: '' });
 
   // Minta izin notifikasi desktop langsung ke peramban secara otomatis
   useEffect(() => {
@@ -155,7 +153,10 @@ export function PortalCustomerApp() {
     try {
       const token = window.AndroidBridge.getFcmToken();
       if (token && token.length > 20) {
-        const lastSyncedToken = sessionStorage.getItem('mytekno_synced_fcm_token');
+        const syncKey = targetCustomer?.id_pelanggan
+          ? `mytekno_synced_fcm_token_${targetCustomer.id_pelanggan}`
+          : 'mytekno_synced_fcm_token';
+        const lastSyncedToken = sessionStorage.getItem(syncKey);
         if (lastSyncedToken !== token) {
           const res = await PortalAuthService.registerFcm(
             token,
@@ -163,35 +164,11 @@ export function PortalCustomerApp() {
             targetCustomer?.kantor
           );
           if (res.ok && res.data?.ok) {
-            sessionStorage.setItem('mytekno_synced_fcm_token', token);
+            sessionStorage.setItem(syncKey, token);
           }
         }
       }
     } catch (_) {}
-  };
-
-  const notifyEnableGps = () => {
-    const alertedGpsKey = 'mytekno_alerted_enable_gps';
-    if (sessionStorage.getItem(alertedGpsKey)) return;
-    sessionStorage.setItem(alertedGpsKey, '1');
-
-    // 1. Notifikasi Native Android Bridge (muncul banner di HP)
-    if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === 'function') {
-      try {
-        window.AndroidBridge.showNativeNotification(
-          'Aktifkan Lokasi Perangkat',
-          'Untuk mempermudah teknisi memetakan titik jaringan rumah Anda, silakan aktifkan Lokasi (GPS) smartphone Anda.',
-          false
-        );
-      } catch (_) {}
-    }
-
-    // 2. Notifikasi Toast Halus di Web
-    setGpsToast({
-      show: true,
-      title: 'Aktifkan Lokasi (GPS)',
-      message: 'Untuk optimalisasi pemetaan titik jaringan rumah Anda, silakan aktifkan izin Lokasi (GPS) pada smartphone Anda.'
-    });
   };
 
   const syncGpsLocation = (targetCustomer) => {
@@ -211,9 +188,6 @@ export function PortalCustomerApp() {
           sessionStorage.setItem(attemptedKey, 'true');
           const newLoc = res.data.lokasi_gps;
           setCustomer((prev) => ({ ...(prev || {}), lokasi_gps: newLoc }));
-        } else if (res.data?.accuracy_too_low) {
-          // Jika akurasi terlalu rendah (misal GPS HP mati), ingatkan pengguna
-          notifyEnableGps();
         }
       } catch (err) {
         console.warn('Gagal mengunci lokasi GPS rumah:', err);
@@ -236,23 +210,19 @@ export function PortalCustomerApp() {
       } catch (_) {}
     }
 
-    // 2. Fallback standar HTML5 Geolocation API
+    // 2. Fallback standar HTML5 Geolocation API (berjalan senyap di latar belakang)
     if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           const acc = pos.coords.accuracy;
-          if (acc && acc > 100) {
-            notifyEnableGps();
-          }
           performSave(lat, lng, acc);
         },
         (err) => {
           console.warn('Geolocation permission or error:', err.message);
-          // Cegah spam berulang dalam sesi aktif jika ditolak pengguna
+          // Cegah percobaan berulang dalam sesi aktif jika ditolak pengguna
           sessionStorage.setItem(attemptedKey, 'denied');
-          notifyEnableGps();
         },
         {
           enableHighAccuracy: true,
@@ -438,11 +408,25 @@ export function PortalCustomerApp() {
   };
 
   const handleLogout = async () => {
+    let fcmToken = null;
+    const platform = typeof window !== 'undefined' && window.AndroidBridge ? 'APP' : 'WEB';
+    if (typeof window !== 'undefined' && window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === 'function') {
+      try {
+        fcmToken = window.AndroidBridge.getFcmToken() || null;
+      } catch (_) {}
+    }
     try {
-      await PortalAuthService.logout();
+      await PortalAuthService.logout(fcmToken, platform);
     } catch (e) {
       console.error(e);
     } finally {
+      try {
+        Object.keys(sessionStorage).forEach((k) => {
+          if (k.startsWith('mytekno_synced_fcm_token')) {
+            sessionStorage.removeItem(k);
+          }
+        });
+      } catch (_) {}
       setIsAuthenticated(false);
       setCustomer(null);
       setViewState('login');
@@ -582,16 +566,6 @@ export function PortalCustomerApp() {
         </div>
 
         
-
-        {/* Floating Toast Notifikasi GPS & Optimalisasi */}
-        <PortalToastNotification
-          show={gpsToast.show}
-          title={gpsToast.title}
-          message={gpsToast.message}
-          type="info"
-          duration={6000}
-          onClose={() => setGpsToast({ show: false, message: '', title: '' })}
-        />
 
         {/* Bottom Navigation Bar di Dalam Shell */}
         <PortalBottomNav activeTab={activeTab} onTabChange={(tab) => switchTab(tab)} />

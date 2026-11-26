@@ -41919,7 +41919,8 @@ function AppHeader({ activeTab, isNotificationOpen, setIsNotificationOpen, total
 	} catch {
 		allowedCodes = currentUser.allowed_kantor.split(",").map((s) => s.trim()).filter(Boolean);
 	}
-	const visibleKantors = kantorList.filter((k) => currentUser?.role === "super admin" || allowedCodes.includes(k.kode));
+	const normalizedAllowed = allowedCodes.map((c) => String(c || "").trim().toLowerCase()).filter(Boolean);
+	const visibleKantors = kantorList.filter((k) => currentUser?.role === "super admin" || normalizedAllowed.includes(String(k.kode || "").trim().toLowerCase()));
 	const cleanOfficeName = (name, code) => {
 		if (!name) return code ? code.toUpperCase() : "Kantor";
 		return name.replace(/^Kantor\s+/i, "").trim();
@@ -42749,8 +42750,12 @@ var PortalAuthService = class {
 			platform: plat
 		});
 	}
-	static async logout() {
-		return new PortalApiService().post("/auth/logout");
+	static async logout(fcmToken = null, platform = null) {
+		const plat = platform || (typeof window !== "undefined" && window.AndroidBridge ? "APP" : "WEB");
+		return new PortalApiService().post("/auth/logout", {
+			platform: plat,
+			fcm_token: fcmToken || null
+		});
 	}
 	static async mintaResetPassword(no_hp) {
 		return new PortalApiService().post("/auth/minta-reset-password", { no_hp });
@@ -46528,7 +46533,7 @@ function PortalToastNotification({ show, message, type = "success", title, durat
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		role: "alert",
 		"aria-live": "polite",
-		className: "absolute bottom-16 left-3 right-3 sm:left-auto sm:right-3 sm:max-w-xs z-50 pointer-events-auto transition-all duration-200 animate-in fade-in slide-in-from-bottom-2",
+		className: "absolute bottom-16 inset-x-0 mx-auto w-[calc(100%-2rem)] max-w-[300px] z-50 pointer-events-auto transition-all duration-200 animate-in fade-in slide-in-from-bottom-2",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: `px-3 py-2 rounded-xl shadow-lg shadow-slate-950/20 border backdrop-blur-md flex items-center gap-2.5 ${current.bgClass}`,
 			children: [
@@ -49908,11 +49913,6 @@ function PortalCustomerApp() {
 	const [loading, setLoading] = (0, import_react.useState)(true);
 	const [hasUnreadNotifications, setHasUnreadNotifications] = (0, import_react.useState)(false);
 	const [paymentSubTab, setPaymentSubTab] = (0, import_react.useState)("tagihan");
-	const [gpsToast, setGpsToast] = (0, import_react.useState)({
-		show: false,
-		message: "",
-		title: ""
-	});
 	(0, import_react.useEffect)(() => {
 		if (isAuthenticated) autoRequestDesktopNotificationPermission();
 	}, [isAuthenticated]);
@@ -49980,25 +49980,13 @@ function PortalCustomerApp() {
 		try {
 			const token = window.AndroidBridge.getFcmToken();
 			if (token && token.length > 20) {
-				if (sessionStorage.getItem("mytekno_synced_fcm_token") !== token) {
+				const syncKey = targetCustomer?.id_pelanggan ? `mytekno_synced_fcm_token_${targetCustomer.id_pelanggan}` : "mytekno_synced_fcm_token";
+				if (sessionStorage.getItem(syncKey) !== token) {
 					const res = await PortalAuthService.registerFcm(token, targetCustomer?.id_pelanggan, targetCustomer?.kantor);
-					if (res.ok && res.data?.ok) sessionStorage.setItem("mytekno_synced_fcm_token", token);
+					if (res.ok && res.data?.ok) sessionStorage.setItem(syncKey, token);
 				}
 			}
 		} catch (_) {}
-	};
-	const notifyEnableGps = () => {
-		const alertedGpsKey = "mytekno_alerted_enable_gps";
-		if (sessionStorage.getItem(alertedGpsKey)) return;
-		sessionStorage.setItem(alertedGpsKey, "1");
-		if (window.AndroidBridge && typeof window.AndroidBridge.showNativeNotification === "function") try {
-			window.AndroidBridge.showNativeNotification("Aktifkan Lokasi Perangkat", "Untuk mempermudah teknisi memetakan titik jaringan rumah Anda, silakan aktifkan Lokasi (GPS) smartphone Anda.", false);
-		} catch (_) {}
-		setGpsToast({
-			show: true,
-			title: "Aktifkan Lokasi (GPS)",
-			message: "Untuk optimalisasi pemetaan titik jaringan rumah Anda, silakan aktifkan izin Lokasi (GPS) pada smartphone Anda."
-		});
 	};
 	const syncGpsLocation = (targetCustomer) => {
 		if (!targetCustomer) return;
@@ -50016,7 +50004,7 @@ function PortalCustomerApp() {
 						...prev || {},
 						lokasi_gps: newLoc
 					}));
-				} else if (res.data?.accuracy_too_low) notifyEnableGps();
+				}
 			} catch (err) {
 				console.warn("Gagal mengunci lokasi GPS rumah:", err);
 			}
@@ -50037,12 +50025,10 @@ function PortalCustomerApp() {
 			const lat = pos.coords.latitude;
 			const lng = pos.coords.longitude;
 			const acc = pos.coords.accuracy;
-			if (acc && acc > 100) notifyEnableGps();
 			performSave(lat, lng, acc);
 		}, (err) => {
 			console.warn("Geolocation permission or error:", err.message);
 			sessionStorage.setItem(attemptedKey, "denied");
-			notifyEnableGps();
 		}, {
 			enableHighAccuracy: true,
 			timeout: 1e4,
@@ -50171,11 +50157,21 @@ function PortalCustomerApp() {
 		syncFcmToken(custData);
 	};
 	const handleLogout = async () => {
+		let fcmToken = null;
+		const platform = typeof window !== "undefined" && window.AndroidBridge ? "APP" : "WEB";
+		if (typeof window !== "undefined" && window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === "function") try {
+			fcmToken = window.AndroidBridge.getFcmToken() || null;
+		} catch (_) {}
 		try {
-			await PortalAuthService.logout();
+			await PortalAuthService.logout(fcmToken, platform);
 		} catch (e) {
 			console.error(e);
 		} finally {
+			try {
+				Object.keys(sessionStorage).forEach((k) => {
+					if (k.startsWith("mytekno_synced_fcm_token")) sessionStorage.removeItem(k);
+				});
+			} catch (_) {}
 			setIsAuthenticated(false);
 			setCustomer(null);
 			setViewState("login");
@@ -50237,82 +50233,67 @@ function PortalCustomerApp() {
 		className: "fixed inset-0 sm:relative sm:min-h-[100dvh] bg-slate-200/90 p-0 sm:p-4 pb-0 sm:pb-4 flex justify-center items-center text-slate-900 font-sans antialiased overflow-hidden overscroll-none select-none",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "w-full max-w-[440px] mx-auto h-[100dvh] sm:h-[92dvh] bg-[#F1F5F9] relative flex flex-col sm:rounded-2xl sm:shadow-lg sm:shadow-slate-900/5 sm:border sm:border-slate-300/70 overflow-hidden overscroll-none",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex-1 flex flex-col min-h-0 relative overflow-hidden",
-					children: [
-						activeTab === "beranda" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalDashboardTab, {
-							data: dashboardData,
-							hasUnreadNotifications,
-							onNavigate: (tab) => switchTab(tab),
-							onOpenNotifications: () => switchTab("notifikasi")
-						}),
-						activeTab === "kendala" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalTicketsTab, {
-							customer,
-							dashboardData,
-							hasUnreadNotifications,
-							onOpenNotifications: () => switchTab("notifikasi")
-						}),
-						activeTab === "wifi" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalWifiTab, {
-							customer,
-							dashboardData,
-							hasUnreadNotifications,
-							onOpenNotifications: () => switchTab("notifikasi")
-						}),
-						activeTab === "kuota" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalQuotaTab, {
-							customer,
-							dashboardData,
-							hasUnreadNotifications,
-							onOpenNotifications: () => switchTab("notifikasi")
-						}),
-						activeTab === "profil" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalProfileTab, {
-							customer,
-							dashboardData,
-							hasUnreadNotifications,
-							onNavigate: (tab) => switchTab(tab),
-							onCustomerUpdate: (updated) => setCustomer((prev) => ({
-								...prev,
-								...updated
-							})),
-							onLogout: handleLogout,
-							onOpenNotifications: () => switchTab("notifikasi")
-						}),
-						activeTab === "pembayaran" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalPaymentTab, {
-							customer,
-							dashboardData,
-							hasUnreadNotifications,
-							initialSubTab: paymentSubTab,
-							onBack: () => switchTab("beranda"),
-							onOpenNotifications: () => switchTab("notifikasi")
-						}),
-						activeTab === "notifikasi" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalNotificationsPage, {
-							customer,
-							dashboardData,
-							onBack: () => switchTab("beranda"),
-							onNavigate: (tab, subTab) => {
-								if (subTab) setPaymentSubTab(subTab);
-								switchTab(tab);
-							}
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalToastNotification, {
-					show: gpsToast.show,
-					title: gpsToast.title,
-					message: gpsToast.message,
-					type: "info",
-					duration: 6e3,
-					onClose: () => setGpsToast({
-						show: false,
-						message: "",
-						title: ""
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex-1 flex flex-col min-h-0 relative overflow-hidden",
+				children: [
+					activeTab === "beranda" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalDashboardTab, {
+						data: dashboardData,
+						hasUnreadNotifications,
+						onNavigate: (tab) => switchTab(tab),
+						onOpenNotifications: () => switchTab("notifikasi")
+					}),
+					activeTab === "kendala" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalTicketsTab, {
+						customer,
+						dashboardData,
+						hasUnreadNotifications,
+						onOpenNotifications: () => switchTab("notifikasi")
+					}),
+					activeTab === "wifi" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalWifiTab, {
+						customer,
+						dashboardData,
+						hasUnreadNotifications,
+						onOpenNotifications: () => switchTab("notifikasi")
+					}),
+					activeTab === "kuota" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalQuotaTab, {
+						customer,
+						dashboardData,
+						hasUnreadNotifications,
+						onOpenNotifications: () => switchTab("notifikasi")
+					}),
+					activeTab === "profil" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalProfileTab, {
+						customer,
+						dashboardData,
+						hasUnreadNotifications,
+						onNavigate: (tab) => switchTab(tab),
+						onCustomerUpdate: (updated) => setCustomer((prev) => ({
+							...prev,
+							...updated
+						})),
+						onLogout: handleLogout,
+						onOpenNotifications: () => switchTab("notifikasi")
+					}),
+					activeTab === "pembayaran" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalPaymentTab, {
+						customer,
+						dashboardData,
+						hasUnreadNotifications,
+						initialSubTab: paymentSubTab,
+						onBack: () => switchTab("beranda"),
+						onOpenNotifications: () => switchTab("notifikasi")
+					}),
+					activeTab === "notifikasi" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalNotificationsPage, {
+						customer,
+						dashboardData,
+						onBack: () => switchTab("beranda"),
+						onNavigate: (tab, subTab) => {
+							if (subTab) setPaymentSubTab(subTab);
+							switchTab(tab);
+						}
 					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalBottomNav, {
-					activeTab,
-					onTabChange: (tab) => switchTab(tab)
-				})
-			]
+				]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalBottomNav, {
+				activeTab,
+				onTabChange: (tab) => switchTab(tab)
+			})]
 		})
 	});
 }
@@ -50484,6 +50465,29 @@ function App() {
 		window.addEventListener("edtekno_kantor_updated", handleKantorUpdate);
 		return () => window.removeEventListener("edtekno_kantor_updated", handleKantorUpdate);
 	}, [isAuthenticated]);
+	(0, import_react.useEffect)(() => {
+		if (!isAuthenticated || !currentUser || currentUser.role === "super admin") return;
+		let allowedCodes = [];
+		if (Array.isArray(currentUser.allowed_kantor)) allowedCodes = currentUser.allowed_kantor;
+		else if (typeof currentUser.allowed_kantor === "string") try {
+			const parsed = JSON.parse(currentUser.allowed_kantor);
+			allowedCodes = Array.isArray(parsed) ? parsed : [currentUser.allowed_kantor];
+		} catch {
+			allowedCodes = currentUser.allowed_kantor.split(",");
+		}
+		const normalizedAllowed = allowedCodes.map((c) => String(c || "").trim().toLowerCase()).filter((c) => c && c !== "all");
+		if (normalizedAllowed.length === 0) return;
+		const currentNormalized = String(activeOffice || "").trim().toLowerCase();
+		if (!normalizedAllowed.includes(currentNormalized)) {
+			const firstMatch = kantorList.find((k) => normalizedAllowed.includes(String(k.kode || "").trim().toLowerCase()));
+			handleSwitchOffice(firstMatch ? firstMatch.kode : normalizedAllowed[0]);
+		}
+	}, [
+		isAuthenticated,
+		currentUser,
+		kantorList,
+		activeOffice
+	]);
 	const [isScanningActive, setIsScanningActive] = (0, import_react.useState)(true);
 	const [scanPercent, setScanPercent] = (0, import_react.useState)(78);
 	const [filterStatus, setFilterStatus] = (0, import_react.useState)("ALL");

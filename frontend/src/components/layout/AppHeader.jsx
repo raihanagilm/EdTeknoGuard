@@ -58,8 +58,9 @@ export function AppHeader({
     }
   }
 
+  const normalizedAllowed = allowedCodes.map((c) => String(c || '').trim().toLowerCase()).filter(Boolean)
   const visibleKantors = kantorList.filter(
-    (k) => currentUser?.role === 'super admin' || allowedCodes.includes(k.kode)
+    (k) => currentUser?.role === 'super admin' || normalizedAllowed.includes(String(k.kode || '').trim().toLowerCase())
   )
 
   const cleanOfficeName = (name, code) => {

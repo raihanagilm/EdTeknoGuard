@@ -241,6 +241,35 @@ export default function App() {
     return () => window.removeEventListener('edtekno_kantor_updated', handleKantorUpdate)
   }, [isAuthenticated])
 
+  // Pastikan activeOffice selalu berada dalam daftar kantor yang diizinkan untuk user aktif
+  useEffect(() => {
+    if (!isAuthenticated || !currentUser || currentUser.role === 'super admin') return
+    let allowedCodes = []
+    if (Array.isArray(currentUser.allowed_kantor)) {
+      allowedCodes = currentUser.allowed_kantor
+    } else if (typeof currentUser.allowed_kantor === 'string') {
+      try {
+        const parsed = JSON.parse(currentUser.allowed_kantor)
+        allowedCodes = Array.isArray(parsed) ? parsed : [currentUser.allowed_kantor]
+      } catch {
+        allowedCodes = currentUser.allowed_kantor.split(',')
+      }
+    }
+    const normalizedAllowed = allowedCodes
+      .map((c) => String(c || '').trim().toLowerCase())
+      .filter((c) => c && c !== 'all')
+
+    if (normalizedAllowed.length === 0) return
+
+    const currentNormalized = String(activeOffice || '').trim().toLowerCase()
+    if (!normalizedAllowed.includes(currentNormalized)) {
+      const firstMatch = kantorList.find((k) =>
+        normalizedAllowed.includes(String(k.kode || '').trim().toLowerCase())
+      )
+      handleSwitchOffice(firstMatch ? firstMatch.kode : normalizedAllowed[0])
+    }
+  }, [isAuthenticated, currentUser, kantorList, activeOffice])
+
   // Telemetry Scanner & Realtime Clock State
   const [isScanningActive, setIsScanningActive] = useState(true)
   const [scanPercent, setScanPercent] = useState(78)

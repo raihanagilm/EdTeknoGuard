@@ -89,6 +89,121 @@ class PortalCustomerService:
         ).order_by(LogPerformaONT.waktu_cek.desc()).first()
 
     @staticmethod
+    def _clear_fcm_token_from_other_customers(
+        token: str,
+        exclude_cust_id: Optional[str] = None,
+        db: Optional[Session] = None
+    ) -> None:
+        """
+        Membersihkan token FCM yang sama dari akun pelanggan lain (lintas tenant)
+        agar satu perangkat HP hanya terikat ke satu akun pelanggan aktif.
+        """
+        if not token:
+            return
+
+        def _clear_in_session(session: Session) -> None:
+            query = session.query(Pelanggan).filter(Pelanggan.fcm_token == token)
+            if exclude_cust_id:
+                query = query.filter(Pelanggan.id_pelanggan != exclude_cust_id)
+            updated = query.update({"fcm_token": None}, synchronize_session=False)
+            if updated:
+                session.commit()
+
+        if db is not None:
+            try:
+                _clear_in_session(db)
+            except Exception as e:
+                logger.warning(f"FCM: Gagal membersihkan token duplikat di DB utama: {e}")
+
+        for k_code in get_all_kantor_codes():
+            k_db = None
+            try:
+                k_db = TenantDatabaseManager.get_tenant_session(k_code)
+                _clear_in_session(k_db)
+            except Exception as e:
+                logger.debug(f"FCM: Gagal membersihkan token duplikat di tenant {k_code}: {e}")
+            finally:
+                if k_db is not None:
+                    k_db.close()
+
+    @staticmethod
+    def reassign_fcm_token(
+        cust_id: str,
+        token: str,
+        db: Optional[Session] = None,
+        hint_kantor: Optional[str] = None
+    ) -> Tuple[bool, Optional[str], Optional[str]]:
+        """
+        Mengikat token FCM perangkat ke akun pelanggan aktif sambil mencabut
+        token tersebut dari akun pelanggan lain yang sebelumnya memakai perangkat sama.
+        """
+        if not cust_id or not token:
+            return False, None, None
+
+        PortalCustomerService._clear_fcm_token_from_other_customers(
+            token=token,
+            exclude_cust_id=cust_id,
+            db=db
+        )
+
+        cust, target_db = PortalCustomerService.get_customer_by_id(
+            cust_id,
+            db=db,
+            hint_kantor=hint_kantor
+        )
+        if not cust or not target_db:
+            return False, None, None
+
+        try:
+            cust.fcm_token = token
+            target_db.commit()
+            return True, cust.nama, cust.kantor or hint_kantor
+        finally:
+            if target_db != db:
+                target_db.close()
+
+    @staticmethod
+    def clear_fcm_token_on_logout(
+        cust_id: str,
+        platform: str = "WEB",
+        fcm_token: Optional[str] = None,
+        db: Optional[Session] = None,
+        hint_kantor: Optional[str] = None
+    ) -> None:
+        """
+        Menghapus token FCM saat pelanggan logout dari aplikasi Android (APP)
+        atau saat token perangkat dikirim eksplisit, tanpa memutus token Android
+        jika pelanggan hanya logout dari Web Browser.
+        """
+        clean_platform = (platform or "WEB").upper().strip()
+        clean_token = (fcm_token or "").strip()
+
+        if not clean_token and clean_platform != "APP":
+            return
+
+        if clean_token:
+            PortalCustomerService._clear_fcm_token_from_other_customers(
+                token=clean_token,
+                exclude_cust_id=None,
+                db=db
+            )
+
+        if cust_id:
+            cust, target_db = PortalCustomerService.get_customer_by_id(
+                cust_id,
+                db=db,
+                hint_kantor=hint_kantor
+            )
+            if cust and target_db:
+                try:
+                    if clean_platform == "APP" or (clean_token and cust.fcm_token == clean_token):
+                        cust.fcm_token = None
+                        target_db.commit()
+                finally:
+                    if target_db != db:
+                        target_db.close()
+
+    @staticmethod
     def save_speedtest_results(
         db: Session,
         id_pelanggan: str,
