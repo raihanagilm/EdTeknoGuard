@@ -14999,20 +14999,24 @@ var TICK_DBM_LIST = [
 	26,
 	26.5,
 	27,
+	28,
+	29,
 	30,
 	35
 ];
 function transformDbm(val) {
 	if (val === null || val === void 0 || isNaN(val)) return null;
 	const v = Math.abs(Number(val));
-	if (v <= 25) return v / 25 * 30;
-	else if (v <= 27) return 30 + (v - 25) / 2 * 45;
-	else return 75 + (Math.min(v, 35) - 27) / 8 * 25;
+	if (v <= 25) return v;
+	else if (v <= 27) return 25 + (v - 25) / 2 * 30;
+	else if (v <= 30) return 55 + (v - 27) / 3 * 30;
+	else return 85 + (Math.min(v, 35) - 30) / 5 * 15;
 }
 function inverseTransformDbm(u) {
-	if (u <= 30) return u / 30 * 25;
-	else if (u <= 75) return 25 + (u - 30) / 45 * 2;
-	else return 27 + (u - 75) / 25 * 8;
+	if (u <= 25) return u;
+	else if (u <= 55) return 25 + (u - 25) / 30 * 2;
+	else if (u <= 85) return 27 + (u - 55) / 30 * 3;
+	else return 30 + (u - 85) / 15 * 5;
 }
 function formatDuration(seconds) {
 	if (!seconds || isNaN(seconds)) return "00:00";
