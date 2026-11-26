@@ -1,8 +1,8 @@
-# Aturan Global UI/UX Workspace: Kepatuhan Mutlak Terhadap designsystempro.md
+# Aturan Global UI/UX Workspace: Kepatuhan Mutlak Terhadap DESIGN.md
 
 Setiap kali AI Agent merancang, memodifikasi, mereview, atau mengimplementasikan kode frontend (HTML, Tailwind CSS, Jinja2, Alpine.js, Chart.js, SVG, modal, form, dan navigasi) pada proyek **EdTeknoGuard**, agen **WAJIB MEMBACA DAN MEMATUHI**:
 
-👉 **[`designsystempro.md`](file:///c:/Users/r/Documents/Magang/EdTeknoGuard/designsystempro.md) — Master Rulebook UI/UX (Single Source of Truth)**
+👉 **[`DESIGN.md`](DESIGN.md) — Master Rulebook UI/UX (Single Source of Truth)**
 
 ---
 
@@ -15,10 +15,11 @@ Setiap kali AI Agent merancang, memodifikasi, mereview, atau mengimplementasikan
    - Gunakan hanya kelipatan 4px / 8px: `p-1` (4px), `p-2` (8px), `p-3` (12px), `p-4` (16px), `p-6` (24px), `p-8` (32px), `p-12` (48px).
    - Dilarang keras menggunakan nilai spacing arbitrer acak (seperti `p-[13px]`, `m-[17px]`).
 
-3. **Proporsi Warna 60-30-10:**
-   - 60% warna dominan netral/latar (`bg-slate-50`, `bg-white`).
-   - 30% warna sekunder/kontainer/surface (`border-slate-200`, `text-slate-700`, card backgrounds).
-   - 10% warna aksen/brand (`#4F46E5` / `bg-indigo-600` dan warna status alert).
+3. **Proporsi Warna 60-30-10 (Semantic Tokens):**
+   - Gunakan **semantic design tokens** dari `DESIGN.md` / SalkarsaUI (dilarang hardcoded hex/rgb atau raw color classes).
+   - 60% warna dominan netral/latar (`bg-background`, `bg-card`).
+   - 30% warna sekunder/kontainer/surface (`border-border`, `text-foreground`, `bg-muted`).
+   - 10% warna aksen/brand (`bg-primary`, `text-primary`, serta token status alert).
 
 4. **Aksesibilitas & Kontras Teks (WCAG AA):**
    - Kontras teks dengan latar belakang wajib memenuhi rasio minimal 4.5:1 untuk teks normal dan 3:1 untuk teks besar.
